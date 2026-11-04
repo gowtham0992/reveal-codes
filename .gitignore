@@ -1,0 +1,24 @@
+# .kiro/ is tracked on purpose: nothing under it may be ignored (steering, specs, hooks, agents, MCP settings).
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Environment: never commit secrets, but do commit .env.example
+.env
+.env.*
+!.env.example
+
+# Logs and OS files
+*.log
+.DS_Store
+coverage/

@@ -1,0 +1,9 @@
+# Steering files are kept byte for byte as authored.
+.kiro
+# Rows are appended by a hook and are not column-aligned.
+docs/KIRO_USAGE.md
+LICENSE
+pnpm-lock.yaml
+dist
+.next
+node_modules

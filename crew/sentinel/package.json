@@ -1,0 +1,9 @@
+{
+  "name": "@reveal-codes/sentinel",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Kiro Crew app that watches the repository for drift.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": "./src/index.ts"
+}
