@@ -19,7 +19,7 @@ reveal-codes/
         ops.ts                Insert/Delete/Replace operations and inverses
         segment.ts            sentence segmentation (lossless)
         citations/            grammar, extract(), format()
-        codes.ts              render(doc) -> Reveal Codes text; parse(text) -> structure
+        codes.ts              render(doc, mode) -> Reveal Codes text (full | display); parse(fullText) -> document
         testing/arbitraries.ts
       test/                   *.test.ts (examples) and *.properties.test.ts (PBT)
     verifier/                 CourtListener client, quote matcher, cache, fixtures

@@ -29,10 +29,10 @@ Courts have sanctioned lawyers in several hundred decisions for filings that cit
 ## Product principles (binding on every feature)
 
 0. **Paste is the front door.** Most users draft elsewhere. The first-run experience is: paste, see codes, verify, export. The in-app assistant is a second path, not a prerequisite.
-1. **Provenance is captured, never inferred.** We record how text entered the document (typed, pasted, AI-inserted, AI-then-edited). We never run an "AI detector." If we cannot know, the code says unknown.
+1. **Provenance is captured, never inferred.** We record how text entered the document (typed, pasted, AI-inserted, AI-then-edited). We never run an "AI detector." If we cannot know, the code is PST.
 2. **Verification is deterministic and reproducible.** Same text plus same CourtListener data gives the same codes. No LLM decides whether a citation is real.
 3. **Nothing leaves the machine silently.** Citation strings go to CourtListener. Draft text goes to the LLM provider only when the author uses the assistant, and the UI says so. There is no telemetry.
-4. **Red codes block export.** A filing with unresolved `CIT ✘`, `CIT ?`, or `QUO ✘` codes cannot export unless the author writes an override reason. Overrides are printed in the certification. The product never hides a problem to be convenient.
+4. **Red codes block export.** Only `CIT ✓` and `QUO ✓` pass. A filing with any `CIT ✘`, `CIT ?`, `CIT …`, `QUO ✘`, or `QUO …` code cannot export unless the author writes an override reason for each one. Overrides are printed in the certification. The product never hides a problem to be convenient.
 5. **One keystroke to the truth.** Alt-F3 always toggles the Reveal Codes pane. The pane is a faithful serialization of the document's provenance; it is not a summary.
 6. **Quotes are checked, not just citations.** A real case with an invented quotation is the failure mode that existence checkers miss. `QUO ✘` is a headline result, shown with where the quote diverges from the opinion.
 7. **Respect the period.** The pane looks like 1989 (blue field, grey text, bracketed codes, monospace). The editor above it looks like 2026. The contrast is the point. Spooky theming is not; this is not a Costume entry.
@@ -42,13 +42,49 @@ Courts have sanctioned lawyers in several hundred decisions for filings that cit
 Use these words consistently in code, specs, UI, and docs:
 
 - **span**: a contiguous run of characters sharing one provenance record.
-- **provenance code** (or just **code**): the bracketed token rendered in the pane, e.g. `[AI:r7]`.
+- **provenance code** (or just **code**): a bracketed token rendered in the pane, drawn only from the code list below.
 - **origin**: one of `HUM`, `PST`, `AI`, `AI>HUM`.
 - **citation**: a reference to a judicial opinion in a recognised reporter form, e.g. `410 U.S. 113`, `598 F.3d 1, 7 (2d Cir. 2010)`, `2024 WL 123456`.
 - **cluster**: CourtListener's identifier for one opinion across reporters.
 - **verification status**: `verified`, `not_found`, `ambiguous`, `unchecked`.
 - **quote check**: whether text inside quotation marks attributed to a citation appears verbatim (whitespace-normalised) in the opinion.
 - **certification**: the exported statement of AI use, verification results, and overrides.
+
+### Codes (binding)
+
+These are the only codes. No feature may add, rename, or restyle one without changing this list first.
+
+Provenance codes, one at the start of every span:
+
+- `[HUM]`: typed by the author.
+- `[PST]`: entered from outside the editor (pasted or imported). This is also the code for text whose origin we cannot know.
+- `[AI:<run>]`: inserted by the assistant in run `<run>`.
+- `[AI>HUM:<run>]`: inserted by the assistant in run `<run>`, then substantially edited by the author.
+
+Citation codes, opening at the start of a citation and closed by `[/CIT]`:
+
+- `[CIT ✓]`: verified; CourtListener resolved it to exactly one cluster.
+- `[CIT ✘]`: not found.
+- `[CIT ?]`: ambiguous; more than one candidate cluster. Shows the candidate count.
+- `[CIT …]`: unchecked; not yet verified, could not be verified, or a short form (such as `Id.`) with no preceding citation to refer to.
+
+Quote codes, opening at the start of quoted text attributed to a citation and closed by `[/QUO]`:
+
+- `[QUO ✓]`: the quote appears verbatim (whitespace-normalised) in the opinion.
+- `[QUO ✘]`: the quote does not appear; the pane shows where it diverges.
+- `[QUO …]`: unchecked.
+
+Reference codes, opening at the start of a statute, regulation, or secondary-source reference and closed by `[/REF]`:
+
+- `[REF]`: recognised as a non-case reference. Never verified, never blocks export, carries no verification payload, and is rendered grey in the pane.
+
+Structural codes:
+
+- `[/CIT]`, `[/QUO]`, `[/REF]`: close the most recent citation, quote, or reference code.
+- `[OVR]`: the author's written override reason for the red code it follows. Shows the reason.
+- `[DOC]`: document header carrying engine state. Present only in the full serialisation, never in the pane.
+
+`CIT ✓` and `QUO ✓` are the only codes that pass export (principle 4). The pane shows the display form: the codes above with no payload except the run id, the `[CIT ?]` candidate count, and the `[OVR]` reason. The full form, used for round-tripping, carries every payload.
 
 ## Success for the hackathon demo
 
