@@ -1,0 +1,13 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Commit after spec task",
+      "trigger": "PostTaskExec",
+      "action": {
+        "type": "command",
+        "command": "scripts/commit-task.sh"
+      }
+    }
+  ]
+}
