@@ -214,20 +214,20 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
   - [x] 5.3 Implement `citations/lex.ts`
     - Bounded readers for integers with no leading zeros and range checks, spaces, and word characters.
     - _Requirements: 9.8, 10.1_
-  - [ ] 5.4 Implement `citations/grammar.ts`
+  - [x] 5.4 Implement `citations/grammar.ts`
     - Reporter citations, parallel tails with up to 4 members and per-member pincites (D1, D2), and parentheticals under the tightened court rule (D3).
     - The reporter token is resolved longest first.
     - Per design A9 step 3.
     - _Requirements: 9.3, 9.5, 11.1, 11.5, 11.6_
-  - [ ] 5.5 Implement `citations/grammar-db.ts`
+  - [-] 5.5 Implement `citations/grammar-db.ts`
     - `WL` and `<court> LEXIS` forms with an optional `, at *<pincite>`.
     - Per design A9 step 2.
     - _Requirements: 9.4_
-  - [ ] 5.6 Implement `citations/grammar-other.ts`
+  - [-] 5.6 Implement `citations/grammar-other.ts`
     - U.S.C., C.F.R., and Federal Rules forms (D8).
     - Per design A9 step 5.
     - _Requirements: 9.6_
-  - [ ] 5.7 Implement `citations/signals.ts` and `citations/party.ts`
+  - [-] 5.7 Implement `citations/signals.ts` and `citations/party.ts`
     - `signals.ts`: `SIGNALS` holds the 14 capitalised Signals in Glossary order (`See`, `See also`, `See, e.g.,`, `E.g.,`, `Accord`, `Cf.`, `But see`, `Compare`, `Citing`, `Quoting`, `But cf.`, `Contra`, `E.g.`, `See generally`), compared case-sensitively. `GAP_SIGNALS` holds 20 entries: the first ten Signals plus each with only its first letter lowercased, built with a `lowerFirst` map rather than typed twice. `with` is in neither list. `MAX_GAP_SIGNAL = 10` (`See, e.g.,`).
     - `startsWithSignal` uses `SIGNALS` and tests each Signal followed by a space, `,`, or the end of the range. `gapSignalsAt(text, at, limit)` returns the end of every `GAP_SIGNALS` entry that starts at `at` and ends by `limit` (at most three).
     - `party.ts`: `PARTY_STOP_LIST` as word arrays, built from `SIGNALS` split on spaces plus `In`, `As`, `Under`, `Following`, `Applying`, `The court in`, `The Court in`. `CONNECTORS` (`&`, `of`, `the`, `and`, `ex rel.`). `isCapitalisedWord`, which rejects `v.`.
