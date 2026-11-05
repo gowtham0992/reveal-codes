@@ -27,6 +27,28 @@ export const arbText: fc.Arbitrary<string> = fc
   .array(fc.oneof(printableAscii, whitespace, special, astral), { maxLength: 1000 })
   .map((items) => items.join(""));
 
+/**
+ * A terminator sequence (Req 8.3): one to three of `.?!`, zero to two
+ * closers, then one to three whitespace code units. Some draws omit the
+ * whitespace, giving near-miss sequences that are not boundaries.
+ */
+const arbTerminatorSequence: fc.Arbitrary<string> = fc
+  .tuple(
+    fc.array(fc.constantFrom(".", "?", "!"), { minLength: 1, maxLength: 3 }),
+    fc.array(fc.constantFrom('"', "\u201d", "'", "\u2019", ")"), { maxLength: 2 }),
+    fc.array(whitespace, { maxLength: 3 }),
+  )
+  .map(([ts, cs, ws]) => ts.join("") + cs.join("") + ws.join(""));
+
+/**
+ * `arbText` chunks interleaved with terminator sequences, so that most
+ * values contain several Sentence boundaries. Surrogates appear only in
+ * Surrogate_Pairs; the closers add `’` to `arbText`'s alphabet.
+ */
+export const arbSentencedText: fc.Arbitrary<string> = fc
+  .array(fc.tuple(arbText, arbTerminatorSequence), { maxLength: 12 })
+  .chain((pairs) => arbText.map((tail) => pairs.flat().join("") + tail));
+
 /** Any sequence of UTF-16 code units, including lone surrogates (Req 9.9, 20.6). */
 export const arbAnyString: fc.Arbitrary<string> = fc
   .array(fc.integer({ min: 0, max: 0xffff }))

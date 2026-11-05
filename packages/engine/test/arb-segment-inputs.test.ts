@@ -1,7 +1,13 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { LEGAL_ABBREVIATIONS } from "../src/abbreviations";
-import { arbAbbreviationProse, arbCitationRanges, arbText } from "../src/testing/arbitraries";
+import { countBoundaries } from "../src/boundary";
+import {
+  arbAbbreviationProse,
+  arbCitationRanges,
+  arbSentencedText,
+  arbText,
+} from "../src/testing/arbitraries";
 import { isValidBoundary } from "../src/validate";
 import { runs } from "./support/fc";
 
@@ -58,5 +64,12 @@ describe("segmentation input arbitraries meet their definitions _Requirements: 2
         .flatMap((p) => p.abbreviations.map((a) => a.abbreviation)),
     );
     expect([...seen].sort()).toEqual([...LEGAL_ABBREVIATIONS].sort());
+  });
+
+  it("arbSentencedText usually contains a Sentence boundary and splits no Surrogate_Pair", () => {
+    const samples = fc.sample(arbSentencedText, { numRuns: 200, seed: 11 });
+    for (const t of samples) expect(t).not.toMatch(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/);
+    const withBoundary = samples.filter((t) => countBoundaries(t, 0, t.length, [], 1) > 0);
+    expect(withBoundary.length).toBeGreaterThan(samples.length / 2);
   });
 });

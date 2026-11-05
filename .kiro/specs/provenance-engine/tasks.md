@@ -180,7 +180,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `arbCitationRanges(t)`: sorted, non-overlapping ranges on Valid_Boundaries.
     - `arbAbbreviationProse`: prose with Legal_Abbreviations spliced in, drawn from the whole `LEGAL_ABBREVIATIONS` list (including `Ltd.`, `Co.`, `L.P.`, `N.A.`, and `L.L.C.`), each followed by a space and a capitalised word.
     - _Requirements: 22.1_
-  - [ ] 4.5 Write Property 14 in `test/segment.properties.test.ts`
+  - [x] 4.5 Write Property 14 in `test/segment.properties.test.ts`
     - **Property 14: Segmentation is a lossless partition at valid boundaries**
     - Here it runs on `arbText` with `arbCitationRanges` through `segmentWith`. Task 5.35 adds `arbTextWithCitations` through `segment`.
     - **Validates: Requirements 8.1, 8.2, 8.8**
@@ -189,7 +189,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 16: Dominant origin and origin set match a per-unit count**
     - **Validates: Requirements 8.7**
     - _Requirements: 8.7_
-  - [ ] 4.7 Write example tests in `test/boundary.test.ts`
+  - [-] 4.7 Write example tests in `test/boundary.test.ts`
     - Terminators followed by trailing `"`, `”`, `'`, `’`, `)`.
     - Whitespace belongs to the preceding Sentence.
     - No boundary after `v.`, `Inc.`, or `No.`, nor after `Ltd.`, `Co.`, `L.P.`, `N.A.`, or `L.L.C.` (`Acme Co. Then` is one Sentence).
