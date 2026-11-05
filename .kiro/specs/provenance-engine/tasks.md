@@ -255,7 +255,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `arbCourt`, `arbCitation`, `arbNearMissCitation` returning the string and the expected value, `arbGarbageCitation`, and `arbValueCorruption` with the field recorded.
     - Add an export line to `arbitraries.ts`.
     - _Requirements: 22.1, 22.4_
-  - [ ] 5.12 Write Property 21 in `test/format.properties.test.ts`
+  - [x] 5.12 Write Property 21 in `test/format.properties.test.ts`
     - **Property 21: Canonical format round trips and is idempotent**
     - **Validates: Requirements 10.1, 10.2, 10.3, 10.4, 11.2, 14.3, 14.5**
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 11.2, 14.3, 14.5_
