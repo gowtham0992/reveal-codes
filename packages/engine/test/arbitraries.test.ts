@@ -193,6 +193,7 @@ describe("op arbitraries meet their definitions _Requirements: 22.1, 22.4_", () 
       "invalid_provenance:actor",
       "invalid_provenance:origin",
       "invalid_provenance:runId",
+      "invalid_timestamp",
       "inverted_range",
       "out_of_range",
       "split_surrogate:document",

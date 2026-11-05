@@ -755,7 +755,7 @@ For any `arbDocument` `d`, any op with Inverse `i` from `apply(d, op)`, and any 
 **Validates: Requirements 5.7**
 
 ### Property 10: Rejected operations return the first error in precedence and change nothing
-For any `arbDocument` `d` and any `arbFaultyOp(d)`, the operation must carry one or more injected faults from {invalid threshold, non-integer or out-of-range field, `from > to`, surrogate split, bad Origin, Run_Id rule violation, bad Actor}. The result has `ok: false`, its error kind equals the first fault in the order `invalid_config`, `out_of_range`, `inverted_range`, `split_surrogate`, `invalid_provenance`, it carries no Inverse, and `d` is equal to its pre-call clone. [ops]
+For any `arbDocument` `d` and any `arbFaultyOp(d)`, the operation must carry one or more injected faults from {invalid threshold, non-integer or out-of-range field, `from > to`, surrogate split, bad Origin, Run_Id rule violation, bad Actor, malformed provenance Timestamp}. The result has `ok: false`, its error kind equals the first fault in the order `invalid_config`, `out_of_range`, `inverted_range`, `split_surrogate`, `invalid_provenance`, `invalid_timestamp`, it carries no Inverse, and `d` is equal to its pre-call clone. [ops]
 **Validates: Requirements 2.5, 5.2, 6.6, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7**
 
 ### Property 11: Run table accounting matches the edit model
@@ -763,7 +763,7 @@ For any `arbDocument` `d` and any op from `arbOpSequence(d)`, each Run's Origina
 **Validates: Requirements 4.8, 4.9, 6.1, 6.2, 6.7**
 
 ### Property 12: A Run is relabelled exactly when its Edited_Proportion exceeds the threshold, and stays relabelled
-For any `arbDocument`, `arbOpSequence`, and threshold from `arbThreshold`, which includes "absent", meaning 0.4: after each forward op, every Run with `editedCount / originalLength > threshold` has its relabelled flag set and all of its Spans at `AI>HUM`. Every Run at or below the threshold that was not previously relabelled keeps its `AI` Spans. A relabelled Run never returns to `AI` under forward ops. [relabel]
+For any `arbDocument`, `arbOpSequence`, and threshold from `arbThreshold`, which includes "absent", meaning 0.4: after each non-empty forward op (any op other than a no-op under Req 4.7, which relabels nothing), every Run with `editedCount / originalLength > threshold` has its relabelled flag set and all of its Spans at `AI>HUM`. Every Run at or below the threshold that was not previously relabelled keeps its `AI` Spans. A relabelled Run never returns to `AI` under forward ops. [relabel]
 **Validates: Requirements 6.3, 6.4, 6.5, 6.8, 6.10**
 
 ### Property 13: Only the Engine produces AI>HUM
@@ -1040,11 +1040,13 @@ All errors are plain data `{ kind, ...fields }`. No source module throws, and no
 |---|---|---|---|
 | `invalid_provenance` | `field: "origin" \| "runId" \| "actor"`, `value: unknown` | `apply`, `createDocument` path | 2.5, 7.4, 7.5 |
 | `split_surrogate` | `offset`, `where: "document" \| "text"` | `createDocument`, `apply` | 2.6, 7.3 |
+| `split_surrogate` (creation) | `createDocument` reports an unpaired surrogate as `{ kind: "split_surrogate", offset, where: "text" }`; at creation `offset` is also a Document Offset, because the Text equals the supplied string | `createDocument` | 2.6 |
 | `invalid_timestamp` | `value: unknown` | `createDocument`, `apply` (provenance), `setVerification` (`waitUntil` via `invalid_verification_result`), `recordOverride` | 2.7 |
 | `invalid_spans` | `offset`, `violation: "empty" \| "overlap" \| "unsorted" \| "gap" \| "coverage"` | `normaliseSpans`, `normalise`, `segment` | 3.6, 8.9 |
 | `out_of_range` | `field: "at" \| "from" \| "to"`, `value`, `length` | `apply` | 7.1 |
 | `inverted_range` | `from`, `to` | `apply` | 7.2 |
 | `invalid_config` | `field: "relabelThreshold"`, `value` | `apply` | 6.6 |
+| `invalid_config` (key present, value `undefined`) | `{ relabelThreshold: undefined }` counts as a supplied threshold and is rejected as `{ kind: "invalid_config", field: "relabelThreshold", value: undefined }`; only an absent config or an absent key means 0.4 (accepted by the user) | `apply` | 6.6, 6.10 |
 | `stale_inverse` | none | `apply` with an Inverse | 5.7 |
 | `invalid_citation` | `field` | `format` | 10.5 |
 | `unknown_citation` | `key` | `setVerification` | 16.4 |

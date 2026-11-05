@@ -2,11 +2,13 @@
  * `arbFaultyOp` (design "Arbitraries" table, Property 10; Req 22.1, 22.4).
  * Each value carries one or more injected faults from {invalid threshold,
  * non-integer or out-of-range field, `from > to`, surrogate split, bad
- * Origin, Run_Id rule violation, bad Actor}. Every fault part records its
- * own error at generation time, and the parts touch disjoint fields, so the
- * expected error is the first recorded one in the order `invalid_config`,
- * `out_of_range`, `inverted_range`, `split_surrogate` (document, then
- * text), `invalid_provenance`. It is never inferred from the engine.
+ * Origin, Run_Id rule violation, bad Actor, malformed provenance
+ * Timestamp}. Every fault part records its own error at generation time,
+ * and the parts touch disjoint fields, so the expected error is the first
+ * recorded one in the order `invalid_config`, `out_of_range`,
+ * `inverted_range`, `split_surrogate` (document, then text),
+ * `invalid_provenance`, `invalid_timestamp`. It is never inferred from the
+ * engine.
  */
 import fc from "fast-check";
 import type { EngineError } from "../errors.js";
@@ -19,6 +21,7 @@ import {
   arbThreshold,
   RUN_ID_POOL,
 } from "./arb-ops.js";
+import { arbBadTimestamp } from "./arb-bad-timestamp.js";
 import { arbStringWithLoneSurrogate, arbText, arbTimestamp } from "./arb-text.js";
 
 /** A rejected op, the config to apply it under, and the error `apply` must return. */
@@ -34,8 +37,18 @@ type OpKind = CallerOperation["kind"];
 const valid = <T>(arb: fc.Arbitrary<T>): fc.Arbitrary<Part<T>> =>
   arb.map((value) => ({ value, error: null }));
 
-const maybe = <T>(ok: fc.Arbitrary<Part<T>>, bad: fc.Arbitrary<Part<T>>): fc.Arbitrary<Part<T>> =>
-  fc.oneof(ok, bad);
+/**
+ * A valid part with weight `okWeight`, or a faulty one with weight 1. Each
+ * part is valid 2 times in 3 by default, so the lower-precedence faults
+ * (above all `invalid_timestamp`, which shows only when every other part is
+ * valid) are reached often.
+ */
+const maybe = <T>(
+  ok: fc.Arbitrary<Part<T>>,
+  bad: fc.Arbitrary<Part<T>>,
+  okWeight = 2,
+): fc.Arbitrary<Part<T>> =>
+  fc.oneof({ arbitrary: ok, weight: okWeight }, { arbitrary: bad, weight: 1 });
 
 /** Config: a valid setting, or a threshold outside (0, 1] (`invalid_config`). */
 const arbConfigPart: fc.Arbitrary<Part<EngineConfig | undefined>> = maybe(
@@ -191,26 +204,45 @@ const arbActorPart: fc.Arbitrary<Part<Origin>> = maybe(
   })),
 );
 
+/**
+ * Provenance Timestamp: kept as generated (`undefined`), or replaced by a
+ * string that fails `isTimestamp` (`invalid_timestamp`). It touches only
+ * `provenance.timestamp`, so a bad Origin or Run_Id still wins. Delete has
+ * no Timestamp and ignores this part.
+ */
+const arbTimestampPart: fc.Arbitrary<Part<string | undefined>> = maybe(
+  fc.constant({ value: undefined, error: null }),
+  arbBadTimestamp.map((value) => ({ value, error: { kind: "invalid_timestamp", value } })),
+  1,
+);
+
 type Parts = Readonly<{
   config: Part<EngineConfig | undefined>;
   offsets: Part<readonly number[]>;
   text: Part<string>;
   provenance: Part<Provenance>;
+  timestamp: Part<string | undefined>;
   actor: Part<Origin>;
 }>;
+
+/** The provenance part's value, with its Timestamp replaced if the timestamp part is faulty. */
+function provenanceOf(p: Parts): Provenance {
+  const timestamp = p.timestamp.value;
+  return timestamp === undefined ? p.provenance.value : { ...p.provenance.value, timestamp };
+}
 
 /** Builds the op of `kind` from its parts. */
 function buildOp(kind: OpKind, p: Parts): CallerOperation {
   const [a = 0, b = 0] = p.offsets.value;
-  if (kind === "insert") return { kind, at: a, text: p.text.value, provenance: p.provenance.value };
+  if (kind === "insert") return { kind, at: a, text: p.text.value, provenance: provenanceOf(p) };
   if (kind === "delete") return { kind, from: a, to: b, actor: p.actor.value };
-  return { kind, from: a, to: b, text: p.text.value, provenance: p.provenance.value };
+  return { kind, from: a, to: b, text: p.text.value, provenance: provenanceOf(p) };
 }
 
 /** The recorded errors of the parts `kind` uses, in precedence order. */
 function errorsOf(kind: OpKind, p: Parts): readonly (EngineError | null)[] {
   if (kind === "delete") return [p.config.error, p.offsets.error, p.actor.error];
-  return [p.config.error, p.offsets.error, p.text.error, p.provenance.error];
+  return [p.config.error, p.offsets.error, p.text.error, p.provenance.error, p.timestamp.error];
 }
 
 function arbFaultyOfKind(doc: Document, kind: OpKind): fc.Arbitrary<FaultyOp> {
@@ -221,6 +253,7 @@ function arbFaultyOfKind(doc: Document, kind: OpKind): fc.Arbitrary<FaultyOp> {
       offsets: arbOffsetPart(doc, kind),
       text: arbTextPart,
       provenance,
+      timestamp: arbTimestampPart,
       actor: arbActorPart,
     })
     .map((parts) => ({
