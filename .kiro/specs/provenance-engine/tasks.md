@@ -86,7 +86,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `validateConfig` accepts a threshold in (0, 1] and treats an absent one as 0.4.
     - `validateCallerOp` checks in this fixed order: `out_of_range` by field, `inverted_range`, `split_surrogate`, `invalid_provenance`, `invalid_timestamp`.
     - Per design A2.
-    - _Requirements: 6.5, 6.6, 6.10, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6_
+    - _Requirements: 6.5, 6.6, 6.10, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.8_
   - [x] 2.8 Implement `ops/splice.ts`
     - `spliceText` and `effectiveProvenance`. A relabelled Run turns `AI` into `AI>HUM`.
     - `spliceSpans` returns the deleted pieces and merges only at the two seams.
