@@ -297,7 +297,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `extract(text)` is total: it scans, links, then pairs and attaches quotes, and computes Normalised_Forms.
     - Add `segment(text, spans)` to `segment.ts`. It calls `segmentWith(text, spans, extract(text).citations)`.
     - _Requirements: 8.5, 9.1, 9.9, 11.2, 11.3, 11.4_
-  - [ ] 5.20 Create `src/testing/arb-text-citations.ts` and `src/testing/arb-opinion.ts`
+  - [-] 5.20 Create `src/testing/arb-text-citations.ts` and `src/testing/arb-opinion.ts`
     - `arb-text-citations.ts`: `arbTextWithCitations` with every tagged quote group from the design table and its expected `Extraction`, plus `arbGapPunct`, `arbFollowGap`, `arbQuoteContent`, `arbProseWords`, `arbCitingString`, `arbOffsetPair`, and `arbQuoteNoise`.
     - No quote group places one Quotation_Pair inside or across another, so the expected `Extraction` needs no pair-dropping step. `arbQuoteNoise` may create pairs that open inside other pairs (nested or crossing); Property 20's reference model drops them (Req 13.10).
     - Party Short_Form fragments use `arbStopListPrefix` + `arbShortFormParty`, with and without ` v. ` and Entity_Suffixes, and are preceded by `; `, `(`, a lower-case non-Connector prose word, or a Gap_Signal and a space. The prose vocabulary contains neither `with` nor any lowercase Gap_Signal.
@@ -407,7 +407,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - If `apps/web/demo/` does not exist yet, author the fixture here and note in the README that `apps/web/demo/` must reuse it.
     - `test/demo.test.ts` asserts the planted items extract at known Offsets.
     - _Requirements: 9.1, 9.2, 13.1_
-  - [ ] 5.39 Implement `citations/incremental.ts` `rescan`
+  - [x] 5.39 Implement `citations/incremental.ts` `rescan`
     - Finds the left resync landing position at or before `from − LOOKAHEAD − 1`.
     - Scans until the right resync point `q ≥ newTo + LOOKBEHIND`, with `LOOKBEHIND = 162`, where `q − delta` is an old landing position. This window covers party matches whose `partyStartFor` scan (up to `PARTY_SCAN = 161` before the tail comma) reaches into the edit, such as inserting `In ` or `Roe v. ` before a party.
     - Splices the kept, new, and shifted matches.

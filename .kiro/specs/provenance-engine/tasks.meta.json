@@ -756,6 +756,25 @@
         "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
         "timestamp": 1793857523538
       }
+    ],
+    "5.20 Create `src/testing/arb-text-citations.ts` and `src/testing/arb-opinion.ts`": [
+      {
+        "executionId": "7b0014ec-3c82-4411-b05c-6c8937e469eb",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793857532643
+      }
+    ],
+    "5.39 Implement `citations/incremental.ts` `rescan`": [
+      {
+        "executionId": "7b0014ec-3c82-4411-b05c-6c8937e469eb",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793857533288
+      },
+      {
+        "executionId": "7b0014ec-3c82-4411-b05c-6c8937e469eb",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793858954387
+      }
     ]
   }
 }
