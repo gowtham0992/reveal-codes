@@ -15,7 +15,7 @@ import reporters from "../src/citations/reporters.json" with { type: "json" };
 describe("REPORTERS _Requirements: 14.1_", () => {
   it("is the vendored list, in file order", () => {
     expect(REPORTERS).toEqual(reporters);
-    expect(REPORTERS.length).toBe(1126);
+    expect(REPORTERS.length).toBe(932);
   });
 
   it("indexes every entry exactly at its own position", () => {

@@ -48,23 +48,35 @@ describe("Property 21: Canonical format round trips and is idempotent _Requireme
   });
 
   // Shrunk counterexample (seed 842338267, path "61:2:1:0:0:0:0:0:3:3:3:3:3").
-  // `1600 Phila. Ct. Com. Pl. LEXIS 1` scans as a Database_Citation (year
-  // 1600, lexisCourt `Phila. Ct. Com. Pl.`), not the Reporter_Citation that
-  // was formatted: 194 Reporter_List entries end in ` LEXIS`, and a volume in
-  // the year range makes the two readings the same string. Open spec
-  // question; `it.fails` keeps the suite green until it is resolved, and
-  // starts failing (so it must become `it`) once the round trip holds.
-  it.fails("counterexample: a `… LEXIS` reporter with a year-like volume round trips", () => {
-    const c: FullValue = {
+  // `1600 Phila. Ct. Com. Pl. LEXIS 1` used to be both a Reporter_Citation
+  // (194 Reporter_List entries ended in ` LEXIS`) and a Database_Citation, so
+  // the reporter value did not round trip. Req 14.7 resolved the collision by
+  // dropping every database citation form from the Reporter_List: the reporter
+  // value is now invalid and the string reads only as the Database_Citation.
+  it("counterexample: `1600 Phila. Ct. Com. Pl. LEXIS 1` is a Database_Citation, not a reporter", () => {
+    const asReporter: FullValue = {
       kind: "reporter",
       volume: 1600,
       reporter: "Phila. Ct. Com. Pl. LEXIS",
       page: 1,
     };
-    const formatted = format(c);
-    expect(formatted).toEqual({ ok: true, value: "1600 Phila. Ct. Com. Pl. LEXIS 1" });
-    const text = formatted.ok ? formatted.value : "";
+    expect(format(asReporter)).toEqual({
+      ok: false,
+      error: { kind: "invalid_citation", field: "reporter" },
+    });
+
+    const text = "1600 Phila. Ct. Com. Pl. LEXIS 1";
+    const asDatabase: FullValue = {
+      kind: "database",
+      year: 1600,
+      designator: "LEXIS",
+      lexisCourt: "Phila. Ct. Com. Pl.",
+      number: 1,
+    };
     const matches = scanRange(text, 0, () => false);
-    expect(matches).toEqual([{ start: 0, end: text.length, value: c }]);
+    expect(matches).toHaveLength(1);
+    expect(matches[0]).toMatchObject({ start: 0, end: text.length });
+    expect(matches[0]?.value).toEqual(asDatabase);
+    expect(format(asDatabase)).toEqual({ ok: true, value: text });
   });
 });

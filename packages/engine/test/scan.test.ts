@@ -18,14 +18,7 @@ describe("scan constants _Requirements: 9.1, 9.7_", () => {
 });
 
 describe("matchAt class order _Requirements: 9.1, 9.7_", () => {
-  it("prefers a Database_Citation over a reporter reading at the same p", () => {
-    // `Ala. LEXIS` is also a Reporter_List entry, so `2020 Ala. LEXIS 123`
-    // has a reporter reading (volume 2020, page 123); the database class wins.
-    const m = matchAt("2020 Ala. LEXIS 123", 0);
-    expect(m?.value).toMatchObject({ kind: "database", year: 2020, number: 123 });
-    expect(m?.end).toBe(19);
-  });
-
+  // Req 14.7 removed the only reporter/database collisions (`… LEXIS` entries), so no text has both readings.
   it("takes a Parallel_Citation over its first member", () => {
     const text = "410 U.S. 113, 93 S. Ct. 705 (1973)";
     const m = matchAt(text, 0);
