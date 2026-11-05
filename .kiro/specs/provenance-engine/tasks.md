@@ -297,7 +297,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `extract(text)` is total: it scans, links, then pairs and attaches quotes, and computes Normalised_Forms.
     - Add `segment(text, spans)` to `segment.ts`. It calls `segmentWith(text, spans, extract(text).citations)`.
     - _Requirements: 8.5, 9.1, 9.9, 11.2, 11.3, 11.4_
-  - [-] 5.20 Create `src/testing/arb-text-citations.ts` and `src/testing/arb-opinion.ts`
+  - [x] 5.20 Create `src/testing/arb-text-citations.ts` and `src/testing/arb-opinion.ts`
     - `arb-text-citations.ts`: `arbTextWithCitations` with every tagged quote group from the design table and its expected `Extraction`, plus `arbGapPunct`, `arbFollowGap`, `arbQuoteContent`, `arbProseWords`, `arbCitingString`, `arbOffsetPair`, and `arbQuoteNoise`.
     - No quote group places one Quotation_Pair inside or across another, so the expected `Extraction` needs no pair-dropping step. `arbQuoteNoise` may create pairs that open inside other pairs (nested or crossing); Property 20's reference model drops them (Req 13.10).
     - Party Short_Form fragments use `arbStopListPrefix` + `arbShortFormParty`, with and without ` v. ` and Entity_Suffixes, and are preceded by `; `, `(`, a lower-case non-Connector prose word, or a Gap_Signal and a space. The prose vocabulary contains neither `with` nor any lowercase Gap_Signal.
