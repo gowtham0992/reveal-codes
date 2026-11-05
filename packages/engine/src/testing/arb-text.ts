@@ -4,6 +4,8 @@
  * Only `src/testing/` may import fast-check.
  */
 import fc from "fast-check";
+import { LEGAL_ABBREVIATIONS } from "../abbreviations.js";
+import { isValidBoundary } from "../validate.js";
 
 const fromUnits = (units: readonly number[]): string =>
   units.map((u) => String.fromCharCode(u)).join("");
@@ -98,3 +100,95 @@ const loneHigh = fc
 export const arbStringWithLoneSurrogate: fc.Arbitrary<LoneSurrogateString> = fc
   .tuple(arbText, fc.oneof(loneLow, loneHigh))
   .map(([prefix, rest]) => ({ text: prefix + rest, offset: prefix.length }));
+
+/** A half-open range `[start, end)` standing in for a citation range. */
+export type CitationRange = Readonly<{ start: number; end: number }>;
+
+/** Snaps left off Surrogate_Pair interiors, sorts, and drops duplicates. */
+function toBoundaries(text: string, raw: readonly number[]): number[] {
+  const snapped = raw.map((o) => (isValidBoundary(text, o) ? o : o - 1));
+  return [...new Set(snapped)].sort((a, b) => a - b);
+}
+
+/** Pairs consecutive boundaries into non-empty ranges, dropping an odd last one. */
+function pairUp(bounds: readonly number[]): CitationRange[] {
+  const ranges: CitationRange[] = [];
+  for (let i = 0; i + 1 < bounds.length; i += 2) {
+    ranges.push({ start: bounds[i] as number, end: bounds[i + 1] as number });
+  }
+  return ranges;
+}
+
+/**
+ * 0 to 10 sorted, non-overlapping, non-empty ranges within `t` whose ends
+ * are Valid_Boundaries (never inside a Surrogate_Pair). Offsets are drawn
+ * with `fc.integer` and snapped with `.map`, so shrinking still works.
+ */
+export function arbCitationRanges(t: string): fc.Arbitrary<readonly CitationRange[]> {
+  if (t.length === 0) return fc.constant([]);
+  return fc
+    .array(fc.integer({ min: 0, max: t.length }), { maxLength: 20 })
+    .map((raw) => pairUp(toBoundaries(t, raw)));
+}
+
+const lower = fc.integer({ min: 0x61, max: 0x7a }).map((u) => String.fromCharCode(u));
+const upper = fc.integer({ min: 0x41, max: 0x5a }).map((u) => String.fromCharCode(u));
+
+const arbLowerWord = fc.array(lower, { minLength: 1, maxLength: 10 }).map((cs) => cs.join(""));
+
+/** `[A-Z][a-z]{0,11}`. */
+export const arbCapitalisedWord: fc.Arbitrary<string> = fc
+  .tuple(upper, fc.array(lower, { maxLength: 11 }))
+  .map(([first, rest]) => first + rest.join(""));
+
+/** One Legal_Abbreviation occurrence inside `arbAbbreviationProse` text. */
+export type AbbreviationOccurrence = Readonly<{ abbreviation: string; start: number; end: number }>;
+
+/** Prose with spliced Legal_Abbreviations, each at a recorded Offset. */
+export type AbbreviationProse = Readonly<{
+  text: string;
+  abbreviations: readonly AbbreviationOccurrence[];
+}>;
+
+type ProseFragment =
+  | Readonly<{ kind: "word"; word: string }>
+  | Readonly<{ kind: "abbr"; abbreviation: string; next: string }>;
+
+const arbProseFragment: fc.Arbitrary<ProseFragment> = fc.oneof(
+  arbLowerWord.map((word): ProseFragment => ({ kind: "word", word })),
+  fc
+    .tuple(fc.constantFrom(...LEGAL_ABBREVIATIONS), arbCapitalisedWord)
+    .map(([abbreviation, next]): ProseFragment => ({ kind: "abbr", abbreviation, next })),
+);
+
+/** Joins fragments with single spaces, recording each abbreviation's range. */
+function joinProse(fragments: readonly ProseFragment[]): AbbreviationProse {
+  const parts: string[] = [];
+  const abbreviations: AbbreviationOccurrence[] = [];
+  let at = 0;
+  for (const f of fragments) {
+    const piece = f.kind === "word" ? f.word : `${f.abbreviation} ${f.next}`;
+    if (parts.length > 0) at += 1;
+    if (f.kind === "abbr") {
+      abbreviations.push({
+        abbreviation: f.abbreviation,
+        start: at,
+        end: at + f.abbreviation.length,
+      });
+    }
+    parts.push(piece);
+    at += piece.length;
+  }
+  return { text: parts.join(" "), abbreviations };
+}
+
+/**
+ * Lower-case prose words joined by single spaces, with Legal_Abbreviations
+ * from the whole `LEGAL_ABBREVIATIONS` list spliced in, each followed by a
+ * space and a Capitalised word (`Acme Co. Then`). Prose words hold no
+ * period, so every `.` in the text belongs to a recorded abbreviation.
+ * Each abbreviation is preceded by the start of the text or a space.
+ */
+export const arbAbbreviationProse: fc.Arbitrary<AbbreviationProse> = fc
+  .array(arbProseFragment, { maxLength: 30 })
+  .map(joinProse);

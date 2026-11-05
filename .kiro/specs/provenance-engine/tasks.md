@@ -168,7 +168,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - The index builders take the extra reporter abbreviations as a parameter. They get an empty list here, and task 5.2 passes `REPORTERS` entries ending in `.`.
     - Per design A8.
     - _Requirements: 8.6, 9.2, 12.2, 13.1_
-  - [ ] 4.2 Implement `boundary.ts`
+  - [x] 4.2 Implement `boundary.ts`
     - `isBoundaryAt(text, b, citationRanges)` and `countBoundaries(text, from, to, citationRanges, cap)`. Both take citation ranges as a parameter and do not import the Extractor.
     - Per design A8 step 3.
     - _Requirements: 8.3, 8.5, 8.6, 8.8_
@@ -176,7 +176,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Checks coverage first, then finds boundaries, then computes the dominant origin (ties go to the earliest-starting span) and the origin set in fixed order.
     - The public `segment` is added in task 5.19.
     - _Requirements: 8.1, 8.2, 8.4, 8.7, 8.9_
-  - [ ] 4.4 Extend `src/testing/arb-text.ts`
+  - [-] 4.4 Extend `src/testing/arb-text.ts`
     - `arbCitationRanges(t)`: sorted, non-overlapping ranges on Valid_Boundaries.
     - `arbAbbreviationProse`: prose with Legal_Abbreviations spliced in, drawn from the whole `LEGAL_ABBREVIATIONS` list (including `Ltd.`, `Co.`, `L.P.`, `N.A.`, and `L.L.C.`), each followed by a space and a capitalised word.
     - _Requirements: 22.1_
