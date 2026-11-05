@@ -156,7 +156,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - An `AI>HUM` Insert returns `invalid_provenance`.
     - _Requirements: 4.5, 4.10, 6.10, 7.4_
 
-- [ ] 3. Checkpoint: document model and operations
+- [x] 3. Checkpoint: document model and operations
   - Ensure `pnpm lint`, `pnpm typecheck`, and `pnpm test` pass. Ask the user if questions arise.
 
 - [ ] 4. Sentence segmentation (citation ranges passed in)
