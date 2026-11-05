@@ -301,7 +301,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `arb-text-citations.ts`: `arbTextWithCitations` with every tagged quote group from the design table and its expected `Extraction`, plus `arbGapPunct`, `arbFollowGap`, `arbQuoteContent`, `arbProseWords`, `arbCitingString`, `arbOffsetPair`, and `arbQuoteNoise`.
     - Party Short_Form fragments use `arbStopListPrefix` + `arbShortFormParty`, with and without ` v. ` and Entity_Suffixes, and are preceded by `; `, `(`, a lower-case non-Connector prose word, or a Gap_Signal and a space. The prose vocabulary contains neither `with` nor any lowercase Gap_Signal.
     - Quote tags include: preceding with a Gap_Signal (every `GAP_SIGNALS` entry, before a Full_Citation or a party Short_Form, and `"q." ` + Gap_Signal + Case_Name + Full_Citation); preceding with a parenthetical signal (`(quoting Roe v. Wade, 410 U.S. 113)` shape); and unattached groups for `In` before a party Short_Form, `with` before a Case_Name, two Gap_Signals, a Party_Name over 80 code units, and a following gap holding a Gap_Signal (`(quoting "q")`).
-    - The builder counts the boundaries each group's own words add (one after `Cf.` or `cf.` and after each Single_Capital_Initial; none after `v.`, an Entity_Suffix, or the periods of `E.g.,`).
+    - The builder counts the boundaries each group's own words add (one after `Cf.` or `cf.`; one after each Case_Name Single_Capital_Initial that Req 8.10 does not exclude, that is, one followed by ` v. `, ` et al.`, or a space and a digit-run token; none after an initial followed by a space and a Capitalised_Word or by `,`; none after `v.`, an Entity_Suffix, or the periods of `E.g.,`; none inside a Citation range). See the design's `arbTextWithCitations` row.
     - `arb-opinion.ts`: `arbOpinionWithQuotes`.
     - Add export lines to `arbitraries.ts`.
     - _Requirements: 22.1, 22.4_
@@ -389,10 +389,10 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - _Requirements: 11.3, 14.3_
   - [ ] 5.35 Write Property 15 in `test/segment.properties.test.ts` and widen Property 14
     - **Property 15: Sentence boundaries are exactly the rule's positions**
-    - This is the citation-aware segmentation property. It runs `segment` against `extract(t)` ranges on `arbTextWithCitations` with `arbAbbreviationProse` spliced in, drawn from the whole `LEGAL_ABBREVIATIONS` list (including `Ltd.`, `Co.`, `L.P.`, `N.A.`, `L.L.C.`) plus reporter abbreviations.
+    - This is the citation-aware segmentation property. It runs `segment` against `extract(t)` ranges on `arbTextWithCitations` with `arbAbbreviationProse` spliced in, drawn from the whole `LEGAL_ABBREVIATIONS` list (including `Ltd.`, `Co.`, `L.P.`, `N.A.`, `L.L.C.`) plus reporter abbreviations, and with `arbInitialProse` fragments spliced in, so that initials followed by one space and a Capitalised_Word (no boundary, Req 8.10) and the near cases that still split both occur.
     - Also add `arbTextWithCitations` through `segment` to the Property 14 generator from task 4.5. Do not add a second `fc.assert` for Property 14.
-    - **Validates: Requirements 8.3, 8.4, 8.5, 8.6**
-    - _Requirements: 8.3, 8.4, 8.5, 8.6_
+    - **Validates: Requirements 8.3, 8.4, 8.5, 8.6, 8.10**
+    - _Requirements: 8.3, 8.4, 8.5, 8.6, 8.10_
   - [ ] 5.36 Write Property 5 in `test/spans.properties.test.ts`
     - **Property 5: Invalid span lists are rejected at the first violation**
     - It asserts both `normaliseSpans` and the public `segment`, so it lands here rather than in task 2.

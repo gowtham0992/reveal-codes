@@ -65,7 +65,12 @@ export const arbPartyWord: fc.Arbitrary<string> = fc
   )
   .map(([w, d]) => w + d);
 
-/** A Single_Capital_Initial such as `J.`, never a reporter abbreviation. */
+/**
+ * A Single_Capital_Initial such as `J.`, never a reporter abbreviation. An
+ * initial followed by ` v. `, ` et al.`, or a digit run ends a Sentence
+ * (Req 8.10 does not apply) unless it is a reporter abbreviation (Req 8.6),
+ * so excluding `A.`, `F.`, and `P.` keeps boundary counts exact.
+ */
 export const arbInitial: fc.Arbitrary<string> = fc
   .constantFrom(...INITIAL_LETTERS)
   .map((c) => `${c}.`);

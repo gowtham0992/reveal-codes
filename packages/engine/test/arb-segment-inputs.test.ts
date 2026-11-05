@@ -5,11 +5,40 @@ import { countBoundaries } from "../src/boundary";
 import {
   arbAbbreviationProse,
   arbCitationRanges,
+  arbInitialProse,
   arbSentencedText,
   arbText,
+  type InitialCase,
 } from "../src/testing/arbitraries";
 import { isValidBoundary } from "../src/validate";
 import { runs } from "./support/fc";
+
+/** Two units before the tested `.`, the `.`, the gap, and the next unit, per case. */
+const INITIAL_SHAPES: Readonly<Record<InitialCase, RegExp>> = {
+  joined: /^ [A-Z]\. [A-Z]$/,
+  chain: /^ [A-Z]\. [A-Z]$/,
+  reporter: /^ [AFP]\. [a-z]$/,
+  lowercase: /^ [A-Z]\. [a-z]$/,
+  digit: /^ [A-Z]\. [0-9]$/,
+  vee: /^ [A-Z]\. v$/,
+  etal: /^ [A-Z]\. e$/,
+  twoSpaces: /^ [A-Z]\. {2}[A-Z]$/,
+  newline: /^ [A-Z]\.\n[A-Z]$/,
+  closer: /^ [A-Z]\.\) [A-Z]$/,
+  twoLetters: /^[A-Z]{2}\. [A-Z]$/,
+  glued: /^[a-z][A-Z]\. [A-Z]$/,
+  paren: /^\([A-Z]\. [A-Z]$/,
+};
+
+/** True when `text[i]` lies in a Legal_Abbreviation preceded by a space or the start. */
+function inSpacedAbbreviation(text: string, i: number): boolean {
+  return LEGAL_ABBREVIATIONS.some((a) => {
+    for (let s = Math.max(0, i - a.length + 1); s <= i; s += 1) {
+      if (text.startsWith(a, s) && (s === 0 || text[s - 1] === " ")) return true;
+    }
+    return false;
+  });
+}
 
 describe("segmentation input arbitraries meet their definitions _Requirements: 22.1_", () => {
   it("arbCitationRanges are sorted, non-overlapping, non-empty, on Valid_Boundaries", () => {
@@ -64,6 +93,34 @@ describe("segmentation input arbitraries meet their definitions _Requirements: 2
         .flatMap((p) => p.abbreviations.map((a) => a.abbreviation)),
     );
     expect([...seen].sort()).toEqual([...LEGAL_ABBREVIATIONS].sort());
+  });
+
+  it("arbInitialProse records each tested `.` with its case shape and its `after` Offset", () => {
+    fc.assert(
+      fc.property(arbInitialProse, ({ text, initials }) => {
+        for (const o of initials) {
+          expect(text[o.dot]).toBe(".");
+          // Two units before the `.` through the first unit after the gap; a
+          // leading space stands in for the start of the text.
+          expect((" " + text).slice(o.dot - 1, o.after + 2)).toMatch(INITIAL_SHAPES[o.kind]);
+          expect(o.splits).toBe(!["joined", "chain", "reporter"].includes(o.kind));
+        }
+        const dots = new Set(initials.map((o) => o.dot));
+        for (const m of text.matchAll(/\./g)) {
+          if (!dots.has(m.index)) expect(inSpacedAbbreviation(text, m.index)).toBe(true);
+        }
+      }),
+      runs(),
+    );
+  });
+
+  it("arbInitialProse draws every initial case across samples", () => {
+    const seen = new Set(
+      fc
+        .sample(arbInitialProse, { numRuns: 300, seed: 5 })
+        .flatMap((p) => p.initials.map((o) => o.kind)),
+    );
+    expect([...seen].sort()).toEqual(Object.keys(INITIAL_SHAPES).sort());
   });
 
   it("arbSentencedText usually contains a Sentence boundary and splits no Surrogate_Pair", () => {

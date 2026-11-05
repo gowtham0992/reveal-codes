@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { BASE_ABBREVIATION_INDEX } from "../src/abbreviations";
 import {
   countBoundaries,
   isBoundaryAt,
+  isInitialBeforeCapitalisedWord,
   isInsideCitation,
   type CitationRange,
 } from "../src/boundary";
@@ -109,9 +111,10 @@ describe("Legal_Abbreviation exclusion _Requirements: 8.6_", () => {
 
 describe("citation ranges _Requirements: 8.5_", () => {
   it("places no boundary strictly inside a hand-placed citation range", () => {
-    const text = "See K. B. C.";
-    expect(boundariesOf(text)).toEqual([7, 10]);
-    expect(boundariesOf(text, [{ start: 4, end: 10 }])).toEqual([10]);
+    // Two-letter words, because `K. B. C` has no boundary under Req 8.10.
+    const text = "See Kx. Bx. C.";
+    expect(boundariesOf(text)).toEqual([8, 12]);
+    expect(boundariesOf(text, [{ start: 4, end: 12 }])).toEqual([12]);
   });
 
   it("keeps a citation range inside one Sentence when segmenting", () => {
@@ -122,8 +125,8 @@ describe("citation ranges _Requirements: 8.5_", () => {
   });
 
   it("allows a boundary exactly at a range's start or end", () => {
-    const text = "K. B. C";
-    expect(boundariesOf(text, [{ start: 3, end: 6 }])).toEqual([3, 6]);
+    const text = "Kx. Bx. C";
+    expect(boundariesOf(text, [{ start: 4, end: 8 }])).toEqual([4, 8]);
   });
 
   it("isInsideCitation is strict at both ends", () => {
@@ -164,6 +167,70 @@ describe("countBoundaries _Requirements: 8.3_", () => {
   it("respects citation ranges and abbreviations", () => {
     expect(countBoundaries(text, 0, text.length, [{ start: 2, end: 10 }], Infinity)).toBe(1);
     expect(countBoundaries("Acme Co. Then x. Y", 0, 18, [], Infinity)).toBe(1);
+  });
+});
+
+describe("Single_Capital_Initial exclusion _Requirements: 8.10_", () => {
+  it("places no boundary after `Q.` in `United States v. John Q. Public, 5 U.S. 1`", () => {
+    const text = "United States v. John Q. Public, 5 U.S. 1";
+    expect(isBoundaryAt(text, text.indexOf("Public"), [])).toBe(false);
+    expect(boundariesOf(text)).toEqual([]);
+  });
+
+  it("lets a quote before that Case_Name see no boundary in the gap", () => {
+    const text = '"no." United States v. John Q. Public, 5 U.S. 1';
+    expect(countBoundaries(text, text.indexOf('"', 1), text.indexOf("5"), [], 2)).toBe(1);
+  });
+
+  it("places no boundary in `Exhibit A. The court`, even without reporter abbreviations", () => {
+    const text = "Exhibit A. The court";
+    expect(boundariesOf(text)).toEqual([]);
+    expect(isBoundaryAt(text, 11, [], BASE_ABBREVIATION_INDEX)).toBe(false);
+    expect(isBoundaryAt("Exhibit J. The court", 11, [], BASE_ABBREVIATION_INDEX)).toBe(false);
+  });
+
+  it("applies at the start of the Text and along a chain of initials", () => {
+    expect(boundariesOf("Q. Public")).toEqual([]);
+    expect(sentencesOf("J. K. Rowling wrote. Then")).toEqual(["J. K. Rowling wrote. ", "Then"]);
+  });
+
+  it("accepts a Legal_Abbreviation, an initial, or a Surrogate_Pair capital as the next word", () => {
+    expect(boundariesOf("Plan B. Inc. x")).toEqual([]);
+    expect(boundariesOf("Plan B. L.L.C. x")).toEqual([]);
+    expect(boundariesOf("Plan B. \u{1D400}bc")).toEqual([]);
+  });
+
+  it("still splits `Plan B. then`, where the next word is lower-case", () => {
+    expect(sentencesOf("Plan B. then")).toEqual(["Plan B. ", "then"]);
+  });
+
+  it("does not split `Plan B. Then we left.` (the rule's own limitation)", () => {
+    expect(sentencesOf("Plan B. Then we left.")).toEqual(["Plan B. Then we left."]);
+  });
+
+  it.each([
+    ["two spaces", "Plan B.  Then", 9],
+    ["a newline", "Plan B.\nThen", 8],
+    ["a closer", "Plan B.) Then", 9],
+    ["two capitals", "Plan AB. Then", 9],
+    ["a capital glued to a letter", "PlanB. Then", 7],
+    ["`(` before the capital", "(B. Then", 4],
+    ["a tab before the capital", "Plan\tB. Then", 8],
+    ["a lower-case initial", "Plan b. Then", 8],
+    ["a digit run next", "Plan B. 5 more", 8],
+    ["`v.` next", "Plan B. v. Wade", 8],
+    ["`et al.` next", "Plan B. et al. x", 8],
+    ["a `W` run with a non-abbreviation period", "Plan B. Then.", 8],
+    ["a quotation mark next", 'Plan B. "Then"', 8],
+  ])("still splits with %s", (_label, text, b) => {
+    expect(boundariesOf(text)).toEqual([b]);
+  });
+
+  it("isInitialBeforeCapitalisedWord reads the `.` at `i` only", () => {
+    expect(isInitialBeforeCapitalisedWord("Plan B. Then", 6)).toBe(true);
+    expect(isInitialBeforeCapitalisedWord("Plan B. Then", 5)).toBe(false);
+    expect(isInitialBeforeCapitalisedWord("Plan B.", 6)).toBe(false);
+    expect(isInitialBeforeCapitalisedWord("B. Then", -1)).toBe(false);
   });
 });
 

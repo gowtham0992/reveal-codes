@@ -8,3 +8,4 @@ export * from "./arb-citation.js";
 export * from "./arb-citation-corrupt.js";
 export * from "./arb-case-name.js";
 export * from "./arb-short-form-party.js";
+export * from "./arb-initial-prose.js";

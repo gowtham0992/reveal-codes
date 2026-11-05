@@ -234,13 +234,14 @@ Out of scope: network access, CourtListener, LLM providers, UI, DOCX and PDF exp
 
 1. WHEN a non-empty Text is segmented, THE Segmenter SHALL return one or more Sentences, each with `start < end`, ordered by `start`, where the first Sentence starts at 0, each subsequent Sentence starts at the previous Sentence's `end`, the last Sentence ends at Text.length, and the concatenation of `text.slice(start, end)` over all Sentences equals the Text exactly, including every whitespace code unit.
 2. WHEN the empty Text is segmented, THE Segmenter SHALL return zero Sentences.
-3. WHEN a Text contains a terminator sequence (one or more of `.`, `?`, `!`, optionally followed by one or more of `"`, `”`, `'`, `’`, `)`), followed by one or more whitespace code units and then a non-whitespace code unit, THE Segmenter SHALL place a Sentence boundary at the Offset of that non-whitespace code unit, so that the whitespace belongs to the preceding Sentence, unless criterion 5 or 6 excludes the boundary.
+3. WHEN a Text contains a terminator sequence (one or more of `.`, `?`, `!`, optionally followed by one or more of `"`, `”`, `'`, `’`, `)`), followed by one or more whitespace code units and then a non-whitespace code unit, THE Segmenter SHALL place a Sentence boundary at the Offset of that non-whitespace code unit, so that the whitespace belongs to the preceding Sentence, unless criterion 5, 6, or 10 excludes the boundary.
 4. WHEN a Text contains no position satisfying criterion 3, THE Segmenter SHALL return exactly one Sentence covering [0, Text.length).
 5. THE Segmenter SHALL place no Sentence boundary at an Offset `b` with `start < b < end` for any Citation range `[start, end)` returned by the Extractor for the same Text.
 6. IF the terminator sequence in criterion 3 ends with the final period of a Legal_Abbreviation that matches exactly (case-sensitive) and is preceded by the start of the Text, a whitespace code unit, or `(`, THEN THE Segmenter SHALL place no Sentence boundary after that terminator sequence.
 7. WHEN a Text is segmented with Spans that satisfy the Coverage_Invariant for that Text, THE Segmenter SHALL report for every Sentence, including a Sentence that overlaps only one Span, its Dominant_Origin (computed over code units in `[start, end)`, ties broken by the earliest-starting Span) and the set of every Origin of a Span that overlaps at least one code unit of the Sentence.
 8. THE Segmenter SHALL place each Sentence boundary at a Valid_Boundary.
 9. IF the Spans passed to the Segmenter do not satisfy the Coverage_Invariant for the Text, THEN THE Segmenter SHALL return an Engine_Error of kind `invalid_spans` and return no Sentences.
+10. IF the terminator sequence in criterion 3 is a `.` that immediately follows a single ASCII uppercase letter (`A` to `Z`), that letter is preceded by the start of the Text or an ASCII space, and the `.` is followed by one ASCII space and then a Capitalised_Word (the maximal run, starting after that space, of Unicode letters, ASCII digits, `.`, `'`, `’`, and `-`), THEN THE Segmenter SHALL place no Sentence boundary after that `.`, so that `United States v. John Q. Public, 5 U.S. 1` and `Exhibit A. The court` each have no boundary after the initial.
 
 ### Requirement 9: Full citation extraction (Request 4.1, Added from citations.md)
 
@@ -562,7 +563,7 @@ New behaviours:
 
 - **Redo and `stale_inverse` (5.5–5.7)**: applying an inverse returns a redo inverse; undo/redo chains restore exact state; an inverse applied to the wrong document is rejected.
 - **Fixed error precedence (7.6)**: `out_of_range`, then `inverted_range`, then `split_surrogate`, then `invalid_provenance`, then `invalid_timestamp`.
-- **Explicit sentence-terminator rule (8.3–8.6)**: terminators, trailing quotes and parentheses, whitespace ownership, and the citation and abbreviation exclusions.
+- **Explicit sentence-terminator rule (8.3–8.6, 8.10)**: terminators, trailing quotes and parentheses, whitespace ownership, and the citation, abbreviation, and single-capital-initial exclusions.
 - **Citation boundary rules and word-boundary rejection (9.2, 9.8)**.
 - **Canonical format layout and value ranges (10.1–10.2, 10.5)**, with `invalid_citation` for values outside them.
 - **First-entry tie-break for ambiguous near misses (11.5, 14.6)**: the first matching entry in `reporters.json` order wins.
