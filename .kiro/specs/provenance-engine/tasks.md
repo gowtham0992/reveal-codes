@@ -189,7 +189,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 16: Dominant origin and origin set match a per-unit count**
     - **Validates: Requirements 8.7**
     - _Requirements: 8.7_
-  - [-] 4.7 Write example tests in `test/boundary.test.ts`
+  - [x] 4.7 Write example tests in `test/boundary.test.ts`
     - Terminators followed by trailing `"`, `”`, `'`, `’`, `)`.
     - Whitespace belongs to the preceding Sentence.
     - No boundary after `v.`, `Inc.`, or `No.`, nor after `Ltd.`, `Co.`, `L.P.`, `N.A.`, or `L.L.C.` (`Acme Co. Then` is one Sentence).
