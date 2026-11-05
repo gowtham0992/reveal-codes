@@ -53,8 +53,8 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `structuralEqual` on key order and array order.
     - _Requirements: 1.4, 2.5, 2.6, 2.7_
 
-- [ ] 2. Document model and edit operations
-  - [ ] 2.1 Implement `spans.ts`
+- [~] 2. Document model and edit operations
+  - [x] 2.1 Implement `spans.ts`
     - `checkCoverage` returns `invalid_spans` with the first violation's Offset and kind.
     - `normaliseSpans` merges Mergeable runs and keeps the lowest-start Timestamp.
     - Also implement `mergeSeams`, `originAt`, and `runExtents`.
