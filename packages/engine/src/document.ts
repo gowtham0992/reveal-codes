@@ -1,12 +1,21 @@
 /**
- * Document creation and normalisation (design A1, Req 2, Req 3.4).
- * `apply` joins this module in task 2.12.
+ * Document creation, normalisation, and the `apply` dispatcher (design A1,
+ * A2; Req 2, 3.4, 4.7, 4.10, 5.1, 5.2, 7.7).
  */
 import { creationEdit, reanchorStage, withLayer, type DraftDocument } from "./anchor.js";
-import type { EngineError } from "./errors.js";
+import type { EngineError, InvalidSpans } from "./errors.js";
+import {
+  applyDelete,
+  applyInsert,
+  applyInverse,
+  applyReplace,
+  makeInverse,
+  validateCallerOp,
+  validateConfig,
+} from "./ops.js";
 import { err, ok, type Result } from "./result.js";
 import { normaliseSpans } from "./spans.js";
-import type { Document, Span } from "./types.js";
+import type { Applied, CallerOperation, Document, EngineConfig, Operation, Span } from "./types.js";
 import { firstUnpairedSurrogate, isTimestamp } from "./validate.js";
 
 /**
@@ -45,4 +54,50 @@ export function normalise(doc: Document): Result<Document, EngineError> {
   const spans = normaliseSpans(doc.text.length, doc.spans);
   if (!spans.ok) return spans;
   return ok({ ...doc, spans: spans.value });
+}
+
+/**
+ * The edit position of a validated Caller_Operation when it is a no-op under
+ * Req 4.7 (empty inserted text over an empty range), or `null` otherwise.
+ */
+function noOpAt(op: CallerOperation): number | null {
+  if (op.kind === "insert") return op.text.length === 0 ? op.at : null;
+  if (op.kind === "delete") return op.from === op.to ? op.from : null;
+  return op.from === op.to && op.text.length === 0 ? op.from : null;
+}
+
+/** Design A2 step 5: routes a validated, non-no-op Caller_Operation. */
+function dispatch(
+  doc: Document,
+  op: CallerOperation,
+  threshold: number,
+): Result<Applied, InvalidSpans> {
+  if (op.kind === "insert") return applyInsert(doc, op, threshold);
+  if (op.kind === "delete") return applyDelete(doc, op, threshold);
+  return applyReplace(doc, op, threshold);
+}
+
+/**
+ * Applies an Operation to `doc` (design A2). In order: `validateConfig`
+ * (so an invalid threshold is rejected even for an Inverse), Inverse
+ * routing to `applyInverse` (Req 5.7), `validateCallerOp` (Req 7), the
+ * no-op case (Req 4.7, 4.10), which returns `doc` itself with an Inverse
+ * that restores it, and dispatch to Insert, Delete, or Replace.
+ *
+ * On failure the error is returned and `doc` is untouched (Req 5.2); on
+ * success exactly one Inverse is returned (Req 5.1).
+ */
+export function apply(
+  doc: Document,
+  op: Operation,
+  config?: EngineConfig,
+): Result<Applied, EngineError> {
+  const threshold = validateConfig(config);
+  if (!threshold.ok) return threshold;
+  if (op.kind === "inverse") return applyInverse(doc, op);
+  const valid = validateCallerOp(doc, op);
+  if (!valid.ok) return valid;
+  const at = noOpAt(valid.value);
+  if (at !== null) return ok({ document: doc, inverse: makeInverse(doc, doc, at, "", 0) });
+  return dispatch(doc, valid.value, threshold.value);
 }
