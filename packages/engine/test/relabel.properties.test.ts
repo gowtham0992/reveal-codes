@@ -1,8 +1,15 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import { apply } from "../src/document";
 import { arbDocument, arbOpTrace, arbThreshold } from "../src/testing/arbitraries";
-import type { CallerOperation, Document, Origin, Provenance, RunEntry } from "../src/types";
+import type { CallerOperation, Document, Insert, Origin, Provenance, RunEntry } from "../src/types";
 import { runs } from "./support/fc";
+import {
+  arbForgedOp,
+  arbRelabelledInsert,
+  checkRelabelledInsert,
+  expectNoMixedRun,
+} from "./support/origin";
 
 // Shared helpers for Properties 11 to 13 (design "Correctness Properties", [relabel]).
 
@@ -178,5 +185,64 @@ describe("relabel properties: threshold relabelling _Requirements: 6.3, 6.4, 6.5
       }),
       runs(),
     );
+  });
+});
+
+const arbOriginCase = fc
+  .tuple(arbDocument, arbThreshold)
+  .chain(([doc, setting]) =>
+    fc
+      .tuple(arbForgedOp(doc), arbRelabelledInsert(doc))
+      .map(([forged, relabelledInsert]) => ({ doc, setting, forged, relabelledInsert })),
+  );
+
+describe("relabel properties: only the Engine produces AI>HUM _Requirements: 6.11, 6.12, 7.4_", () => {
+  it("Property 13: caller AI>HUM is rejected; AI inserts under relabelled Runs become AI>HUM; no Run mixes Origins", () => {
+    // Property 13
+    fc.assert(
+      fc.property(arbOriginCase, ({ doc, setting, forged, relabelledInsert }) => {
+        expectNoMixedRun(doc);
+        const snapshot = structuredClone(doc);
+        const rejected = apply(doc, forged, setting.config);
+        expect(rejected.ok).toBe(false);
+        if (!rejected.ok) {
+          expect(rejected.error).toEqual({
+            kind: "invalid_provenance",
+            field: "origin",
+            value: "AI>HUM",
+          });
+        }
+        expect(doc).toEqual(snapshot);
+        if (relabelledInsert !== null) checkRelabelledInsert(doc, relabelledInsert, setting.config);
+      }),
+      runs(),
+    );
+  });
+
+  it("Property 13 counterexample: an AI insert inside a relabelled span merges and keeps that span's Timestamp", () => {
+    const t0 = "0000-01-01T00:00:00Z";
+    const doc: Document = {
+      text: "abcde",
+      spans: [{ start: 0, end: 5, provenance: { origin: "AI>HUM", runId: "r2", timestamp: t0 } }],
+      runs: [{ runId: "r2", originalLength: 10, editedCount: 5, relabelled: true }],
+      citations: [],
+      quotes: [],
+      overrides: [],
+      keyCounter: 0,
+    };
+    const op: Insert = {
+      kind: "insert",
+      at: 2,
+      text: " ",
+      provenance: { origin: "AI", runId: "r2", timestamp: "0000-01-01T00:00:00.0Z" },
+    };
+    const result = apply(doc, op, { relabelThreshold: 1 });
+    expect(result.ok && result.value.document.spans).toEqual([
+      { start: 0, end: 6, provenance: { origin: "AI>HUM", runId: "r2", timestamp: t0 } },
+    ]);
+    expect(result.ok && result.value.document.runs).toEqual([
+      { runId: "r2", originalLength: 11, editedCount: 5, relabelled: true },
+    ]);
+    checkRelabelledInsert(doc, op, { relabelThreshold: 1 });
   });
 });

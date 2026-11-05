@@ -5,14 +5,18 @@ import { structuralEqual } from "../src/equal";
 import {
   arbCallerInsertOrDelete,
   arbDocument,
+  arbOpTrace,
   arbReplace,
   arbThreshold,
+  type OpStep,
 } from "../src/testing/arbitraries";
 import type {
+  Applied,
   Delete,
   Document,
   EngineConfig,
   Insert,
+  Inverse,
   Origin,
   Provenance,
   RunEntry,
@@ -283,5 +287,64 @@ describe("Property 7: Replace equals Delete followed by Insert _Requirements: 4.
       { runId: "r1", originalLength: 10, editedCount: 7, relabelled: true },
     ]);
     expect(structuralEqual(result.value.document, sequential)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Property 8 helpers: walk a trace forward, then undo it and redo each step.
+// ---------------------------------------------------------------------------
+
+/** `apply(doc, inv)` must succeed and return exactly one Inverse (Req 5.1, 5.5). */
+function appliedInverse(doc: Document, inv: Inverse, config?: EngineConfig): Applied {
+  const result = apply(doc, inv, config);
+  expect(result.ok).toBe(true);
+  if (!result.ok) throw new Error(`apply(inverse) failed with ${result.error.kind}`);
+  expect(result.value.inverse.kind).toBe("inverse");
+  return result.value;
+}
+
+/** Full Document equality: the engine's structural check and a deep field-by-field one. */
+function expectSameDocument(actual: Document, expected: Document): void {
+  expect(structuralEqual(actual, expected)).toBe(true);
+  expect(actual).toEqual(expected);
+}
+
+/** `d0 … dn` and `i1 … in` from a trace whose every step must succeed (Req 5.1). */
+function forwardChain(d0: Document, steps: readonly OpStep[]): [Document[], Inverse[]] {
+  const docs: Document[] = [d0];
+  const inverses: Inverse[] = [];
+  for (const { result } of steps) {
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(`apply failed with ${result.error.kind}`);
+    expect(result.value.inverse.kind).toBe("inverse");
+    docs.push(result.value.document);
+    inverses.push(result.value.inverse);
+  }
+  return [docs, inverses];
+}
+
+describe("Property 8: Undo and redo restore documents exactly _Requirements: 4.7, 5.1, 5.3, 5.4, 5.5, 5.6_", () => {
+  it("applying in … i1 returns dn−1 … d0, and each redo Inverse returns the undone Document", () => {
+    const arbCase = fc
+      .tuple(arbDocument, arbThreshold)
+      .chain(([doc, setting]) =>
+        arbOpTrace(doc, setting.config).map((steps) => ({ doc, setting, steps })),
+      );
+    // Property 8
+    fc.assert(
+      fc.property(arbCase, ({ doc, setting, steps }) => {
+        const { config } = setting;
+        const [docs, inverses] = forwardChain(doc, steps);
+        let current = docs[docs.length - 1] as Document;
+        for (let k = inverses.length; k >= 1; k--) {
+          const undone = appliedInverse(current, inverses[k - 1] as Inverse, config);
+          expectSameDocument(undone.document, docs[k - 1] as Document);
+          const redone = appliedInverse(undone.document, undone.inverse, config);
+          expectSameDocument(redone.document, docs[k] as Document);
+          current = undone.document;
+        }
+      }),
+      runs(),
+    );
   });
 });

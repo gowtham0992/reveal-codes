@@ -125,7 +125,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 7: Replace equals Delete followed by Insert**
     - **Validates: Requirements 4.6, 6.9**
     - _Requirements: 4.6, 6.9_
-  - [ ] 2.17 Write Property 8 in `test/ops.properties.test.ts`
+  - [x] 2.17 Write Property 8 in `test/ops.properties.test.ts`
     - **Property 8: Undo and redo restore documents exactly**
     - **Validates: Requirements 4.7, 5.1, 5.3, 5.4, 5.5, 5.6**
     - _Requirements: 4.7, 5.1, 5.3, 5.4, 5.5, 5.6_
@@ -145,7 +145,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 12: A Run is relabelled exactly when its Edited_Proportion exceeds the threshold, and stays relabelled**
     - **Validates: Requirements 6.3, 6.4, 6.5, 6.8, 6.10**
     - _Requirements: 6.3, 6.4, 6.5, 6.8, 6.10_
-  - [ ] 2.22 Write Property 13 in `test/relabel.properties.test.ts`
+  - [-] 2.22 Write Property 13 in `test/relabel.properties.test.ts`
     - **Property 13: Only the Engine produces AI>HUM**
     - **Validates: Requirements 6.11, 6.12, 7.4**
     - _Requirements: 6.11, 6.12, 7.4_
