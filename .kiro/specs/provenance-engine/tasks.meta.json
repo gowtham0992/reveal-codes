@@ -196,6 +196,18 @@
         "chatSessionId": "sess_4abe13b9-4867-47fa-a34b-b248e12831b9",
         "timestamp": 1793843694562
       }
+    ],
+    "2.11 Implement `ops/insert.ts`, `ops/delete.ts`, and `ops/replace.ts`": [
+      {
+        "executionId": "4abd3201-efa9-486c-9a12-002c74549b0c",
+        "chatSessionId": "sess_4abe13b9-4867-47fa-a34b-b248e12831b9",
+        "timestamp": 1793843697642
+      },
+      {
+        "executionId": "4abd3201-efa9-486c-9a12-002c74549b0c",
+        "chatSessionId": "sess_4abe13b9-4867-47fa-a34b-b248e12831b9",
+        "timestamp": 1793843905816
+      }
     ]
   }
 }

@@ -101,7 +101,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Applying an Inverse does not validate, relabel, or re-extract.
     - Per design A7.
     - _Requirements: 5.1, 5.3, 5.4, 5.5, 5.6, 5.7_
-  - [ ] 2.11 Implement `ops/insert.ts`, `ops/delete.ts`, and `ops/replace.ts`
+  - [x] 2.11 Implement `ops/insert.ts`, `ops/delete.ts`, and `ops/replace.ts`
     - The Insert and Delete pipeline follows design A3 steps 1 to 8 and calls `reanchorStage` at step 7.
     - Replace runs Delete then Insert, evaluates relabelling once after both counts, and returns one combined Inverse (design A4).
     - _Requirements: 4.1, 4.4, 4.6, 4.8, 6.9, 6.11_
