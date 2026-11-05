@@ -96,7 +96,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `addOriginalLength`, `countDeleted` (`HUM` Actor, `AI` pieces only), `countInserted` (strictly inside the pre-insertion Run_Extent), and `relabelRuns` (sticky flag, full normalisation only on the relabel path).
     - Per design A3 steps 3 to 5.
     - _Requirements: 4.8, 4.9, 6.1, 6.2, 6.3, 6.4, 6.7, 6.8, 6.12_
-  - [-] 2.10 Implement `ops/inverse.ts`
+  - [x] 2.10 Implement `ops/inverse.ts`
     - `makeInverse` uses shared arrays. `applyInverse` checks staleness with reference equality first, then `structuralEqual`, and returns a redo Inverse.
     - Applying an Inverse does not validate, relabel, or re-extract.
     - Per design A7.
