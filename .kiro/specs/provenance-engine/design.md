@@ -756,7 +756,7 @@ For any `arbDocument` `d`, any op with Inverse `i` from `apply(d, op)`, and any 
 
 ### Property 10: Rejected operations return the first error in precedence and change nothing
 For any `arbDocument` `d` and any `arbFaultyOp(d)`, the operation must carry one or more injected faults from {invalid threshold, non-integer or out-of-range field, `from > to`, surrogate split, bad Origin, Run_Id rule violation, bad Actor, malformed provenance Timestamp}. The result has `ok: false`, its error kind equals the first fault in the order `invalid_config`, `out_of_range`, `inverted_range`, `split_surrogate`, `invalid_provenance`, `invalid_timestamp`, it carries no Inverse, and `d` is equal to its pre-call clone. [ops]
-**Validates: Requirements 2.5, 5.2, 6.6, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7**
+**Validates: Requirements 2.5, 5.2, 6.6, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8**
 
 ### Property 11: Run table accounting matches the edit model
 For any `arbDocument` `d` and any op from `arbOpSequence(d)`, each Run's Original_Length increases by `text.length` exactly when the op inserts non-empty `AI` text under that Run (creating the entry if absent), and is otherwise unchanged. Each Run's edited count increases by exactly the `HUM`-deleted `AI` code units of that Run, plus the `HUM`-inserted length when the insertion Offset lies strictly inside that Run's pre-insertion extent (measured after deletion for Replace). Counts are unchanged for Actors `PST` and `AI`. [relabel]
@@ -1041,7 +1041,7 @@ All errors are plain data `{ kind, ...fields }`. No source module throws, and no
 | `invalid_provenance` | `field: "origin" \| "runId" \| "actor"`, `value: unknown` | `apply`, `createDocument` path | 2.5, 7.4, 7.5 |
 | `split_surrogate` | `offset`, `where: "document" \| "text"` | `createDocument`, `apply` | 2.6, 7.3 |
 | `split_surrogate` (creation) | `createDocument` reports an unpaired surrogate as `{ kind: "split_surrogate", offset, where: "text" }`; at creation `offset` is also a Document Offset, because the Text equals the supplied string | `createDocument` | 2.6 |
-| `invalid_timestamp` | `value: unknown` | `createDocument`, `apply` (provenance), `setVerification` (`waitUntil` via `invalid_verification_result`), `recordOverride` | 2.7 |
+| `invalid_timestamp` | `value: unknown` | `createDocument`, `apply` (provenance), `setVerification` (`waitUntil` via `invalid_verification_result`), `recordOverride` | 2.7, 7.8 |
 | `invalid_spans` | `offset`, `violation: "empty" \| "overlap" \| "unsorted" \| "gap" \| "coverage"` | `normaliseSpans`, `normalise`, `segment` | 3.6, 8.9 |
 | `out_of_range` | `field: "at" \| "from" \| "to"`, `value`, `length` | `apply` | 7.1 |
 | `inverted_range` | `from`, `to` | `apply` | 7.2 |
