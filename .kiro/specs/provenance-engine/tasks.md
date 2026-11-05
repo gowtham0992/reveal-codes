@@ -159,7 +159,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
 - [x] 3. Checkpoint: document model and operations
   - Ensure `pnpm lint`, `pnpm typecheck`, and `pnpm test` pass. Ask the user if questions arise.
 
-- [~] 4. Sentence segmentation (citation ranges passed in)
+- [x] 4. Sentence segmentation (citation ranges passed in)
   - [x] 4.1 Implement `abbreviations.ts`
     - `LEGAL_ABBREVIATIONS` is the non-reporter list in Glossary order: `Id.`, `v.`, `Inc.`, `Corp.`, `Ltd.`, `Co.`, `L.P.`, `N.A.`, `L.L.C.`, `No.`, `Cir.`, `Dist.`, `Ct.`, `Fed.`, `Supp.`, `et al.`. `Ltd.`, `Co.`, `L.P.`, `N.A.`, and `L.L.C.` are new, so no boundary follows them (for example in `Acme Co. Then`).
     - `ENTITY_SUFFIX_WORDS`: `Inc.`, `LLC`, `L.L.C.`, `Ltd.`, `Co.`, `Corp.`, `L.P.`, `N.A.`, shared by `party.ts` and `case-name.ts`. Every entry except `LLC` is also a Legal_Abbreviation.
@@ -185,7 +185,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Here it runs on `arbText` with `arbCitationRanges` through `segmentWith`. Task 5.35 adds `arbTextWithCitations` through `segment`.
     - **Validates: Requirements 8.1, 8.2, 8.8**
     - _Requirements: 8.1, 8.2, 8.8_
-  - [ ] 4.6 Write Property 16 in `test/segment.properties.test.ts`
+  - [x] 4.6 Write Property 16 in `test/segment.properties.test.ts`
     - **Property 16: Dominant origin and origin set match a per-unit count**
     - **Validates: Requirements 8.7**
     - _Requirements: 8.7_

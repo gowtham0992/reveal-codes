@@ -92,6 +92,50 @@ export function arbSpanFragmentation(
   });
 }
 
+/** Cut points every `width` code units, snapped left off Surrogate_Pair interiors. */
+function blockCuts(text: string, width: number): readonly number[] {
+  const cuts: number[] = [];
+  for (let c = width; c < text.length; c += width) {
+    const snapped = isValidBoundary(text, c) ? c : c - 1;
+    if (snapped > (cuts[cuts.length - 1] ?? 0)) cuts.push(snapped);
+  }
+  return cuts;
+}
+
+/**
+ * A labelling of `text` in equal-width blocks (1 to 4 code units, except
+ * where a block edge is snapped off a Surrogate_Pair) alternating between
+ * two labels of different Origins, so Sentences often hold equal counts of
+ * two Origins.
+ */
+function arbBlockLabelling(text: string): fc.Arbitrary<readonly Span[]> {
+  return fc
+    .tuple(
+      fc.integer({ min: 1, max: 4 }),
+      fc.tuple(arbLabel, arbLabel).filter(([a, b]) => a.origin !== b.origin),
+      arbTimestamp,
+    )
+    .map(([width, [a, b], timestamp]) =>
+      pieces(text.length, blockCuts(text, width)).map(([start, end], i) => ({
+        start,
+        end,
+        provenance: withTimestamp(i % 2 === 0 ? a : b, timestamp),
+      })),
+    );
+}
+
+/**
+ * `arbSpanFragmentation` over either a free labelling or an equal-width
+ * block labelling. The block half makes Dominant_Origin ties common
+ * (Property 16); every value is still a valid fragmentation of `text`.
+ */
+export function arbTieProneFragmentation(text: string): fc.Arbitrary<readonly Span[]> {
+  return fc.oneof(
+    arbSpanFragmentation(text),
+    arbBlockLabelling(text).chain((labelling) => arbSpanFragmentation(text, labelling)),
+  );
+}
+
 /**
  * A corrupted span list over `text`, with the `invalid_spans` error that
  * `checkCoverage` must report, recorded at generation time.

@@ -47,6 +47,10 @@
     "4.5 Write Property 14 in `test/segment.properties.test.ts`": {
       "status": "passed",
       "lastRunTimestamp": 1793851828246
+    },
+    "4.6 Write Property 16 in `test/segment.properties.test.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1793851983102
     }
   },
   "executionHistory": {
@@ -482,6 +486,25 @@
         "executionId": "f7b07160-3c63-4143-bf0d-aebad527559c",
         "chatSessionId": "sess_69a449db-23a5-4357-9489-27d010a07fd4",
         "timestamp": 1793851845685
+      }
+    ],
+    "4.6 Write Property 16 in `test/segment.properties.test.ts`": [
+      {
+        "executionId": "f7b07160-3c63-4143-bf0d-aebad527559c",
+        "chatSessionId": "sess_69a449db-23a5-4357-9489-27d010a07fd4",
+        "timestamp": 1793851848645
+      },
+      {
+        "executionId": "f7b07160-3c63-4143-bf0d-aebad527559c",
+        "chatSessionId": "sess_69a449db-23a5-4357-9489-27d010a07fd4",
+        "timestamp": 1793851999342
+      }
+    ],
+    "4. Sentence segmentation (citation ranges passed in)": [
+      {
+        "executionId": "f7b07160-3c63-4143-bf0d-aebad527559c",
+        "chatSessionId": "sess_69a449db-23a5-4357-9489-27d010a07fd4",
+        "timestamp": 1793851999415
       }
     ]
   }
