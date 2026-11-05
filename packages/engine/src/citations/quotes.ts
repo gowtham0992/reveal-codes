@@ -1,8 +1,8 @@
 /**
  * Quote layer: pairing quotation marks and attaching each Quotation_Pair to
  * at most one Citation (Req 13.1, 13.2, 13.5–13.9; design A9, "Quote
- * pairing" and "Attachment"; D18, D19), with the outermost pair winning
- * when one pair lies inside another (Req 13.10).
+ * pairing" and "Attachment"; D18, D19, D20), with the earlier-opening pair
+ * winning when two pairs nest or cross (Req 13.10).
  *
  * Sentence membership is decided by `countBoundaries`, the Segmenter's own
  * predicate (A8), so attachment agrees with `segment` by construction.
@@ -67,31 +67,33 @@ function pairCurly(text: string): QuotePair[] {
 }
 
 /**
- * Drops every pair B that lies inside some pair A (`A.open < B.open` and
- * `B.close < A.close`). `sorted` is ascending by `open`; mark Offsets are
- * distinct, so B lies inside an earlier pair exactly when its `close` is
- * below the greatest `close` seen so far (Req 13.10).
+ * Keeps a pair only when its opening mark lies after the closing mark of the
+ * last pair kept, so a pair opening inside a kept pair (nested or crossing)
+ * is dropped (Req 13.10). `sorted` is ascending by `open`; mark Offsets are
+ * distinct, so the comparison is strict. The kept pairs are disjoint.
  */
-function dropContained(sorted: readonly QuotePair[]): QuotePair[] {
+function dropOpeningInsideKept(sorted: readonly QuotePair[]): QuotePair[] {
   const out: QuotePair[] = [];
-  let maxClose = -1;
+  let lastClose = -1;
   for (const p of sorted) {
-    if (p.close > maxClose) out.push(p);
-    maxClose = Math.max(maxClose, p.close);
+    if (p.open > lastClose) {
+      out.push(p);
+      lastClose = p.close;
+    }
   }
   return out;
 }
 
 /**
- * Every Quotation_Pair with non-whitespace content that lies inside no other
- * pair, ascending by opening mark. Straight and curly marks are paired
- * independently, so a `“…"` mixture yields nothing (Req 13.1, 13.6, 13.10).
- * A straight and a curly pair that cross are both kept.
+ * Every Quotation_Pair with non-whitespace content whose opening mark lies
+ * inside no earlier kept pair, ascending by opening mark. Straight and curly
+ * marks are paired independently, so a `“…"` mixture yields nothing (Req
+ * 13.1, 13.6, 13.10).
  */
 export function pairQuoteMarks(text: string): readonly QuotePair[] {
   const pairs = [...pairStraight(text), ...pairCurly(text)];
   const sorted = pairs.filter((p) => hasContent(text, p)).sort((a, b) => a.open - b.open);
-  return dropContained(sorted);
+  return dropOpeningInsideKept(sorted);
 }
 
 const isAttachable = (c: QuoteCitation): boolean => c.value.kind !== "other";

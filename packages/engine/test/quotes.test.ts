@@ -39,6 +39,11 @@ describe("pairQuoteMarks _Requirements: 13.1, 13.2, 13.6_", () => {
     expect(pairQuoteMarks('“a "b" c”')).toEqual([{ open: 0, close: 8 }]);
   });
 
+  it("drops a pair whose opening mark lies inside an earlier pair it crosses (13.10)", () => {
+    expect(pairQuoteMarks('"a “b" c”')).toEqual([{ open: 0, close: 5 }]);
+    expect(pairQuoteMarks('“a "b” c"')).toEqual([{ open: 0, close: 5 }]);
+  });
+
   it("returns the quoted text without its marks", () => {
     const t = '"right" 410 U.S. 113';
     expect(quotes(t)).toEqual([
@@ -110,7 +115,7 @@ describe("attachQuotes following rule _Requirements: 13.8, 13.7_", () => {
   });
 });
 
-describe("outermost quote pair wins _Requirements: 13.7, 13.10_", () => {
+describe("earlier-opening quote pair wins _Requirements: 13.7, 13.10_", () => {
   it('attaches only the outer quote of `"He wrote “no” 410 U.S. 113 today." Roe v. Wade, 410 U.S. 113`', () => {
     const t = '"He wrote “no” 410 U.S. 113 today." Roe v. Wade, 410 U.S. 113';
     const later = t.lastIndexOf("410 U.S. 113");
@@ -126,5 +131,37 @@ describe("outermost quote pair wins _Requirements: 13.7, 13.10_", () => {
     const starts = scanRange(t, 0, never).map((c) => c.start);
     expect(starts).toContain(t.indexOf("410 U.S. 113"));
     expect(starts).toContain(later);
+  });
+
+  it('keeps only the straight pair of `"a “b" 410 U.S. 113 c” 5 U.S. 1`', () => {
+    const t = '"a “b" 410 U.S. 113 c” 5 U.S. 1';
+    expect(pairQuoteMarks(t)).toEqual([{ open: 0, close: 5 }]);
+    expect(quotes(t)).toEqual([
+      {
+        start: 1,
+        end: 5,
+        text: "a “b",
+        citationStart: t.indexOf("410 U.S. 113"),
+        rule: "preceding",
+      },
+    ]);
+    expect(quotes(t).some((q) => q.citationStart === t.indexOf("5 U.S. 1"))).toBe(false);
+  });
+
+  it('keeps only the straight pair of `Roe, 410 U.S. 113 ("a “b" c”) 5 U.S. 1`', () => {
+    const t = 'Roe, 410 U.S. 113 ("a “b" c”) 5 U.S. 1';
+    const open = t.indexOf('"');
+    expect(pairQuoteMarks(t)).toEqual([{ open, close: open + 5 }]);
+    const cited = scanRange(t, 0, never)[0];
+    expect(cited && t.slice(cited.start, cited.end)).toBe("410 U.S. 113");
+    expect(quotes(t)).toEqual([
+      {
+        start: open + 1,
+        end: open + 5,
+        text: "a “b",
+        citationStart: t.indexOf("410 U.S. 113"),
+        rule: "following",
+      },
+    ]);
   });
 });
