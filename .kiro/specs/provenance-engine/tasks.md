@@ -39,10 +39,10 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - The `EngineError` union with every kind and field in the design's Error Handling table, plus `MalformedRule`.
     - Every type in design "Data Models". Optional fields are absent, never `undefined`.
     - _Requirements: 1.7, 1.8, 2.4_
-  - [ ] 1.3 Implement `equal.ts` `structuralEqual(a, b)`
+  - [x] 1.3 Implement `equal.ts` `structuralEqual(a, b)`
     - Compares primitives, keys, and array order, with a reference-equality fast path.
     - _Requirements: 1.4_
-  - [ ] 1.4 Implement `validate.ts`
+  - [x] 1.4 Implement `validate.ts`
     - `isTimestamp`: a regex plus integer calendar checks including leap years, with no `Date` (design A1 step 1).
     - `firstUnpairedSurrogate`, `isValidBoundary`, and `checkProvenance`, which enforces that a Run_Id is present if and only if the Origin is `AI` or `AI>HUM`.
     - _Requirements: 2.5, 2.6, 2.7, 7.3_
