@@ -28,6 +28,7 @@ const INITIAL_SHAPES: Readonly<Record<InitialCase, RegExp>> = {
   twoLetters: /^[A-Z]{2}\. [A-Z]$/,
   glued: /^[a-z][A-Z]\. [A-Z]$/,
   paren: /^\([A-Z]\. [A-Z]$/,
+  id: /^ [A-Z]\. I$/,
 };
 
 /** True when `text[i]` lies in a Legal_Abbreviation preceded by a space or the start. */

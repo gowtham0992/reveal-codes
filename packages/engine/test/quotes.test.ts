@@ -34,6 +34,11 @@ describe("pairQuoteMarks _Requirements: 13.1, 13.2, 13.6_", () => {
     expect(quotes('“right" Roe v. Wade, 410 U.S. 113')).toEqual([]);
   });
 
+  it("drops a curly pair that lies inside a straight pair (13.10)", () => {
+    expect(pairQuoteMarks('"He wrote “no” today."')).toEqual([{ open: 0, close: 21 }]);
+    expect(pairQuoteMarks('“a "b" c”')).toEqual([{ open: 0, close: 8 }]);
+  });
+
   it("returns the quoted text without its marks", () => {
     const t = '"right" 410 U.S. 113';
     expect(quotes(t)).toEqual([
@@ -102,5 +107,24 @@ describe("attachQuotes following rule _Requirements: 13.8, 13.7_", () => {
       ["first", at, "preceding"],
       ["second", at, "following"],
     ]);
+  });
+});
+
+describe("outermost quote pair wins _Requirements: 13.7, 13.10_", () => {
+  it('attaches only the outer quote of `"He wrote “no” 410 U.S. 113 today." Roe v. Wade, 410 U.S. 113`', () => {
+    const t = '"He wrote “no” 410 U.S. 113 today." Roe v. Wade, 410 U.S. 113';
+    const later = t.lastIndexOf("410 U.S. 113");
+    expect(quotes(t)).toEqual([
+      {
+        start: 1,
+        end: t.indexOf('" Roe'),
+        text: "He wrote “no” 410 U.S. 113 today.",
+        citationStart: later,
+        rule: "preceding",
+      },
+    ]);
+    const starts = scanRange(t, 0, never).map((c) => c.start);
+    expect(starts).toContain(t.indexOf("410 U.S. 113"));
+    expect(starts).toContain(later);
   });
 });

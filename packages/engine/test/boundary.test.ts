@@ -222,6 +222,7 @@ describe("Single_Capital_Initial exclusion _Requirements: 8.10_", () => {
     ["`et al.` next", "Plan B. et al. x", 8],
     ["a `W` run with a non-abbreviation period", "Plan B. Then.", 8],
     ["a quotation mark next", 'Plan B. "Then"', 8],
+    ["`Id.` next", "Exhibit B. Id. at 5", 11],
   ])("still splits with %s", (_label, text, b) => {
     expect(boundariesOf(text)).toEqual([b]);
   });
@@ -231,6 +232,13 @@ describe("Single_Capital_Initial exclusion _Requirements: 8.10_", () => {
     expect(isInitialBeforeCapitalisedWord("Plan B. Then", 5)).toBe(false);
     expect(isInitialBeforeCapitalisedWord("Plan B.", 6)).toBe(false);
     expect(isInitialBeforeCapitalisedWord("B. Then", -1)).toBe(false);
+  });
+
+  it("excludes a following `W` run that is exactly `Id.`, and only that run", () => {
+    expect(isInitialBeforeCapitalisedWord("Exhibit B. Id. at 5", 9)).toBe(false);
+    expect(sentencesOf("Exhibit B. Id. at 5")).toEqual(["Exhibit B. ", "Id. at 5"]);
+    expect(isInitialBeforeCapitalisedWord("Plan B. Idaho", 6)).toBe(true);
+    expect(isInitialBeforeCapitalisedWord("Plan B. Inc. x", 6)).toBe(true);
   });
 });
 

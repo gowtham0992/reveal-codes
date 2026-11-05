@@ -1,7 +1,8 @@
 /**
  * Quote layer: pairing quotation marks and attaching each Quotation_Pair to
  * at most one Citation (Req 13.1, 13.2, 13.5–13.9; design A9, "Quote
- * pairing" and "Attachment"; D18, D19).
+ * pairing" and "Attachment"; D18, D19), with the outermost pair winning
+ * when one pair lies inside another (Req 13.10).
  *
  * Sentence membership is decided by `countBoundaries`, the Segmenter's own
  * predicate (A8), so attachment agrees with `segment` by construction.
@@ -66,13 +67,31 @@ function pairCurly(text: string): QuotePair[] {
 }
 
 /**
- * Every Quotation_Pair with non-whitespace content, ascending by opening
- * mark. Straight and curly marks are paired independently, so a `“…"`
- * mixture yields nothing (Req 13.1, 13.6).
+ * Drops every pair B that lies inside some pair A (`A.open < B.open` and
+ * `B.close < A.close`). `sorted` is ascending by `open`; mark Offsets are
+ * distinct, so B lies inside an earlier pair exactly when its `close` is
+ * below the greatest `close` seen so far (Req 13.10).
+ */
+function dropContained(sorted: readonly QuotePair[]): QuotePair[] {
+  const out: QuotePair[] = [];
+  let maxClose = -1;
+  for (const p of sorted) {
+    if (p.close > maxClose) out.push(p);
+    maxClose = Math.max(maxClose, p.close);
+  }
+  return out;
+}
+
+/**
+ * Every Quotation_Pair with non-whitespace content that lies inside no other
+ * pair, ascending by opening mark. Straight and curly marks are paired
+ * independently, so a `“…"` mixture yields nothing (Req 13.1, 13.6, 13.10).
+ * A straight and a curly pair that cross are both kept.
  */
 export function pairQuoteMarks(text: string): readonly QuotePair[] {
   const pairs = [...pairStraight(text), ...pairCurly(text)];
-  return pairs.filter((p) => hasContent(text, p)).sort((a, b) => a.open - b.open);
+  const sorted = pairs.filter((p) => hasContent(text, p)).sort((a, b) => a.open - b.open);
+  return dropContained(sorted);
 }
 
 const isAttachable = (c: QuoteCitation): boolean => c.value.kind !== "other";

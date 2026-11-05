@@ -75,14 +75,17 @@ function wordRunEnd(text: string, start: number): number {
  * Req 8.10: `text[i]` is a `.` right after one ASCII capital, which follows
  * the start of the Text or an ASCII space, and the `.` is followed by one
  * ASCII space and a Capitalised_Word (the maximal `W` run starting at
- * `i + 2`, tested with the Glossary's `isCapitalisedWord`).
+ * `i + 2`, tested with the Glossary's `isCapitalisedWord`) that is not
+ * exactly `Id.`, so `Exhibit B. Id. at 5` still splits before `Id.`.
  */
 export function isInitialBeforeCapitalisedWord(text: string, i: number): boolean {
   if (!Number.isInteger(i) || i < 1 || text.charAt(i) !== ".") return false;
   if (!isAsciiUpper(text.charAt(i - 1))) return false;
   if (i >= 2 && text.charAt(i - 2) !== " ") return false;
   if (text.charAt(i + 1) !== " ") return false;
-  return isCapitalisedWord(text, i + 2, wordRunEnd(text, i + 2));
+  const end = wordRunEnd(text, i + 2);
+  if (text.slice(i + 2, end) === "Id.") return false;
+  return isCapitalisedWord(text, i + 2, end);
 }
 
 /**

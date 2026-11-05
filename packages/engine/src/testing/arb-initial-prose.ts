@@ -24,7 +24,8 @@ export type InitialCase =
   | "closer"
   | "twoLetters"
   | "glued"
-  | "paren";
+  | "paren"
+  | "id";
 
 /**
  * One tested `.`: its Offset `dot`, the Offset `after` of the first
@@ -48,9 +49,12 @@ const upper = fc.integer({ min: 0x41, max: 0x5a }).map((u) => String.fromCharCod
 const arbLowerWord = fc.array(lower, { minLength: 1, maxLength: 8 }).map((cs) => cs.join(""));
 const arbDigits = fc.integer({ min: 0, max: 9999 }).map(String);
 
-/** Legal_Abbreviations that are Capitalised_Words as one `W` run (not `v.`, `et al.`). */
+/**
+ * Legal_Abbreviations that are Capitalised_Words as one `W` run (not `v.`,
+ * `et al.`) and that Req 8.10 accepts after an initial (not `Id.`).
+ */
 const arbFollowingAbbreviation = fc.constantFrom(
-  ...LEGAL_ABBREVIATIONS.filter((a) => a !== "v." && a !== "et al."),
+  ...LEGAL_ABBREVIATIONS.filter((a) => a !== "v." && a !== "et al." && a !== "Id."),
 );
 
 /** The one-letter reporter abbreviations, which Req 8.6 already excludes. */
@@ -99,6 +103,7 @@ const singles: fc.Arbitrary<Fragment> = fc.oneof(
     .tuple(lower, arbInitial, arbCapitalisedWord)
     .map(([x, i, w]) => one("glued", `${x}${i} ${w}`, 2, 1, true)),
   fc.tuple(arbInitial, arbCapitalisedWord).map(([i, w]) => one("paren", `(${i} ${w}`, 2, 1, true)),
+  fc.tuple(arbInitial, arbDigits).map(([i, d]) => one("id", `${i} Id. at ${d}`, 1, 1, true)),
 );
 
 /** `J. K. Smith`: both initials are followed by one space and a Capitalised_Word. */
