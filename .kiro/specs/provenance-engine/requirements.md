@@ -356,6 +356,7 @@ Out of scope: network access, CourtListener, LLM providers, UI, DOCX and PDF exp
 4. THE Engine SHALL ship a `reporters.json` that contains at least one entry, in which every entry is a non-empty string with no leading or trailing whitespace and no two entries are equal.
 5. WHEN a Reporter_Citation's token matches a Reporter_List entry exactly, THE Extractor SHALL record that entry as the reporter in the Citation_Value, and SHALL record a Normalised_Form only when Requirement 11.2 requires one.
 6. WHEN a Near_Miss token matches more than one Reporter_List entry after removing or collapsing periods and spaces, THE Extractor SHALL record as the reporter the matching entry that appears first in `reporters.json`, so that equal input always yields an equal Normalised_Form.
+7. WHEN `reporters.json` is generated from reporters-db, THE generator SHALL drop every entry whose last whitespace-separated token is `LEXIS` or `WL` and SHALL list each such entry in the licence note with the reason `database citation form`, because Database_Citations are recognised only by the Database grammar (Requirement 9.4); otherwise a Reporter_Citation could have the same Canonical_Form as a Database_Citation and break Requirements 10.3 and 10.4.
 
 ### Requirement 15: Re-anchoring citations on edit (Request 5.3, Added)
 

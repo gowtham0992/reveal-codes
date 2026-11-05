@@ -72,7 +72,10 @@ function dropReason(entry: string): string | undefined {
   const bad = FORBIDDEN_CHARS.filter((c) => entry.includes(c));
   if (bad.length > 0) return `contains ${bad.map((c) => JSON.stringify(c)).join(", ")}`;
   if (entry.split(/\s+/).some((t) => /^\d+$/.test(t))) return "has an all-digit token";
+  // Exact match first, so bare `WL` / `LEXIS` keep their own reason.
   if (RESERVED_TOKENS.includes(entry)) return "reserved database token";
+  // `… LEXIS` / `… WL` reporters collide with Database_Citations (Req 14.7).
+  if (RESERVED_TOKENS.includes(entry.split(/\s+/).at(-1) ?? "")) return "database citation form";
   if (entry.length > MAX_REPORTER_LENGTH) {
     return `longer than ${String(MAX_REPORTER_LENGTH)} code units (resolver window)`;
   }
