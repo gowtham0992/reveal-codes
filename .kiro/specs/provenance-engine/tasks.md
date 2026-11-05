@@ -259,7 +259,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 21: Canonical format round trips and is idempotent**
     - **Validates: Requirements 10.1, 10.2, 10.3, 10.4, 11.2, 14.3, 14.5**
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 11.2, 14.3, 14.5_
-  - [ ] 5.13 Write Property 22 in `test/format.properties.test.ts`
+  - [x] 5.13 Write Property 22 in `test/format.properties.test.ts`
     - **Property 22: Invalid citation values are rejected at the first failing field**
     - **Validates: Requirements 10.5**
     - _Requirements: 10.5_
@@ -276,20 +276,20 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `arbShortFormParty` builds one Party_Side or two joined by ` v. `. Each side is a Word_Run with optional Connectors, followed with probability ½ by one Entity_Suffix. Word_Runs are truncated to 44 code units in a one-side party and 16 per side in a two-side party. A leading live stop-list word is replaced by `Smith`, and `Id.` is excluded.
     - Add an export line to `arbitraries.ts`.
     - _Requirements: 22.1, 22.4_
-  - [ ] 5.16 Write Property 48 in `test/arbitraries.properties.test.ts`
+  - [x] 5.16 Write Property 48 in `test/arbitraries.properties.test.ts`
     - **Property 48: arbCaseName generates only Case_Names**
     - The test-local Glossary checker, `isCaseName`, and `isGapCaseName` all accept every value, and `extract(n).citations` is empty.
     - Include the companion `fc.statistics` example test, which also checks that every one of the eight Entity_Suffix words and the abbreviations `Ltd.`, `Co.`, `L.P.`, `N.A.`, `L.L.C.` occur.
     - **Validates: Requirements 22.1, 22.4**
     - _Requirements: 22.1, 22.4_
-  - [ ] 5.17 Implement `citations/quotes.ts`
+  - [x] 5.17 Implement `citations/quotes.ts`
     - `pairQuoteMarks` pairs straight and curly marks independently and drops empty pairs.
     - `attachQuotes` applies the preceding rule first: the first citation after the closing mark must be a Full_Citation or Short_Form (no skipping past an Other_Reference), `matchPrecedingGap` must accept the gap, which may hold one Gap_Signal and one Case_Name, and `countBoundaries` (cap 2) must be ≤ 1.
     - It then applies the following rule: every code unit between the citation's end and the opening mark is whitespace or `, ; : (`, so a Gap_Signal such as `quoting` rejects it (Req 13.8, D18), and `countBoundaries` (cap 1) is 0.
     - The preceding rule takes precedence.
     - Per design A9 "Attachment".
     - _Requirements: 13.1, 13.2, 13.5, 13.6, 13.7, 13.8, 13.9_
-  - [ ] 5.18 Implement `citations/link.ts` `linkShortForms`
+  - [x] 5.18 Implement `citations/link.ts` `linkShortForms`
     - `Id.` links to the previous citation. It becomes an Orphan after an Other_Reference or an Orphan.
     - A party form looks up the last Full_Citation with the same volume and normalised reporter.
     - _Requirements: 12.1, 12.2, 12.3, 12.6, 12.7_

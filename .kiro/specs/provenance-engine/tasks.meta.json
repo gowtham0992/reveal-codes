@@ -55,6 +55,14 @@
     "5.12 Write Property 21 in `test/format.properties.test.ts`": {
       "status": "passed",
       "lastRunTimestamp": 1793856381173
+    },
+    "5.13 Write Property 22 in `test/format.properties.test.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1793856484585
+    },
+    "5.16 Write Property 48 in `test/arbitraries.properties.test.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1793856663457
     }
   },
   "executionHistory": {
@@ -687,6 +695,54 @@
         "executionId": "979efbf5-e9e4-4f2b-8581-b5f1ab0ca7cd",
         "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
         "timestamp": 1793854691426
+      }
+    ],
+    "5.13 Write Property 22 in `test/format.properties.test.ts`": [
+      {
+        "executionId": "7630614e-d7aa-459b-9a24-68558e688b4c",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793856403167
+      },
+      {
+        "executionId": "7630614e-d7aa-459b-9a24-68558e688b4c",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793856688004
+      }
+    ],
+    "5.16 Write Property 48 in `test/arbitraries.properties.test.ts`": [
+      {
+        "executionId": "7630614e-d7aa-459b-9a24-68558e688b4c",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793856404866
+      },
+      {
+        "executionId": "7630614e-d7aa-459b-9a24-68558e688b4c",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793856688036
+      }
+    ],
+    "5.17 Implement `citations/quotes.ts`": [
+      {
+        "executionId": "7630614e-d7aa-459b-9a24-68558e688b4c",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793856405718
+      },
+      {
+        "executionId": "7630614e-d7aa-459b-9a24-68558e688b4c",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793856688075
+      }
+    ],
+    "5.18 Implement `citations/link.ts` `linkShortForms`": [
+      {
+        "executionId": "7630614e-d7aa-459b-9a24-68558e688b4c",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793856405874
+      },
+      {
+        "executionId": "7630614e-d7aa-459b-9a24-68558e688b4c",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793856688111
       }
     ]
   }
