@@ -219,7 +219,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - The reporter token is resolved longest first.
     - Per design A9 step 3.
     - _Requirements: 9.3, 9.5, 11.1, 11.5, 11.6_
-  - [-] 5.5 Implement `citations/grammar-db.ts`
+  - [x] 5.5 Implement `citations/grammar-db.ts`
     - `WL` and `<court> LEXIS` forms with an optional `, at *<pincite>`.
     - Per design A9 step 2.
     - _Requirements: 9.4_
