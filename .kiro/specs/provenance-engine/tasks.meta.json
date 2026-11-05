@@ -51,6 +51,11 @@
     "4.6 Write Property 16 in `test/segment.properties.test.ts`": {
       "status": "passed",
       "lastRunTimestamp": 1793851983102
+    },
+    "5.12 Write Property 21 in `test/format.properties.test.ts`": {
+      "status": "failed",
+      "failingExample": "{\"kind\":\"reporter\",\"volume\":1600,\"reporter\":\"Phila. Ct. Com. Pl. LEXIS\",\"page\":1} (seed 842338267, path \"61:2:1:0:0:0:0:0:3:3:3:3:3\"). format gives \"1600 Phila. Ct. Com. Pl. LEXIS 1\", which scanRange reads as a Database_Citation {year:1600, designator:\"LEXIS\", lexisCourt:\"Phila. Ct. Com. Pl.\", number:1}. 194 reporters.json entries end in \" LEXIS\"; any such reporter value with volume 1600–2999 fails the round trip (a pincite or parenthetical also gets cut off or absorbed by the database grammar).",
+      "lastRunTimestamp": 1793854370131
     }
   },
   "executionHistory": {
@@ -649,6 +654,30 @@
         "executionId": "979efbf5-e9e4-4f2b-8581-b5f1ab0ca7cd",
         "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
         "timestamp": 1793854224159
+      }
+    ],
+    "5.12 Write Property 21 in `test/format.properties.test.ts`": [
+      {
+        "executionId": "979efbf5-e9e4-4f2b-8581-b5f1ab0ca7cd",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793854228677
+      },
+      {
+        "executionId": "979efbf5-e9e4-4f2b-8581-b5f1ab0ca7cd",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793854691514
+      }
+    ],
+    "5.15 Create `src/testing/arb-case-name.ts`": [
+      {
+        "executionId": "979efbf5-e9e4-4f2b-8581-b5f1ab0ca7cd",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793854228709
+      },
+      {
+        "executionId": "979efbf5-e9e4-4f2b-8581-b5f1ab0ca7cd",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793854691426
       }
     ]
   }

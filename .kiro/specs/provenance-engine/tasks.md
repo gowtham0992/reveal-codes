@@ -269,7 +269,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `isGapCaseName` is `isCaseName` plus the D19 rule: neither Party_Name begins with `with` or with a lowercase-first `GAP_SIGNALS` entry followed by a space, `,`, or the end of that Party_Name.
     - `matchPrecedingGap(text, g0, g1)` matches `P1 + S? + P2 + C? + P3`. It tries `S` empty, then each end from `gapSignalsAt` at the end of `P1`, takes `P2` as the maximal punctuation run after `S`, and tests `C` with `caseAt`, which tries candidate ends ending in `,` bounded by `MIN_CASE_NAME` and `MAX_CASE_NAME` and checks each with `isGapCaseName`. At most four `caseAt` calls per gap.
     - _Requirements: 13.1, 13.9_
-  - [ ] 5.15 Create `src/testing/arb-case-name.ts`
+  - [x] 5.15 Create `src/testing/arb-case-name.ts`
     - `arbPartyName`, `arbCaseName`, `arbSignal`, `arbGapSignal`, `arbLongParty`, `arbShortFormParty`, `arbStopListPrefix`, and `arbPartyLeftContext`, as specified in the design's Arbitraries table.
     - `arbPartyName` appends an Entity_Suffix with probability ½, draws Legal_Abbreviations including `Ltd.`, `Co.`, `L.P.`, `N.A.`, and `L.L.C.`, and never uses `with` or a lowercase Gap_Signal as a token.
     - `arbSignal` draws from the 14 `SIGNALS`. `arbGapSignal` draws from the 20 `GAP_SIGNALS` entries, capitalised and lowercase-first.
