@@ -293,7 +293,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `Id.` links to the previous citation. It becomes an Orphan after an Other_Reference or an Orphan.
     - A party form looks up the last Full_Citation with the same volume and normalised reporter.
     - _Requirements: 12.1, 12.2, 12.3, 12.6, 12.7_
-  - [ ] 5.19 Implement `citations/extract.ts` and the public `segment`
+  - [x] 5.19 Implement `citations/extract.ts` and the public `segment`
     - `extract(text)` is total: it scans, links, then pairs and attaches quotes, and computes Normalised_Forms.
     - Add `segment(text, spans)` to `segment.ts`. It calls `segmentWith(text, spans, extract(text).citations)`.
     - _Requirements: 8.5, 9.1, 9.9, 11.2, 11.3, 11.4_

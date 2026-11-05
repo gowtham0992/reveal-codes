@@ -54,7 +54,7 @@
     },
     "5.12 Write Property 21 in `test/format.properties.test.ts`": {
       "status": "passed",
-      "lastRunTimestamp": 1793856381173
+      "lastRunTimestamp": 1793857487333
     },
     "5.13 Write Property 22 in `test/format.properties.test.ts`": {
       "status": "passed",
@@ -62,7 +62,7 @@
     },
     "5.16 Write Property 48 in `test/arbitraries.properties.test.ts`": {
       "status": "passed",
-      "lastRunTimestamp": 1793856663457
+      "lastRunTimestamp": 1793857488078
     }
   },
   "executionHistory": {
@@ -743,6 +743,18 @@
         "executionId": "7630614e-d7aa-459b-9a24-68558e688b4c",
         "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
         "timestamp": 1793856688111
+      }
+    ],
+    "5.19 Implement `citations/extract.ts` and the public `segment`": [
+      {
+        "executionId": "7b0014ec-3c82-4411-b05c-6c8937e469eb",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793857321814
+      },
+      {
+        "executionId": "7b0014ec-3c82-4411-b05c-6c8937e469eb",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793857523538
       }
     ]
   }
