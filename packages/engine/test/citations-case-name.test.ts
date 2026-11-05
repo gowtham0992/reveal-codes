@@ -124,6 +124,18 @@ describe("matchPrecedingGap _Requirements: 13.1, 13.9_", () => {
     }
   });
 
+  it("tries only the longest Gap_Signal at a position (D21)", () => {
+    expect(gap(" See also See A, Inc. v. A & A, ")).toBe(false);
+    for (const g of [
+      " See also Roe v. Wade, ",
+      " See, e.g., Roe v. Wade, ",
+      " See Roe v. Wade, ",
+      " see also ",
+    ]) {
+      expect(gap(g)).toBe(true);
+    }
+  });
+
   it("matches only inside [g0, g1)", () => {
     const t = '"x" See Roe v. Wade, 410 U.S. 113';
     expect(matchPrecedingGap(t, 3, 21)).toBe(true);

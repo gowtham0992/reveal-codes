@@ -2,7 +2,7 @@
  * Party_Name and Case_Name checks and the preceding-quote gap matcher
  * (Glossary Party_Name, Case_Name, Gap_Signal, Entity_Suffix,
  * Legal_Abbreviation, Single_Capital_Initial; Req 13.1, 13.9; design A9,
- * "Gap matcher"; D9, D10, D19).
+ * "Gap matcher"; D9, D10, D19, D21).
  *
  * Every function reads only inside the range it is given and never throws.
  */
@@ -168,6 +168,8 @@ function caseAt(text: string, x: number, z: number, g1: number): boolean {
 /**
  * True when `text[g0 .. g1)` is `P1 + S + P2 + C + P3` (Req 13.1): `P*` gap
  * punctuation, `S` empty or one Gap_Signal, `C` empty or one Case_Name.
+ * `S` is only the longest Gap_Signal at the end of `P1` (D21), so the rest
+ * of a longer signal (`also See …`) is never read as a Case_Name.
  */
 export function matchPrecedingGap(text: string, g0: number, g1: number): boolean {
   if (!isRange(text, g0, g1)) return false;
@@ -176,9 +178,8 @@ export function matchPrecedingGap(text: string, g0: number, g1: number): boolean
   let z = g1;
   while (z > a && isP(text.charAt(z - 1))) z--;
   if (caseAt(text, a, z, g1)) return true;
-  for (const b of gapSignalsAt(text, a, g1)) {
-    const a2 = skipP(text, b, g1);
-    if (a2 === g1 || caseAt(text, a2, z, g1)) return true;
-  }
-  return false;
+  const b = gapSignalsAt(text, a, g1).at(-1);
+  if (b === undefined) return false;
+  const a2 = skipP(text, b, g1);
+  return a2 === g1 || caseAt(text, a2, z, g1);
 }
