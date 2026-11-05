@@ -113,11 +113,11 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `arb-ops.ts`: `arbOp`, `arbOpSequence(doc)` as a recursive `fc.chain` that snaps Offsets off surrogate interiors and never generates `AI>HUM`, `arbCallerInsertOrDelete`, `arbReplace`, `arbFaultyOp` with the expected error recorded, and `arbThreshold`.
     - `arb-document.ts`: a base `arbDocument` built only through `createDocument` and `apply`. It uses the Run_Id pool of 8, which includes `r[1]` and `a\b`, and two threshold settings so that relabelled Runs are common.
     - _Requirements: 22.1, 22.4_
-  - [ ] 2.14 Write Property 1 in `test/document.properties.test.ts`
+  - [x] 2.14 Write Property 1 in `test/document.properties.test.ts`
     - **Property 1: Every returned Document is canonical and satisfies the Run invariant**
     - **Validates: Requirements 3.1, 3.2, 4.10, 6.12**
     - _Requirements: 3.1, 3.2, 4.10, 6.12_
-  - [ ] 2.15 Write Property 6 in `test/ops.properties.test.ts`
+  - [-] 2.15 Write Property 6 in `test/ops.properties.test.ts`
     - **Property 6: Insert and Delete agree with a per-code-unit model**
     - **Validates: Requirements 4.1, 4.2, 4.3, 4.4, 4.5, 4.7, 4.11, 4.12**
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.7, 4.11, 4.12_
@@ -137,7 +137,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 10: Rejected operations return the first error in precedence and change nothing**
     - **Validates: Requirements 2.5, 5.2, 6.6, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7**
     - _Requirements: 2.5, 5.2, 6.6, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7_
-  - [ ] 2.20 Write Property 11 in `test/relabel.properties.test.ts`
+  - [-] 2.20 Write Property 11 in `test/relabel.properties.test.ts`
     - **Property 11: Run table accounting matches the edit model**
     - **Validates: Requirements 4.8, 4.9, 6.1, 6.2, 6.7**
     - _Requirements: 4.8, 4.9, 6.1, 6.2, 6.7_
@@ -149,7 +149,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 13: Only the Engine produces AI>HUM**
     - **Validates: Requirements 6.11, 6.12, 7.4**
     - _Requirements: 6.11, 6.12, 7.4_
-  - [ ] 2.23 Write example tests in `test/ops.test.ts` and `test/relabel.test.ts`
+  - [-] 2.23 Write example tests in `test/ops.test.ts` and `test/relabel.test.ts`
     - With the default threshold 0.4, a Run at exactly 40% is not relabelled, and a Run at 40% plus one code unit is.
     - Delete-all keeps every Run with its Original_Length.
     - Delete(0, 0) on an empty Document is a no-op.
