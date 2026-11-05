@@ -198,8 +198,8 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Text with no terminator is one Sentence.
     - _Requirements: 8.3, 8.4, 8.5, 8.6_
 
-- [ ] 5. Citations, extraction, and re-anchoring
-  - [ ] 5.1 Add the reporter list generator and commit its output
+- [~] 5. Citations, extraction, and re-anchoring
+  - [-] 5.1 Add the reporter list generator and commit its output
     - `packages/engine/scripts/generate-reporters.ts` sits outside `src` and may use `node:fs`. It runs offline against a local reporters-db checkout path and a generation date, both passed as arguments.
     - It keeps edition keys in file order, de-duplicates by first occurrence, and drops grammar-breaking entries.
     - The artefacts are the committed `src/citations/reporters.json` and `src/citations/REPORTERS_LICENSE.md`. The licence note records the BSD licence, the repository URL, the release tag or commit, the date, and the dropped entries.
@@ -211,7 +211,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `lookupReporter` tries an exact match, then the collapsed form.
     - Pass the `REPORTERS` entries that end in `.` into the `abbreviations.ts` index.
     - _Requirements: 8.6, 11.5, 14.1, 14.3, 14.5, 14.6_
-  - [ ] 5.3 Implement `citations/lex.ts`
+  - [x] 5.3 Implement `citations/lex.ts`
     - Bounded readers for integers with no leading zeros and range checks, spaces, and word characters.
     - _Requirements: 9.8, 10.1_
   - [ ] 5.4 Implement `citations/grammar.ts`

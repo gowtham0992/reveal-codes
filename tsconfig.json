@@ -8,6 +8,7 @@
   "references": [
     { "path": "packages/engine" },
     { "path": "packages/engine/test" },
+    { "path": "packages/engine/scripts" },
     { "path": "packages/verifier" },
     { "path": "packages/courtlistener-mcp" },
     { "path": "apps/web" },
