@@ -28,7 +28,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
 
 ## Tasks
 
-- [~] 1. Package scaffolding and core types
+- [x] 1. Package scaffolding and core types
   - [x] 1.1 Configure the engine package and test support
     - In `packages/engine/package.json`, keep `dependencies`, `peerDependencies`, and `optionalDependencies` absent. List only `fast-check` and `vitest` under `devDependencies`.
     - Add `packages/engine/test/tsconfig.json` with `"types": ["node"]`, used by tests only. The package tsconfig includes only `src`, so `src` cannot type-check against Node globals. Wire the test tsconfig into `tsc -b`.
@@ -46,7 +46,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `isTimestamp`: a regex plus integer calendar checks including leap years, with no `Date` (design A1 step 1).
     - `firstUnpairedSurrogate`, `isValidBoundary`, and `checkProvenance`, which enforces that a Run_Id is present if and only if the Origin is `AI` or `AI>HUM`.
     - _Requirements: 2.5, 2.6, 2.7, 7.3_
-  - [ ] 1.5 Write example tests in `test/validate.test.ts`
+  - [x] 1.5 Write example tests in `test/validate.test.ts`
     - Timestamps: `2024-02-29` is valid, `2023-02-29` is invalid, and a missing `Z` is invalid.
     - Lone high and low surrogates are detected at their indexes.
     - Provenance shape rule.

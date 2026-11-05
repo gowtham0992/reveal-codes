@@ -48,6 +48,25 @@
         "chatSessionId": "sess_08f63f6c-9109-491f-b96b-b067734bfd02",
         "timestamp": 1793841044962
       }
+    ],
+    "1.5 Write example tests in `test/validate.test.ts`": [
+      {
+        "executionId": "43bf4146-5c5f-45fc-b1b9-40895668093f",
+        "chatSessionId": "sess_08f63f6c-9109-491f-b96b-b067734bfd02",
+        "timestamp": 1793841048212
+      },
+      {
+        "executionId": "43bf4146-5c5f-45fc-b1b9-40895668093f",
+        "chatSessionId": "sess_08f63f6c-9109-491f-b96b-b067734bfd02",
+        "timestamp": 1793841107725
+      }
+    ],
+    "1. Package scaffolding and core types": [
+      {
+        "executionId": "43bf4146-5c5f-45fc-b1b9-40895668093f",
+        "chatSessionId": "sess_08f63f6c-9109-491f-b96b-b067734bfd02",
+        "timestamp": 1793841107764
+      }
     ]
   }
 }
