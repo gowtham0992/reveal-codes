@@ -28,13 +28,13 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
 
 ## Tasks
 
-- [ ] 1. Package scaffolding and core types
-  - [ ] 1.1 Configure the engine package and test support
+- [~] 1. Package scaffolding and core types
+  - [x] 1.1 Configure the engine package and test support
     - In `packages/engine/package.json`, keep `dependencies`, `peerDependencies`, and `optionalDependencies` absent. List only `fast-check` and `vitest` under `devDependencies`.
     - Add `packages/engine/test/tsconfig.json` with `"types": ["node"]`, used by tests only. The package tsconfig includes only `src`, so `src` cannot type-check against Node globals. Wire the test tsconfig into `tsc -b`.
     - Add `test/support/fc.ts` exporting `runs()`. It returns `{ numRuns: Number(process.env.FC_NUM_RUNS ?? "200") }`, so runs default to 200 and become 500 under `pnpm test:pbt`. Make failure output report `seed` and `path`, and document replay with `fc.assert(prop, { ...runs(), seed, path })`.
     - _Requirements: 1.1, 1.2, 22.3_
-  - [ ] 1.2 Create `result.ts`, `errors.ts`, and `types.ts`
+  - [-] 1.2 Create `result.ts`, `errors.ts`, and `types.ts`
     - `Result`, `ok()`, and `err()`.
     - The `EngineError` union with every kind and field in the design's Error Handling table, plus `MalformedRule`.
     - Every type in design "Data Models". Optional fields are absent, never `undefined`.
