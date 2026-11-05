@@ -118,3 +118,65 @@ describe("relabel properties: Run table accounting _Requirements: 4.8, 4.9, 6.1,
     );
   });
 });
+
+/**
+ * Whether `op` is a no-op Caller_Operation under Req 4.7: empty insert,
+ * empty-range delete, or empty-range replace with empty text. Such ops
+ * return the input Document unchanged, so they never relabel a Run.
+ */
+const isNoOp = (op: CallerOperation): boolean => {
+  const { from, to, text } = shapeOf(op);
+  return from === to && text.length === 0;
+};
+
+/**
+ * The relabelled flag each Run must carry after a non-empty op (Req 6.3,
+ * 6.4, 6.5, 6.8, 6.10): set iff it was set before, or the Run's
+ * Edited_Proportion after the op is strictly above `threshold`.
+ */
+function expectedFlags(prev: Document, next: Document, threshold: number): Map<string, boolean> {
+  const before = new Map(prev.runs.map((r) => [r.runId, r.relabelled]));
+  return new Map(
+    next.runs.map((r) => [
+      r.runId,
+      (before.get(r.runId) ?? false) || r.editedCount / r.originalLength > threshold,
+    ]),
+  );
+}
+
+/** Asserts Property 12 for one successful step `prev -> next` caused by `op`. */
+function checkRelabelStep(prev: Document, next: Document, op: CallerOperation, t: number): void {
+  if (isNoOp(op)) {
+    expect(next).toEqual(prev);
+    return;
+  }
+  const flags = new Map(next.runs.map((r) => [r.runId, r.relabelled]));
+  expect(flags).toEqual(expectedFlags(prev, next, t));
+  for (const r of prev.runs) {
+    if (r.relabelled) expect(flags.get(r.runId)).toBe(true);
+  }
+  for (const s of next.spans) {
+    const runId = s.provenance.runId;
+    if (runId === undefined) continue;
+    expect(s.provenance.origin).toBe(flags.get(runId) === true ? "AI>HUM" : "AI");
+  }
+}
+
+describe("relabel properties: threshold relabelling _Requirements: 6.3, 6.4, 6.5, 6.8, 6.10_", () => {
+  it("Property 12: a Run is relabelled exactly when its Edited_Proportion exceeds the threshold, and stays relabelled", () => {
+    // Property 12
+    fc.assert(
+      fc.property(arbAccountingCase, ({ doc, setting, steps }) => {
+        let prev = doc;
+        for (const { op, result } of steps) {
+          expect(result.ok).toBe(true);
+          if (!result.ok) return;
+          const next = result.value.document;
+          checkRelabelStep(prev, next, op, setting.threshold);
+          prev = next;
+        }
+      }),
+      runs(),
+    );
+  });
+});

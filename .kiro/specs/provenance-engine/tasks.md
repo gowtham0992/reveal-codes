@@ -121,7 +121,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 6: Insert and Delete agree with a per-code-unit model**
     - **Validates: Requirements 4.1, 4.2, 4.3, 4.4, 4.5, 4.7, 4.11, 4.12**
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.7, 4.11, 4.12_
-  - [ ] 2.16 Write Property 7 in `test/ops.properties.test.ts`
+  - [x] 2.16 Write Property 7 in `test/ops.properties.test.ts`
     - **Property 7: Replace equals Delete followed by Insert**
     - **Validates: Requirements 4.6, 6.9**
     - _Requirements: 4.6, 6.9_
@@ -141,7 +141,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 11: Run table accounting matches the edit model**
     - **Validates: Requirements 4.8, 4.9, 6.1, 6.2, 6.7**
     - _Requirements: 4.8, 4.9, 6.1, 6.2, 6.7_
-  - [ ] 2.21 Write Property 12 in `test/relabel.properties.test.ts`
+  - [-] 2.21 Write Property 12 in `test/relabel.properties.test.ts`
     - **Property 12: A Run is relabelled exactly when its Edited_Proportion exceeds the threshold, and stays relabelled**
     - **Validates: Requirements 6.3, 6.4, 6.5, 6.8, 6.10**
     - _Requirements: 6.3, 6.4, 6.5, 6.8, 6.10_

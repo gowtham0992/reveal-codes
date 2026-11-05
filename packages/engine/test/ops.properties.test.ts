@@ -2,7 +2,12 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { apply, createDocument } from "../src/document";
 import { structuralEqual } from "../src/equal";
-import { arbCallerInsertOrDelete, arbDocument, arbThreshold } from "../src/testing/arbitraries";
+import {
+  arbCallerInsertOrDelete,
+  arbDocument,
+  arbReplace,
+  arbThreshold,
+} from "../src/testing/arbitraries";
 import type {
   Delete,
   Document,
@@ -210,5 +215,73 @@ describe("Property 6: Insert and Delete agree with a per-code-unit model _Requir
     ]);
     const empty: Insert = { kind: "insert", at: 0, text: "", provenance: ai };
     expect(applied(doc, empty, { relabelThreshold: 0.05 })).toBe(doc);
+  });
+});
+
+describe("Property 7: Replace equals Delete followed by Insert _Requirements: 4.6, 6.9_", () => {
+  it("apply(d, Replace) is structurally equal to Delete then Insert, with one Inverse back to d", () => {
+    const arbCase = fc
+      .tuple(arbDocument, arbThreshold)
+      .chain(([doc, setting]) => arbReplace(doc).map((op) => ({ doc, setting, op })));
+    // Property 7
+    fc.assert(
+      fc.property(arbCase, ({ doc, setting, op }) => {
+        const { config } = setting;
+        const result = apply(doc, op, config);
+        expect(result.ok).toBe(true);
+        if (!result.ok) return;
+        const del: Delete = {
+          kind: "delete",
+          from: op.from,
+          to: op.to,
+          actor: op.provenance.origin,
+        };
+        const ins: Insert = {
+          kind: "insert",
+          at: op.from,
+          text: op.text,
+          provenance: op.provenance,
+        };
+        const sequential = applied(applied(doc, del, config), ins, config);
+        expect(result.value.document).toEqual(sequential);
+        expect(structuralEqual(result.value.document, sequential)).toBe(true);
+        const undone = apply(result.value.document, result.value.inverse, config);
+        expect(undone.ok).toBe(true);
+        if (undone.ok) expect(structuralEqual(undone.value.document, doc)).toBe(true);
+      }),
+      runs(),
+    );
+  });
+
+  // Req 6.9: the delete alone leaves r1 at 2/10, under 0.4; the insert inside
+  // the Run_Extent brings it to 7/10, so the Replace relabels r1, as the
+  // sequential Delete then Insert does.
+  it("a Replace that crosses the threshold only after both counts relabels like the sequence", () => {
+    const created = createDocument("abcdefghij", T0);
+    if (!created.ok) throw new Error("fixture: createDocument failed");
+    const ai: Provenance = { origin: "AI", runId: "r1", timestamp: T1 };
+    const doc = applied(created.value, {
+      kind: "insert",
+      at: 0,
+      text: "0123456789",
+      provenance: ai,
+    });
+    const hum: Provenance = { origin: "HUM", timestamp: T1 };
+    const del: Delete = { kind: "delete", from: 1, to: 3, actor: "HUM" };
+    expect(applied(doc, del).runs).toEqual([
+      { runId: "r1", originalLength: 10, editedCount: 2, relabelled: false },
+    ]);
+    const result = apply(doc, { kind: "replace", from: 1, to: 3, text: "xxxxx", provenance: hum });
+    if (!result.ok) throw new Error("fixture: replace failed");
+    const sequential = applied(applied(doc, del), {
+      kind: "insert",
+      at: 1,
+      text: "xxxxx",
+      provenance: hum,
+    });
+    expect(result.value.document.runs).toEqual([
+      { runId: "r1", originalLength: 10, editedCount: 7, relabelled: true },
+    ]);
+    expect(structuralEqual(result.value.document, sequential)).toBe(true);
   });
 });
