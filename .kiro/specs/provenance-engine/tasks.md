@@ -205,7 +205,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - The artefacts are the committed `src/citations/reporters.json` and `src/citations/REPORTERS_LICENSE.md`. The licence note records the BSD licence, the repository URL, the release tag or commit, the date, and the dropped entries.
     - No test or build step runs the generator or touches the network.
     - _Requirements: 14.2, 14.4_
-  - [ ] 5.2 Implement `citations/reporters.ts`
+  - [x] 5.2 Implement `citations/reporters.ts`
     - `REPORTERS` is a static JSON import (`with { type: "json" }`).
     - `exactIndex` and `collapsedIndex` are built once, and the first entry wins.
     - `lookupReporter` tries an exact match, then the collapsed form.

@@ -8,11 +8,8 @@
  * Extractor guarantees (Req 9.1, 9.7).
  */
 
-import {
-  BASE_ABBREVIATION_INDEX,
-  isAbbreviationEndingAt,
-  type AbbreviationIndex,
-} from "./abbreviations";
+import { isAbbreviationEndingAt, type AbbreviationIndex } from "./abbreviations";
+import { LEGAL_ABBREVIATION_INDEX } from "./citations/reporters.js";
 
 /** A half-open `[start, end)` Offset range, such as an extracted Citation's. */
 export type CitationRange = Readonly<{ start: number; end: number }>;
@@ -61,7 +58,7 @@ export function isBoundaryAt(
   text: string,
   b: number,
   citationRanges: readonly CitationRange[],
-  index: AbbreviationIndex = BASE_ABBREVIATION_INDEX,
+  index: AbbreviationIndex = LEGAL_ABBREVIATION_INDEX,
 ): boolean {
   if (!Number.isInteger(b) || b <= 0 || b >= text.length) return false;
   if (isWhitespace(text.charAt(b))) return false;
@@ -81,7 +78,7 @@ export function countBoundaries(
   to: number,
   citationRanges: readonly CitationRange[],
   cap: number,
-  index: AbbreviationIndex = BASE_ABBREVIATION_INDEX,
+  index: AbbreviationIndex = LEGAL_ABBREVIATION_INDEX,
 ): number {
   let count = 0;
   if (!(cap > 0)) return count;

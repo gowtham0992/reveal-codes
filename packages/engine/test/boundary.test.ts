@@ -109,7 +109,7 @@ describe("Legal_Abbreviation exclusion _Requirements: 8.6_", () => {
 
 describe("citation ranges _Requirements: 8.5_", () => {
   it("places no boundary strictly inside a hand-placed citation range", () => {
-    const text = "See A. B. C.";
+    const text = "See K. B. C.";
     expect(boundariesOf(text)).toEqual([7, 10]);
     expect(boundariesOf(text, [{ start: 4, end: 10 }])).toEqual([10]);
   });
@@ -122,7 +122,7 @@ describe("citation ranges _Requirements: 8.5_", () => {
   });
 
   it("allows a boundary exactly at a range's start or end", () => {
-    const text = "A. B. C";
+    const text = "K. B. C";
     expect(boundariesOf(text, [{ start: 3, end: 6 }])).toEqual([3, 6]);
   });
 
