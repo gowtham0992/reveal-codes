@@ -172,7 +172,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `isBoundaryAt(text, b, citationRanges)` and `countBoundaries(text, from, to, citationRanges, cap)`. Both take citation ranges as a parameter and do not import the Extractor.
     - Per design A8 step 3.
     - _Requirements: 8.3, 8.5, 8.6, 8.8_
-  - [ ] 4.3 Implement internal `segmentWith(text, spans, citationRanges)` in `segment.ts`
+  - [x] 4.3 Implement internal `segmentWith(text, spans, citationRanges)` in `segment.ts`
     - Checks coverage first, then finds boundaries, then computes the dominant origin (ties go to the earliest-starting span) and the origin set in fixed order.
     - The public `segment` is added in task 5.19.
     - _Requirements: 8.1, 8.2, 8.4, 8.7, 8.9_
