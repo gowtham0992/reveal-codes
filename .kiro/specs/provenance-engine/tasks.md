@@ -246,7 +246,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `scanRange` moves a leftmost-longest cursor.
     - Enforce `MAX_MATCH`, `LOOKAHEAD`, and `LOOKBEHIND = 162` (`PARTY_SCAN + 1`; the earlier 82 was too small for the party scan). Every read of `matchAt(p)` lies in `[p − LOOKBEHIND, p + LOOKAHEAD)`.
     - _Requirements: 9.1, 9.7, 9.8_
-  - [-] 5.10 Implement `citations/format.ts`
+  - [x] 5.10 Implement `citations/format.ts`
     - `validateFullValue` checks fields in a fixed order and returns `invalid_citation { field }`. Short_Form and Other values are rejected.
     - `format` lays out the Canonical_Form with per-member parallel pincites (D1).
     - Per design A13.
