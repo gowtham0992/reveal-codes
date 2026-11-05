@@ -77,7 +77,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Follows design A1 steps 1 to 3: timestamp check first, then surrogate check.
     - Citations and quotes come from `reanchorStage`, which returns empty arrays until task 5.41.
     - _Requirements: 2.1, 2.2, 2.4, 2.6, 2.7, 3.4_
-  - [-] 2.6 Write example tests in `test/document.test.ts`
+  - [x] 2.6 Write example tests in `test/document.test.ts`
     - Citation-free text gives one `PST` Span. Empty text gives zero Spans.
     - A lone surrogate returns `split_surrogate` at its Offset. A bad timestamp returns `invalid_timestamp`.
     - Validation order is timestamp, then surrogate.
