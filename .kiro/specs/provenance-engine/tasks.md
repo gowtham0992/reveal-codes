@@ -65,7 +65,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Build everything from fast-check combinators only, as in the design's Arbitraries table.
     - `arbitraries.ts` contains only `export * from "./arb-*"` lines. Later tasks add one line per new arbitrary file.
     - _Requirements: 22.1, 22.4_
-  - [ ] 2.3 Write Property 3 in `test/spans.properties.test.ts`
+  - [x] 2.3 Write Property 3 in `test/spans.properties.test.ts`
     - **Property 3: Normalisation merges exactly the Mergeable runs and is idempotent**
     - **Validates: Requirements 3.3, 3.4, 3.5**
     - _Requirements: 3.3, 3.4, 3.5_
@@ -73,7 +73,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 4: Canonical form is unique per provenance labelling**
     - **Validates: Requirements 3.7**
     - _Requirements: 3.7_
-  - [ ] 2.5 Implement `createDocument` and `normalise` in `document.ts`
+  - [x] 2.5 Implement `createDocument` and `normalise` in `document.ts`
     - Follows design A1 steps 1 to 3: timestamp check first, then surrogate check.
     - Citations and quotes come from `reanchorStage`, which returns empty arrays until task 5.41.
     - _Requirements: 2.1, 2.2, 2.4, 2.6, 2.7, 3.4_
@@ -87,7 +87,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `validateCallerOp` checks in this fixed order: `out_of_range` by field, `inverted_range`, `split_surrogate`, `invalid_provenance`, `invalid_timestamp`.
     - Per design A2.
     - _Requirements: 6.5, 6.6, 6.10, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6_
-  - [ ] 2.8 Implement `ops/splice.ts`
+  - [-] 2.8 Implement `ops/splice.ts`
     - `spliceText` and `effectiveProvenance`. A relabelled Run turns `AI` into `AI>HUM`.
     - `spliceSpans` returns the deleted pieces and merges only at the two seams.
     - Per design A3 steps 1, 2, and 6.

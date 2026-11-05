@@ -1,5 +1,10 @@
 {
-  "pbtResults": {},
+  "pbtResults": {
+    "2.3 Write Property 3 in `test/spans.properties.test.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1793843459315
+    }
+  },
   "executionHistory": {
     "1.2 Create `result.ts`, `errors.ts`, and `types.ts`": [
       {
@@ -102,6 +107,37 @@
         "executionId": "4abd3201-efa9-486c-9a12-002c74549b0c",
         "chatSessionId": "sess_4abe13b9-4867-47fa-a34b-b248e12831b9",
         "timestamp": 1793843352954
+      }
+    ],
+    "2.3 Write Property 3 in `test/spans.properties.test.ts`": [
+      {
+        "executionId": "4abd3201-efa9-486c-9a12-002c74549b0c",
+        "chatSessionId": "sess_4abe13b9-4867-47fa-a34b-b248e12831b9",
+        "timestamp": 1793843357086
+      },
+      {
+        "executionId": "4abd3201-efa9-486c-9a12-002c74549b0c",
+        "chatSessionId": "sess_4abe13b9-4867-47fa-a34b-b248e12831b9",
+        "timestamp": 1793843515475
+      }
+    ],
+    "2.5 Implement `createDocument` and `normalise` in `document.ts`": [
+      {
+        "executionId": "4abd3201-efa9-486c-9a12-002c74549b0c",
+        "chatSessionId": "sess_4abe13b9-4867-47fa-a34b-b248e12831b9",
+        "timestamp": 1793843357645
+      },
+      {
+        "executionId": "4abd3201-efa9-486c-9a12-002c74549b0c",
+        "chatSessionId": "sess_4abe13b9-4867-47fa-a34b-b248e12831b9",
+        "timestamp": 1793843515565
+      }
+    ],
+    "2.8 Implement `ops/splice.ts`": [
+      {
+        "executionId": "4abd3201-efa9-486c-9a12-002c74549b0c",
+        "chatSessionId": "sess_4abe13b9-4867-47fa-a34b-b248e12831b9",
+        "timestamp": 1793843358489
       }
     ]
   }
