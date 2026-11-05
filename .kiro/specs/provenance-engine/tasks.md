@@ -53,7 +53,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `structuralEqual` on key order and array order.
     - _Requirements: 1.4, 2.5, 2.6, 2.7_
 
-- [~] 2. Document model and edit operations
+- [x] 2. Document model and edit operations
   - [x] 2.1 Implement `spans.ts`
     - `checkCoverage` returns `invalid_spans` with the first violation's Offset and kind.
     - `normaliseSpans` merges Mergeable runs and keeps the lowest-start Timestamp.
@@ -133,7 +133,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 9: An Inverse applied to the wrong Document is rejected**
     - **Validates: Requirements 5.7**
     - _Requirements: 5.7_
-  - [ ] 2.19 Write Property 10 in `test/ops.properties.test.ts`
+  - [x] 2.19 Write Property 10 in `test/ops.properties.test.ts`
     - **Property 10: Rejected operations return the first error in precedence and change nothing**
     - **Validates: Requirements 2.5, 5.2, 6.6, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7**
     - _Requirements: 2.5, 5.2, 6.6, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7_

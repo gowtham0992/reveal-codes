@@ -5,6 +5,7 @@ import { structuralEqual } from "../src/equal";
 import {
   arbCallerInsertOrDelete,
   arbDocument,
+  arbFaultyOp,
   arbOp,
   arbOpTrace,
   arbReplace,
@@ -249,6 +250,24 @@ describe("Property 9: An Inverse applied to the wrong Document is rejected _Requ
         const before = structuredClone(e);
         expect(apply(e, inverse)).toEqual({ ok: false, error: { kind: "stale_inverse" } });
         expect(e).toEqual(before);
+      }),
+      runs(),
+    );
+  });
+});
+
+describe("Property 10: Rejected operations return the first error in precedence and change nothing _Requirements: 2.5, 5.2, 6.6, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7_", () => {
+  it("apply(d, faulty op) returns exactly the recorded first error, no Inverse, and leaves d unchanged", () => {
+    const arbCase = arbDocument.chain((d) => arbFaultyOp(d).map((faulty) => ({ d, faulty })));
+    // Property 10
+    fc.assert(
+      fc.property(arbCase, ({ d, faulty: { op, config, expected } }) => {
+        const before = structuredClone(d);
+        const result = apply(d, op, config);
+        expect(result).toStrictEqual({ ok: false, error: expected });
+        expect("value" in result).toBe(false);
+        expect(d).toStrictEqual(before);
+        expect(structuralEqual(d, before)).toBe(true);
       }),
       runs(),
     );
