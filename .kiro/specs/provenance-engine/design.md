@@ -466,7 +466,7 @@ Edited counts follow Req 6.1 literally: deletions count only from `AI`-origin sp
 
 Full extraction is defined in layers. Each layer is a pure function of the Text plus the previous layer:
 
-1. **Match layer.** `scanRange(text, 0, end)` visits a cursor `p` from 0. At each `p`, `matchAt(text, p)` either returns a Match, after which the cursor jumps to `match.end`, or returns null, after which the cursor moves to `p + 1`. `matchAt` reads only `text[p-1 .. p+LOOKAHEAD)`.
+1. **Match layer.** `scanRange(text, 0, end)` visits a cursor `p` from 0. At each `p`, `matchAt(text, p)` either returns a Match, after which the cursor jumps to `match.end`, or returns null, after which the cursor moves to `p + 1`. `matchAt` reads only `text[p − LOOKBEHIND .. p + LOOKAHEAD)` (A9, constants table).
 2. **Link layer.** `linkShortForms(matches)` is O(c) over the match list (Req 12).
 3. **Quote layer.** `pairQuoteMarks(text)` pairs marks globally and drops every pair whose opening mark lies inside an earlier kept pair, in O(n + q log q) for q quote characters. `attachQuotes(text, pairs, citations)` applies the preceding and following rules with local gap scans and local boundary counts (A9).
 
