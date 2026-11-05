@@ -109,7 +109,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - The dispatcher validates config, routes Inverses, validates Caller_Operations, returns a no-op Document with an Inverse, then dispatches (design A2).
     - `ops.ts` re-exports `ops/*`.
     - _Requirements: 4.7, 4.10, 5.1, 5.2, 7.7_
-  - [ ] 2.13 Create `src/testing/arb-ops.ts` and `src/testing/arb-document.ts`
+  - [x] 2.13 Create `src/testing/arb-ops.ts` and `src/testing/arb-document.ts`
     - `arb-ops.ts`: `arbOp`, `arbOpSequence(doc)` as a recursive `fc.chain` that snaps Offsets off surrogate interiors and never generates `AI>HUM`, `arbCallerInsertOrDelete`, `arbReplace`, `arbFaultyOp` with the expected error recorded, and `arbThreshold`.
     - `arb-document.ts`: a base `arbDocument` built only through `createDocument` and `apply`. It uses the Run_Id pool of 8, which includes `r[1]` and `a\b`, and two threshold settings so that relabelled Runs are common.
     - _Requirements: 22.1, 22.4_
