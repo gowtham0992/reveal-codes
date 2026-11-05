@@ -60,7 +60,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Also implement `mergeSeams`, `originAt`, and `runExtents`.
     - Per design A3 step 2.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
-  - [ ] 2.2 Create `src/testing/arb-text.ts` and `src/testing/arbitraries.ts`
+  - [x] 2.2 Create `src/testing/arb-text.ts` and `src/testing/arbitraries.ts`
     - Arbitraries: `arbText`, `arbAnyString`, `arbTimestamp`, `arbStringWithLoneSurrogate`, `arbSpanFragmentation`, and `arbSpanCorruption`. `arbSpanCorruption` records the expected Offset when it generates the value.
     - Build everything from fast-check combinators only, as in the design's Arbitraries table.
     - `arbitraries.ts` contains only `export * from "./arb-*"` lines. Later tasks add one line per new arbitrary file.
@@ -82,7 +82,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - A lone surrogate returns `split_surrogate` at its Offset. A bad timestamp returns `invalid_timestamp`.
     - Validation order is timestamp, then surrogate.
     - _Requirements: 2.1, 2.2, 2.6, 2.7_
-  - [ ] 2.7 Implement `ops/validate.ts`
+  - [-] 2.7 Implement `ops/validate.ts`
     - `validateConfig` accepts a threshold in (0, 1] and treats an absent one as 0.4.
     - `validateCallerOp` checks in this fixed order: `out_of_range` by field, `inverted_range`, `split_surrogate`, `invalid_provenance`, `invalid_timestamp`.
     - Per design A2.
