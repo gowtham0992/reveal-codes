@@ -235,7 +235,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - The scan reads only `text[c − PARTY_SCAN .. c)` with `PARTY_SCAN = 161`, and a token or predecessor outside that window counts as a stop (D17). It returns `null` when an accepted start lies more than `MAX_PARTY` before `c`, takes the leftmost accepted start, strips stop-list entries and leading Connectors in a loop, and returns `null` if the remainder starts with `v.`.
     - Per design A9 and D12 to D18.
     - _Requirements: 9.2, 12.2, 12.8, 13.1_
-  - [ ] 5.8 Implement `citations/grammar-short.ts`
+  - [x] 5.8 Implement `citations/grammar-short.ts`
     - `matchIdAt` checks the left context.
     - `matchPartyShortAt(text, p)` is tail-anchored. It fast-rejects unless `text[p]` can start a Capitalised_Word and `text[p − 1]` is outside the word-token set. It then walks the commas in `(p, p + MAX_PARTY]` left to right and takes the first comma `c` whose `, <volume> <reporter> at <page>` tail matches, skipping commas that start an Entity_Suffix (`Smith, Inc., …`) and prose commas. It matches only when `partyStartFor(text, c) === p`.
     - At the same `p`, `Id.` and the party form are one class and the longer wins (D16).
@@ -246,7 +246,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `scanRange` moves a leftmost-longest cursor.
     - Enforce `MAX_MATCH`, `LOOKAHEAD`, and `LOOKBEHIND = 162` (`PARTY_SCAN + 1`; the earlier 82 was too small for the party scan). Every read of `matchAt(p)` lies in `[p − LOOKBEHIND, p + LOOKAHEAD)`.
     - _Requirements: 9.1, 9.7, 9.8_
-  - [ ] 5.10 Implement `citations/format.ts`
+  - [-] 5.10 Implement `citations/format.ts`
     - `validateFullValue` checks fields in a fixed order and returns `invalid_citation { field }`. Short_Form and Other values are rejected.
     - `format` lays out the Canonical_Form with per-member parallel pincites (D1).
     - Per design A13.
@@ -263,7 +263,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 22: Invalid citation values are rejected at the first failing field**
     - **Validates: Requirements 10.5**
     - _Requirements: 10.5_
-  - [ ] 5.14 Implement `citations/case-name.ts`
+  - [-] 5.14 Implement `citations/case-name.ts`
     - `isPartyName` follows the Glossary rules, D9, and D10. It allows an Entity_Suffix (`,` and space are in the character set), and accepts every `.` that belongs to a Legal_Abbreviation occurrence found with `abbreviationsStartingAt` at a word start (including the inner periods of `L.L.C.`, `L.P.`, `N.A.`) or closes a Single_Capital_Initial. It rejects an inner ` v. ` and a leading Signal (`startsWithSignal`).
     - `isCaseName` splits on exactly one ` v. `.
     - `isGapCaseName` is `isCaseName` plus the D19 rule: neither Party_Name begins with `with` or with a lowercase-first `GAP_SIGNALS` entry followed by a space, `,`, or the end of that Party_Name.
