@@ -176,7 +176,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Checks coverage first, then finds boundaries, then computes the dominant origin (ties go to the earliest-starting span) and the origin set in fixed order.
     - The public `segment` is added in task 5.19.
     - _Requirements: 8.1, 8.2, 8.4, 8.7, 8.9_
-  - [-] 4.4 Extend `src/testing/arb-text.ts`
+  - [x] 4.4 Extend `src/testing/arb-text.ts`
     - `arbCitationRanges(t)`: sorted, non-overlapping ranges on Valid_Boundaries.
     - `arbAbbreviationProse`: prose with Legal_Abbreviations spliced in, drawn from the whole `LEGAL_ABBREVIATIONS` list (including `Ltd.`, `Co.`, `L.P.`, `N.A.`, and `L.L.C.`), each followed by a space and a capitalised word.
     - _Requirements: 22.1_
