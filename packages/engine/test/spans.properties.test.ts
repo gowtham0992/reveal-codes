@@ -1,7 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { checkCoverage, normaliseSpans } from "../src/spans";
-import { arbSpanFragmentation, arbText } from "../src/testing/arbitraries";
+import { arbLabelling, arbSpanFragmentation, arbText } from "../src/testing/arbitraries";
 import type { Provenance, Span } from "../src/types";
 import { runs } from "./support/fc";
 
@@ -68,6 +68,38 @@ describe("normaliseSpans _Requirements: 3.3, 3.4, 3.5_", () => {
 
         const twice = normaliseSpans(text.length, out);
         expect(twice).toStrictEqual({ ok: true, value: out });
+      }),
+      runs(),
+    );
+  });
+});
+
+/** A span's place and label, without its Timestamp (Req 3.7 compares only these). */
+const shapeOf = (spans: readonly Span[]): readonly string[] =>
+  spans.map((s) => `${String(s.start)}:${String(s.end)}:${labelKey(s.provenance)}`);
+
+function canonicalShape(length: number, spans: readonly Span[]): readonly string[] {
+  const r = normaliseSpans(length, spans);
+  if (!r.ok) throw new Error(`valid span list rejected: ${JSON.stringify(r)}`);
+  return shapeOf(r.value);
+}
+
+const arbTwoFragmentations = arbText.chain((text) =>
+  arbLabelling(text).chain((labelling) =>
+    fc
+      .tuple(arbSpanFragmentation(text, labelling), arbSpanFragmentation(text, labelling))
+      .map(([a, b]) => ({ text, labelling, a, b })),
+  ),
+);
+
+describe("normaliseSpans canonical form _Requirements: 3.7_", () => {
+  // Property 4
+  it("gives the same starts, ends, Origins and Run_Ids for any two fragmentations of one labelling", () => {
+    fc.assert(
+      fc.property(arbTwoFragmentations, ({ text, labelling, a, b }) => {
+        const expected = canonicalShape(text.length, labelling);
+        expect(canonicalShape(text.length, a)).toStrictEqual(expected);
+        expect(canonicalShape(text.length, b)).toStrictEqual(expected);
       }),
       runs(),
     );

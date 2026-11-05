@@ -3,6 +3,10 @@
     "2.3 Write Property 3 in `test/spans.properties.test.ts`": {
       "status": "passed",
       "lastRunTimestamp": 1793843459315
+    },
+    "2.4 Write Property 4 in `test/spans.properties.test.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1793843565489
     }
   },
   "executionHistory": {
@@ -143,6 +147,39 @@
         "executionId": "4abd3201-efa9-486c-9a12-002c74549b0c",
         "chatSessionId": "sess_4abe13b9-4867-47fa-a34b-b248e12831b9",
         "timestamp": 1793843516280
+      }
+    ],
+    "2.4 Write Property 4 in `test/spans.properties.test.ts`": [
+      {
+        "executionId": "4abd3201-efa9-486c-9a12-002c74549b0c",
+        "chatSessionId": "sess_4abe13b9-4867-47fa-a34b-b248e12831b9",
+        "timestamp": 1793843519458
+      },
+      {
+        "executionId": "4abd3201-efa9-486c-9a12-002c74549b0c",
+        "chatSessionId": "sess_4abe13b9-4867-47fa-a34b-b248e12831b9",
+        "timestamp": 1793843692166
+      }
+    ],
+    "2.6 Write example tests in `test/document.test.ts`": [
+      {
+        "executionId": "4abd3201-efa9-486c-9a12-002c74549b0c",
+        "chatSessionId": "sess_4abe13b9-4867-47fa-a34b-b248e12831b9",
+        "timestamp": 1793843520622
+      }
+    ],
+    "2.9 Implement `relabel.ts`": [
+      {
+        "executionId": "4abd3201-efa9-486c-9a12-002c74549b0c",
+        "chatSessionId": "sess_4abe13b9-4867-47fa-a34b-b248e12831b9",
+        "timestamp": 1793843521469
+      }
+    ],
+    "2.10 Implement `ops/inverse.ts`": [
+      {
+        "executionId": "4abd3201-efa9-486c-9a12-002c74549b0c",
+        "chatSessionId": "sess_4abe13b9-4867-47fa-a34b-b248e12831b9",
+        "timestamp": 1793843522147
       }
     ]
   }

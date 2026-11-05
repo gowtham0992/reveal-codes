@@ -69,7 +69,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 3: Normalisation merges exactly the Mergeable runs and is idempotent**
     - **Validates: Requirements 3.3, 3.4, 3.5**
     - _Requirements: 3.3, 3.4, 3.5_
-  - [ ] 2.4 Write Property 4 in `test/spans.properties.test.ts`
+  - [x] 2.4 Write Property 4 in `test/spans.properties.test.ts`
     - **Property 4: Canonical form is unique per provenance labelling**
     - **Validates: Requirements 3.7**
     - _Requirements: 3.7_
@@ -77,7 +77,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Follows design A1 steps 1 to 3: timestamp check first, then surrogate check.
     - Citations and quotes come from `reanchorStage`, which returns empty arrays until task 5.41.
     - _Requirements: 2.1, 2.2, 2.4, 2.6, 2.7, 3.4_
-  - [ ] 2.6 Write example tests in `test/document.test.ts`
+  - [-] 2.6 Write example tests in `test/document.test.ts`
     - Citation-free text gives one `PST` Span. Empty text gives zero Spans.
     - A lone surrogate returns `split_surrogate` at its Offset. A bad timestamp returns `invalid_timestamp`.
     - Validation order is timestamp, then surrogate.
@@ -92,11 +92,11 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `spliceSpans` returns the deleted pieces and merges only at the two seams.
     - Per design A3 steps 1, 2, and 6.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.11, 4.12, 6.11_
-  - [ ] 2.9 Implement `relabel.ts`
+  - [-] 2.9 Implement `relabel.ts`
     - `addOriginalLength`, `countDeleted` (`HUM` Actor, `AI` pieces only), `countInserted` (strictly inside the pre-insertion Run_Extent), and `relabelRuns` (sticky flag, full normalisation only on the relabel path).
     - Per design A3 steps 3 to 5.
     - _Requirements: 4.8, 4.9, 6.1, 6.2, 6.3, 6.4, 6.7, 6.8, 6.12_
-  - [ ] 2.10 Implement `ops/inverse.ts`
+  - [-] 2.10 Implement `ops/inverse.ts`
     - `makeInverse` uses shared arrays. `applyInverse` checks staleness with reference equality first, then `structuralEqual`, and returns a redo Inverse.
     - Applying an Inverse does not validate, relabel, or re-extract.
     - Per design A7.
