@@ -1,5 +1,6 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import { extract } from "../src/citations/extract";
 import { format, validateFullValue } from "../src/citations/format";
 import { scanRange } from "../src/citations/scan";
 import { structuralEqual } from "../src/equal";
@@ -14,21 +15,10 @@ import { runs } from "./support/fc";
 
 // Properties 21 and 22 (design "Correctness Properties", [format]).
 
-/** The Quotation_Pair marks (Req 13.1 glossary); text without them has no Quote_Candidate. */
-const QUOTE_MARKS = /["\u201C\u201D]/;
-
 describe("Property 21: Canonical format round trips and is idempotent _Requirements: 10.1, 10.2, 10.3, 10.4, 11.2, 14.3, 14.5_", () => {
-  it("scanning format(c) yields exactly c over the whole string, and format of that value is format(c)", () => {
+  it("extracting format(c) yields exactly c over the whole string, and format of that value is format(c)", () => {
     // Property 21
     // Feature: provenance-engine, Property 21: Canonical format round trips and is idempotent
-    //
-    // `extract` (task 5.19) does not exist yet, so this reads `format(c)` back
-    // with `scanRange`, the match layer `extract` is built on. The two
-    // `extract`-only clauses are checked through their definitions:
-    // Normalised_Form is `format(value)` set only when it differs from the
-    // text as written (design A9), so `format(value) === text` means none;
-    // a Quote_Candidate needs a Quotation_Pair, so text with no quotation
-    // mark has none. Switch to `extract(text)` when task 5.19 lands.
     fc.assert(
       fc.property(arbCitation, (c) => {
         const formatted = format(c);
@@ -36,14 +26,14 @@ describe("Property 21: Canonical format round trips and is idempotent _Requireme
         if (!formatted.ok) return;
         const text = formatted.value;
 
-        const matches = scanRange(text, 0, () => false);
-        expect(matches).toHaveLength(1);
-        const [m] = matches;
+        const { citations, quotes } = extract(text);
+        expect(citations).toHaveLength(1);
+        const [m] = citations;
         if (m === undefined) return;
         expect([m.start, m.end]).toEqual([0, text.length]);
         expect(structuralEqual(m.value, c)).toBe(true);
         expect(m.normalised).toBeUndefined();
-        expect(QUOTE_MARKS.test(text)).toBe(false);
+        expect(quotes).toEqual([]);
 
         const again = format(m.value);
         expect(again.ok && again.value === text).toBe(true);

@@ -2,10 +2,12 @@
  * Sentence segmentation (design A8, Req 8). Lossless: Sentences tile
  * [0, text.length) exactly, and whitespace after a terminator belongs to the
  * preceding Sentence. Boundaries come from the one shared predicate in
- * `boundary.ts`; citation ranges are passed in so this module does not import
- * the Extractor. The public `segment(text, spans)` (task 5.19) wraps this.
+ * `boundary.ts`. `segmentWith` takes citation ranges as a parameter; the
+ * public `segment(text, spans)` passes `extract(text).citations`, the same
+ * list quote attachment counts boundaries against (Req 8.5).
  */
 import { isBoundaryAt, type CitationRange } from "./boundary.js";
+import { extract } from "./citations/extract.js";
 import type { EngineError } from "./errors.js";
 import { err, ok, type Result } from "./result.js";
 import { checkCoverage } from "./spans.js";
@@ -110,4 +112,16 @@ export function segmentWith(
     sentences.push({ start, end, dominantOrigin, origins });
   }
   return ok(sentences);
+}
+
+/**
+ * Segments `text` with the Extractor's own Citation ranges, so no Sentence
+ * boundary falls strictly inside a Citation (Req 8.5). Returns
+ * `invalid_spans` under the same rule as `segmentWith` (Req 8.9).
+ */
+export function segment(
+  text: string,
+  spans: readonly Span[],
+): Result<readonly Sentence[], EngineError> {
+  return segmentWith(text, spans, extract(text).citations);
 }

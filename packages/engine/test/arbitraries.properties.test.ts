@@ -1,8 +1,8 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { isCaseName, isGapCaseName } from "../src/citations/case-name";
+import { extract } from "../src/citations/extract";
 import { REPORTERS } from "../src/citations/reporters";
-import { scanRange } from "../src/citations/scan";
 import { arbCaseName } from "../src/testing/arbitraries";
 import { runs } from "./support/fc";
 
@@ -116,10 +116,7 @@ describe("arbitraries: arbCaseName _Requirements: 22.1, 22.4_", () => {
         expect(isGapCaseName(n, 0, n.length)).toBe(true);
         // Arbitraries table: at most one of the two Party_Names holds a digit run.
         expect(parties(n).filter((p) => /[0-9]/.test(p)).length).toBeLessThanOrEqual(1);
-        // Stands in for `extract(n).citations` until task 5.19 lands; switch then.
-        // `extract` takes its Citations from this match layer, and linking and
-        // quote attachment never add a Citation, so an empty scan is equivalent.
-        expect(scanRange(n, 0, () => false)).toEqual([]);
+        expect(extract(n).citations).toEqual([]);
       }),
       runs(),
     );
