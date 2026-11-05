@@ -4,3 +4,5 @@ export * from "./arb-ops.js";
 export * from "./arb-faulty-op.js";
 export * from "./arb-document.js";
 export * from "./arb-bad-timestamp.js";
+export * from "./arb-citation.js";
+export * from "./arb-citation-corrupt.js";

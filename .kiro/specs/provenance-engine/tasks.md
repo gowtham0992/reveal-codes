@@ -241,7 +241,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - At the same `p`, `Id.` and the party form are one class and the longer wins (D16).
     - Per design A9 step 4.
     - _Requirements: 9.2, 12.1, 12.2, 12.8_
-  - [ ] 5.9 Implement `citations/scan.ts`
+  - [x] 5.9 Implement `citations/scan.ts`
     - `matchAt` checks the word boundary first, then tries the classes in order, longest within a class, with the Other_Reference precedence look-ahead.
     - `scanRange` moves a leftmost-longest cursor.
     - Enforce `MAX_MATCH`, `LOOKAHEAD`, and `LOOKBEHIND = 162` (`PARTY_SCAN + 1`; the earlier 82 was too small for the party scan). Every read of `matchAt(p)` lies in `[p − LOOKBEHIND, p + LOOKAHEAD)`.
@@ -251,7 +251,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `format` lays out the Canonical_Form with per-member parallel pincites (D1).
     - Per design A13.
     - _Requirements: 10.1, 10.2, 10.5, 11.4_
-  - [ ] 5.11 Create `src/testing/arb-citation.ts`
+  - [x] 5.11 Create `src/testing/arb-citation.ts`
     - `arbCourt`, `arbCitation`, `arbNearMissCitation` returning the string and the expected value, `arbGarbageCitation`, and `arbValueCorruption` with the field recorded.
     - Add an export line to `arbitraries.ts`.
     - _Requirements: 22.1, 22.4_
