@@ -227,7 +227,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - U.S.C., C.F.R., and Federal Rules forms (D8).
     - Per design A9 step 5.
     - _Requirements: 9.6_
-  - [-] 5.7 Implement `citations/signals.ts` and `citations/party.ts`
+  - [x] 5.7 Implement `citations/signals.ts` and `citations/party.ts`
     - `signals.ts`: `SIGNALS` holds the 14 capitalised Signals in Glossary order (`See`, `See also`, `See, e.g.,`, `E.g.,`, `Accord`, `Cf.`, `But see`, `Compare`, `Citing`, `Quoting`, `But cf.`, `Contra`, `E.g.`, `See generally`), compared case-sensitively. `GAP_SIGNALS` holds 20 entries: the first ten Signals plus each with only its first letter lowercased, built with a `lowerFirst` map rather than typed twice. `with` is in neither list. `MAX_GAP_SIGNAL = 10` (`See, e.g.,`).
     - `startsWithSignal` uses `SIGNALS` and tests each Signal followed by a space, `,`, or the end of the range. `gapSignalsAt(text, at, limit)` returns the end of every `GAP_SIGNALS` entry that starts at `at` and ends by `limit` (at most three).
     - `party.ts`: `PARTY_STOP_LIST` as word arrays, built from `SIGNALS` split on spaces plus `In`, `As`, `Under`, `Following`, `Applying`, `The court in`, `The Court in`. `CONNECTORS` (`&`, `of`, `the`, `and`, `ex rel.`). `isCapitalisedWord`, which rejects `v.`.
