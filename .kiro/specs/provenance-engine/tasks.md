@@ -263,7 +263,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 22: Invalid citation values are rejected at the first failing field**
     - **Validates: Requirements 10.5**
     - _Requirements: 10.5_
-  - [-] 5.14 Implement `citations/case-name.ts`
+  - [x] 5.14 Implement `citations/case-name.ts`
     - `isPartyName` follows the Glossary rules, D9, and D10. It allows an Entity_Suffix (`,` and space are in the character set), and accepts every `.` that belongs to a Legal_Abbreviation occurrence found with `abbreviationsStartingAt` at a word start (including the inner periods of `L.L.C.`, `L.P.`, `N.A.`) or closes a Single_Capital_Initial. It rejects an inner ` v. ` and a leading Signal (`startsWithSignal`).
     - `isCaseName` splits on exactly one ` v. `.
     - `isGapCaseName` is `isCaseName` plus the D19 rule: neither Party_Name begins with `with` or with a lowercase-first `GAP_SIGNALS` entry followed by a space, `,`, or the end of that Party_Name.
