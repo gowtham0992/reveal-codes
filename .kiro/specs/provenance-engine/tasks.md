@@ -129,7 +129,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 8: Undo and redo restore documents exactly**
     - **Validates: Requirements 4.7, 5.1, 5.3, 5.4, 5.5, 5.6**
     - _Requirements: 4.7, 5.1, 5.3, 5.4, 5.5, 5.6_
-  - [ ] 2.18 Write Property 9 in `test/ops.properties.test.ts`
+  - [x] 2.18 Write Property 9 in `test/ops.properties.test.ts`
     - **Property 9: An Inverse applied to the wrong Document is rejected**
     - **Validates: Requirements 5.7**
     - _Requirements: 5.7_
