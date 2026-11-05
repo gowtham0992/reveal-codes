@@ -149,7 +149,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 13: Only the Engine produces AI>HUM**
     - **Validates: Requirements 6.11, 6.12, 7.4**
     - _Requirements: 6.11, 6.12, 7.4_
-  - [-] 2.23 Write example tests in `test/ops.test.ts` and `test/relabel.test.ts`
+  - [x] 2.23 Write example tests in `test/ops.test.ts` and `test/relabel.test.ts`
     - With the default threshold 0.4, a Run at exactly 40% is not relabelled, and a Run at 40% plus one code unit is.
     - Delete-all keeps every Run with its Original_Length.
     - Delete(0, 0) on an empty Document is a no-op.
