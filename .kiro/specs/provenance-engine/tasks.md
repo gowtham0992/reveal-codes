@@ -145,7 +145,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 12: A Run is relabelled exactly when its Edited_Proportion exceeds the threshold, and stays relabelled**
     - **Validates: Requirements 6.3, 6.4, 6.5, 6.8, 6.10**
     - _Requirements: 6.3, 6.4, 6.5, 6.8, 6.10_
-  - [-] 2.22 Write Property 13 in `test/relabel.properties.test.ts`
+  - [x] 2.22 Write Property 13 in `test/relabel.properties.test.ts`
     - **Property 13: Only the Engine produces AI>HUM**
     - **Validates: Requirements 6.11, 6.12, 7.4**
     - _Requirements: 6.11, 6.12, 7.4_
