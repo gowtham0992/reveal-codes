@@ -92,7 +92,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `spliceSpans` returns the deleted pieces and merges only at the two seams.
     - Per design A3 steps 1, 2, and 6.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.11, 4.12, 6.11_
-  - [-] 2.9 Implement `relabel.ts`
+  - [x] 2.9 Implement `relabel.ts`
     - `addOriginalLength`, `countDeleted` (`HUM` Actor, `AI` pieces only), `countInserted` (strictly inside the pre-insertion Run_Extent), and `relabelRuns` (sticky flag, full normalisation only on the relabel path).
     - Per design A3 steps 3 to 5.
     - _Requirements: 4.8, 4.9, 6.1, 6.2, 6.3, 6.4, 6.7, 6.8, 6.12_
