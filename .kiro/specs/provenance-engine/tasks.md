@@ -223,7 +223,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `WL` and `<court> LEXIS` forms with an optional `, at *<pincite>`.
     - Per design A9 step 2.
     - _Requirements: 9.4_
-  - [-] 5.6 Implement `citations/grammar-other.ts`
+  - [x] 5.6 Implement `citations/grammar-other.ts`
     - U.S.C., C.F.R., and Federal Rules forms (D8).
     - Per design A9 step 5.
     - _Requirements: 9.6_
