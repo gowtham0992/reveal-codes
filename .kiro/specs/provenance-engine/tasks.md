@@ -117,7 +117,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 1: Every returned Document is canonical and satisfies the Run invariant**
     - **Validates: Requirements 3.1, 3.2, 4.10, 6.12**
     - _Requirements: 3.1, 3.2, 4.10, 6.12_
-  - [-] 2.15 Write Property 6 in `test/ops.properties.test.ts`
+  - [x] 2.15 Write Property 6 in `test/ops.properties.test.ts`
     - **Property 6: Insert and Delete agree with a per-code-unit model**
     - **Validates: Requirements 4.1, 4.2, 4.3, 4.4, 4.5, 4.7, 4.11, 4.12**
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.7, 4.11, 4.12_
