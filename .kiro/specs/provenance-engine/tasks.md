@@ -448,6 +448,31 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Builds `t` and `t′` (with `g + " "` inserted before `m + x`) from `arbQuoteContent`, `arbGapPunct`, `arbCaseName`, `arbCitation`, `arbShortFormParty`, and `arbGapSignal`, and checks the attachment under the Sentence condition and the shifted citations.
     - **Validates: Requirements 12.2, 13.1**
     - _Requirements: 12.2, 13.1_
+  - [ ] 5.47 Add `citations/lexis-courts.ts` and the `lexisCourtListed` value field, and update `format.ts`
+    - Depends on regenerated data: start only after the maintainer has re-run `scripts/generate-reporters.ts` against reporters-db and committed `src/citations/lexis-courts.json` and the updated `REPORTERS_LICENSE.md`. Do not hand-write the list.
+    - `lexis-courts.ts`: `LEXIS_COURTS` as a static JSON import (`with { type: "json" }`), exact and collapsed indexes built once (first entry wins), `lookupLexisCourt` (exact, then collapsed), and `isUnlistedLexisCourt` (the Glossary Unlisted_Lexis_Court rule). It is the only importer of `lexis-courts.json` (Req 14.8).
+    - `types.ts`: `DatabaseValue` gains `lexisCourtListed?: boolean`, present iff the designator is `LEXIS`, `true` for a listed court (the list entry) and `false` for an unlisted court (as written).
+    - `format.ts`: `validateFullValue` checks `lexisCourtListed` after `court` and before `lexisCourt`; a listed court must be an exact entry, and an unlisted court must satisfy the tight rule and match no entry exactly or collapsed. `format` prints the court as recorded.
+    - Per design A13 and D22.
+    - _Requirements: 9.4, 10.1, 10.5, 14.8_
+  - [ ] 5.48 Update `citations/grammar-db.ts` for listed and unlisted LEXIS courts
+    - Depends on 5.47 and on the regenerated `lexis-courts.json`.
+    - The court starts one space after the year and runs to the first `LEXIS` token. Fail if any court token is a year in 1600–2999. Then try `lookupLexisCourt` (exact, then collapsed) for `lexisCourtListed: true` with the list entry, else `isUnlistedLexisCourt` for `lexisCourtListed: false` with the court as written, else fail. Keep every read inside `[p − 2, p + 140)`.
+    - Add the design's named example tests to `test/grammar-db.test.ts` and `test/extract.test.ts`: `under 42 U.S.C. § 1983 and the court in 2023 U.S. Dist. LEXIS 5` keeps the Other_Reference and starts the Database_Citation at `2023`, and `Smith v. Local 2092 Union, 2023 U.S. Dist. LEXIS 5` starts it at `2023`; also the near-miss, unlisted, and rejected-court examples.
+    - Per design A9 step 2 and D22.
+    - _Requirements: 9.4, 9.7, 11.2, 11.3, 14.8_
+  - [ ] 5.49 Update the citation arbitraries for LEXIS courts
+    - Depends on 5.47 and 5.48, and on the regenerated `lexis-courts.json`.
+    - `arb-citation.ts`: add `arbLexisCourt` and `arbDatabaseValue` (listed courts from `LEXIS_COURTS`, unlisted courts under the tight rule and filtered against both indexes, equal weight), and use them in `arbCitation`.
+    - `arb-citation-corrupt.ts`: `arbValueCorruption` gains the `lexisCourtListed` and `lexisCourt`-consistency corruptions from the design's Arbitraries table, each with its expected field.
+    - `arb-text-citations.ts` and `arb-text-builder.ts`: remove the `\n`-before-LEXIS workaround from `putFull` and from the module comment, so a LEXIS fragment is joined like any other.
+    - _Requirements: 22.1, 22.4_
+  - [ ] 5.50 Re-run Properties 21 and 22 and the 5.20 preview test against the LEXIS changes
+    - Depends on 5.47 to 5.49 and on the regenerated `lexis-courts.json`.
+    - Update the Property 21 and Property 22 statements in `test/format.properties.test.ts` to the design's new wording (round trip keeps `lexisCourtListed`; corruptions of the flag and court consistency). Do not add a second `fc.assert` for either property.
+    - Re-run `test/arb-text-citations.test.ts` ("the constructed Extraction equals extract(text)") with the workaround removed.
+    - Record any counterexample as a named example (Req 22.5).
+    - _Requirements: 9.4, 10.1, 10.3, 10.4, 10.5_
 
 - [ ] 6. Checkpoint: citations and re-anchoring
   - Ensure `pnpm lint`, `pnpm typecheck`, and `pnpm test` pass. Ask the user if questions arise.
@@ -455,6 +480,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
 - [ ] 7. Verification state, issues, and overrides
   - [ ] 7.1 Implement `verification.ts`
     - `setVerification` checks `unknown_citation`, then `not_verifiable`, then `invalid_verification_result`. It keeps the Override when the status is unchanged and drops it when the status changes.
+    - `not_verifiable` covers a Short_Form key and, after task 5.47, a `verified` result (well-formed or not; only `r.status` is read) on a Database_Citation with `lexisCourtListed: false`, returning the input Document unchanged. `not_found`, `ambiguous`, and `unchecked` on such a citation are recorded as usual, so it stays an Issue until overridden (Req 16.5, 18.2, D22).
     - `setQuoteCheck` checks `unknown_quote`, then `not_verifiable` (quote on an Orphan), then `invalid_quote_result`. It drops the Override when the result differs.
     - `verificationOf` derives the result for a Short_Form from its target, and returns `unchecked` for an Orphan.
     - Per design A10.
@@ -466,14 +492,17 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - _Requirements: 12.5, 13.4, 17.6, 17.7, 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 18.8_
   - [ ] 7.3 Create `src/testing/arb-state.ts` and extend `arbDocument`
     - Arbitraries: `arbVerificationResult`, `arbQuoteCheckResult(len)`, `arbReason` (including `[ ] \ { } ; = ,`), `arbBlankReason`, `arbStateWrites`, `arbBadVerificationWrite`, `arbBadQuoteWrite`, and `arbStateOpSequence`. Each bad-write arbitrary records its expected error.
+    - `arbBadVerificationWrite` includes a `verified` write (well-formed or malformed) on an unlisted LEXIS key, expecting `not_verifiable`. `arbStateOpSequence` uses texts with unlisted LEXIS citations, weights `verified` writes toward their keys, and biases edits into and next to them (design Arbitraries table, D22).
     - `arbDocument` applies `arbStateWrites` through `setVerification`, `setQuoteCheck`, and `recordOverride`, weighted across every status. A write that returns an error is skipped, not filtered.
     - _Requirements: 22.1, 22.4_
   - [ ] 7.4 Write Property 28 in `test/verification.properties.test.ts`
     - **Property 28: Writing a verification result updates the citation and its Short_Forms only**
+    - Excludes a `verified` result on an unlisted LEXIS key, which Property 29 covers.
     - **Validates: Requirements 12.4, 16.1, 16.6, 16.7**
     - _Requirements: 12.4, 16.1, 16.6, 16.7_
   - [ ] 7.5 Write Property 29 in `test/verification.properties.test.ts`
     - **Property 29: Invalid verification writes are rejected without change**
+    - Includes the Req 16.5 extension: a `verified` result on a Database_Citation with `lexisCourtListed: false` returns `not_verifiable`, before any payload check.
     - **Validates: Requirements 16.2, 16.3, 16.4, 16.5**
     - _Requirements: 16.2, 16.3, 16.4, 16.5_
   - [ ] 7.6 Write Property 30 in `test/verification.properties.test.ts`
@@ -498,8 +527,9 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - _Requirements: 18.3, 18.4, 18.5, 18.6, 18.7_
   - [ ] 7.11 Write Property 35 in `test/issues.properties.test.ts`
     - **Property 35: Overrides only ever belong to current Issues**
-    - **Validates: Requirements 15.8, 16.6, 17.4**
-    - _Requirements: 15.8, 16.6, 17.4_
+    - Also asserts that no sequence of operations and verification results ever puts a citation with `lexisCourtListed: false` in the `verified` state: in every intermediate Document every such Full_Citation has a status other than `verified`. `arbStateOpSequence` generates unlisted LEXIS citations and `verified` writes aimed at them. Same `fc.assert`; no new Property number.
+    - **Validates: Requirements 15.8, 16.5, 16.6, 17.4**
+    - _Requirements: 15.8, 16.5, 16.6, 17.4_
   - [ ] 7.12 Write Property 26 in `test/anchor.properties.test.ts`
     - **Property 26: Touched citations reset, untouched ones carry over with shifted offsets**
     - This lands here because it needs `arbDocument` with verification results and Overrides from task 7.3.
@@ -651,7 +681,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
   - Task 8: 36, 37, 38, 39, 40, 41
   - Task 10: 42
 - Properties 7 and 8 land in task 2, while the citation layer is still empty, so they check Issue_Keys and `keyCounter` only trivially at first. After task 5.41 they run against Documents with citations without any change to the test, because `arbDocument` gains citation text in task 5.42.
-- The reporters-db generator runs offline against a maintainer's local checkout. Only the committed `reporters.json` and `REPORTERS_LICENSE.md` are used at run time. No test touches the network.
+- The reporters-db generator runs offline against a maintainer's local checkout. Only the committed `reporters.json`, `lexis-courts.json`, and `REPORTERS_LICENSE.md` are used at run time. No test touches the network. Tasks 5.47 to 5.50 wait for the maintainer to regenerate these files with the updated generator.
 - Task 11.3 is a manual measurement on the Reference_Machine, as Req 21.6 and 21.7 require. It is never run by `pnpm test`, `pnpm test:pbt`, or CI.
 - If a property fails, add the shrunk counterexample as a named example in the same properties file and fix the code, or record the faulty requirement in `BUILD_LOG.md`. Do not weaken the property (Req 22.5).
 
@@ -699,10 +729,10 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     { "id": 36, "tasks": ["5.29"] },
     { "id": 37, "tasks": ["5.30"] },
     { "id": 38, "tasks": ["5.31"] },
-    { "id": 39, "tasks": ["5.46"] },
-    { "id": 40, "tasks": ["7.1"] },
-    { "id": 41, "tasks": ["7.2"] },
-    { "id": 42, "tasks": ["7.3"] },
+    { "id": 39, "tasks": ["5.46", "5.47"] },
+    { "id": 40, "tasks": ["5.48", "7.1"] },
+    { "id": 41, "tasks": ["5.49", "7.2"] },
+    { "id": 42, "tasks": ["5.50", "7.3"] },
     { "id": 43, "tasks": ["7.4", "7.8", "7.12", "7.13", "7.14"] },
     { "id": 44, "tasks": ["7.5", "7.9"] },
     { "id": 45, "tasks": ["7.6", "7.10"] },

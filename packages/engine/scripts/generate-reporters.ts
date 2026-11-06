@@ -1,5 +1,6 @@
-// Generates src/citations/reporters.json and src/citations/REPORTERS_LICENSE.md
-// from a local Free Law Project reporters-db checkout (Req 14.2, 14.4).
+// Generates src/citations/reporters.json, src/citations/lexis-courts.json, and
+// src/citations/REPORTERS_LICENSE.md from a local Free Law Project reporters-db
+// checkout (Req 14.2, 14.4, 14.7, 14.9).
 //
 // Usage (from packages/engine):
 //   node --experimental-strip-types scripts/generate-reporters.ts \
@@ -16,13 +17,19 @@ const REPOSITORY_URL = "https://github.com/freelawproject/reporters-db";
 const DATA_PATH = join("reporters_db", "data", "reporters.json");
 const LICENCE_FILES = ["LICENSE", "LICENSE.txt", "LICENSE.md"];
 const MAX_REPORTER_LENGTH = 40;
+// Longest LEXIS court the Database grammar reads (design A9 step 2, MAX_COURT).
+const MAX_COURT_LENGTH = 40;
 const FORBIDDEN_CHARS = [",", "(", ")", '"', "'", "“", "”", "‘", "’"];
 const RESERVED_TOKENS = ["WL", "LEXIS"];
+const DATABASE_FORM = "database citation form";
+const LEXIS_TAIL = /\s+LEXIS$/;
+const YEAR_TOKEN = /^(1[6-9]|2\d)\d\d$/;
 
 type Args = { checkout: string; date: string; tag: string; outDir: string };
 type Dropped = { entry: string; reason: string };
 type Selection = { kept: string[]; dropped: Dropped[]; duplicates: string[] };
 type Source = { commit: string; licence: string };
+type Output = { reporters: Selection; courts: Selection };
 
 function parseArgs(argv: readonly string[]): Args {
   const [checkout, date, tag, outDir] = argv;
@@ -65,24 +72,52 @@ function editionKeysInFileOrder(data: unknown): string[] {
   return keys;
 }
 
+function forbiddenReason(entry: string): string | undefined {
+  const bad = FORBIDDEN_CHARS.filter((c) => entry.includes(c));
+  return bad.length > 0 ? `contains ${bad.map((c) => JSON.stringify(c)).join(", ")}` : undefined;
+}
+
 // Returns why an entry breaks the citation grammar, or undefined if it is usable.
 function dropReason(entry: string): string | undefined {
   if (entry.trim() === "") return "empty or whitespace only";
   if (entry !== entry.trim()) return "leading or trailing whitespace";
-  const bad = FORBIDDEN_CHARS.filter((c) => entry.includes(c));
-  if (bad.length > 0) return `contains ${bad.map((c) => JSON.stringify(c)).join(", ")}`;
+  const forbidden = forbiddenReason(entry);
+  if (forbidden !== undefined) return forbidden;
   if (entry.split(/\s+/).some((t) => /^\d+$/.test(t))) return "has an all-digit token";
   // Exact match first, so bare `WL` / `LEXIS` keep their own reason.
   if (RESERVED_TOKENS.includes(entry)) return "reserved database token";
   // `… LEXIS` / `… WL` reporters collide with Database_Citations (Req 14.7).
-  if (RESERVED_TOKENS.includes(entry.split(/\s+/).at(-1) ?? "")) return "database citation form";
+  if (RESERVED_TOKENS.includes(entry.split(/\s+/).at(-1) ?? "")) return DATABASE_FORM;
   if (entry.length > MAX_REPORTER_LENGTH) {
     return `longer than ${String(MAX_REPORTER_LENGTH)} code units (resolver window)`;
   }
   return undefined;
 }
 
-function selectEntries(keys: readonly string[]): Selection {
+// Returns why a LEXIS court breaks the Database grammar (design A9 step 2), or
+// undefined if the grammar can read it back exactly. All-digit tokens are
+// allowed; year tokens are not, because the year must directly precede the court.
+function courtDropReason(court: string): string | undefined {
+  if (court === "") return "empty court";
+  if (court.split(" ").some((t) => t === "" || /\s/.test(t))) {
+    return "whitespace other than single spaces";
+  }
+  const forbidden = forbiddenReason(court);
+  if (forbidden !== undefined) return forbidden;
+  const tokens = court.split(" ");
+  if (tokens.some((t) => YEAR_TOKEN.test(t))) return "has a year token (1600–2999)";
+  if (tokens[0] === "WL") return "starts with a WL token";
+  if (tokens.includes("LEXIS")) return "contains a LEXIS token";
+  if (court.length > MAX_COURT_LENGTH) {
+    return `longer than ${String(MAX_COURT_LENGTH)} code units (court bound)`;
+  }
+  return undefined;
+}
+
+function selectEntries(
+  keys: readonly string[],
+  reasonOf: (entry: string) => string | undefined,
+): Selection {
   const seen = new Set<string>();
   const selection: Selection = { kept: [], dropped: [], duplicates: [] };
   for (const entry of keys) {
@@ -91,11 +126,19 @@ function selectEntries(keys: readonly string[]): Selection {
       continue;
     }
     seen.add(entry);
-    const reason = dropReason(entry);
+    const reason = reasonOf(entry);
     if (reason === undefined) selection.kept.push(entry);
     else selection.dropped.push({ entry, reason });
   }
   return selection;
+}
+
+// The court part (entry minus its trailing ` LEXIS`) of every entry dropped as a
+// database citation form whose last token is `LEXIS`, in source file order.
+function lexisCourtsOf(reporters: Selection): string[] {
+  return reporters.dropped
+    .filter((d) => d.reason === DATABASE_FORM && LEXIS_TAIL.test(d.entry))
+    .map((d) => d.entry.replace(LEXIS_TAIL, ""));
 }
 
 function resolveRef(gitDir: string, ref: string): string {
@@ -141,30 +184,55 @@ function entryList(lines: readonly string[]): string[] {
   return lines.length === 0 ? ["None."] : [...lines];
 }
 
-function licenceNote(args: Args, source: Source, selection: Selection): string {
-  const dropped = selection.dropped.map((d) => `- ${code(d.entry)}: ${d.reason}`);
-  const duplicates = [...new Set(selection.duplicates)].map((d) => `- ${code(d)}`);
+function droppedList(selection: Selection): string[] {
+  return entryList(selection.dropped.map((d) => `- ${code(d.entry)}: ${d.reason}`));
+}
+
+function repeatedList(selection: Selection): string[] {
+  return entryList([...new Set(selection.duplicates)].map((d) => `- ${code(d)}`));
+}
+
+function noteHeader(args: Args, source: Source, output: Output): string[] {
   return [
     "# reporters.json licence note",
     "",
     "`reporters.json` lists the edition abbreviations from Free Law Project's reporters-db,",
-    "in source file order, de-duplicated by first occurrence. It is generated by",
-    "`scripts/generate-reporters.ts`; do not edit it by hand.",
+    "in source file order, de-duplicated by first occurrence. `lexis-courts.json` lists the",
+    "LEXIS courts derived from the same data. Both are generated by",
+    "`scripts/generate-reporters.ts`; do not edit them by hand.",
     "",
     "- Licence: BSD (reporters-db licence text reproduced below)",
     `- Repository: ${REPOSITORY_URL}`,
     `- Release tag: \`${args.tag}\``,
     `- Commit: \`${source.commit}\``,
     `- Generation date: ${args.date}`,
-    `- Entries kept: ${String(selection.kept.length)}`,
+    `- Entries kept: ${String(output.reporters.kept.length)}`,
+    `- \`lexis-courts.json\`: ${String(output.courts.kept.length)} entries, each the court part ` +
+      "(the entry minus its trailing ` LEXIS`) of an entry dropped below as " +
+      `\`${DATABASE_FORM}\` whose last token is \`LEXIS\`, in source file order, ` +
+      "de-duplicated by first occurrence, minus the courts dropped below",
+  ];
+}
+
+function licenceNote(args: Args, source: Source, output: Output): string {
+  return [
+    ...noteHeader(args, source, output),
     "",
     "## Dropped entries (break the citation grammar)",
     "",
-    ...entryList(dropped),
+    ...droppedList(output.reporters),
     "",
     "## Repeated abbreviations (first occurrence kept)",
     "",
-    ...entryList(duplicates),
+    ...repeatedList(output.reporters),
+    "",
+    "## Dropped LEXIS courts (break the Database grammar)",
+    "",
+    ...droppedList(output.courts),
+    "",
+    "## Repeated LEXIS courts (first occurrence kept)",
+    "",
+    ...repeatedList(output.courts),
     "",
     "## reporters-db licence",
     "",
@@ -175,22 +243,35 @@ function licenceNote(args: Args, source: Source, selection: Selection): string {
   ].join("\n");
 }
 
+function select(data: unknown): Output {
+  const reporters = selectEntries(editionKeysInFileOrder(data), dropReason);
+  if (reporters.kept.length === 0) {
+    throw new Error("no reporter entries survived filtering");
+  }
+  const courts = selectEntries(lexisCourtsOf(reporters), courtDropReason);
+  if (courts.kept.length === 0) {
+    throw new Error("no LEXIS courts survived filtering");
+  }
+  return { reporters, courts };
+}
+
+function writeJson(path: string, entries: readonly string[]): void {
+  writeFileSync(path, `${JSON.stringify(entries, null, 2)}\n`);
+}
+
 function main(): void {
   const args = parseArgs(process.argv.slice(2));
   const data: unknown = JSON.parse(readFileSync(join(args.checkout, DATA_PATH), "utf8"));
-  const selection = selectEntries(editionKeysInFileOrder(data));
-  if (selection.kept.length === 0) {
-    throw new Error("no reporter entries survived filtering");
-  }
+  const output = select(data);
   const source = readSource(args.checkout);
-  writeFileSync(
-    join(args.outDir, "reporters.json"),
-    `${JSON.stringify(selection.kept, null, 2)}\n`,
-  );
-  writeFileSync(join(args.outDir, "REPORTERS_LICENSE.md"), licenceNote(args, source, selection));
+  writeJson(join(args.outDir, "reporters.json"), output.reporters.kept);
+  writeJson(join(args.outDir, "lexis-courts.json"), output.courts.kept);
+  writeFileSync(join(args.outDir, "REPORTERS_LICENSE.md"), licenceNote(args, source, output));
+  const { reporters, courts } = output;
   process.stdout.write(
-    `kept ${String(selection.kept.length)}, dropped ${String(selection.dropped.length)}, ` +
-      `repeated ${String(selection.duplicates.length)} -> ${args.outDir}\n`,
+    `kept ${String(reporters.kept.length)}, dropped ${String(reporters.dropped.length)}, ` +
+      `repeated ${String(reporters.duplicates.length)}; lexis courts ` +
+      `${String(courts.kept.length)}, dropped ${String(courts.dropped.length)} -> ${args.outDir}\n`,
   );
 }
 
