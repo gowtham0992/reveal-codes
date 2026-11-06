@@ -15,10 +15,21 @@ import { runs } from "./support/fc";
 
 // Properties 21 and 22 (design "Correctness Properties", [format]).
 
+/** The LEXIS flag and whether the key is present at all (a WL value has none). */
+const lexisFlagOf = (v: CitationValue): Readonly<{ present: boolean; flag: unknown }> =>
+  v.kind === "database"
+    ? { present: "lexisCourtListed" in v, flag: v.lexisCourtListed }
+    : { present: false, flag: undefined };
+
 describe("Property 21: Canonical format round trips and is idempotent _Requirements: 10.1, 10.2, 10.3, 10.4, 11.2, 14.3, 14.5_", () => {
-  it("extracting format(c) yields exactly c over the whole string, and format of that value is format(c)", () => {
+  it("extracting format(c) yields exactly c over the whole string, keeping lexisCourtListed, and format of that value is format(c)", () => {
     // Property 21
     // Feature: provenance-engine, Property 21: Canonical format round trips and is idempotent
+    //
+    // `arbCitation` covers LEXIS values with listed courts
+    // (`lexisCourtListed: true`) and unlisted courts (`false`). Value equality
+    // includes the flag, so the round trip keeps it; the flag check below
+    // states that directly.
     fc.assert(
       fc.property(arbCitation, (c) => {
         const formatted = format(c);
@@ -32,6 +43,7 @@ describe("Property 21: Canonical format round trips and is idempotent _Requireme
         if (m === undefined) return;
         expect([m.start, m.end]).toEqual([0, text.length]);
         expect(structuralEqual(m.value, c)).toBe(true);
+        expect(lexisFlagOf(m.value)).toEqual(lexisFlagOf(c));
         expect(m.normalised).toBeUndefined();
         expect(quotes).toEqual([]);
 
@@ -120,7 +132,7 @@ const arbNonFullCase: fc.Arbitrary<Rejection> = fc
   .map((value) => ({ value, field: "kind" }));
 
 describe("Property 22: Invalid citation values are rejected at the first failing field _Requirements: 10.5_", () => {
-  it("validateFullValue and format both return invalid_citation naming the recorded field", () => {
+  it("validateFullValue and format both return invalid_citation naming the recorded field, including LEXIS flag and court-consistency corruptions", () => {
     const cases: fc.Arbitrary<Rejection> = fc.oneof(arbValueCorruption, arbNonFullCase);
     // Property 22
     // Feature: provenance-engine, Property 22: Invalid citation values are rejected at the first failing field
@@ -128,6 +140,13 @@ describe("Property 22: Invalid citation values are rejected at the first failing
     // `arbValueCorruption` breaks exactly one field of an `arbCitation` value,
     // so the recorded field is the first failure in A13 order. Short_Form and
     // Other values are not Full_Citations and fail at `kind`, the first step.
+    //
+    // The corruptions include breaking the consistency between
+    // `lexisCourtListed` and `lexisCourt` (A13, D22): the flag removed or
+    // non-boolean on a LEXIS value, or present on a WL value, is rejected at
+    // `lexisCourtListed`; `true` with a court that is not an exact list entry,
+    // and `false` with a list entry, a collapsed match of one, or a court that
+    // breaks the Unlisted_Lexis_Court rule, are rejected at `lexisCourt`.
     fc.assert(
       fc.property(cases, ({ value, field }) => {
         const expected = { ok: false, error: { kind: "invalid_citation", field } };
