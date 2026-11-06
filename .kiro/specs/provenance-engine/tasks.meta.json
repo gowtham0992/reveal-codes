@@ -67,6 +67,18 @@
     "5.36 Write Property 5 in `test/spans.properties.test.ts`": {
       "status": "passed",
       "lastRunTimestamp": 1793926001131
+    },
+    "5.21 Write Property 17 in `test/extract.properties.test.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1793928059619
+    },
+    "5.33 Write Property 23 in `test/format.properties.test.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1793928171435
+    },
+    "5.35 Write Property 15 in `test/segment.properties.test.ts` and widen Property 14": {
+      "status": "passed",
+      "lastRunTimestamp": 1793930286478
     }
   },
   "executionHistory": {
@@ -855,6 +867,61 @@
         "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
         "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
         "timestamp": 1793927938053
+      }
+    ],
+    "5.21 Write Property 17 in `test/extract.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793927950227
+      },
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793930332252
+      }
+    ],
+    "5.32 Write example tests in `test/extract.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793927950266
+      },
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793930332134
+      }
+    ],
+    "5.33 Write Property 23 in `test/format.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793927951127
+      },
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793930332177
+      }
+    ],
+    "5.35 Write Property 15 in `test/segment.properties.test.ts` and widen Property 14": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793927951834
+      },
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793930332225
+      }
+    ],
+    "5.38 Add the demo-motion fixture and its extraction test": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793927952796
       }
     ]
   }

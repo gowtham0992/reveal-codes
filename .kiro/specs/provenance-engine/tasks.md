@@ -306,7 +306,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `arb-opinion.ts`: `arbOpinionWithQuotes`.
     - Add export lines to `arbitraries.ts`.
     - _Requirements: 22.1, 22.4_
-  - [ ] 5.21 Write Property 17 in `test/extract.properties.test.ts`
+  - [x] 5.21 Write Property 17 in `test/extract.properties.test.ts`
     - **Property 17: Extraction offsets are exact on any string**
     - **Validates: Requirements 9.2, 9.7, 9.9, 13.2, 13.7**
     - _Requirements: 9.2, 9.7, 9.9, 13.2, 13.7_
@@ -369,7 +369,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - A 76-code-unit party preceded by ` extensively ` gives the party, and one preceded by a 90-code-unit Capitalised_Word also gives the party (D17).
     - The preceding-quote examples with `Planned Parenthood`, `See Planned Parenthood`, and `In Casey`.
     - _Requirements: 9.2, 12.2, 12.8, 13.1_
-  - [ ] 5.32 Write example tests in `test/extract.test.ts`
+  - [x] 5.32 Write example tests in `test/extract.test.ts`
     - Preceding-quote examples that attach (13.1): `"… ." Roe, 410 U.S. at 153.`; `"…," Roe v. Wade, 410 U.S. 113 (1973)`; `"…." See Roe v. Wade, 410 U.S. 113` and `"…," See Roe v. Wade, 410 U.S. 113 (1973)`; `"…" See Planned Parenthood, 505 U.S. at 833`; `"…" (quoting Roe v. Wade, 410 U.S. 113)` and `"…" (citing Casey, 505 U.S. at 833)`; `"…" See, e.g., Roe v. Wade, 410 U.S. 113`; `"…" Cf. Roe v. Wade, 410 U.S. 113`; and `"…." Compare Roe v. Wade, 410 U.S. 113, with Casey, 505 U.S. at 833`, which attaches to `410 U.S. 113`.
     - Preceding-quote examples that do not attach (13.1, 13.9): `"…" In Casey, 505 U.S. at 833`; `"…," with Casey v. Smith, 5 U.S. 1 (1801)` (D19); two Gap_Signals, `"…" See accord Roe v. Wade, 410 U.S. 113` and `"…" See Accord Roe v. Wade, 410 U.S. 113`; `"… ." Cf. Roe v. Wade, 410 U.S. 113` (two boundaries); and any other gap spanning two boundaries.
     - Following-quote examples (13.8): `Roe, 410 U.S. at 153 ("quoted text")` and `410 U.S. 113, 116: "quoted text"` attach, and `Roe, 410 U.S. at 153 (quoting "quoted text")` does not attach to `Roe`.
@@ -379,7 +379,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - A `“…"` mixture gives no quote (13.6).
     - The empty string and a string with only lone surrogates return empty lists (9.9).
     - _Requirements: 9.9, 12.6, 12.7, 13.1, 13.5, 13.6, 13.8, 13.9_
-  - [ ] 5.33 Write Property 23 in `test/format.properties.test.ts`
+  - [x] 5.33 Write Property 23 in `test/format.properties.test.ts`
     - **Property 23: Near misses are extracted and normalised to the first matching reporter**
     - **Validates: Requirements 10.6, 11.1, 11.2, 11.4, 11.5, 11.6, 14.6**
     - _Requirements: 10.6, 11.1, 11.2, 11.4, 11.5, 11.6, 14.6_
@@ -388,7 +388,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Inserts garbage at neutral positions only (D4).
     - **Validates: Requirements 11.3, 14.3**
     - _Requirements: 11.3, 14.3_
-  - [ ] 5.35 Write Property 15 in `test/segment.properties.test.ts` and widen Property 14
+  - [x] 5.35 Write Property 15 in `test/segment.properties.test.ts` and widen Property 14
     - **Property 15: Sentence boundaries are exactly the rule's positions**
     - This is the citation-aware segmentation property. It runs `segment` against `extract(t)` ranges on `arbTextWithCitations` with `arbAbbreviationProse` spliced in, drawn from the whole `LEGAL_ABBREVIATIONS` list (including `Ltd.`, `Co.`, `L.P.`, `N.A.`, `L.L.C.`) plus reporter abbreviations, and with `arbInitialProse` fragments spliced in, so that initials followed by one space and a Capitalised_Word (no boundary, Req 8.10) and the near cases that still split both occur.
     - Also add `arbTextWithCitations` through `segment` to the Property 14 generator from task 4.5. Do not add a second `fc.assert` for Property 14.
@@ -402,7 +402,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
   - [ ]* 5.37 Write example tests for the Req 10.2 layouts in `test/format.test.ts`
     - `410 U.S. 113, 116 (1973)`, `598 F.3d 1, 7 (2d Cir. 2010)`, `2024 WL 123456`, and `2023 U.S. Dist. LEXIS 98765`. Property 21 already covers these.
     - _Requirements: 10.2_
-  - [ ] 5.38 Add the demo-motion fixture and its extraction test
+  - [-] 5.38 Add the demo-motion fixture and its extraction test
     - Add `packages/engine/fixtures/demo-motion.txt`, a motion with three fabricated citations and one fabricated quote, and `fixtures/README.md` with one line naming its source and date.
     - If `apps/web/demo/` does not exist yet, author the fixture here and note in the README that `apps/web/demo/` must reuse it.
     - `test/demo.test.ts` asserts the planted items extract at known Offsets.
