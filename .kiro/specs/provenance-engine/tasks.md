@@ -420,7 +420,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Cleans up Overrides.
     - Per design A6.
     - _Requirements: 15.2, 15.3, 15.4, 15.5, 15.6, 15.7, 15.8_
-  - [-] 5.41 Wire the citation layer into `createDocument` and the operation pipeline
+  - [x] 5.41 Wire the citation layer into `createDocument` and the operation pipeline
     - Replace `reanchorStage` with real stages. `createDocument` runs `extract` and then `assignKeys` with every result `unchecked` (design A1 step 4).
     - Insert and Delete run `rescan`, `linkShortForms`, `pairQuoteMarks` and `attachQuotes`, then `reanchor` (A3 step 7, A5).
     - Replace re-extracts after both its delete and its insert step (A4).
