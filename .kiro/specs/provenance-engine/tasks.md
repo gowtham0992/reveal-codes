@@ -324,7 +324,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Uses a test-local naive reference model that pairs marks per family, drops blank pairs, then, in a left-to-right pass by opening mark, drops every pair whose opening mark lies inside the last kept pair (Req 13.10), and takes Sentences from `segment`. It tries every split `P1 + S + P2 + C + P3` of a preceding gap, with `S` empty or the longest entry of a test-local Gap_Signal list typed from the Glossary (ten forms plus their lowercase-first forms, no `with`) that starts at that position and fits in the gap (D21), and checks `C` with a test-local Case_Name checker (Entity_Suffixes, inner periods of `L.L.C.`, `L.P.`, `N.A.`, and the D19 leading-word rule). Following gaps accept only whitespace and `, ; : (`.
     - **Validates: Requirements 13.1, 13.5, 13.6, 13.7, 13.8, 13.9, 13.10**
     - _Requirements: 13.1, 13.5, 13.6, 13.7, 13.8, 13.9, 13.10_
-  - [~] 5.25 Write Property 44 in `test/extract.properties.test.ts`
+  - [x] 5.25 Write Property 44 in `test/extract.properties.test.ts`
     - **Property 44: Boundary counting agrees with the Segmenter's Sentences**
     - **Validates: Requirements 13.1, 13.8**
     - _Requirements: 13.1, 13.8_
@@ -439,7 +439,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Uses `arbEdit(t)` from task 5.42, so edits change a party's canonical start or tail comma from outside its range, split a Party_Side, or add and remove a Gap_Signal in a gap.
     - **Validates: Requirements 15.1**
     - _Requirements: 15.1_
-  - [~] 5.45 Write Property 27 in `test/anchor.properties.test.ts`
+  - [ ] 5.45 Write Property 27 in `test/anchor.properties.test.ts`
     - **Property 27: Issue_Keys are fresh, unique, and assigned in document order**
     - **Validates: Requirements 15.5, 15.7**
     - _Requirements: 15.5, 15.7_
