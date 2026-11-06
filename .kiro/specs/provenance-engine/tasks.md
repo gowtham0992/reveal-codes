@@ -394,7 +394,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Also add `arbTextWithCitations` through `segment` to the Property 14 generator from task 4.5. Do not add a second `fc.assert` for Property 14.
     - **Validates: Requirements 8.3, 8.4, 8.5, 8.6, 8.10**
     - _Requirements: 8.3, 8.4, 8.5, 8.6, 8.10_
-  - [ ] 5.36 Write Property 5 in `test/spans.properties.test.ts`
+  - [x] 5.36 Write Property 5 in `test/spans.properties.test.ts`
     - **Property 5: Invalid span lists are rejected at the first violation**
     - It asserts both `normaliseSpans` and the public `segment`, so it lands here rather than in task 2.
     - **Validates: Requirements 3.6, 8.9**
@@ -413,7 +413,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Splices the kept, new, and shifted matches.
     - Per design A5.
     - _Requirements: 15.1, 21.1_
-  - [ ] 5.40 Implement `anchor.ts`
+  - [x] 5.40 Implement `anchor.ts`
     - `mapRange` follows Req 15.3.
     - Carries over Full_Citations, Short_Forms (link target compared through the mapping, D5), and quotes (conditions a to d, comparing `citationStart` and `rule`).
     - `assignKeys` issues `k<n>` in `(start, citation first)` order and skips Other_References.
