@@ -455,7 +455,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `format.ts`: `validateFullValue` checks `lexisCourtListed` after `court` and before `lexisCourt`; a listed court must be an exact entry, and an unlisted court must satisfy the tight rule and match no entry exactly or collapsed. `format` prints the court as recorded.
     - Per design A13 and D22.
     - _Requirements: 9.4, 10.1, 10.5, 14.8_
-  - [ ] 5.48 Update `citations/grammar-db.ts` for listed and unlisted LEXIS courts
+  - [x] 5.48 Update `citations/grammar-db.ts` for listed and unlisted LEXIS courts
     - Depends on 5.47 and on the regenerated `lexis-courts.json`.
     - The court starts one space after the year and runs to the first `LEXIS` token. Fail if any court token is a year in 1600–2999. Then try `lookupLexisCourt` (exact, then collapsed) for `lexisCourtListed: true` with the list entry, else `isUnlistedLexisCourt` for `lexisCourtListed: false` with the court as written, else fail. Keep every read inside `[p − 2, p + 140)`.
     - Add the design's named example tests to `test/grammar-db.test.ts` and `test/extract.test.ts`: `under 42 U.S.C. § 1983 and the court in 2023 U.S. Dist. LEXIS 5` keeps the Other_Reference and starts the Database_Citation at `2023`, and `Smith v. Local 2092 Union, 2023 U.S. Dist. LEXIS 5` starts it at `2023`; also the near-miss, unlisted, and rejected-court examples.
