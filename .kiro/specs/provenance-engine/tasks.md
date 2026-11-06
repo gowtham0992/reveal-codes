@@ -461,13 +461,13 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Add the design's named example tests to `test/grammar-db.test.ts` and `test/extract.test.ts`: `under 42 U.S.C. § 1983 and the court in 2023 U.S. Dist. LEXIS 5` keeps the Other_Reference and starts the Database_Citation at `2023`, and `Smith v. Local 2092 Union, 2023 U.S. Dist. LEXIS 5` starts it at `2023`; also the near-miss, unlisted, and rejected-court examples.
     - Per design A9 step 2 and D22.
     - _Requirements: 9.4, 9.7, 11.2, 11.3, 14.8_
-  - [ ] 5.49 Update the citation arbitraries for LEXIS courts
+  - [x] 5.49 Update the citation arbitraries for LEXIS courts
     - Depends on 5.47 and 5.48, and on the regenerated `lexis-courts.json`.
     - `arb-citation.ts`: add `arbLexisCourt` and `arbDatabaseValue` (listed courts from `LEXIS_COURTS`, unlisted courts under the tight rule and filtered against both indexes, equal weight), and use them in `arbCitation`.
     - `arb-citation-corrupt.ts`: `arbValueCorruption` gains the `lexisCourtListed` and `lexisCourt`-consistency corruptions from the design's Arbitraries table, each with its expected field.
     - `arb-text-citations.ts` and `arb-text-builder.ts`: remove the `\n`-before-LEXIS workaround from `putFull` and from the module comment, so a LEXIS fragment is joined like any other.
     - _Requirements: 22.1, 22.4_
-  - [ ] 5.50 Re-run Properties 21 and 22 and the 5.20 preview test against the LEXIS changes
+  - [-] 5.50 Re-run Properties 21 and 22 and the 5.20 preview test against the LEXIS changes
     - Depends on 5.47 to 5.49 and on the regenerated `lexis-courts.json`.
     - Update the Property 21 and Property 22 statements in `test/format.properties.test.ts` to the design's new wording (round trip keeps `lexisCourtListed`; corruptions of the flag and court consistency). Do not add a second `fc.assert` for either property.
     - Re-run `test/arb-text-citations.test.ts` ("the constructed Extraction equals extract(text)") with the workaround removed.

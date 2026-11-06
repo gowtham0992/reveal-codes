@@ -832,6 +832,25 @@
         "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
         "timestamp": 1793927471503
       }
+    ],
+    "5.49 Update the citation arbitraries for LEXIS courts": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793927472311
+      },
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793927846270
+      }
+    ],
+    "5.50 Re-run Properties 21 and 22 and the 5.20 preview test against the LEXIS changes": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793927845341
+      }
     ]
   }
 }
