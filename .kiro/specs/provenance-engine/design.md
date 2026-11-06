@@ -1023,8 +1023,8 @@ For any value of each arbitrary:
 **Validates: Requirements 22.4**
 
 ### Property 44: Boundary counting agrees with the Segmenter's Sentences
-For any `arbTextWithCitations` or `arbText` string `t` and any Offsets `0 ≤ x < y < t.length` from `arbOffsetPair(t)`, let `cits = extract(t).citations` and `S = segment(t, oneSpan(t))`. Then `countBoundaries(t, x, y, cits, ∞)` equals `sentenceIndex(S, y) − sentenceIndex(S, x)`. So the preceding-rule test (`≤ 1`) holds exactly when `x` and `y` are in the same or adjacent Sentences, and the following-rule test (`= 0`) holds exactly when they are in the same Sentence. The test computes `sentenceIndex` by scanning `S`. [extract]
-Arbitraries: `arbTextWithCitations`, `arbText`, `arbOffsetPair`.
+For any `arbBoundaryText` or `arbText` string `t` and any Offsets `0 ≤ x < y < t.length` from `arbOffsetPair(t)`, let `cits = extract(t).citations` and `S = segment(t, oneSpan(t))`. Then `countBoundaries(t, x, y, cits, ∞)` equals `sentenceIndex(S, y) − sentenceIndex(S, x)`. So the preceding-rule test (`≤ 1`) holds exactly when `x` and `y` are in the same or adjacent Sentences, and the following-rule test (`= 0`) holds exactly when they are in the same Sentence. The test computes `sentenceIndex` by scanning `S`. [extract]
+Arbitraries: `arbBoundaryText` (`src/testing/arb-boundary-text.ts`, built on `arbTextWithCitations` with `arbAbbreviationProse`, `arbReporterAbbreviationProse`, and `arbInitialProse` pieces spliced in) and `arbText`, weighted 3:1, then `arbOffsetPair(t)`. A cap `k` from 1 to 3 is drawn with each case, and the test also checks the cap: `countBoundaries(t, x, y, cits, k)` equals `min(sentenceIndex(S, y) − sentenceIndex(S, x), k)`.
 **Validates: Requirements 13.1, 13.8**
 
 ### Property 45: Case_Name and Gap_Signal gaps attach, and `In`, `with`, doubled-signal, or over-long gaps do not
