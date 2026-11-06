@@ -21,7 +21,7 @@ Design goals, in priority order:
 | `[DOC]` header | `[DOC{v=1;n=<counter>;r=<runId>,<orig>,<edited>,<0\|1>;r=…}]`, Runs sorted by Run_Id in UTF-16 order. |
 | Issue_Key format | `k<n>`, where `<n>` is the decimal Issue_Key_Counter value with no leading zeros (`k0`, `k17`). |
 | Inverse | `{ kind: "inverse", expect, restore }`: a reference to the post-operation Document plus a text patch and the pre-operation arrays (shared, not copied). Staleness is a structural comparison with a reference-equality fast path. No hash is used, so detection is exact. |
-| Replace | Executed internally as Delete then Insert, with one combined Inverse. This makes Req 4.6's equality (including Issue_Keys and the counter) hold by construction and agrees with Req 6.9 (see "Replace composition" below). |
+| Replace | Text, Spans, and Run table are built as Delete then Insert, relabelled once after both counts (Req 6.9). The citation layer is re-anchored once against the original Document with the combined Edit `[from, to) → [from, from + text.length)`. One combined Inverse. See "Replace composition" below. |
 | Re-extraction | A windowed incremental rescan of the citation layer with a resynchronisation proof, followed by global but cheap passes for quote pairing, attachment, and Short_Form linking. Property 25 asserts that the result equals full extraction. |
 | Reporter list | `src/citations/reporters.json` (a JSON array of strings in reporters-db order) is a static import. Exact and near-miss indexes are built from it once at module load. The generation script lives at `packages/engine/scripts/generate-reporters.ts` and runs offline against a local reporters-db checkout. |
 | Benchmark | `packages/engine/bench/` holds a vitest file under its own config. It is run only by `pnpm --filter @reveal-codes/engine bench` and is excluded from `pnpm test`, `pnpm test:pbt`, and CI. |
@@ -123,7 +123,7 @@ src/
   ops/splice.ts            spliceText, spliceSpans, effectiveProvenance (220)
   ops/insert.ts            applyInsert (pipeline for one insert) (120)
   ops/delete.ts            applyDelete (120)
-  ops/replace.ts           applyReplace = delete ∘ insert with merged inverse (60)
+  ops/replace.ts           applyReplace = delete ∘ insert drafts, one re-anchor, merged inverse (70)
   ops/inverse.ts           makeInverse, applyInverse, redo (120)
   relabel.ts               countDeleted, countInserted, relabelRuns, addOriginalLength (200)
   anchor.ts                reanchor (Req 15), assignKeys; no longer holds reanchorStage (250)
@@ -447,7 +447,7 @@ Validation order: timestamp, then surrogate. Req 2 does not fix an order; this c
 
 #### A3. Insert and Delete pipeline (Req 4, 6, 15)
 
-Shared steps for one primitive edit `[from, oldTo) → text` (Insert has `from = oldTo = at`; Delete has `text = ""`):
+Shared steps for one edit `[from, oldTo) → text` (Insert has `from = oldTo = at`; Delete has `text = ""`; a Replace runs steps 1 to 4 and 6 for its delete and then for its insert, and steps 5 and 7 once, A4):
 
 1. **Effective provenance (Req 6.11).** If the origin is `AI` and the run `r` has `relabelled: true`, use origin `AI>HUM`.
 2. **Span splice (Req 4.1–4.5, 4.11, 4.12).** Binary-search the spans that hold `from` and `oldTo`. Keep the pieces left of `from` and right of `oldTo`, cutting partial spans. The pieces keep their Provenance_Record, including the Timestamp. Shift the right pieces by `delta`. Insert the new piece. Record the deleted pieces. Because the input is canonical, merging can only happen at the two seams around the edit (left piece with the new piece, and the new piece or left piece with the right piece), so `mergeSeams` runs in O(1) at those indices and keeps the lowest-start Timestamp. Req 4.12 (insert inside a Mergeable span) falls out: cut, new piece, and cut all merge, keeping the left cut's Timestamp.
@@ -455,18 +455,20 @@ Shared steps for one primitive edit `[from, oldTo) → text` (Insert has `from =
 4. **Edited counts (Req 6.1, 6.2, 6.7).** Only when the actor is `HUM`. For deletions, sum the deleted pieces with origin `AI` by Run_Id. For insertions, compute `runExtents` on the spans *before* the insertion (for a Delete there is no insertion). Each run with `runStart < at < runEnd` gets `+text.length`. `runExtents` is O(spans).
 5. **Relabel (Req 6.3, 6.4, 6.8).** For each entry with `!relabelled && editedCount / originalLength > threshold`, set `relabelled: true` and rewrite that run's spans to `AI>HUM`, keeping Timestamps and Offsets. Then run full `normaliseSpans`, which is O(spans) and happens only in this rare path. A relabelled flag is never cleared by a forward op.
 6. **Text splice.** `text.slice(0, from) + inserted + text.slice(oldTo)`.
-7. **Re-extraction (A5)**, then **re-anchoring (A6)**.
+7. **Re-extraction (A5)**, then **re-anchoring (A6)**, against the Document before the Operation with the Operation's Edit `[from, oldTo) → [from, newTo)`. For a Replace this is the combined Edit `[from, to) → [from, from + text.length)`.
 8. **Inverse (A7).**
 
 Edited counts follow Req 6.1 literally: deletions count only from `AI`-origin spans, and insertions count against every Run_Extent. Once a run is relabelled its count keeps growing harmlessly. The flag is sticky, so the extra count never changes behaviour.
 
-#### A4. Replace composition (Req 4.6, 6.9, 15.4)
+#### A4. Replace composition (Req 4.6, 6.9, 15.3, 15.4)
 
-`applyReplace(doc, from, to, text, prov)` = `applyDelete(doc, from, to, prov.origin)` followed by `applyInsert(d1, from, text, prov)`, with relabel decisions deferred:
+`applyReplace(doc, from, to, text, prov)` builds one draft and settles it once:
 
-- Step 5 (relabel) runs once, after both counts (Req 6.9). This gives the same result as running it after each step, for two reasons: counts only increase, and the flag is sticky, so every run that crosses after the delete also crosses after both. Insertions under `HUM` or `PST` never create `AI` spans, so relabelling earlier would not change what is inserted. An `AI` Replace adds no edited counts at all (actor `AI`, Req 6.7). Property 7 asserts full structural equality with the sequential composition.
-- Re-extraction and re-anchoring run after the delete and again after the insert. A citation touched by the delete is reset and gets a new key, and the insert's re-anchor sees the reset citation, so it gets another fresh key. Doing exactly what the sequential composition does is the only way to make Req 4.6's equality hold for Issue_Keys and `keyCounter`. Req 15.4's "even when the Replace writes identical text" holds because the delete step touches the citation.
-- One Inverse is returned, with `expect` set to the final document and `restore` set to the original document.
+- **Draft.** `deleteDraft(doc, from, to, prov.origin)` and then `insertDraft(·, from, text, prov)` give the Text, Spans, and Run table that Delete followed by Insert would give. The insert's edited counts use the post-delete spans (Req 6.9, Property 11). Neither half re-anchors, so no intermediate Document exists.
+- **Relabel.** Step 5 runs once, after both counts (Req 6.9). This gives the same Text, Spans, and Run table as running it after each step, for two reasons: counts only increase, and the flag is sticky, so every run that crosses after the delete also crosses after both. Insertions under `HUM` or `PST` never create `AI` spans, so relabelling earlier would not change what is inserted. An `AI` Replace adds no edited counts at all (actor `AI`, Req 6.7). Property 7 asserts this equality.
+- **Re-anchor.** Step 7 runs once, with `prev = doc` and the combined Edit `{ from, oldTo: to, newTo: from + text.length }`. `rescan` (A5) and `mapRange` (A6) take a general Edit, so nothing is special-cased. A citation whose range the combined Edit touches under Req 15.3 is reset and gets exactly one fresh key, so a Replace issues no key that no item keeps (Property 27). Req 15.4's "even when the Replace writes identical text" holds because the combined Edit shares a code unit with the citation. A Replace adjacent to a citation (its `[from, to)` ends at `start` or begins at `end`) leaves the citation untouched, so it keeps its key, result, and Override even when the Text after the delete alone would not extract it. Property 7 asserts that the layer equals this single re-anchor.
+- With empty `text` the Replace is the Delete alone, and with `from == to` the Insert alone (Req 4.6). The combined Edit then equals that primitive's Edit.
+- One Inverse is returned, with `expect` set to the final document and `restore` set to the original document (A7). It restores Issue_Keys, results, Overrides, and `keyCounter` from that snapshot, so it does not depend on how the layer was derived (Property 8).
 
 #### A5. Incremental re-extraction (Req 15.1, 21)
 
@@ -496,9 +498,9 @@ Window cost: at most `LOOKAHEAD + edit length + LOOKBEHIND + 2 × MAX_MATCH` pos
 
 #### A6. Re-anchoring and Issue_Key assignment (Req 15, glossary)
 
-Inputs: the previous Document P, the new extraction E on the new text, and the primitive edit with its `delta`.
+Inputs: the previous Document P, the new extraction E on the new text, and the Operation's edit (for a Replace, its combined Edit, A4) with its `delta`.
 
-1. `mapRange([s, e))` returns the mapped range if the previous range is untouched under Req 15.3, else `null`. For an Insert: untouched if `at ≤ s || at ≥ e`. For a Delete: untouched if `to ≤ s || from ≥ e`. Untouched ranges at or after the edit point are shifted by `delta`.
+1. `mapRange([s, e))` returns the mapped range if the previous range is untouched under Req 15.3, else `null`. For an Insert: untouched if `at ≤ s || at ≥ e`. For a Delete, and for a Replace's combined Edit with `from < to`: untouched if `to ≤ s || from ≥ e`. Untouched ranges at or after the edit point are shifted by `delta`.
 2. Index the previous Full_Citations by mapped start: `Map<number, CitationRecord>`, including only records with untouched ranges.
 3. **Full_Citations.** A new Full_Citation is carried over when the index has an entry at its start with equal `end`, equal `text`, a structurally equal `value`, and an equal `normalised`. It keeps `key`, `result`, and Override. Otherwise it is reset: `unchecked`, a new key, and no Override.
 4. **Short_Forms.** Carried over when the Full_Citation rule holds with the value compared field by field, except `targetStart`. For `targetStart`, both must be `null`, or the new target must be the carried-over image of the old target (same key after step 3). Otherwise the Short_Form gets a new key. Short_Forms carry no result.
@@ -763,9 +765,14 @@ For any valid span list corrupted by `arbSpanCorruption`, which applies one of: 
 For any `arbDocument` `d` and any single `arbCallerInsertOrDelete(d)` (including empty ones), the new Text equals the string splice, and the (Origin, Run_Id, Timestamp) at every Offset equals the reference model. The model splices an array of per-unit pieces, gives the inserted piece the effective provenance, and assigns each maximal Mergeable run the Timestamp of its lowest-start piece. An empty op returns a Document equal to `d`. [ops]
 **Validates: Requirements 4.1, 4.2, 4.3, 4.4, 4.5, 4.7, 4.11, 4.12**
 
-### Property 7: Replace equals Delete followed by Insert
-For any `arbDocument` `d` and any `arbReplace(d)` `R(from, to, text, p)`, `apply(d, R).document` equals `apply(apply(d, Delete(from, to, p.origin)).document, Insert(from, text, p)).document`, including Run table, Issue_Keys, Overrides, and `keyCounter`. [ops]
-**Validates: Requirements 4.6, 6.9**
+### Property 7: Replace equals Delete followed by Insert in Text, Spans, and Run table, and re-anchors once
+For any `arbDocument` `d` and any `arbReplace(d)` `R(from, to, text, p)`, with `n = apply(d, R).document` and `s = apply(apply(d, Delete(from, to, p.origin)).document, Insert(from, text, p)).document`:
+- `n` has the Text, Spans (Timestamps included), and Run table of `s`.
+- Unless `R` is a no-op under Req 4.7, `n`'s citation layer (Citations, Quote_Candidates, results, Issue_Keys, Overrides, `keyCounter`) equals `reanchorStage({ prev: d, draft, edit })`, where `draft` holds `n`'s Text, Spans, and Run table and `edit = { from, oldTo: to, newTo: from + text.length }`. A no-op returns `d`.
+- Applying `R`'s one Inverse to `n` returns a Document equal to `d`.
+
+The re-anchor assertion belongs here rather than in Property 27 because it states how a Replace relates to its parts, which is what this property is about. Property 27 states key freshness and order for every Operation, and holds for a Replace as a consequence. [ops]
+**Validates: Requirements 4.6, 6.9, 15.3**
 
 ### Property 8: Undo and redo restore documents exactly
 For any `arbDocument` `d` and any `arbOpSequence(d)` producing `d0 … dn` with Inverses `i1 … in`:
@@ -1138,6 +1145,10 @@ Check order where requirements leave it open:
   - Timestamp edge cases: `2024-02-29` valid, `2023-02-29` invalid, missing `Z` invalid (2.7).
   - The default threshold 0.4: a Run at exactly 40% is not relabelled, and one at 40% plus 1 unit is (6.10).
   - Delete-all keeps Runs (4.5).
+  - Replace re-anchors once over its combined Edit (4.6, 15.3, 15.4, A4, D6), in `test/citation-layer.test.ts`:
+    - `See 410 U.S. 113.` with `Replace(4, 5, "4")` (identical text inside the citation) touches the citation, which gets the one fresh key `k1`, and `keyCounter` becomes 2. No key is issued that no item keeps.
+    - `Ab 1 U.S. 2.` with its citation recorded as verified and `Replace(2, 3, " ")` (adjacent to the citation) keeps the citation's key `k0` and its verified result, and `keyCounter` stays 1, although `Ab1 U.S. 2.` alone extracts nothing.
+    - The Inverse of a Replace restores keys, results, Overrides, and `keyCounter`.
   - Format layouts from Req 10.2.
   - `Id.` after `42 U.S.C. § 1983` is an Orphan (12.6).
   - LEXIS court start (9.4, D22), in `test/grammar-db.test.ts` and `test/extract.test.ts`:
@@ -1242,7 +1253,7 @@ Check order where requirements leave it open:
 | Re-anchor | O(c + q) with a `Map` | ~20 µs |
 | Inverse | O(1) | — |
 
-Expected total: well under 1 ms, against the 5 ms median and 15 ms p95 limits. Replace runs the pipeline twice (A4), which stays within budget.
+Expected total: well under 1 ms, against the 5 ms median and 15 ms p95 limits. Replace runs the span, text, and count steps for both halves but extracts and re-anchors once (A4), so it costs about one Insert.
 
 **Rules that keep it there:**
 
@@ -1284,7 +1295,7 @@ D6 and D7 are design choices that the requirements permit. D9 to D11 are new wit
 - **D3. Court validity (10.1) is too weak for the round trip.** Courts such as `1999`, `x 2001`, `a  b`, or ones containing `"` cannot round-trip. The design tightens the court rule (A9), and `format` rejects such courts with `invalid_citation { field: "court" }`.
 - **D4. Garbage non-interference (11.3, third bullet) is false in general.** Replacing garbage in a quote-to-citation gap with spaces can create an attachment that did not exist before. A garbage string can also end in a real citation, for example `5 X 10 F.3d 20`. Property 24 restricts insertion to neutral positions and digit-free tokens. Its tokens also contain no word `Id.`, because a token holding a word the grammar can start a citation with on its own is not a Garbage_Citation (D24).
 - **D5. Short_Form carry-over (15.2a).** Link targets are compared through the edit mapping rather than as raw Offsets. Otherwise every Short_Form would reset on any edit before its target.
-- **D6. Replace is Delete then Insert internally (4.6).** This is the only way to satisfy Req 4.6's full equality, including Issue_Keys and the counter. A touched citation may therefore use two keys in one Replace.
+- **D6. Replace is one edit for the citation layer (4.6, 15.3).** Its Text, Spans, and Run table are built as Delete then Insert, but its citation layer is re-anchored once against the original Document with the combined Edit `[from, to) → [from, from + text.length)`. A touched citation gets one fresh key, never two. A citation adjacent to the replaced range keeps its key and result even when the delete alone would break its extraction: in `Ab 1 U.S. 2.`, `Replace(2, 3, " ")` keeps the citation, although `Ab1 U.S. 2.` extracts nothing.
 - **D7. `[CIT ?]` count syntax.** The design writes `[CIT ?:3]`, following the `:` convention of `[AI:<run>]`. product.md does not fix this syntax.
 - **D8. Other_Reference scope.** v1 recognises `U.S.C.`, `C.F.R.`, and Federal Rules. citations.md names "secondary sources" without forms, so law reviews are not recognised.
 - **D9. Legal_Abbreviation context inside a Party_Name.** The Glossary requires every `.` in a Party_Name to be one of the periods of a Legal_Abbreviation occurrence (including the inner periods of `L.L.C.`, `L.P.`, and `N.A.`) or of a Single_Capital_Initial, but does not say what may precede the abbreviation. The design requires the occurrence to start at the start of the Party_Name or after a space, matching Req 8.6, which uses start, whitespace, or `(`; `(` cannot occur in a Party_Name. So `Acme, L.L.C.` passes, and `AcmeL.L.C.` does not.

@@ -103,7 +103,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - _Requirements: 5.1, 5.3, 5.4, 5.5, 5.6, 5.7_
   - [x] 2.11 Implement `ops/insert.ts`, `ops/delete.ts`, and `ops/replace.ts`
     - The Insert and Delete pipeline follows design A3 steps 1 to 8 and calls `reanchorStage` at step 7.
-    - Replace runs Delete then Insert, evaluates relabelling once after both counts, and returns one combined Inverse (design A4).
+    - Replace builds its Text, Spans, and Run table as Delete then Insert, evaluates relabelling once after both counts, calls `reanchorStage` once with the combined edit, and returns one combined Inverse (design A4).
     - _Requirements: 4.1, 4.4, 4.6, 4.8, 6.9, 6.11_
   - [x] 2.12 Implement `apply` in `document.ts` and the `ops.ts` facade
     - The dispatcher validates config, routes Inverses, validates Caller_Operations, returns a no-op Document with an Inverse, then dispatches (design A2).
@@ -122,9 +122,10 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Validates: Requirements 4.1, 4.2, 4.3, 4.4, 4.5, 4.7, 4.11, 4.12**
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.7, 4.11, 4.12_
   - [x] 2.16 Write Property 7 in `test/ops.properties.test.ts`
-    - **Property 7: Replace equals Delete followed by Insert**
-    - **Validates: Requirements 4.6, 6.9**
-    - _Requirements: 4.6, 6.9_
+    - **Property 7: Replace equals Delete followed by Insert in Text, Spans, and Run table, and re-anchors once**
+    - The citation layer after a non-no-op Replace equals `reanchorStage({ prev: d, draft, edit })` with the combined edit `{ from, oldTo: to, newTo: from + text.length }`; one Inverse returns to `d`.
+    - **Validates: Requirements 4.6, 6.9, 15.3**
+    - _Requirements: 4.6, 6.9, 15.3_
   - [x] 2.17 Write Property 8 in `test/ops.properties.test.ts`
     - **Property 8: Undo and redo restore documents exactly**
     - **Validates: Requirements 4.7, 5.1, 5.3, 5.4, 5.5, 5.6**
@@ -423,7 +424,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
   - [x] 5.41 Wire the citation layer into `createDocument` and the operation pipeline
     - Replace `reanchorStage` with real stages. `createDocument` runs `extract` and then `assignKeys` with every result `unchecked` (design A1 step 4).
     - Insert and Delete run `rescan`, `linkShortForms`, `pairQuoteMarks` and `attachQuotes`, then `reanchor` (A3 step 7, A5).
-    - Replace re-extracts after both its delete and its insert step (A4).
+    - Replace re-extracts and re-anchors once, against the original Document, with the combined edit `[from, to) → [from, from + text.length)` (A4).
     - _Requirements: 2.3, 4.6, 15.1, 15.4_
   - [x] 5.42 Extend `src/testing/arb-ops.ts` and `src/testing/arb-document.ts`
     - `arbEdit(t)` biases edit positions into citation ranges, party names, and stop-list prefixes, up to `LOOKBEHIND` (162) code units before them, into Entity_Suffixes and the ` v. ` of a party, and into quote-to-citation gaps. It biases inserted text toward `arbStopListPrefix` values, Connectors, Capitalised_Words, `arbGapSignal` values, Entity_Suffixes (`, Inc.`, `, L.L.C.`), ` v. ` and `v. ` + a Capitalised_Word, `, `, and `; `.
@@ -441,6 +442,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - _Requirements: 15.1_
   - [ ] 5.45 Write Property 27 in `test/anchor.properties.test.ts`
     - **Property 27: Issue_Keys are fresh, unique, and assigned in document order**
+    - Holds for Replace because a Replace re-anchors once over its combined edit (A4), so it issues no key that no item keeps: `See 410 U.S. 113.` with `Replace(4, 5, "4")` gives the citation `k1` and `keyCounter` 2.
     - **Validates: Requirements 15.5, 15.7**
     - _Requirements: 15.5, 15.7_
   - [~] 5.46 Write Property 51 in `test/extract.properties.test.ts`
