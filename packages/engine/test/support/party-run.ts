@@ -24,14 +24,14 @@ import {
 import type { ExtractedCitation, FullValue, PartyValue } from "../../src/types";
 
 /** Glossary Legal_Abbreviation: the fixed list plus every Reporter_List entry. */
-const LEGAL_ABBREVIATIONS: ReadonlySet<string> = new Set([
+export const LEGAL_ABBREVIATIONS: ReadonlySet<string> = new Set([
   ...["Id.", "v.", "Inc.", "Corp.", "Ltd.", "Co.", "L.P.", "N.A.", "L.L.C."],
   ...["No.", "Cir.", "Dist.", "Ct.", "Fed.", "Supp.", "et al."],
   ...(reportersJson as readonly string[]),
 ]);
 
 /** Glossary Entity_Suffix words. */
-const SUFFIX_WORDS: ReadonlySet<string> = new Set([
+export const SUFFIX_WORDS: ReadonlySet<string> = new Set([
   "Inc.",
   "LLC",
   "L.L.C.",

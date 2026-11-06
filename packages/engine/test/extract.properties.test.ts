@@ -20,6 +20,15 @@ import {
   expectExactSortedDisjoint,
   expectQuoteWellFormed,
 } from "./support/offsets";
+import { modelParty, windowAgrees } from "./support/party-model";
+import {
+  arbP50Input,
+  expectModelParty,
+  p50Before,
+  p50Input,
+  p50Text,
+  partyForms,
+} from "./support/party-model-case";
 import { arbP49Input, expectPartyForms, isPartyRunRef } from "./support/party-run";
 import { modelQuotes } from "./support/quote-model";
 import { arbNoisyText, shifted } from "./support/quote-noise";
@@ -195,6 +204,63 @@ describe("extract party Short_Forms _Requirements: 9.2, 12.2, 12.8_", () => {
     fc.assert(
       fc.property(arbP49Input, (input) => {
         expectPartyForms(input.t);
+      }),
+      runs(),
+    );
+  });
+});
+
+describe("extract party reference model _Requirements: 9.2, 12.2_", () => {
+  const F = { kind: "reporter", volume: 5, reporter: "U.S.", page: 1, year: 1801 } as const;
+  const at = (l: string, x: string, r: string): ReturnType<typeof p50Input> =>
+    p50Input(F, l, x, r, 9);
+  const P76 = `${"Abcdefghi ".repeat(7)}Abcdef`;
+  const R81 = `${"Abcdefghi ".repeat(8)}A`;
+
+  it("rare branches: leading Connectors after a stop entry, `ex rel.`, `v.` left first", () => {
+    const party = (l: string, x: string, r: string): string | null => {
+      const m = expectModelParty(at(l, x, r));
+      return m.kind === "party" ? m.party : null;
+    };
+    expect(party("", "In the ", "Matter of Smith")).toBe("Matter of Smith");
+    expect(party("held ", "See In ", "United States ex rel. Smith")).toBe(
+      "United States ex rel. Smith",
+    );
+    expect(party("(", "In ex rel. ", "Smith")).toBe("Smith");
+    expect(party("", "Under the ", "Acme, Inc. v. Smith, LLC")).toBe("Acme, Inc. v. Smith, LLC");
+    expect(modelParty(p50Before(at("", "In ", "v. Wade")))).toMatchObject({ kind: "not_run" });
+    expect(party("", "In ", "v. Wade")).toBeNull();
+  });
+
+  it("window edges: 80 and 81 code units, and the D17 read window", () => {
+    const p80 = `${"Abcdefghi ".repeat(6)}Abcdefghi, Inc. v. A`;
+    expect(expectModelParty(at("held ", "", p80))).toMatchObject({ kind: "party", party: p80 });
+    expect(expectModelParty(at("held ", "", `${p80}x`))).toMatchObject({ kind: "too_long" });
+    expect(expectModelParty(at("extensively ", "", P76))).toMatchObject({ party: P76 });
+    // An over-long run whose first start past 80 has its predecessor at the window edge.
+    const edge = at("", "", `A${"b".repeat(78)} ${R81}`);
+    expect(windowAgrees(p50Before(edge), expectModelParty(edge))).toBe(true);
+    // One code unit further the model's guard refuses, though the engine still agrees.
+    const out = at("", "", `A${"b".repeat(79)} ${R81}`);
+    const m = modelParty(p50Before(out));
+    expect([m.kind, windowAgrees(p50Before(out), m), partyForms(p50Text(out))]).toEqual([
+      "too_long",
+      false,
+      [],
+    ]);
+    // D17: a 90-code-unit word starts outside the window, so the engine keeps the party.
+    const d17 = at(`A${"b".repeat(89)} `, "", P76);
+    const md17 = modelParty(p50Before(d17));
+    expect([md17.kind, windowAgrees(p50Before(d17), md17)]).toEqual(["too_long", false]);
+    const start = p50Text(d17).length - d17.tail.length - P76.length;
+    expect(partyForms(p50Text(d17))).toEqual([[start, P76, 0]]);
+  });
+
+  // Property 50
+  it("Property 50: the party is the longest Party_Run with stop-list entries and Connectors stripped", () => {
+    fc.assert(
+      fc.property(arbP50Input, (input) => {
+        expectModelParty(input);
       }),
       runs(),
     );
