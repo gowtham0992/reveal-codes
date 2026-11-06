@@ -178,10 +178,13 @@ function refAbbreviationEnds(text: string, i: number): boolean {
   });
 }
 
-/** Reference Glossary Capitalised_Word. */
+/** The Legal_Abbreviations ending in `.`, the abbreviation part of a Capitalised_Word. */
+const PERIOD_ABBREVIATION_SET: ReadonlySet<string> = new Set(PERIOD_ABBREVIATIONS);
+
+/** Reference Glossary Capitalised_Word: its abbreviation part ends in `.` and is not `v.`. */
 function refIsCapitalisedWord(word: string): boolean {
   if (/^\p{Lu}[\p{L}0-9'’-]*$/u.test(word) || /^[A-Z]\.$/.test(word)) return true;
-  return word !== "v." && ALL_ABBREVIATIONS.has(word);
+  return word !== "v." && PERIOD_ABBREVIATION_SET.has(word);
 }
 
 const W_RUN = /[\p{L}0-9.'’-]*/uy;

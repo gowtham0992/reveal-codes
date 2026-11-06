@@ -240,6 +240,12 @@ describe("Single_Capital_Initial exclusion _Requirements: 8.10_", () => {
     expect(isInitialBeforeCapitalisedWord("Plan B. Idaho", 6)).toBe(true);
     expect(isInitialBeforeCapitalisedWord("Plan B. Inc. x", 6)).toBe(true);
   });
+
+  it("splits `Exhibit J. F.3d at 5` before `F.3d`, a reporter entry not ending in `.`", () => {
+    expect(isInitialBeforeCapitalisedWord("Exhibit J. F.3d at 5", 9)).toBe(false);
+    expect(boundariesOf("Exhibit J. F.3d at 5")).toEqual([11]);
+    expect(sentencesOf("Exhibit J. F.3d at 5")).toEqual(["Exhibit J. ", "F.3d at 5"]);
+  });
 });
 
 describe("text with no terminator _Requirements: 8.4_", () => {
