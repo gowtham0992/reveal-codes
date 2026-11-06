@@ -838,6 +838,8 @@ For any `arbTextWithCitations` value `(t, expected)`, `extract(t)` equals `expec
 - Citations: reporter, parallel, database, Short_Form (`Id.`, `Id. at`, party, with and without an `arbStopListPrefix` before the party, with and without ` v. ` and Entity_Suffixes in the party), Orphan (including `Id.` after an Other_Reference or an Orphan), and Other_Reference.
 - Attached quotes: Preceding_Quotes in the same and in the next Sentence, with and without a Case_Name in the gap, with and without a Gap_Signal in the gap (every Gap_Signal, capitalised and lowercase-first, including `(quoting …)` parentheticals); Following_Quotes in `("…")` and `: "…"` forms; pairs that satisfy both rules; citations carrying several quotes.
 - Pairs that attach to nothing: a gap spanning two boundaries, `In` before a party Short_Form, `with` before a Case_Name, two Gap_Signals, and a Party_Name over 80 code units.
+
+After the run, the test checks that the checked values covered the cases it records (party Short_Forms with and without ` v. ` and Entity_Suffixes, every Gap_Signal attached, `(quoting …)` attached, and each attach-to-nothing case seen and never attached). So that this coverage clause holds on every run, not only for most seeds, 400 seeded coverage examples (`fc.sample(arbTextWithCitations, { numRuns: 400, seed: 518 })`) are passed as fast-check `examples` and run before the random runs. fast-check counts examples inside `numRuns`, so `numRuns` is `runs().numRuns` plus their count, and every run still makes `runs()` random runs.
 [extract]
 **Validates: Requirements 9.1, 9.3, 9.4, 9.5, 9.6, 12.1, 12.2, 12.3, 12.6, 12.7, 13.1, 13.5, 13.7, 13.8, 13.9**
 

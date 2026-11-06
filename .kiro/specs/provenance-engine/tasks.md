@@ -314,6 +314,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
   - [x] 5.22 Write Property 18 in `test/extract.properties.test.ts`
     - **Property 18: Extraction finds exactly the constructed citations, links, and quotes**
     - Covers party Short_Forms with and without ` v. ` and Entity_Suffixes, Preceding_Quotes with every Gap_Signal in both cases (including `(quoting …)`), and the unattached `In`, `with`, two-Gap_Signal, and over-80 cases.
+    - 400 seeded coverage examples run as fast-check `examples` before the `runs()` random runs (`numRuns` raised by their count), so the coverage clause holds on every run.
     - **Validates: Requirements 9.1, 9.3, 9.4, 9.5, 9.6, 12.1, 12.2, 12.3, 12.6, 12.7, 13.1, 13.5, 13.7, 13.8, 13.9**
     - _Requirements: 9.1, 9.3, 9.4, 9.5, 9.6, 12.1, 12.2, 12.3, 12.6, 12.7, 13.1, 13.5, 13.7, 13.8, 13.9_
   - [x] 5.23 Write Property 19 in `test/extract.properties.test.ts`
