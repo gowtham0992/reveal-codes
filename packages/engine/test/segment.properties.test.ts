@@ -5,6 +5,7 @@ import { isBoundaryAt, type CitationRange } from "../src/boundary";
 import { extract } from "../src/citations/extract";
 import { REPORTERS } from "../src/citations/reporters";
 import { segment, segmentWith } from "../src/segment";
+import type { InitialOccurrence } from "../src/testing/arb-initial-prose";
 import {
   arbBoundaryText,
   arbCitationRanges,
@@ -214,36 +215,98 @@ const arbBoundaryInput = arbBoundaryText.chain((input) =>
   arbTieProneFragmentation(input.text).map((spans) => ({ ...input, spans })),
 );
 
+type BoundaryInput = typeof arbBoundaryInput extends fc.Arbitrary<infer T> ? T : never;
+
+/** Property 15's check of one input against `refBoundaries` and the recorded occurrences. */
+function checkBoundaries({ text, spans, abbreviations, initials }: BoundaryInput): void {
+  const result = segment(text, spans);
+  expect(result.ok).toBe(true);
+  if (!result.ok) return;
+  const cits = extract(text).citations;
+  const interior = result.value.slice(1).map((s) => s.start);
+  const expected = refBoundaries(text, cits);
+  expect(interior).toEqual(expected);
+  if (text.length > 0 && expected.length === 0) expect(result.value).toHaveLength(1);
+  const found = new Set(interior);
+  for (const c of cits) expect(interior.filter((b) => c.start < b && b < c.end)).toEqual([]);
+  for (const a of abbreviations) {
+    expect(text.slice(a.start, a.end)).toBe(a.abbreviation);
+    expect(found.has(a.end + 1)).toBe(false);
+  }
+  for (const o of initials) {
+    expect(text.charAt(o.dot)).toBe(".");
+    // An initial's label is set inside its spliced piece; a Citation (Req 8.5) or a
+    // Legal_Abbreviation (Req 8.6) formed with the surrounding text still excludes it.
+    const splits = o.splits && !strictlyInside(o.after, cits) && !refAbbreviationEnds(text, o.dot);
+    expect({ kind: o.kind, after: o.after, boundary: found.has(o.after) }).toEqual({
+      kind: o.kind,
+      after: o.after,
+      boundary: splits,
+    });
+  }
+}
+
+/**
+ * Shrunk Property 15 counterexamples (seeds -2112387698, -723280868,
+ * 409568589): a spliced initial labelled as splitting whose `.` also ends a
+ * multi-word Reporter_List entry begun by the base text before it, so Req 8.6
+ * excludes the boundary. The shrunk span lists are replaced by one HUM span;
+ * the boundaries do not depend on spans.
+ */
+const initialExample = (
+  text: string,
+  kind: InitialOccurrence["kind"],
+  dot: number,
+  after: number,
+): BoundaryInput => ({
+  text,
+  abbreviations: [],
+  initials: [{ kind, dot, after, splits: true }],
+  spans: [
+    {
+      start: 0,
+      end: text.length,
+      provenance: { origin: "HUM", timestamp: "0000-01-01T00:00:00Z" },
+    },
+  ],
+});
+
+const INITIAL_COMPLETES_REPORTER: readonly (readonly [string, BoundaryInput])[] = [
+  ["N.Y. Civ. Proc. R.", initialExample("1 N.Y. Civ. Proc. R.  A R. 1", "twoSpaces", 19, 22)],
+  [
+    "Pa. C.",
+    initialExample(
+      "1600 Ala. App. LEXIS 1 held 1600 Ala. App. LEXIS 1, at *1 held held See & See & A B. A, Inc. v. A A, 1 Pa. C. v. A D. & C. at 1",
+      "vee",
+      108,
+      110,
+    ),
+  ],
+  [
+    "Adv. S.",
+    initialExample("1 Ariz. Adv. S.\nA Rep. 1, 1 (D. D. 1600) held held", "newline", 14, 16),
+  ],
+];
+
 describe("segment boundaries _Requirements: 8.3, 8.4, 8.5, 8.6, 8.10_", () => {
   // Property 15
-  it("Property 15: Sentence boundaries are exactly the rule's positions", () => {
-    fc.assert(
-      fc.property(arbBoundaryInput, ({ text, spans, abbreviations, initials }) => {
-        const result = segment(text, spans);
-        expect(result.ok).toBe(true);
-        if (!result.ok) return;
-        const cits = extract(text).citations;
-        const interior = result.value.slice(1).map((s) => s.start);
-        const expected = refBoundaries(text, cits);
-        expect(interior).toEqual(expected);
-        if (text.length > 0 && expected.length === 0) expect(result.value).toHaveLength(1);
-        const found = new Set(interior);
-        for (const c of cits) expect(interior.filter((b) => c.start < b && b < c.end)).toEqual([]);
-        for (const a of abbreviations) {
-          expect(text.slice(a.start, a.end)).toBe(a.abbreviation);
-          expect(found.has(a.end + 1)).toBe(false);
-        }
-        for (const o of initials) {
-          expect(text.charAt(o.dot)).toBe(".");
-          const splits = o.splits && !strictlyInside(o.after, cits);
-          expect({ kind: o.kind, after: o.after, boundary: found.has(o.after) }).toEqual({
-            kind: o.kind,
-            after: o.after,
-            boundary: splits,
-          });
-        }
-      }),
-      runs(),
-    );
-  });
+  // 500 runs take 0.85-1.2 s idle and 5.1-6.9 s with the CPU 2x oversubscribed,
+  // past vitest's 5 s default, which a synchronous test only checks once it returns.
+  // 60 s is about 9x the loaded worst case and covers a 52.7 s run seen under load.
+  it(
+    "Property 15: Sentence boundaries are exactly the rule's positions",
+    { timeout: 60_000 },
+    () => {
+      fc.assert(fc.property(arbBoundaryInput, checkBoundaries), runs());
+    },
+  );
+
+  it.each(INITIAL_COMPLETES_REPORTER)(
+    "Property 15 example: an initial completing %s has no boundary after it",
+    (_name, input) => {
+      checkBoundaries(input);
+      const result = segment(input.text, input.spans);
+      expect(result.ok && result.value.map((s) => s.start)).not.toContain(input.initials[0]?.after);
+    },
+  );
 });
