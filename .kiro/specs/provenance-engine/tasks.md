@@ -335,12 +335,12 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Uses `arbQuoteContent`, `arbCaseName`, `arbGapPunct`, `arbGapSignal`, `arbCitation`, `arbShortFormParty`, and `arbLongParty`.
     - **Validates: Requirements 13.1, 13.9**
     - _Requirements: 13.1, 13.9_
-  - [-] 5.27 Write Property 46 in `test/extract.properties.test.ts`
+  - [x] 5.27 Write Property 46 in `test/extract.properties.test.ts`
     - **Property 46: Following quotes attach to the citation before them in the same Sentence**
     - Also asserts that inserting `s + " "` for any `arbGapSignal` `s` into the following gap leaves no quote.
     - **Validates: Requirements 13.8, 13.9**
     - _Requirements: 13.8, 13.9_
-  - [~] 5.28 Write Property 47 in `test/extract.properties.test.ts`
+  - [-] 5.28 Write Property 47 in `test/extract.properties.test.ts`
     - **Property 47: The preceding rule wins, and one citation can carry several quotes**
     - **Validates: Requirements 13.5, 13.7**
     - _Requirements: 13.5, 13.7_
