@@ -467,7 +467,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `arb-citation-corrupt.ts`: `arbValueCorruption` gains the `lexisCourtListed` and `lexisCourt`-consistency corruptions from the design's Arbitraries table, each with its expected field.
     - `arb-text-citations.ts` and `arb-text-builder.ts`: remove the `\n`-before-LEXIS workaround from `putFull` and from the module comment, so a LEXIS fragment is joined like any other.
     - _Requirements: 22.1, 22.4_
-  - [-] 5.50 Re-run Properties 21 and 22 and the 5.20 preview test against the LEXIS changes
+  - [x] 5.50 Re-run Properties 21 and 22 and the 5.20 preview test against the LEXIS changes
     - Depends on 5.47 to 5.49 and on the regenerated `lexis-courts.json`.
     - Update the Property 21 and Property 22 statements in `test/format.properties.test.ts` to the design's new wording (round trip keeps `lexisCourtListed`; corruptions of the flag and court consistency). Do not add a second `fc.assert` for either property.
     - Re-run `test/arb-text-citations.test.ts` ("the constructed Extraction equals extract(text)") with the workaround removed.
