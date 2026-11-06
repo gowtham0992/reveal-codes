@@ -838,7 +838,16 @@ For any `arbTextWithCitations` value `(t, expected)`, `extract(t)` equals `expec
 **Validates: Requirements 9.1, 9.3, 9.4, 9.5, 9.6, 12.1, 12.2, 12.3, 12.6, 12.7, 13.1, 13.5, 13.7, 13.8, 13.9**
 
 ### Property 19: Citations glued to letters or digits are not extracted
-For any `arbCitation` string `s` and any letter or digit `x`, `extract(x + s)` and `extract(s + x)` contain no citation starting at `s`'s first volume, or ending at `s`'s last page or number digit, respectively. [extract]
+For any candidate citation string `s` and any letter or digit `x`, where `s` is drawn from four candidate families:
+- the Canonical_Form `format(v)` of an `arbCitation` value `v`;
+- a Near_Miss from `arbNearMissCitation`;
+- an Other_Reference from `arbOtherReference` (`<title> U.S.C. § <section>`, `<title> C.F.R. § <section>`, or `Fed. R. …`, the section possibly followed by subdivisions such as `(b)(6)`);
+- a Short_Form, either `Id. at <n>` or a party Short_Form `<party>, <volume> <reporter> at <n>`;
+
+the test first checks that `extract(s)` is exactly one citation covering `s`, and then checks the sides that Req 9.8 covers for that family:
+- **Left glue.** `extract(x + s)` contains no citation starting at Offset `x.length`. This applies to Canonical_Forms and Near_Misses (whose first code unit is the first volume or year digit) and to an Other_Reference only when its title is its first code unit (`U.S.C.` and `C.F.R.` forms, not `Fed. R.`). It does not apply to Short_Forms, whose left rules are their own (Req 12.1, 12.2).
+- **Right glue.** Let `d` be the Offset just past `s`'s last page, pincite, or number digit, or, for an Other_Reference, just past the section's last digit. Then `extract(s + x)` contains no citation ending at `d`, and when a parenthetical follows that digit (a court-and-year parenthetical of a Reporter_Citation or Parallel_Citation, or an Other_Reference's subdivisions), so that `d < s.length`, the check also runs inside the citation: `extract(s.slice(0, d) + x + s.slice(d))`, with `x` inserted right after the last digit and before the parenthetical, contains no citation ending at `d`. Right glue applies to every family, and is the only side checked for Short_Forms.
+[extract]
 **Validates: Requirements 9.8**
 
 ### Property 20: Quote pairing and attachment agree with a reference model
