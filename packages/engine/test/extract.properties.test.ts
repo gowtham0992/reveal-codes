@@ -22,6 +22,7 @@ import {
 } from "../src/testing/arbitraries";
 import type { ExtractedCitation, ExtractedQuote } from "../src/types";
 import { runs } from "./support/fc";
+import { arbGapCase, expectGapAttachment } from "./support/gap-attach";
 import { modelQuotes } from "./support/quote-model";
 import { arbNoisyText, shifted } from "./support/quote-noise";
 import { sentenceIndex, sentencesOf } from "./support/sentence-index";
@@ -286,5 +287,12 @@ describe("extract boundary counting _Requirements: 13.1, 13.8_", () => {
       }),
       runs(),
     );
+  });
+});
+
+describe("extract preceding gaps _Requirements: 13.1, 13.9_", () => {
+  // Property 45
+  it("Property 45: Case_Name and Gap_Signal gaps attach; `In`, `with`, two-signal, over-long do not", () => {
+    fc.assert(fc.property(arbGapCase, expectGapAttachment), runs());
   });
 });
