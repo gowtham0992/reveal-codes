@@ -2,10 +2,18 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { format, validateFullValue } from "../src/citations/format";
 import { isCourtText } from "../src/citations/grammar";
+import {
+  isUnlistedLexisCourt,
+  LEXIS_COURTS,
+  lexisCollapsedIndex,
+} from "../src/citations/lexis-courts";
 import { collapseReporter, lookupReporter, REPORTERS } from "../src/citations/reporters";
 import {
   arbCitation,
   arbCourt,
+  arbDatabaseValue,
+  arbLexisCourt,
+  arbNearMissLexisCourt,
   arbGarbageCitation,
   arbNearMissCitation,
   arbValueCorruption,
@@ -17,6 +25,39 @@ describe("citation arbitraries meet their definitions _Requirements: 22.1, 22.4_
     fc.assert(
       fc.property(arbCourt, (c) => {
         expect(isCourtText(c)).toBe(true);
+      }),
+      runs(),
+    );
+  });
+
+  it("arbLexisCourt gives exact entries when listed and readable unlisted courts otherwise", () => {
+    fc.assert(
+      fc.property(arbLexisCourt, ({ lexisCourtListed, lexisCourt }) => {
+        if (lexisCourtListed) {
+          expect(LEXIS_COURTS).toContain(lexisCourt);
+          return;
+        }
+        expect(isUnlistedLexisCourt(lexisCourt)).toBe(true);
+        expect(isGlossaryUnlisted(lexisCourt)).toBe(true);
+      }),
+      runs(),
+    );
+  });
+
+  it("arbDatabaseValue yields WL, listed, and unlisted values", () => {
+    const seen = new Set(
+      fc
+        .sample(arbDatabaseValue, { numRuns: 500, seed: 1 })
+        .map((v) => (v.designator === "WL" ? "WL" : String(v.lexisCourtListed))),
+    );
+    expect([...seen].sort()).toEqual(["WL", "false", "true"]);
+  });
+
+  it("arbNearMissLexisCourt is a collapsed match that is not an entry", () => {
+    fc.assert(
+      fc.property(arbNearMissLexisCourt, (c) => {
+        expect(LEXIS_COURTS).not.toContain(c);
+        expect(lexisCollapsedIndex.has(collapseReporter(c))).toBe(true);
       }),
       runs(),
     );
@@ -70,3 +111,13 @@ describe("citation arbitraries meet their definitions _Requirements: 22.1, 22.4_
     );
   });
 });
+
+/** Test-local Glossary Unlisted_Lexis_Court checker (design P43), apart from the list lookup. */
+function isGlossaryUnlisted(c: string): boolean {
+  const tokens = c.split(" ");
+  const tokenOk = (t: string): boolean =>
+    /^[A-Z0-9][^\s(),"“”]*$/.test(t) &&
+    !(/^\d{4}$/.test(t) && +t >= 1600 && +t <= 2999) &&
+    t !== "LEXIS";
+  return c.length >= 1 && c.length <= 40 && tokens[0] !== "WL" && tokens.every(tokenOk);
+}

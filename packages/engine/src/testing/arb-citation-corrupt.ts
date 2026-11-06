@@ -4,8 +4,11 @@
  * the field `validateFullValue` must report. Only one field is broken and the
  * rest stay valid, so the recorded field is also the first failure in the A13
  * order (volume, reporter, page, pincite, court, lexisCourtListed, lexisCourt,
- * year, members, number). The `lexisCourtListed` corruptions are task 5.49.
- * A broken parallel member field is broken in one member, chosen by index. The expected field is never inferred from the engine.
+ * year, members, number). LEXIS corruptions (D22) break either the flag
+ * (removed, non-boolean, or added to a WL value: `lexisCourtListed`) or the
+ * court's consistency with it (`lexisCourt`), never both. A broken parallel
+ * member field is broken in one member, chosen by index. The expected field
+ * is never inferred from the engine.
  */
 import fc from "fast-check";
 import {
@@ -16,6 +19,7 @@ import {
   YEAR_RANGE,
   type IntRange,
 } from "../citations/lex.js";
+import { LEXIS_COURTS, lexisExactIndex } from "../citations/lexis-courts.js";
 import { REPORTERS } from "../citations/reporters.js";
 import type {
   DatabaseValue,
@@ -32,6 +36,7 @@ import {
   arbParallelValue,
   arbReporter,
   arbReporterValue,
+  arbUnlistedLexisCourt,
 } from "./arb-citation.js";
 
 /** A broken value and the field `validateFullValue` must name. */
@@ -61,8 +66,32 @@ export const arbBadCourt: fc.Arbitrary<string> = fc.oneof(
 /** Bad courts plus LEXIS-specific faults: a leading `WL` or a `LEXIS` token. */
 const arbBadLexisCourt: fc.Arbitrary<string> = fc.oneof(
   arbBadCourt,
-  arbLexisCourt.map((c) => `WL ${c}`),
-  arbLexisCourt.map((c) => `${c} LEXIS`),
+  arbCourt.map((c) => `WL ${c}`),
+  arbCourt.map((c) => `${c} LEXIS`),
+);
+
+const NEAR_MISS_SOURCES = LEXIS_COURTS.filter((c) => /[. ]/.test(c));
+
+/** A list entry with one period or space removed that is not itself an entry (a collapsed match). */
+export const arbNearMissLexisCourt: fc.Arbitrary<string> = fc
+  .tuple(fc.constantFrom(...NEAR_MISS_SOURCES), fc.nat())
+  .map(([entry, at]) => {
+    const sites = Array.from({ length: entry.length }, (_, i) => i).filter(
+      (i) => entry[i] === "." || entry[i] === " ",
+    );
+    const i = sites[at % sites.length] ?? 0;
+    return entry.slice(0, i) + entry.slice(i + 1);
+  })
+  .filter((c) => c.length > 0 && !lexisExactIndex.has(c));
+
+/** Courts that are not an Unlisted_Lexis_Court: an entry, a collapsed match, a lower-case token, a comma, a year token. */
+const arbNotUnlistedCourt: fc.Arbitrary<string> = fc.oneof(
+  fc.constantFrom(...LEXIS_COURTS),
+  arbNearMissLexisCourt,
+  arbUnlistedLexisCourt.map((c) => `foo ${c}`),
+  arbUnlistedLexisCourt.map((c) => `${c},`),
+  arbUnlistedLexisCourt.map((c) => `${c} 1999`),
+  arbBadLexisCourt,
 );
 
 const EXACT = new Set(REPORTERS);
@@ -128,24 +157,68 @@ const parallelPatch: fc.Arbitrary<Patch<ParallelValue>> = fc.oneof(
   })),
 );
 
+/** `v`'s year, number, and pincite under `designator`, with no LEXIS fields. */
+function baseOf(v: DatabaseValue, designator: "WL" | "LEXIS"): DatabaseValue {
+  const base = { kind: "database", year: v.year, designator, number: v.number } as const;
+  return v.pincite === undefined ? base : { ...base, pincite: v.pincite };
+}
+
 /** A LEXIS value without its court (flag kept), or a WL value given one. */
 function toggleLexisCourt(v: DatabaseValue, court: string): DatabaseValue {
   if (v.designator === "WL") return { ...v, lexisCourt: court };
   const flag = v.lexisCourtListed === undefined ? {} : { lexisCourtListed: v.lexisCourtListed };
-  const base = { kind: "database", year: v.year, designator: "LEXIS", number: v.number } as const;
-  const flagged = { ...base, ...flag };
-  return v.pincite === undefined ? flagged : { ...flagged, pincite: v.pincite };
+  return { ...baseOf(v, "LEXIS"), ...flag };
 }
+
+/** Values of the wrong type for `lexisCourtListed`, typed as the field so they can be stored. */
+const arbNonBooleanFlag: fc.Arbitrary<boolean> = fc
+  .constantFrom<unknown>("true", "false", 0, 1, null)
+  .map((x) => x as boolean);
+
+/** The flag corruptions: removed or non-boolean on LEXIS, added to WL. */
+const flagPatches: readonly fc.Arbitrary<Patch<DatabaseValue>>[] = [
+  patch("lexisCourtListed", arbLexisCourt, (v: DatabaseValue, l) => ({
+    ...baseOf(v, "LEXIS"),
+    lexisCourt: l.lexisCourt,
+  })),
+  patch(
+    "lexisCourtListed",
+    fc.tuple(arbLexisCourt, arbNonBooleanFlag),
+    (v: DatabaseValue, [l, f]) => ({
+      ...baseOf(v, "LEXIS"),
+      lexisCourtListed: f,
+      lexisCourt: l.lexisCourt,
+    }),
+  ),
+  patch("lexisCourtListed", fc.boolean(), (v: DatabaseValue, lexisCourtListed) => ({
+    ...baseOf(v, "WL"),
+    lexisCourtListed,
+  })),
+];
+
+/** The consistency corruptions: a court that disagrees with a valid flag. */
+const consistencyPatches: readonly fc.Arbitrary<Patch<DatabaseValue>>[] = [
+  patch("lexisCourt", arbCourt, toggleLexisCourt),
+  patch(
+    "lexisCourt",
+    fc.oneof(arbUnlistedLexisCourt, arbNearMissLexisCourt, arbBadLexisCourt),
+    (v: DatabaseValue, lexisCourt) => ({
+      ...baseOf(v, "LEXIS"),
+      lexisCourtListed: true,
+      lexisCourt,
+    }),
+  ),
+  patch("lexisCourt", arbNotUnlistedCourt, (v: DatabaseValue, lexisCourt) => ({
+    ...baseOf(v, "LEXIS"),
+    lexisCourtListed: false,
+    lexisCourt,
+  })),
+];
 
 const databasePatch: fc.Arbitrary<Patch<DatabaseValue>> = fc.oneof(
   patch("pincite", arbBadInt(PINCITE_RANGE), (v: DatabaseValue, pincite) => ({ ...v, pincite })),
-  patch("lexisCourt", arbLexisCourt, toggleLexisCourt),
-  patch("lexisCourt", arbBadLexisCourt, (v: DatabaseValue, lexisCourt) => ({
-    ...v,
-    designator: "LEXIS",
-    lexisCourtListed: true,
-    lexisCourt,
-  })),
+  ...flagPatches,
+  ...consistencyPatches,
   patch("year", arbBadInt(YEAR_RANGE), (v: DatabaseValue, year) => ({ ...v, year })),
   patch("number", arbBadInt(DOC_NUMBER_RANGE), (v: DatabaseValue, number) => ({ ...v, number })),
 );

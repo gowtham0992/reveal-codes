@@ -99,18 +99,12 @@ function pairsOf(value: FullValue): readonly Pair[] {
 }
 
 /**
- * Appends a Full_Citation as written, with its Normalised_Form if any.
- *
- * A LEXIS court may hold any tokens joined by single spaces (A9 court rule),
- * so a year-like number up to 40 code units earlier (`§ 1983 and the court in
- * 2023 U.S. Dist. LEXIS 5`, or a Near_Miss volume) could start a longer
- * Database_Citation that swallows the text before this one. The space before
- * a LEXIS citation is therefore written as `\n`, which no court can span.
+ * Appends a Full_Citation as written, with its Normalised_Form if any. A
+ * LEXIS citation is joined like any other: an earlier number cannot start a
+ * longer LEXIS match, because its court would hold this citation's year as a
+ * token (A9 step 2, D22).
  */
 export function putFull(b: Builder, value: FullValue, text: string, normalised?: string): number {
-  if (value.kind === "database" && value.designator === "LEXIS" && b.text.endsWith(" ")) {
-    b.text = `${b.text.slice(0, -1)}\n`;
-  }
   const start = record(b, text, value, normalised);
   for (const p of pairsOf(value)) {
     if (!b.byPair.has(keyOf(p))) b.pairs.push(p);

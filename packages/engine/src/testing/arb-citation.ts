@@ -1,8 +1,10 @@
 /**
  * Citation arbitraries (design "Arbitraries" table; Req 22.1, 22.4).
  *
- * - `arbCourt` / `arbLexisCourt`: courts under the tightened rule D3, with no
- *   `LEXIS` or `WL` token, so they are also valid LEXIS courts.
+ * - `arbCourt`: courts under the tightened rule D3, with no `LEXIS` or `WL`
+ *   token.
+ * - `arbLexisCourt`: a listed court (an exact `lexis-courts.json` entry, flag
+ *   true) or an `arbUnlistedLexisCourt` (flag false), equally weighted (D22).
  * - `arbCitation`: valid Full_Citation values (reporter, parallel, database)
  *   with numbers in the Req 10.1 ranges and reporters from `REPORTERS`.
  * - `arbNearMissCitation`: `{ text, token, value }`, where `token` is an entry
@@ -24,7 +26,7 @@ import {
   YEAR_RANGE,
   type IntRange,
 } from "../citations/lex.js";
-import { LEXIS_COURTS } from "../citations/lexis-courts.js";
+import { LEXIS_COURTS, lexisCollapsedIndex, lexisExactIndex } from "../citations/lexis-courts.js";
 import { collapseReporter, lookupReporter, REPORTERS } from "../citations/reporters.js";
 import type {
   DatabaseValue,
@@ -68,12 +70,51 @@ export const arbCourt: fc.Arbitrary<string> = fc
     return fixed.join(" ");
   });
 
+// LEXIS courts (A13, D22)
+
+const UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const LETTERS_DOT = `${UPPER}abcdefghijklmnopqrstuvwxyz.`;
+
+/** `[A-Z][A-Za-z.]{0,9}`, never `LEXIS` (rewritten to `LEXIS.`). */
+const arbUpperToken: fc.Arbitrary<string> = fc
+  .tuple(asciiUnit(UPPER), fc.string({ unit: asciiUnit(LETTERS_DOT), maxLength: 9 }))
+  .map(([head, tail]) => (head + tail === "LEXIS" ? "LEXIS." : head + tail));
+
+/** A digit run that is not a year in 1600–2999. */
+const arbDigitToken: fc.Arbitrary<string> = fc
+  .integer({ min: 0, max: 99999 })
+  .map(String)
+  .filter((t) => !isYearLike(t));
+
+/** The first `n` tokens whose join fits in 40 code units (at least one). */
+function trimCourt(tokens: readonly string[]): string {
+  let court = tokens[0] ?? "";
+  for (const t of tokens.slice(1)) {
+    if (court.length + 1 + t.length > 40) break;
+    court = `${court} ${t}`;
+  }
+  return court;
+}
+
 /**
- * A court string with no `LEXIS` or `WL` token. Since task 5.47 it is not by
- * itself a valid `lexisCourt` (A13); `arbValueCorruption` uses it to build bad
- * LEXIS courts. Task 5.49 replaces it with the listed/unlisted `arbLexisCourt`.
+ * An Unlisted_Lexis_Court (Glossary): 1 to 4 tokens, each `[A-Z][A-Za-z.]{0,9}`
+ * or a non-year digit run, joined by single spaces, first token not `WL`,
+ * trimmed to ≤ 40 code units at a token boundary, and matching no
+ * `lexis-courts.json` entry exactly or collapsed.
  */
-export const arbLexisCourt: fc.Arbitrary<string> = arbCourt;
+export const arbUnlistedLexisCourt: fc.Arbitrary<string> = fc
+  .array(fc.oneof(arbUpperToken, arbDigitToken), { minLength: 1, maxLength: 4 })
+  .map((tokens) => trimCourt(tokens[0] === "WL" ? ["WL.", ...tokens.slice(1)] : tokens))
+  .filter((c) => !lexisExactIndex.has(c) && !lexisCollapsedIndex.has(collapseReporter(c)));
+
+/** The two LEXIS fields of a Database_Citation value, consistent under A13. */
+export type LexisCourt = Readonly<{ lexisCourtListed: boolean; lexisCourt: string }>;
+
+/** A listed court (an exact entry, flag true) or an unlisted one (flag false), equally weighted. */
+export const arbLexisCourt: fc.Arbitrary<LexisCourt> = fc.oneof(
+  fc.constantFrom(...LEXIS_COURTS).map((lexisCourt) => ({ lexisCourtListed: true, lexisCourt })),
+  arbUnlistedLexisCourt.map((lexisCourt) => ({ lexisCourtListed: false, lexisCourt })),
+);
 
 /** An exact Reporter_List entry. */
 export const arbReporter: fc.Arbitrary<string> = fc.constantFrom(...REPORTERS);
@@ -106,29 +147,15 @@ const arbPincite: fc.Arbitrary<{ pincite?: number }> = fc.record(
 );
 
 /**
- * A `WL` value, or a LEXIS value with a listed court (an exact
- * `lexis-courts.json` entry, `lexisCourtListed: true`). Unlisted courts are
- * added by task 5.49.
+ * A `WL` value (no LEXIS fields) or a LEXIS value whose two LEXIS fields come
+ * from `arbLexisCourt`, equally weighted.
  */
 export const arbDatabaseValue: fc.Arbitrary<DatabaseValue> = fc
-  .tuple(
-    int(YEAR_RANGE),
-    fc.option(fc.constantFrom(...LEXIS_COURTS)),
-    int(DOC_NUMBER_RANGE),
-    arbPincite,
-  )
-  .map(([year, court, number, pin]) =>
-    court === null
+  .tuple(int(YEAR_RANGE), fc.option(arbLexisCourt, { freq: 2 }), int(DOC_NUMBER_RANGE), arbPincite)
+  .map(([year, lexis, number, pin]) =>
+    lexis === null
       ? { kind: "database", year, designator: "WL", number, ...pin }
-      : {
-          kind: "database",
-          year,
-          designator: "LEXIS",
-          lexisCourtListed: true,
-          lexisCourt: court,
-          number,
-          ...pin,
-        },
+      : { kind: "database", year, designator: "LEXIS", ...lexis, number, ...pin },
   );
 
 /** Valid Full_Citation values (Req 10.1). */

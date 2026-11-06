@@ -19,9 +19,9 @@
  *   capitalised live Gap_Signal (`See`, `Accord`, …) is absorbed into the
  *   Party_Run and stripped, so the prefix is dropped when signal, prefix, and
  *   party together would exceed 80 code units;
- * - the space before a LEXIS Database_Citation is written as `\n`
- *   (`putFull`), so no year-like number earlier in the text can start a
- *   longer LEXIS match whose court spans the words in between;
+ * - a LEXIS Database_Citation is joined like any other fragment: no earlier
+ *   number can start a longer LEXIS match, because that court would hold the
+ *   citation's own year as a token (A9 step 2, D22);
  * - a fragment that would take the text past 5,000 code units ends the value.
  */
 import fc from "fast-check";
