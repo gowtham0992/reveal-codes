@@ -70,7 +70,7 @@ Out of scope: network access, CourtListener, LLM providers, UI, DOCX and PDF exp
 - **Canonical_Form**: the string `format(citation)` produces for a Citation_Value.
 - **Near_Miss**: a citation string whose reporter matches a Reporter_List entry after removing or collapsing periods and spaces, e.g. `410 US 113`, `410 U. S. 113`.
 - **Normalised_Form**: the Canonical_Form of a Near_Miss.
-- **Garbage_Citation**: a `<volume> <token> <page>` string whose token matches no Reporter_List entry under exact or Near_Miss comparison, e.g. `410 Q.Z. 113`.
+- **Garbage_Citation**: a `<volume> <token> <page>` string whose token matches no Reporter_List entry under exact or Near_Miss comparison and contains no word `Id.`, e.g. `410 Q.Z. 113`. A string whose token contains the word `Id.` is not a Garbage_Citation, because that `Id.` is a Short_Form the Extractor returns on its own.
 - **Extractor**: the Engine function `extract(text)` returning Citations and Quote_Candidates. The Extractor is infallible and returns a plain value, not a Result (Requirement 9.9).
 - **Quotation_Pair**: a straight `"` followed by the next straight `"`, or a curly `“` followed by the next curly `”`, as paired under Requirement 13.1, that is kept under Requirement 13.10 (its opening mark does not lie inside an earlier-opening pair that is kept). Its closing mark is the second mark of the pair and its opening mark the first.
 - **Signal**: a Bluebook introductory signal word, used by the Party_Name rule and the Party_Stop_List: every Gap_Signal in the capitalised form listed under Gap_Signal (`See`, `See also`, `See, e.g.,`, `E.g.,`, `Accord`, `Cf.`, `But see`, `Compare`, `Citing`, `Quoting`), plus `But cf.`, `Contra`, `E.g.`, and `See generally`. Signals are compared case-sensitively.

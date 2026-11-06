@@ -327,4 +327,22 @@ describe("Property 24: Garbage citations are never extracted and do not disturb 
       expect(extract(pad(g))).toEqual(extract(pad(" ".repeat(g.length))));
     }
   });
+
+  it("seed 1899639715: `1 Id. A 1` is not a Garbage_Citation, and its `Id.` extracts as an Orphan (D24)", () => {
+    // Shrunk counterexample from seed 1899639715, path
+    // "393:1:0:0:1:1:1:2:2:2:2:2:2:2:2:2:2:2:2:2:2:12:11:11:10:10:10": text
+    // `held 1 A. 1, 1 A. 1`, garbage `1 Id. A 1` at k = 0. Its token `Id. A`
+    // matches no reporter, but the word `Id.` starts a Short_Form on its own,
+    // so the string is not a Garbage_Citation (D24) and `arbGarbageToken`
+    // no longer generates it. The Engine is unchanged: the `Id.` still
+    // extracts, as an Orphan (no preceding citation), which blocks export.
+    const text = "held 1 Id. A 1 1 A. 1, 1 A. 1";
+    const { citations, quotes } = extract(text);
+    expect(citations.map((c) => [c.start, c.end, c.text])).toEqual([
+      [7, 10, "Id."],
+      [15, 29, "1 A. 1, 1 A. 1"],
+    ]);
+    expect(citations[0]?.value).toEqual({ kind: "short", form: "id", targetStart: null });
+    expect(quotes).toEqual([]);
+  });
 });

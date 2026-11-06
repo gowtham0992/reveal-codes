@@ -11,7 +11,7 @@
  *   with one or more period/space edits that is not itself an entry, and
  *   `value.reporter` is the first `REPORTERS` entry with the same collapsed key.
  * - `arbGarbageCitation`: `<vol> <token> <page>` whose token resolves neither
- *   exactly nor collapsed.
+ *   exactly nor collapsed and has no word `Id.` (D24).
  * - `arbValueCorruption` lives in `arb-citation-corrupt.ts` (module size).
  *
  * Everything is built from fast-check combinators, so values shrink.
@@ -237,9 +237,14 @@ const arbGarbageWord: fc.Arbitrary<string> = fc
   )
   .map(([head, tail, dot]) => head + tail + (dot ? "." : ""));
 
-/** A digit-free token of 1 to 3 words that matches no entry, exactly or collapsed. */
+/**
+ * A digit-free token of 1 to 3 words that matches no entry, exactly or
+ * collapsed, and has no word `Id.`: the grammar starts a Short_Form at `Id.`
+ * on its own, so such a string is not a Garbage_Citation (D24).
+ */
 export const arbGarbageToken: fc.Arbitrary<string> = fc
   .array(arbGarbageWord, { minLength: 1, maxLength: 3 })
+  .filter((words) => !words.includes("Id."))
   .map((words) => words.join(" "))
   .filter((t) => lookupReporter(t) === null);
 

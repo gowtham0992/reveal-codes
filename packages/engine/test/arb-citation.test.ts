@@ -100,12 +100,13 @@ describe("citation arbitraries meet their definitions _Requirements: 22.1, 22.4_
     );
   });
 
-  it("arbGarbageCitation tokens resolve neither exactly nor collapsed", () => {
+  it("arbGarbageCitation tokens resolve neither exactly nor collapsed and contain no word Id. (D24)", () => {
     fc.assert(
       fc.property(arbGarbageCitation, (g) => {
         const token = g.slice(g.indexOf(" ") + 1, g.lastIndexOf(" "));
         expect(token).not.toMatch(/\d/);
         expect(lookupReporter(token)).toBeNull();
+        expect(token.split(" ")).not.toContain("Id.");
       }),
       runs(),
     );
