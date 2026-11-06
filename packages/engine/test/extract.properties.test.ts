@@ -18,6 +18,8 @@ import {
 } from "../src/testing/arbitraries";
 import type { ExtractedCitation, ExtractedQuote } from "../src/types";
 import { runs } from "./support/fc";
+import { modelQuotes } from "./support/quote-model";
+import { arbNoisyText, shifted } from "./support/quote-noise";
 
 type Ranged = Readonly<{ start: number; end: number; text: string }>;
 
@@ -209,5 +211,49 @@ describe("extract word boundaries _Requirements: 9.8_", () => {
   // Property 19
   it("Property 19: citations glued to letters or digits are not extracted", () => {
     fc.assert(fc.property(arbCandidate, arbLetterOrDigit, expectGlueRejected), runs());
+  });
+});
+
+describe("extract quote reference model _Requirements: 13.1, 13.5, 13.6, 13.7, 13.8, 13.9, 13.10_", () => {
+  it("the reference model reads the Req 13.10 and D21 examples as the design does", () => {
+    /** `[quoted text, cited text, rule]` for each model quote. */
+    const at = (t: string): readonly string[][] =>
+      modelQuotes(t, extract(t).citations).map((q) => [
+        q.text,
+        t.slice(q.citationStart, q.citationStart + 4) + "@" + String(q.citationStart),
+        q.rule,
+      ]);
+    const nested = '"He wrote “no” 410 U.S. 113 today." Roe v. Wade, 410 U.S. 113';
+    expect(at(nested)).toEqual([
+      [
+        "He wrote “no” 410 U.S. 113 today.",
+        `410 @${String(nested.lastIndexOf("410"))}`,
+        "preceding",
+      ],
+    ]);
+    expect(at('"a “b" 410 U.S. 113 c” 5 U.S. 1')).toEqual([["a “b", "410 @7", "preceding"]]);
+    expect(at('Roe, 410 U.S. 113 ("a “b" c”) 5 U.S. 1')).toEqual([["a “b", "410 @5", "following"]]);
+    expect(at('"q" See also See A, Inc. v. A & A, 410 U.S. 113')).toEqual([]);
+    expect(at('"q" See also Roe v. Wade, 410 U.S. 113')).toEqual([["q", "410 @26", "preceding"]]);
+    expect(at('"q," with Casey v. Smith, 5 U.S. 1')).toEqual([]);
+    expect(at('"q" In Casey, 505 U.S. at 833')).toEqual([]);
+  });
+
+  it("Property 20 counterexample (seed -341920749): no `Id.` right after a closing `”` (Req 12.1)", () => {
+    expect(extract("argued later. Id.").citations.map((c) => c.start)).toEqual([14]);
+    expect(extract('"argued later. "”Id.').citations).toEqual([]);
+    expect(extract('"argued later. "“Id.').citations.map((c) => c.start)).toEqual([17]);
+  });
+
+  // Property 20
+  it("Property 20: quote pairing and attachment agree with a reference model", () => {
+    fc.assert(
+      fc.property(arbNoisyText, ({ base, text, shift }) => {
+        const got = extract(text);
+        expect(got.citations).toEqual(extract(base).citations.map((c) => shifted(c, shift)));
+        expect(got.quotes).toEqual(modelQuotes(text, got.citations));
+      }),
+      runs(),
+    );
   });
 });
