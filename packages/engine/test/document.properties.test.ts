@@ -1,10 +1,14 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import { extract } from "../src/citations/extract";
 import { apply, createDocument } from "../src/document";
 import {
   arbCreatedDocument,
   arbDocument,
   arbOpTrace,
+  arbStringWithLoneSurrogate,
+  arbText,
+  arbTextWithCitations,
   arbThreshold,
   arbTimestamp,
   type OpStep,
@@ -134,6 +138,97 @@ describe("every returned Document _Requirements: 3.1, 3.2, 4.10, 6.12_", () => {
         docs.forEach((doc, i) => {
           expect({ i, v: violations(doc) }).toEqual({ i, v: [] });
         });
+      }),
+      runs(),
+    );
+  });
+});
+
+/** Creation input: a valid text, or a string with a lone surrogate at `offset`. */
+type CreationInput =
+  | Readonly<{ kind: "valid"; text: string; ts: string }>
+  | Readonly<{ kind: "surrogate"; text: string; offset: number; ts: string }>;
+
+const arbCreationInput: fc.Arbitrary<CreationInput> = fc.oneof(
+  fc
+    .tuple(
+      fc.oneof(
+        arbTextWithCitations.map((t) => t.text),
+        arbText,
+        fc.constant(""),
+      ),
+      arbTimestamp,
+    )
+    .map(([text, ts]) => ({ kind: "valid" as const, text, ts })),
+  fc
+    .tuple(arbStringWithLoneSurrogate, arbTimestamp)
+    .map(([s, ts]) => ({ kind: "surrogate" as const, text: s.text, offset: s.offset, ts })),
+);
+
+/**
+ * Test-local Issue_Key assignment at creation (Glossary): the keys of every
+ * Full_Citation, Short_Form, and Quote_Candidate in issue order (ascending
+ * start, a Citation before a Quote_Candidate at an equal start), skipping
+ * Other_References.
+ */
+function keysInIssueOrder(doc: Document): readonly string[] {
+  const items: { start: number; tie: number; key: string }[] = [];
+  for (const r of doc.citations) {
+    if (r.kind !== "other") items.push({ start: r.citation.start, tie: 0, key: r.key });
+  }
+  for (const q of doc.quotes) items.push({ start: q.quote.start, tie: 1, key: q.key });
+  return items.sort((a, b) => a.start - b.start || a.tie - b.tie).map((i) => i.key);
+}
+
+/** Expected record kind for an extracted value (Glossary). */
+const recordKind = (k: string): string =>
+  k === "other" ? "other" : k === "short" ? "short" : "full";
+
+/** Req 2.3 and Issue_Key assignment: the citation layer is the Extractor's, unchecked and keyed. */
+function expectCreatedLayer(doc: Document, text: string): void {
+  const e = extract(text);
+  expect(doc.citations.map((r) => r.citation)).toEqual(e.citations);
+  expect(doc.quotes.map((q) => q.quote)).toEqual(e.quotes);
+  expect(doc.citations.map((r) => r.kind)).toEqual(
+    e.citations.map((c) => recordKind(c.value.kind)),
+  );
+  for (const r of doc.citations) {
+    if (r.kind === "full") expect(r.result).toEqual({ status: "unchecked" });
+  }
+  for (const q of doc.quotes) expect(q.result).toEqual({ status: "unchecked" });
+  const keys = keysInIssueOrder(doc);
+  expect(keys).toEqual(keys.map((_, n) => `k${String(n)}`));
+  expect(doc.keyCounter).toBe(keys.length);
+}
+
+/** Req 2.1, 2.2: Text, one PST Span with `ts` (none when empty), no Runs, no Overrides. */
+function expectCreatedState(doc: Document, text: string, ts: string): void {
+  expect(doc.text).toBe(text);
+  const spans =
+    text.length === 0
+      ? []
+      : [{ start: 0, end: text.length, provenance: { origin: "PST", timestamp: ts } }];
+  expect(doc.spans).toEqual(spans);
+  expect(doc.runs).toEqual([]);
+  expect(doc.overrides).toEqual([]);
+}
+
+describe("createDocument _Requirements: 2.1, 2.2, 2.3, 2.6_", () => {
+  // Property 2
+  it("preserves text and starts as one PST span with extracted, unchecked citations", () => {
+    fc.assert(
+      fc.property(arbCreationInput, (input) => {
+        const r = createDocument(input.text, input.ts);
+        if (input.kind === "surrogate") {
+          expect(r).toEqual({
+            ok: false,
+            error: { kind: "split_surrogate", offset: input.offset, where: "text" },
+          });
+          return;
+        }
+        if (!r.ok) throw new Error(`createDocument rejected: ${JSON.stringify(r.error)}`);
+        expectCreatedState(r.value, input.text, input.ts);
+        expectCreatedLayer(r.value, input.text);
       }),
       runs(),
     );
