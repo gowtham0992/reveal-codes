@@ -448,7 +448,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Holds for Replace because a Replace re-anchors once over its combined edit (A4), so it issues no key that no item keeps: `See 410 U.S. 113.` with `Replace(4, 5, "4")` gives the citation `k1` and `keyCounter` 2.
     - **Validates: Requirements 15.5, 15.7**
     - _Requirements: 15.5, 15.7_
-  - [-] 5.46 Write Property 51 in `test/extract.properties.test.ts`
+  - [x] 5.46 Write Property 51 in `test/extract.properties.test.ts`
     - **Property 51: A Gap_Signal before a citation never prevents an attachment that holds without it**
     - Builds `t` and `t′` (with `g + " "` inserted before `m + x`) from `arbQuoteContent`, `arbGapPunct`, `arbCaseName`, `arbCitation`, `arbShortFormParty`, and `arbGapSignal`, and checks the attachment under the Sentence condition and the shifted citations.
     - **Validates: Requirements 12.2, 13.1**
