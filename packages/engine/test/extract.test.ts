@@ -80,6 +80,36 @@ describe("extract _Requirements: 9.1, 9.9, 11.2, 11.3, 11.4_", () => {
     for (const c of citations) expect(c).not.toHaveProperty("normalised");
   });
 
+  it("keeps an Other_Reference before a LEXIS citation and starts the citation at its year (D22)", () => {
+    const text = "under 42 U.S.C. § 1983 and the court in 2023 U.S. Dist. LEXIS 5";
+    const { citations } = extract(text);
+    expect(citations.map((c) => [c.start, c.text, c.value.kind])).toEqual([
+      [text.indexOf("42 U.S.C."), "42 U.S.C. § 1983", "other"],
+      [text.indexOf("2023"), "2023 U.S. Dist. LEXIS 5", "database"],
+    ]);
+    expect(citations[1]?.value).toMatchObject({ lexisCourtListed: true, lexisCourt: "U.S. Dist." });
+  });
+
+  it("does not let a number in a party name start a LEXIS citation (D22)", () => {
+    const text = "Smith v. Local 2092 Union, 2023 U.S. Dist. LEXIS 5";
+    const { citations } = extract(text);
+    expect(citations.map((c) => [c.start, c.text])).toEqual([
+      [text.indexOf("2023"), "2023 U.S. Dist. LEXIS 5"],
+    ]);
+    expect(citations[0]?.value).toMatchObject({ lexisCourtListed: true, lexisCourt: "U.S. Dist." });
+  });
+
+  it("normalises a near-miss LEXIS court, keeps an unlisted one, and drops a bad one (D22)", () => {
+    const [near] = extract("2023 US Dist. LEXIS 5").citations;
+    expect(near).toMatchObject({ normalised: "2023 U.S. Dist. LEXIS 5" });
+    expect(near?.value).toMatchObject({ lexisCourtListed: true, lexisCourt: "U.S. Dist." });
+    const [unlisted] = extract("2023 Foo Cty. Ct. LEXIS 5").citations;
+    expect(unlisted).not.toHaveProperty("normalised");
+    expect(unlisted?.value).toMatchObject({ lexisCourtListed: false, lexisCourt: "Foo Cty. Ct." });
+    expect(extract("2023 foo LEXIS 5").citations).toEqual([]);
+    expect(extract("2023 Foo, Bar LEXIS 5").citations).toEqual([]);
+  });
+
   it("ignores a Garbage_Citation and keeps the rest", () => {
     const text = "410 Q.Z. 113 and 410 U.S. 113";
     expect(summary(text)).toEqual([["410 U.S. 113", "reporter", undefined, undefined]]);

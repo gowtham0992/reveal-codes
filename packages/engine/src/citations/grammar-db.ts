@@ -15,14 +15,16 @@
  * parenthetical that does not parse is not part of the citation; the citation
  * then ends earlier, as for reporter citations (A9 court rule).
  *
- * The LEXIS court follows the tightened court rule (A9, D3): 1 to 40 code
- * units of tokens without whitespace, parentheses, or `"“”`, joined by single
- * spaces, whose last token is not a year in 1600–2999. A court token is never
- * `LEXIS`: the first `LEXIS` token ends the court. A court that
- * `lookupLexisCourt` resolves records the list entry with
- * `lexisCourtListed: true`; any other court records the court as written with
- * `lexisCourtListed: false` (D22). The court-start, year-token, and
- * Unlisted_Lexis_Court rejection rules of A9 step 2 are task 5.48.
+ * The LEXIS court (A9 step 2, D22) starts exactly one space after the year
+ * and runs, over court tokens joined by single spaces, to the first token
+ * that is exactly `LEXIS`. It fails if no token precedes `LEXIS`, if it
+ * passes 40 code units first, or if any court token is a year in 1600–2999;
+ * the last rule is what stops an earlier number (`§ 1983`, `Local 2092`) from
+ * starting a LEXIS match that swallows the prose before the real year. A
+ * court that `lookupLexisCourt` resolves records the list entry with
+ * `lexisCourtListed: true`; otherwise an Unlisted_Lexis_Court
+ * (`isUnlistedLexisCourt`) records the court as written with
+ * `lexisCourtListed: false`; any other court is no citation.
  *
  * Reads stay within `[p − 2, p + 140)`, well inside `LOOKAHEAD`.
  */
@@ -39,18 +41,17 @@ import {
   readLiteral,
   readSpaces,
 } from "./lex.js";
-import { lookupLexisCourt } from "./lexis-courts.js";
+import { isCourtText, MAX_COURT_LENGTH } from "./grammar.js";
+import { isUnlistedLexisCourt, lookupLexisCourt } from "./lexis-courts.js";
 
 /** A Database_Citation match: `[start, end)` and its value. */
 export type DatabaseMatch = Readonly<{ start: number; end: number; value: DatabaseValue }>;
 
-/** Longest court (Req 10.1, A9 court rule). */
-export const MAX_COURT = 40;
-
 const WL = "WL";
 const LEXIS = "LEXIS";
 const PINCITE_LEAD = ", at *";
-const COURT_FORBIDDEN = /[\s()"“”]/u;
+/** Code units that end a court token (A9 step 2.1). */
+const COURT_TOKEN_END = /[\s()"“”]/u;
 
 type Field = Readonly<{ end: number }>;
 type NumberField = Readonly<{ value: number; end: number }>;
@@ -98,34 +99,41 @@ function readDesignator(text: string, at: number): Located<Designator> | null {
   }
   const court = readLexisCourt(text, at);
   if (court === null) return null;
+  const designator = lexisDesignator(court.value);
   const end = readSpaces(text, court.end);
-  return end === null ? null : { value: lexisDesignator(court.value), end };
+  return end === null || designator === null ? null : { value: designator, end };
 }
 
-/** The LEXIS designator for a court as written: the list entry if listed (D22). */
-function lexisDesignator(court: string): Designator {
+/**
+ * Classifies a LEXIS court as written (A9 step 2.2–2.4, D22): no token may be
+ * a year; then the list entry if listed, else the court as written if it is
+ * an Unlisted_Lexis_Court, else `null`.
+ */
+function lexisDesignator(court: string): Designator | null {
+  if (court.split(" ").some(isYearToken)) return null;
   const entry = lookupLexisCourt(court);
-  return entry === null
+  if (entry !== null) return { designator: "LEXIS", lexisCourtListed: true, lexisCourt: entry };
+  return isUnlistedLexisCourt(court)
     ? { designator: "LEXIS", lexisCourtListed: false, lexisCourt: court }
-    : { designator: "LEXIS", lexisCourtListed: true, lexisCourt: entry };
+    : null;
 }
 
 /**
  * Reads court tokens up to the first `LEXIS` token, and returns the court and
- * the Offset just past `LEXIS`. Fails if no court token precedes `LEXIS`, the
- * court breaks the court rule, or `LEXIS` is not found within the bound.
+ * the Offset just past `LEXIS` (A9 step 2.1). Fails if no court token
+ * precedes `LEXIS`, a separator is not one U+0020, or `LEXIS` is not found
+ * within the 40-code-unit court bound. Reads stop at `at + 46`.
  */
 function readLexisCourt(text: string, at: number): Located<string> | null {
   let tokenStart = at;
   for (;;) {
-    const tokenEnd = readCourtToken(text, tokenStart, at + MAX_COURT + 1 + LEXIS.length);
+    const tokenEnd = readCourtToken(text, tokenStart, at + MAX_COURT_LENGTH + 1 + LEXIS.length);
     if (tokenEnd === null) return null;
     if (text.slice(tokenStart, tokenEnd) === LEXIS) {
       if (tokenStart === at) return null;
-      const court = text.slice(at, tokenStart - 1);
-      return isCourt(court) ? { value: court, end: tokenEnd } : null;
+      return { value: text.slice(at, tokenStart - 1), end: tokenEnd };
     }
-    if (tokenEnd - at > MAX_COURT) return null;
+    if (tokenEnd - at > MAX_COURT_LENGTH) return null;
     const next = readSpaces(text, tokenEnd);
     if (next === null) return null;
     tokenStart = next;
@@ -139,23 +147,11 @@ function readLexisCourt(text: string, at: number): Located<string> | null {
  */
 function readCourtToken(text: string, at: number, limit: number): number | null {
   let end = at;
-  while (end < text.length && !COURT_FORBIDDEN.test(text.charAt(end))) {
+  while (end < text.length && !COURT_TOKEN_END.test(text.charAt(end))) {
     if (end === limit) return null;
     end += 1;
   }
   return end === at ? null : end;
-}
-
-/**
- * The tightened court rule (A9, D3) on a candidate court string: 1 to 40 code
- * units, tokens without whitespace, parentheses, or `"“”` joined by single
- * spaces, last token not a year in 1600–2999.
- */
-export function isCourt(court: string): boolean {
-  if (court.length < 1 || court.length > MAX_COURT) return false;
-  const tokens = court.split(" ");
-  if (tokens.some((t) => t.length === 0 || COURT_FORBIDDEN.test(t))) return false;
-  return !isYearToken(tokens[tokens.length - 1] ?? "");
 }
 
 /** True when `token` is exactly a four-digit year in YEAR_RANGE. */
@@ -183,7 +179,7 @@ function readPincite(text: string, at: number): NumberField | null {
 function readParenthetical(text: string, at: number): Field | null {
   const open = readSpaces(text, at);
   if (open === null || text[open] !== "(") return null;
-  const limit = open + 1 + MAX_COURT + 1 + 4;
+  const limit = open + 1 + MAX_COURT_LENGTH + 1 + 4;
   const found = text.slice(open + 1, limit + 1).indexOf(")");
   if (found === -1) return null;
   const close = open + 1 + found;
@@ -194,6 +190,6 @@ function readParenthetical(text: string, at: number): Field | null {
 function isParentheticalContent(content: string): boolean {
   const lastSpace = content.lastIndexOf(" ");
   const last = content.slice(lastSpace + 1);
-  if (!isYearToken(last)) return isCourt(content);
-  return lastSpace === -1 || isCourt(content.slice(0, lastSpace));
+  if (!isYearToken(last)) return isCourtText(content);
+  return lastSpace === -1 || isCourtText(content.slice(0, lastSpace));
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isCourt, matchDatabaseAt } from "../src/citations/grammar-db";
+import { matchDatabaseAt } from "../src/citations/grammar-db";
 
 const slice = (text: string, p: number): string | null => {
   const m = matchDatabaseAt(text, p);
@@ -82,11 +82,12 @@ describe("matchDatabaseAt LEXIS form _Requirements: 9.4_", () => {
     });
   });
 
-  it("rejects a missing, over-long, or year-final court", () => {
+  it("rejects a missing, over-long, or year-holding court", () => {
     expect(matchDatabaseAt("2023 LEXIS 98765", 0)).toBeNull();
     expect(matchDatabaseAt(`2023 ${"A".repeat(41)} LEXIS 5`, 0)).toBeNull();
     expect(matchDatabaseAt(`2023 ${"A".repeat(40)} LEXIS 5`, 0)).not.toBeNull();
     expect(matchDatabaseAt("2023 Dist. 1999 LEXIS 5", 0)).toBeNull();
+    expect(matchDatabaseAt("2023 1999 Dist. LEXIS 5", 0)).toBeNull();
     expect(matchDatabaseAt("2023 U.S.  Dist. LEXIS 5", 0)).toBeNull();
     expect(matchDatabaseAt("2023 (Dist.) LEXIS 5", 0)).toBeNull();
   });
@@ -124,23 +125,61 @@ describe("matchDatabaseAt rejects _Requirements: 9.4, 9.8, 10.1_", () => {
     expect(matchDatabaseAt("2024 WL 1", -1)).toBeNull();
     expect(matchDatabaseAt("2024 WL 1", 99)).toBeNull();
     expect(matchDatabaseAt("2024 WL \uD800", 0)).toBeNull();
-    expect(matchDatabaseAt("2024 \uDC00 LEXIS 5", 0)?.value).toMatchObject({
+    expect(matchDatabaseAt("2024 \uDC00 LEXIS 5", 0)).toBeNull();
+    expect(matchDatabaseAt("2024 A\uDC00 LEXIS 5", 0)?.value).toMatchObject({
       lexisCourtListed: false,
-      lexisCourt: "\uDC00",
+      lexisCourt: "A\uDC00",
     });
   });
 });
 
-describe("isCourt _Requirements: 10.1_", () => {
-  it("applies the tightened court rule", () => {
-    expect(isCourt("U.S. Dist.")).toBe(true);
-    expect(isCourt("S.D.N.Y. Jan. 5,")).toBe(true);
-    expect(isCourt("")).toBe(false);
-    expect(isCourt("1999")).toBe(false);
-    expect(isCourt("x 2001")).toBe(false);
-    expect(isCourt("a  b")).toBe(false);
-    expect(isCourt(" a")).toBe(false);
-    expect(isCourt('a"b')).toBe(false);
-    expect(isCourt("A".repeat(41))).toBe(false);
+describe("matchDatabaseAt LEXIS court start and classes _Requirements: 9.4, 9.7, 11.2, 14.8_", () => {
+  it("starts at the year before the court, not at an earlier statute section (D22)", () => {
+    const text = "under 42 U.S.C. § 1983 and the court in 2023 U.S. Dist. LEXIS 5";
+    expect(matchDatabaseAt(text, text.indexOf("1983"))).toBeNull();
+    const at = text.indexOf("2023");
+    expect(matchDatabaseAt(text, at)).toEqual({
+      start: at,
+      end: text.length,
+      value: {
+        kind: "database",
+        year: 2023,
+        designator: "LEXIS",
+        lexisCourtListed: true,
+        lexisCourt: "U.S. Dist.",
+        number: 5,
+      },
+    });
+  });
+
+  it("starts at the year before the court, not at a number in a party name (D22)", () => {
+    const text = "Smith v. Local 2092 Union, 2023 U.S. Dist. LEXIS 5";
+    expect(matchDatabaseAt(text, text.indexOf("2092"))).toBeNull();
+    expect(matchDatabaseAt(text, text.indexOf("2023"))?.value).toMatchObject({
+      year: 2023,
+      lexisCourtListed: true,
+      lexisCourt: "U.S. Dist.",
+    });
+  });
+
+  it("gives a near-miss court the list entry and an unlisted court itself", () => {
+    expect(matchDatabaseAt("2023 US Dist. LEXIS 5", 0)?.value).toMatchObject({
+      lexisCourtListed: true,
+      lexisCourt: "U.S. Dist.",
+    });
+    expect(matchDatabaseAt("2023 Foo Cty. Ct. LEXIS 5", 0)?.value).toMatchObject({
+      lexisCourtListed: false,
+      lexisCourt: "Foo Cty. Ct.",
+    });
+  });
+
+  it("rejects a court with a lower-case token, a comma, or a year token", () => {
+    expect(matchDatabaseAt("2023 foo LEXIS 5", 0)).toBeNull();
+    expect(matchDatabaseAt("2023 Foo, Bar LEXIS 5", 0)).toBeNull();
+    expect(matchDatabaseAt("2023 Foo 2020 Ct. LEXIS 5", 0)).toBeNull();
+    expect(matchDatabaseAt("2023 Foo 3000 Ct. LEXIS 5", 0)?.value).toMatchObject({
+      lexisCourtListed: false,
+      lexisCourt: "Foo 3000 Ct.",
+    });
   });
 });
