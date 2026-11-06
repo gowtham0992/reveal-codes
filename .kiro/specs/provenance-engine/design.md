@@ -745,6 +745,7 @@ Arbitraries: `arbDocument`, `arbOpSequence`.
 For any `arbText` or `arbTextWithCitations` string `t` and `arbTimestamp` `ts`:
 - `createDocument(t, ts)` has Text `t`, one `PST` Span with `ts` (or zero Spans when `t` is empty), no Runs, and no Overrides.
 - Its citations and quotes equal `extract(t)` with every result `unchecked`.
+- Its Issue_Keys follow Issue_Key assignment at creation: taking every Full_Citation, Short_Form, and Quote_Candidate in issue order (ascending start Offset, a Citation before a Quote_Candidate at an equal start), the `n` keys are `k0`, `k1`, …, `k(n−1)` in that order; Other_References carry no Issue_Key; and `keyCounter` is `n`.
 - For any `arbStringWithLoneSurrogate`, it returns `split_surrogate` at the first unpaired index.
 [document]
 **Validates: Requirements 2.1, 2.2, 2.3, 2.6**
