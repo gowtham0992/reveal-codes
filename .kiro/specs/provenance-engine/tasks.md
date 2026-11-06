@@ -429,9 +429,9 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Replace re-extracts and re-anchors once, against the original Document, with the combined edit `[from, to) → [from, from + text.length)` (A4).
     - _Requirements: 2.3, 4.6, 15.1, 15.4_
   - [x] 5.42 Extend `src/testing/arb-ops.ts` and `src/testing/arb-document.ts`
-    - `arbEdit(t)` biases edit positions into citation ranges, party names, and stop-list prefixes, up to `LOOKBEHIND` (162) code units before them, into Entity_Suffixes and the ` v. ` of a party, and into quote-to-citation gaps. It biases inserted text toward `arbStopListPrefix` values, Connectors, Capitalised_Words, `arbGapSignal` values, Entity_Suffixes (`, Inc.`, `, L.L.C.`), ` v. ` and `v. ` + a Capitalised_Word, `, `, and `; `.
+    - `arbEdit(t)` lives in `src/testing/arb-edit.ts` with `applyTextEdit` and `editTargets`. It biases edit positions into citation ranges, party names, and stop-list prefixes, up to `LOOKBEHIND` (162) code units before them, into Entity_Suffixes and the ` v. ` of a party, and into quote-to-citation gaps. It biases inserted text toward `arbStopListPrefix` values, Connectors, Capitalised_Words, `arbGapSignal` values, Entity_Suffixes (`, Inc.`, `, L.L.C.`), ` v. ` and `v. ` + a Capitalised_Word, `, `, and `; `.
     - `arbCitationTargetedOp(d)` also targets quote-to-citation gaps.
-    - `arbDocument` text now comes from `arbText` or `arbTextWithCitations`, and `arbOpSequence` biases Offsets into citation and quote ranges.
+    - `arbDocument` text now comes from `arbDocumentText`, which draws `arbTextWithCitations` and `arbText` at 3:1, and `arbOpSequence` biases Offsets into citation and quote ranges.
     - _Requirements: 22.1, 22.4_
   - [x] 5.43 Write Property 2 in `test/document.properties.test.ts`
     - **Property 2: Creation preserves text and starts as one PST span with extracted, unchecked citations**
