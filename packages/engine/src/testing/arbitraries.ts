@@ -9,6 +9,7 @@ export * from "./arb-citation-corrupt.js";
 export * from "./arb-case-name.js";
 export * from "./arb-short-form-party.js";
 export * from "./arb-initial-prose.js";
+export * from "./arb-boundary-text.js";
 export * from "./arb-quote-parts.js";
 export * from "./arb-text-builder.js";
 export * from "./arb-quote-render.js";
