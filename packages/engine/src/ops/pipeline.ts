@@ -5,7 +5,8 @@
  * are separate so that Replace can relabel once after both counts while
  * re-anchoring after each primitive edit (design A4, Req 6.9).
  */
-import { reanchorStage, withLayer, type DraftDocument, type Edit } from "../anchor.js";
+import { withLayer, type DraftDocument, type Edit } from "../anchor.js";
+import { reanchorStage } from "../citation-layer.js";
 import type { InvalidSpans } from "../errors.js";
 import { relabelRuns } from "../relabel.js";
 import { ok, type Result } from "../result.js";

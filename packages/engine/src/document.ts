@@ -2,7 +2,8 @@
  * Document creation, normalisation, and the `apply` dispatcher (design A1,
  * A2; Req 2, 3.4, 4.7, 4.10, 5.1, 5.2, 7.7).
  */
-import { creationEdit, reanchorStage, withLayer, type DraftDocument } from "./anchor.js";
+import { creationEdit, withLayer, type DraftDocument } from "./anchor.js";
+import { reanchorStage } from "./citation-layer.js";
 import type { EngineError, InvalidSpans } from "./errors.js";
 import {
   applyDelete,

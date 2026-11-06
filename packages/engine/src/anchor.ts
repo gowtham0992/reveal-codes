@@ -1,17 +1,6 @@
 /**
- * Citation-layer pipeline stage (design A1 step 4, A3 step 7, A6).
- *
- * `reanchorStage` is the single place where a Document's citation layer
- * (Citations, Quote_Candidates, Overrides, Issue_Key_Counter) is derived
- * after its Text, Spans, and Run table are settled. It runs both at creation
- * (`prev` is null) and after every primitive Insert or Delete (`prev` is the
- * Document before the edit).
- *
- * Until task 5.41 the Extractor is not wired in, so the stage returns empty
- * Citations, Quote_Candidates, and Overrides and leaves the counter unchanged
- * (0 at creation). Task 5.41 replaces the body with `rescan`,
- * `linkShortForms`, quote pairing and attachment, and `reanchor`/`assignKeys`
- * without changing this signature.
+ * Re-anchoring of the citation layer (design A1 step 4, A6). The pipeline
+ * stage that calls it, `reanchorStage`, lives in `citation-layer.ts`.
  *
  * Re-anchoring (design A6; Req 15.2 to 15.8) is implemented below the stage:
  *
@@ -70,32 +59,6 @@ export type CitationLayer = Readonly<{
 /** Edit describing creation: the empty Text became `[0, length)`. */
 export function creationEdit(length: number): Edit {
   return { from: 0, oldTo: 0, newTo: length };
-}
-
-/**
- * Input to `reanchorStage`. `prev` is the Document before `edit`, or null at
- * creation, where `edit` is `creationEdit(draft.text.length)`. `draft` holds
- * the post-edit Text, Spans, and Run table.
- */
-export type ReanchorInput = Readonly<{
-  prev: Document | null;
-  draft: DraftDocument;
-  edit: Edit;
-}>;
-
-/**
- * Derives the citation layer of `input.draft`. Placeholder until task 5.41:
- * empty Citations, Quote_Candidates, and Overrides, with the counter carried
- * over from `prev` (0 at creation). Task 5.41 reads `draft` and `edit` too.
- * Total and pure.
- */
-export function reanchorStage({ prev }: ReanchorInput): CitationLayer {
-  return {
-    citations: [],
-    quotes: [],
-    overrides: [],
-    keyCounter: prev === null ? 0 : prev.keyCounter,
-  };
 }
 
 /** Joins a draft and its citation layer into a Document. */
