@@ -11,6 +11,7 @@ import {
 } from "../src/testing/arbitraries";
 import { COVERAGE_EXAMPLES, expectCovered, record, type Coverage } from "./support/coverage";
 import { runs } from "./support/fc";
+import { arbFollowCase, expectFollowAttachment } from "./support/follow-attach";
 import { arbGapCase, expectGapAttachment } from "./support/gap-attach";
 import { arbCandidate, expectGlueRejected } from "./support/glue";
 import {
@@ -133,5 +134,12 @@ describe("extract preceding gaps _Requirements: 13.1, 13.9_", () => {
   // Property 45
   it("Property 45: Case_Name and Gap_Signal gaps attach; `In`, `with`, two-signal, over-long do not", () => {
     fc.assert(fc.property(arbGapCase, expectGapAttachment), runs());
+  });
+});
+
+describe("extract following quotes _Requirements: 13.8, 13.9_", () => {
+  // Property 46
+  it("Property 46: following quotes attach to the citation before them in the same Sentence", () => {
+    fc.assert(fc.property(arbFollowCase, expectFollowAttachment), runs());
   });
 });
