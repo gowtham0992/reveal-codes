@@ -4,7 +4,7 @@
     "outDir": "dist",
     "types": ["node"]
   },
-  "include": ["eslint.config.ts", "vitest.config.ts"],
+  "include": ["eslint.config.ts", "vitest.config.ts", "vitest.setup.ts"],
   "references": [
     { "path": "packages/engine" },
     { "path": "packages/engine/test" },
