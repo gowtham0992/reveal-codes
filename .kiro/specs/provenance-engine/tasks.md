@@ -103,7 +103,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - _Requirements: 5.1, 5.3, 5.4, 5.5, 5.6, 5.7_
   - [x] 2.11 Implement `ops/insert.ts`, `ops/delete.ts`, and `ops/replace.ts`
     - The Insert and Delete pipeline follows design A3 steps 1 to 8 and calls `reanchorStage` at step 7.
-    - Replace builds its Text, Spans, and Run table as Delete then Insert, evaluates relabelling once after both counts, calls `reanchorStage` once with the combined edit, and returns one combined Inverse (design A4).
+    - Replace builds its Text, Spans, and Run table as Delete then Insert, evaluates relabelling after the delete step and again after the insert step, calls `reanchorStage` once with the combined edit, and returns one combined Inverse (design A4).
     - _Requirements: 4.1, 4.4, 4.6, 4.8, 6.9, 6.11_
   - [x] 2.12 Implement `apply` in `document.ts` and the `ops.ts` facade
     - The dispatcher validates config, routes Inverses, validates Caller_Operations, returns a no-op Document with an Inverse, then dispatches (design A2).
