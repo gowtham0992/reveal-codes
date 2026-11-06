@@ -87,6 +87,10 @@
     "5.22 Write Property 18 in `test/extract.properties.test.ts`": {
       "status": "passed",
       "lastRunTimestamp": 1793931004169
+    },
+    "5.23 Write Property 19 in `test/extract.properties.test.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1793938373566
     }
   },
   "executionHistory": {
@@ -971,6 +975,399 @@
         "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
         "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
         "timestamp": 1793938055589
+      }
+    ],
+    "5.23 Write Property 19 in `test/extract.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073399
+      },
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938090341
+      },
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938858774
+      }
+    ],
+    "5.24 Write Property 20 in `test/extract.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073464
+      }
+    ],
+    "5.25 Write Property 44 in `test/extract.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073498
+      }
+    ],
+    "5.26 Write Property 45 in `test/extract.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073548
+      }
+    ],
+    "5.27 Write Property 46 in `test/extract.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073575
+      }
+    ],
+    "5.28 Write Property 47 in `test/extract.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073601
+      }
+    ],
+    "5.29 Write Property 49 in `test/extract.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073628
+      }
+    ],
+    "5.30 Write Property 50 in `test/extract.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073672
+      }
+    ],
+    "5.31 Add Short_Form_Party named examples to `test/extract.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073701
+      }
+    ],
+    "5.42 Extend `src/testing/arb-ops.ts` and `src/testing/arb-document.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073730
+      },
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938090406
+      }
+    ],
+    "5.43 Write Property 2 in `test/document.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073758
+      }
+    ],
+    "5.44 Write Property 25 in `test/anchor.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073784
+      }
+    ],
+    "5.45 Write Property 27 in `test/anchor.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073809
+      }
+    ],
+    "5.46 Write Property 51 in `test/extract.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073865
+      }
+    ],
+    "6. Checkpoint: citations and re-anchoring": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073892
+      }
+    ],
+    "7.1 Implement `verification.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073919
+      }
+    ],
+    "7.2 Implement `issues.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073945
+      }
+    ],
+    "7.3 Create `src/testing/arb-state.ts` and extend `arbDocument`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938073975
+      }
+    ],
+    "7.4 Write Property 28 in `test/verification.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074014
+      }
+    ],
+    "7.5 Write Property 29 in `test/verification.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074043
+      }
+    ],
+    "7.6 Write Property 30 in `test/verification.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074069
+      }
+    ],
+    "7.7 Write Property 31 in `test/verification.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074094
+      }
+    ],
+    "7.8 Write Property 32 in `test/issues.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074118
+      }
+    ],
+    "7.9 Write Property 33 in `test/issues.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074148
+      }
+    ],
+    "7.10 Write Property 34 in `test/issues.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074191
+      }
+    ],
+    "7.11 Write Property 35 in `test/issues.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074215
+      }
+    ],
+    "7.12 Write Property 26 in `test/anchor.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074242
+      }
+    ],
+    "7.13 Write Property 43 in `test/arbitraries.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074268
+      }
+    ],
+    "8.1 Implement `codes/syntax.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074293
+      }
+    ],
+    "8.2 Implement `codes/render.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074318
+      }
+    ],
+    "8.3 Implement `codes/strip.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074345
+      }
+    ],
+    "8.4 Implement `codes/lex.ts` `lexCodes`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074369
+      }
+    ],
+    "8.5 Implement `codes/decode.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074408
+      }
+    ],
+    "8.6 Implement `codes/check.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074443
+      }
+    ],
+    "8.7 Implement the `codes.ts` facade": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074475
+      }
+    ],
+    "8.8 Create `src/testing/arb-codes.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074505
+      }
+    ],
+    "8.9 Write Property 36 in `test/codes.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074537
+      }
+    ],
+    "8.10 Write Property 37 in `test/codes.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074567
+      }
+    ],
+    "8.11 Write Property 38 in `test/codes.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074597
+      }
+    ],
+    "8.12 Write Property 39 in `test/codes.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074642
+      }
+    ],
+    "8.13 Write Property 40 in `test/codes.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074672
+      }
+    ],
+    "8.14 Write Property 41 in `test/codes.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074697
+      }
+    ],
+    "8.15 Write example tests in `test/codes.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074722
+      }
+    ],
+    "9. Checkpoint: rendering and parsing": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074753
+      }
+    ],
+    "10.1 Write `src/index.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074780
+      }
+    ],
+    "10.2 Write static checks in `test/purity.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074810
+      }
+    ],
+    "10.3 Create `src/testing/arb-api.ts` `arbApiCall(d)`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074840
+      }
+    ],
+    "10.4 Write Property 42 in `test/purity.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074866
+      }
+    ],
+    "10.5 Write `test/inventory.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074893
+      }
+    ],
+    "11.1 Create the benchmark in `packages/engine/bench/`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074921
+      }
+    ],
+    "11.2 Add a check to `test/purity.test.ts` that the root `package.json` scripts and `.github/workflows/ci.yml` never invoke the benchmark": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074948
+      }
+    ],
+    "11.3 Run `pnpm --filter @reveal-codes/engine bench` by hand on the Reference_Machine and record the results in `BUILD_LOG.md`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938074975
+      }
+    ],
+    "12.1 Add a dated `BUILD_LOG.md` entry": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938075002
+      }
+    ],
+    "12.2 Add rows to `docs/KIRO_USAGE.md`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938075032
       }
     ]
   }

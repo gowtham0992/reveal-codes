@@ -315,44 +315,44 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Covers party Short_Forms with and without ` v. ` and Entity_Suffixes, Preceding_Quotes with every Gap_Signal in both cases (including `(quoting …)`), and the unattached `In`, `with`, two-Gap_Signal, and over-80 cases.
     - **Validates: Requirements 9.1, 9.3, 9.4, 9.5, 9.6, 12.1, 12.2, 12.3, 12.6, 12.7, 13.1, 13.5, 13.7, 13.8, 13.9**
     - _Requirements: 9.1, 9.3, 9.4, 9.5, 9.6, 12.1, 12.2, 12.3, 12.6, 12.7, 13.1, 13.5, 13.7, 13.8, 13.9_
-  - [ ] 5.23 Write Property 19 in `test/extract.properties.test.ts`
+  - [x] 5.23 Write Property 19 in `test/extract.properties.test.ts`
     - **Property 19: Citations glued to letters or digits are not extracted**
     - **Validates: Requirements 9.8**
     - _Requirements: 9.8_
-  - [ ] 5.24 Write Property 20 in `test/extract.properties.test.ts`
+  - [~] 5.24 Write Property 20 in `test/extract.properties.test.ts`
     - **Property 20: Quote pairing and attachment agree with a reference model**
     - Uses a test-local naive reference model that pairs marks per family, drops blank pairs, then, in a left-to-right pass by opening mark, drops every pair whose opening mark lies inside the last kept pair (Req 13.10), and takes Sentences from `segment`. It tries every split `P1 + S + P2 + C + P3` of a preceding gap, with `S` empty or the longest entry of a test-local Gap_Signal list typed from the Glossary (ten forms plus their lowercase-first forms, no `with`) that starts at that position and fits in the gap (D21), and checks `C` with a test-local Case_Name checker (Entity_Suffixes, inner periods of `L.L.C.`, `L.P.`, `N.A.`, and the D19 leading-word rule). Following gaps accept only whitespace and `, ; : (`.
     - **Validates: Requirements 13.1, 13.5, 13.6, 13.7, 13.8, 13.9, 13.10**
     - _Requirements: 13.1, 13.5, 13.6, 13.7, 13.8, 13.9, 13.10_
-  - [ ] 5.25 Write Property 44 in `test/extract.properties.test.ts`
+  - [~] 5.25 Write Property 44 in `test/extract.properties.test.ts`
     - **Property 44: Boundary counting agrees with the Segmenter's Sentences**
     - **Validates: Requirements 13.1, 13.8**
     - _Requirements: 13.1, 13.8_
-  - [ ] 5.26 Write Property 45 in `test/extract.properties.test.ts`
+  - [~] 5.26 Write Property 45 in `test/extract.properties.test.ts`
     - **Property 45: Case_Name and Gap_Signal gaps attach, and `In`, `with`, doubled-signal, or over-long gaps do not**
     - Uses `arbQuoteContent`, `arbCaseName`, `arbGapPunct`, `arbGapSignal`, `arbCitation`, `arbShortFormParty`, and `arbLongParty`.
     - **Validates: Requirements 13.1, 13.9**
     - _Requirements: 13.1, 13.9_
-  - [ ] 5.27 Write Property 46 in `test/extract.properties.test.ts`
+  - [~] 5.27 Write Property 46 in `test/extract.properties.test.ts`
     - **Property 46: Following quotes attach to the citation before them in the same Sentence**
     - Also asserts that inserting `s + " "` for any `arbGapSignal` `s` into the following gap leaves no quote.
     - **Validates: Requirements 13.8, 13.9**
     - _Requirements: 13.8, 13.9_
-  - [ ] 5.28 Write Property 47 in `test/extract.properties.test.ts`
+  - [~] 5.28 Write Property 47 in `test/extract.properties.test.ts`
     - **Property 47: The preceding rule wins, and one citation can carry several quotes**
     - **Validates: Requirements 13.5, 13.7**
     - _Requirements: 13.5, 13.7_
-  - [ ] 5.29 Write Property 49 in `test/extract.properties.test.ts`
+  - [~] 5.29 Write Property 49 in `test/extract.properties.test.ts`
     - **Property 49: Party Short_Forms start with a Capitalised_Word and never with a stop-list entry**
     - The test-local Party_Run checker allows at most one ` v. ` between two Party_Sides and at most one Entity_Suffix per side. The tail is located from `party.length`, not from the first `,`.
     - **Validates: Requirements 9.2, 12.2, 12.8**
     - _Requirements: 9.2, 12.2, 12.8_
-  - [ ] 5.30 Write Property 50 in `test/extract.properties.test.ts`
+  - [~] 5.30 Write Property 50 in `test/extract.properties.test.ts`
     - **Property 50: The party is the longest Party_Run with stop-list entries and Connectors stripped**
     - Uses a test-local word-list reference model that shares no code with `party.ts`. It accepts the first word start whose words parse as one Party_Side or two joined by ` v. `, each side a Word_Run optionally followed by `, ` and one Entity_Suffix word, and yields no party if stripping leaves `v.` first.
     - **Validates: Requirements 9.2, 12.2**
     - _Requirements: 9.2, 12.2_
-  - [ ] 5.31 Add Short_Form_Party named examples to `test/extract.properties.test.ts`
+  - [~] 5.31 Add Short_Form_Party named examples to `test/extract.properties.test.ts`
     - Each example follows a Full_Citation it can link to.
     - `In Casey` gives `Casey`.
     - `Planned Parenthood` and `See Planned Parenthood` give `Planned Parenthood`.
@@ -425,25 +425,25 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Insert and Delete run `rescan`, `linkShortForms`, `pairQuoteMarks` and `attachQuotes`, then `reanchor` (A3 step 7, A5).
     - Replace re-extracts after both its delete and its insert step (A4).
     - _Requirements: 2.3, 4.6, 15.1, 15.4_
-  - [ ] 5.42 Extend `src/testing/arb-ops.ts` and `src/testing/arb-document.ts`
+  - [x] 5.42 Extend `src/testing/arb-ops.ts` and `src/testing/arb-document.ts`
     - `arbEdit(t)` biases edit positions into citation ranges, party names, and stop-list prefixes, up to `LOOKBEHIND` (162) code units before them, into Entity_Suffixes and the ` v. ` of a party, and into quote-to-citation gaps. It biases inserted text toward `arbStopListPrefix` values, Connectors, Capitalised_Words, `arbGapSignal` values, Entity_Suffixes (`, Inc.`, `, L.L.C.`), ` v. ` and `v. ` + a Capitalised_Word, `, `, and `; `.
     - `arbCitationTargetedOp(d)` also targets quote-to-citation gaps.
     - `arbDocument` text now comes from `arbText` or `arbTextWithCitations`, and `arbOpSequence` biases Offsets into citation and quote ranges.
     - _Requirements: 22.1, 22.4_
-  - [ ] 5.43 Write Property 2 in `test/document.properties.test.ts`
+  - [~] 5.43 Write Property 2 in `test/document.properties.test.ts`
     - **Property 2: Creation preserves text and starts as one PST span with extracted, unchecked citations**
     - **Validates: Requirements 2.1, 2.2, 2.3, 2.6**
     - _Requirements: 2.1, 2.2, 2.3, 2.6_
-  - [ ] 5.44 Write Property 25 in `test/anchor.properties.test.ts`
+  - [~] 5.44 Write Property 25 in `test/anchor.properties.test.ts`
     - **Property 25: Incremental re-extraction equals full extraction**
     - Uses `arbEdit(t)` from task 5.42, so edits change a party's canonical start or tail comma from outside its range, split a Party_Side, or add and remove a Gap_Signal in a gap.
     - **Validates: Requirements 15.1**
     - _Requirements: 15.1_
-  - [ ] 5.45 Write Property 27 in `test/anchor.properties.test.ts`
+  - [~] 5.45 Write Property 27 in `test/anchor.properties.test.ts`
     - **Property 27: Issue_Keys are fresh, unique, and assigned in document order**
     - **Validates: Requirements 15.5, 15.7**
     - _Requirements: 15.5, 15.7_
-  - [ ] 5.46 Write Property 51 in `test/extract.properties.test.ts`
+  - [~] 5.46 Write Property 51 in `test/extract.properties.test.ts`
     - **Property 51: A Gap_Signal before a citation never prevents an attachment that holds without it**
     - Builds `t` and `t′` (with `g + " "` inserted before `m + x`) from `arbQuoteContent`, `arbGapPunct`, `arbCaseName`, `arbCitation`, `arbShortFormParty`, and `arbGapSignal`, and checks the attachment under the Sentence condition and the shifted citations.
     - **Validates: Requirements 12.2, 13.1**
@@ -474,68 +474,68 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Record any counterexample as a named example (Req 22.5).
     - _Requirements: 9.4, 10.1, 10.3, 10.4, 10.5_
 
-- [ ] 6. Checkpoint: citations and re-anchoring
+- [~] 6. Checkpoint: citations and re-anchoring
   - Ensure `pnpm lint`, `pnpm typecheck`, and `pnpm test` pass. Ask the user if questions arise.
 
 - [ ] 7. Verification state, issues, and overrides
-  - [ ] 7.1 Implement `verification.ts`
+  - [~] 7.1 Implement `verification.ts`
     - `setVerification` checks `unknown_citation`, then `not_verifiable`, then `invalid_verification_result`. It keeps the Override when the status is unchanged and drops it when the status changes.
     - `not_verifiable` covers a Short_Form key and, after task 5.47, a `verified` result (well-formed or not; only `r.status` is read) on a Database_Citation with `lexisCourtListed: false`, returning the input Document unchanged. `not_found`, `ambiguous`, and `unchecked` on such a citation are recorded as usual, so it stays an Issue until overridden (Req 16.5, 18.2, D22).
     - `setQuoteCheck` checks `unknown_quote`, then `not_verifiable` (quote on an Orphan), then `invalid_quote_result`. It drops the Override when the result differs.
     - `verificationOf` derives the result for a Short_Form from its target, and returns `unchecked` for an Orphan.
     - Per design A10.
     - _Requirements: 12.4, 12.5, 13.3, 13.4, 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7, 17.1, 17.2, 17.3, 17.4, 17.5, 17.8_
-  - [ ] 7.2 Implement `issues.ts`
+  - [~] 7.2 Implement `issues.ts`
     - `issues` returns items in `(start, citation first)` order, each with its IssueCode.
     - `blockingIssues`, `overrides`, and `recordOverride`. `recordOverride` checks `unknown_issue`, then `empty_override_reason` using `trim`, then `invalid_timestamp`. It stores the reason verbatim and keeps one Override per key.
     - Per design A10.
     - _Requirements: 12.5, 13.4, 17.6, 17.7, 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 18.8_
-  - [ ] 7.3 Create `src/testing/arb-state.ts` and extend `arbDocument`
+  - [~] 7.3 Create `src/testing/arb-state.ts` and extend `arbDocument`
     - Arbitraries: `arbVerificationResult`, `arbQuoteCheckResult(len)`, `arbReason` (including `[ ] \ { } ; = ,`), `arbBlankReason`, `arbStateWrites`, `arbBadVerificationWrite`, `arbBadQuoteWrite`, and `arbStateOpSequence`. Each bad-write arbitrary records its expected error.
     - `arbBadVerificationWrite` includes a `verified` write (well-formed or malformed) on an unlisted LEXIS key, expecting `not_verifiable`. `arbStateOpSequence` uses texts with unlisted LEXIS citations, weights `verified` writes toward their keys, and biases edits into and next to them (design Arbitraries table, D22).
     - `arbDocument` applies `arbStateWrites` through `setVerification`, `setQuoteCheck`, and `recordOverride`, weighted across every status. A write that returns an error is skipped, not filtered.
     - _Requirements: 22.1, 22.4_
-  - [ ] 7.4 Write Property 28 in `test/verification.properties.test.ts`
+  - [~] 7.4 Write Property 28 in `test/verification.properties.test.ts`
     - **Property 28: Writing a verification result updates the citation and its Short_Forms only**
     - Excludes a `verified` result on an unlisted LEXIS key, which Property 29 covers.
     - **Validates: Requirements 12.4, 16.1, 16.6, 16.7**
     - _Requirements: 12.4, 16.1, 16.6, 16.7_
-  - [ ] 7.5 Write Property 29 in `test/verification.properties.test.ts`
+  - [~] 7.5 Write Property 29 in `test/verification.properties.test.ts`
     - **Property 29: Invalid verification writes are rejected without change**
     - Includes the Req 16.5 extension: a `verified` result on a Database_Citation with `lexisCourtListed: false` returns `not_verifiable`, before any payload check.
     - **Validates: Requirements 16.2, 16.3, 16.4, 16.5**
     - _Requirements: 16.2, 16.3, 16.4, 16.5_
-  - [ ] 7.6 Write Property 30 in `test/verification.properties.test.ts`
+  - [~] 7.6 Write Property 30 in `test/verification.properties.test.ts`
     - **Property 30: Writing a quote-check result updates that quote only**
     - **Validates: Requirements 17.1, 17.2, 17.4**
     - _Requirements: 17.1, 17.2, 17.4_
-  - [ ] 7.7 Write Property 31 in `test/verification.properties.test.ts`
+  - [~] 7.7 Write Property 31 in `test/verification.properties.test.ts`
     - **Property 31: Invalid quote-check writes are rejected without change**
     - **Validates: Requirements 13.4, 17.3, 17.5, 17.8**
     - _Requirements: 13.4, 17.3, 17.5, 17.8_
-  - [ ] 7.8 Write Property 32 in `test/issues.properties.test.ts`
+  - [~] 7.8 Write Property 32 in `test/issues.properties.test.ts`
     - **Property 32: The Issue set is exactly the non-passing items**
     - **Validates: Requirements 12.5, 13.4, 17.6, 17.7, 18.2**
     - _Requirements: 12.5, 13.4, 17.6, 17.7, 18.2_
-  - [ ] 7.9 Write Property 33 in `test/issues.properties.test.ts`
+  - [~] 7.9 Write Property 33 in `test/issues.properties.test.ts`
     - **Property 33: blockingIssues are the un-overridden Issues in order**
     - **Validates: Requirements 18.1, 18.8**
     - _Requirements: 18.1, 18.8_
-  - [ ] 7.10 Write Property 34 in `test/issues.properties.test.ts`
+  - [~] 7.10 Write Property 34 in `test/issues.properties.test.ts`
     - **Property 34: Recording an Override follows the reason and target rules**
     - **Validates: Requirements 18.3, 18.4, 18.5, 18.6, 18.7**
     - _Requirements: 18.3, 18.4, 18.5, 18.6, 18.7_
-  - [ ] 7.11 Write Property 35 in `test/issues.properties.test.ts`
+  - [~] 7.11 Write Property 35 in `test/issues.properties.test.ts`
     - **Property 35: Overrides only ever belong to current Issues**
     - Also asserts that no sequence of operations and verification results ever puts a citation with `lexisCourtListed: false` in the `verified` state: in every intermediate Document every such Full_Citation has a status other than `verified`. `arbStateOpSequence` generates unlisted LEXIS citations and `verified` writes aimed at them. Same `fc.assert`; no new Property number.
     - **Validates: Requirements 15.8, 16.5, 16.6, 17.4**
     - _Requirements: 15.8, 16.5, 16.6, 17.4_
-  - [ ] 7.12 Write Property 26 in `test/anchor.properties.test.ts`
+  - [~] 7.12 Write Property 26 in `test/anchor.properties.test.ts`
     - **Property 26: Touched citations reset, untouched ones carry over with shifted offsets**
     - This lands here because it needs `arbDocument` with verification results and Overrides from task 7.3.
     - **Validates: Requirements 15.2, 15.3, 15.4, 15.6, 15.7**
     - _Requirements: 15.2, 15.3, 15.4, 15.6, 15.7_
-  - [ ] 7.13 Write Property 43 in `test/arbitraries.properties.test.ts`
+  - [~] 7.13 Write Property 43 in `test/arbitraries.properties.test.ts`
     - **Property 43: The shared arbitraries generate only valid values**
     - Covers the full `arbDocument`, `arbOpSequence`, near-miss, garbage, text-with-citations, opinion, `arbShortFormParty`, `arbGapSignal`, and `arbStopListPrefix` arbitraries. `arbShortFormParty` values are checked as Party_Runs of at most `MAX_PARTY` with at most one ` v. ` and at most one Entity_Suffix per side, and `arbGapSignal` values against a test-local Glossary list that excludes `with`.
     - **Validates: Requirements 22.4**
@@ -547,126 +547,126 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - _Requirements: 16.3, 17.8, 18.5_
 
 - [ ] 8. Reveal Codes rendering and parsing
-  - [ ] 8.1 Implement `codes/syntax.ts`
+  - [~] 8.1 Implement `codes/syntax.ts`
     - `CODE_NAMES` with the exact glyphs from product.md.
     - `escapeText`, `escapeRetained`, `escapePayload`, and `unescape`, using the per-context escape sets in the design.
     - `codeString(name, retained, fields, mode)`.
     - _Requirements: 19.2, 19.3, 19.11_
-  - [ ] 8.2 Implement `codes/render.ts`
+  - [~] 8.2 Implement `codes/render.ts`
     - Builds per-offset close and open events in the Req 19.6 order, with `[DOC]` first in full mode.
     - Writes the Payload_Section fields from the design table, places `[OVR]` after its opening Code, and builds positions in the same pass.
     - In display mode it omits fields and `[DOC]`.
     - Per design A11.
     - _Requirements: 19.1, 19.2, 19.4, 19.5, 19.6, 19.7, 19.8, 19.9, 19.10, 19.12_
-  - [ ] 8.3 Implement `codes/strip.ts`
+  - [~] 8.3 Implement `codes/strip.ts`
     - `strip` is a text-only two-state scanner that drops `[DOC]` and every `{…}` section.
     - `stripPositions`.
     - Per design A11 "Strip".
     - _Requirements: 19.11, 19.12, 19.13_
-  - [ ] 8.4 Implement `codes/lex.ts` `lexCodes`
+  - [~] 8.4 Implement `codes/lex.ts` `lexCodes`
     - A single pass that records every syntax fault at its input index and returns the lowest one.
     - Per design A12 step 1.
     - _Requirements: 20.3, 20.6_
-  - [ ] 8.5 Implement `codes/decode.ts`
+  - [~] 8.5 Implement `codes/decode.ts`
     - Turns tokens into a draft Document: header, spans, citation and quote ranges, and `[OVR]` attachment (`ovr_position`).
     - Field decoders.
     - Per design A12 step 2.
     - _Requirements: 20.1, 20.3_
-  - [ ] 8.6 Implement `codes/check.ts`
+  - [~] 8.6 Implement `codes/check.ts`
     - Runs the Req 20.4 semantic rules, each reported with its `rule` tag.
     - Includes `unverifiable_status`: a `[CIT ✓]` on a Database_Citation whose Extractor value has `lexisCourtListed: false` is rejected at that Code's input index, the same treatment as a `[CIT ✓]` on an Orphan, never a downgrade (Req 16.5, 20.4, D23). Add the design's named example test "Parse rejects a verified code on an unlisted LEXIS citation" to `test/codes.test.ts`, with its listed-court counterpart that parses `ok`.
     - Cross-checks against the Extractor (`extractor_mismatch`), including `[REF]` pairs and quote attachment.
     - Per design A12 step 3.
     - _Requirements: 20.4, 20.5_
-  - [ ] 8.7 Implement the `codes.ts` facade
+  - [~] 8.7 Implement the `codes.ts` facade
     - Exports `render`, `parse` (lex, decode, check, build, and never throws), `strip`, and `stripPositions`.
     - _Requirements: 20.1, 20.2, 20.6_
-  - [ ] 8.8 Create `src/testing/arb-codes.ts`
+  - [~] 8.8 Create `src/testing/arb-codes.ts`
     - `arbSyntaxFault` records the injected index. `arbSemanticTamper` records the expected `MalformedRule`.
     - Add an export line to `arbitraries.ts`.
     - _Requirements: 22.1_
-  - [ ] 8.9 Write Property 36 in `test/codes.properties.test.ts`
+  - [~] 8.9 Write Property 36 in `test/codes.properties.test.ts`
     - **Property 36: Full Reveal Codes round trip**
     - **Validates: Requirements 19.2, 19.3, 20.1, 20.2**
     - _Requirements: 19.2, 19.3, 20.1, 20.2_
-  - [ ] 8.10 Write Property 37 in `test/codes.properties.test.ts`
+  - [~] 8.10 Write Property 37 in `test/codes.properties.test.ts`
     - **Property 37: Display is the Strip projection of full**
     - **Validates: Requirements 19.10, 19.11, 19.12, 19.13**
     - _Requirements: 19.10, 19.11, 19.12, 19.13_
-  - [ ] 8.11 Write Property 38 in `test/codes.properties.test.ts`
+  - [~] 8.11 Write Property 38 in `test/codes.properties.test.ts`
     - **Property 38: Removing Codes and unescaping yields the Text**
     - **Validates: Requirements 19.3, 19.5**
     - _Requirements: 19.3, 19.5_
-  - [ ] 8.12 Write Property 39 in `test/codes.properties.test.ts`
+  - [~] 8.12 Write Property 39 in `test/codes.properties.test.ts`
     - **Property 39: Codes match the document structure**
     - **Validates: Requirements 19.1, 19.2, 19.4, 19.6, 19.7, 19.8**
     - _Requirements: 19.1, 19.2, 19.4, 19.6, 19.7, 19.8_
-  - [ ] 8.13 Write Property 40 in `test/codes.properties.test.ts`
+  - [~] 8.13 Write Property 40 in `test/codes.properties.test.ts`
     - **Property 40: Malformed text is rejected at the lowest fault index, and parse never throws**
     - **Validates: Requirements 20.3, 20.6**
     - _Requirements: 20.3, 20.6_
-  - [ ] 8.14 Write Property 41 in `test/codes.properties.test.ts`
+  - [~] 8.14 Write Property 41 in `test/codes.properties.test.ts`
     - **Property 41: Semantically tampered renderings are rejected with the violated rule**
     - `arbSemanticTamper` includes replacing the opening citation code of an unlisted LEXIS Database_Citation with `[CIT ✓{k=<same key>;cl=<id>}]`, expecting `unverifiable_status` (D23). Same `fc.assert`; no new Property number.
     - **Validates: Requirements 20.4, 20.5**
     - _Requirements: 20.4, 20.5_
-  - [ ] 8.15 Write example tests in `test/codes.test.ts`
+  - [~] 8.15 Write example tests in `test/codes.test.ts`
     - Empty Document: full mode renders only `[DOC]` with one position, and display mode renders `""` with none (19.9).
     - Parsing a display rendering, or `""`, returns `malformed_codes` with `missing_doc` at 0 (20.3).
     - The design's full and display example strings.
     - Every Code from product.md appears in at least one rendering.
     - _Requirements: 19.1, 19.9, 19.10, 20.3_
 
-- [ ] 9. Checkpoint: rendering and parsing
+- [~] 9. Checkpoint: rendering and parsing
   - Ensure `pnpm lint`, `pnpm typecheck`, and `pnpm test` pass. Ask the user if questions arise.
 
 - [ ] 10. Public API and purity checks
-  - [ ] 10.1 Write `src/index.ts`
+  - [~] 10.1 Write `src/index.ts`
     - Named re-exports of the design's Public API and `DEFAULT_RELABEL_THRESHOLD`, plus the public types.
     - Do not export `testing/`.
     - Remove the `PACKAGE_NAME` placeholder and replace `test/index.test.ts` with a test that calls exported functions and asserts their results.
     - _Requirements: 1.2, 1.9_
-  - [ ] 10.2 Write static checks in `test/purity.test.ts`
+  - [~] 10.2 Write static checks in `test/purity.test.ts`
     - The engine `package.json` dependency fields are empty or absent (1.1).
     - No file in `src` contains `node:` imports, DOM globals, `Date`, `performance`, `Math.random`, `crypto`, `fetch`, `XMLHttpRequest`, `setTimeout`, `setInterval`, imports from outside the package, `export default`, or `try`/`catch` (1.2, 1.3, 1.9). `testing/` may import fast-check.
     - `index.ts` does not re-export `testing/` (1.2).
     - `reporters.json` is the only reporter list, its entries are non-empty, trimmed, and unique, and the licence note has the licence name, repository, version or commit, and date (14.1, 14.2, 14.4).
     - _Requirements: 1.1, 1.2, 1.3, 1.9, 14.1, 14.2, 14.4_
-  - [ ] 10.3 Create `src/testing/arb-api.ts` `arbApiCall(d)`
+  - [~] 10.3 Create `src/testing/arb-api.ts` `arbApiCall(d)`
     - One call to any exported function with generated arguments, including failing ones.
     - Add an export line to `arbitraries.ts`.
     - _Requirements: 22.1_
-  - [ ] 10.4 Write Property 42 in `test/purity.properties.test.ts`
+  - [~] 10.4 Write Property 42 in `test/purity.properties.test.ts`
     - **Property 42: Engine functions are deterministic, pure, and invent no values**
     - Calls run on deep-frozen arguments.
     - **Validates: Requirements 1.4, 1.5, 1.6, 1.7**
     - _Requirements: 1.4, 1.5, 1.6, 1.7_
-  - [ ] 10.5 Write `test/inventory.test.ts`
+  - [~] 10.5 Write `test/inventory.test.ts`
     - Parse the `### Property N` headings in `design.md` and assert that each N appears exactly once as `// Property N` with one `fc.assert`, in a `*.properties.test.ts` file whose describe title contains `_Requirements:`.
     - Assert that no test file contains `vi.mock` of an engine module or `try {`.
     - _Requirements: 22.2, 22.6_
 
 - [ ] 11. Benchmark (manual, outside CI)
-  - [ ] 11.1 Create the benchmark in `packages/engine/bench/`
+  - [~] 11.1 Create the benchmark in `packages/engine/bench/`
     - `fixture.ts` builds the Document deterministically from `BENCH_SEED = 20261103` with a local mulberry32 PRNG. The Document has exactly 50,000 code units, 500 Spans, at least 10 Runs, 100 Full_Citations, and at least 20 quotes. The fixture asserts these counts.
     - `apply.bench.test.ts` runs the four scenarios from Req 21.1 to 21.3. Each gets 100 warm-ups and 1,000 timed runs from the same input. It prints the median and p95, and on failure reports one message listing every failing scenario with its times.
     - `bench/vitest.config.ts` includes only `bench/**/*.bench.test.ts`.
     - Add the engine package script `"bench": "vitest run --config bench/vitest.config.ts"`. Do not reference it from the root scripts or `ci.yml`.
     - _Requirements: 21.1, 21.2, 21.3, 21.4, 21.5, 21.7_
-  - [ ] 11.2 Add a check to `test/purity.test.ts` that the root `package.json` scripts and `.github/workflows/ci.yml` never invoke the benchmark
+  - [~] 11.2 Add a check to `test/purity.test.ts` that the root `package.json` scripts and `.github/workflows/ci.yml` never invoke the benchmark
     - _Requirements: 21.7_
-  - [ ] 11.3 Run `pnpm --filter @reveal-codes/engine bench` by hand on the Reference_Machine and record the results in `BUILD_LOG.md`
+  - [~] 11.3 Run `pnpm --filter @reveal-codes/engine bench` by hand on the Reference_Machine and record the results in `BUILD_LOG.md`
     - Record the median and p95 for each scenario, the seed, and the machine's CPU, memory, OS, and Node version.
     - _Requirements: 21.6_
 
 - [ ] 12. Documentation
-  - [ ] 12.1 Add a dated `BUILD_LOG.md` entry
+  - [~] 12.1 Add a dated `BUILD_LOG.md` entry
     - What the engine build delivered.
     - Where Kiro produced something wrong and what spec or steering change fixed it (for example the deviations D1 to D19, the `LOOKBEHIND` correction from 82 to 162, and the quote-attachment and Short_Form_Party rewrites).
     - Any test that was hard to write, with the requirement it points to.
     - Counterexample regressions recorded under Req 22.5.
     - _Requirements: 21.6, 22.5_
-  - [ ] 12.2 Add rows to `docs/KIRO_USAGE.md`
+  - [~] 12.2 Add rows to `docs/KIRO_USAGE.md`
     - The spec `.kiro/specs/provenance-engine/` (requirements.md, design.md, tasks.md).
     - The steering edits made during this spec: `.kiro/steering/product.md` (binding Code list including `[REF]`, and principle 4 blocking codes) and `.kiro/steering/structure.md` (`codes.ts` render modes and parse).
     - Each row gives the path and one line on why it exists, as structure.md requires.
