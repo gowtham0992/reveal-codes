@@ -349,7 +349,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - The test-local Party_Run checker allows at most one ` v. ` between two Party_Sides and at most one Entity_Suffix per side. The tail is located from `party.length`, not from the first `,`.
     - **Validates: Requirements 9.2, 12.2, 12.8**
     - _Requirements: 9.2, 12.2, 12.8_
-  - [~] 5.30 Write Property 50 in `test/extract.properties.test.ts`
+  - [x] 5.30 Write Property 50 in `test/extract.properties.test.ts`
     - **Property 50: The party is the longest Party_Run with stop-list entries and Connectors stripped**
     - Uses a test-local word-list reference model that shares no code with `party.ts`. It accepts the first word start whose words parse as one Party_Side or two joined by ` v. `, each side a Word_Run optionally followed by `, ` and one Entity_Suffix word, and yields no party if stripping leaves `v.` first.
     - **Validates: Requirements 9.2, 12.2**
