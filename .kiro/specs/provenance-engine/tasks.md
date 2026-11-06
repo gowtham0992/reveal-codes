@@ -402,7 +402,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
   - [ ]* 5.37 Write example tests for the Req 10.2 layouts in `test/format.test.ts`
     - `410 U.S. 113, 116 (1973)`, `598 F.3d 1, 7 (2d Cir. 2010)`, `2024 WL 123456`, and `2023 U.S. Dist. LEXIS 98765`. Property 21 already covers these.
     - _Requirements: 10.2_
-  - [-] 5.38 Add the demo-motion fixture and its extraction test
+  - [x] 5.38 Add the demo-motion fixture and its extraction test
     - Add `packages/engine/fixtures/demo-motion.txt`, a motion with three fabricated citations and one fabricated quote, and `fixtures/README.md` with one line naming its source and date.
     - If `apps/web/demo/` does not exist yet, author the fixture here and note in the README that `apps/web/demo/` must reuse it.
     - `test/demo.test.ts` asserts the planted items extract at known Offsets.
