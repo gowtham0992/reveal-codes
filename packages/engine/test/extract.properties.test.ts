@@ -20,6 +20,7 @@ import {
   expectExactSortedDisjoint,
   expectQuoteWellFormed,
 } from "./support/offsets";
+import { arbP49Input, expectPartyForms, isPartyRunRef } from "./support/party-run";
 import { modelQuotes } from "./support/quote-model";
 import { arbNoisyText, shifted } from "./support/quote-noise";
 import { sentenceIndex, sentencesOf } from "./support/sentence-index";
@@ -149,5 +150,42 @@ describe("extract both quote rules _Requirements: 13.5, 13.7_", () => {
   // Property 47
   it("Property 47: the preceding rule wins, and one citation can carry several quotes", () => {
     fc.assert(fc.property(arbBothCase, expectPrecedingWins), runs());
+  });
+});
+
+describe("extract party Short_Forms _Requirements: 9.2, 12.2, 12.8_", () => {
+  it("the test-local Party_Run checker follows the Glossary", () => {
+    const ok = ["Roe v. Wade", "Acme, Inc. v. Smith, LLC", "Matter of Smith", "Inc.", "Id. Smith"];
+    const okToo = ["United States ex rel. Smith", "Board of the City", "J. Smith", "N.A."];
+    for (const p of [...ok, ...okToo]) expect({ p, ok: isPartyRunRef(p) }).toEqual({ p, ok: true });
+    const bad = ["A v. B v. C", "Smith, Inc., LLC", "v. Wade", "of Smith", "Smith of", "F.3d"];
+    const badToo = ["Smith, Jones", "Smith  Jones", "Smith, inc.", 'Smith "Jones"', "Roe v.Wade"];
+    for (const p of [...bad, ...badToo])
+      expect({ p, ok: isPartyRunRef(p) }).toEqual({ p, ok: false });
+  });
+
+  it("rare branches: `Id.` party (D16), suffix commas before the tail, 80 code units", () => {
+    const full = "5 U.S. 1 (1801). ";
+    const parties = (t: string): readonly string[] =>
+      expectPartyForms(full + t).map((v) => v.party);
+    expect(parties("Id. Smith, 5 U.S. at 9")).toEqual(["Id. Smith"]);
+    expect(parties("Acme, Inc. v. Smith, LLC, 5 U.S. at 9")).toEqual(["Acme, Inc. v. Smith, LLC"]);
+    expect(parties("foo, Inc., 5 U.S. at 9")).toEqual(["Inc."]);
+    expect(parties("In the Matter of Smith, 5 U.S. at 9")).toEqual(["Matter of Smith"]);
+    expect(parties("In v. Wade, 5 U.S. at 9")).toEqual([]);
+    const p80 = `${"Abcdefghi ".repeat(6)}Abcdefghi, Inc. v. A`;
+    expect(p80.length).toBe(80);
+    expect(parties(`held ${p80}, 5 U.S. at 9`)).toEqual([p80]);
+    expect(parties(`held ${p80}x, 5 U.S. at 9`)).toEqual([]);
+  });
+
+  // Property 49
+  it("Property 49: party Short_Forms start with a Capitalised_Word and never with a stop-list entry", () => {
+    fc.assert(
+      fc.property(arbP49Input, (input) => {
+        expectPartyForms(input.t);
+      }),
+      runs(),
+    );
   });
 });
