@@ -382,8 +382,10 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - _Requirements: 9.9, 12.6, 12.7, 13.1, 13.5, 13.6, 13.8, 13.9_
   - [x] 5.33 Write Property 23 in `test/format.properties.test.ts`
     - **Property 23: Near misses are extracted and normalised to the first matching reporter**
-    - **Validates: Requirements 10.6, 11.1, 11.2, 11.4, 11.5, 11.6, 14.6**
-    - _Requirements: 10.6, 11.1, 11.2, 11.4, 11.5, 11.6, 14.6_
+    - Also covers near-miss LEXIS courts: a LEXIS Database_Citation whose court collapsed-matches a `lexis-courts.json` entry extracts with `lexisCourtListed: true`, that list entry as `lexisCourt`, and Normalised_Form `format(value)`; re-extracting the Normalised_Form gives the same value and no Normalised_Form. Cases come from `arbNearMissLexisCitation` (`src/testing/arb-lexis-near-miss.ts`, built on `arbNearMissLexisCourt`, optional `, at *<pin>`) as a third `fc.oneof` branch under the one `fc.assert`; the expected entry is computed test-locally from `lexis-courts.json` in file order with the test's own collapse key.
+    - Named example: `2020 Phila.Ct. Com. Pl. LEXIS 5`.
+    - **Validates: Requirements 9.4, 10.6, 11.1, 11.2, 11.4, 11.5, 11.6, 14.6**
+    - _Requirements: 9.4, 10.6, 11.1, 11.2, 11.4, 11.5, 11.6, 14.6_
   - [x] 5.34 Write Property 24 in `test/format.properties.test.ts`
     - **Property 24: Garbage citations are never extracted and do not disturb the rest**
     - Inserts garbage at neutral positions only (D4).

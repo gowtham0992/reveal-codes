@@ -19,7 +19,7 @@ import {
   YEAR_RANGE,
   type IntRange,
 } from "../citations/lex.js";
-import { LEXIS_COURTS, lexisExactIndex } from "../citations/lexis-courts.js";
+import { LEXIS_COURTS } from "../citations/lexis-courts.js";
 import { REPORTERS } from "../citations/reporters.js";
 import type {
   DatabaseValue,
@@ -38,6 +38,7 @@ import {
   arbReporterValue,
   arbUnlistedLexisCourt,
 } from "./arb-citation.js";
+import { arbNearMissLexisCourt } from "./arb-lexis-near-miss.js";
 
 /** A broken value and the field `validateFullValue` must name. */
 export type ValueCorruption = Readonly<{ value: FullValue; field: string }>;
@@ -69,20 +70,6 @@ const arbBadLexisCourt: fc.Arbitrary<string> = fc.oneof(
   arbCourt.map((c) => `WL ${c}`),
   arbCourt.map((c) => `${c} LEXIS`),
 );
-
-const NEAR_MISS_SOURCES = LEXIS_COURTS.filter((c) => /[. ]/.test(c));
-
-/** A list entry with one period or space removed that is not itself an entry (a collapsed match). */
-export const arbNearMissLexisCourt: fc.Arbitrary<string> = fc
-  .tuple(fc.constantFrom(...NEAR_MISS_SOURCES), fc.nat())
-  .map(([entry, at]) => {
-    const sites = Array.from({ length: entry.length }, (_, i) => i).filter(
-      (i) => entry[i] === "." || entry[i] === " ",
-    );
-    const i = sites[at % sites.length] ?? 0;
-    return entry.slice(0, i) + entry.slice(i + 1);
-  })
-  .filter((c) => c.length > 0 && !lexisExactIndex.has(c));
 
 /** Courts that are not an Unlisted_Lexis_Court: an entry, a collapsed match, a lower-case token, a comma, a year token. */
 const arbNotUnlistedCourt: fc.Arbitrary<string> = fc.oneof(

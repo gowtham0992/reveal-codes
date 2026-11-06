@@ -4,12 +4,14 @@ import { extract } from "../src/citations/extract";
 import { format, validateFullValue } from "../src/citations/format";
 import { scanRange } from "../src/citations/scan";
 import { structuralEqual } from "../src/equal";
+import lexisCourtsJson from "../src/citations/lexis-courts.json" with { type: "json" };
 import reportersJson from "../src/citations/reporters.json" with { type: "json" };
 import {
   arbCitation,
   arbGarbageCitation,
   arbMember,
   arbNearMissCitation,
+  arbNearMissLexisCitation,
   arbReporter,
   arbShortFormParty,
   arbTextWithCitations,
@@ -178,12 +180,25 @@ describe("Property 22: Invalid citation values are rejected at the first failing
 /** Req 11.1's collapsed key, written out here so the oracle does not reuse the engine's. */
 const collapseKey = (t: string): string => t.replace(/[. ]/g, "");
 
-/** The first `reporters.json` entry, in file order, whose collapsed key equals `token`'s (Req 11.5). */
-const firstListEntry = (token: string): string | undefined =>
-  (reportersJson as readonly string[]).find((e) => collapseKey(e) === collapseKey(token));
+/** The first entry of `list`, in file order, whose collapsed key equals `token`'s (Req 9.4, 11.5). */
+const firstListEntry = (list: readonly string[], token: string): string | undefined =>
+  list.find((e) => collapseKey(e) === collapseKey(token));
 
-/** A near-miss case: the text as written and the value it must extract to. */
-type NearMissCase = Readonly<{ text: string; token: string; nmReporter: string; value: FullValue }>;
+const REPORTERS_JSON: readonly string[] = reportersJson;
+const LEXIS_COURTS_JSON: readonly string[] = lexisCourtsJson;
+
+/**
+ * A near-miss case: the text as written, the near-miss token (a reporter or
+ * a LEXIS court), the list entry the value records for it, the JSON list that
+ * entry must come from, and the value the text must extract to.
+ */
+type NearMissCase = Readonly<{
+  text: string;
+  token: string;
+  nmEntry: string;
+  list: readonly string[];
+  value: FullValue;
+}>;
 
 /** `<vol> <rep> <page>[, <pin>]`, the D1 layout of one parallel member. */
 const memberText = (m: ReporterMember): string =>
@@ -194,7 +209,17 @@ const memberText = (m: ReporterMember): string =>
 const arbNearMissAlone: fc.Arbitrary<NearMissCase> = arbNearMissCitation.map((nm) => ({
   text: nm.text,
   token: nm.token,
-  nmReporter: nm.value.reporter,
+  nmEntry: nm.value.reporter,
+  list: REPORTERS_JSON,
+  value: nm.value,
+}));
+
+/** A LEXIS Database_Citation whose court is a collapsed match of a list entry (Req 9.4). */
+const arbNearMissLexis: fc.Arbitrary<NearMissCase> = arbNearMissLexisCitation.map((nm) => ({
+  text: nm.text,
+  token: nm.court,
+  nmEntry: nm.value.lexisCourt ?? "",
+  list: LEXIS_COURTS_JSON,
   value: nm.value,
 }));
 
@@ -224,27 +249,31 @@ const arbNearMissParallel: fc.Arbitrary<NearMissCase> = fc
     return {
       text: pieces.join(", ") + yearText,
       token: nm.token,
-      nmReporter: nmMember.reporter,
+      nmEntry: nmMember.reporter,
+      list: REPORTERS_JSON,
       value,
     };
   });
 
-describe("Property 23: Near misses are extracted and normalised to the first matching reporter _Requirements: 10.6, 11.1, 11.2, 11.4, 11.5, 11.6, 14.6_", () => {
-  it("a near miss alone or as a parallel member extracts as written, to the first collapsed reporters.json entry, with Normalised_Form format(value) that re-extracts plainly, and repeats identically", () => {
+describe("Property 23: Near misses are extracted and normalised to the first matching reporter _Requirements: 9.4, 10.6, 11.1, 11.2, 11.4, 11.5, 11.6, 14.6_", () => {
+  it("a near miss alone, as a parallel member, or as a near-miss LEXIS court extracts as written, to the first collapsed list entry, with Normalised_Form format(value) that re-extracts plainly, and repeats identically", () => {
     // Property 23
     // Feature: provenance-engine, Property 23: Near misses are extracted and normalised to the first matching reporter
     //
-    // The expected reporter comes from a local scan of `reporters.json` in file
-    // order with the collapsed key written out above (Req 11.5, 14.6), and the
-    // expected value is built by the generator, never by `extract`. A near-miss
-    // token is never an exact entry, so the text as written differs from the
-    // Canonical_Form and a Normalised_Form must be recorded (Req 11.2).
+    // The expected entry comes from a local scan of `reporters.json` (a
+    // reporter near miss) or `lexis-courts.json` (a near-miss LEXIS court) in
+    // file order with the collapsed key written out above (Req 9.4, 11.5,
+    // 14.6), and the expected value is built by the generator, never by
+    // `extract`. A near-miss token is never an exact entry, so the text as
+    // written differs from the Canonical_Form and a Normalised_Form must be
+    // recorded (Req 11.2). A LEXIS value keeps `lexisCourtListed: true`.
     fc.assert(
       fc.property(
-        fc.oneof(arbNearMissAlone, arbNearMissParallel),
-        ({ text, token, nmReporter, value }) => {
-          expect(nmReporter).toBe(firstListEntry(token));
-          expect(nmReporter).not.toBe(token);
+        fc.oneof(arbNearMissAlone, arbNearMissParallel, arbNearMissLexis),
+        ({ text, token, nmEntry, list, value }) => {
+          expect(nmEntry).toBe(firstListEntry(list, token));
+          expect(nmEntry).not.toBe(token);
+          if (value.kind === "database") expect(value.lexisCourtListed).toBe(true);
 
           const canonical = format(value);
           expect(canonical.ok).toBe(true);
@@ -258,6 +287,7 @@ describe("Property 23: Near misses are extracted and normalised to the first mat
           expect([c.start, c.end]).toEqual([0, text.length]);
           expect(c.text).toBe(text);
           expect(structuralEqual(c.value, value)).toBe(true);
+          expect(lexisFlagOf(c.value)).toEqual(lexisFlagOf(value));
           expect(c.normalised).toBe(canonical.value);
 
           const plain = extract(canonical.value);
@@ -273,6 +303,31 @@ describe("Property 23: Near misses are extracted and normalised to the first mat
       ),
       runs(),
     );
+  });
+
+  it("example: `2020 Phila.Ct. Com. Pl. LEXIS 5` records the listed court `Phila. Ct. Com. Pl.`", () => {
+    const text = "2020 Phila.Ct. Com. Pl. LEXIS 5";
+    const value: FullValue = {
+      kind: "database",
+      year: 2020,
+      designator: "LEXIS",
+      lexisCourtListed: true,
+      lexisCourt: "Phila. Ct. Com. Pl.",
+      number: 5,
+    };
+    expect(firstListEntry(LEXIS_COURTS_JSON, "Phila.Ct. Com. Pl.")).toBe("Phila. Ct. Com. Pl.");
+    const normalised = "2020 Phila. Ct. Com. Pl. LEXIS 5";
+    expect(format(value)).toEqual({ ok: true, value: normalised });
+
+    const [c, ...rest] = extract(text).citations;
+    expect(rest).toEqual([]);
+    expect(c).toMatchObject({ start: 0, end: text.length, text, normalised });
+    expect(c?.value).toEqual(value);
+
+    const [p, ...others] = extract(normalised).citations;
+    expect(others).toEqual([]);
+    expect(p?.value).toEqual(value);
+    expect(p?.normalised).toBeUndefined();
   });
 });
 
