@@ -79,6 +79,14 @@
     "5.35 Write Property 15 in `test/segment.properties.test.ts` and widen Property 14": {
       "status": "passed",
       "lastRunTimestamp": 1793930286478
+    },
+    "5.34 Write Property 24 in `test/format.properties.test.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1793930515781
+    },
+    "5.22 Write Property 18 in `test/extract.properties.test.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1793931004169
     }
   },
   "executionHistory": {
@@ -927,6 +935,32 @@
         "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
         "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
         "timestamp": 1793930332599
+      }
+    ],
+    "5.41 Wire the citation layer into `createDocument` and the operation pipeline": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793930346510
+      }
+    ],
+    "5.22 Write Property 18 in `test/extract.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793930346573
+      },
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793938054842
+      }
+    ],
+    "5.34 Write Property 24 in `test/format.properties.test.ts`": [
+      {
+        "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793930346605
       }
     ]
   }

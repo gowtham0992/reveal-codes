@@ -310,7 +310,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 17: Extraction offsets are exact on any string**
     - **Validates: Requirements 9.2, 9.7, 9.9, 13.2, 13.7**
     - _Requirements: 9.2, 9.7, 9.9, 13.2, 13.7_
-  - [ ] 5.22 Write Property 18 in `test/extract.properties.test.ts`
+  - [x] 5.22 Write Property 18 in `test/extract.properties.test.ts`
     - **Property 18: Extraction finds exactly the constructed citations, links, and quotes**
     - Covers party Short_Forms with and without ` v. ` and Entity_Suffixes, Preceding_Quotes with every Gap_Signal in both cases (including `(quoting …)`), and the unattached `In`, `with`, two-Gap_Signal, and over-80 cases.
     - **Validates: Requirements 9.1, 9.3, 9.4, 9.5, 9.6, 12.1, 12.2, 12.3, 12.6, 12.7, 13.1, 13.5, 13.7, 13.8, 13.9**
@@ -383,7 +383,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 23: Near misses are extracted and normalised to the first matching reporter**
     - **Validates: Requirements 10.6, 11.1, 11.2, 11.4, 11.5, 11.6, 14.6**
     - _Requirements: 10.6, 11.1, 11.2, 11.4, 11.5, 11.6, 14.6_
-  - [ ] 5.34 Write Property 24 in `test/format.properties.test.ts`
+  - [-] 5.34 Write Property 24 in `test/format.properties.test.ts`
     - **Property 24: Garbage citations are never extracted and do not disturb the rest**
     - Inserts garbage at neutral positions only (D4).
     - **Validates: Requirements 11.3, 14.3**
@@ -420,7 +420,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Cleans up Overrides.
     - Per design A6.
     - _Requirements: 15.2, 15.3, 15.4, 15.5, 15.6, 15.7, 15.8_
-  - [ ] 5.41 Wire the citation layer into `createDocument` and the operation pipeline
+  - [-] 5.41 Wire the citation layer into `createDocument` and the operation pipeline
     - Replace `reanchorStage` with real stages. `createDocument` runs `extract` and then `assignKeys` with every result `unchecked` (design A1 step 4).
     - Insert and Delete run `rescan`, `linkShortForms`, `pairQuoteMarks` and `attachQuotes`, then `reanchor` (A3 step 7, A5).
     - Replace re-extracts after both its delete and its insert step (A4).
