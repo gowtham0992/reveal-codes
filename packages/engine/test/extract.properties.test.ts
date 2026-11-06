@@ -29,6 +29,7 @@ import {
   p50Text,
   partyForms,
 } from "./support/party-model-case";
+import { expectPartyExample, PARTY_EXAMPLES } from "./support/party-examples";
 import { arbP49Input, expectPartyForms, isPartyRunRef } from "./support/party-run";
 import { modelQuotes } from "./support/quote-model";
 import { arbNoisyText, shifted } from "./support/quote-noise";
@@ -173,7 +174,7 @@ describe("extract both quote rules _Requirements: 13.5, 13.7_", () => {
   });
 });
 
-describe("extract party Short_Forms _Requirements: 9.2, 12.2, 12.8_", () => {
+describe("extract party Short_Forms _Requirements: 9.2, 12.2, 12.8, 13.1_", () => {
   it("the test-local Party_Run checker follows the Glossary", () => {
     const ok = ["Roe v. Wade", "Acme, Inc. v. Smith, LLC", "Matter of Smith", "Inc.", "Id. Smith"];
     const okToo = ["United States ex rel. Smith", "Board of the City", "J. Smith", "N.A."];
@@ -197,6 +198,10 @@ describe("extract party Short_Forms _Requirements: 9.2, 12.2, 12.8_", () => {
     expect(p80.length).toBe(80);
     expect(parties(`held ${p80}, 5 U.S. at 9`)).toEqual([p80]);
     expect(parties(`held ${p80}x, 5 U.S. at 9`)).toEqual([]);
+  });
+
+  it.each(PARTY_EXAMPLES.map((e) => [e.name, e] as const))("named example: %s", (_name, e) => {
+    expectPartyExample(e);
   });
 
   // Property 49
