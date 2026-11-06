@@ -479,7 +479,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Record any counterexample as a named example (Req 22.5).
     - _Requirements: 9.4, 10.1, 10.3, 10.4, 10.5_
 
-- [~] 6. Checkpoint: citations and re-anchoring
+- [x] 6. Checkpoint: citations and re-anchoring
   - Ensure `pnpm lint`, `pnpm typecheck`, and `pnpm test` pass. Ask the user if questions arise.
 
 - [ ] 7. Verification state, issues, and overrides
