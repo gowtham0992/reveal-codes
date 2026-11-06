@@ -1,5 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import { withLayer } from "../src/anchor";
+import { reanchorStage } from "../src/citation-layer";
 import { apply, createDocument } from "../src/document";
 import { structuralEqual } from "../src/equal";
 import {
@@ -21,6 +23,7 @@ import type {
   Insert,
   Inverse,
   Provenance,
+  Replace,
 } from "../src/types";
 import { runs } from "./support/fc";
 import { isEmptyOp, lengthsOf, modelText, modelUnits, unitsOf } from "./support/units";
@@ -81,8 +84,26 @@ describe("Property 6: Insert and Delete agree with a per-code-unit model _Requir
   });
 });
 
-describe("Property 7: Replace equals Delete followed by Insert _Requirements: 4.6, 6.9_", () => {
-  it("apply(d, Replace) is structurally equal to Delete then Insert, with one Inverse back to d", () => {
+/** Delete(from, to, p.origin) then Insert(from, text, p), as two Operations. */
+function sequentialReplace(doc: Document, op: Replace, config?: EngineConfig): Document {
+  const del: Delete = { kind: "delete", from: op.from, to: op.to, actor: op.provenance.origin };
+  const ins: Insert = { kind: "insert", at: op.from, text: op.text, provenance: op.provenance };
+  return applied(applied(doc, del, config), ins, config);
+}
+
+/**
+ * The Document whose Text, Spans, and Run table are `next`'s and whose
+ * citation layer is `doc` re-anchored once with the Replace's combined edit
+ * `[from, to) → [from, from + text.length)` (design A4).
+ */
+function reanchoredOnce(doc: Document, op: Replace, next: Document): Document {
+  const draft = { text: next.text, spans: next.spans, runs: next.runs };
+  const edit = { from: op.from, oldTo: op.to, newTo: op.from + op.text.length };
+  return withLayer(draft, reanchorStage({ prev: doc, draft, edit }));
+}
+
+describe("Property 7: Replace equals Delete followed by Insert in Text, Spans, and Run table, and re-anchors once _Requirements: 4.6, 6.9, 15.3_", () => {
+  it("apply(d, Replace) has Delete then Insert's Text, Spans, and Run table, one re-anchor's citation layer, and one Inverse back to d", () => {
     const arbCase = fc
       .tuple(arbDocument, arbThreshold)
       .chain(([doc, setting]) => arbReplace(doc).map((op) => ({ doc, setting, op })));
@@ -93,21 +114,14 @@ describe("Property 7: Replace equals Delete followed by Insert _Requirements: 4.
         const result = apply(doc, op, config);
         expect(result.ok).toBe(true);
         if (!result.ok) return;
-        const del: Delete = {
-          kind: "delete",
-          from: op.from,
-          to: op.to,
-          actor: op.provenance.origin,
-        };
-        const ins: Insert = {
-          kind: "insert",
-          at: op.from,
-          text: op.text,
-          provenance: op.provenance,
-        };
-        const sequential = applied(applied(doc, del, config), ins, config);
-        expect(result.value.document).toEqual(sequential);
-        expect(structuralEqual(result.value.document, sequential)).toBe(true);
+        const next = result.value.document;
+        const sequential = sequentialReplace(doc, op, config);
+        expect(next.text).toBe(sequential.text);
+        expect(next.spans).toEqual(sequential.spans);
+        expect(next.runs).toEqual(sequential.runs);
+        const noOp = op.from === op.to && op.text.length === 0;
+        const expected = noOp ? doc : reanchoredOnce(doc, op, next);
+        expect(structuralEqual(next, expected)).toBe(true);
         const undone = apply(result.value.document, result.value.inverse, config);
         expect(undone.ok).toBe(true);
         if (undone.ok) expect(structuralEqual(undone.value.document, doc)).toBe(true);
@@ -145,7 +159,10 @@ describe("Property 7: Replace equals Delete followed by Insert _Requirements: 4.
     expect(result.value.document.runs).toEqual([
       { runId: "r1", originalLength: 10, editedCount: 7, relabelled: true },
     ]);
-    expect(structuralEqual(result.value.document, sequential)).toBe(true);
+    const replaced = result.value.document;
+    expect(replaced.text).toBe(sequential.text);
+    expect(replaced.spans).toEqual(sequential.spans);
+    expect(replaced.runs).toEqual(sequential.runs);
   });
 });
 

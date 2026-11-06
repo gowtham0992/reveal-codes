@@ -107,26 +107,55 @@ describe("citation layer after Replace  _Requirements: 4.6, 15.4_", () => {
   const from = FULL_START + 9;
   const to = from + 3; // "113"
 
-  it("re-extracts after the delete and after the insert, even for identical text", () => {
+  it("re-anchors once over the combined edit, resetting a citation even for identical text", () => {
     const doc = verifiedDoc();
     const next = run(doc, { kind: "replace", from, to, text: "113", provenance: hum });
     expect(next.text).toBe(TEXT);
     expect(layerOf(next)).toEqual(extract(TEXT));
-    // Delete: quote k3, orphaned Id. k4. Insert: citation k5, quote k6, Id. k7.
-    expect(keysOf(next)).toEqual(["k5", "k6", "k7"]);
-    expect(next.keyCounter).toBe(8);
+    // One re-anchor: the citation, its quote, and its Id. take k3, k4, k5.
+    expect(keysOf(next)).toEqual(["k3", "k4", "k5"]);
+    expect(next.keyCounter).toBe(6);
     const full = next.citations[0];
     expect(full?.kind === "full" && full.result).toEqual({ status: "unchecked" });
   });
 
-  it("equals Delete followed by Insert, keys and counter included", () => {
+  it("has Delete then Insert's Text, Spans, and Run table, but not its two-step keys", () => {
     const doc = verifiedDoc();
     const replaced = run(doc, { kind: "replace", from, to, text: "113", provenance: hum });
     const deleted = run(doc, { kind: "delete", from, to, actor: "HUM" });
-    const mid = { keys: keysOf(deleted), counter: deleted.keyCounter };
-    expect(mid).toEqual({ keys: ["k3", "k4"], counter: 5 });
     const inserted = run(deleted, { kind: "insert", at: from, text: "113", provenance: hum });
-    expect(replaced).toEqual(inserted);
+    expect([replaced.text, replaced.spans, replaced.runs]).toEqual([
+      inserted.text,
+      inserted.spans,
+      inserted.runs,
+    ]);
+    expect([keysOf(inserted), inserted.keyCounter]).toEqual([["k5", "k6", "k7"], 8]);
+    expect([keysOf(replaced), replaced.keyCounter]).toEqual([["k3", "k4", "k5"], 6]);
+  });
+
+  it('See 410 U.S. 113. with Replace(4, 5, "4") gives the citation one fresh key, k1', () => {
+    const doc = created("See 410 U.S. 113.");
+    const next = run(doc, { kind: "replace", from: 4, to: 5, text: "4", provenance: hum });
+    expect(next.text).toBe("See 410 U.S. 113.");
+    expect([keysOf(next), next.keyCounter]).toEqual([["k1"], 2]);
+    const full = next.citations[0];
+    expect(full?.kind === "full" && full.result).toEqual({ status: "unchecked" });
+  });
+
+  it('Ab 1 U.S. 2. with Replace(2, 3, " ") next to the citation keeps k0 and verified', () => {
+    const base = created("Ab 1 U.S. 2.");
+    const doc: Document = {
+      ...base,
+      citations: base.citations.map((r): CitationRecord =>
+        r.kind === "full" ? { ...r, result: { status: "verified", clusterId: "1" } } : r,
+      ),
+    };
+    // The delete alone would leave "Ab1 U.S. 2.", which extracts nothing.
+    expect(run(doc, { kind: "delete", from: 2, to: 3, actor: "HUM" }).citations).toEqual([]);
+    const next = run(doc, { kind: "replace", from: 2, to: 3, text: " ", provenance: hum });
+    expect([keysOf(next), next.keyCounter]).toEqual([["k0"], doc.keyCounter]);
+    expect(next.keyCounter).toBe(1);
+    expect(next.citations).toEqual(doc.citations);
   });
 
   it("its Inverse restores keys, results, and the counter", () => {

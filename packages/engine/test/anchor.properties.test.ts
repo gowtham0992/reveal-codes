@@ -132,12 +132,11 @@ describe("Property 27: Issue_Keys are fresh, unique, and assigned in document or
   });
 
   // Shrunk by hand from a Property 27 failure (seed 2112810442, path
-  // "42:4209:0:3:1:2:2:2:2:2:2:2:2:2:2:2"). Replace runs re-anchoring after
-  // its delete step and again after its insert step (design A4, D6), so the
-  // touched citation is keyed k1 by the delete step and k2 by the insert
-  // step. k1 is issued but held by no item, so the keys new to the Document
-  // are [k2], not k<1> … k<2> as Property 27 states.
-  it("counterexample: a Replace touching a citation issues a key no item keeps", () => {
+  // "42:4209:0:3:1:2:2:2:2:2:2:2:2:2:2:2"), when Replace re-anchored after
+  // its delete step and again after its insert step and so issued k1 to no
+  // item. A Replace now re-anchors once over its combined edit (design A4,
+  // D6), so the touched citation gets the one fresh key k1 and the counter 2.
+  it("a Replace touching a citation issues exactly the keys its items keep", () => {
     const ts = "2026-01-01T00:00:00Z";
     const d = createDocument("See 410 U.S. 113.", ts);
     expect(d.ok).toBe(true);

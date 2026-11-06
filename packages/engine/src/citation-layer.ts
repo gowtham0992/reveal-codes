@@ -11,8 +11,9 @@
  * - After a primitive Insert or Delete it rescans the match layer
  *   incrementally (A5 layer 1), recomputes linking, Normalised_Forms, and
  *   quotes in full (layers 2 and 3), and re-anchors against `prev` (A6).
- *   Replace calls it once after its delete step and once after its insert
- *   step (A4), so it needs nothing special here.
+ *   Replace calls it once, with `prev` the original Document and the
+ *   combined edit `[from, to) → [from, from + text.length)` (A4); `rescan`
+ *   and `reanchor` take a general edit, so it needs nothing special here.
  *
  * The Document does not store its match layer. `matchesOf` rebuilds it from
  * `prev.citations`: every Citation record, Other_References included, is one

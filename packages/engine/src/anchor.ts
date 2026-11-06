@@ -4,7 +4,8 @@
  *
  * Re-anchoring (design A6; Req 15.2 to 15.8) is implemented below the stage:
  *
- * - `mapRange` maps a previous range through a primitive Edit (Req 15.3).
+ * - `mapRange` maps a previous range through an Edit: an Insert's, a
+ *   Delete's, or a Replace's single combined Edit (Req 15.3).
  * - `reanchor` carries over Full_Citations (A6 step 3), Short_Forms with
  *   link targets compared through the mapping (step 4, D5), and
  *   Quote_Candidates under conditions a to d (step 5), then issues fresh
@@ -35,7 +36,7 @@ import type {
 
 export { assignKeys, issueOrder, type Carry, type KeyedLayer } from "./anchor-keys.js";
 
-/** One primitive edit: Text range [from, oldTo) became [from, newTo). */
+/** One edit: Text range [from, oldTo) became [from, newTo); a Replace is one such edit. */
 export type Edit = Readonly<{ from: number; oldTo: number; newTo: number }>;
 
 /**
@@ -81,7 +82,8 @@ export type Range = Readonly<{ start: number; end: number }>;
 /**
  * Req 15.3: the image of a previous range under `edit`, or null when the
  * edit touches it. A pure insertion (`from === oldTo`) touches the range only
- * strictly inside it; a deletion touches it when the two share a code unit.
+ * strictly inside it; a deletion or a Replace's combined edit touches it
+ * when `[from, oldTo)` and the range share a code unit.
  * Untouched ranges at or after `oldTo` shift by `newTo − oldTo`.
  */
 export function mapRange(range: Range, edit: Edit): Range | null {
