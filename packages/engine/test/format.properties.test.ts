@@ -65,6 +65,7 @@ describe("Property 21: Canonical format round trips and is idempotent _Requireme
       kind: "database",
       year: 1600,
       designator: "LEXIS",
+      lexisCourtListed: true,
       lexisCourt: "Phila. Ct. Com. Pl.",
       number: 1,
     };

@@ -41,6 +41,7 @@ const lexis: DatabaseValue = {
   kind: "database",
   year: 2023,
   designator: "LEXIS",
+  lexisCourtListed: true,
   lexisCourt: "U.S. Dist.",
   number: 98765,
 };
@@ -118,10 +119,45 @@ describe("validateFullValue rejections in A13 order _Requirements: 10.5_", () =>
     expectField({ ...circuit, court: "x 2001", year: 1599 }, "court");
     expectField({ ...lexis, lexisCourt: "U.S. LEXIS Dist.", year: 3000 }, "lexisCourt");
     expectField({ ...lexis, lexisCourt: "WL Dist." }, "lexisCourt");
-    expectField({ kind: "database", year: 2023, designator: "LEXIS", number: 98765 }, "lexisCourt");
+    expectField(
+      { kind: "database", year: 2023, designator: "LEXIS", lexisCourtListed: true, number: 98765 },
+      "lexisCourt",
+    );
     expectField({ ...westlaw, lexisCourt: "U.S." }, "lexisCourt");
     expectField({ ...circuit, year: 3000 }, "year");
     expectField({ ...westlaw, year: 999, number: 0 }, "year");
+  });
+
+  it("names lexisCourtListed after court and before lexisCourt (A13, D22)", () => {
+    const unflagged: DatabaseValue = {
+      kind: "database",
+      year: 2023,
+      designator: "LEXIS",
+      lexisCourt: "WL Dist.",
+      number: 98765,
+    };
+    expectField(unflagged, "lexisCourtListed");
+    expectField(
+      { ...lexis, lexisCourtListed: "yes" } as unknown as CitationValue,
+      "lexisCourtListed",
+    );
+    expectField({ ...westlaw, lexisCourtListed: true, lexisCourt: "U.S." }, "lexisCourtListed");
+    expectField({ ...westlaw, lexisCourtListed: false, year: 999 }, "lexisCourtListed");
+  });
+
+  it("checks lexisCourt against the recorded flag (A13, D22)", () => {
+    expectField({ ...lexis, lexisCourt: "US Dist." }, "lexisCourt");
+    expectField({ ...lexis, lexisCourt: "Foo Cty. Ct." }, "lexisCourt");
+    const unlisted = { ...lexis, lexisCourtListed: false } as const;
+    expectField(unlisted, "lexisCourt");
+    expectField({ ...unlisted, lexisCourt: "US Dist." }, "lexisCourt");
+    expectField({ ...unlisted, lexisCourt: "foo Ct." }, "lexisCourt");
+    expectField({ ...unlisted, lexisCourt: "Foo, Ct." }, "lexisCourt");
+    expectField({ ...unlisted, lexisCourt: "Foo 2023 Ct." }, "lexisCourt");
+    expect(format({ ...unlisted, lexisCourt: "Foo Cty. Ct." })).toEqual({
+      ok: true,
+      value: "2023 Foo Cty. Ct. LEXIS 98765",
+    });
   });
 
   it("names members, then number", () => {

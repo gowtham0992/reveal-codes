@@ -18,7 +18,11 @@
  * The LEXIS court follows the tightened court rule (A9, D3): 1 to 40 code
  * units of tokens without whitespace, parentheses, or `"“”`, joined by single
  * spaces, whose last token is not a year in 1600–2999. A court token is never
- * `LEXIS`: the first `LEXIS` token ends the court.
+ * `LEXIS`: the first `LEXIS` token ends the court. A court that
+ * `lookupLexisCourt` resolves records the list entry with
+ * `lexisCourtListed: true`; any other court records the court as written with
+ * `lexisCourtListed: false` (D22). The court-start, year-token, and
+ * Unlisted_Lexis_Court rejection rules of A9 step 2 are task 5.48.
  *
  * Reads stay within `[p − 2, p + 140)`, well inside `LOOKAHEAD`.
  */
@@ -35,6 +39,7 @@ import {
   readLiteral,
   readSpaces,
 } from "./lex.js";
+import { lookupLexisCourt } from "./lexis-courts.js";
 
 /** A Database_Citation match: `[start, end)` and its value. */
 export type DatabaseMatch = Readonly<{ start: number; end: number; value: DatabaseValue }>;
@@ -49,7 +54,9 @@ const COURT_FORBIDDEN = /[\s()"“”]/u;
 
 type Field = Readonly<{ end: number }>;
 type NumberField = Readonly<{ value: number; end: number }>;
-type Designator = Readonly<{ designator: "WL" } | { designator: "LEXIS"; lexisCourt: string }>;
+type Designator = Readonly<
+  { designator: "WL" } | { designator: "LEXIS"; lexisCourtListed: boolean; lexisCourt: string }
+>;
 type Located<T> = Readonly<{ value: T; end: number }>;
 
 /**
@@ -92,7 +99,15 @@ function readDesignator(text: string, at: number): Located<Designator> | null {
   const court = readLexisCourt(text, at);
   if (court === null) return null;
   const end = readSpaces(text, court.end);
-  return end === null ? null : { value: { designator: "LEXIS", lexisCourt: court.value }, end };
+  return end === null ? null : { value: lexisDesignator(court.value), end };
+}
+
+/** The LEXIS designator for a court as written: the list entry if listed (D22). */
+function lexisDesignator(court: string): Designator {
+  const entry = lookupLexisCourt(court);
+  return entry === null
+    ? { designator: "LEXIS", lexisCourtListed: false, lexisCourt: court }
+    : { designator: "LEXIS", lexisCourtListed: true, lexisCourt: entry };
 }
 
 /**

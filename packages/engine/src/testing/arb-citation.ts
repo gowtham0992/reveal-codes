@@ -24,6 +24,7 @@ import {
   YEAR_RANGE,
   type IntRange,
 } from "../citations/lex.js";
+import { LEXIS_COURTS } from "../citations/lexis-courts.js";
 import { collapseReporter, lookupReporter, REPORTERS } from "../citations/reporters.js";
 import type {
   DatabaseValue,
@@ -67,7 +68,11 @@ export const arbCourt: fc.Arbitrary<string> = fc
     return fixed.join(" ");
   });
 
-/** A court that the LEXIS grammar reads back unchanged (no `LEXIS`, no leading `WL`). */
+/**
+ * A court string with no `LEXIS` or `WL` token. Since task 5.47 it is not by
+ * itself a valid `lexisCourt` (A13); `arbValueCorruption` uses it to build bad
+ * LEXIS courts. Task 5.49 replaces it with the listed/unlisted `arbLexisCourt`.
+ */
 export const arbLexisCourt: fc.Arbitrary<string> = arbCourt;
 
 /** An exact Reporter_List entry. */
@@ -100,12 +105,30 @@ const arbPincite: fc.Arbitrary<{ pincite?: number }> = fc.record(
   optional,
 );
 
+/**
+ * A `WL` value, or a LEXIS value with a listed court (an exact
+ * `lexis-courts.json` entry, `lexisCourtListed: true`). Unlisted courts are
+ * added by task 5.49.
+ */
 export const arbDatabaseValue: fc.Arbitrary<DatabaseValue> = fc
-  .tuple(int(YEAR_RANGE), fc.option(arbLexisCourt), int(DOC_NUMBER_RANGE), arbPincite)
+  .tuple(
+    int(YEAR_RANGE),
+    fc.option(fc.constantFrom(...LEXIS_COURTS)),
+    int(DOC_NUMBER_RANGE),
+    arbPincite,
+  )
   .map(([year, court, number, pin]) =>
     court === null
       ? { kind: "database", year, designator: "WL", number, ...pin }
-      : { kind: "database", year, designator: "LEXIS", lexisCourt: court, number, ...pin },
+      : {
+          kind: "database",
+          year,
+          designator: "LEXIS",
+          lexisCourtListed: true,
+          lexisCourt: court,
+          number,
+          ...pin,
+        },
   );
 
 /** Valid Full_Citation values (Req 10.1). */

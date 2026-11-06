@@ -23,8 +23,14 @@ export function collapseReporter(token: string): string {
   return token.replace(/[. ]/g, "");
 }
 
-/** Maps each key to the index of the first entry that produces it. */
-function firstIndexBy(entries: readonly string[], key: (e: string) => string): Map<string, number> {
+/**
+ * Maps each non-empty key to the index of the first entry that produces it,
+ * so list order decides every collision.
+ */
+export function firstIndexBy(
+  entries: readonly string[],
+  key: (e: string) => string,
+): Map<string, number> {
   const index = new Map<string, number>();
   entries.forEach((entry, i) => {
     const k = key(entry);

@@ -49,10 +49,23 @@ describe("matchDatabaseAt LEXIS form _Requirements: 9.4_", () => {
         kind: "database",
         year: 2023,
         designator: "LEXIS",
+        lexisCourtListed: true,
         lexisCourt: "U.S. Dist.",
         number: 98765,
       },
     });
+  });
+
+  it("records the list entry for a listed court and the court as written otherwise (D22)", () => {
+    expect(matchDatabaseAt("2023 US Dist. LEXIS 5", 0)?.value).toMatchObject({
+      lexisCourtListed: true,
+      lexisCourt: "U.S. Dist.",
+    });
+    expect(matchDatabaseAt("2023 Foo Cty. Ct. LEXIS 5", 0)?.value).toMatchObject({
+      lexisCourtListed: false,
+      lexisCourt: "Foo Cty. Ct.",
+    });
+    expect(matchDatabaseAt("2024 WL 5", 0)?.value).not.toHaveProperty("lexisCourtListed");
   });
 
   it("reads an optional `, at *<pincite>`", () => {
@@ -62,6 +75,7 @@ describe("matchDatabaseAt LEXIS form _Requirements: 9.4_", () => {
       kind: "database",
       year: 2023,
       designator: "LEXIS",
+      lexisCourtListed: true,
       lexisCourt: "U.S. App.",
       number: 7,
       pincite: 12,
@@ -111,6 +125,7 @@ describe("matchDatabaseAt rejects _Requirements: 9.4, 9.8, 10.1_", () => {
     expect(matchDatabaseAt("2024 WL 1", 99)).toBeNull();
     expect(matchDatabaseAt("2024 WL \uD800", 0)).toBeNull();
     expect(matchDatabaseAt("2024 \uDC00 LEXIS 5", 0)?.value).toMatchObject({
+      lexisCourtListed: false,
       lexisCourt: "\uDC00",
     });
   });

@@ -4,8 +4,8 @@
  * `validateFullValue` checks a Citation_Value field by field in a fixed
  * order and reports the first failure as `invalid_citation { field }`:
  *
- *   kind, volume, reporter, page, pincite, court | lexisCourt,
- *   year, members, number
+ *   kind, volume, reporter, page, pincite, court, lexisCourtListed,
+ *   lexisCourt, year, members, number
  *
  * For a Parallel_Citation each member-level step (volume, reporter, page,
  * pincite) checks every member in order before the next step runs, so the
@@ -17,9 +17,12 @@
  * in `410 U.S. 113, 116, 93 S. Ct. 705, 708 (1973)`.
  *
  * Court rules follow the tightened rule D3 so the Req 10.3 round trip holds.
- * A `lexisCourt` must also contain no `LEXIS` token (the grammar ends the
- * court at the first one) and must not start with a `WL` token (the grammar
- * reads `<year> WL ` as the Westlaw designator first). Nothing here throws.
+ * The two LEXIS fields follow A13 and D22: `lexisCourtListed` is a boolean on
+ * a LEXIS value and absent on a WL value; `lexisCourt` is then an exact
+ * Lexis_Court_List entry when listed, or an Unlisted_Lexis_Court (which
+ * matches no entry, exactly or collapsed) when unlisted, and absent on a WL
+ * value. `format` prints the court as recorded and never prints the flag.
+ * Nothing here throws.
  */
 
 import type { EngineError, InvalidCitation } from "../errors.js";
@@ -32,7 +35,6 @@ import type {
   ReporterMember,
 } from "../types.js";
 import { isCourtText, MAX_MEMBERS } from "./grammar.js";
-import { isCourt } from "./grammar-db.js";
 import {
   DOC_NUMBER_RANGE,
   PAGE_RANGE,
@@ -41,6 +43,7 @@ import {
   YEAR_RANGE,
   type IntRange,
 } from "./lex.js";
+import { isUnlistedLexisCourt, lexisExactIndex } from "./lexis-courts.js";
 import { exactIndex } from "./reporters.js";
 
 /** Smallest Parallel_Citation (Req 10.1). */
@@ -68,13 +71,6 @@ function isOptCourt(c: unknown): boolean {
   return c === undefined || (typeof c === "string" && isCourtText(c));
 }
 
-/** A LEXIS court the Database grammar reads back unchanged (D3, Req 10.3). */
-function isLexisCourt(c: unknown): boolean {
-  if (typeof c !== "string" || !isCourt(c)) return false;
-  const tokens = c.split(" ");
-  return tokens[0] !== "WL" && !tokens.includes("LEXIS");
-}
-
 /** The reporter members of a value: itself, its members, or none. */
 function membersOf(v: FullValue): readonly ReporterMember[] {
   if (v.kind === "reporter") return [v];
@@ -86,9 +82,22 @@ function eachMember(field: string, test: (m: ReporterMember) => boolean): Check 
   return { field, ok: (v) => membersOf(v).every(test) };
 }
 
-/** `lexisCourt` is present iff the designator is `LEXIS`. */
-function isLexisPart(v: DatabaseValue): boolean {
-  return v.designator === "WL" ? v.lexisCourt === undefined : isLexisCourt(v.lexisCourt);
+/** `lexisCourtListed` is a boolean iff the designator is `LEXIS` (A13). */
+function isLexisFlag(v: DatabaseValue): boolean {
+  const flag: unknown = v.lexisCourtListed;
+  return v.designator === "WL" ? flag === undefined : typeof flag === "boolean";
+}
+
+/**
+ * `lexisCourt` agrees with the recorded flag (A13, D22): absent on WL, an
+ * exact list entry when listed, an Unlisted_Lexis_Court when unlisted. Runs
+ * only after `isLexisFlag` passed.
+ */
+function isLexisCourtPart(v: DatabaseValue): boolean {
+  const c: unknown = v.lexisCourt;
+  if (v.designator === "WL") return c === undefined;
+  if (typeof c !== "string") return false;
+  return v.lexisCourtListed === true ? lexisExactIndex.has(c) : isUnlistedLexisCourt(c);
 }
 
 const CHECKS: readonly Check[] = [
@@ -103,7 +112,8 @@ const CHECKS: readonly Check[] = [
         : membersOf(v).every((m) => isOptIntIn(m.pincite, PINCITE_RANGE)),
   },
   { field: "court", ok: (v) => v.kind === "database" || isOptCourt(v.court) },
-  { field: "lexisCourt", ok: (v) => v.kind !== "database" || isLexisPart(v) },
+  { field: "lexisCourtListed", ok: (v) => v.kind !== "database" || isLexisFlag(v) },
+  { field: "lexisCourt", ok: (v) => v.kind !== "database" || isLexisCourtPart(v) },
   {
     field: "year",
     ok: (v) =>

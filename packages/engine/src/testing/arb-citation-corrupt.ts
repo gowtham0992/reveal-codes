@@ -3,9 +3,9 @@
  * 22.4). Takes an `arbCitation` value and breaks exactly one field, recording
  * the field `validateFullValue` must report. Only one field is broken and the
  * rest stay valid, so the recorded field is also the first failure in the A13
- * order (volume, reporter, page, pincite, court | lexisCourt, year, members,
- * number). A broken parallel member field is broken in one member, chosen by
- * index. The expected field is never inferred from the engine.
+ * order (volume, reporter, page, pincite, court, lexisCourtListed, lexisCourt,
+ * year, members, number). The `lexisCourtListed` corruptions are task 5.49.
+ * A broken parallel member field is broken in one member, chosen by index. The expected field is never inferred from the engine.
  */
 import fc from "fast-check";
 import {
@@ -128,11 +128,13 @@ const parallelPatch: fc.Arbitrary<Patch<ParallelValue>> = fc.oneof(
   })),
 );
 
-/** A LEXIS value without its court, or a WL value given one. */
+/** A LEXIS value without its court (flag kept), or a WL value given one. */
 function toggleLexisCourt(v: DatabaseValue, court: string): DatabaseValue {
   if (v.designator === "WL") return { ...v, lexisCourt: court };
+  const flag = v.lexisCourtListed === undefined ? {} : { lexisCourtListed: v.lexisCourtListed };
   const base = { kind: "database", year: v.year, designator: "LEXIS", number: v.number } as const;
-  return v.pincite === undefined ? base : { ...base, pincite: v.pincite };
+  const flagged = { ...base, ...flag };
+  return v.pincite === undefined ? flagged : { ...flagged, pincite: v.pincite };
 }
 
 const databasePatch: fc.Arbitrary<Patch<DatabaseValue>> = fc.oneof(
@@ -141,6 +143,7 @@ const databasePatch: fc.Arbitrary<Patch<DatabaseValue>> = fc.oneof(
   patch("lexisCourt", arbBadLexisCourt, (v: DatabaseValue, lexisCourt) => ({
     ...v,
     designator: "LEXIS",
+    lexisCourtListed: true,
     lexisCourt,
   })),
   patch("year", arbBadInt(YEAR_RANGE), (v: DatabaseValue, year) => ({ ...v, year })),

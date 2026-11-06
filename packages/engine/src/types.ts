@@ -52,11 +52,17 @@ export type ParallelValue = Readonly<{
   year?: number;
 }>;
 
-/** `lexisCourt` is present iff `designator` is `LEXIS`. */
+/**
+ * `lexisCourtListed` and `lexisCourt` are both present iff `designator` is
+ * `LEXIS`. `lexisCourtListed` is `true` when `lexisCourt` is a
+ * `lexis-courts.json` entry (the list entry, not the text as written) and
+ * `false` when it is an Unlisted_Lexis_Court as written (D22).
+ */
 export type DatabaseValue = Readonly<{
   kind: "database";
   year: number;
   designator: "WL" | "LEXIS";
+  lexisCourtListed?: boolean;
   lexisCourt?: string;
   number: number;
   pincite?: number;
