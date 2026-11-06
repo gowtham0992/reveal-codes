@@ -7,10 +7,12 @@ import { structuralEqual } from "../src/equal";
 import reportersJson from "../src/citations/reporters.json" with { type: "json" };
 import {
   arbCitation,
+  arbGarbageCitation,
   arbMember,
   arbNearMissCitation,
   arbReporter,
   arbShortFormParty,
+  arbTextWithCitations,
   arbValueCorruption,
 } from "../src/testing/arbitraries";
 import type {
@@ -23,6 +25,7 @@ import type {
   ReporterMember,
 } from "../src/types";
 import { runs } from "./support/fc";
+import { neutralPositions } from "./support/neutral";
 
 // Properties 21 and 22 (design "Correctness Properties", [format]).
 
@@ -265,6 +268,43 @@ describe("Property 23: Near misses are extracted and normalised to the first mat
           expect(p.normalised).toBeUndefined();
 
           expect(extract(text)).toEqual(first);
+        },
+      ),
+      runs(),
+    );
+  });
+});
+
+// Property 24 (design "Correctness Properties", [format]; D4).
+
+describe("Property 24: Garbage citations are never extracted and do not disturb the rest _Requirements: 11.3, 14.3_", () => {
+  it("garbage at a neutral position yields no overlapping citation, no attached quote, and the same Extraction as spaces in its place", () => {
+    // Property 24
+    // Feature: provenance-engine, Property 24: Garbage citations are never extracted and do not disturb the rest
+    //
+    // `g` goes in at a neutral position of an `arbTextWithCitations` text
+    // (D4): a word start between two words, outside every recorded citation,
+    // quote, and quote-to-citation gap, followed by one space. The spaced
+    // text has the same length, so its Extraction is compared without shift.
+    fc.assert(
+      fc.property(
+        arbTextWithCitations,
+        arbGarbageCitation,
+        fc.nat(),
+        ({ text, expected }, g, k) => {
+          const positions = neutralPositions(text, expected);
+          fc.pre(positions.length > 0);
+          const at = positions[k % positions.length] ?? 0;
+          const end = at + g.length;
+          const withGarbage = `${text.slice(0, at)}${g} ${text.slice(at)}`;
+          const withSpaces = `${text.slice(0, at)}${" ".repeat(g.length)} ${text.slice(at)}`;
+
+          const got = extract(withGarbage);
+          expect(got.citations.filter((c) => c.start < end && c.end > at)).toEqual([]);
+          expect(got.quotes.filter((q) => q.citationStart >= at && q.citationStart < end)).toEqual(
+            [],
+          );
+          expect(got).toEqual(extract(withSpaces));
         },
       ),
       runs(),
