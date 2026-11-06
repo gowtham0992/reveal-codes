@@ -319,7 +319,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 19: Citations glued to letters or digits are not extracted**
     - **Validates: Requirements 9.8**
     - _Requirements: 9.8_
-  - [~] 5.24 Write Property 20 in `test/extract.properties.test.ts`
+  - [x] 5.24 Write Property 20 in `test/extract.properties.test.ts`
     - **Property 20: Quote pairing and attachment agree with a reference model**
     - Uses a test-local naive reference model that pairs marks per family, drops blank pairs, then, in a left-to-right pass by opening mark, drops every pair whose opening mark lies inside the last kept pair (Req 13.10), and takes Sentences from `segment`. It tries every split `P1 + S + P2 + C + P3` of a preceding gap, with `S` empty or the longest entry of a test-local Gap_Signal list typed from the Glossary (ten forms plus their lowercase-first forms, no `with`) that starts at that position and fits in the gap (D21), and checks `C` with a test-local Case_Name checker (Entity_Suffixes, inner periods of `L.L.C.`, `L.P.`, `N.A.`, and the D19 leading-word rule). Following gaps accept only whitespace and `, ; : (`.
     - **Validates: Requirements 13.1, 13.5, 13.6, 13.7, 13.8, 13.9, 13.10**
@@ -430,11 +430,11 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `arbCitationTargetedOp(d)` also targets quote-to-citation gaps.
     - `arbDocument` text now comes from `arbText` or `arbTextWithCitations`, and `arbOpSequence` biases Offsets into citation and quote ranges.
     - _Requirements: 22.1, 22.4_
-  - [~] 5.43 Write Property 2 in `test/document.properties.test.ts`
+  - [x] 5.43 Write Property 2 in `test/document.properties.test.ts`
     - **Property 2: Creation preserves text and starts as one PST span with extracted, unchecked citations**
     - **Validates: Requirements 2.1, 2.2, 2.3, 2.6**
     - _Requirements: 2.1, 2.2, 2.3, 2.6_
-  - [~] 5.44 Write Property 25 in `test/anchor.properties.test.ts`
+  - [x] 5.44 Write Property 25 in `test/anchor.properties.test.ts`
     - **Property 25: Incremental re-extraction equals full extraction**
     - Uses `arbEdit(t)` from task 5.42, so edits change a party's canonical start or tail comma from outside its range, split a Party_Side, or add and remove a Gap_Signal in a gap.
     - **Validates: Requirements 15.1**
