@@ -19,6 +19,27 @@ const special = fc.constantFrom("[", "]", "\\", "{", "}", '"', "\u201c", "\u201d
 
 const astral = fc.integer({ min: 0x10000, max: 0x10ffff }).map((cp) => String.fromCodePoint(cp));
 
+const LETTER_OR_NUMBER = /^[\p{L}\p{N}]$/u;
+
+const codePointIn = (min: number, max: number): fc.Arbitrary<string> =>
+  fc
+    .integer({ min, max })
+    .map((cp) => String.fromCodePoint(cp))
+    .filter((c) => LETTER_OR_NUMBER.test(c));
+
+/**
+ * One code point that is a letter or digit in the sense of Req 9.8
+ * (`\p{L}` or `\p{N}`): ASCII letters and digits, other BMP letters and
+ * numbers (`é`, `Ж`, `٣`), and astral ones (`𝐀`, `𐐀`, `𝟎`, a CJK
+ * Extension B ideograph), so an astral value is one Surrogate_Pair.
+ */
+export const arbLetterOrDigit: fc.Arbitrary<string> = fc.oneof(
+  fc.constantFrom("a", "c", "x", "z", "A", "C", "X", "Z", "0", "1", "5", "9"),
+  fc.constantFrom("é", "ß", "Ж", "ا", "٣", "²", "\u{1D400}", "\u{10400}", "\u{1D7CE}", "\u{20000}"),
+  codePointIn(0x80, 0xffff),
+  codePointIn(0x10000, 0x10ffff),
+);
+
 /**
  * Strings of 0 to 2,000 code units. Each item is at most 2 code units and
  * there are at most 1,000 items. Surrogates appear only in Surrogate_Pairs.

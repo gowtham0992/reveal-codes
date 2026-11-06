@@ -83,21 +83,28 @@ const arbSection: fc.Arbitrary<string> = fc
 
 const FED_SETS: readonly string[] = ["Civ. P. ", "Crim. P. ", "App. P. ", "Bankr. P. ", "Evid. "];
 
+/** An Other_Reference as written and its value. */
+export type OtherReference = Readonly<{ text: string; value: OtherValue }>;
+
 /** An Other_Reference string and its value (D8). */
-const arbOther: fc.Arbitrary<Fragment> = fc.oneof(
+export const arbOtherReference: fc.Arbitrary<OtherReference> = fc.oneof(
   fc
     .tuple(fc.integer({ min: 1, max: 999 }), fc.constantFrom("usc", "cfr"), arbSection)
-    .map(([title, form, section]): Fragment => {
+    .map(([title, form, section]): OtherReference => {
       const code = form === "usc" ? "U.S.C." : "C.F.R.";
       const value: OtherValue = { kind: "other", form, title, section };
-      return { kind: "other", text: `${String(title)} ${code} § ${section}`, value };
+      return { text: `${String(title)} ${code} § ${section}`, value };
     }),
-  fc.tuple(fc.constantFrom(...FED_SETS), arbSection).map(([set, section]): Fragment => ({
-    kind: "other",
+  fc.tuple(fc.constantFrom(...FED_SETS), arbSection).map(([set, section]): OtherReference => ({
     text: `Fed. R. ${set}${section}`,
     value: { kind: "other", form: "fed_rule", section },
   })),
 );
+
+const arbOther: fc.Arbitrary<Fragment> = arbOtherReference.map((r): Fragment => ({
+  kind: "other",
+  ...r,
+}));
 
 const arbPartyContext: fc.Arbitrary<string> = fc.oneof(
   fc.constantFrom("; ", "("),
