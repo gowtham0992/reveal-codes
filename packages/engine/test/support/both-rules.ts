@@ -9,6 +9,11 @@
  * Sentence conditions are read from `segment` (via `sentencesOf`) and
  * asserted, so a construction that misses one fails rather than passing
  * vacuously; `extract` is never used to compute an expectation.
+ *
+ * `f1` and `f2` are drawn only from Full_Citations that do not end in a
+ * terminator sequence (`endsWithTerminator`, e.g. a `(D.)` court): one
+ * followed by a space ends its Sentence (Req 8.3, 8.10), which would move
+ * the opening mark after it into the next Sentence and break 13.8.
  */
 import fc from "fast-check";
 import { expect } from "vitest";
@@ -19,6 +24,7 @@ import {
   arbGapPunct,
   arbQuoteContent,
   canonical,
+  endsWithTerminator,
 } from "../../src/testing/arbitraries";
 import type { FullValue } from "../../src/types";
 import { sentenceIndex, sentencesOf } from "./sentence-index";
@@ -34,9 +40,14 @@ export type BothCase = Readonly<{
   q2: string;
 }>;
 
+/** Full_Citations whose canonical form does not end a Sentence before a space. */
+const arbNonTerminalCitation: fc.Arbitrary<FullValue> = arbCitation.filter(
+  (value) => !endsWithTerminator({ kind: "full", value, text: canonical(value) }),
+);
+
 export const arbBothCase: fc.Arbitrary<BothCase> = fc.record({
-  f1: arbCitation,
-  f2: arbCitation,
+  f1: arbNonTerminalCitation,
+  f2: arbNonTerminalCitation,
   g1: arbFollowGap,
   p: arbGapPunct.filter((s) => !s.includes(".")),
   g2: arbFollowGap,

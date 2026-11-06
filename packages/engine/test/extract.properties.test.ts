@@ -147,6 +147,17 @@ describe("extract following quotes _Requirements: 13.8, 13.9_", () => {
 });
 
 describe("extract both quote rules _Requirements: 13.5, 13.7_", () => {
+  it("seed -1203167891: a `(D.)` court ends the Sentence, so the second quote attaches to nothing", () => {
+    // Shrunk Property 47 counterexample from before `f1`/`f2` excluded terminator endings.
+    // `1 A. 1` is [0, 6), `1 A. 1 (D.)` is [9, 20). `"a"` at 6–8 precedes the second
+    // citation with an empty gap (13.1, 13.5). `(D.)` then a space ends the Sentence
+    // (Req 8.3, 8.10), so `"a"` at 21–23 has no citation in its Sentence (13.8, 13.9).
+    const t = '1 A. 1"a"1 A. 1 (D.) "a"';
+    expect(extract(t).quotes).toEqual([
+      { start: 7, end: 8, text: "a", citationStart: 9, rule: "preceding" },
+    ]);
+  });
+
   // Property 47
   it("Property 47: the preceding rule wins, and one citation can carry several quotes", () => {
     fc.assert(fc.property(arbBothCase, expectPrecedingWins), runs());
