@@ -108,6 +108,10 @@
       "status": "failed",
       "failingExample": "createDocument(\"See 410 U.S. 113.\") (keys [k0], keyCounter 1); apply Replace(4, 5, \"4\", HUM). Result: keys [k2], keyCounter 3. Keys new to the Document are [k2], but Property 27 expects [k1, k2]. Replace re-anchors after its delete step (issues k1) and again after its insert step (issues k2), per design A4/D6. Fast-check seed 2112810442, path \"42:4209:0:3:1:2:2:2:2:2:2:2:2:2:2:2\" (a Replace). The property holds for Insert and Delete at 1000 runs.",
       "lastRunTimestamp": 1793941128062
+    },
+    "5.26 Write Property 45 in `test/extract.properties.test.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1793945158579
     }
   },
   "executionHistory": {
@@ -1050,6 +1054,16 @@
         "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
         "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
         "timestamp": 1793938073548
+      },
+      {
+        "executionId": "e5c8b4b6-0f1d-460b-97e3-4b3571510a74",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793944875731
+      },
+      {
+        "executionId": "e5c8b4b6-0f1d-460b-97e3-4b3571510a74",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793945195261
       }
     ],
     "5.27 Write Property 46 in `test/extract.properties.test.ts`": [
@@ -1057,6 +1071,11 @@
         "executionId": "48a32958-c76a-4619-a515-6213ac4ec9fe",
         "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
         "timestamp": 1793938073575
+      },
+      {
+        "executionId": "e5c8b4b6-0f1d-460b-97e3-4b3571510a74",
+        "chatSessionId": "sess_006f30f1-8398-4db3-b8cd-f30c28b0e8fc",
+        "timestamp": 1793945195318
       }
     ],
     "5.28 Write Property 47 in `test/extract.properties.test.ts`": [

@@ -330,12 +330,12 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 44: Boundary counting agrees with the Segmenter's Sentences**
     - **Validates: Requirements 13.1, 13.8**
     - _Requirements: 13.1, 13.8_
-  - [~] 5.26 Write Property 45 in `test/extract.properties.test.ts`
+  - [x] 5.26 Write Property 45 in `test/extract.properties.test.ts`
     - **Property 45: Case_Name and Gap_Signal gaps attach, and `In`, `with`, doubled-signal, or over-long gaps do not**
     - Uses `arbQuoteContent`, `arbCaseName`, `arbGapPunct`, `arbGapSignal`, `arbCitation`, `arbShortFormParty`, and `arbLongParty`.
     - **Validates: Requirements 13.1, 13.9**
     - _Requirements: 13.1, 13.9_
-  - [~] 5.27 Write Property 46 in `test/extract.properties.test.ts`
+  - [-] 5.27 Write Property 46 in `test/extract.properties.test.ts`
     - **Property 46: Following quotes attach to the citation before them in the same Sentence**
     - Also asserts that inserting `s + " "` for any `arbGapSignal` `s` into the following gap leaves no quote.
     - **Validates: Requirements 13.8, 13.9**
