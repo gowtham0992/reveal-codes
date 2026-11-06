@@ -26,6 +26,7 @@ import type {
 } from "../src/types";
 import { runs } from "./support/fc";
 import { neutralPositions } from "./support/neutral";
+import { p24Seed26608700 } from "./support/p24-seed-26608700";
 
 // Properties 21 and 22 (design "Correctness Properties", [format]).
 
@@ -309,5 +310,21 @@ describe("Property 24: Garbage citations are never extracted and do not disturb 
       ),
       runs(),
     );
+  });
+
+  it("seed 26608700: the gap of a quote that attaches to nothing is not neutral", () => {
+    // Shrunk counterexample from seed 26608700 (fixture holds seed, path,
+    // value). Old neutral.ts picked offset 53, `See |also`, inside the gap of
+    // `"a a a a"`, which attaches to nothing (two Gap_Signals, D21). Spaces
+    // there made it attach to `1600 WL 1` through `also See …` (D4).
+    const { text, expected, garbage: g } = p24Seed26608700;
+    const positions = neutralPositions(text, expected);
+    expect(text.slice(49, 57)).toBe("See also");
+    expect(positions).not.toContain(53);
+    expect(positions.length).toBeGreaterThan(0);
+    for (const at of positions) {
+      const pad = (s: string): string => `${text.slice(0, at)}${s} ${text.slice(at)}`;
+      expect(extract(pad(g))).toEqual(extract(pad(" ".repeat(g.length))));
+    }
   });
 });
