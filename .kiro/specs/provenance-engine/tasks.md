@@ -340,11 +340,11 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Also asserts that inserting `s + " "` for any `arbGapSignal` `s` into the following gap leaves no quote.
     - **Validates: Requirements 13.8, 13.9**
     - _Requirements: 13.8, 13.9_
-  - [-] 5.28 Write Property 47 in `test/extract.properties.test.ts`
+  - [x] 5.28 Write Property 47 in `test/extract.properties.test.ts`
     - **Property 47: The preceding rule wins, and one citation can carry several quotes**
     - **Validates: Requirements 13.5, 13.7**
     - _Requirements: 13.5, 13.7_
-  - [~] 5.29 Write Property 49 in `test/extract.properties.test.ts`
+  - [-] 5.29 Write Property 49 in `test/extract.properties.test.ts`
     - **Property 49: Party Short_Forms start with a Capitalised_Word and never with a stop-list entry**
     - The test-local Party_Run checker allows at most one ` v. ` between two Party_Sides and at most one Entity_Suffix per side. The tail is located from `party.length`, not from the first `,`.
     - **Validates: Requirements 9.2, 12.2, 12.8**
