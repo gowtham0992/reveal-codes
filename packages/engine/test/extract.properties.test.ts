@@ -1,17 +1,21 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { ENTITY_SUFFIX_WORDS } from "../src/abbreviations";
+import { countBoundaries } from "../src/boundary";
 import { extract } from "../src/citations/extract";
 import { GAP_SIGNALS } from "../src/citations/signals";
 import {
   arbAnyString,
+  arbBoundaryText,
   arbCitation,
   arbIdCite,
   arbLetterOrDigit,
   arbNearMissCitation,
   arbOpinionWithQuotes,
   arbOtherReference,
+  arbOffsetPair,
   arbPartyCite,
+  arbText,
   arbTextWithCitations,
   canonical,
   type TextWithCitations,
@@ -20,6 +24,7 @@ import type { ExtractedCitation, ExtractedQuote } from "../src/types";
 import { runs } from "./support/fc";
 import { modelQuotes } from "./support/quote-model";
 import { arbNoisyText, shifted } from "./support/quote-noise";
+import { sentenceIndex, sentencesOf } from "./support/sentence-index";
 
 type Ranged = Readonly<{ start: number; end: number; text: string }>;
 
@@ -252,6 +257,32 @@ describe("extract quote reference model _Requirements: 13.1, 13.5, 13.6, 13.7, 1
         const got = extract(text);
         expect(got.citations).toEqual(extract(base).citations.map((c) => shifted(c, shift)));
         expect(got.quotes).toEqual(modelQuotes(text, got.citations));
+      }),
+      runs(),
+    );
+  });
+});
+
+/** Citing text with abbreviations and initials spliced in, or plain prose, with an Offset pair. */
+const arbBoundaryPair = fc
+  .oneof(
+    { arbitrary: arbBoundaryText.map((b) => b.text), weight: 3 },
+    { arbitrary: arbText, weight: 1 },
+  )
+  .chain((t) => arbOffsetPair(t).map((pair) => ({ t, pair })));
+
+describe("extract boundary counting _Requirements: 13.1, 13.8_", () => {
+  // Property 44
+  it("Property 44: boundary counting agrees with the Segmenter's Sentences", () => {
+    fc.assert(
+      fc.property(arbBoundaryPair, fc.integer({ min: 1, max: 3 }), ({ t, pair }, cap) => {
+        if (pair === null) return;
+        const [x, y] = pair;
+        const cits = extract(t).citations;
+        const sentences = sentencesOf(t);
+        const want = sentenceIndex(sentences, y) - sentenceIndex(sentences, x);
+        expect(countBoundaries(t, x, y, cits, Infinity)).toBe(want);
+        expect(countBoundaries(t, x, y, cits, cap)).toBe(Math.min(want, cap));
       }),
       runs(),
     );
