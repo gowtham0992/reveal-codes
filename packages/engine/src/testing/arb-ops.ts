@@ -1,6 +1,7 @@
 /**
  * Caller_Operation arbitraries (design "Arbitraries" table: `arbOp`,
  * `arbOpSequence`; Properties 1, 6, 7, 8, 11, 12, 13; Req 22.1, 22.4).
+ * `arbCitationTargetedOp` aims ops at the citation layer through `arbEdit`.
  * Built only from fast-check combinators. Offsets are drawn in
  * [0, length] and snapped left off Surrogate_Pair interiors with `.map`,
  * so shrinking still works and every op is valid against its Document.
@@ -22,6 +23,7 @@ import type {
   Replace,
 } from "../types.js";
 import { isValidBoundary } from "../validate.js";
+import { arbEdit } from "./arb-edit.js";
 import { arbText, arbTimestamp } from "./arb-text.js";
 
 /** The Run_Id pool of 8, including Codes syntax (`r[1]`, `a\b`). */
@@ -132,6 +134,25 @@ export function arbReplace(doc: Document): fc.Arbitrary<Replace> {
 /** One valid Caller_Operation against `doc`: Insert, Delete, or Replace. */
 export function arbOp(doc: Document): fc.Arbitrary<CallerOperation> {
   return fc.oneof(arbInsert(doc), arbDelete(doc), arbReplace(doc));
+}
+
+/**
+ * One valid Caller_Operation aimed at the citation layer (Property 26):
+ * mostly an `arbEdit(doc.text)` range and text, which targets citation and
+ * party ranges, stop-list entries, Entity_Suffixes, ` v. `, quote-to-citation
+ * gaps, and the `LOOKBEHIND` before them, as a Delete (no text) or Replace,
+ * or an Insert when the range is empty. Otherwise `arbOp`, whose Offsets are
+ * biased into citation and quote ranges.
+ */
+export function arbCitationTargetedOp(doc: Document): fc.Arbitrary<CallerOperation> {
+  const edited = fc
+    .tuple(arbEdit(doc.text), arbCallerProvenance(doc), arbActor)
+    .map(([e, provenance, actor]): CallerOperation => {
+      if (e.from === e.oldTo) return { kind: "insert", at: e.from, text: e.text, provenance };
+      if (e.text === "") return { kind: "delete", from: e.from, to: e.oldTo, actor };
+      return { kind: "replace", from: e.from, to: e.oldTo, text: e.text, provenance };
+    });
+  return fc.oneof({ arbitrary: edited, weight: 3 }, arbOp(doc));
 }
 
 /** One step of a trace: the op and what `apply` returned for it. */

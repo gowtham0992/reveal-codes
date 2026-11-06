@@ -1,7 +1,8 @@
 /**
  * Base `arbDocument` (design "Arbitraries" table, Properties 1, 6 to 13;
  * Req 22.1, 22.4). Built only through `createDocument` and `apply`: a text
- * from `arbText`, then `createDocument`, then an `arbOpTrace` applied under
+ * from `arbText` or `arbTextWithCitations` (so Documents carry citations,
+ * Short_Forms, and attached quotes), then `createDocument`, then an `arbOpTrace` applied under
  * one of two threshold settings, so every value is engine-reachable. The
  * low setting makes relabelled Runs common. Run_Ids come from
  * `RUN_ID_POOL` (8 ids, including `r[1]` and `a\b`). Verification,
@@ -14,6 +15,7 @@ import type { Result } from "../result.js";
 import type { Document, EngineConfig } from "../types.js";
 import { arbOpTrace, type OpStep } from "./arb-ops.js";
 import { arbText, arbTimestamp } from "./arb-text.js";
+import { arbTextWithCitations } from "./arb-text-citations.js";
 
 /** The two threshold settings documents are built under: default 0.4, and 0.05. */
 export const BUILD_CONFIGS: readonly (EngineConfig | undefined)[] = [
@@ -24,9 +26,19 @@ export const BUILD_CONFIGS: readonly (EngineConfig | undefined)[] = [
 const isOk = (r: Result<Document, EngineError>): r is Readonly<{ ok: true; value: Document }> =>
   r.ok;
 
-/** Freshly created Documents: one `PST` span over an `arbText` string. */
+/**
+ * Document text: an `arbTextWithCitations` text (weight 3) or an `arbText`
+ * string (weight 1). The ops after creation are biased into citation and
+ * quote ranges and break many citations, so citation text is weighted up.
+ */
+export const arbDocumentText: fc.Arbitrary<string> = fc.oneof(
+  { arbitrary: arbTextWithCitations.map((t) => t.text), weight: 3 },
+  { arbitrary: arbText, weight: 1 },
+);
+
+/** Freshly created Documents: one `PST` span over an `arbDocumentText` string. */
 export const arbCreatedDocument: fc.Arbitrary<Document> = fc
-  .tuple(arbText, arbTimestamp)
+  .tuple(arbDocumentText, arbTimestamp)
   .map(([text, timestamp]) => createDocument(text, timestamp))
   .filter(isOk)
   .map((r) => r.value);
