@@ -126,7 +126,8 @@ src/
   ops/replace.ts           applyReplace = delete ∘ insert with merged inverse (60)
   ops/inverse.ts           makeInverse, applyInverse, redo (120)
   relabel.ts               countDeleted, countInserted, relabelRuns, addOriginalLength (200)
-  anchor.ts                reanchor (Req 15), assignKeys (220)
+  anchor.ts                reanchor (Req 15), assignKeys; no longer holds reanchorStage (250)
+  citation-layer.ts        reanchorStage (A1 step 4, A3 step 7), matchesOf (A5 layer 1) (80)
   verification.ts          setVerification, setQuoteCheck, verificationOf (200)
   issues.ts                issues, blockingIssues, overrides, recordOverride (220)
   abbreviations.ts         LEGAL_ABBREVIATIONS (non-reporter list), ENTITY_SUFFIX_WORDS, isAbbreviationEndingAt, abbreviationsStartingAt (130)
@@ -474,6 +475,8 @@ Full extraction is defined in layers. Each layer is a pure function of the Text 
 1. **Match layer.** `scanRange(text, 0, end)` visits a cursor `p` from 0. At each `p`, `matchAt(text, p)` either returns a Match, after which the cursor jumps to `match.end`, or returns null, after which the cursor moves to `p + 1`. `matchAt` reads only `text[p − LOOKBEHIND .. p + LOOKAHEAD)` (A9, constants table).
 2. **Link layer.** `linkShortForms(matches)` is O(c) over the match list (Req 12).
 3. **Quote layer.** `pairQuoteMarks(text)` pairs marks globally and drops every pair whose opening mark lies inside an earlier kept pair, in O(n + q log q) for q quote characters. `attachQuotes(text, pairs, citations)` applies the preceding and following rules with local gap scans and local boundary counts (A9).
+
+The Document does not store its match layer. The pipeline rebuilds the previous match list from `prev.citations` (`matchesOf`: one match per record, Other_References included, ascending `start`, Short_Form `targetStart` reset to null, `normalised` dropped). This equals `scanRange(prev.text)` whenever `prev.citations` is the Extractor's output for `prev.text`, which every Document from `createDocument`, `apply`, an Inverse, or `parse` satisfies. `parse` qualifies because it takes Citation_Values and link targets from `extract(text)` and rejects any decoded range set that differs from the Extractor's (A12 step 3, Req 20.5).
 
 Only layer 1 is incremental. Layers 2 and 3 are recomputed in full: they cost O(c + q) plus a single O(n) `charCodeAt` loop, which takes about 0.1 ms at n = 50,000, plus the gap scans, whose total is O(n) (A9, "Cost").
 
