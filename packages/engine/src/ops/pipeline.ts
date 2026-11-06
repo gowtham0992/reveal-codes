@@ -2,8 +2,8 @@
  * Shared tail of the Insert and Delete pipeline (design A3 steps 5 and 7).
  * The draft stages in ops/insert.ts and ops/delete.ts settle Text, Spans,
  * and counts; `relabelDraft` applies step 5 and `settleDraft` step 7. They
- * are separate so that Replace can relabel once after both counts and then
- * re-anchor once over its combined edit (design A4, Req 6.9).
+ * are separate so that Replace can relabel after each of its two steps and
+ * then re-anchor once over its combined edit (design A4, Req 6.9).
  */
 import { withLayer, type DraftDocument, type Edit } from "../anchor.js";
 import { reanchorStage } from "../citation-layer.js";

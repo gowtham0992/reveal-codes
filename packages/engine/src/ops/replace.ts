@@ -1,15 +1,15 @@
 /**
  * Replace composition (design A4; Req 4.6, 6.9, 15.3, 15.4). Replace builds
- * its Text, Spans, and Run table as Delete followed by Insert would. Its
+ * its Text, Spans, and Run table as Delete followed by Insert would,
+ * relabelling after the delete step and again after the insert step. One
+ * relabel after both steps is not enough: an AI insert under the same Run
+ * grows its Original_Length, so a crossing that the delete step makes under
+ * a lowered threshold can be undone by the time both counts are in. Its
  * citation layer comes from one re-anchor of the original Document over the
  * combined Edit `[from, to) → [from, from + text.length)`, so a citation
  * that the Replace touches gets one fresh Issue_Key and one that it leaves
- * untouched under Req 15.3 keeps its key, result, and Override. Relabelling
- * runs once, after both counts (Req 6.9); the Text, Spans, and Run table
- * still equal the sequential composition because counts only grow, flags
- * are sticky, and the Run invariant (Req 6.12) means a relabel never merges
- * spans that the insert could have split. One Inverse restores the original
- * Document.
+ * untouched under Req 15.3 keeps its key, result, and Override. One Inverse,
+ * built from snapshots, restores the original Document.
  */
 import type { DraftDocument, Edit } from "../anchor.js";
 import type { InvalidSpans } from "../errors.js";
@@ -26,24 +26,29 @@ export function replaceEdit(from: number, to: number, length: number): Edit {
 }
 
 /**
- * Text, Spans, and Run table after the Replace, before relabelling: the
- * Delete draft, then the Insert draft counted against the post-delete spans
- * (Req 6.9). Neither step re-anchors.
+ * Text, Spans, and Run table after the Replace: the Delete draft relabelled,
+ * then the Insert draft, counted against the post-delete spans (Req 6.9),
+ * relabelled again. Neither step re-anchors.
  */
-export function replaceDraft(doc: DraftDocument, op: Replace): DraftDocument {
-  const deleted = deleteDraft(doc, op.from, op.to, op.provenance.origin);
-  return insertDraft(deleted, op.from, op.text, op.provenance);
+export function replaceDraft(
+  doc: DraftDocument,
+  op: Replace,
+  threshold: number,
+): Result<DraftDocument, InvalidSpans> {
+  const deleted = relabelDraft(deleteDraft(doc, op.from, op.to, op.provenance.origin), threshold);
+  if (!deleted.ok) return deleted;
+  return relabelDraft(insertDraft(deleted.value, op.from, op.text, op.provenance), threshold);
 }
 
 /**
- * Both halves when the range and the text are non-empty: one relabel after
- * both counts, then one re-anchor against `doc` with the combined Edit.
+ * Both halves when the range and the text are non-empty: the relabelled
+ * draft, then one re-anchor against `doc` with the combined Edit.
  */
 function bothStages(doc: Document, op: Replace, threshold: number): Result<Document, InvalidSpans> {
-  const relabelled = relabelDraft(replaceDraft(doc, op), threshold);
-  if (!relabelled.ok) return relabelled;
+  const draft = replaceDraft(doc, op, threshold);
+  if (!draft.ok) return draft;
   const edit = replaceEdit(op.from, op.to, op.text.length);
-  return ok(settleDraft(doc, relabelled.value, edit));
+  return ok(settleDraft(doc, draft.value, edit));
 }
 
 /**
