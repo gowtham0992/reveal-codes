@@ -9,6 +9,7 @@ import {
   arbText,
   arbTextWithCitations,
 } from "../src/testing/arbitraries";
+import { arbBothCase, expectPrecedingWins } from "./support/both-rules";
 import { COVERAGE_EXAMPLES, expectCovered, record, type Coverage } from "./support/coverage";
 import { runs } from "./support/fc";
 import { arbFollowCase, expectFollowAttachment } from "./support/follow-attach";
@@ -141,5 +142,12 @@ describe("extract following quotes _Requirements: 13.8, 13.9_", () => {
   // Property 46
   it("Property 46: following quotes attach to the citation before them in the same Sentence", () => {
     fc.assert(fc.property(arbFollowCase, expectFollowAttachment), runs());
+  });
+});
+
+describe("extract both quote rules _Requirements: 13.5, 13.7_", () => {
+  // Property 47
+  it("Property 47: the preceding rule wins, and one citation can carry several quotes", () => {
+    fc.assert(fc.property(arbBothCase, expectPrecedingWins), runs());
   });
 });
