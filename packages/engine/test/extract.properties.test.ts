@@ -14,6 +14,7 @@ import { COVERAGE_EXAMPLES, expectCovered, record, type Coverage } from "./suppo
 import { runs } from "./support/fc";
 import { arbFollowCase, expectFollowAttachment } from "./support/follow-attach";
 import { arbGapCase, expectGapAttachment } from "./support/gap-attach";
+import { arbP51Case, expectSignalKeepsAttachment } from "./support/gap-signal-insert";
 import { arbCandidate, expectGlueRejected } from "./support/glue";
 import {
   arbExtractInput,
@@ -267,6 +268,16 @@ describe("extract party reference model _Requirements: 9.2, 12.2_", () => {
       fc.property(arbP50Input, (input) => {
         expectModelParty(input);
       }),
+      runs(),
+    );
+  });
+});
+
+describe("extract Gap_Signal insertion _Requirements: 12.2, 13.1_", () => {
+  // Property 51
+  it("Property 51: a Gap_Signal before a citation never prevents an attachment that holds without it", () => {
+    fc.assert(
+      fc.property(arbP51Case, (k) => void expectSignalKeepsAttachment(k)),
       runs(),
     );
   });
