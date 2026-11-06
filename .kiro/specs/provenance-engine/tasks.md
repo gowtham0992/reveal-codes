@@ -199,7 +199,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Text with no terminator is one Sentence.
     - _Requirements: 8.3, 8.4, 8.5, 8.6_
 
-- [~] 5. Citations, extraction, and re-anchoring
+- [x] 5. Citations, extraction, and re-anchoring
   - [x] 5.1 Add the reporter list generator and commit its output
     - `packages/engine/scripts/generate-reporters.ts` sits outside `src` and may use `node:fs`. It runs offline against a local reporters-db checkout path and a generation date, both passed as arguments.
     - It keeps edition keys in file order, de-duplicates by first occurrence, and drops grammar-breaking entries.
@@ -443,7 +443,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Uses `arbEdit(t)` from task 5.42, so edits change a party's canonical start or tail comma from outside its range, split a Party_Side, or add and remove a Gap_Signal in a gap.
     - **Validates: Requirements 15.1**
     - _Requirements: 15.1_
-  - [ ] 5.45 Write Property 27 in `test/anchor.properties.test.ts`
+  - [x] 5.45 Write Property 27 in `test/anchor.properties.test.ts`
     - **Property 27: Issue_Keys are fresh, unique, and assigned in document order**
     - Holds for Replace because a Replace re-anchors once over its combined edit (A4), so it issues no key that no item keeps: `See 410 U.S. 113.` with `Replace(4, 5, "4")` gives the citation `k1` and `keyCounter` 2.
     - **Validates: Requirements 15.5, 15.7**
