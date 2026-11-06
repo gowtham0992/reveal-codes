@@ -4,13 +4,24 @@ import { extract } from "../src/citations/extract";
 import { format, validateFullValue } from "../src/citations/format";
 import { scanRange } from "../src/citations/scan";
 import { structuralEqual } from "../src/equal";
+import reportersJson from "../src/citations/reporters.json" with { type: "json" };
 import {
   arbCitation,
+  arbMember,
+  arbNearMissCitation,
   arbReporter,
   arbShortFormParty,
   arbValueCorruption,
 } from "../src/testing/arbitraries";
-import type { CitationValue, FullValue, IdValue, OtherValue, PartyValue } from "../src/types";
+import type {
+  CitationValue,
+  FullValue,
+  IdValue,
+  OtherValue,
+  ParallelValue,
+  PartyValue,
+  ReporterMember,
+} from "../src/types";
 import { runs } from "./support/fc";
 
 // Properties 21 and 22 (design "Correctness Properties", [format]).
@@ -153,6 +164,109 @@ describe("Property 22: Invalid citation values are rejected at the first failing
         expect(validateFullValue(value)).toEqual(expected);
         expect(format(value)).toEqual(expected);
       }),
+      runs(),
+    );
+  });
+});
+
+// Property 23 (design "Correctness Properties", [format]).
+
+/** Req 11.1's collapsed key, written out here so the oracle does not reuse the engine's. */
+const collapseKey = (t: string): string => t.replace(/[. ]/g, "");
+
+/** The first `reporters.json` entry, in file order, whose collapsed key equals `token`'s (Req 11.5). */
+const firstListEntry = (token: string): string | undefined =>
+  (reportersJson as readonly string[]).find((e) => collapseKey(e) === collapseKey(token));
+
+/** A near-miss case: the text as written and the value it must extract to. */
+type NearMissCase = Readonly<{ text: string; token: string; nmReporter: string; value: FullValue }>;
+
+/** `<vol> <rep> <page>[, <pin>]`, the D1 layout of one parallel member. */
+const memberText = (m: ReporterMember): string =>
+  `${String(m.volume)} ${m.reporter} ${String(m.page)}` +
+  (m.pincite === undefined ? "" : `, ${String(m.pincite)}`);
+
+/** A near miss alone (Req 11.1, 11.4). */
+const arbNearMissAlone: fc.Arbitrary<NearMissCase> = arbNearMissCitation.map((nm) => ({
+  text: nm.text,
+  token: nm.token,
+  nmReporter: nm.value.reporter,
+  value: nm.value,
+}));
+
+/**
+ * A near miss as one member of a Parallel_Citation (Req 11.6): 1 to 3 exact
+ * members, the near miss spliced in at index `at`, and an optional year.
+ */
+const arbNearMissParallel: fc.Arbitrary<NearMissCase> = fc
+  .tuple(
+    fc.array(arbMember, { minLength: 1, maxLength: 3 }),
+    arbNearMissCitation,
+    fc.nat(),
+    fc.option(fc.integer({ min: 1600, max: 2999 }), { nil: undefined }),
+  )
+  .map(([exact, nm, at, year]) => {
+    const i = at % (exact.length + 1);
+    const nmMember: ReporterMember = {
+      volume: nm.value.volume,
+      reporter: nm.value.reporter,
+      page: nm.value.page,
+    };
+    const members = [...exact.slice(0, i), nmMember, ...exact.slice(i)];
+    const pieces = members.map((m, j) => (j === i ? nm.text : memberText(m)));
+    const yearText = year === undefined ? "" : ` (${String(year)})`;
+    const base = { kind: "parallel", members } as const;
+    const value: ParallelValue = year === undefined ? base : { ...base, year };
+    return {
+      text: pieces.join(", ") + yearText,
+      token: nm.token,
+      nmReporter: nmMember.reporter,
+      value,
+    };
+  });
+
+describe("Property 23: Near misses are extracted and normalised to the first matching reporter _Requirements: 10.6, 11.1, 11.2, 11.4, 11.5, 11.6, 14.6_", () => {
+  it("a near miss alone or as a parallel member extracts as written, to the first collapsed reporters.json entry, with Normalised_Form format(value) that re-extracts plainly, and repeats identically", () => {
+    // Property 23
+    // Feature: provenance-engine, Property 23: Near misses are extracted and normalised to the first matching reporter
+    //
+    // The expected reporter comes from a local scan of `reporters.json` in file
+    // order with the collapsed key written out above (Req 11.5, 14.6), and the
+    // expected value is built by the generator, never by `extract`. A near-miss
+    // token is never an exact entry, so the text as written differs from the
+    // Canonical_Form and a Normalised_Form must be recorded (Req 11.2).
+    fc.assert(
+      fc.property(
+        fc.oneof(arbNearMissAlone, arbNearMissParallel),
+        ({ text, token, nmReporter, value }) => {
+          expect(nmReporter).toBe(firstListEntry(token));
+          expect(nmReporter).not.toBe(token);
+
+          const canonical = format(value);
+          expect(canonical.ok).toBe(true);
+          if (!canonical.ok) return;
+          expect(canonical.value).not.toBe(text);
+
+          const first = extract(text);
+          expect(first.citations).toHaveLength(1);
+          const [c] = first.citations;
+          if (c === undefined) return;
+          expect([c.start, c.end]).toEqual([0, text.length]);
+          expect(c.text).toBe(text);
+          expect(structuralEqual(c.value, value)).toBe(true);
+          expect(c.normalised).toBe(canonical.value);
+
+          const plain = extract(canonical.value);
+          expect(plain.citations).toHaveLength(1);
+          const [p] = plain.citations;
+          if (p === undefined) return;
+          expect([p.start, p.end]).toEqual([0, canonical.value.length]);
+          expect(structuralEqual(p.value, value)).toBe(true);
+          expect(p.normalised).toBeUndefined();
+
+          expect(extract(text)).toEqual(first);
+        },
+      ),
       runs(),
     );
   });
