@@ -448,7 +448,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Builds `t` and `t′` (with `g + " "` inserted before `m + x`) from `arbQuoteContent`, `arbGapPunct`, `arbCaseName`, `arbCitation`, `arbShortFormParty`, and `arbGapSignal`, and checks the attachment under the Sentence condition and the shifted citations.
     - **Validates: Requirements 12.2, 13.1**
     - _Requirements: 12.2, 13.1_
-  - [ ] 5.47 Add `citations/lexis-courts.ts` and the `lexisCourtListed` value field, and update `format.ts`
+  - [x] 5.47 Add `citations/lexis-courts.ts` and the `lexisCourtListed` value field, and update `format.ts`
     - Depends on regenerated data: start only after the maintainer has re-run `scripts/generate-reporters.ts` against reporters-db and committed `src/citations/lexis-courts.json` and the updated `REPORTERS_LICENSE.md`. Do not hand-write the list.
     - `lexis-courts.ts`: `LEXIS_COURTS` as a static JSON import (`with { type: "json" }`), exact and collapsed indexes built once (first entry wins), `lookupLexisCourt` (exact, then collapsed), and `isUnlistedLexisCourt` (the Glossary Unlisted_Lexis_Court rule). It is the only importer of `lexis-courts.json` (Req 14.8).
     - `types.ts`: `DatabaseValue` gains `lexisCourtListed?: boolean`, present iff the designator is `LEXIS`, `true` for a listed court (the list entry) and `false` for an unlisted court (as written).
