@@ -700,6 +700,7 @@ Text between event offsets is emitted through `escapeText`. Each Code string is 
    - Unpaired surrogate in the Text.
    - `p` in range.
    - Short_Form Code and count against the derived status.
+   - No `[CIT ✓]` on a Database_Citation whose Extractor value has `lexisCourtListed: false` (rule `unverifiable_status`, at the input index of that `[CIT ✓]`; Req 20.4, 16.5, D23). The value comes from the Extractor output, as for Short_Form link targets. This is the same treatment as a `[CIT ✓]` on an Orphan: a status `setVerification` could never have written is rejected, never downgraded.
    - No citation Code at an Other_Reference range.
    - `[REF]` has no Payload_Section and no `[OVR]`.
    - Run invariant (Req 6.12), plus `originalLength ≥ 1` and every span Run_Id present in the Run table.
@@ -930,6 +931,8 @@ For any `arbDocument` `d`, Issue key `k`, `arbReason` `s`, and Timestamp:
 For any `arbDocument` `d` and any interleaving from `arbStateOpSequence(d)` of edits, verification writes, quote writes, and overrides:
 - every Override in every intermediate Document has a key that identifies a current Issue;
 - no intermediate Document holds a Full_Citation whose value has `lexisCourtListed: false` with status `verified`, whatever the sequence of operations and verification results. `arbStateOpSequence` generates texts with unlisted LEXIS citations, `verified` writes aimed at their keys (each must return `not_verifiable` and leave the Document unchanged), and edits that create, touch, and shift them, so a carried-over result is exercised as well as a direct write.
+
+`parse` is the one other way to obtain a Document, and it rejects a `[CIT ✓]` on such a citation with `malformed_codes { rule: "unverifiable_status" }` (Req 20.4, D23; Property 41 checks it). The claim therefore holds for every Document the Engine returns, including one obtained by parsing.
 [issues]
 **Validates: Requirements 15.8, 16.5, 16.6, 17.4**
 
@@ -968,7 +971,7 @@ For any `arbDocument` `d` and single fault from `arbSyntaxFault` injected at ind
 **Validates: Requirements 20.3, 20.6**
 
 ### Property 41: Semantically tampered renderings are rejected with the violated rule
-For any `arbDocument` `d` and any `arbSemanticTamper(d)`, the tamper is one of: break coverage or canonical form, an invalid provenance, an `AI` span in a relabelled Run, a wrong Short_Form code or count, a citation code on a `[REF]` range, a moved or extra or missing `[REF]` pair, a `[REF]` with a Payload_Section or `[OVR]`, an Override on a non-Issue, an out-of-range `p`, a shifted `[/CIT]`, a `[QUO …]` pair added around a Quotation_Pair that attaches to nothing, or a `[QUO …]` pair removed from an attached quote. `parse` returns `malformed_codes` whose `rule` equals the tamper's recorded rule. [codes]
+For any `arbDocument` `d` and any `arbSemanticTamper(d)`, the tamper is one of: break coverage or canonical form, an invalid provenance, an `AI` span in a relabelled Run, a wrong Short_Form code or count, an opening citation code on a Database_Citation with `lexisCourtListed: false` replaced by `[CIT ✓{k=<same key>;cl=<non-empty id>}]` (rule `unverifiable_status`; `arbDocument` therefore includes texts with unlisted LEXIS citations), a citation code on a `[REF]` range, a moved or extra or missing `[REF]` pair, a `[REF]` with a Payload_Section or `[OVR]`, an Override on a non-Issue, an out-of-range `p`, a shifted `[/CIT]`, a `[QUO …]` pair added around a Quotation_Pair that attaches to nothing, or a `[QUO …]` pair removed from an attached quote. `parse` returns `malformed_codes` whose `rule` equals the tamper's recorded rule. [codes]
 **Validates: Requirements 20.4, 20.5**
 
 ### Property 42: Engine functions are deterministic, pure, and invent no values
@@ -1087,7 +1090,7 @@ All errors are plain data `{ kind, ...fields }`. No source module throws, and no
 `MalformedRule` covers two groups:
 
 - **Syntax:** `unknown_code`, `unterminated_code`, `unbalanced_close`, `unclosed_open`, `missing_doc`, `misplaced_doc`, `bad_field`, `dangling_escape`, `ovr_position`.
-- **Semantics:** `coverage`, `canonical`, `provenance`, `surrogate`, `quote_prefix`, `short_form_code`, `ref_code`, `run_invariant`, `override_target`, `issue_key`, `extractor_mismatch`.
+- **Semantics:** `coverage`, `canonical`, `provenance`, `surrogate`, `quote_prefix`, `short_form_code`, `unverifiable_status`, `ref_code`, `run_invariant`, `override_target`, `issue_key`, `extractor_mismatch`.
 
 Check order where requirements leave it open:
 
@@ -1145,6 +1148,7 @@ Check order where requirements leave it open:
   - In `"a “b" 410 U.S. 113 c” 5 U.S. 1` the crossing curly pair is dropped; the only quote is `a “b`, a Preceding_Quote of `410 U.S. 113`, and none attaches to `5 U.S. 1`. In `Roe, 410 U.S. 113 ("a “b" c”) 5 U.S. 1` the only quote is `a “b`, a Following_Quote of `410 U.S. 113` (13.10).
   - Empty-document renderings (19.9).
   - Display text of a parsed display rendering fails with `missing_doc` at 0 (20.3).
+  - Parse rejects a verified code on an unlisted LEXIS citation (20.4, 16.5, D23), in `test/codes.test.ts`: in the Full_Rendering of a Document created from `2023 Foo Cty. Ct. LEXIS 5`, replace the citation's `[CIT …{k=k0}]` with `[CIT ✓{k=k0;cl=1}]`; `parse` returns `malformed_codes` with `rule: "unverifiable_status"` and `index` at that `[CIT ✓`. The same edit on `2023 U.S. Dist. LEXIS 5` parses `ok` with status `verified` and cluster `1`.
   - Quote between two citations attaches to the following one as a Preceding_Quote (13.5).
   - The Req 13.1 and 13.8 examples:
     - `"… ." Roe, 410 U.S. at 153.` attaches (one boundary; the party is inside the Short_Form).
@@ -1270,7 +1274,7 @@ Expected total: well under 1 ms, against the 5 ms median and 15 ms p95 limits. R
 - D5, Short_Form carry-over compared through the edit mapping;
 - D8, v1 Other_References limited to U.S.C., C.F.R., and the Federal Rules.
 
-D6 and D7 are design choices that the requirements permit. D9 to D11 are new with the Req 13 rewrite and await review. D12 to D15 record choices made in requirements.md for the Short_Form_Party rule (resolving the former Open Risk R2); D14 is reversed by requirements decision (h). D16 is a design interpretation of that rule, revised for decision (h), that awaits review. D18 records the Kiro decisions listed in requirements decision (h), which the user can override there. D17 and D19 are new design interpretations that await review. D20 records the Req 13.10 rule for nested and crossing quote pairs. D22 records the user's decision on LEXIS courts (requirements decision (i)).
+D6 and D7 are design choices that the requirements permit. D9 to D11 are new with the Req 13 rewrite and await review. D12 to D15 record choices made in requirements.md for the Short_Form_Party rule (resolving the former Open Risk R2); D14 is reversed by requirements decision (h). D16 is a design interpretation of that rule, revised for decision (h), that awaits review. D18 records the Kiro decisions listed in requirements decision (h), which the user can override there. D17 and D19 are new design interpretations that await review. D20 records the Req 13.10 rule for nested and crossing quote pairs. D22 records the user's decision on LEXIS courts (requirements decision (i)). D23 applies the user's standing rule for adversarial input to `parse` and that decision.
 
 - **D1. Parallel pincites (10.2 vs 9.5 and 10.3).** Req 9.5 records a pincite for each parallel member and Req 10.1 allows one, but the Req 10.2 parallel layout has nowhere to write it, so `extract(format(c))` would lose it. The design writes `, <pincite>` after each member's page.
 - **D2. Parallel without a parenthetical.** Req 9.5 describes members that share a parenthetical. `format` of a parallel value with neither court nor year produces comma-joined members with no parenthetical, so for the round trip to work the extractor must also treat comma-joined members with no parenthetical as one Parallel_Citation (consistent with the Glossary). Side effect: `1 F.3d 2, 3 F.3d 4` with no parenthetical is read as one parallel.
@@ -1298,6 +1302,7 @@ D6 and D7 are design choices that the requirements permit. D9 to D11 are new wit
 - **D20. Earlier-opening quote pair wins over nested and crossing pairs (Req 13.10).** Pairs are taken by opening mark and a pair that opens inside a kept pair is dropped; this keeps Req 13.7 (no overlapping quotes) where the earlier containment-only rule let crossing pairs overlap, matches the scanner's leftmost-first reading, and still checks one quote instead of none.
 - **D21. Only the longest Gap_Signal at a gap position is tried (Req 13.1).** When several Gap_Signals start at the same position (`See`, `See also`, `See, e.g.,`), `matchPrecedingGap` tries only the longest that fits; this keeps Req 13.1's rule that a gap holding two Gap_Signals attaches nothing (with `S = See`, `also See A, Inc. v. A & A,` would read as a Case_Name), is leftmost-longest like the scanner, and costs no ordinary gap its attachment, since no real Party_Name begins with the remainder of a longer Gap_Signal (`also …`, `, e.g., …`).
 - **D22. LEXIS courts come from reporters-db; unlisted courts extract but can never verify (user decision, Req 9.4, 14.8, 14.9, 16.5).** A LEXIS court is a `lexis-courts.json` entry (exact, then collapsed; `lexisCourtListed: true`, the entry recorded) or else an Unlisted_Lexis_Court under the tight rule (`lexisCourtListed: false`, the court as written); the year directly precedes the court, and no court token may be a year, so `… § 1983 and the court in 2023 U.S. Dist. LEXIS 5` and `Local 2092 Union, 2023 U.S. Dist. LEXIS 5` both start at `2023`. `setVerification` rejects `verified` for an unlisted court with `not_verifiable`. Reasoning: in real filings no text before a LEXIS cite is swallowed, while unlisted courts still surface as citations and can never pass as verified. The A13 validity rules for the two LEXIS fields are a design tightening of Req 10.1 in the manner of D3, needed for the Req 10.3 round trip.
+- **D23. Parse rejects a verified code on an unlisted LEXIS citation (user's standing rule for adversarial input, Req 20.4, 16.5).** A `[CIT ✓]` on a Database_Citation with `lexisCourtListed: false` is `malformed_codes { rule: "unverifiable_status" }`, not a silent downgrade to `unchecked`. Reasoning: this is how `parse` already treats a `[CIT ✓]` on an Orphan (`short_form_code`) and every other state the Engine cannot produce, so it keeps Property 35 true for parsed Documents, keeps the citation an Issue that export blocks, and depends only on the input text.
 
 ## Deferred to other specs
 

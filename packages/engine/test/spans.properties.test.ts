@@ -1,7 +1,13 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import { segment } from "../src/segment";
 import { checkCoverage, normaliseSpans } from "../src/spans";
-import { arbLabelling, arbSpanFragmentation, arbText } from "../src/testing/arbitraries";
+import {
+  arbLabelling,
+  arbSpanCorruption,
+  arbSpanFragmentation,
+  arbText,
+} from "../src/testing/arbitraries";
 import type { Provenance, Span } from "../src/types";
 import { runs } from "./support/fc";
 
@@ -100,6 +106,20 @@ describe("normaliseSpans canonical form _Requirements: 3.7_", () => {
         const expected = canonicalShape(text.length, labelling);
         expect(canonicalShape(text.length, a)).toStrictEqual(expected);
         expect(canonicalShape(text.length, b)).toStrictEqual(expected);
+      }),
+      runs(),
+    );
+  });
+});
+
+describe("invalid span lists _Requirements: 3.6, 8.9_", () => {
+  // Property 5
+  it("normaliseSpans and segment both return invalid_spans at the recorded first violation", () => {
+    fc.assert(
+      fc.property(arbSpanCorruption, ({ text, spans, expected }) => {
+        const rejected = { ok: false, error: expected };
+        expect(normaliseSpans(text.length, spans)).toStrictEqual(rejected);
+        expect(segment(text, spans)).toStrictEqual(rejected);
       }),
       runs(),
     );

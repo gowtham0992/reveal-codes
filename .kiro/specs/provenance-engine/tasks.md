@@ -574,6 +574,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - _Requirements: 20.1, 20.3_
   - [ ] 8.6 Implement `codes/check.ts`
     - Runs the Req 20.4 semantic rules, each reported with its `rule` tag.
+    - Includes `unverifiable_status`: a `[CIT ✓]` on a Database_Citation whose Extractor value has `lexisCourtListed: false` is rejected at that Code's input index, the same treatment as a `[CIT ✓]` on an Orphan, never a downgrade (Req 16.5, 20.4, D23). Add the design's named example test "Parse rejects a verified code on an unlisted LEXIS citation" to `test/codes.test.ts`, with its listed-court counterpart that parses `ok`.
     - Cross-checks against the Extractor (`extractor_mismatch`), including `[REF]` pairs and quote attachment.
     - Per design A12 step 3.
     - _Requirements: 20.4, 20.5_
@@ -606,6 +607,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - _Requirements: 20.3, 20.6_
   - [ ] 8.14 Write Property 41 in `test/codes.properties.test.ts`
     - **Property 41: Semantically tampered renderings are rejected with the violated rule**
+    - `arbSemanticTamper` includes replacing the opening citation code of an unlisted LEXIS Database_Citation with `[CIT ✓{k=<same key>;cl=<id>}]`, expecting `unverifiable_status` (D23). Same `fc.assert`; no new Property number.
     - **Validates: Requirements 20.4, 20.5**
     - _Requirements: 20.4, 20.5_
   - [ ] 8.15 Write example tests in `test/codes.test.ts`
