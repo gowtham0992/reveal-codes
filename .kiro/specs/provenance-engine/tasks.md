@@ -637,7 +637,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `index.ts` does not re-export `testing/` (1.2).
     - `reporters.json` is the only reporter list, its entries are non-empty, trimmed, and unique, and the licence note has the licence name, repository, version or commit, and date (14.1, 14.2, 14.4).
     - _Requirements: 1.1, 1.2, 1.3, 1.9, 14.1, 14.2, 14.4_
-  - [~] 10.3 Create `src/testing/arb-api.ts` `arbApiCall(d)`
+  - [x] 10.3 Create `src/testing/arb-api.ts` `arbApiCall(d)`
     - One call to any exported function with generated arguments, including failing ones.
     - Add an export line to `arbitraries.ts`.
     - _Requirements: 22.1_
