@@ -652,7 +652,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - _Requirements: 22.2, 22.6_
 
 - [ ] 11. Benchmark (manual, outside CI)
-  - [~] 11.1 Create the benchmark in `packages/engine/bench/`
+  - [x] 11.1 Create the benchmark in `packages/engine/bench/`
     - `fixture.ts` builds the Document deterministically from `BENCH_SEED = 20261103` with a local mulberry32 PRNG. The Document has exactly 50,000 code units, 500 Spans, at least 10 Runs, 100 Full_Citations, and at least 20 quotes. The fixture asserts these counts.
     - `apply.bench.test.ts` runs the four scenarios from Req 21.1 to 21.3. Each gets 100 warm-ups and 1,000 timed runs from the same input. It prints the median and p95, and on failure reports one message listing every failing scenario with its times.
     - `bench/vitest.config.ts` includes only `bench/**/*.bench.test.ts`.

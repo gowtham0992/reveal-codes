@@ -1,0 +1,9 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../dist/bench",
+    "types": ["node"]
+  },
+  "include": ["."],
+  "references": [{ "path": ".." }]
+}
