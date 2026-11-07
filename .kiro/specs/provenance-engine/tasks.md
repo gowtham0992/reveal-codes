@@ -572,7 +572,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - A single pass that records every syntax fault at its input index and returns the lowest one.
     - Per design A12 step 1.
     - _Requirements: 20.3, 20.6_
-  - [~] 8.5 Implement `codes/decode.ts`
+  - [x] 8.5 Implement `codes/decode.ts`
     - Turns tokens into a draft Document: header, spans, citation and quote ranges, and `[OVR]` attachment (`ovr_position`).
     - Field decoders.
     - Per design A12 step 2.
