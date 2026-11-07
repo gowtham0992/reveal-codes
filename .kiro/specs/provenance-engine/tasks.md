@@ -514,7 +514,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 30: Writing a quote-check result updates that quote only**
     - **Validates: Requirements 17.1, 17.2, 17.4**
     - _Requirements: 17.1, 17.2, 17.4_
-  - [~] 7.7 Write Property 31 in `test/verification.properties.test.ts`
+  - [-] 7.7 Write Property 31 in `test/verification.properties.test.ts`
     - **Property 31: Invalid quote-check writes are rejected without change**
     - **Validates: Requirements 13.4, 17.3, 17.5, 17.8**
     - _Requirements: 13.4, 17.3, 17.5, 17.8_
@@ -530,7 +530,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 34: Recording an Override follows the reason and target rules**
     - **Validates: Requirements 18.3, 18.4, 18.5, 18.6, 18.7**
     - _Requirements: 18.3, 18.4, 18.5, 18.6, 18.7_
-  - [~] 7.11 Write Property 35 in `test/issues.properties.test.ts`
+  - [x] 7.11 Write Property 35 in `test/issues.properties.test.ts`
     - **Property 35: Overrides only ever belong to current Issues**
     - Also asserts that no sequence of operations and verification results ever puts a citation with `lexisCourtListed: false` in the `verified` state: in every intermediate Document every such Full_Citation has a status other than `verified`. `arbStateOpSequence` generates unlisted LEXIS citations and `verified` writes aimed at them. Same `fc.assert`; no new Property number.
     - **Validates: Requirements 15.8, 16.5, 16.6, 17.4**

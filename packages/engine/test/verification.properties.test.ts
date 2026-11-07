@@ -1,6 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import {
+  arbBadQuoteWrite,
   arbBadVerificationWrite,
   arbDocument,
   arbQuoteCheckResult,
@@ -8,7 +9,7 @@ import {
   fullRecordsOf,
   isUnlistedLexisRecord,
 } from "../src/testing/arbitraries";
-import type { BadVerificationWrite, FullRecord } from "../src/testing/arbitraries";
+import type { BadQuoteWrite, BadVerificationWrite, FullRecord } from "../src/testing/arbitraries";
 import type { EngineError } from "../src/errors";
 import type { Document, IssueKey, VerificationResult } from "../src/types";
 import { setQuoteCheck, setVerification, verificationOf } from "../src/verification";
@@ -178,6 +179,33 @@ describe("quote-check state  _Requirements: 17.1, 17.2, 17.4_", () => {
         // Other keys' Overrides are kept, in order.
         const otherOvr = (d: Document) => d.overrides.filter((o) => o.key !== target.key);
         expect(otherOvr(next)).toEqual(otherOvr(doc));
+      }),
+      runs(),
+    );
+  }, 120_000);
+});
+
+/** The Engine_Error a bad quote-check write is expected to produce, from the recorded fault. */
+function expectedQuoteError(w: BadQuoteWrite): EngineError {
+  const e = w.expected;
+  if (e.kind === "invalid_quote_result") return e;
+  return { kind: e.kind, key: w.key };
+}
+
+describe("invalid quote-check writes  _Requirements: 13.4, 17.3, 17.5, 17.8_", () => {
+  // Property 31
+  it("P31 invalid quote-check writes are rejected without change", () => {
+    const arbBad = arbDocument.chain((doc) =>
+      arbBadQuoteWrite(doc).map((write) => ({ doc, write })),
+    );
+    fc.assert(
+      fc.property(arbBad, ({ doc, write }) => {
+        const before = structuredClone(doc);
+        const r = setQuoteCheck(doc, write.key, write.result);
+        expect(r.ok).toBe(false);
+        if (r.ok) return;
+        expect(r.error).toEqual(expectedQuoteError(write));
+        expect(doc).toEqual(before);
       }),
       runs(),
     );

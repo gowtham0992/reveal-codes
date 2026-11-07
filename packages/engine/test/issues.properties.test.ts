@@ -2,10 +2,12 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { blockingIssues, issues, recordOverride } from "../src/issues";
 import {
+  applyStateStep,
   arbBadTimestamp,
   arbBlankReason,
   arbDocument,
   arbReason,
+  arbStateOpSequence,
   arbTimestamp,
 } from "../src/testing/arbitraries";
 import type { Document, Issue } from "../src/types";
@@ -185,6 +187,50 @@ describe("issues properties: recording an Override _Requirements: 18.3, 18.4, 18
             expect(again.value.overrides.filter((o) => o.key === key)).toEqual([
               { key, reason: `${reason}!`, timestamp: ts },
             ]);
+          }
+        },
+      ),
+      runs(),
+    );
+  });
+});
+
+/** Asserts the Property 35 invariants on one Document. */
+function expectOverridesAndUnlisted(d: Document): void {
+  const all = issues(d);
+  const rank = new Map(all.map((i, n) => [i.key, n]));
+  const keys = d.overrides.map((o) => o.key);
+  // Each Override key is a current Issue key, once, in issue order.
+  expect(new Set(keys).size).toBe(keys.length);
+  const ranks = keys.map((k) => rank.get(k) ?? -1);
+  expect(ranks.every((n) => n >= 0)).toBe(true);
+  expect([...ranks].sort((a, b) => a - b)).toEqual(ranks);
+  // An unlisted LEXIS citation is never verified.
+  for (const r of d.citations) {
+    if (
+      r.kind === "full" &&
+      r.citation.value.kind === "database" &&
+      r.citation.value.lexisCourtListed === false
+    ) {
+      expect(r.result.status).not.toBe("verified");
+    }
+  }
+}
+
+describe("issues properties: Overrides and unlisted LEXIS _Requirements: 15.8, 16.5, 16.6, 17.4_", () => {
+  it("Property 35: Overrides only ever belong to current Issues", () => {
+    // Property 35
+    fc.assert(
+      fc.property(
+        arbDocument.chain((d) => fc.tuple(fc.constant(d), arbStateOpSequence(d))),
+        ([d, steps]) => {
+          let cur = d;
+          expectOverridesAndUnlisted(cur);
+          for (const step of steps) {
+            const r = applyStateStep(cur, step);
+            // A rejected step leaves the Document as it was.
+            if (r.ok) cur = r.value;
+            expectOverridesAndUnlisted(cur);
           }
         },
       ),
