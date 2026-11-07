@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { parse, render } from "../src/codes.js";
-import { createDocument } from "../src/document.js";
+import { apply, createDocument } from "../src/document.js";
 import { structuralEqual } from "../src/equal.js";
-import { setVerification } from "../src/verification.js";
+import { recordOverride } from "../src/issues.js";
+import type { Document, Operation } from "../src/types.js";
+import { setQuoteCheck, setVerification } from "../src/verification.js";
 
 const TS = "2026-11-03T10:00:00Z";
 
@@ -77,5 +79,168 @@ describe("parse (_Requirements: 20.1, 20.2, 20.6_)", () => {
       ok: false,
       error: { kind: "malformed_codes", index: 0, rule: "missing_doc" },
     });
+  });
+});
+
+// Examples for the Renderer (tasks 8.15).
+
+const T1 = "2026-11-03T10:01:00Z";
+const T2 = "2026-11-03T10:05:00Z";
+
+function must<T>(r: { ok: true; value: T } | { ok: false; error: { kind: string } }): T {
+  if (!r.ok) throw new Error(`unexpected error: ${r.error.kind}`);
+  return r.value;
+}
+
+function applied(doc: Document, op: Operation): Document {
+  const r = apply(doc, op);
+  if (!r.ok) throw new Error(`apply failed: ${r.error.kind}`);
+  return r.value.document;
+}
+
+/** The design's full/display example (Data Models, "Example (full, then display)"). */
+function designDocument(): Document {
+  const base = must(createDocument("See 410 U.S. 999, and ", TS));
+  const withAi = applied(base, {
+    kind: "insert",
+    at: base.text.length,
+    text: "42 [sic] \u2026",
+    provenance: { origin: "AI", runId: "r1", timestamp: T1 },
+  });
+  const cit = withAi.citations[0];
+  if (cit === undefined || cit.kind !== "full") throw new Error("no full citation");
+  const failed = must(setVerification(withAi, cit.key, { status: "not_found" }));
+  return must(recordOverride(failed, cit.key, "Typo in source", T2));
+}
+
+describe("render: empty Document (_Requirements: 19.9_)", () => {
+  const empty = must(createDocument("", TS));
+
+  it("full mode is only [DOC] with one position at Offset 0", () => {
+    const r = render(empty, "full");
+    expect(r.text).toMatch(/^\[DOC[^\]]*\]$/);
+    expect(r.positions).toEqual([{ offset: 0, code: r.text }]);
+  });
+
+  it("display mode is the empty string with no positions", () => {
+    expect(render(empty, "display")).toEqual({ text: "", positions: [] });
+  });
+});
+
+describe("parse of non-Full renderings (_Requirements: 20.3_)", () => {
+  const missingDoc = {
+    ok: false,
+    error: { kind: "malformed_codes", index: 0, rule: "missing_doc" },
+  };
+
+  // KNOWN DISAGREEMENT: the engine reports `bad_field` at 0 (the field-less
+  // `[PST]` Code is also a fault at index 0 and wins the tie). Req 20.3 wants
+  // the missing [DOC] reported at 0. `it.fails` flips to red once fixed.
+  it.fails("rejects a display rendering with missing_doc at 0", () => {
+    const d = must(createDocument("Plain text.", TS));
+    const display = render(d, "display").text;
+    expect(display).toBe("[PST]Plain text.");
+    expect(parse(display)).toEqual(missingDoc);
+  });
+
+  it("rejects the display rendering of the empty Document (empty string)", () => {
+    const display = render(must(createDocument("", TS)), "display").text;
+    expect(display).toBe("");
+    expect(parse(display)).toEqual(missingDoc);
+  });
+});
+
+// The design example writes `[OVR]` after the citation text. Req 19.6/19.7 and
+// the design's own prose put it immediately after the opening Code, so the
+// strings below move `[OVR]` there and are otherwise verbatim.
+describe("render: design example (_Requirements: 19.1, 19.10_)", () => {
+  const designDisplay =
+    "[PST]See [CIT \u2718][OVR:Typo in source]410 U.S. 999[/CIT], and [AI:r1]42 \\[sic\\] \u2026";
+  const designFull =
+    "[DOC{v=1;n=2;r=r1,40,0,0}][PST{t=2026-11-03T10:00:00Z}]See [CIT \u2718{k=k0}]" +
+    "[OVR:Typo in source{t=2026-11-03T10:05:00Z}]410 U.S. 999[/CIT], and " +
+    "[AI:r1{t=2026-11-03T10:01:00Z}]42 \\[sic\\] \u2026";
+
+  it("display mode equals the design's display string exactly", () => {
+    expect(render(designDocument(), "display").text).toBe(designDisplay);
+  });
+
+  // The design's header `n=2;r=r1,40,0,0` is not reachable for this text: the
+  // design says the example "abbreviates text for width". The body is compared
+  // verbatim; the header is checked against the engine's value.
+  it("full mode equals the design's full string after the [DOC] header", () => {
+    const full = render(designDocument(), "full").text;
+    const designBody = designFull.slice(designFull.indexOf("}]") + 2);
+    expect(full.slice(full.indexOf("}]") + 2)).toBe(designBody);
+    expect(full.startsWith("[DOC{v=1;n=1;r=r1,10,0,0}]")).toBe(true);
+  });
+});
+
+/** One Document per Code family so every Code of the vocabulary is emitted. */
+function codeDocuments(): Document[] {
+  const text =
+    'A 410 U.S. 113 ("one"). B 347 U.S. 483 ("two"). C 384 U.S. 436 ("three"). ' +
+    "D 5 U.S. 137. See 5 U.S.C. \u00a7 1 here.";
+  let d = must(createDocument(text, TS));
+  const cits = d.citations.flatMap((c) => (c.kind === "full" ? [c.key] : []));
+  const [c0, c1, c2] = cits;
+  const quotes = d.quotes.map((q) => q.key);
+  const [q0, q1] = quotes;
+  if (c0 === undefined || c1 === undefined || c2 === undefined) throw new Error("citations");
+  if (q0 === undefined || q1 === undefined || quotes.length !== 3) throw new Error("quotes");
+  d = must(setVerification(d, c0, { status: "verified", clusterId: "9" }));
+  d = must(setVerification(d, c1, { status: "not_found" }));
+  d = must(setVerification(d, c2, { status: "ambiguous", candidates: ["1", "2"] }));
+  d = must(setQuoteCheck(d, q0, { status: "match" }));
+  d = must(setQuoteCheck(d, q1, { status: "mismatch", prefixLength: 1 }));
+  d = must(recordOverride(d, c1, "Typo", T2));
+
+  const hum = applied(must(createDocument("", TS)), {
+    kind: "insert",
+    at: 0,
+    text: "typed",
+    provenance: { origin: "HUM", timestamp: TS },
+  });
+  const ai = applied(must(createDocument("", TS)), {
+    kind: "insert",
+    at: 0,
+    text: "abcdefghij",
+    provenance: { origin: "AI", runId: "r2", timestamp: T1 },
+  });
+  const edited = applied(ai, { kind: "delete", from: 0, to: 5, actor: "HUM" });
+  return [d, hum, ai, edited];
+}
+
+describe("render: every Code appears (_Requirements: 19.1, 19.10_)", () => {
+  const docs = codeDocuments();
+  const full = docs.flatMap((d) => render(d, "full").positions.map((p) => p.code));
+  const display = docs.flatMap((d) => render(d, "display").positions.map((p) => p.code));
+  const expected = [
+    "[HUM",
+    "[PST",
+    "[AI:r2",
+    "[AI>HUM:r2",
+    "[CIT \u2713",
+    "[CIT \u2718",
+    "[CIT ?:2",
+    "[CIT \u2026",
+    "[QUO \u2713",
+    "[QUO \u2718",
+    "[QUO \u2026",
+    "[REF]",
+    "[/CIT]",
+    "[/QUO]",
+    "[/REF]",
+    "[OVR:Typo",
+  ];
+
+  it.each(expected)("%s appears in the full and the display rendering", (prefix) => {
+    expect(full.some((c) => c.startsWith(prefix))).toBe(true);
+    expect(display.some((c) => c.startsWith(prefix))).toBe(true);
+  });
+
+  it("[DOC] appears in the full rendering only", () => {
+    expect(full.some((c) => c.startsWith("[DOC"))).toBe(true);
+    expect(display.some((c) => c.startsWith("[DOC"))).toBe(false);
   });
 });

@@ -590,7 +590,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `arbSyntaxFault` records the injected index. `arbSemanticTamper` records the expected `MalformedRule`.
     - Add an export line to `arbitraries.ts`.
     - _Requirements: 22.1_
-  - [~] 8.9 Write Property 36 in `test/codes.properties.test.ts`
+  - [x] 8.9 Write Property 36 in `test/codes.properties.test.ts`
     - **Property 36: Full Reveal Codes round trip**
     - **Validates: Requirements 19.2, 19.3, 20.1, 20.2**
     - _Requirements: 19.2, 19.3, 20.1, 20.2_
@@ -615,7 +615,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `arbSemanticTamper` includes replacing the opening citation code of an unlisted LEXIS Database_Citation with `[CIT ✓{k=<same key>;cl=<id>}]`, expecting `unverifiable_status` (D23). Same `fc.assert`; no new Property number.
     - **Validates: Requirements 20.4, 20.5**
     - _Requirements: 20.4, 20.5_
-  - [~] 8.15 Write example tests in `test/codes.test.ts`
+  - [-] 8.15 Write example tests in `test/codes.test.ts`
     - Empty Document: full mode renders only `[DOC]` with one position, and display mode renders `""` with none (19.9).
     - Parsing a display rendering, or `""`, returns `malformed_codes` with `missing_doc` at 0 (20.3).
     - The design's full and display example strings.
