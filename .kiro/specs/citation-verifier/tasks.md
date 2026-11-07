@@ -192,3 +192,29 @@ Deviations from the design's file layout, decided while planning:
 - Checkpoints are tasks 2.6, 4.9, 7.3 and 8.2. Task 8.3 is the last task of the plan and comes after the final checkpoint.
 - Property coverage: P7, P8, P9 (group 2); P1, P4, P2, P11, P12 (group 3); P3, P5, P6, P10 (group 4). Twelve in all (Req 16.1).
 - Engine files are not edited by any task.
+
+## Task Dependency Graph
+
+```json
+{
+  "waves": [
+    { "id": 0, "tasks": ["1.1"] },
+    { "id": 1, "tasks": ["1.2"] },
+    { "id": 2, "tasks": ["2.1", "3.1"] },
+    { "id": 3, "tasks": ["2.2", "3.3", "4.1", "4.2", "4.3"] },
+    { "id": 4, "tasks": ["2.3", "5.1"] },
+    { "id": 5, "tasks": ["2.4"] },
+    { "id": 6, "tasks": ["2.5", "3.2"] },
+    { "id": 7, "tasks": ["3.4"] },
+    { "id": 8, "tasks": ["3.5"] },
+    { "id": 9, "tasks": ["3.6"] },
+    { "id": 10, "tasks": ["4.4"] },
+    { "id": 11, "tasks": ["4.5", "4.6", "4.7", "6.1"] },
+    { "id": 12, "tasks": ["4.8", "6.2"] },
+    { "id": 13, "tasks": ["7.1"] },
+    { "id": 14, "tasks": ["7.2"] },
+    { "id": 15, "tasks": ["8.1"] },
+    { "id": 16, "tasks": ["8.3"] }
+  ]
+}
+```
