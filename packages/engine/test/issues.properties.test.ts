@@ -1,6 +1,6 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { issues } from "../src/issues";
+import { blockingIssues, issues } from "../src/issues";
 import { arbDocument } from "../src/testing/arbitraries";
 import type { Document, Issue } from "../src/types";
 import { runs } from "./support/fc";
@@ -57,6 +57,28 @@ describe("issues properties: the Issue set _Requirements: 12.5, 13.4, 17.6, 17.7
         }
         for (const i of actual) expect(linkedOrOther.has(i.key)).toBe(false);
         expect(actual.length).toBeLessThanOrEqual(d.citations.length + d.quotes.length);
+      }),
+      runs(),
+    );
+  });
+});
+
+describe("issues properties: blocking Issues _Requirements: 18.1, 18.8_", () => {
+  it("Property 33: blockingIssues are the un-overridden Issues in order", () => {
+    // Property 33
+    fc.assert(
+      fc.property(arbDocument, (d) => {
+        const all = issues(d);
+        const overriddenKeys = new Set(d.overrides.map((o) => o.key));
+        const expected = all.filter((i) => !overriddenKeys.has(i.key));
+        const actual = blockingIssues(d);
+
+        // Same Issues, same order as issues(d) minus the overridden keys.
+        expect(actual).toEqual(expected);
+        // Each key appears once.
+        expect(new Set(actual.map((i) => i.key)).size).toBe(actual.length);
+        // Empty exactly when every Issue has an Override.
+        expect(actual.length === 0).toBe(all.every((i) => overriddenKeys.has(i.key)));
       }),
       runs(),
     );

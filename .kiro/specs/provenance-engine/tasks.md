@@ -505,7 +505,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Excludes a `verified` result on an unlisted LEXIS key, which Property 29 covers.
     - **Validates: Requirements 12.4, 16.1, 16.6, 16.7**
     - _Requirements: 12.4, 16.1, 16.6, 16.7_
-  - [~] 7.5 Write Property 29 in `test/verification.properties.test.ts`
+  - [x] 7.5 Write Property 29 in `test/verification.properties.test.ts`
     - **Property 29: Invalid verification writes are rejected without change**
     - Includes the Req 16.5 extension: a `verified` result on a Database_Citation with `lexisCourtListed: false` returns `not_verifiable`, before any payload check.
     - **Validates: Requirements 16.2, 16.3, 16.4, 16.5**
@@ -522,7 +522,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 32: The Issue set is exactly the non-passing items**
     - **Validates: Requirements 12.5, 13.4, 17.6, 17.7, 18.2**
     - _Requirements: 12.5, 13.4, 17.6, 17.7, 18.2_
-  - [~] 7.9 Write Property 33 in `test/issues.properties.test.ts`
+  - [-] 7.9 Write Property 33 in `test/issues.properties.test.ts`
     - **Property 33: blockingIssues are the un-overridden Issues in order**
     - **Validates: Requirements 18.1, 18.8**
     - _Requirements: 18.1, 18.8_

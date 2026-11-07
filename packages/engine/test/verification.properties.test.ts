@@ -1,12 +1,14 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import {
+  arbBadVerificationWrite,
   arbDocument,
   arbVerificationResult,
   fullRecordsOf,
   isUnlistedLexisRecord,
 } from "../src/testing/arbitraries";
-import type { FullRecord } from "../src/testing/arbitraries";
+import type { BadVerificationWrite, FullRecord } from "../src/testing/arbitraries";
+import type { EngineError } from "../src/errors";
 import type { Document, IssueKey, VerificationResult } from "../src/types";
 import { setVerification, verificationOf } from "../src/verification";
 import { runs } from "./support/fc";
@@ -79,6 +81,35 @@ describe("verification state  _Requirements: 12.4, 16.1, 16.6, 16.7_", () => {
         // Other keys' Overrides are kept, in order.
         const others = (d: Document) => d.overrides.filter((o) => o.key !== target.key);
         expect(others(next)).toEqual(others(doc));
+      }),
+      runs(),
+    );
+  }, 120_000);
+});
+
+/** The Engine_Error a bad write is expected to produce, from the recorded fault. */
+function expectedError(w: BadVerificationWrite): EngineError {
+  const { kind, field } = w.expected;
+  if (kind === "invalid_verification_result") {
+    return { kind, field: field ?? "" };
+  }
+  return { kind, key: w.key };
+}
+
+describe("invalid verification writes  _Requirements: 16.2, 16.3, 16.4, 16.5_", () => {
+  // Property 29
+  it("P29 invalid verification writes are rejected without change", () => {
+    const arbBad = arbDocument.chain((doc) =>
+      arbBadVerificationWrite(doc).map((write) => ({ doc, write })),
+    );
+    fc.assert(
+      fc.property(arbBad, ({ doc, write }) => {
+        const before = structuredClone(doc);
+        const r = setVerification(doc, write.key, write.result);
+        expect(r.ok).toBe(false);
+        if (r.ok) return;
+        expect(r.error).toEqual(expectedError(write));
+        expect(doc).toEqual(before);
       }),
       runs(),
     );
