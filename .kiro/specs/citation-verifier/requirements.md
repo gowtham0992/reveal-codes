@@ -31,8 +31,7 @@ Scope: `packages/verifier` and `packages/courtlistener-mcp`. Out of scope: UI, t
 - **Citation_Line**: the string `<volume> <reporter> <page>` for one Reporter_Member, produced with the Engine's `format` applied to a reporter value that has no pincite, court, or year.
 - **Reporter_Member**: one reporter citation inside a Full_Record. A reporter value has one; a parallel value has several; a database value has none.
 - **Lookup_Batch**: the ordered, de-duplicated list of Citation_Lines built from the Full_Records of one `lookup` call.
-- **Lookup_Chunk**: a prefix-ordered slice of a Lookup_Batch sent as one request.
-- **Send**: one HTTP request carrying at most 60 consecutive Citation_Lines of a Lookup_Chunk, so that no request exceeds the Token_Bucket capacity.
+- **Lookup_Chunk**: a prefix-ordered slice of a Lookup_Batch holding at most 60 Citation_Lines and at most 64 000 characters in its Request_Body, sent as exactly one request per attempt.
 - **Request_Body**: the text sent to the citation-lookup endpoint for one Lookup_Chunk: its Citation_Lines joined by `\n`.
 - **Line_Status**: the per-citation `status` field CourtListener returns for one Citation_Line: 200, 300, 404, 400, or 429.
 - **Terminal_Result**: a `VerificationResult` whose status is `verified`, `ambiguous`, or `not_found`.
@@ -45,7 +44,8 @@ Scope: `packages/verifier` and `packages/courtlistener-mcp`. Out of scope: UI, t
 - **Fixture_Set**: the recorded CourtListener responses and opinion excerpts in `packages/verifier/fixtures/`.
 - **Fixture_Fetch**: the `fetch` implementation returned by `createFixtureFetch()` that serves the Fixture_Set.
 - **Demo_Corpus**: Ashcroft v. Iqbal, 556 U.S. 662; Bell Atlantic v. Twombly, 550 U.S. 544; Roe v. Wade, 410 U.S. 113; the fabricated citation 123 F.4th 456; one ambiguous citation; and one throttled response.
-- **Verifier_Status**: the value returned by the `verifier_status` tool: Token_Bucket state and cache counts.
+- **Status_Counters**: the counts of cache hits, cache misses, and cache writes since the Verifier started, kept by the Verifier in memory as one set covering both citation entries and opinion entries.
+- **Verifier_Status**: the value returned by the exported `verifierStatus` function and by the `verifier_status` tool: the Token_Bucket state (available tokens and capacity) and the Status_Counters.
 
 ## Requirements
 
@@ -64,7 +64,7 @@ Scope: `packages/verifier` and `packages/courtlistener-mcp`. Out of scope: UI, t
 7. WHEN `lookup` is called with zero Full_Records, THE Verifier SHALL return an empty map and make zero calls to `Deps.fetch`.
 8. WHEN `lookup` is called twice with equal records and identical CourtListener responses, THE Verifier SHALL return result maps with equal keys and deeply equal values (determinism).
 9. IF a call to `Deps.fetch` rejects, returns a non-success HTTP response, or returns a body that does not match the expected response shape, THEN THE Verifier SHALL resolve `lookup` without throwing and SHALL give each affected Full_Record a result with status `unchecked` as specified in Requirement 4.
-10. IF a failure affects only some Request_Bodies, THEN THE Verifier SHALL keep the results of unaffected Full_Records unchanged.
+10. IF a failure affects only some Lookup_Chunks, THEN THE Verifier SHALL keep the results of unaffected Full_Records unchanged.
 
 ### Requirement 2: No draft text leaves the machine
 
@@ -146,17 +146,16 @@ Scope: `packages/verifier` and `packages/courtlistener-mcp`. Out of scope: UI, t
 #### Acceptance Criteria
 
 1. THE Token_Bucket SHALL have an integer capacity of 60 citations, SHALL start full, and SHALL refill 1 citation per 1 000 ms elapsed as measured by `Deps.now`, retaining any partial-token elapsed milliseconds and never exceeding 60 tokens.
-2. THE Verifier SHALL dispatch each Lookup_Chunk as one or more Sends, where each Send contains at most 60 Citation_Lines (the Token_Bucket capacity), taken in order, with every Send except possibly the last containing exactly 60 lines.
-3. WHEN a Send of n lines is about to be dispatched and fewer than n whole tokens are available, THE Verifier SHALL call `Deps.sleep` exactly once with (n − available whole tokens) × 1 000 − (retained partial-token milliseconds), in milliseconds, and SHALL then deduct n tokens immediately before calling `Deps.fetch`.
-4. WHEN a Send is a retry attempt, THE Verifier SHALL deduct tokens for its lines again, as for a first attempt, before calling `Deps.fetch`.
+2. THE Verifier SHALL split a Lookup_Batch into Lookup_Chunks of at most 60 Citation_Lines and at most 64 000 characters in the Request_Body, closing a chunk at whichever cap is reached first; a single Citation_Line that alone exceeds 64 000 characters SHALL form its own chunk and be returned as `unchecked`, without being sent.
+3. WHEN a Lookup_Chunk of n lines is about to be dispatched and fewer than n whole tokens are available, THE Verifier SHALL call `Deps.sleep` exactly once with the Shortfall × 1 000 − (retained partial-token milliseconds), in milliseconds, and SHALL then deduct n tokens immediately before calling `Deps.fetch`.
+4. WHEN a Lookup_Chunk is dispatched as a retry attempt, THE Verifier SHALL deduct tokens for its lines again, as for a first attempt, before calling `Deps.fetch`.
 5. FOR ALL sequences of `lookup` calls and all `Deps.now` values, the total Citation_Lines passed to `Deps.fetch` (including retries) within any sliding 60 000 ms window SHALL NOT exceed 60 (token bucket property).
-6. THE Verifier SHALL split a Lookup_Batch into Lookup_Chunks of at most 250 Citation_Lines and at most 64 000 characters in the Request_Body, closing a chunk at whichever cap is reached first; a single Citation_Line that alone exceeds 64 000 characters SHALL form its own chunk and be returned as `unchecked`, without being sent.
-7. FOR ALL Lookup_Batches, every Lookup_Chunk SHALL satisfy both caps and the concatenation of the Lookup_Chunks SHALL equal the Lookup_Batch in order (chunking property).
-8. THE Verifier SHALL send exactly one request per Send, and no Send SHALL span two Lookup_Chunks.
-9. IF a request returns HTTP 429 or a status of 500 or higher, THEN THE Verifier SHALL call `Deps.sleep` with the `Retry-After` interval (seconds converted to ms) or the interval from `wait_until` to `Deps.now` (minimum 0 ms), using the larger when both are present and 1 000 ms when neither is present, capped at 30 000 ms, and SHALL retry that Send at most twice.
-10. IF a Send is still failing after the second retry, THEN THE Verifier SHALL return `unchecked` for its lines with `waitUntil` taken from the last response, SHALL keep results already obtained for other Sends, and SHALL continue with the remaining Sends.
-11. FOR ALL sequences of 429 and 5xx responses, THE Verifier SHALL call `Deps.fetch` at most three times per Send, and the final results for an exhausted Send SHALL be `unchecked` carrying the last `waitUntil` (retry bound property).
-12. THE Verifier SHALL NOT retry a response with any status other than 429 or 5xx.
+6. THE Verifier SHALL send each Lookup_Chunk as exactly one request per attempt.
+7. FOR ALL Lookup_Batches, every Lookup_Chunk SHALL hold at most 60 Citation_Lines and at most 64 000 characters in its Request_Body, and the concatenation of the Lookup_Chunks SHALL equal the de-duplicated input Lookup_Batch in order (chunking property).
+8. IF a request returns HTTP 429 or a status of 500 or higher, THEN THE Verifier SHALL call `Deps.sleep` with the `Retry-After` interval (seconds converted to ms) or the interval from `wait_until` to `Deps.now` (minimum 0 ms), using the larger when both are present and 1 000 ms when neither is present, capped at 30 000 ms, and SHALL retry that Lookup_Chunk at most twice.
+9. IF a Lookup_Chunk is still failing after the second retry, THEN THE Verifier SHALL return `unchecked` for its lines with `waitUntil` taken from the last response, SHALL keep results already obtained for other Lookup_Chunks, and SHALL continue with the remaining Lookup_Chunks.
+10. FOR ALL sequences of 429 and 5xx responses, THE Verifier SHALL call `Deps.fetch` at most three times per Lookup_Chunk, and the final results for an exhausted Lookup_Chunk SHALL be `unchecked` carrying the last `waitUntil` (retry bound property).
+11. THE Verifier SHALL NOT retry a response with any status other than 429 or 5xx.
 
 ### Requirement 8: Quote checking
 
@@ -220,6 +219,8 @@ Scope: `packages/verifier` and `packages/courtlistener-mcp`. Out of scope: UI, t
 10. IF a write by FileCacheStore fails, THEN THE FileCacheStore SHALL leave any existing entry for that key unchanged, SHALL remove its temporary file, and THE Verifier SHALL still return the Terminal_Result to the caller.
 11. THE MemoryCacheStore SHALL implement the same CacheStore interface and the same expiry behaviour as criterion 3, so that the same property tests run against both stores.
 12. THE Verifier SHALL NOT write the token, an `Authorization` header, or any request header into any cache entry or cache file name.
+13. THE Verifier SHALL keep the Status_Counters in memory, incrementing the hit counter for each `CacheStore.get` that returns a value, the miss counter for each `CacheStore.get` that returns a miss, and the write counter for each `CacheStore.set` call, for both citation entries and opinion entries.
+14. THE Verifier SHALL export `verifierStatus(deps: Deps)` returning the Token_Bucket state (available whole tokens computed with `Deps.now`, and capacity) and the Status_Counters, and SHALL NOT require the CacheStore to list its keys.
 
 ### Requirement 11: Injected dependencies
 
@@ -269,7 +270,7 @@ Scope: `packages/verifier` and `packages/courtlistener-mcp`. Out of scope: UI, t
 5. IF `fetchOpinionText` returns `null`, THEN THE MCP_Server SHALL return a message stating that the opinion text is unavailable for that `clusterId`, and SHALL NOT return a tool error.
 6. WHEN `check_quote({ clusterId, quote })` is called with a positive-integer `clusterId` and a `quote` of 1 to 10,000 characters, THE MCP_Server SHALL fetch the opinion text and return the result of `checkQuote`.
 7. IF the opinion text for `check_quote` is unavailable, THEN THE MCP_Server SHALL return the status `unchecked` together with a reason stating that the opinion text is unavailable.
-8. WHEN `verifier_status()` is called, THE MCP_Server SHALL return the Token_Bucket state (available tokens and capacity), the number of cached citation entries, and the number of cached opinion entries.
+8. WHEN `verifier_status()` is called, THE MCP_Server SHALL return the result of `verifierStatus`: the Token_Bucket state (available tokens and capacity) and the Status_Counters (hits, misses, writes).
 9. THE MCP_Server tool handlers SHALL be thin wrappers over Verifier functions and SHALL hold no verification logic.
 10. THE MCP_Server SHALL read `COURTLISTENER_TOKEN`, `REVEAL_CODES_CACHE_DIR` (default `~/.reveal-codes/cache`), and `REVEAL_CODES_FIXTURES_ONLY` from the environment.
 11. WHERE `REVEAL_CODES_FIXTURES_ONLY` is `1`, THE MCP_Server SHALL serve every request from Fixture_Fetch and SHALL make no network call.
@@ -312,7 +313,7 @@ Scope: `packages/verifier` and `packages/courtlistener-mcp`. Out of scope: UI, t
 
 #### Acceptance Criteria
 
-1. THE Verifier SHALL contain exactly 12 property tests, one per claim in this list, each with exactly one `fc.assert(fc.property(...))` call, each placed in a file named `<module>.properties.test.ts`, and each preceded by a `// Property N` comment, where N is unique within the package and runs from 1 to 12 without gaps: (1) status mapping (Requirement 3.8), (2) privacy of request bodies (2.8), (3) token bucket (7.5), (4) chunking (7.7), (5) cache round trip (10.6), (6) cache hits (10.5), (7) quote idempotence and length (8.10 and 8.11), (8) lifted quote (8.12), (9) altered quote (8.13), (10) retry bound (7.11), (11) database forms (5.5), and (12) short and other records never sent and never in the result map (Requirement 1, criteria 3 and 4).
+1. THE Verifier SHALL contain exactly 12 property tests, one per claim in this list, each with exactly one `fc.assert(fc.property(...))` call, each placed in a file named `<module>.properties.test.ts`, and each preceded by a `// Property N` comment, where N is unique within the package and runs from 1 to 12 without gaps: (1) status mapping (Requirement 3.8), (2) privacy of request bodies (2.8), (3) token bucket (7.5), (4) chunking (7.7), (5) cache round trip (10.6), (6) cache hits (10.5), (7) quote idempotence and length (8.10 and 8.11), (8) lifted quote (8.12), (9) altered quote (8.13), (10) retry bound (7.10), (11) database forms (5.5), and (12) short and other records never sent and never in the result map (Requirement 1, criteria 3 and 4).
 2. THE Verifier SHALL title the `describe` block of each property test with the text `_Requirements: x.y_`, where x.y lists every requirement criterion that the property covers.
 3. THE Verifier SHALL cover every acceptance criterion not named in criterion 1 with at least one example test that uses Fixture_Fetch or an in-test fake, and SHALL make no network requests in any test.
 4. THE property tests SHALL run with `numRuns` of at least 200 when run locally and exactly 500 when the `CI` environment variable is set.
@@ -340,13 +341,15 @@ Standing rule (carried over from the provenance-engine spec, user decision): any
 
 ## Notes for the user
 
-- **Privacy decision overrides `citations.md`.** The steering file says to send the whole document `text`. Requirement 2 sends only formatted citation strings, as you decided. Requirement 17.2 updates the steering file in the final group; I did not edit it in this phase.
-- **Citation_Line drops pincite, court, and year.** CourtListener resolves on volume, reporter, and page, and leaving the rest out sends less. De-duplication is therefore by `<volume> <reporter> <page>`, which is also the cache key. Change this if you want the full formatted citation as the key.
-- **Parallel precedence (Requirement 6.3) is mine.** You fixed the `verified` and `ambiguous` rules. For the remaining cases I chose ambiguous, then unchecked, then not_found, so that an unchecked member never turns into a failure. Confirm or change.
-- **Request timeout of 15 000 ms** (Requirement 4.2) was not specified; I picked it.
-- **`checkQuote` never returns `unchecked`.** The `unchecked` state is for callers with no opinion text; the MCP `check_quote` tool returns it in that case.
-- **`verifier_status` cache counts** are counted by key prefix (`opinion:` and citation lines), which needs the CacheStore to list keys or the Verifier to keep counters; the design decides which.
-- **Decision needed: Sends versus "one request per chunk".** A 250-line chunk can never fit a 60-token bucket, so "wait for exactly the shortfall" cannot be satisfied for it. Requirement 7 splits each chunk into Sends of at most 60 lines, so a chunk can cost several requests. This departs from "one request per chunk"; the alternative is to cap chunks at 60 lines. Confirm or change.
-- **Length-monotone property (8.11)** is stated against NFC(s), because NFC can lengthen some strings. Steps 2 to 6 never lengthen.
-- **Twelve properties, not thirteen.** Short and other records are one property (16.1, claim 12).
-- **Cache expiry** is evaluated by each CacheStore using an injected clock (10.3), keeping `get(key)` as you specified.
+Decisions recorded from review:
+
+- **Privacy overrides `citations.md`.** Only formatted citation strings are sent to CourtListener. Requirement 17.2 and 17.3 update the steering file in the final group; it is not edited in this phase.
+- **One chunk, one request.** A Lookup_Chunk holds at most 60 Citation_Lines (the Token_Bucket capacity) and at most 64 000 characters, and is sent as one request, so the bucket can always cover a chunk by waiting for the Shortfall. The "Send" concept is removed. CourtListener's API accepts at most 250 citations per request; the 60-line cap keeps the Verifier under that by design, so 250 appears in no criterion.
+- **Citation_Line** is `<volume> <reporter> <page>` with pincite, court, and year dropped. The same string is the de-duplication key and the cache key.
+- **Parallel precedence** (Requirement 6): verified, then ambiguous, then unchecked, then not_found.
+- **Request timeout** is 15 000 ms, by racing `Deps.fetch` against `Deps.sleep(15000)`.
+- **`checkQuote` never returns `unchecked`.** The MCP `check_quote` tool returns it when the opinion text is unavailable.
+- **Length bound (8.11)** is stated against NFC(s), because NFC can lengthen some strings.
+- **Twelve properties.** Short and other records are one property (16.1, claim 12).
+- **CacheStore clock.** Each CacheStore takes an injected `now()` at construction; `get(key)` keeps its signature.
+- **Status counters.** `verifier_status` reports Verifier-kept hit, miss, and write counters (one set) plus the Token_Bucket state; the CacheStore does not list keys.
