@@ -622,7 +622,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Every Code from product.md appears in at least one rendering.
     - _Requirements: 19.1, 19.9, 19.10, 20.3_
 
-- [~] 9. Checkpoint: rendering and parsing
+- [x] 9. Checkpoint: rendering and parsing
   - Ensure `pnpm lint`, `pnpm typecheck`, and `pnpm test` pass. Ask the user if questions arise.
 
 - [ ] 10. Public API and purity checks
