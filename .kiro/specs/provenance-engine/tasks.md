@@ -583,7 +583,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Cross-checks against the Extractor (`extractor_mismatch`), including `[REF]` pairs and quote attachment.
     - Per design A12 step 3.
     - _Requirements: 20.4, 20.5_
-  - [~] 8.7 Implement the `codes.ts` facade
+  - [x] 8.7 Implement the `codes.ts` facade
     - Exports `render`, `parse` (lex, decode, check, build, and never throws), `strip`, and `stripPositions`.
     - _Requirements: 20.1, 20.2, 20.6_
   - [~] 8.8 Create `src/testing/arb-codes.ts`
