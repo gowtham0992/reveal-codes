@@ -586,7 +586,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
   - [x] 8.7 Implement the `codes.ts` facade
     - Exports `render`, `parse` (lex, decode, check, build, and never throws), `strip`, and `stripPositions`.
     - _Requirements: 20.1, 20.2, 20.6_
-  - [~] 8.8 Create `src/testing/arb-codes.ts`
+  - [x] 8.8 Create `src/testing/arb-codes.ts`
     - `arbSyntaxFault` records the injected index. `arbSemanticTamper` records the expected `MalformedRule`.
     - Add an export line to `arbitraries.ts`.
     - _Requirements: 22.1_
