@@ -602,7 +602,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 38: Removing Codes and unescaping yields the Text**
     - **Validates: Requirements 19.3, 19.5**
     - _Requirements: 19.3, 19.5_
-  - [~] 8.12 Write Property 39 in `test/codes.properties.test.ts`
+  - [x] 8.12 Write Property 39 in `test/codes.properties.test.ts`
     - **Property 39: Codes match the document structure**
     - **Validates: Requirements 19.1, 19.2, 19.4, 19.6, 19.7, 19.8**
     - _Requirements: 19.1, 19.2, 19.4, 19.6, 19.7, 19.8_
