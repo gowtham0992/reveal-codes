@@ -182,7 +182,7 @@ const arbTamper41 = arbTamperDocument.chain((d) => arbSemanticTamper(d));
 
 // The named D23 example (unlisted LEXIS `2023 Foo Cty. Ct. LEXIS 5` with a forged
 // `[CIT ✓{k=k0;cl=1}]`) lives in test/codes.test.ts and is reused by reference.
-// The REF payload tamper is deliberately not generated (lexer reports bad_field).
+// The REF payload tamper (`[REF{k=k0}]`) is generated with rule `bad_field`, reported by the lexer.
 describe("Property 41: Semantically tampered renderings are rejected with the violated rule _Requirements: 20.4, 20.5_", () => {
   it("parse returns malformed_codes with the recorded index and rule", () => {
     // Property 41

@@ -54,6 +54,7 @@ const BUILDERS: Readonly<Record<TamperKind, Builder>> = {
   unverifiable_lexis: C.unverifiableLexis,
   ref_as_cit: C.refAsCit,
   ref_override: C.refOverride,
+  ref_payload: C.refPayload,
   override_nonissue: C.overrideNonIssue,
   issue_key_counter: C.issueKeyCounter,
   issue_key_duplicate: C.issueKeyDuplicate,

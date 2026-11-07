@@ -6,8 +6,9 @@
  * edit lands, never from running `parse`. A builder returns `undefined` when
  * the tamper cannot apply to the document.
  *
- * Not generated: `[REF{...}]` with a Payload_Section. The lexer rejects it
- * as `bad_field`, not `ref_code` (known gap from task 8.6).
+ * `ref_payload` (`[REF{...}]`, see `arb-codes-citations.ts`) records
+ * `bad_field`: the lexer reports a Payload_Section on a payload-less Code, so
+ * it is not a `ref_code` tamper.
  */
 import fc from "fast-check";
 import {

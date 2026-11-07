@@ -146,6 +146,7 @@ export type TamperKind =
   | "unverifiable_lexis"
   | "ref_as_cit"
   | "ref_override"
+  | "ref_payload"
   | "override_nonissue"
   | "issue_key_counter"
   | "issue_key_duplicate"

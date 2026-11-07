@@ -119,6 +119,12 @@ export const refOverride: Builder = (c) =>
     tamper("ref_override", "ref_code", o.end, edited(c, insertEdit(o.end, `[OVR:why{t=${TS}}]`))),
   );
 
+/** `[REF]` replaced by `[REF{k=k0}]`: a Payload_Section on a Code that takes none (`bad_field`, lexer). */
+export const refPayload: Builder = (c) =>
+  pick(refPairs(c.s), ([o]) =>
+    tamper("ref_payload", "bad_field", o.start, edited(c, replaceCode(o, "[REF{k=k0}]"))),
+  );
+
 /** An `[OVR]` on a verified citation or a matching quote, which are not Issues. */
 export const overrideNonIssue: Builder = (c) => {
   const targets = c.s.codes.filter(

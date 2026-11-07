@@ -51,7 +51,18 @@ describe("arbSemanticTamper (_Requirements: 22.1_)", () => {
     expect([...seen].sort()).toEqual([...TAMPER_KINDS].sort());
   });
 
-  it("never records the REF payload tamper that the lexer reports as bad_field", () => {
-    expect(TAMPER_KINDS.filter((k) => k.includes("payload"))).toEqual([]);
+  it("includes the REF payload tamper, recorded as bad_field at the [REF code", () => {
+    expect(TAMPER_KINDS).toContain("ref_payload");
+    const seen = fc
+      .sample(
+        arbTamperDocument.chain((d) => arbSemanticTamper(d)),
+        { numRuns: 1500, seed: 41 },
+      )
+      .filter((t) => t.kind === "ref_payload");
+    expect(seen.length).toBeGreaterThan(0);
+    for (const t of seen) {
+      expect(t.rule).toBe("bad_field");
+      expect(t.text.startsWith("[REF{k=k0}]", t.index)).toBe(true);
+    }
   });
 });
