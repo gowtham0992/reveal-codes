@@ -422,11 +422,11 @@ Any other `\x` pair, and a `\` at the end of input, is a dangling Escape_Charact
 Example (full, then display):
 
 ```
-[DOC{v=1;n=2;r=r1,40,0,0}][PST{t=2026-11-03T10:00:00Z}]See [CIT ✘{k=k0}]410 U.S. 999[OVR:Typo in source{t=2026-11-03T10:05:00Z}][/CIT], and [AI:r1{t=2026-11-03T10:01:00Z}]42 \[sic\] …
-[PST]See [CIT ✘]410 U.S. 999[OVR:Typo in source][/CIT], and [AI:r1]42 \[sic\] …
+[DOC{v=1;n=1;r=r1,10,0,0}][PST{t=2026-11-03T10:00:00Z}]See [CIT ✘{k=k0}][OVR:Typo in source{t=2026-11-03T10:05:00Z}]410 U.S. 999[/CIT], and [AI:r1{t=2026-11-03T10:01:00Z}]42 \[sic\] …
+[PST]See [CIT ✘][OVR:Typo in source]410 U.S. 999[/CIT], and [AI:r1]42 \[sic\] …
 ```
 
-The literal `[` and `]` in the Text appear escaped (`\[`, `\]`) in both modes. A Code's Text Offset is the Offset in the Document's Text at which the Code appears. In the example, `[OVR]` follows its opening code: the `[/CIT]` sits at the citation's end Offset, and the `[OVR]` at the citation's start Offset is emitted immediately after `[CIT ✘]` (Req 19.6, 19.7). The example abbreviates text for width.
+The literal `[` and `]` in the Text appear escaped (`\[`, `\]`) in both modes. A Code's Text Offset is the Offset in the Document's Text at which the Code appears. In the example, `[OVR]` follows its opening code: the `[/CIT]` sits at the citation's end Offset, and the `[OVR]` at the citation's start Offset is emitted immediately after `[CIT ✘]` (Req 19.6, 19.7). The example Document is the 22-character PST text `See 410 U.S. 999, and ` followed by the AI insert `42 [sic] …` (10 characters, the Run's Original_Length) in Run `r1`, with one Issue_Key issued (`n=1`).
 
 ### Algorithms
 

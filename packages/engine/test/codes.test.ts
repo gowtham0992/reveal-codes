@@ -181,14 +181,11 @@ describe("parse reports the lowest fault across lex and decode (_Requirements: 2
   });
 });
 
-// The design example writes `[OVR]` after the citation text. Req 19.6/19.7 and
-// the design's own prose put it immediately after the opening Code, so the
-// strings below move `[OVR]` there and are otherwise verbatim.
 describe("render: design example (_Requirements: 19.1, 19.10_)", () => {
   const designDisplay =
     "[PST]See [CIT \u2718][OVR:Typo in source]410 U.S. 999[/CIT], and [AI:r1]42 \\[sic\\] \u2026";
   const designFull =
-    "[DOC{v=1;n=2;r=r1,40,0,0}][PST{t=2026-11-03T10:00:00Z}]See [CIT \u2718{k=k0}]" +
+    "[DOC{v=1;n=1;r=r1,10,0,0}][PST{t=2026-11-03T10:00:00Z}]See [CIT \u2718{k=k0}]" +
     "[OVR:Typo in source{t=2026-11-03T10:05:00Z}]410 U.S. 999[/CIT], and " +
     "[AI:r1{t=2026-11-03T10:01:00Z}]42 \\[sic\\] \u2026";
 
@@ -196,14 +193,8 @@ describe("render: design example (_Requirements: 19.1, 19.10_)", () => {
     expect(render(designDocument(), "display").text).toBe(designDisplay);
   });
 
-  // The design's header `n=2;r=r1,40,0,0` is not reachable for this text: the
-  // design says the example "abbreviates text for width". The body is compared
-  // verbatim; the header is checked against the engine's value.
-  it("full mode equals the design's full string after the [DOC] header", () => {
-    const full = render(designDocument(), "full").text;
-    const designBody = designFull.slice(designFull.indexOf("}]") + 2);
-    expect(full.slice(full.indexOf("}]") + 2)).toBe(designBody);
-    expect(full.startsWith("[DOC{v=1;n=1;r=r1,10,0,0}]")).toBe(true);
+  it("full mode equals the design's full string verbatim, header included", () => {
+    expect(render(designDocument(), "full").text).toBe(designFull);
   });
 });
 
