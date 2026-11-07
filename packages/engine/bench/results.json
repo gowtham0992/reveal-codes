@@ -1,0 +1,48 @@
+{
+  "seed": 20261103,
+  "documentCounts": {
+    "textLength": 50000,
+    "spans": 500,
+    "runs": 12,
+    "fullCitations": 100,
+    "quotes": 40
+  },
+  "thresholds": {
+    "medianMs": 5,
+    "p95Ms": 15
+  },
+  "warmUps": 100,
+  "timedRuns": 1000,
+  "scenarios": [
+    {
+      "scenario": "21.1 insert outside every citation and run extent",
+      "medianMs": 0.43641700000000583,
+      "p95Ms": 0.5216669999999795,
+      "pass": true
+    },
+    {
+      "scenario": "21.2 insert inside a citation and a run extent",
+      "medianMs": 0.44014549999997143,
+      "p95Ms": 0.5993750000000091,
+      "pass": true
+    },
+    {
+      "scenario": "21.3 delete outside every citation",
+      "medianMs": 0.4323339999999689,
+      "p95Ms": 0.5579579999998714,
+      "pass": true
+    },
+    {
+      "scenario": "21.3 replace outside every citation",
+      "medianMs": 0.4438749999999345,
+      "p95Ms": 0.5281250000000455,
+      "pass": true
+    }
+  ],
+  "machine": {
+    "nodeVersion": "v22.23.4",
+    "os": "Darwin 27.0.0 arm64",
+    "cpuModel": "Apple M4",
+    "totalMemoryBytes": 25769803776
+  }
+}

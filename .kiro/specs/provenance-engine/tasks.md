@@ -651,7 +651,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Assert that no test file contains `vi.mock` of an engine module or `try {`.
     - _Requirements: 22.2, 22.6_
 
-- [ ] 11. Benchmark (manual, outside CI)
+- [x] 11. Benchmark (manual, outside CI)
   - [x] 11.1 Create the benchmark in `packages/engine/bench/`
     - `fixture.ts` builds the Document deterministically from `BENCH_SEED = 20261103` with a local mulberry32 PRNG. The Document has exactly 50,000 code units, 500 Spans, at least 10 Runs, 100 Full_Citations, and at least 20 quotes. The fixture asserts these counts.
     - `apply.bench.test.ts` runs the four scenarios from Req 21.1 to 21.3. Each gets 100 warm-ups and 1,000 timed runs from the same input. It prints the median and p95, and on failure reports one message listing every failing scenario with its times.
@@ -660,7 +660,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - _Requirements: 21.1, 21.2, 21.3, 21.4, 21.5, 21.7_
   - [x] 11.2 Add a check to `test/purity.test.ts` that the root `package.json` scripts and `.github/workflows/ci.yml` never invoke the benchmark
     - _Requirements: 21.7_
-  - [~] 11.3 Run `pnpm --filter @reveal-codes/engine bench` by hand on the Reference_Machine and record the results in `BUILD_LOG.md`
+  - [x] 11.3 Run `pnpm --filter @reveal-codes/engine bench` by hand on the Reference_Machine and record the results in `BUILD_LOG.md`
     - Record the median and p95 for each scenario, the seed, and the machine's CPU, memory, OS, and Node version.
     - _Requirements: 21.6_
 
