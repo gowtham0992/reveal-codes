@@ -551,7 +551,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - A whitespace-only Override reason is rejected. Properties 29, 31, and 34 already cover these.
     - _Requirements: 16.3, 17.8, 18.5_
 
-- [ ] 8. Reveal Codes rendering and parsing
+- [x] 8. Reveal Codes rendering and parsing
   - [x] 8.1 Implement `codes/syntax.ts`
     - `CODE_NAMES` with the exact glyphs from product.md.
     - `escapeText`, `escapeRetained`, `escapePayload`, and `unescape`, using the per-context escape sets in the design.
@@ -610,7 +610,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 40: Malformed text is rejected at the lowest fault index, and parse never throws**
     - **Validates: Requirements 20.3, 20.6**
     - _Requirements: 20.3, 20.6_
-  - [~] 8.14 Write Property 41 in `test/codes.properties.test.ts`
+  - [x] 8.14 Write Property 41 in `test/codes.properties.test.ts`
     - **Property 41: Semantically tampered renderings are rejected with the violated rule**
     - `arbSemanticTamper` includes replacing the opening citation code of an unlisted LEXIS Database_Citation with `[CIT ✓{k=<same key>;cl=<id>}]`, expecting `unverifiable_status` (D23). Same `fc.assert`; no new Property number.
     - **Validates: Requirements 20.4, 20.5**

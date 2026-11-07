@@ -3,7 +3,14 @@ import { describe, expect, it } from "vitest";
 import { parse, render, strip, stripPositions } from "../src/codes";
 import { escapeText } from "../src/codes/syntax";
 import { structuralEqual } from "../src/equal";
-import { arbAnyString, arbDocument, arbSyntaxFault } from "../src/testing/arbitraries";
+import {
+  TAMPER_KINDS,
+  arbAnyString,
+  arbDocument,
+  arbSemanticTamper,
+  arbSyntaxFault,
+  arbTamperDocument,
+} from "../src/testing/arbitraries";
 import type { CodePosition, Document } from "../src/types";
 import { VOCABULARY, modelEvents } from "./support/codes-model";
 import { runs } from "./support/fc";
@@ -168,5 +175,30 @@ describe("Property 40: Malformed text is rejected at the lowest fault index, and
       }),
       runs(),
     );
+  });
+});
+
+const arbTamper41 = arbTamperDocument.chain((d) => arbSemanticTamper(d));
+
+// The named D23 example (unlisted LEXIS `2023 Foo Cty. Ct. LEXIS 5` with a forged
+// `[CIT ✓{k=k0;cl=1}]`) lives in test/codes.test.ts and is reused by reference.
+// The REF payload tamper is deliberately not generated (lexer reports bad_field).
+describe("Property 41: Semantically tampered renderings are rejected with the violated rule _Requirements: 20.4, 20.5_", () => {
+  it("parse returns malformed_codes with the recorded index and rule", () => {
+    // Property 41
+    fc.assert(
+      fc.property(arbTamper41, (t) => {
+        expect(parse(t.text)).toEqual({
+          ok: false,
+          error: { kind: "malformed_codes", index: t.index, rule: t.rule },
+        });
+      }),
+      runs(),
+    );
+  });
+
+  it("every tamper kind is reachable from arbTamperDocument (example, not a property)", () => {
+    const seen = new Set(fc.sample(arbTamper41, { numRuns: 1500, seed: 41 }).map((t) => t.kind));
+    expect([...seen].sort()).toEqual([...TAMPER_KINDS].sort());
   });
 });
