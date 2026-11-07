@@ -339,3 +339,88 @@ describe("vendored reporter list _Requirements: 14.1, 14.2, 14.4_", () => {
     expect(offenders).toEqual([]);
   });
 });
+
+const REPO_ROOT = path.resolve(PACKAGE_ROOT, "..", "..");
+
+/** True when a command line would run the benchmark (Req 21.7). */
+export function invokesBenchmark(command: string): boolean {
+  return /bench|\.bench\.test/i.test(command);
+}
+
+/** Every `run:` command in a workflow, including block-scalar (`run: |`) bodies. */
+function ciRunCommands(yaml: string): string[] {
+  const lines = yaml.split("\n");
+  const commands: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const m = /^(\s*)(?:-\s+)?run:\s*(.*)$/.exec(lines[i] ?? "");
+    if (m === null) continue;
+    const indent = (m[1] ?? "").length;
+    const inline = (m[2] ?? "").trim();
+    if (inline !== "" && !/^[|>][+-]?$/.test(inline)) {
+      commands.push(inline);
+      continue;
+    }
+    for (let j = i + 1; j < lines.length; j++) {
+      const body = lines[j] ?? "";
+      const bodyIndent = body.length - body.trimStart().length;
+      if (body.trim() !== "" && bodyIndent <= indent) break;
+      if (body.trim() !== "") commands.push(body.trim());
+    }
+  }
+  return commands;
+}
+
+describe("the benchmark is never run by CI or the default scripts _Requirements: 21.7_", () => {
+  const rootScripts = (
+    JSON.parse(readFileSync(path.join(REPO_ROOT, "package.json"), "utf8")) as {
+      scripts: Record<string, string>;
+    }
+  ).scripts;
+  const enginePkg = JSON.parse(readFileSync(path.join(PACKAGE_ROOT, "package.json"), "utf8")) as {
+    scripts: Record<string, string>;
+  };
+  const ciPath = path.join(REPO_ROOT, ".github", "workflows", "ci.yml");
+
+  it("matcher detects benchmark invocations (negative sanity)", () => {
+    expect(invokesBenchmark("pnpm --filter @reveal-codes/engine bench")).toBe(true);
+    expect(invokesBenchmark("vitest run --config bench/vitest.config.ts")).toBe(true);
+    expect(invokesBenchmark("vitest run apply.bench.test.ts")).toBe(true);
+    expect(invokesBenchmark("pnpm test:pbt")).toBe(false);
+    expect(invokesBenchmark("vitest run --passWithNoTests properties.test")).toBe(false);
+  });
+
+  it("ci.yml run-line extraction reads inline and block commands", () => {
+    const yaml =
+      "steps:\n  - run: pnpm lint\n  - run: |\n      pnpm test\n      pnpm x\n  - uses: a\n";
+    expect(ciRunCommands(yaml)).toEqual(["pnpm lint", "pnpm test", "pnpm x"]);
+  });
+
+  it("no root package.json script value invokes the benchmark", () => {
+    expect(Object.keys(rootScripts).length).toBeGreaterThan(0);
+    const offenders = Object.entries(rootScripts).filter(([, cmd]) => invokesBenchmark(cmd));
+    expect(offenders).toEqual([]);
+  });
+
+  it("no ci.yml run step invokes the benchmark (ci.yml exists in this repo)", () => {
+    const yaml = readFileSync(ciPath, "utf8");
+    const commands = ciRunCommands(yaml);
+    expect(commands.length).toBeGreaterThan(0);
+    expect(commands.filter(invokesBenchmark)).toEqual([]);
+  });
+
+  it("the engine bench script exists only under the name `bench`; test scripts, if any, exclude it", () => {
+    expect(Object.keys(enginePkg.scripts).filter((n) => /bench/i.test(n))).toEqual(["bench"]);
+    for (const name of ["test", "test:pbt"]) {
+      const script = enginePkg.scripts[name];
+      if (script !== undefined) expect(invokesBenchmark(script)).toBe(false);
+    }
+  });
+
+  it("the normal vitest config only includes test/ and never bench/", () => {
+    const config = scan(readFileSync(path.join(REPO_ROOT, "vitest.config.ts"), "utf8"));
+    const text = config.strings.join("\n");
+    expect(text).toContain("packages/engine");
+    expect(text).toContain("test/**/*.test.ts");
+    expect(config.strings.filter(invokesBenchmark)).toEqual([]);
+  });
+});

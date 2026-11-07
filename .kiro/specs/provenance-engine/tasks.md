@@ -658,7 +658,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `bench/vitest.config.ts` includes only `bench/**/*.bench.test.ts`.
     - Add the engine package script `"bench": "vitest run --config bench/vitest.config.ts"`. Do not reference it from the root scripts or `ci.yml`.
     - _Requirements: 21.1, 21.2, 21.3, 21.4, 21.5, 21.7_
-  - [~] 11.2 Add a check to `test/purity.test.ts` that the root `package.json` scripts and `.github/workflows/ci.yml` never invoke the benchmark
+  - [x] 11.2 Add a check to `test/purity.test.ts` that the root `package.json` scripts and `.github/workflows/ci.yml` never invoke the benchmark
     - _Requirements: 21.7_
   - [~] 11.3 Run `pnpm --filter @reveal-codes/engine bench` by hand on the Reference_Machine and record the results in `BUILD_LOG.md`
     - Record the median and p95 for each scenario, the seed, and the machine's CPU, memory, OS, and Node version.

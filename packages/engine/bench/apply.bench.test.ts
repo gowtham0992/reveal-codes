@@ -99,13 +99,9 @@ function resultsJson(measured: readonly Measured[], counts: object): string {
   )}\n`;
 }
 
-/** Best effort: a failed write is reported and never fails the benchmark. */
+/** A failed write throws (writeFileSync) and fails the run loudly. */
 function writeResults(json: string): void {
-  try {
-    writeFileSync(RESULTS_PATH, json);
-  } catch (cause: unknown) {
-    console.warn(`Could not write ${RESULTS_PATH}: ${String(cause)}`);
-  }
+  writeFileSync(RESULTS_PATH, json);
 }
 
 it("apply meets the Req 21 latency limits", () => {
