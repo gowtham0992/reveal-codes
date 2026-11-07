@@ -540,7 +540,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - This lands here because it needs `arbDocument` with verification results and Overrides from task 7.3.
     - **Validates: Requirements 15.2, 15.3, 15.4, 15.6, 15.7**
     - _Requirements: 15.2, 15.3, 15.4, 15.6, 15.7_
-  - [-] 7.13 Write Property 43 in `test/arbitraries.properties.test.ts`
+  - [x] 7.13 Write Property 43 in `test/arbitraries.properties.test.ts`
     - **Property 43: The shared arbitraries generate only valid values**
     - Covers the full `arbDocument`, `arbOpSequence`, near-miss, garbage, text-with-citations, opinion, `arbShortFormParty`, `arbGapSignal`, and `arbStopListPrefix` arbitraries. `arbShortFormParty` values are checked as Party_Runs of at most `MAX_PARTY` with at most one ` v. ` and at most one Entity_Suffix per side, and `arbGapSignal` values against a test-local Glossary list that excludes `with`.
     - **Validates: Requirements 22.4**
