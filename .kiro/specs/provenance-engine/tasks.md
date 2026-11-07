@@ -557,18 +557,18 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `escapeText`, `escapeRetained`, `escapePayload`, and `unescape`, using the per-context escape sets in the design.
     - `codeString(name, retained, fields, mode)`.
     - _Requirements: 19.2, 19.3, 19.11_
-  - [~] 8.2 Implement `codes/render.ts`
+  - [x] 8.2 Implement `codes/render.ts`
     - Builds per-offset close and open events in the Req 19.6 order, with `[DOC]` first in full mode.
     - Writes the Payload_Section fields from the design table, places `[OVR]` after its opening Code, and builds positions in the same pass.
     - In display mode it omits fields and `[DOC]`.
     - Per design A11.
     - _Requirements: 19.1, 19.2, 19.4, 19.5, 19.6, 19.7, 19.8, 19.9, 19.10, 19.12_
-  - [~] 8.3 Implement `codes/strip.ts`
+  - [x] 8.3 Implement `codes/strip.ts`
     - `strip` is a text-only two-state scanner that drops `[DOC]` and every `{…}` section.
     - `stripPositions`.
     - Per design A11 "Strip".
     - _Requirements: 19.11, 19.12, 19.13_
-  - [~] 8.4 Implement `codes/lex.ts` `lexCodes`
+  - [-] 8.4 Implement `codes/lex.ts` `lexCodes`
     - A single pass that records every syntax fault at its input index and returns the lowest one.
     - Per design A12 step 1.
     - _Requirements: 20.3, 20.6_
