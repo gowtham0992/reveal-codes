@@ -510,7 +510,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Includes the Req 16.5 extension: a `verified` result on a Database_Citation with `lexisCourtListed: false` returns `not_verifiable`, before any payload check.
     - **Validates: Requirements 16.2, 16.3, 16.4, 16.5**
     - _Requirements: 16.2, 16.3, 16.4, 16.5_
-  - [-] 7.6 Write Property 30 in `test/verification.properties.test.ts`
+  - [x] 7.6 Write Property 30 in `test/verification.properties.test.ts`
     - **Property 30: Writing a quote-check result updates that quote only**
     - **Validates: Requirements 17.1, 17.2, 17.4**
     - _Requirements: 17.1, 17.2, 17.4_
