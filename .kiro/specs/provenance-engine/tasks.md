@@ -482,7 +482,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
 - [x] 6. Checkpoint: citations and re-anchoring
   - Ensure `pnpm lint`, `pnpm typecheck`, and `pnpm test` pass. Ask the user if questions arise.
 
-- [~] 7. Verification state, issues, and overrides
+- [x] 7. Verification state, issues, and overrides
   - [x] 7.1 Implement `verification.ts`
     - `setVerification` checks `unknown_citation`, then `not_verifiable`, then `invalid_verification_result`. It keeps the Override when the status is unchanged and drops it when the status changes.
     - `not_verifiable` covers a Short_Form key and, after task 5.47, a `verified` result (well-formed or not; only `r.status` is read) on a Database_Citation with `lexisCourtListed: false`, returning the input Document unchanged. `not_found`, `ambiguous`, and `unchecked` on such a citation are recorded as usual, so it stays an Issue until overridden (Req 16.5, 18.2, D22).
@@ -514,7 +514,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 30: Writing a quote-check result updates that quote only**
     - **Validates: Requirements 17.1, 17.2, 17.4**
     - _Requirements: 17.1, 17.2, 17.4_
-  - [-] 7.7 Write Property 31 in `test/verification.properties.test.ts`
+  - [x] 7.7 Write Property 31 in `test/verification.properties.test.ts`
     - **Property 31: Invalid quote-check writes are rejected without change**
     - **Validates: Requirements 13.4, 17.3, 17.5, 17.8**
     - _Requirements: 13.4, 17.3, 17.5, 17.8_
