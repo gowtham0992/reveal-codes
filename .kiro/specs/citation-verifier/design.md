@@ -995,11 +995,6 @@ Settled in review (the design follows them; nothing here blocks the tasks):
 - **Final task** runs `lookup_citations` through the registered `courtlistener` tool on the citation strings that `extract` returns for `packages/engine/fixtures/demo-motion.txt` (Req 14.5 to 14.7). `apps/web/demo/` is not referenced.
 - **Housekeeping.** A root `.npmrc` sets `reporter=silent`; the SDK is pinned to one exact v1 version; stdout carries protocol messages only and logs go to stderr (Req 13.13, 13.16, 13.17).
 
-Still open (non-blocking, a wording point in the requirements):
-
-- **Req 8.15, definition versus descriptive sentence.** The design implements the definition (the largest `n`). The closing sentence of 8.15 ("consumed by the matched segments ... plus the matched prefix of the first failing segment") gives the same number except for the whitespace between an ellipsis and the next segment, and for a short interior segment, where the definition also counts that segment's trailing ellipsis (A9, worked example 2: 30, not 25). Also, 8.15 excludes Req 8.3 from the multi-segment prefix form while the Glossary's Normalised_Quote includes it; the design applies 8.3 to single-segment quotes only. If you prefer the sentence, say so and A9 changes.
-- **Req 8.12 and dots next to an ellipsis form.** A segment that ends in `.` and is joined directly to `...` loses that dot to the ellipsis form, so a 12-character interior segment would drop to 11 and mismatch. The property generator avoids it (see `arbEllipsisJoin`); the requirement text does not mention it.
-
 ## Open Risks
 
 - **R1. Live API shapes.** `clusters[].id`, a per-line `wait_until`, form encoding, and `fields=` selection are taken from the docs and not exercised against the live API in this phase. The recording task checks each and corrects the parser and fixtures if they differ. Each wrong guess fails safe (`unchecked`).
