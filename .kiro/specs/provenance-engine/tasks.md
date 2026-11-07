@@ -626,7 +626,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
   - Ensure `pnpm lint`, `pnpm typecheck`, and `pnpm test` pass. Ask the user if questions arise.
 
 - [ ] 10. Public API and purity checks
-  - [~] 10.1 Write `src/index.ts`
+  - [x] 10.1 Write `src/index.ts`
     - Named re-exports of the design's Public API and `DEFAULT_RELABEL_THRESHOLD`, plus the public types.
     - Do not export `testing/`.
     - Remove the `PACKAGE_NAME` placeholder and replace `test/index.test.ts` with a test that calls exported functions and asserts their results.

@@ -1,6 +1,68 @@
-export type PackageName = "@reveal-codes/engine";
+// Public entry point: named re-exports only (Req 1.9). `testing/` is deliberately not exported (Req 1.2).
 
-export const PACKAGE_NAME: PackageName = "@reveal-codes/engine";
+// creation and editing
+export { apply, createDocument, normalise } from "./document.js";
+export { normaliseSpans } from "./spans.js";
+export { DEFAULT_RELABEL_THRESHOLD } from "./ops/validate.js";
 
-export { blockingIssues, issues, overrides, recordOverride } from "./issues.js";
+// segmentation and citations
+export { segment } from "./segment.js";
+export { extract } from "./citations/extract.js";
+export { format } from "./citations/format.js";
+
+// verification state
 export { setQuoteCheck, setVerification, verificationOf } from "./verification.js";
+
+// issues and overrides
+export { blockingIssues, issues, overrides, recordOverride } from "./issues.js";
+
+// Reveal Codes
+export { parse, render, strip, stripPositions } from "./codes.js";
+
+// results and errors
+export { err, ok } from "./result.js";
+export type { Result } from "./result.js";
+export type { EngineError, EngineErrorKind, MalformedRule, SpanViolation } from "./errors.js";
+
+// public types
+export type {
+  Applied,
+  CallerOperation,
+  CitationRecord,
+  CitationValue,
+  CodePosition,
+  DatabaseValue,
+  Delete,
+  Document,
+  EngineConfig,
+  ExtractedCitation,
+  ExtractedQuote,
+  Extraction,
+  FullValue,
+  IdValue,
+  Insert,
+  Inverse,
+  Issue,
+  IssueCode,
+  IssueKey,
+  Operation,
+  Origin,
+  Override,
+  ParallelValue,
+  PartyValue,
+  Provenance,
+  QuoteCheckResult,
+  QuoteRecord,
+  QuoteRule,
+  OtherValue,
+  Rendering,
+  RenderMode,
+  Replace,
+  ReporterMember,
+  ReporterValue,
+  Restore,
+  RunEntry,
+  Sentence,
+  Span,
+  VerificationResult,
+} from "./types.js";
