@@ -615,7 +615,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `arbSemanticTamper` includes replacing the opening citation code of an unlisted LEXIS Database_Citation with `[CIT ✓{k=<same key>;cl=<id>}]`, expecting `unverifiable_status` (D23). Same `fc.assert`; no new Property number.
     - **Validates: Requirements 20.4, 20.5**
     - _Requirements: 20.4, 20.5_
-  - [-] 8.15 Write example tests in `test/codes.test.ts`
+  - [x] 8.15 Write example tests in `test/codes.test.ts`
     - Empty Document: full mode renders only `[DOC]` with one position, and display mode renders `""` with none (19.9).
     - Parsing a display rendering, or `""`, returns `malformed_codes` with `missing_doc` at 0 (20.3).
     - The design's full and display example strings.
