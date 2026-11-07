@@ -266,6 +266,17 @@ function lexOne(st: State, i: number): number {
  * fault. Never throws, for any string (Req 20.6).
  */
 export function lexCodes(input: string): Result<readonly LexToken[], LexFault> {
+  const r = lexAll(input);
+  return r.fault === undefined ? ok(r.tokens) : err(r.fault);
+}
+
+/**
+ * Lexes and keeps the tokens even when there are faults, so that decode-level
+ * faults can compete with lex-level ones for the lowest index (Req 20.3).
+ */
+export function lexAll(
+  input: string,
+): Readonly<{ tokens: readonly LexToken[]; fault: LexFault | undefined }> {
   const st: State = {
     input,
     tokens: [],
@@ -295,7 +306,7 @@ function finish(
   tokens: readonly LexToken[],
   stacks: Stacks,
   faults: LexFault[],
-): Result<readonly LexToken[], LexFault> {
+): Readonly<{ tokens: readonly LexToken[]; fault: LexFault | undefined }> {
   for (const family of ["cit", "quo", "ref"] as const) {
     for (const index of stacks[family]) faults.push({ index, rule: "unclosed_open" });
   }
@@ -309,6 +320,14 @@ function finish(
       faults.push({ index: c.index, rule: "misplaced_doc" });
   }
   let lowest: LexFault | undefined;
-  for (const f of faults) if (lowest === undefined || f.index < lowest.index) lowest = f;
-  return lowest === undefined ? ok(tokens) : err(lowest);
+  // On a tie at the lowest index `missing_doc` wins (Req 20.3: a missing
+  // `[DOC]`, including every Display_Rendering, is the fault at index 0).
+  for (const f of faults) {
+    const better =
+      lowest === undefined ||
+      f.index < lowest.index ||
+      (f.index === lowest.index && f.rule === "missing_doc");
+    if (better) lowest = f;
+  }
+  return { tokens, fault: lowest };
 }

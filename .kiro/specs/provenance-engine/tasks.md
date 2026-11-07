@@ -606,7 +606,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 39: Codes match the document structure**
     - **Validates: Requirements 19.1, 19.2, 19.4, 19.6, 19.7, 19.8**
     - _Requirements: 19.1, 19.2, 19.4, 19.6, 19.7, 19.8_
-  - [~] 8.13 Write Property 40 in `test/codes.properties.test.ts`
+  - [x] 8.13 Write Property 40 in `test/codes.properties.test.ts`
     - **Property 40: Malformed text is rejected at the lowest fault index, and parse never throws**
     - **Validates: Requirements 20.3, 20.6**
     - _Requirements: 20.3, 20.6_

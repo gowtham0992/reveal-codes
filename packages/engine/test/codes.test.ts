@@ -133,10 +133,8 @@ describe("parse of non-Full renderings (_Requirements: 20.3_)", () => {
     error: { kind: "malformed_codes", index: 0, rule: "missing_doc" },
   };
 
-  // KNOWN DISAGREEMENT: the engine reports `bad_field` at 0 (the field-less
-  // `[PST]` Code is also a fault at index 0 and wins the tie). Req 20.3 wants
-  // the missing [DOC] reported at 0. `it.fails` flips to red once fixed.
-  it.fails("rejects a display rendering with missing_doc at 0", () => {
+  // The field-less `[PST]` is also a bad_field at 0; missing_doc wins the tie.
+  it("rejects a display rendering with missing_doc at 0", () => {
     const d = must(createDocument("Plain text.", TS));
     const display = render(d, "display").text;
     expect(display).toBe("[PST]Plain text.");
@@ -147,6 +145,39 @@ describe("parse of non-Full renderings (_Requirements: 20.3_)", () => {
     const display = render(must(createDocument("", TS)), "display").text;
     expect(display).toBe("");
     expect(parse(display)).toEqual(missingDoc);
+  });
+});
+
+describe("parse reports the lowest fault across lex and decode (_Requirements: 20.3_)", () => {
+  const DOC = "[DOC{v=1;n=0}]";
+  const OK_T = "2026-11-03T10:00:00Z";
+
+  it("reports a decode-level bad timestamp that precedes a later lex-level unknown code", () => {
+    const r = parse(`${DOC}[PST{t=not-a-time}]x[ZZZ]`);
+    expect(r).toEqual({
+      ok: false,
+      error: { kind: "malformed_codes", index: DOC.length, rule: "bad_field" },
+    });
+  });
+
+  it("reports a decode-level ovr_position that precedes a later lex-level unbalanced close", () => {
+    const r = parse(`${DOC}[PST{t=${OK_T}}][OVR:why{t=${OK_T}}]x[/CIT]`);
+    expect(r).toEqual({
+      ok: false,
+      error: {
+        kind: "malformed_codes",
+        index: DOC.length + `[PST{t=${OK_T}}]`.length,
+        rule: "ovr_position",
+      },
+    });
+  });
+
+  it("lets the lex-level fault win when it is the lower one", () => {
+    const r = parse(`${DOC}[ZZZ][PST{t=not-a-time}]`);
+    expect(r).toEqual({
+      ok: false,
+      error: { kind: "malformed_codes", index: DOC.length, rule: "unknown_code" },
+    });
   });
 });
 
