@@ -625,13 +625,13 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
 - [x] 9. Checkpoint: rendering and parsing
   - Ensure `pnpm lint`, `pnpm typecheck`, and `pnpm test` pass. Ask the user if questions arise.
 
-- [ ] 10. Public API and purity checks
+- [x] 10. Public API and purity checks
   - [x] 10.1 Write `src/index.ts`
     - Named re-exports of the design's Public API and `DEFAULT_RELABEL_THRESHOLD`, plus the public types.
     - Do not export `testing/`.
     - Remove the `PACKAGE_NAME` placeholder and replace `test/index.test.ts` with a test that calls exported functions and asserts their results.
     - _Requirements: 1.2, 1.9_
-  - [~] 10.2 Write static checks in `test/purity.test.ts`
+  - [x] 10.2 Write static checks in `test/purity.test.ts`
     - The engine `package.json` dependency fields are empty or absent (1.1).
     - No file in `src` contains `node:` imports, DOM globals, `Date`, `performance`, `Math.random`, `crypto`, `fetch`, `XMLHttpRequest`, `setTimeout`, `setInterval`, imports from outside the package, `export default`, or `try`/`catch` (1.2, 1.3, 1.9). `testing/` may import fast-check.
     - `index.ts` does not re-export `testing/` (1.2).
@@ -641,12 +641,12 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - One call to any exported function with generated arguments, including failing ones.
     - Add an export line to `arbitraries.ts`.
     - _Requirements: 22.1_
-  - [~] 10.4 Write Property 42 in `test/purity.properties.test.ts`
+  - [x] 10.4 Write Property 42 in `test/purity.properties.test.ts`
     - **Property 42: Engine functions are deterministic, pure, and invent no values**
     - Calls run on deep-frozen arguments.
     - **Validates: Requirements 1.4, 1.5, 1.6, 1.7**
     - _Requirements: 1.4, 1.5, 1.6, 1.7_
-  - [~] 10.5 Write `test/inventory.test.ts`
+  - [x] 10.5 Write `test/inventory.test.ts`
     - Parse the `### Property N` headings in `design.md` and assert that each N appears exactly once as `// Property N` with one `fc.assert`, in a `*.properties.test.ts` file whose describe title contains `_Requirements:`.
     - Assert that no test file contains `vi.mock` of an engine module or `try {`.
     - _Requirements: 22.2, 22.6_
