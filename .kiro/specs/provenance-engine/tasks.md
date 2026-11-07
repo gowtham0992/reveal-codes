@@ -500,7 +500,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `arbBadVerificationWrite` includes a `verified` write (well-formed or malformed) on an unlisted LEXIS key, expecting `not_verifiable`. `arbStateOpSequence` uses texts with unlisted LEXIS citations, weights `verified` writes toward their keys, and biases edits into and next to them (design Arbitraries table, D22).
     - `arbDocument` applies `arbStateWrites` through `setVerification`, `setQuoteCheck`, and `recordOverride`, weighted across every status. A write that returns an error is skipped, not filtered.
     - _Requirements: 22.1, 22.4_
-  - [~] 7.4 Write Property 28 in `test/verification.properties.test.ts`
+  - [x] 7.4 Write Property 28 in `test/verification.properties.test.ts`
     - **Property 28: Writing a verification result updates the citation and its Short_Forms only**
     - Excludes a `verified` result on an unlisted LEXIS key, which Property 29 covers.
     - **Validates: Requirements 12.4, 16.1, 16.6, 16.7**
@@ -518,7 +518,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 31: Invalid quote-check writes are rejected without change**
     - **Validates: Requirements 13.4, 17.3, 17.5, 17.8**
     - _Requirements: 13.4, 17.3, 17.5, 17.8_
-  - [~] 7.8 Write Property 32 in `test/issues.properties.test.ts`
+  - [x] 7.8 Write Property 32 in `test/issues.properties.test.ts`
     - **Property 32: The Issue set is exactly the non-passing items**
     - **Validates: Requirements 12.5, 13.4, 17.6, 17.7, 18.2**
     - _Requirements: 12.5, 13.4, 17.6, 17.7, 18.2_
@@ -535,12 +535,12 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Also asserts that no sequence of operations and verification results ever puts a citation with `lexisCourtListed: false` in the `verified` state: in every intermediate Document every such Full_Citation has a status other than `verified`. `arbStateOpSequence` generates unlisted LEXIS citations and `verified` writes aimed at them. Same `fc.assert`; no new Property number.
     - **Validates: Requirements 15.8, 16.5, 16.6, 17.4**
     - _Requirements: 15.8, 16.5, 16.6, 17.4_
-  - [~] 7.12 Write Property 26 in `test/anchor.properties.test.ts`
+  - [-] 7.12 Write Property 26 in `test/anchor.properties.test.ts`
     - **Property 26: Touched citations reset, untouched ones carry over with shifted offsets**
     - This lands here because it needs `arbDocument` with verification results and Overrides from task 7.3.
     - **Validates: Requirements 15.2, 15.3, 15.4, 15.6, 15.7**
     - _Requirements: 15.2, 15.3, 15.4, 15.6, 15.7_
-  - [~] 7.13 Write Property 43 in `test/arbitraries.properties.test.ts`
+  - [-] 7.13 Write Property 43 in `test/arbitraries.properties.test.ts`
     - **Property 43: The shared arbitraries generate only valid values**
     - Covers the full `arbDocument`, `arbOpSequence`, near-miss, garbage, text-with-citations, opinion, `arbShortFormParty`, `arbGapSignal`, and `arbStopListPrefix` arbitraries. `arbShortFormParty` values are checked as Party_Runs of at most `MAX_PARTY` with at most one ` v. ` and at most one Entity_Suffix per side, and `arbGapSignal` values against a test-local Glossary list that excludes `with`.
     - **Validates: Requirements 22.4**
