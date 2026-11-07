@@ -664,14 +664,14 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Record the median and p95 for each scenario, the seed, and the machine's CPU, memory, OS, and Node version.
     - _Requirements: 21.6_
 
-- [ ] 12. Documentation
-  - [~] 12.1 Add a dated `BUILD_LOG.md` entry
+- [x] 12. Documentation
+  - [x] 12.1 Add a dated `BUILD_LOG.md` entry
     - What the engine build delivered.
     - Where Kiro produced something wrong and what spec or steering change fixed it (for example the deviations D1 to D19, the `LOOKBEHIND` correction from 82 to 162, and the quote-attachment and Short_Form_Party rewrites).
     - Any test that was hard to write, with the requirement it points to.
     - Counterexample regressions recorded under Req 22.5.
     - _Requirements: 21.6, 22.5_
-  - [~] 12.2 Add rows to `docs/KIRO_USAGE.md`
+  - [x] 12.2 Add rows to `docs/KIRO_USAGE.md`
     - The spec `.kiro/specs/provenance-engine/` (requirements.md, design.md, tasks.md).
     - The steering edits made during this spec: `.kiro/steering/product.md` (binding Code list including `[REF]`, and principle 4 blocking codes) and `.kiro/steering/structure.md` (`codes.ts` render modes and parse).
     - Each row gives the path and one line on why it exists, as structure.md requires.
