@@ -490,7 +490,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `verificationOf` derives the result for a Short_Form from its target, and returns `unchecked` for an Orphan.
     - Per design A10.
     - _Requirements: 12.4, 12.5, 13.3, 13.4, 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7, 17.1, 17.2, 17.3, 17.4, 17.5, 17.8_
-  - [~] 7.2 Implement `issues.ts`
+  - [x] 7.2 Implement `issues.ts`
     - `issues` returns items in `(start, citation first)` order, each with its IssueCode.
     - `blockingIssues`, `overrides`, and `recordOverride`. `recordOverride` checks `unknown_issue`, then `empty_override_reason` using `trim`, then `invalid_timestamp`. It stores the reason verbatim and keeps one Override per key.
     - Per design A10.
