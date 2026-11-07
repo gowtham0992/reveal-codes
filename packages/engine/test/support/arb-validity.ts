@@ -68,6 +68,23 @@ export const GLOSSARY_GAP_SIGNALS: readonly string[] = [
   ...["citing", "quoting"],
 ];
 
+/**
+ * Glossary Unlisted_Lexis_Court, shape clauses only (the "matches no entry"
+ * clause is checked by the caller against `lexis-courts.json`): 1 to 40 code
+ * units; tokens separated by single U+0020; every token starts with an ASCII
+ * uppercase letter or digit; no token is a year 1600-2999; no token holds `,`,
+ * whitespace, a parenthesis, or `"` `“` `”`; no token is `LEXIS`; the first
+ * token is not `WL`. Typed from the Glossary; shares no code with the Engine.
+ */
+export function isGlossaryUnlistedShape(court: string): boolean {
+  const tokenOk = (t: string): boolean =>
+    /^[A-Z0-9][^\s(),"“”]*$/.test(t) &&
+    !(/^[0-9]{4}$/.test(t) && Number(t) >= 1600 && Number(t) <= 2999) &&
+    t !== "LEXIS";
+  const tokens = court.split(" ");
+  return court.length >= 1 && court.length <= 40 && tokens[0] !== "WL" && tokens.every(tokenOk);
+}
+
 /** Count of non-overlapping occurrences of `needle` in `s`. */
 export function countOf(s: string, needle: string): number {
   return s.split(needle).length - 1;

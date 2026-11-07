@@ -2,6 +2,7 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { isCaseName, isGapCaseName } from "../src/citations/case-name";
 import { extract } from "../src/citations/extract";
+import { LEXIS_COURTS } from "../src/citations/lexis-courts";
 import { REPORTERS } from "../src/citations/reporters";
 import { format } from "../src/citations/format";
 import { MAX_PARTY } from "../src/citations/party";
@@ -11,6 +12,7 @@ import {
   arbDocument,
   arbGapSignal,
   arbGarbageCitation,
+  arbLexisCourt,
   arbNearMissCitation,
   arbOpinionWithQuotes,
   arbOpSequence,
@@ -23,6 +25,7 @@ import {
 import {
   documentFaults,
   GLOSSARY_GAP_SIGNALS,
+  isGlossaryUnlistedShape,
   isStopListPrefix,
   partyFaults,
 } from "./support/arb-validity";
@@ -259,6 +262,22 @@ describe("arbitraries: the shared arbitraries generate only valid values _Requir
   });
 
   // Property 43
+  it("arbLexisCourt listed values are exact lexis-courts.json entries; unlisted ones meet the Glossary and match no entry", () => {
+    fc.assert(
+      fc.property(arbLexisCourt, ({ lexisCourtListed, lexisCourt }) => {
+        if (lexisCourtListed) {
+          expect(LEXIS_COURTS.includes(lexisCourt)).toBe(true);
+          return;
+        }
+        expect(isGlossaryUnlistedShape(lexisCourt)).toBe(true);
+        expect(LEXIS_COURTS.includes(lexisCourt)).toBe(false);
+        expect(LEXIS_COURTS.some((e) => collapse(e) === collapse(lexisCourt))).toBe(false);
+      }),
+      runs(),
+    );
+  });
+
+  // Property 43
   it("arbTextWithCitations offsets slice to their recorded strings", () => {
     fc.assert(
       fc.property(arbTextWithCitations, ({ text, expected }) => {
@@ -335,5 +354,19 @@ describe("arbitraries: the shared arbitraries generate only valid values _Requir
     expect(isStopListPrefix("the ")).toBe(false);
     expect(isStopListPrefix("See")).toBe(false);
     expect(isStopListPrefix("See  ")).toBe(false);
+    expect(isGlossaryUnlistedShape("Foo Cty. Ct.")).toBe(true);
+    for (const bad of [
+      "",
+      "and the court in 2023 U.S. Dist.",
+      "Union, 2023 U.S. Dist.",
+      "Foo  Cty.",
+      "WL Foo",
+      "Foo LEXIS",
+      "Foo (Ct.)",
+      "Foo “Ct.”",
+      "A".repeat(41),
+    ]) {
+      expect(isGlossaryUnlistedShape(bad), bad).toBe(false);
+    }
   });
 });
