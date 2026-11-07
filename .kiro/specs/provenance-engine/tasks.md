@@ -495,7 +495,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `blockingIssues`, `overrides`, and `recordOverride`. `recordOverride` checks `unknown_issue`, then `empty_override_reason` using `trim`, then `invalid_timestamp`. It stores the reason verbatim and keeps one Override per key.
     - Per design A10.
     - _Requirements: 12.5, 13.4, 17.6, 17.7, 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 18.8_
-  - [~] 7.3 Create `src/testing/arb-state.ts` and extend `arbDocument`
+  - [x] 7.3 Create `src/testing/arb-state.ts` and extend `arbDocument`
     - Arbitraries: `arbVerificationResult`, `arbQuoteCheckResult(len)`, `arbReason` (including `[ ] \ { } ; = ,`), `arbBlankReason`, `arbStateWrites`, `arbBadVerificationWrite`, `arbBadQuoteWrite`, and `arbStateOpSequence`. Each bad-write arbitrary records its expected error.
     - `arbBadVerificationWrite` includes a `verified` write (well-formed or malformed) on an unlisted LEXIS key, expecting `not_verifiable`. `arbStateOpSequence` uses texts with unlisted LEXIS citations, weights `verified` writes toward their keys, and biases edits into and next to them (design Arbitraries table, D22).
     - `arbDocument` applies `arbStateWrites` through `setVerification`, `setQuoteCheck`, and `recordOverride`, weighted across every status. A write that returns an error is skipped, not filtered.

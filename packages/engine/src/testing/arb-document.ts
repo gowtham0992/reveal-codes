@@ -6,7 +6,8 @@
  * one of two threshold settings, so every value is engine-reachable. The
  * low setting makes relabelled Runs common. Run_Ids come from
  * `RUN_ID_POOL` (8 ids, including `r[1]` and `a\b`). Verification,
- * quote-check, and Override writes are added by a later task.
+ * quote-check, and Override writes are then applied through the Engine's
+ * setters (`arbStateWrites`); a write that returns an error is skipped.
  */
 import fc from "fast-check";
 import { createDocument } from "../document.js";
@@ -14,6 +15,7 @@ import type { EngineError } from "../errors.js";
 import type { Result } from "../result.js";
 import type { Document, EngineConfig } from "../types.js";
 import { arbOpTrace, type OpStep } from "./arb-ops.js";
+import { applyStateWrites, arbStateWrites } from "./arb-state.js";
 import { arbText, arbTimestamp } from "./arb-text.js";
 import { arbTextWithCitations } from "./arb-text-citations.js";
 
@@ -49,8 +51,10 @@ const lastDocument = (start: Document, steps: readonly OpStep[]): Document =>
 
 /**
  * A Canonical_Document reached from `createDocument` by 0 to 20 valid
- * Caller_Operations, applied under the default threshold or 0.05.
+ * Caller_Operations, applied under the default threshold or 0.05, then 0 to
+ * 12 verification, quote-check, and Override writes (skipped on error).
  */
 export const arbDocument: fc.Arbitrary<Document> = fc
   .tuple(arbCreatedDocument, fc.constantFrom(...BUILD_CONFIGS))
-  .chain(([start, config]) => arbOpTrace(start, config).map((steps) => lastDocument(start, steps)));
+  .chain(([start, config]) => arbOpTrace(start, config).map((steps) => lastDocument(start, steps)))
+  .chain((doc) => arbStateWrites(doc).map((writes) => applyStateWrites(doc, writes)));
