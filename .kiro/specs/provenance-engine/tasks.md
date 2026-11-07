@@ -568,7 +568,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - `stripPositions`.
     - Per design A11 "Strip".
     - _Requirements: 19.11, 19.12, 19.13_
-  - [-] 8.4 Implement `codes/lex.ts` `lexCodes`
+  - [x] 8.4 Implement `codes/lex.ts` `lexCodes`
     - A single pass that records every syntax fault at its input index and returns the lowest one.
     - Per design A12 step 1.
     - _Requirements: 20.3, 20.6_
