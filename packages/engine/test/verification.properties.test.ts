@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   arbBadVerificationWrite,
   arbDocument,
+  arbQuoteCheckResult,
   arbVerificationResult,
   fullRecordsOf,
   isUnlistedLexisRecord,
@@ -10,7 +11,7 @@ import {
 import type { BadVerificationWrite, FullRecord } from "../src/testing/arbitraries";
 import type { EngineError } from "../src/errors";
 import type { Document, IssueKey, VerificationResult } from "../src/types";
-import { setVerification, verificationOf } from "../src/verification";
+import { setQuoteCheck, setVerification, verificationOf } from "../src/verification";
 import { runs } from "./support/fc";
 
 // Shared helpers for Properties 28 to 31 (design "Correctness Properties", [verification]).
@@ -110,6 +111,73 @@ describe("invalid verification writes  _Requirements: 16.2, 16.3, 16.4, 16.5_", 
         if (r.ok) return;
         expect(r.error).toEqual(expectedError(write));
         expect(doc).toEqual(before);
+      }),
+      runs(),
+    );
+  }, 120_000);
+});
+
+/** True when the quote at `citationStart` attaches to an Orphan Short_Form (Property 31's domain). */
+function onOrphan(doc: Document, citationStart: number): boolean {
+  const c = doc.citations.find((r) => r.citation.start === citationStart);
+  if (c === undefined || c.kind !== "short") return false;
+  const v = c.citation.value;
+  return v.kind === "short" && v.targetStart === null;
+}
+
+/** A Document, a quote key not on an Orphan, and a valid result for that quote's length. */
+const arbQuoteCase = arbDocument
+  .map((doc) => ({
+    doc,
+    eligible: doc.quotes.filter((q) => !onOrphan(doc, q.quote.citationStart)),
+  }))
+  .filter(({ eligible }) => eligible.length > 0)
+  .chain(({ doc, eligible }) =>
+    fc.constantFrom(...eligible).chain((target) =>
+      arbQuoteCheckResult(target.quote.end - target.quote.start).map((result) => ({
+        doc,
+        target,
+        result,
+      })),
+    ),
+  );
+
+describe("quote-check state  _Requirements: 17.1, 17.2, 17.4_", () => {
+  // Property 30
+  it("P30 setQuoteCheck updates that quote only", () => {
+    fc.assert(
+      fc.property(arbQuoteCase, ({ doc, target, result }) => {
+        const written = setQuoteCheck(doc, target.key, result);
+        if (!written.ok) throw new Error(`write rejected: ${JSON.stringify(written.error)}`);
+        const next = written.value;
+
+        // The quote stores exactly the written result; mismatch diverges at start + prefixLength.
+        const stored = next.quotes.find((q) => q.key === target.key);
+        expect(stored?.result).toEqual(result);
+        if (stored !== undefined && result.status === "mismatch") {
+          const offset = stored.quote.start + result.prefixLength;
+          expect(offset).toBeGreaterThanOrEqual(stored.quote.start);
+          expect(offset).toBeLessThan(stored.quote.end);
+        }
+        // Every other quote is unchanged, in order.
+        expect(next.quotes.map((q) => q.key)).toEqual(doc.quotes.map((q) => q.key));
+        const others = (d: Document) => d.quotes.filter((q) => q.key !== target.key);
+        expect(others(next)).toEqual(others(doc));
+        expect(stored?.quote).toEqual(target.quote);
+        // Citations, text, spans, runs, and counters are untouched.
+        expect(next.citations).toEqual(doc.citations);
+        expect(next.text).toBe(doc.text);
+        expect(next.spans).toEqual(doc.spans);
+        expect(next.runs).toEqual(doc.runs);
+        expect(next.keyCounter).toBe(doc.keyCounter);
+        // The Override on the key survives exactly when the result is structurally unchanged.
+        const before = doc.overrides.find((o) => o.key === target.key);
+        const after = next.overrides.find((o) => o.key === target.key);
+        const same = JSON.stringify(target.result) === JSON.stringify(result);
+        expect(after).toEqual(same ? before : undefined);
+        // Other keys' Overrides are kept, in order.
+        const otherOvr = (d: Document) => d.overrides.filter((o) => o.key !== target.key);
+        expect(otherOvr(next)).toEqual(otherOvr(doc));
       }),
       runs(),
     );
