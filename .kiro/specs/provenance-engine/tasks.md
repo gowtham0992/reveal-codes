@@ -552,7 +552,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - _Requirements: 16.3, 17.8, 18.5_
 
 - [ ] 8. Reveal Codes rendering and parsing
-  - [~] 8.1 Implement `codes/syntax.ts`
+  - [x] 8.1 Implement `codes/syntax.ts`
     - `CODE_NAMES` with the exact glyphs from product.md.
     - `escapeText`, `escapeRetained`, `escapePayload`, and `unescape`, using the per-context escape sets in the design.
     - `codeString(name, retained, fields, mode)`.
