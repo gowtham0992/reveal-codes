@@ -535,7 +535,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Also asserts that no sequence of operations and verification results ever puts a citation with `lexisCourtListed: false` in the `verified` state: in every intermediate Document every such Full_Citation has a status other than `verified`. `arbStateOpSequence` generates unlisted LEXIS citations and `verified` writes aimed at them. Same `fc.assert`; no new Property number.
     - **Validates: Requirements 15.8, 16.5, 16.6, 17.4**
     - _Requirements: 15.8, 16.5, 16.6, 17.4_
-  - [-] 7.12 Write Property 26 in `test/anchor.properties.test.ts`
+  - [x] 7.12 Write Property 26 in `test/anchor.properties.test.ts`
     - **Property 26: Touched citations reset, untouched ones carry over with shifted offsets**
     - This lands here because it needs `arbDocument` with verification results and Overrides from task 7.3.
     - **Validates: Requirements 15.2, 15.3, 15.4, 15.6, 15.7**
