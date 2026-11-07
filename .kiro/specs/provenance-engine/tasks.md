@@ -594,7 +594,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 36: Full Reveal Codes round trip**
     - **Validates: Requirements 19.2, 19.3, 20.1, 20.2**
     - _Requirements: 19.2, 19.3, 20.1, 20.2_
-  - [~] 8.10 Write Property 37 in `test/codes.properties.test.ts`
+  - [x] 8.10 Write Property 37 in `test/codes.properties.test.ts`
     - **Property 37: Display is the Strip projection of full**
     - **Validates: Requirements 19.10, 19.11, 19.12, 19.13**
     - _Requirements: 19.10, 19.11, 19.12, 19.13_
