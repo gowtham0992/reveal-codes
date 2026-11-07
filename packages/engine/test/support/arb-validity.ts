@@ -4,7 +4,7 @@
  * lists below are typed from the Glossary, and the Engine's own validators
  * (`checkCoverage`, `checkProvenance`, `isTimestamp`) are used only where the
  * Requirement is stated in terms of them. Kept here so
- * arbitraries.properties.test.ts stays under the 300-line module limit.
+ * arbitraries-validity.properties.test.ts stays under the 300-line module limit.
  */
 import { checkCoverage } from "../../src/spans";
 import type { Document, Provenance } from "../../src/types";
