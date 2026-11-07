@@ -522,7 +522,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 32: The Issue set is exactly the non-passing items**
     - **Validates: Requirements 12.5, 13.4, 17.6, 17.7, 18.2**
     - _Requirements: 12.5, 13.4, 17.6, 17.7, 18.2_
-  - [-] 7.9 Write Property 33 in `test/issues.properties.test.ts`
+  - [x] 7.9 Write Property 33 in `test/issues.properties.test.ts`
     - **Property 33: blockingIssues are the un-overridden Issues in order**
     - **Validates: Requirements 18.1, 18.8**
     - _Requirements: 18.1, 18.8_
