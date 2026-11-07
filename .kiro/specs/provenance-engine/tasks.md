@@ -482,8 +482,8 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
 - [x] 6. Checkpoint: citations and re-anchoring
   - Ensure `pnpm lint`, `pnpm typecheck`, and `pnpm test` pass. Ask the user if questions arise.
 
-- [ ] 7. Verification state, issues, and overrides
-  - [~] 7.1 Implement `verification.ts`
+- [~] 7. Verification state, issues, and overrides
+  - [x] 7.1 Implement `verification.ts`
     - `setVerification` checks `unknown_citation`, then `not_verifiable`, then `invalid_verification_result`. It keeps the Override when the status is unchanged and drops it when the status changes.
     - `not_verifiable` covers a Short_Form key and, after task 5.47, a `verified` result (well-formed or not; only `r.status` is read) on a Database_Citation with `lexisCourtListed: false`, returning the input Document unchanged. `not_found`, `ambiguous`, and `unchecked` on such a citation are recorded as usual, so it stays an Issue until overridden (Req 16.5, 18.2, D22).
     - `setQuoteCheck` checks `unknown_quote`, then `not_verifiable` (quote on an Orphan), then `invalid_quote_result`. It drops the Override when the result differs.
