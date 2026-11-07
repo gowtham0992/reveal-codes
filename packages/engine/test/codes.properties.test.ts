@@ -38,49 +38,58 @@ function expectConsistent(d: Document, text: string, positions: readonly CodePos
 }
 
 describe("Property 37: Display is the Strip projection of full _Requirements: 19.10, 19.11, 19.12, 19.13_", () => {
-  it("display text is strip of full text, and display text is a strip fixed point", () => {
+  it("display is strip of full, positions project, offsets are consistent, strip is total", () => {
     // Property 37
     fc.assert(
-      fc.property(arbDocument, (d) => {
-        const display = render(d, "display").text;
-        expect(display).toBe(strip(render(d, "full").text));
-        expect(strip(display)).toBe(display);
+      fc.property(fc.tuple(arbDocument, arbAnyString), ([d, garbage]) => {
+        const full = render(d, "full");
+        const display = render(d, "display");
+        expect(display.text).toBe(strip(full.text));
+        expect(strip(display.text)).toBe(display.text);
+
+        const projected = stripPositions(full.positions);
+        expect(display.positions).toEqual(projected);
+        expect(projected.length).toBe(
+          full.positions.filter((p) => !p.code.startsWith("[DOC")).length,
+        );
+
+        expectConsistent(d, full.text, full.positions);
+        expectConsistent(d, display.text, display.positions);
+
+        expect(strip(garbage).length).toBeLessThanOrEqual(garbage.length);
       }),
       runs(),
     );
   });
+});
 
-  it("display positions are stripPositions of full positions, with [DOC] dropped", () => {
-    // Property 37
-    fc.assert(
-      fc.property(arbDocument, (d) => {
-        const full = render(d, "full").positions;
-        const projected = stripPositions(full);
-        expect(render(d, "display").positions).toEqual(projected);
-        expect(projected.length).toBe(full.filter((p) => !p.code.startsWith("[DOC")).length);
-      }),
-      runs(),
-    );
-  });
+/** Test-local: drop every `[`..`]` Code, treating `\x` pairs as text, then unescape `\[` `\]` `\\`. */
+function removeCodesAndUnescape(rendered: string): string {
+  let kept = "";
+  let i = 0;
+  while (i < rendered.length) {
+    const c = rendered[i] as string;
+    if (c === "\\" && i + 1 < rendered.length) {
+      kept += rendered.slice(i, i + 2);
+      i += 2;
+    } else if (c === "[") {
+      i += 1;
+      while (i < rendered.length && rendered[i] !== "]") i += rendered[i] === "\\" ? 2 : 1;
+      i += 1;
+    } else {
+      kept += c;
+      i += 1;
+    }
+  }
+  return kept.replace(/\\([[\]\\])/g, "$1");
+}
 
-  it("positions are sorted and located consistently with each rendering text", () => {
-    // Property 37
+describe("Property 38: Removing Codes and unescaping yields the Text _Requirements: 19.3, 19.5_", () => {
+  it("removing every Code and unescaping gives d.text in both modes", () => {
+    // Property 38
     fc.assert(
-      fc.property(arbDocument, (d) => {
-        for (const mode of ["full", "display"] as const) {
-          const r = render(d, mode);
-          expectConsistent(d, r.text, r.positions);
-        }
-      }),
-      runs(),
-    );
-  });
-
-  it("strip is total on arbitrary strings and never lengthens its input", () => {
-    // Property 37
-    fc.assert(
-      fc.property(arbAnyString, (s) => {
-        expect(strip(s).length).toBeLessThanOrEqual(s.length);
+      fc.property(arbDocument, fc.constantFrom("full", "display"), (d, mode) => {
+        expect(removeCodesAndUnescape(render(d, mode).text)).toBe(d.text);
       }),
       runs(),
     );

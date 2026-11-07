@@ -598,7 +598,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - **Property 37: Display is the Strip projection of full**
     - **Validates: Requirements 19.10, 19.11, 19.12, 19.13**
     - _Requirements: 19.10, 19.11, 19.12, 19.13_
-  - [~] 8.11 Write Property 38 in `test/codes.properties.test.ts`
+  - [x] 8.11 Write Property 38 in `test/codes.properties.test.ts`
     - **Property 38: Removing Codes and unescaping yields the Text**
     - **Validates: Requirements 19.3, 19.5**
     - _Requirements: 19.3, 19.5_
