@@ -23,6 +23,7 @@ export type MalformedSemanticRule =
   | "surrogate"
   | "quote_prefix"
   | "short_form_code"
+  | "unverifiable_status"
   | "ref_code"
   | "run_invariant"
   | "override_target"

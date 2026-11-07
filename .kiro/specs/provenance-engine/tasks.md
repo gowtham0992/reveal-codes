@@ -577,7 +577,7 @@ Property tests are mandatory in this repository (tech.md, testing.md), so none a
     - Field decoders.
     - Per design A12 step 2.
     - _Requirements: 20.1, 20.3_
-  - [~] 8.6 Implement `codes/check.ts`
+  - [x] 8.6 Implement `codes/check.ts`
     - Runs the Req 20.4 semantic rules, each reported with its `rule` tag.
     - Includes `unverifiable_status`: a `[CIT ✓]` on a Database_Citation whose Extractor value has `lexisCourtListed: false` is rejected at that Code's input index, the same treatment as a `[CIT ✓]` on an Orphan, never a downgrade (Req 16.5, 20.4, D23). Add the design's named example test "Parse rejects a verified code on an unlisted LEXIS citation" to `test/codes.test.ts`, with its listed-court counterpart that parses `ok`.
     - Cross-checks against the Extractor (`extractor_mismatch`), including `[REF]` pairs and quote attachment.
