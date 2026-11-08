@@ -143,7 +143,8 @@ function bannedViolations(path: string, css: ReturnType<typeof parseCss>): Viola
 function typeViolations(path: string, decls: CssDeclaration[]): Violation[] {
   const found: Violation[] = [];
   const sizes = ["var(--size-ui)", "13px", "inherit"];
-  if (path.endsWith("editor-surface.module.css")) sizes.push("var(--size-editor)", "12pt");
+  if (/(?:editor-surface|print-view)\.module\.css$/.test(path))
+    sizes.push("var(--size-editor)", "12pt");
   for (const d of decls) {
     const value = norm(d.value);
     const stack = FONT_STACKS[d.prop];

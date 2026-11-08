@@ -33,6 +33,7 @@ No account and no token are needed.
 - Verify sends only citation records to this app's own server, and from there only citation strings go to CourtListener. Your draft text is not sent.
 - Quotation text is checked in the browser against the opinion and is never sent anywhere.
 - Draft, the assistant, sends the prompt and the paragraph at the cursor to the configured LLM provider. Nothing is sent to a provider unless you use Draft. The provider is Amazon Bedrock when `AWS_REGION` and `BEDROCK_MODEL_ID` are set, otherwise Anthropic when `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL` are set.
+- Exporting to DOCX and printing send nothing anywhere; both happen in your browser.
 - There is no telemetry.
 - A CourtListener token is required for live lookups, because the citation-lookup endpoint answers anonymous requests with 401. Without `COURTLISTENER_TOKEN` the app runs in demo mode on recorded responses and says so in the interface.
 - The CourtListener token, if set, is sent only to the CourtListener base URL. It is never cached, logged or sent to the browser.

@@ -363,6 +363,16 @@
         "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
         "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
         "timestamp": 1794154513022
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794157037212
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794157367916
       }
     ],
     "5.6 Checkpoint - end-to-end export flow": [
@@ -370,6 +380,11 @@
         "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
         "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
         "timestamp": 1794154513057
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794157367982
       }
     ],
     "6.1 README, KIRO_USAGE, BUILD_LOG, and steering rows": [

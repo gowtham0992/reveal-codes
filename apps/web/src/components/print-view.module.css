@@ -1,0 +1,104 @@
+@page {
+  size: letter;
+  margin: 1in;
+}
+
+.page {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 16px 1in;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.controls {
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.message {
+  margin: 0 0 8px;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  padding: 6px 0;
+  border-top: 1px solid var(--rule);
+  overflow-wrap: anywhere;
+}
+
+.code {
+  font-weight: 700;
+}
+
+.section p {
+  margin: 0 0 12px;
+}
+
+.serif {
+  font-family: var(--font-editor);
+  font-size: var(--size-editor);
+  line-height: var(--line-editor);
+}
+
+.mono {
+  font-family: var(--font-pane);
+  font-size: var(--size-ui);
+}
+
+.appendixLines {
+  margin: 0;
+  font-family: var(--font-pane);
+  font-size: var(--size-ui);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.title {
+  font-weight: 700;
+}
+
+.table {
+  width: 100%;
+  margin: 0 0 12px;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 2px 6px;
+  border: 1px solid var(--ink);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.table th {
+  font-weight: 700;
+}
+
+.signature {
+  margin: 24px 0 0;
+}
+
+@media print {
+  .controls {
+    display: none;
+  }
+
+  .page {
+    max-width: none;
+    padding: 0;
+  }
+
+  .statement,
+  .appendix {
+    break-before: page;
+  }
+}
