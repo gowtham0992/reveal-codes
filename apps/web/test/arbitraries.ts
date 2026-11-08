@@ -1,9 +1,12 @@
 import * as fc from "fast-check";
 import { apply, createDocument } from "@reveal-codes/engine";
-import type { CallerOperation, Document } from "@reveal-codes/engine";
+import type { CallerOperation, Document, VerificationResult } from "@reveal-codes/engine";
 import { arbCreatedDocument, arbDocument } from "../../../packages/engine/src/testing/arb-document";
 import { arbBoundary, arbOpSequence } from "../../../packages/engine/src/testing/arb-ops";
 import { arbText, arbTimestamp } from "../../../packages/engine/src/testing/arb-text";
+import { arbOpinionWithQuotes } from "../../../packages/engine/src/testing/arb-opinion";
+import { arbProseWords } from "../../../packages/engine/src/testing/arb-quote-parts";
+import { arbTextWithCitations } from "../../../packages/engine/src/testing/arb-text-citations";
 import { docFromText } from "../src/editor/offsets";
 import { editorSchema } from "../src/editor/schema";
 import type { Node as PMNode } from "@tiptap/pm/model";
@@ -163,3 +166,57 @@ export const arbLayoutDocument: fc.Arbitrary<Document> = fc.oneof(
   { arbitrary: arbDocument, weight: 3 },
   { arbitrary: arbEscapeHeavyDocument, weight: 1 },
 );
+
+/** Property 5 input: citations, quotes and short forms from the Engine, then long prose appended. */
+export const arbCitingDocument: fc.Arbitrary<Document> = fc
+  .tuple(
+    arbTextWithCitations.map((t) => t.text),
+    fc.array(arbProseWords, { minLength: 3, maxLength: 40 }),
+  )
+  .map(([cited, prose]) => `${cited} ${prose.join(" ")}`)
+  .map((text) => createDocument(text, "2024-01-01T00:00:00.000Z"))
+  .filter((r) => r.ok && r.value.citations.some((c) => c.kind === "full"))
+  .map((r) => {
+    if (!r.ok) throw new Error(`createDocument failed: ${r.error.kind}`);
+    return r.value;
+  });
+
+/** Cluster ids come from a small pool so quotes of different citations share clusters. */
+export const CLUSTER_POOL: readonly string[] = ["101", "102", "103"];
+
+/** What the fake server answers: one result per posted record, one opinion per pooled cluster. */
+export type VerifyScript = Readonly<{
+  results: readonly VerificationResult[];
+  /** Opinion text per `CLUSTER_POOL` entry; null is "unavailable". */
+  opinions: readonly (string | null)[];
+  /** Whether each opinion also embeds the Document's quotes, so some quotes match. */
+  embedQuotes: boolean;
+}>;
+
+const arbScriptResult: fc.Arbitrary<VerificationResult> = fc.oneof(
+  {
+    arbitrary: fc
+      .constantFrom(...CLUSTER_POOL)
+      .map((clusterId) => ({ status: "verified" as const, clusterId })),
+    weight: 4,
+  },
+  { arbitrary: fc.constant({ status: "not_found" as const }), weight: 1 },
+  { arbitrary: fc.constant({ status: "unchecked" as const }), weight: 1 },
+  {
+    arbitrary: fc.constant({ status: "ambiguous" as const, candidates: ["101", "102"] }),
+    weight: 1,
+  },
+);
+
+export const arbVerifyScript: fc.Arbitrary<VerifyScript> = fc.record({
+  results: fc.array(arbScriptResult, { minLength: 1, maxLength: 8 }),
+  opinions: fc.tuple(
+    ...CLUSTER_POOL.map(() =>
+      fc.option(
+        arbOpinionWithQuotes.map((o) => o.text),
+        { nil: null },
+      ),
+    ),
+  ),
+  embedQuotes: fc.boolean(),
+});
