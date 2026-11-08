@@ -39,9 +39,13 @@ const arbCase9: fc.Arbitrary<Case9> = fc.oneof(
   arbAdversarialPair.map((p): Case9 => ({ tag: "adversarial", ...p })),
 );
 
-/** The expected mismatch prefixLength: Req 8.7 for a short single segment, else the A9 model. */
+/**
+ * The expected mismatch prefixLength: Req 8.8 for a quote with no segment, Req 8.7 for a
+ * short single segment, else the A9 model (which knows neither rule).
+ */
 function expectedPrefix(quote: string, opinion: string): number {
   const segs = splitSegments(normaliseQuote(quote));
+  if (segs.length === 0) return 0;
   const only = segs.length === 1 ? (segs[0] as string) : undefined;
   if (only !== undefined && only.length < 12) return 0;
   return modelPrefixLength(quote, opinion);
@@ -65,6 +69,14 @@ describe("Property 9: altered quotation _Requirements: 8.6, 8.13, 8.15_", () => 
       }),
       { numRuns: runs() },
     );
+  });
+
+  // Shrunk counterexample of Property 9 (seed -328581092, found at 500 runs): the quote ",."
+  // is empty after Req 8.3 tail trimming, so it has no segment and Req 8.8 gives 0. The
+  // brute-force model skips tail trimming for prefixes and answered 1. The code was right.
+  it("counterexample: quote ',.' has no segment, so prefixLength is 0 (Req 8.8)", () => {
+    expect(normaliseQuote(",.")).toBe("");
+    expect(checkQuote(", a", ",.")).toEqual({ status: "mismatch", prefixLength: 0 });
   });
 
   // Shrunk counterexample of Property 9: the untracked path probed only cuts before a space,

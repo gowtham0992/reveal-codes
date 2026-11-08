@@ -177,7 +177,7 @@ Deviations from the design's file layout, decided while planning:
     - `BUILD_LOG.md`: append one entry headed `YYYY-MM-DD citation-verifier` (today's date) in the file's existing style, listing each place Kiro's output was wrong and the fix, hard-to-write tests, counterexample regressions, the pinned SDK version, and any `L11+` limitations found, or the text "No Kiro errors".
     - Tests: `packages/verifier/test/docs.test.ts` (README section present; `citations.md` contains "joined by newline" and "one request per chunk" and no whole-document sentence; `.env.example` lists the two new variables each directly after a comment line and the extended token comment) and `packages/verifier/test/inventory.test.ts` (exactly 12 properties numbered 1 to 12 once each; each `// Property N` is followed by exactly one `fc.assert(fc.property(` in a file named `*.properties.test.ts`; each `describe` title ends in `_Requirements: x.y_`).
     - _Requirements: 2.11, 15.7, 16.1, 16.2, 17.1, 17.2, 17.3, 17.4, 17.5_
-  - [~] 8.2 Final checkpoint - full run
+  - [x] 8.2 Final checkpoint - full run
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm test:pbt`; all must pass with `CI=1` set once so the 500-run path is exercised. Confirm `git status` shows no engine changes. Ensure all tests pass, ask the user if questions arise.
   - [~] 8.3 Proof: lookup_citations through the registered courtlistener tool (final task)
     - Compute the strings: run the engine's `extract` on `packages/engine/fixtures/demo-motion.txt` and take `text.slice(start, end)` for every citation it returns.
