@@ -364,7 +364,7 @@ type ManifestEntry = Readonly<{
   source: string; // "courtlistener-live" | "supremecourt.gov" | "hand-authored" ...
   recorded?: string; // ISO date when recorded from the live API
   hand_authored?: true; // exactly one of recorded / hand_authored
-  synthetic?: true; // Req 12.15: only on `1 H. 150` and `576 U.S. 644`, always together with hand_authored
+  synthetic?: true; // Req 12.15: only on `1 Hill 150` and `576 U.S. 644`, always together with hand_authored
   note: string; // one line: where it came from (tech.md)
 }>;
 ```
@@ -377,8 +377,8 @@ Manifest examples (ids and dates are placeholders that the recording task fills 
     "source": "courtlistener-live", "recorded": "<YYYY-MM-DD>", "note": "citation-lookup response for Ashcroft v. Iqbal, one cluster" },
   { "file": "lookup/1047-f3d-212.json", "kind": "lookup", "line": "1047 F.3d 212",
     "source": "courtlistener-live", "recorded": "<YYYY-MM-DD>", "note": "Line_Status 404; fabricated citation in the demo motion" },
-  { "file": "lookup/1-h-150.json", "kind": "lookup", "line": "1 H. 150",
-    "source": "hand-authored", "hand_authored": true, "synthetic": true, "note": "documentation example of a 300 with two clusters; not observed for this line" },
+  { "file": "lookup/1-hill-150.json", "kind": "lookup", "line": "1 Hill 150",
+    "source": "hand-authored", "hand_authored": true, "synthetic": true, "note": "hand-authored 300 with two placeholder clusters; not observed for this line" },
   { "file": "lookup/576-us-644.json", "kind": "lookup", "line": "576 U.S. 644",
     "source": "hand-authored", "hand_authored": true, "synthetic": true, "note": "per-line 429 with wait_until inside HTTP 200; not in the demo motion" },
   { "file": "http/throttle-429.json", "kind": "http",
@@ -397,7 +397,7 @@ The Demo_Corpus is the citation set of `packages/engine/fixtures/demo-motion.txt
 | `1047 F.3d 212` | `lookup/` | 404 | `not_found` |
 | `1012 F. Supp. 2d 88` | `lookup/` | 404 | `not_found` |
 | `912 F.4th 33` | `lookup/` | 404 | `not_found` |
-| `1 H. 150` (synthetic, not in the motion) | `lookup/` | 300, two clusters | `ambiguous` with two candidates |
+| `1 Hill 150` (synthetic, not in the motion) | `lookup/` | 300, two clusters | `ambiguous` with two candidates |
 | `576 U.S. 644` (synthetic, not in the motion) | `lookup/` | 429 per line, with `wait_until`, inside HTTP 200 | `unchecked` with `waitUntil` equal to the recorded value |
 | (none) | `http/throttle-429.json` | HTTP 429, `Retry-After` and `wait_until` | scripted-fetch retry tests only |
 
@@ -947,8 +947,8 @@ describe("Property 4: chunking _Requirements: 7.2, 7.6, 7.7_", () => {
 - **`opinion.test.ts`:** outer opinion loop and inner field loop with the three examples from Req 9.4 and 9.5; HTML strip and entity decode; empty-after-strip; request failure returns `null` and caches nothing; cache hit makes no call; the cluster with zero opinions.
 - **`cache-file.test.ts`:** key encoding of `../x`, `a/b`, `opinion:7`, `.`, `..`; atomic write (a failing rename leaves the old entry and no temp file); unparseable file is a miss; no token in any file.
 - **`status.test.ts`:** counters after a scripted sequence of gets and sets; `verifierStatus` after idle refill; two `createDeps` calls share no state, and `createDeps` returns a full bucket, an empty Window_Log, and zero counters (11.8, 11.9).
-- **`fixtures.test.ts`:** routing table of A13; every manifest entry exists and has exactly one of `recorded` or `hand_authored`; `synthetic` appears only on `1 H. 150` and `576 U.S. 644`, each with `hand_authored` (12.15); each verified case has two genuine quotes of 8 to 60 words that `match` its excerpt; exactly one fabricated quote of 8 to 60 words that `mismatch`es every excerpt (12.1 to 12.13).
-- **`demo-corpus.test.ts`** (Req 12.12, 12.13): `lookup` through `createFixtureFetch()` on the Citation_Lines `556 U.S. 662`, `404 U.S. 519`, `1047 F.3d 212`, `1012 F. Supp. 2d 88`, `912 F.4th 33`, `1 H. 150`, and `576 U.S. 644` returns `verified`, `verified`, three `not_found`, `ambiguous` with its two candidates, and `unchecked` with `waitUntil` equal to the recorded `wait_until`, from one call; the engine's `extract` on `demo-motion.txt` yields exactly the five reporter Citation_Lines (so the motion's `912 F. 4th 33` becomes `912 F.4th 33`); the motion's Haines quotation, found in the motion text, `match`es the Haines excerpt; the motion's quotation attributed to Iqbal, found in the motion text, gives `mismatch` against the Iqbal excerpt; the HTTP-level 429 fixture, replayed by a scripted fetch three times, gives `unchecked` with the last `waitUntil`.
+- **`fixtures.test.ts`:** routing table of A13; every manifest entry exists and has exactly one of `recorded` or `hand_authored`; `synthetic` appears only on `1 Hill 150` and `576 U.S. 644`, each with `hand_authored` (12.15); each verified case has two genuine quotes of 8 to 60 words that `match` its excerpt; exactly one fabricated quote of 8 to 60 words that `mismatch`es every excerpt (12.1 to 12.13).
+- **`demo-corpus.test.ts`** (Req 12.12, 12.13): `lookup` through `createFixtureFetch()` on the Citation_Lines `556 U.S. 662`, `404 U.S. 519`, `1047 F.3d 212`, `1012 F. Supp. 2d 88`, `912 F.4th 33`, `1 Hill 150`, and `576 U.S. 644` returns `verified`, `verified`, three `not_found`, `ambiguous` with its two candidates, and `unchecked` with `waitUntil` equal to the recorded `wait_until`, from one call; the engine's `extract` on `demo-motion.txt` yields exactly the five reporter Citation_Lines (so the motion's `912 F. 4th 33` becomes `912 F.4th 33`); the motion's Haines quotation, found in the motion text, `match`es the Haines excerpt; the motion's quotation attributed to Iqbal, found in the motion text, gives `mismatch` against the Iqbal excerpt; the HTTP-level 429 fixture, replayed by a scripted fetch three times, gives `unchecked` with the last `waitUntil`.
 - **MCP tests** (`packages/courtlistener-mcp/test/`): `env.test.ts`; each handler with valid and invalid arguments; `server.test.ts` registers exactly four tools; `stdio.test.ts` spawns the server through `pnpm mcp` with `REVEAL_CODES_FIXTURES_ONLY=1`, completes the MCP handshake over a pipe, calls `lookup_citations` on the Demo_Corpus citations, and asserts that every line on stdout parses as a JSON-RPC message and that stderr never contains the token (13.1, 13.13, 13.14, 13.15); `package.test.ts` checks the exact v1 SDK pin and the silent reporter in the root `.npmrc` (13.16, 13.17); the static scan of the package's `src` for `console.log`, `console.info`, `console.debug`, and `process.stdout` (13.13).
 
 ### Coverage of non-property criteria
@@ -991,7 +991,7 @@ Settled in review (the design follows them; nothing here blocks the tasks):
 - **Multi-opinion clusters** are limitation L1, with the `fetchOpinionTexts` follow-up.
 - **Field preference** follows Req 9.3 (`plain_text` first) although CourtListener recommends `html_with_citations`. **Position mapping** (Req 2.6, 2.7) stays all-or-nothing, so one unparseable line unchecks its chunk (L6); using `start_index` is a possible later change.
 - **Quotes shorter than 12 normalised characters** (Req 8.7) are measured on the single segment after normalisation, so `[t]he` counts as 3. A throttled opinion is refetched on each `check_quote` call because only non-null text is cached (Req 9.9, L8).
-- **Demo_Corpus** is the citation set of `packages/engine/fixtures/demo-motion.txt`. The ambiguous `1 H. 150` and the throttled `576 U.S. 644` are synthetic and marked `hand_authored` and `synthetic`. The motion writes `912 F. 4th 33`; the Citation_Line is `912 F.4th 33`. Cluster ids, excerpts, and the non-motion quotations come from the recording task or are copied verbatim from the public-domain opinions; nothing is composed. The motion's Haines quotation and its fabricated Iqbal quotation must be consistent with the excerpts.
+- **Demo_Corpus** is the citation set of `packages/engine/fixtures/demo-motion.txt`. The ambiguous `1 Hill 150` and the throttled `576 U.S. 644` are synthetic and marked `hand_authored` and `synthetic`. The motion writes `912 F. 4th 33`; the Citation_Line is `912 F.4th 33`. Cluster ids, excerpts, and the non-motion quotations come from the recording task or are copied verbatim from the public-domain opinions; nothing is composed. The motion's Haines quotation and its fabricated Iqbal quotation must be consistent with the excerpts.
 - **Final task** runs `lookup_citations` through the registered `courtlistener` tool on the citation strings that `extract` returns for `packages/engine/fixtures/demo-motion.txt` (Req 14.5 to 14.7). `apps/web/demo/` is not referenced.
 - **Housekeeping.** A root `.npmrc` sets `reporter=silent`; the SDK is pinned to one exact v1 version; stdout carries protocol messages only and logs go to stderr (Req 13.13, 13.16, 13.17).
 

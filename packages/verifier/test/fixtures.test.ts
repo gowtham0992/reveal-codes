@@ -108,9 +108,9 @@ describe("Fixture_Set manifest _Requirements: 12.1, 12.9, 12.11, 12.15_", () => 
       if (recorded) expect(e.recorded).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     }
   });
-  it("marks synthetic only on 1 H. 150 and 576 U.S. 644, both hand_authored", () => {
+  it("marks synthetic only on 1 Hill 150 and 576 U.S. 644, both hand_authored", () => {
     const synthetic = manifest.filter((e) => e.synthetic === true);
-    expect(synthetic.map((e) => e.line).sort()).toEqual(["1 H. 150", "576 U.S. 644"]);
+    expect(synthetic.map((e) => e.line).sort()).toEqual(["1 Hill 150", "576 U.S. 644"]);
     for (const e of synthetic) expect(e.hand_authored).toBe(true);
   });
   it("holds no token or authorization header in any fixture", () => {

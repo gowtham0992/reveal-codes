@@ -4,7 +4,7 @@ import cluster108432 from "../fixtures/clusters/108432.json" with { type: "json"
 import cluster145875 from "../fixtures/clusters/145875.json" with { type: "json" };
 import lookup1012 from "../fixtures/lookup/1012-f-supp-2d-88.json" with { type: "json" };
 import lookup1047 from "../fixtures/lookup/1047-f3d-212.json" with { type: "json" };
-import lookup1H150 from "../fixtures/lookup/1-h-150.json" with { type: "json" };
+import lookup1Hill150 from "../fixtures/lookup/1-hill-150.json" with { type: "json" };
 import lookup404 from "../fixtures/lookup/404-us-519.json" with { type: "json" };
 import lookup556 from "../fixtures/lookup/556-us-662.json" with { type: "json" };
 import lookup576 from "../fixtures/lookup/576-us-644.json" with { type: "json" };
@@ -20,7 +20,7 @@ const BODIES: Readonly<Record<string, unknown>> = {
   "lookup/1047-f3d-212.json": lookup1047,
   "lookup/1012-f-supp-2d-88.json": lookup1012,
   "lookup/912-f4th-33.json": lookup912,
-  "lookup/1-h-150.json": lookup1H150,
+  "lookup/1-hill-150.json": lookup1Hill150,
   "lookup/576-us-644.json": lookup576,
   "clusters/145875.json": cluster145875,
   "clusters/108432.json": cluster108432,

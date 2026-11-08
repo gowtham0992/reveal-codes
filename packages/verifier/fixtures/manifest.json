@@ -40,13 +40,13 @@
     "note": "status 404 as returned live; fabricated citation in the demo motion (written 912 F. 4th 33)"
   },
   {
-    "file": "lookup/1-h-150.json",
+    "file": "lookup/1-hill-150.json",
     "kind": "lookup",
-    "line": "1 H. 150",
+    "line": "1 Hill 150",
     "source": "hand-authored",
     "hand_authored": true,
     "synthetic": true,
-    "note": "documentation example of a 300 with two clusters; not observed for this line; cluster ids 999000003 and 999000004 are placeholders"
+    "note": "hand-authored 300 with two clusters; not observed for this line; cluster ids 999000003 and 999000004 are PLACEHOLDERS, not real CourtListener ids; line chosen because the engine extracts and formats it unchanged"
   },
   {
     "file": "lookup/576-us-644.json",

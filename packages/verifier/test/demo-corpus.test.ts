@@ -7,7 +7,6 @@ import { createMemoryCacheStore } from "../src/cache-memory";
 import { createDeps } from "../src/create-deps";
 import { createFixtureFetch } from "../src/fixtures";
 import { lookup, planLookup } from "../src/lookup";
-import { mapChunk, parseLookupBody } from "../src/map-status";
 import { fetchOpinionText } from "../src/opinion";
 import { checkQuote } from "../src/quote";
 import { createManualClock } from "./support/manual-clock";
@@ -24,7 +23,7 @@ const LINES = [
   "1047 F.3d 212",
   "1012 F. Supp. 2d 88",
   "912 F.4th 33",
-  "1 H. 150",
+  "1 Hill 150",
   "576 U.S. 644",
 ];
 
@@ -56,34 +55,14 @@ const EXPECTED: readonly VerificationResult[] = [
 ];
 
 describe("Demo_Corpus lookup through createFixtureFetch _Requirements: 12.12_", () => {
-  // The engine does not recognise `H.` as a reporter (it reads `1 Hill 150`), so the
-  // synthetic ambiguous line cannot be produced by `extract`; lookup() covers the other six.
-  it("lookup() returns the recorded outcome for every engine-expressible line in one call", async () => {
-    const lines = LINES.filter((l) => l !== "1 H. 150");
-    const doc = docOf(lines.join(". ") + ".");
+  it("lookup() returns the recorded outcome for all seven lines in one call", async () => {
+    const doc = docOf(LINES.join(". ") + ".");
     const keys = doc.citations.flatMap((c) => (c.kind === "full" ? [c.key] : []));
+    expect(keys).toHaveLength(LINES.length);
     const results = await lookup(doc.citations, fixtureDeps());
-    const want = EXPECTED.filter((_, i) => LINES[i] !== "1 H. 150");
-    expect(keys.map((k) => results.get(k))).toEqual(want);
-  });
-  it("maps all seven recorded lines, including 1 H. 150, from one fixture POST", async () => {
-    const res = await createFixtureFetch()(`${TEST_BASE_URL}/citation-lookup/`, {
-      method: "POST",
-      headers: {},
-      body: new URLSearchParams({ text: LINES.join("\n") }).toString(),
-      signal: new AbortController().signal,
-      redirect: "error",
-    });
-    const mapped = mapChunk(
-      LINES,
-      parseLookupBody(JSON.parse(await res.text())),
-      null,
-      Date.parse(NOW),
-    );
-    expect(LINES.map((l) => mapped.get(l))).toEqual(EXPECTED);
+    expect(keys.map((k) => results.get(k))).toEqual(EXPECTED);
   });
 });
-
 describe("Demo_Corpus opinions and quotes _Requirements: 12.13_", () => {
   it("serves the excerpt as the first sub-opinion text of both verified clusters", async () => {
     const deps = fixtureDeps();
