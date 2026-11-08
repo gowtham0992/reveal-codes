@@ -1,6 +1,6 @@
 | Kind | Name | Path | Why it exists |
 | ---- | ---- | ---- | ------------- |
-| Hook | Commit after spec task | .kiro/hooks/commit-on-task.json, scripts/commit-task.sh | PostTaskExec: commits the working tree as `feat(engine): <task title>` (subject capped at 72 chars, full title in the body when cut). Never pushes or amends; exits 0 when there is nothing to commit. |
+| Hook | Commit after spec task | .kiro/hooks/commit-on-task.json, scripts/commit-task.sh | PostTaskExec: commits the working tree as `feat(<scope>): <task title>`, where scope is the package name when every changed path is under one `packages/<name>/` and `repo` otherwise (subject capped at 72 chars, full title in the body when cut). Never pushes or amends; exits 0 when there is nothing to commit. |
 | Hook | Engine tests on save | .kiro/hooks/engine-tests-on-save.json | PostFileSave on packages/engine/src and packages/engine/test `.ts` files: runs `pnpm vitest run --project engine --passWithNoTests`, killed after 120 s. |
 | Spec | provenance-engine | .kiro/specs/provenance-engine/requirements.md, .kiro/specs/provenance-engine/design.md, .kiro/specs/provenance-engine/tasks.md | Specifies the pure provenance and citation engine in packages/engine: requirements, design with numbered properties, and the task plan that builds it. |
 | Steering | product.md | .kiro/steering/product.md | Edited for this spec: the binding Code list now includes `[REF]` and `[/REF]`, and principle 4 names the blocking codes, so the engine's codes and export rules have one source of truth. |

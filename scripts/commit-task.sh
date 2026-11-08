@@ -32,7 +32,29 @@ if [ -z "$(git status --porcelain)" ]; then
   exit 0
 fi
 
-prefix="feat(engine): "
+git add -A || exit $?
+
+# Scope comes from the paths being committed: one packages/<name>/ for all of
+# them gives <name>; anything else (several packages, root files, docs, .kiro)
+# gives "repo".
+scope=""
+while IFS= read -r -d '' path; do
+  case "$path" in
+    packages/*/*) name="${path#packages/}"; name="${name%%/*}" ;;
+    *) name="repo" ;;
+  esac
+  if [ -z "$scope" ]; then
+    scope="$name"
+  elif [ "$scope" != "$name" ]; then
+    scope="repo"
+  fi
+  [ "$scope" = "repo" ] && break
+done < <(git diff --cached --name-only -z)
+if [ -z "$scope" ]; then
+  exit 0
+fi
+
+prefix="feat(${scope}): "
 max=72
 subject="${prefix}${title}"
 body=""
@@ -43,7 +65,6 @@ if [ "${#subject}" -gt "$max" ]; then
   body="$title"
 fi
 
-git add -A || exit $?
 if [ -n "$body" ]; then
   git commit -q -m "$subject" -m "$body"
 else
