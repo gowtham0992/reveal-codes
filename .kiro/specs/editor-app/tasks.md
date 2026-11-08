@@ -42,7 +42,7 @@ Conventions that apply to every task:
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 10.18, 25.7, 26.4_
 
 - [ ] 2. Offsets and step mapping
-  - [~] 2.1 Editor schema and Offsets_Module
+  - [x] 2.1 Editor schema and Offsets_Module
     - Files: `apps/web/src/editor/schema.ts` (`EDITOR_EXTENSIONS`, `editorSchema` from the three extensions), `apps/web/src/editor/offsets.ts` (`docText`, `posToOffset`, `offsetToPos`, `docFromText` with the arithmetic of the design: `s_i = 1 + Σ(len_j + 2)`, `o_i = Σ(len_j + 1)`; `null` for out-of-range, non-integer and non-content positions; no DOM access).
     - Example tests `offsets.test.ts`: empty document is one empty paragraph at Pos 1; `\n` boundaries (the Offset of the `\n` ends paragraph i, the next Offset starts paragraph i + 1); `null` for negative, fractional, past-the-end Offsets, for doc-level Pos and for paragraph open and close tokens; surrogate pairs count as two units; `docFromText` and `docText` round trip on fixed examples.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 6.1_
@@ -64,7 +64,7 @@ Conventions that apply to every task:
     - _Requirements: 5.8_
 
 - [ ] 3. Store, history, and persistence
-  - [~] 3.1 History and notices
+  - [x] 3.1 History and notices
     - Files: `apps/web/src/history.ts` (`UndoEntry`, `TypingMark`, `pushEdit` with the coalescing rule: exactly one `HUM` one-code-point `insert`, top entry has a typing mark, `op.at` equals the mark's `endOffset`, `nowMs - atMs <= 1000`; `runUndo` applies the group reversed and returns the chronological redo group and the caret `restore.at + restore.insertText.length`; `runRedo` applies forward), `apps/web/src/notices.ts` (`noticeForError(EngineError)`, notice texts of the Error Handling table). No React, TipTap or DOM imports.
     - Example tests `history.test.ts`: coalescing table (gap 1000 versus 1001 ms, wrong Offset, non-`HUM` origin, two code points, no typing mark on the top entry); a new group starts otherwise; undo order is reversed and redo group is chronological; a hand-built stale `Inverse` returns `stale_inverse`; caret value.
     - _Requirements: 8.2, 8.3, 8.4, 8.5, 8.6, 8.8, 8.9_

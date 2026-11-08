@@ -23,3 +23,5 @@ apps/web/public/demo-motion.txt
 *.log
 .DS_Store
 coverage/
+# Stray declaration emit of the root vitest config (not produced by tsc -b)
+/vitest.config.d.ts
