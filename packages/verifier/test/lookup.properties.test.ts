@@ -1,10 +1,11 @@
 import * as fc from "fast-check";
 import { format } from "@reveal-codes/engine";
-import type { CitationRecord } from "@reveal-codes/engine";
+import type { CitationRecord, IssueKey, VerificationResult } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import { buildLookupRequest } from "../src/request";
 import type { LookupRequest } from "../src/request";
-import { planLookup } from "../src/lookup";
+import { planLookup, resultsForRecords } from "../src/lookup";
+import { arbDatabaseCase } from "./support/arb-db-records";
 import { arbLookupCase } from "./support/arb-records";
 import type { LookupCase } from "./support/arb-records";
 import { runs } from "./support/fc";
@@ -73,6 +74,43 @@ describe("Property 2: request bodies _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.8
           expect(r.url.includes("?")).toBe(false);
           expect((r.spec.body ?? "").includes("&")).toBe(false);
         }
+      }),
+      { numRuns: runs() },
+    );
+  });
+});
+
+// Stub until task 4.4 wires `lookup()`: every sent line "resolves", so a database
+// record could only come out unchecked by being routed around the line map.
+function stubResults(c: LookupCase): ReadonlyMap<IssueKey, VerificationResult> {
+  const plan = planLookup(c.records);
+  const lineResults = new Map<string, VerificationResult>(
+    plan.lines.map((l) => [l, { status: "verified", clusterId: "1" }]),
+  );
+  return resultsForRecords(plan.index, lineResults, () => ({ status: "verified", clusterId: "1" }));
+}
+
+// Property 11
+// Feature: citation-verifier, Property 11: Database citations are never sent and always map to unchecked
+describe("Property 11: database citations _Requirements: 5.1, 5.3, 5.4, 5.5_", () => {
+  it("are never sent, map to bare unchecked, and do not change the other lines", () => {
+    fc.assert(
+      fc.property(arbDatabaseCase, (c) => {
+        const reqs = requestsFor(c.mixed);
+        for (const r of reqs) {
+          const text = decodedText(r.spec.body);
+          for (const db of c.databaseTexts) expect(text.includes(db)).toBe(false);
+        }
+        const results = stubResults(c.mixed);
+        for (const key of c.databaseKeys) {
+          const result = results.get(key);
+          expect(result).toEqual({ status: "unchecked" });
+          expect(result !== undefined && "waitUntil" in result).toBe(false);
+        }
+        const bodies = (rs: readonly LookupRequest[]): (string | undefined)[] =>
+          rs.map((r) => r.spec.body);
+        expect(bodies(reqs)).toEqual(bodies(requestsFor(c.withoutDatabase)));
+        if (c.onlyDatabase) expect(reqs).toHaveLength(0);
       }),
       { numRuns: runs() },
     );

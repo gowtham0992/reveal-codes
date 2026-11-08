@@ -83,12 +83,12 @@ Deviations from the design's file layout, decided while planning:
     - **Property 2: Request bodies carry only Citation_Lines drawn from the records**
     - **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5, 2.8**
     - _Requirements: 2.8_
-  - [~] 3.5 Property 11: database citations are never sent and always map to unchecked
+  - [x] 3.5 Property 11: database citations are never sent and always map to unchecked
     - Same file `test/lookup.properties.test.ts`; same harness and swap in task 4.4; records mixed through the engine's `arbDatabaseValue`.
     - **Property 11: Database citations are never sent and always map to unchecked**
     - **Validates: Requirements 5.1, 5.3, 5.4, 5.5**
     - _Requirements: 5.5_
-  - [~] 3.6 Property 12: short and other records are never sent and never in the result map
+  - [-] 3.6 Property 12: short and other records are never sent and never in the result map
     - Same file `test/lookup.properties.test.ts`; same harness and swap in task 4.4.
     - **Property 12: Short and other records are never sent and never in the result map**
     - **Validates: Requirements 1.2, 1.3, 1.4, 1.5, 1.6**
