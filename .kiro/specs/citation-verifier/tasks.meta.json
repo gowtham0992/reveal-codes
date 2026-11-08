@@ -1,0 +1,239 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Package config, vitest projects, guards, and hook": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610567
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098615293
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794099129230
+      }
+    ],
+    "1.2 Deps types, createDeps and state, shared test fakes": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610595
+      }
+    ],
+    "2.1 Normalisation pipeline, KMP search, and segments": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610615
+      }
+    ],
+    "2.2 Origin tracking, prefixLength, and checkQuote": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610637
+      }
+    ],
+    "2.3 Property 7: pipeline idempotent and never longer than NFC": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610662
+      }
+    ],
+    "2.4 Property 8: a lifted quotation matches however it is typeset": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610693
+      }
+    ],
+    "2.5 Property 9: an altered quotation mismatches and prefixLength locates the divergence": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610716
+      }
+    ],
+    "2.6 Checkpoint - quote checking": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610738
+      }
+    ],
+    "3.1 JSON/time helpers, lines, chunks, request, and status mapping": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610759
+      }
+    ],
+    "3.2 Property 1: status mapping yields verified only for Line_Status 200": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610782
+      }
+    ],
+    "3.3 Property 4: chunking caps hold and chunks concatenate to the input": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610803
+      }
+    ],
+    "3.4 Property 2: request bodies carry only Citation_Lines drawn from the records": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610832
+      }
+    ],
+    "3.5 Property 11: database citations are never sent and always map to unchecked": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610870
+      }
+    ],
+    "3.6 Property 12: short and other records are never sent and never in the result map": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610891
+      }
+    ],
+    "4.1 Token bucket, Window_Log, and dispatch gate": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610913
+      }
+    ],
+    "4.2 Transport: timeout race, auth rule, retries": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610933
+      }
+    ],
+    "4.3 Cache access, FileCacheStore, and status": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610952
+      }
+    ],
+    "4.4 lookup() wiring and combineParallel": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610970
+      }
+    ],
+    "4.5 Property 3: lines sent in any 60 000 ms window never exceed 60": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098610990
+      }
+    ],
+    "4.6 Property 5: cache round trip and expiry hold for both stores": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098611009
+      }
+    ],
+    "4.7 Property 6: a fully cached lookup makes no network or sleep calls": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098611027
+      }
+    ],
+    "4.8 Property 10: retries are bounded and exhaustion keeps the last wait": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098611045
+      }
+    ],
+    "4.9 Checkpoint - lookup pipeline": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098611080
+      }
+    ],
+    "5.1 htmlToText and fetchOpinionText": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098611100
+      }
+    ],
+    "6.1 Fixture_Set, manifest, and quotes": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098611119
+      }
+    ],
+    "6.2 createFixtureFetch and Demo_Corpus tests": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098611140
+      }
+    ],
+    "7.1 MCP library: env, context, schemas, tool handlers, server": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098611160
+      }
+    ],
+    "7.2 Entry point, stdio test, registration, and usage rows": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098611176
+      }
+    ],
+    "7.3 Checkpoint - MCP server": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098611194
+      }
+    ],
+    "8.1 Docs, steering alignment, and docs tests": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098611214
+      }
+    ],
+    "8.2 Final checkpoint - full run": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098611234
+      }
+    ],
+    "8.3 Proof: lookup_citations through the registered courtlistener tool (final task)": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794098611253
+      }
+    ]
+  }
+}

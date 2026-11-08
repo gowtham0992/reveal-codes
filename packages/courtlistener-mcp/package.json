@@ -8,5 +8,11 @@
   "exports": "./src/index.ts",
   "scripts": {
     "start": "node --eval \"console.error('courtlistener-mcp: server not implemented yet'); process.exit(1)\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "@reveal-codes/engine": "workspace:*",
+    "@reveal-codes/verifier": "workspace:*",
+    "zod": "3.25.76"
   }
 }
