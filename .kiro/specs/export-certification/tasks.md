@@ -143,14 +143,14 @@ Conventions that apply to every task:
     - Add `apps/web/test/export-flow.test.tsx` (jsdom, fixture fetch only, fixed clock, fake `download` capturing bytes): load the demo motion, Verify, open the Export dialog and assert it is blocked with 4 items and both export buttons disabled, override all four with distinct reasons, assert the buttons enable without closing the dialog, activate Download, and assert the captured file's Statement (read with `readDocxParagraphs` from the export package's test support, or a copy under `apps/web/test/support/`) lists 2 verified, 3 not found, 1 mismatched quote and 4 overrides, with the four reasons in paragraph 5.
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm vitest run --project export`, `pnpm vitest run --project web` and `next build --webpack` (delete `.next` first); fix failures. The real-browser check (Word or LibreOffice) is not automatable here and is left to the user. Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Documentation and final checks
+- [x] 6. Documentation and final checks
   - [x] 6.1 README, KIRO_USAGE, BUILD_LOG, and steering rows
     - `README.md`: add exactly one section headed "Export and certification" that describes each of the six certification statement paragraphs in the order the export prints them, with at least one sentence per paragraph, and states that an override reason is printed in the certification for each red code the author overrides. Do not add a second heading with that name.
     - `docs/KIRO_USAGE.md`: add one row naming this spec with the paths `.kiro/specs/export-certification/requirements.md`, `design.md` and `tasks.md`; one row for the hook `export-tests-on-save` with the path `.kiro/hooks/export-tests-on-save.json` (the row owed by task 1.3); and rows for any steering file edited here. Update `.kiro/steering/structure.md` and `.kiro/steering/tech.md` so they name `packages/export` (workspace list and layout), and add their rows. Add the spec-metadata paths if a `.config.kiro` or `tasks.meta.json` exists for this spec.
     - `BUILD_LOG.md`: one new dated entry in `YYYY-MM-DD` form for this spec, recording the probe result of 1.2 and the path taken, at least one thing Kiro got wrong and the change that fixed it, taken from the completion notes (or an explicit statement that Kiro got nothing wrong), and the unverified real-browser run.
     - `.env.example` stays byte-for-byte unchanged (check with `git diff --exit-code .env.example`).
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 13.2_
-  - [~] 6.2 Final checkpoint - full repository checks
+  - [x] 6.2 Final checkpoint - full repository checks
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `FC_NUM_RUNS=500 pnpm test:pbt` and `next build --webpack` (delete `.next` first); confirm the export package has exactly four `// Property N` comments and that `git diff --exit-code .env.example` passes. Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
