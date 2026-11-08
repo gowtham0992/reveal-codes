@@ -56,7 +56,7 @@ Conventions that apply to every task:
     - Files: `apps/web/src/editor/slice-text.ts` (`sliceToText`: `null` when a node is outside the Editor_Schema or a text node holds `\n`; `textToSlice`: one line is a text-node Slice with open 0/0, several lines are paragraphs with open 1/1, empty gives `Slice.empty`), `apps/web/src/editor/transaction-ops.ts` (`mapSteps` returning `{ ops, path }` and `transactionToOps`; algorithm A-ops: classify delete/insert/replace/none, `actor` equals `provenance.origin` on delete, provenance copied unchanged into insert and replace, `\n` for paragraph boundaries, self-check against `docText` after each step, fallback to one prefix/suffix `replace` with cut points moved off surrogate pairs, no operation when texts are equal; no call to the Engine's `apply`, no clock, no DOM), `apps/web/test/support/pm.ts` (`posIn`, `buildTransaction` from step descriptors reduced modulo the evolving document, `buildPasteTransaction(state, text)` shared with the paste handler of 4.1).
     - Example tests `slice-text.test.ts` and `transaction-ops.test.ts`: four classification cases; `path === "mapped"` for typing, deletion, Enter, Backspace and paste (so a duplicate `prosemirror-transform` copy would be visible); hand-built `ReplaceAroundStep` goes to the fallback; a slice with a non-paragraph node or a text node with `\n` goes to the fallback; fallback with equal texts returns no operation; surrogate pair at a fallback cut point; operations carry the supplied provenance object.
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7_
-  - [~] 2.4 Property 2: mirror invariant
+  - [x] 2.4 Property 2: mirror invariant
     - File `apps/web/test/transaction-ops.properties.test.ts`; `arbEditPlan` in `apps/web/test/arbitraries.ts` (start list plus one to six transactions of one to three steps drawn from insert, delete, replace, split, join and paste-with-newlines; indices snapped off surrogate interiors; origin `HUM` or `PST`). Drives `EditorState` and `Transaction` only.
     - **Property 2: Mirror invariant**
     - Asserts that applying `transactionToOps(textBefore, tr.steps, provenance)` through the Engine's `apply` to a Document holding the text before leaves `document.text` equal to `docText(newState.doc)`; every `insert` and `replace` carries provenance deeply equal to the one supplied; every `delete` has `actor` equal to the supplied origin; a `\n` appears in an operation's text exactly where the inserted slice has a paragraph boundary.
@@ -78,7 +78,7 @@ Conventions that apply to every task:
     - Asserts that undoing until the Undo_Stack is empty yields a Document deeply equal to the starting Document (spans and runs included), redoing until the Redo_Stack is empty yields a Document equal to the one before the first undo, and the number of Undo_Groups never exceeds the number of `edit` actions.
     - **Validates: Requirements 8.5, 8.6, 8.11**
     - _Requirements: 8.11_
-  - [~] 3.4 Persistence and autosave
+  - [x] 3.4 Persistence and autosave
     - Files: `apps/web/src/persist.ts` (`AUTOSAVE_KEY`, `serialise` storing `render(document, "full").text` as `codes`, `deserialise` validating the JSON shape then calling the Engine's `parse`, returning a `Result` with `PersistError`), `apps/web/src/autosave.ts` (`createAutosave` with injected storage and timers: 300 ms debounce, `flush`, `clear`, a throwing `setItem` calls `onError("Autosave failed. Your draft is kept in this tab only.")`).
     - Example tests `persist.test.ts` and `autosave.test.ts`: debounce and flush with the manual timer; write failure sets the error and keeps the Document; absent, non-JSON, wrong-shape and unparseable values give an `Err`; Undo and Redo stacks and Notices are never written; round trip over four fixed Documents (fresh, edited, verified with an override, the demo motion after a recorded Verify) is structurally equal.
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8_
@@ -86,7 +86,7 @@ Conventions that apply to every task:
     - Run `pnpm lint`, `pnpm typecheck` and `pnpm vitest run --project web`; run `FC_NUM_RUNS=500 pnpm vitest run --project web properties.test`; fix failures. Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 4. Editor component and page shell
-  - [~] 4.1 Provenance plugin, clipboard, and paste and drop handling
+  - [x] 4.1 Provenance plugin, clipboard, and paste and drop handling
     - Files: `apps/web/src/editor/provenance-plugin.ts` (`PROVENANCE_META`, `RECONCILE_META`, `provenanceFor`: Reconcile or unchanged documents give `null`, meta wins, `uiEvent` of `paste` or `drop` without meta is `PST`, everything else `HUM`; plugin state computed by `transactionToOps`; the view flushes `onEdit(ops)` once per new plugin state; `handlePaste` reads `text/plain` only and dispatches the shared `buildPasteTransaction` with `PST`; `handleDrop` uses `posAtCoords` and deletes the dragged selection first when `moved`; `beforeinput` cancels `historyUndo` and `historyRedo`), `apps/web/src/editor/clipboard.ts` (`plainTextOf`, `normaliseNewlines` for `\r\n` and `\r`). Timestamps come from the injected `now`. No `AI` or `AI>HUM` origin is constructed here.
     - Example tests `provenance-plugin.test.ts` and `clipboard.test.ts`: `provenanceFor` for typing, IME, Enter, Backspace, Delete, cut, paste, drop, Reconcile and no-change transactions; newline normalisation of `\r\n`, `\r` and `\n`; paste replacing a selection; paste or drop with no `text/plain` leaves the document unchanged; a drag-move becomes `PST` (L6); injected clock used for timestamps; static check that no module constructs `AI>HUM`.
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7_
@@ -100,7 +100,7 @@ Conventions that apply to every task:
     - _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.3, 10.4, 10.6, 10.7, 10.9, 10.10, 10.11, 10.12, 10.13, 10.14, 10.15, 10.16, 25.6_
 
 - [ ] 5. Reveal Codes pane
-  - [~] 5.1 Pane layout module
+  - [x] 5.1 Pane layout module
     - File `apps/web/src/pane/layout.ts`: `layoutPane(document)` building Text_Items and Code_Items from `render(document, "display")`, reading every code offset only from `positions`; `codeFamily`, `codeMeaning` (accessible names such as "Citation not found"), `itemIndexAtOffset`, `offsetOfItem`, `statusText`. Text_Items come from the rendered text, so an escaping backslash stays attached to its character. No React, TipTap or DOM imports.
     - Example tests `layout.test.ts`: every code name maps to its family (`CIT ✓`, `QUO ✘`, `CIT ?:2`, `OVR:reason with : colons`, `AI>HUM:r1`, closers); `codeMeaning` strips payload escapes; `statusText` with newlines and surrogate pairs; `itemIndexAtOffset` at 0, mid-text and the end position; a Document with brackets and backslashes escapes correctly; item count is `n + m`.
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7_
@@ -122,7 +122,7 @@ Conventions that apply to every task:
     - Run `pnpm lint`, `pnpm typecheck` and `pnpm vitest run --project web`; run `FC_NUM_RUNS=500 pnpm vitest run --project web properties.test`; fix failures. Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 6. Server, routes, and Verify flow
-  - [~] 6.1 Server deps, HTTP helpers, and body reader
+  - [x] 6.1 Server deps, HTTP helpers, and body reader
     - Files: `apps/web/src/server/deps.ts` (the only `process.env` reader; pure `readServerConfig(env)` returning `mode`, `token` only in live mode, `baseUrl`, `cacheDir`; `buildServerDeps(config, io)` with live fetch plus `createFileCacheStore` or fixtures `createFixtureFetch()` plus `createMemoryCacheStore`; `getServerContext()` kept on `globalThis`; the Tier 2 `assistant` field is added in 8.1). The production `io.sleep` is a real `setTimeout` promise, cleared on abort and `unref`'d, used in both live and Fixtures_Mode (an instantly resolving sleep makes the Verifier's 15 s timeout win every race). `apps/web/src/server/http.ts` (`NO_STORE`, `jsonResponse`, `notAllowed`), `apps/web/src/server/body.ts` (`readBodyCapped` stopping at 262 144 bytes).
     - Example tests `deps.test.ts` and `http.test.ts`: `readServerConfig` table (token absent or empty, `REVEAL_CODES_FIXTURES_ONLY=1` with a token, defaults for `baseUrl` and `cacheDir`); a sentinel token appears only in `Deps` and never in any response or error; fixtures deps make no network call; **timer test** for both modes: `deps.sleep(15000)` raced against a 50 ms real timer must not win, and an aborted `sleep` clears its timer; `readBodyCapped` stops early on an oversize stream; `notAllowed` carries `Allow` and `Cache-Control: no-store`.
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5, 16.6_

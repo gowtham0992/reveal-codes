@@ -3,7 +3,9 @@ import type { Transaction } from "@tiptap/pm/state";
 import type { Node as PMNode } from "@tiptap/pm/model";
 import { docFromText, docText, offsetToPos } from "../../src/editor/offsets";
 import { editorSchema } from "../../src/editor/schema";
-import { textToSlice } from "../../src/editor/slice-text";
+import { pasteInto } from "../../src/editor/clipboard";
+
+export { buildPasteTransaction, pasteInto } from "../../src/editor/clipboard";
 
 /** Pos of `index` code units into paragraph `paragraph`, computed from node sizes. */
 export function posIn(doc: PMNode, paragraph: number, index: number): number {
@@ -49,12 +51,6 @@ function range(tr: Transaction, a: number, b: number): readonly [number, number]
   return [Math.min(x, y), Math.max(x, y)];
 }
 
-/** Apply a paste of `text` over the selection, as the paste handler does. */
-export function pasteInto(tr: Transaction, text: string, from: number, to: number): void {
-  tr.replaceRange(from, to, textToSlice(editorSchema, text));
-  tr.setMeta("uiEvent", "paste");
-}
-
 function applyDescriptor(tr: Transaction, d: StepDescriptor): void {
   const text = docText(tr.doc);
   if (d.kind === "split") {
@@ -86,14 +82,6 @@ export function buildTransaction(
 ): Transaction {
   const tr = state.tr;
   for (const d of descriptors) applyDescriptor(tr, d);
-  return tr;
-}
-
-/** Paste `text` over the current selection. Shared with the paste handler (task 4.1). */
-export function buildPasteTransaction(state: EditorState, text: string): Transaction {
-  const { from, to } = state.selection;
-  const tr = state.tr;
-  pasteInto(tr, text, from, to);
   return tr;
 }
 
