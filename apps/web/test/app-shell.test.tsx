@@ -69,7 +69,7 @@ describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () =
     expect(screen.queryByRole("complementary", { name: "Assistant" })).toBeNull();
   });
 
-  it("renders the toolbar buttons in order with Verify and Export inert and disabled", async () => {
+  it("renders the toolbar buttons in order with Verify disabled and Export enabled when empty", async () => {
     await mount(fixture());
     const bar = screen.getByRole("toolbar");
     const buttons = within(bar).getAllByRole("button");
@@ -82,7 +82,7 @@ describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () =
     ]);
     expect(
       buttons.filter((b) => (b as HTMLButtonElement).disabled).map((b) => b.textContent),
-    ).toEqual(["Verify", "Export"]);
+    ).toEqual(["Verify"]);
   });
 
   it("exposes the Document textbox and an empty, polite status area", async () => {

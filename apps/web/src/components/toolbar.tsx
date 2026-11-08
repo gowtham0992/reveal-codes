@@ -8,6 +8,8 @@ export type ToolbarProps = Readonly<{
   /** While true the Verify button reads "Verifying…". */
   verifyRunning?: boolean;
   exportDisabled: boolean;
+  /** Blocking issue count; the Export label reads "Export (<n> blocking)" when above zero. */
+  blockingCount?: number;
   /** Mode badge slot (Requirement 15); nothing is rendered when absent. */
   badge?: ReactNode;
   onNew?: () => void;
@@ -16,6 +18,10 @@ export type ToolbarProps = Readonly<{
   onTogglePane?: () => void;
   onExport?: () => void;
 }>;
+
+export function exportLabel(blocking: number): string {
+  return blocking > 0 ? `Export (${String(blocking)} blocking)` : "Export";
+}
 
 export function Toolbar(props: ToolbarProps) {
   return (
@@ -33,7 +39,7 @@ export function Toolbar(props: ToolbarProps) {
         Reveal Codes (Alt-F3)
       </button>
       <button type="button" disabled={props.exportDisabled} onClick={props.onExport}>
-        Export
+        {exportLabel(props.blockingCount ?? 0)}
       </button>
       {props.badge === undefined ? null : <span className={styles["badge"]}>{props.badge}</span>}
       <div role="status" aria-live="polite" className={styles["notice"]}>

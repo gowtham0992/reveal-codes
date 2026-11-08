@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { blockingIssues } from "@reveal-codes/engine";
+import type { Document } from "@reveal-codes/engine";
 import { createAutosave } from "../autosave";
 import type { Autosave } from "../autosave";
 import { useEditorBinding } from "../editor/use-editor-binding";
@@ -11,6 +13,7 @@ import { createStore } from "../store-runtime";
 import type { Store } from "../store-runtime";
 import { hasFullRecord, runVerifyFlow } from "../client/verify-flow";
 import { EditorSurface } from "./editor-surface";
+import { ExportDialog } from "./export-dialog";
 import { ModeBadge, useServerMode } from "./mode-badge";
 import { IssuesRegion } from "./issues-region";
 import { Toolbar } from "./toolbar";
@@ -114,6 +117,57 @@ function useVerify(svc: AppServices, store: Store) {
   return { running, start };
 }
 
+/** Export gate (Requirement 19): the count comes from the Engine, the dialog is a placeholder. */
+function useExportGate(doc: Document) {
+  const [opener, setOpener] = useState<HTMLElement | null>(null);
+  const [open, setOpen] = useState(false);
+  const blocking = blockingIssues(doc).length;
+  return {
+    toolbar: {
+      exportDisabled: blocking > 0,
+      blockingCount: blocking,
+      onExport: (): void => {
+        const active = document.activeElement;
+        setOpener(active instanceof HTMLElement ? active : null);
+        setOpen(true);
+      },
+    },
+    dialog:
+      open && blocking === 0 ? (
+        <ExportDialog
+          restoreFocus={opener}
+          onClose={() => {
+            setOpen(false);
+          }}
+        />
+      ) : null,
+  };
+}
+
+type ShellToolbarProps = Readonly<{
+  notice: string | null;
+  doc: Document;
+  mode: ReturnType<typeof useServerMode>;
+  verify: ReturnType<typeof useVerify>;
+  exportGate: ReturnType<typeof useExportGate>;
+  pane: ReturnType<typeof usePaneControl>;
+}>;
+
+function ShellToolbar({ notice, doc, mode, verify, exportGate, pane }: ShellToolbarProps) {
+  return (
+    <Toolbar
+      notice={notice}
+      paneOpen={pane.open}
+      verifyDisabled={verify.running || !hasFullRecord(doc)}
+      verifyRunning={verify.running}
+      {...exportGate.toolbar}
+      badge={mode === "loading" ? undefined : <ModeBadge mode={mode} />}
+      onVerify={verify.start}
+      onTogglePane={pane.toggle}
+    />
+  );
+}
+
 export function AppShell({ services }: AppShellProps) {
   const { svc, store, autosave } = useShellParts(services);
   const [cursor, setCursor] = useState(0);
@@ -123,18 +177,11 @@ export function AppShell({ services }: AppShellProps) {
   const { notice, doc } = useNoticeAndDocument(store);
   const mode = useServerMode(svc.api);
   const verify = useVerify(svc, store);
+  const exportGate = useExportGate(doc);
+  const toolbar = { notice, doc, mode, verify, exportGate, pane: paneControl };
   return (
     <div className="app" data-pane={paneControl.open ? "open" : undefined}>
-      <Toolbar
-        notice={notice}
-        paneOpen={paneControl.open}
-        verifyDisabled={verify.running || !hasFullRecord(doc)}
-        verifyRunning={verify.running}
-        exportDisabled={true}
-        badge={mode === "loading" ? undefined : <ModeBadge mode={mode} />}
-        onVerify={verify.start}
-        onTogglePane={paneControl.toggle}
-      />
+      <ShellToolbar {...toolbar} />
       <EditorSurface editor={binding.editor} empty={doc.text.length === 0} />
       <IssuesRegion
         document={doc}
@@ -143,6 +190,7 @@ export function AppShell({ services }: AppShellProps) {
         onGo={binding.focusAt}
         demoMode={mode === "fixtures"}
       />
+      {exportGate.dialog}
       <Pane
         open={paneControl.open}
         document={doc}
