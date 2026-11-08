@@ -15,7 +15,7 @@ The spec has two tiers. **Tier 1** (Requirements 1 to 21, 25, 26 except where ma
 
 This spec is constrained by `.kiro/steering/tech.md`, `product.md`, `structure.md`, `citations.md`, and `testing.md`. Where this spec and a steering file differ, the user's brief for this spec is the later decision, and Requirement 26 brings the steering files into line.
 
-Scope: `apps/web` only, plus one hook file, the root `vitest.config.ts` entry for the `web` project, `.env.example`, `README.md`, `docs/KIRO_USAGE.md`, and `BUILD_LOG.md`. Out of scope: any change to `packages/engine` or `packages/verifier`, DOCX or PDF export and the certification (a later spec; Export here opens a placeholder), formatting beyond plain paragraphs, accounts, telemetry, and the Crew app.
+Scope: `apps/web` only, plus one hook file, the root `vitest.config.ts` entry for the `web` project, `.gitignore` (the line `apps/web/public/demo-motion.txt`), the `apps/web/tsconfig.json` references, the `exports` field of `packages/verifier/package.json` (metadata only; no Verifier source changes), `.env.example`, `README.md`, `docs/KIRO_USAGE.md`, and `BUILD_LOG.md`. Out of scope: any change to `packages/engine` or `packages/verifier`, DOCX or PDF export and the certification (a later spec; Export here opens a placeholder), formatting beyond plain paragraphs, accounts, telemetry, and the Crew app.
 
 ## Glossary
 
@@ -61,6 +61,7 @@ Scope: `apps/web` only, plus one hook file, the root `vitest.config.ts` entry fo
 - **Full_Record**: a `CitationRecord` with `kind: "full"`.
 - **Epoch**: an integer in the Store that increases whenever the Document is replaced (New document, Load demo motion, or loading the Persisted_Value); a Verify_Flow result whose Epoch differs from the current Epoch is discarded.
 - **Issues_List**: the right-hand list of `issues(document)`.
+- **Divergence_Words**: for a quote whose `QuoteCheckResult` is a mismatch carrying `prefixLength`, the words of the quote text starting at the word that contains the Offset `prefixLength` within the quote text, up to 6 words, joined by single spaces, and followed by an ellipsis when more words remain. The Divergence_Words are derived in the browser from the quote text in the Document; the Verifier supplies only `prefixLength`.
 - **Override_Dialog**: the modal dialog that collects an override reason.
 - **Export_Button** / **Export_Dialog**: the toolbar button labelled "Export" and the placeholder dialog it opens.
 - **Demo_Motion**: `packages/engine/fixtures/demo-motion.txt`, served to the browser as `apps/web/public/demo-motion.txt`.
@@ -77,12 +78,15 @@ Scope: `apps/web` only, plus one hook file, the root `vitest.config.ts` entry fo
 #### Acceptance Criteria
 
 1. THE Web_App `package.json` SHALL depend on `@reveal-codes/engine` and `@reveal-codes/verifier` through the workspace protocol, and on `@tiptap/core`, `@tiptap/react`, `@tiptap/pm`, `@tiptap/extension-document`, `@tiptap/extension-paragraph`, and `@tiptap/extension-text`, each pinned to one exact version with no range operator.
-2. THE Web_App `package.json` SHALL list `@testing-library/react` and `jsdom` as development dependencies, each pinned to one exact version with no range operator.
-3. WHERE the assistant is present (Tier 2), THE Web_App `package.json` SHALL depend on `ai`, `@ai-sdk/amazon-bedrock`, and `@ai-sdk/anthropic`, each pinned to one exact version with no range operator.
+2. THE Web_App `package.json` SHALL list `@testing-library/react` and `jsdom` as development dependencies, each pinned to one exact version with no range operator, with `jsdom` pinned to `28.1.0`.
+3. WHERE the assistant is present (Tier 2), THE Web_App `package.json` SHALL depend on `ai` `7.0.165`, `@ai-sdk/amazon-bedrock` `5.0.135`, and `@ai-sdk/anthropic` `4.0.99`, each pinned to that exact version with no range operator (and on `zod` `4.6.7` if a peer requires it).
 4. THE Web_App SHALL NOT depend on `@tiptap/starter-kit`, any TipTap history extension, or any state-management library.
 5. THE root `vitest.config.ts` `web` project SHALL include `test/**/*.test.ts` and `test/**/*.test.tsx`, run in the `node` environment by default, and allow a file to select `jsdom` with a `// @vitest-environment jsdom` comment.
 6. THE Web_App `package.json` SHALL define a `predev` script and a `prebuild` script that each run `apps/web/scripts/copy-demo.ts`.
 7. WHEN `pnpm test` runs from the repository root, THE Web_App tests SHALL run as the `web` project and SHALL make no network request.
+8. THE `exports` field of `packages/verifier/package.json` SHALL be an object that keeps `"."` pointing to `./src/index.ts` and adds `"./quote"` pointing to `./src/quote.ts`; this SHALL be the only change to the Verifier package, and no Verifier source file SHALL change.
+9. THE Web_App client modules SHALL import `checkQuote` from `@reveal-codes/verifier/quote`, so that no `node:` builtin reaches the browser bundle.
+10. THE Web_App `package.json` scripts `dev` and `build` SHALL run `next dev --webpack` and `next build --webpack`.
 
 ### Requirement 2: Save hook and static guards
 
@@ -98,6 +102,7 @@ Scope: `apps/web` only, plus one hook file, the root `vitest.config.ts` entry fo
 6. WHEN the `web` test project runs, THE static check SHALL fail with the file path and line number of each `fetch(` call under `apps/web/src` and `apps/web/app` outside `apps/web/src/client/api.ts`, `apps/web/src/server/deps.ts`, and the Tier 2 provider files under `apps/web/src/server/`.
 7. THE Web_App source and tests SHALL contain at most 40 lines in each function, per `tech.md`.
 8. IF a `try/catch` block in Web_App source or tests catches an error and neither rethrows it, returns it as a value, nor asserts on it, THEN THE repository SHALL be considered non-compliant with this requirement.
+9. WHEN the `web` test project runs, THE static check SHALL fail with the file path and line number of each module under `apps/web/src` and `apps/web/app` that is bundled for the browser (every module outside `apps/web/src/server/` and `apps/web/app/api/`) and imports `@reveal-codes/verifier` at its root or any `node:*` specifier.
 
 ### Requirement 3: The Store
 
@@ -141,7 +146,7 @@ Scope: `apps/web` only, plus one hook file, the root `vitest.config.ts` entry fo
 2. WHEN a `ReplaceStep` removes a non-empty range and inserts nothing, THE Ops_Module SHALL emit a `delete` with `actor` equal to `provenance.origin`; WHEN the step removes nothing and inserts a non-empty slice, THE Ops_Module SHALL emit an `insert`; WHEN the step removes a non-empty range and inserts a non-empty slice, THE Ops_Module SHALL emit a `replace`; and WHEN the step removes nothing and inserts nothing, THE Ops_Module SHALL emit no operation.
 3. THE Ops_Module SHALL write each paragraph boundary inside an inserted slice as one `\n` in the operation text.
 4. THE Ops_Module SHALL copy the supplied `provenance` unchanged into every `insert` and `replace` it emits.
-5. IF a step is a `ReplaceAroundStep`, any other step type, or a `ReplaceStep` whose slice holds a node outside the Editor_Schema, THEN THE Ops_Module SHALL discard the mapping of the whole step list and SHALL return one `replace` computed from the longest common prefix and the longest common suffix of `beforeText` and the text that results from applying the steps to the document built from `beforeText`.
+5. IF a step is a `ReplaceAroundStep`, any other step type, or a `ReplaceStep` whose slice holds a node outside the Editor_Schema, THEN THE Ops_Module SHALL discard the mapping of the whole step list and SHALL return one `replace` computed from the longest common prefix and the longest common suffix of `beforeText` and the text that results from applying the steps to the document built from `beforeText`, except that WHEN `beforeText` equals the resulting text, THE Ops_Module SHALL return no operation.
 6. WHEN the Ops_Module computes the fallback `replace` of criterion 5, THE Ops_Module SHALL move each cut point to the nearest Offset that does not fall between the two code units of a surrogate pair.
 7. THE Ops_Module SHALL be pure: it SHALL NOT call the Engine's `apply`, read a clock, or touch the DOM.
 8. FOR ALL starting texts and all sequences of generated ProseMirror transactions (insert text, delete range, replace range, split paragraph, join paragraphs, paste text with newlines), applying the output of `transactionToOps` through the Engine's `apply` to a Document with the starting text SHALL leave `document.text` equal to the Editor text (Property 2, Mirror_Invariant).
@@ -275,6 +280,7 @@ Scope: `apps/web` only, plus one hook file, the root `vitest.config.ts` entry fo
 3. WHEN the user clicks a Text_Item or a Code_Item, THE Web_App SHALL set the Editor selection to the Pos of that item's `offset` and SHALL focus the Editor.
 4. THE Pane SHALL highlight only the selection head when the Editor selection is a range.
 5. WHEN the user clicks the Pane outside every item, THE Web_App SHALL set the Editor selection to the end of the Document.
+6. WHILE the Pane is open and the selection head lies within the `[start, end)` range of a quote whose result is `QUO ✘` with a mismatch `prefixLength`, THE Status_Line SHALL read `statusText(document.text, cursorOffset)` followed by two spaces and `Diverges at: ` and the Divergence_Words of that quote, computed in the browser from the quote text in the current Document.
 
 ### Requirement 14: Pane toggle and F7
 
@@ -355,6 +361,7 @@ Scope: `apps/web` only, plus one hook file, the root `vitest.config.ts` entry fo
 8. IF the Store reports an error for the `override` action, THEN THE Override_Dialog SHALL stay open and show the error kind.
 9. WHEN the Override_Dialog opens, THE dialog SHALL move focus into the reason field; WHEN the user presses Escape or activates "Cancel", THE dialog SHALL close without an action and return focus to the control that opened it; AND WHILE the dialog is open, THE dialog SHALL keep keyboard focus inside itself.
 10. WHILE `issues(document)` is empty, THE Issues_List SHALL show the text "No issues."
+11. WHEN an Issues_List row is a `QUO ✘` whose `QuoteCheckResult` is a mismatch with `prefixLength`, THE row SHALL show the Divergence_Words of that quote, labelled "Diverges at:", computed in the browser from the quote text in the current Document; no quote text SHALL be sent to the server for this purpose.
 
 ### Requirement 19: Export gate
 
@@ -394,6 +401,7 @@ Scope: `apps/web` only, plus one hook file, the root `vitest.config.ts` entry fo
 4. WHEN the user activates Verify on the Demo_Motion in Fixtures_Mode, THE Web_App SHALL show all verification results within 10 000 ms.
 5. THE Web_App tests SHALL include one example test that drives criteria 1 to 4 through the Store, the Verify_Flow with an Api_Client whose `fetch` calls the route handler functions directly, and the Issues_List, with no network.
 6. WHEN checkpoint 7 runs, THE completion notes SHALL record that `pnpm dev` served the page and that the path load demo motion, Alt-F3, Verify, red codes, override, and label change was walked by hand once.
+7. WHEN the Demo_Motion is loaded and before Verify runs, THE Export_Button SHALL read "Export (7 blocking)"; after Verify in Fixtures_Mode it SHALL read "Export (4 blocking)"; and after one override it SHALL read "Export (3 blocking)" (counts verified against the real Engine and fixtures).
 
 ### Requirement 22: Assistant provider module and route (Tier 2)
 
@@ -487,7 +495,8 @@ Standing rule (carried over from the provenance-engine and citation-verifier spe
 - L12. A paste, drop, or assistant text that contains an unpaired surrogate is rejected by the Engine (`split_surrogate`) and leaves the Document unchanged with a Notice.
 - L13. The Verify route has no per-client throttle; the shared Token_Bucket in the server's Verifier deps limits aggregate use. A public deployment should run in Fixtures_Mode.
 - L14. The Assistant_Panel sends only the current paragraph, so the model cannot see the rest of the filing, and markdown in a reply is inserted as plain text. (Tier 2)
-- Design and implementation record further entries here as L15, L16, and so on.
+- L15. The app runs on webpack (`next dev --webpack`, `next build --webpack`) because Turbopack's resolution of the Engine's `.js`-specifier-to-`.ts` imports in Next 16.4.5 was not confirmed.
+- Design and implementation record further entries here as L16, L17, and so on.
 
 ## Notes for the user
 
@@ -506,4 +515,7 @@ Assumptions and reconciliations recorded while writing this document. None of th
 - **Peer dependencies.** `@testing-library/react` needs `@testing-library/dom` as a peer, and the AI SDK packages may need `zod`. If either is required, it is added with an exact version and recorded in `BUILD_LOG.md`, as Requirement 1 limits the dependency list to the brief's.
 - **API differences for design.** `transactionToOps(beforeText, steps, provenance)` follows the brief's signature; if ProseMirror needs the step documents to map positions, the design may derive them from `beforeText` (the paragraph structure is recoverable from the text) and keep the signature. Where a TipTap or ProseMirror API differs from an assumption here (paste and drop hooks, transaction metadata, Reconcile), the design keeps the behaviour stated in the criterion.
 - **Bundling.** The Verifier imports JSON fixtures with import attributes and the Engine and Verifier are workspace packages; how Next.js transpiles them (for example `transpilePackages`) is a design item.
+- **Edits outside `apps/web`.** Root `vitest.config.ts` (the `web` project), `.gitignore` (`apps/web/public/demo-motion.txt`), `apps/web/tsconfig.json` references, and `packages/verifier/package.json` `exports` (adds `./quote`; metadata only, no Verifier source change).
+- **Divergence words.** The Verifier reports only `prefixLength`; the words shown for a `QUO ✘` come from the quote text already in the browser, so no quote text leaves the browser.
+- **Accepted assumptions.** Unflagged edits are `HUM`; `jsdom` is `28.1.0`; Tier 2 pins are `ai` 7.0.165, `@ai-sdk/amazon-bedrock` 5.0.135, `@ai-sdk/anthropic` 4.0.99, `zod` 4.6.7.
 - **Checkpoints.** Checkpoints follow the brief: after Groups 3, 5, and 7, then final. The `pnpm dev` walk-through is recorded at checkpoint 7 (Requirement 21, criterion 6).

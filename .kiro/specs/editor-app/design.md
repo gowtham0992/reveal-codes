@@ -2,7 +2,7 @@
 
 ## Overview
 
-`apps/web` is the Reveal Codes editor: one Next.js page at `/` where a self-represented litigant pastes a draft, presses Alt-F3 to see the provenance codes, presses Verify to check every citation and quotation, and sees which problems block export. The app is a thin shell over three existing pieces and changes none of them: the Engine (`@reveal-codes/engine`) owns the document, the Verifier (`@reveal-codes/verifier`) checks citations and quotations, and TipTap on ProseMirror is the editing surface. This design was checked against the real engine and verifier source, and the demo path of Requirement 21 was run once through the real engine, the real verifier and the recorded fixtures (see "Demo path walkthrough").
+`apps/web` is the Reveal Codes editor: one Next.js page at `/` where a self-represented litigant pastes a draft, presses Alt-F3 to see the provenance codes, presses Verify to check every citation and quotation, and sees which problems block export. The app is a thin shell over three existing pieces and changes none of their source: the Engine (`@reveal-codes/engine`) owns the document, the Verifier (`@reveal-codes/verifier`) checks citations and quotations, and TipTap on ProseMirror is the editing surface. This design was checked against the real engine and verifier source, and the demo path of Requirement 21 was run once through the real engine, the real verifier and the recorded fixtures (see "Demo path walkthrough").
 
 Design goals, in priority order:
 
@@ -23,7 +23,7 @@ Design goals, in priority order:
 | Editor drift safety net | After every flush to the Store the Editor compares its text with `document.text` in a microtask and Reconciles on any difference. A rejected edit (Requirement 6.4) and any bug in the mapper end the same way: the editor yields to the Engine. |
 | Placeholder | `@tiptap/extension-placeholder` is not in the Requirement 1 list and Requirement 1.1 loads three extensions only, so the placeholder is an `aria-hidden` overlay element shown while `document.text === ""`, plus `aria-placeholder` on the content element. |
 | Bundler | Webpack, not Turbopack: `next dev --webpack`, `next build --webpack`. The Engine imports its siblings with `.js` specifiers that name `.ts` files; webpack maps them with `resolve.extensionAlias`, and Turbopack has no equivalent (vercel/next.js issue 82945, status in 16.4.5 not confirmed). See "Next.js specifics" and risk R1. |
-| Verifier in the browser | `checkQuote` is imported from the `@reveal-codes/verifier` entry point. That entry point also re-exports the file cache, which imports `node:fs/promises` and `node:path`; the client webpack config maps those to empty modules. The Verifier package is not changed. |
+| Verifier in the browser | `checkQuote` is imported from the `@reveal-codes/verifier/quote` subpath. `packages/verifier/package.json` `exports` becomes `{ ".": "./src/index.ts", "./quote": "./src/quote.ts" }` (metadata only; no Verifier source file changes). Checked in this design phase: `src/quote.ts` imports only the type `QuoteCheckResult` from the Engine and `./normalise`, `./segments`, `./track`; `segments.ts` imports `./kmp`; `track.ts` imports `./normalise`; `normalise.ts` and `kmp.ts` import nothing; a search of `packages/engine/src` and `packages/verifier/src` finds `node:` only in `cache-file.ts` (`node:fs/promises`, `node:path`), which the subpath never reaches. The client bundle therefore needs no `node:` aliasing, no empty modules and no JSON fixtures. Static test per Requirement 2.9 (see Testing Strategy). |
 | Route method guards | Each route file exports its real handler plus explicit `405` handlers for the other methods, so the `405` carries `Cache-Control: no-store` (Requirement 16.6). Next.js would otherwise answer `405` itself without the header. |
 | Body size | The Verify route reads the body as a stream and stops at 262 144 bytes, so an oversize body is rejected without buffering it. |
 | Record guard | The Verify route validates each record deeply enough that the Verifier's `buildLines` cannot throw (it reads `citation.value` fields). A structurally broken record is `400`. |
@@ -52,7 +52,7 @@ Facts read from the code that shape the design:
 
 - **Engine.** `apply(doc, op)` returns `Result<Applied, EngineError>` with `Applied = { document, inverse }`. An Inverse holds `expect: Document` and applies only to a structurally equal Document (`stale_inverse` otherwise). A no-op operation returns the same Document object. `Replace` with empty text delegates to `Delete`; with `from === to` it delegates to `Insert`. `setVerification`, `setQuoteCheck` and `recordOverride` return a new Document and no Inverse. `issues(doc)` lists a citation only when its result is not `verified`; a short form is an Issue only when it is an orphan. `render(doc, "display")` returns `{ text, positions }` where text characters `\`, `[`, `]` are escaped with a backslash and every other character, including `\n`, is raw.
 - **Display code tokens.** `[` + name + optional `:` retained payload + `]`, for example `[PST]`, `[AI:r1]`, `[CIT ?:2]`, `[OVR:reason]`, `[/CIT]`. Names are fixed by the Engine (`CODE_NAMES`). The retained payload escapes `\ [ ] {`.
-- **Verifier.** The package entry is `./src/index.ts` (one export path). It imports siblings without extensions, and `fixtures.ts` imports JSON with `with { type: "json" }`. `createDeps(init)` trims a trailing `/` from `baseUrl` and builds fresh state. `lookup` never rejects; `fetchOpinionText` returns `null` on any failure; `checkQuote` is total. Its 15 s request timeout is a race against `Deps.sleep(15000)`: **a `sleep` that resolves immediately makes every request time out** (observed while checking the demo path), so the server's `sleep` must be a real, abortable timer in Fixtures_Mode too.
+- **Verifier.** The package entry is `./src/index.ts`; this spec adds the `./quote` subpath (`./src/quote.ts`) for the browser. It imports siblings without extensions, and `fixtures.ts` imports JSON with `with { type: "json" }` (server-side only after the change). `createDeps(init)` trims a trailing `/` from `baseUrl` and builds fresh state. `lookup` never rejects; `fetchOpinionText` returns `null` on any failure; `checkQuote` is total. Its 15 s request timeout is a race against `Deps.sleep(15000)`: **a `sleep` that resolves immediately makes every request time out** (observed while checking the demo path), so the server's `sleep` must be a real, abortable timer in both live and Fixtures_Mode (see Server).
 - **Fixtures.** The recorded corpus serves Ashcroft v. Iqbal (cluster 145875, opinion 9435339) and Haines v. Kerner (cluster 108432, opinion 108432); the three fabricated citations are explicit 404 entries.
 - **Repository.** `apps/web/tsconfig.json` is composite with DOM libs and `jsx: react-jsx`; the root `vitest.config.ts` already declares a `web` project (`include: test/**/*.test.ts`, node). `.npmrc` sets `reporter=silent`. CI runs `lint`, `typecheck`, `test`, `test:pbt`.
 
@@ -123,7 +123,7 @@ flowchart LR
 | `store.ts`, `history.ts`, `store-runtime.ts`, `persist.ts`, `autosave.ts`, `notices.ts` | `@reveal-codes/engine` | React, `@tiptap/*`, DOM globals, `server/`, `client/` |
 | `pane/layout.ts` | `@reveal-codes/engine` | React, TipTap, `server/` |
 | `editor/offsets.ts`, `editor/slice-text.ts`, `editor/transaction-ops.ts`, `editor/schema.ts` | `@tiptap/core`, `@tiptap/pm/*`, `@reveal-codes/engine` | DOM globals, React, `server/` |
-| `client/*` | `@reveal-codes/engine`, `checkQuote` and types from `@reveal-codes/verifier` | `server/`, `node:*` |
+| `client/*` | `@reveal-codes/engine`, `checkQuote` from `@reveal-codes/verifier/quote`, and types from `@reveal-codes/verifier` (`import type` only) | `@reveal-codes/verifier` at its root for values, `server/`, `node:*` |
 | `server/*` | `@reveal-codes/engine`, `@reveal-codes/verifier`, `node:*`, AI SDK (Tier 2) | React, `@tiptap/*`, `client/`, `components/`, `editor/`, `pane/` |
 | `components/*`, `editor/*` (rest) | everything client-side | `server/` |
 | `app/api/**/route.ts` | `server/*` only | everything else |
@@ -178,6 +178,7 @@ apps/web/
       api.ts                          createApiClient, browserApi                           (170)
       verify-flow.ts                  buildVerifyBody, quotesByCluster, runVerifyFlow       (240)
       verify-summary.ts               summaryNotice                                         (60)
+      divergence.ts                   divergenceWords                                       (50)
       assistant-client.ts             T2  streamDraft                                       (90)
     server/
       deps.ts                         readServerConfig, buildServerDeps, getServerContext   (220)
@@ -403,6 +404,20 @@ export function offsetOfItem(layout: PaneLayout, index: number): number;
 export function statusText(text: string, offset: number): string; // "Doc 1 Pg 1 Ln <line> Pos <col>"
 ```
 
+**Divergence words (Requirements 13.6, 18.11).** One pure function, in `client/divergence.ts` (no React, no DOM, no Verifier import):
+
+```ts
+import type { Document, QuoteRecord } from "@reveal-codes/engine";
+/** Words of `quoteText` from the word containing code unit `prefixLength`, at most 6, joined by single spaces; trailing "…" when more words remain. */
+export function divergenceWords(quoteText: string, prefixLength: number): string;
+/** The QuoteRecord whose [start, end) holds `offset` and whose result is a mismatch, else null. */
+export function mismatchAt(document: Document, offset: number): QuoteRecord | null;
+```
+
+Algorithm: split `quoteText` into words with `/\S+/g`, keeping each match's `index`. The first word is the one whose `[index, index + length)` contains `prefixLength`; when `prefixLength` falls in whitespace between words, or equals the text length, it is the next word starting after it, and when no word starts at or after it, it is the last word. Take that word and up to five more (six in all), join with one space, and append `…` when words remain after the sixth. An empty or whitespace-only `quoteText` returns `""`. `prefixLength` is a code unit index into `quote.text`, the same string `checkQuote` received, so no quote text is sent anywhere. `mismatchAt` scans `document.quotes` for `start <= offset < end` and `result.status === "mismatch"`.
+
+Use sites: the Issues row for a `QUO ✘` renders `Diverges at: ` plus `divergenceWords(quote.text, result.prefixLength)` (18.11); `AppShell` passes `statusOverride ?? statusText(...)` to the Pane and, while the Pane is open and `mismatchAt(document, cursorOffset)` is non-null, composes the status as `statusText(text, cursorOffset) + "  Diverges at: " + divergenceWords(...)` (13.6). The F7 message still takes precedence. Both read the current Document, so an edit that moves the quote changes the words on the next render.
+
 Algorithm (11.1 to 11.4): take `rendering = render(document, "display")`. Walk `document.text` by Offset `o` from 0 to `text.length`; at each `o`, first emit every Code_Item whose `positions` entry has `offset === o` (array order), then, if `o < text.length`, emit the Text_Item for the code point at `o`. A Text_Item's `text` is read from `rendering.text`, not recomputed: between code strings the rendering holds the text characters, and a backslash always begins a two-unit escape, so the item is the backslash plus the next unit when the next character is a backslash, and one code point otherwise. Offsets advance by the unescaped code point length. Code_Items at `o === text.length` follow the last Text_Item. The layout reads every code offset from `positions` only and never parses a token for position. `codeFamily` reads the name between `[` and the first `:` or `]` and maps it per 11.5; `codeMeaning` maps names to words (`CIT ✘` to "Citation not found", `AI:r1` to "Inserted by the assistant, run r1", `OVR:<reason>` to "Override: <reason>" with the retained escapes removed). `itemIndexAtOffset` returns the index of the Text_Item with the largest `offset <= argument`, or the index just after the last Text_Item (the "end position") when the argument is `textLength`. `statusText` counts `\n` before the Offset for the line and code units since the last `\n` for the column (11.7).
 
 ### Pane component: `pane/pane.tsx`
@@ -418,7 +433,7 @@ export type PaneProps = Readonly<{
 export function Pane(props: PaneProps): JSX.Element;
 ```
 
-The Pane renders only while open (nothing in the accessibility tree while hidden, 12.1). It memoises `layoutPane(document)` on the Document. Each line (items between `\n` text items) is a `div` with `content-visibility: auto` so off-screen lines skip paint. Each item carries `data-offset`; one delegated click handler on the container reads the nearest `[data-offset]` (13.3) and otherwise calls `onBackgroundClick` (13.5). The Text_Item at the cursor gets the highlight class, and an empty highlighted block follows the last item when the cursor is at the end (13.1, 13.4); an effect calls `scrollIntoView({ block: "nearest" })` on it (13.2). Text_Items are `aria-hidden`; each Code_Item has `role="img"` and `aria-label` from `codeMeaning` (12.8). The Status_Line shows `statusOverride ?? statusText(document.text, cursorOffset)`. The region has `role="region"` and `aria-label="Reveal Codes"`; it shows no logo and no product name (12.7).
+The Pane renders only while open (nothing in the accessibility tree while hidden, 12.1). It memoises `layoutPane(document)` on the Document. Each line (items between `\n` text items) is a `div` with `content-visibility: auto` so off-screen lines skip paint. Each item carries `data-offset`; one delegated click handler on the container reads the nearest `[data-offset]` (13.3) and otherwise calls `onBackgroundClick` (13.5). The Text_Item at the cursor gets the highlight class, and an empty highlighted block follows the last item when the cursor is at the end (13.1, 13.4); an effect calls `scrollIntoView({ block: "nearest" })` on it (13.2). Text_Items are `aria-hidden`; each Code_Item has `role="img"` and `aria-label` from `codeMeaning` (12.8). The Status_Line shows its `statusOverride` prop, which `AppShell` computes (F7 message, else status text plus the divergence words of a mismatched quote under the cursor). The region has `role="region"` and `aria-label="Reveal Codes"`; it shows no logo and no product name (12.7).
 
 ### Persistence: `persist.ts`, `autosave.ts`
 
@@ -556,7 +571,8 @@ export function jsonResponse(status: number, body: unknown): Response;
 export function notAllowed(allow: string): () => Response;    // 405 with Allow and no-store
 ```
 
-- `readServerConfig`: `mode` is `fixtures` when `REVEAL_CODES_FIXTURES_ONLY === "1"` or `COURTLISTENER_TOKEN` is absent or empty, else `live` (15.2); `token` is non-null only in `live`. In `live`, `buildServerDeps` uses the real `fetch`, `createFileCacheStore({ dir, now })` and the token; in `fixtures` it uses `createFixtureFetch()` and `createMemoryCacheStore({ now })` and no token (15.3, 15.4). `io.sleep` is an abortable `setTimeout` promise whose timer is cleared on abort and `unref`'d. `getServerContext` keeps one `Deps` per process on `globalThis` so dev hot reload does not rebuild the bucket and cache.
+- `readServerConfig`: `mode` is `fixtures` when `REVEAL_CODES_FIXTURES_ONLY === "1"` or `COURTLISTENER_TOKEN` is absent or empty, else `live` (15.2); `token` is non-null only in `live`. In `live`, `buildServerDeps` uses the real `fetch`, `createFileCacheStore({ dir, now })` and the token; in `fixtures` it uses `createFixtureFetch()` and `createMemoryCacheStore({ now })` and no token (15.3, 15.4). `getServerContext` keeps one `Deps` per process on `globalThis` so dev hot reload does not rebuild the bucket and cache.
+- **Real timer in both modes (finding).** The Verifier races every request against `Deps.sleep(15000)` (`REQUEST_TIMEOUT_MS`). A `sleep` that resolves immediately makes the timeout win every race, so every request ends as a timeout and the demo path would report `unchecked` for everything. `buildServerDeps` therefore takes `io.sleep` from `ServerIo` and the production `io.sleep` is a real `setTimeout` promise whose timer is cleared on abort and `unref`'d, used in **both** live and Fixtures_Mode (`createFixtureFetch()` replaces only `fetch`, never `sleep`). Tests of the route handlers use the same real timer (never a manual or instant one).
 - `parseVerifyBody` order: invalid JSON, a top-level property other than `records`, or a `records` that is not an array is `400`; more than 500 records is `413`; then each record must be `kind: "full"` with a string `key` and a `citation.value` whose kind is `reporter`, `parallel` or `database` with the fields `buildLines` reads, otherwise `400`. `handleVerify` reads the body through `readBodyCapped(request, 262_144)` (`413` on overrun), calls `lookup(records, deps)` and responds `200` with `[...map]`.
 - The route files are wrappers (16.7):
 
@@ -585,7 +601,7 @@ export async function GET(_request: Request, ctx: { params: Promise<{ clusterId:
 | `AppShell` | Composition root. Creates the Store, services, Autosave, editor binding; owns `paneOpen`, `cursorOffset`, `mode`, `verifying`, `statusOverride`, dialog state. Registers the `window` keydown listener (capture), the `visibilitychange` and `pagehide` listeners, and runs the mount-time autosave load and mode fetch. |
 | `Toolbar` | `role="toolbar"`: buttons New, Load demo motion, Verify (label "Verifying…" and disabled while running; disabled when `!hasFullRecord`), "Reveal Codes (Alt-F3)" with `aria-pressed`, Export (label `Export` or `Export (n blocking)`, disabled while `n > 0`), `ModeBadge`, then the `role="status"` `aria-live="polite"` Notice area. |
 | `EditorSurface` | `EditorContent` inside the page-sized white surface (Georgia, 12pt, line-height 1.5, max width 8.5in); placeholder overlay "Paste your draft here, or start typing." while the text is empty. |
-| `IssuesList` | `aside`/complementary region. Row: code, text shortened to 80 characters with an ellipsis, severity words, "Go". Blocking rows show "Override…"; overridden rows show "Overridden" and the reason. "No issues." when empty. Fixtures_Mode adds the line "Demo mode checks only the recorded demo citations. Any other citation shows as not found." |
+| `IssuesList` | `aside`/complementary region. Row: code, text shortened to 80 characters with an ellipsis, severity words, "Go"; a `QUO ✘` row also shows "Diverges at: " and `divergenceWords(quote.text, prefixLength)`. Blocking rows show "Override…"; overridden rows show "Overridden" and the reason. "No issues." when empty. Fixtures_Mode adds the line "Demo mode checks only the recorded demo citations. Any other citation shows as not found." |
 | `Modal` | `role="dialog"`, `aria-modal="true"`, `aria-labelledby`; moves focus in on open, cycles Tab inside, closes on Escape, returns focus to the opener. Hand-built: `jsdom` has no `HTMLDialogElement.showModal`. |
 | `OverrideDialog` | Labelled reason field, the statement that the reason will be printed in the certification, "Save override" (disabled while `reason.trim().length < 10`) and "Cancel"; shows the error kind if the Store rejects. |
 | `ConfirmDialog` | Used by New and Load demo motion when the text is non-empty (20.3). |
@@ -743,7 +759,7 @@ Ratios are the WCAG relative-luminance ratio, computed by hand and rounded; the 
 
 ## Next.js specifics
 
-**Bundling workspace packages.** `@reveal-codes/engine` and `@reveal-codes/verifier` publish TypeScript source (`exports: "./src/index.ts"`), so `next.config.ts` sets `transpilePackages: ["@reveal-codes/engine", "@reveal-codes/verifier"]`. The Engine imports siblings as `./document.js`; the files are `.ts`. Webpack resolves this with `resolve.extensionAlias = { ".js": [".ts", ".tsx", ".js"] }`. Turbopack, the default bundler in Next 16, has no extensionAlias equivalent (vercel/next.js issue 82945), and Next 16 refuses to build with a custom `webpack` function under Turbopack, so the scripts are `next dev --webpack` and `next build --webpack` (risk R1).
+**Bundling workspace packages.** `@reveal-codes/engine` and `@reveal-codes/verifier` publish TypeScript source (`exports: "./src/index.ts"`), so `next.config.ts` sets `transpilePackages: ["@reveal-codes/engine", "@reveal-codes/verifier"]`. The Engine imports siblings as `./document.js`; the files are `.ts`. Webpack resolves this with `resolve.extensionAlias = { ".js": [".ts", ".tsx", ".js"] }`. Turbopack, the default bundler in Next 16, has no extensionAlias equivalent (vercel/next.js issue 82945), and Next 16 refuses to build with a custom `webpack` function under Turbopack, so the scripts are `next dev --webpack` and `next build --webpack` (risk R1; see Known limitations L15).
 
 ```ts
 // next.config.ts (shape; no `any` annotation is written)
@@ -752,21 +768,15 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@reveal-codes/engine", "@reveal-codes/verifier"],
   outputFileTracingRoot: path.join(import.meta.dirname, "../.."),
   outputFileTracingIncludes: { "/api/assistant": ["./fixtures/assistant/**"] },   // Tier 2
-  webpack(config, { isServer, webpack }) {
+  webpack(config) {
     config.resolve.extensionAlias = { ".js": [".ts", ".tsx", ".js"] };
-    if (!isServer) {
-      // verifier's entry point re-exports the file cache, which imports node:fs/promises and node:path
-      config.plugins.push(new webpack.NormalModuleReplacementPlugin(/^node:/, (r) => {
-        r.request = r.request.replace(/^node:/, "");
-      }));
-      config.resolve.fallback = { ...config.resolve.fallback, fs: false, "fs/promises": false, path: false };
     }
     return config;
   },
 };
 ```
 
-The Verifier's fixture JSON is imported with `with { type: "json" }` and ends up in the client bundle through the same entry point; it is a few kilobytes and a smoke test confirms webpack accepts import attributes (risk R2).
+The client bundle imports `checkQuote` from `@reveal-codes/verifier/quote`, which reaches only `quote.ts`, `normalise.ts`, `segments.ts`, `kmp.ts` and `track.ts`: no `node:` builtin, no JSON fixtures and no file cache. The root entry (with the file cache and the fixture JSON imported with `with { type: "json" }`) is imported by server modules only; the boundary tests in Testing Strategy enforce this (Requirement 2.9). The `webpack` function holds only the `extensionAlias` entry.
 
 **Routes.** Every route file exports `runtime = "nodejs"` (the file cache and `node:crypto` need Node) and `dynamic = "force-dynamic"`. In Next 16 the dynamic segment's `params` is a `Promise`, so the opinion route awaits it. Route handlers do no work beyond calling `server/*`.
 
@@ -1075,14 +1085,14 @@ describe("Property 4: pane layout _Requirements: 11.1, 11.2, 11.3, 11.4, 11.6, 1
 | `transaction-ops.test.ts` | 5.2, 5.5, 5.6: four classification cases; `path === "mapped"` for typing, delete, Enter, Backspace, paste; hand-built `ReplaceAroundStep`; surrogate pair at a fallback cut. |
 | `provenance-plugin.test.ts`, `clipboard.test.ts` | 7.1 to 7.7: `provenanceFor` for each transaction kind; paste newline normalisation (`\r\n`, `\r`, `\n`); fake `ClipboardEvent` and `DragEvent` with and without `text/plain`; injected clock. |
 | `shortcuts.test.ts` | 8.1, 10.5, 14.1, 14.3, 14.5: `classifyKey` table including the keys that must be `null`. |
-| `layout.test.ts` | 11.5, 11.7: every code name to its family; run ids and reasons containing colons; `statusText` with newlines. |
+| `layout.test.ts`, `divergence.test.ts` | 11.5, 11.7: every code name to its family; run ids and reasons containing colons; `statusText` with newlines. 13.6, 18.11: `divergenceWords` with `prefixLength` 0, inside a word, on whitespace, at the text length, more than six words remaining (ellipsis), exactly six (none), empty text; `mismatchAt` inside and outside `[start, end)` and for non-mismatch results. |
 | `persist.test.ts`, `autosave.test.ts` | 9.1 to 9.8: debounce, flush, throwing `setItem`, malformed stored values, and the persistence round trip over four fixed Documents (fresh, edited, verified with an override, demo after Verify). |
 | `api.test.ts`, `verify-flow.test.ts`, `verify-summary.test.ts` | 17.1, 17.4, 17.5, 17.7, 17.8, 17.10 to 17.13: verified-attachment selection including a short-form attachment; sequential opinion requests; epoch discard by dispatching `replace` mid-flow; exact Notice texts. |
-| `deps.test.ts` | 15.1 to 15.5: `readServerConfig` table; live versus fixtures deps with a fake `io`; a sentinel token never appears in any route response or error. |
+| `deps.test.ts` | 15.1 to 15.5: `readServerConfig` table; live versus fixtures deps with a fake `io`; a sentinel token never appears in any route response or error. **Timer test:** for both modes, `buildServerDeps(config, realIo)` is built and `deps.sleep(15000)` is raced against a 50 ms real timer; the test fails if `sleep` resolves first (an immediately resolving sleep), and a second case aborts the `sleep` and asserts the timer is cleared. |
 | `verify-route.test.ts`, `opinion-route.test.ts`, `mode-route.test.ts` | 16.1 to 16.8: bad-body table, 413 cases, id table, 405 with headers, `unchecked` passthrough, no logging (console spy). |
 | `copy-demo.test.ts` | 20.1: byte equality with temporary directories; missing source exits non-zero (one spawned process). |
 | `demo-path.test.tsx` | 21.1 to 21.5, 20.2, 20.7: Load demo motion, Verify through the route-backed `ApiClient`, the Issues list, and the Export label: 7 blocking, then 4, then 3 after one override; all five verification results and both quote results; elapsed time under 10 000 ms. |
-| `toolbar.test.tsx`, `editor-surface.test.tsx`, `pane.test.tsx`, `issues-list.test.tsx`, `export-dialog.test.tsx`, `app-shell.test.tsx` | 6.2 to 6.7, 10.1, 10.2, 10.6, 10.7, 10.17, 12.1, 12.6 to 12.9, 13.1 to 13.5, 14.2, 15.7, 15.8, 17.13, 18.1 to 18.10, 19.1 to 19.3, 19.5, 20.3 to 20.6, 9.3: one rendering test per component, plus integration through `AppShell` for Alt-F3, F7 with a manual timer, autosave load, New and Load confirmations. |
+| `toolbar.test.tsx`, `editor-surface.test.tsx`, `pane.test.tsx`, `issues-list.test.tsx`, `export-dialog.test.tsx`, `app-shell.test.tsx` | 6.2 to 6.7, 10.1, 10.2, 10.6, 10.7, 10.17, 12.1, 12.6 to 12.9, 13.1 to 13.6, 14.2, 15.7, 15.8, 17.13, 18.1 to 18.11, 19.1 to 19.3, 19.5, 20.3 to 20.6, 9.3: one rendering test per component, plus integration through `AppShell` for Alt-F3, F7 with a manual timer, autosave load, New and Load confirmations. |
 | `assistant-panel.test.tsx`, `llm.test.ts`, `assistant-route.test.ts` (Tier 2) | 10.8, 22.1 to 22.10, 23.1 to 23.9, 24.1, 24.2, 24.4: provider selection, hash lookup, chunking at a surrogate pair, context truncation, 400 and 502, run id after an undone insertion, Stop. |
 
 ### Static tests (`test/static/`)
@@ -1095,7 +1105,7 @@ describe("Property 4: pane layout _Requirements: 11.1, 11.2, 11.3, 11.4, 11.6, 1
 | `package-json.test.ts` | Exact pins and workspace protocol (1.1 to 1.4), no UI libraries (10.9), `predev` and `prebuild` (1.6), `--webpack` scripts. |
 | `css-rules.test.ts` | UI_Stylesheets: palette, accent placement, banned properties, three families, weights, 13px, button and focus rules (10.3, 10.4, 10.9, 10.11 to 10.15); Pane stylesheet: Palette-only colours, the code-family table, no font-smoothing properties (12.2 to 12.5). |
 | `copy-rules.test.ts` | String, template and JSX text scan for `!`, "Oops", "Let's" (10.16) and the emoji and icon ranges (10.10). |
-| `boundaries.test.ts` | The import-boundary table; route files import only `server/` (16.7). |
+| `boundaries.test.ts` | The import-boundary table; route files import only `server/` (16.7); no browser-bundled module imports `@reveal-codes/verifier` at its root for a value or any `node:*` specifier (2.9); `client/` imports `checkQuote` only from `@reveal-codes/verifier/quote`. `package-json.test.ts` also asserts the Verifier `exports` object. |
 | `inventory.test.ts` | Exactly five properties, one `fc.assert` each, `// Property N`, `_Requirements: x.y_`, the two ProseMirror property files without `EditorView` (25.1 to 25.5). |
 | `docs.test.ts` | README section, `.env.example` entries and the removed `LLM_PROVIDER`, `KIRO_USAGE.md` rows, `BUILD_LOG.md` entry, `structure.md` layout (26.1 to 26.6); the hook file (2.1, 2.2); the root `vitest.config.ts` `web` entry (1.5). |
 
@@ -1108,7 +1118,7 @@ Criteria 1.1 to 1.6, 2.x, 3.x, 9.x, 10.x, 12.x to 16.x, 17.1, 17.4, 17.7 to 17.1
 - `README.md` gains "What leaves your machine" (26.1); `.env.example` is edited (26.2, 26.3); `docs/KIRO_USAGE.md` gains rows for the `web-tests-on-save` hook and this spec (26.4); `BUILD_LOG.md` gets an `editor-app` entry (26.5); `.kiro/steering/structure.md` is rewritten to the `src/` layout above (26.6, group 9).
 - `.kiro/hooks/web-tests-on-save.json` copies `verifier-tests-on-save.json` with the matcher `apps/web/(src|test)/.*\.tsx?$` and the `web` project (2.1).
 - Checkpoint 7 records that `pnpm dev` served the page and that the hand walk (load demo motion, Alt-F3, Verify, red codes, override, label change) was done once (21.6).
-- Repository files outside `apps/web` that this spec edits, beyond the list in the requirements' scope: root `vitest.config.ts` (the `web` entry and the `project` helper), `.gitignore` (`apps/web/public/demo-motion.txt`), and `apps/web/tsconfig.json` gains `references` to `../../packages/engine` and `../../packages/verifier`, as the Verifier's tsconfig does, so `tsc -b` accepts the test files' imports of Engine arbitraries by relative path.
+- Repository files outside `apps/web` that this spec edits, beyond the list in the requirements' scope: root `vitest.config.ts` (the `web` entry and the `project` helper), `.gitignore` (`apps/web/public/demo-motion.txt`), `apps/web/tsconfig.json` (`references` to `../../packages/engine` and `../../packages/verifier`, as the Verifier's tsconfig does, so `tsc -b` accepts the test files' imports of Engine arbitraries by relative path), and `packages/verifier/package.json` (`exports` object with `"."` and `"./quote"`; metadata only).
 
 ## Traceability
 
@@ -1169,34 +1179,33 @@ Standing rule (carried over from the provenance-engine and citation-verifier spe
 - L12. A paste, drop, or assistant text that contains an unpaired surrogate is rejected by the Engine (`split_surrogate`) and leaves the Document unchanged with a Notice.
 - L13. The Verify route has no per-client throttle; the shared Token_Bucket in the server's Verifier deps limits aggregate use. A public deployment should run in Fixtures_Mode.
 - L14. The Assistant_Panel sends only the current paragraph, so the model cannot see the rest of the filing, and markdown in a reply is inserted as plain text. (Tier 2)
-- L15. Design record: the Engine stores `prefixLength` for a `QUO ✘`, but no editor-app criterion shows it, and the display form of the Pane omits payloads. Product principle 6 promises that a `QUO ✘` is "shown with where the quote diverges"; that display is left to a later spec (certification or a follow-up).
+- L15. The app runs on webpack (`next dev --webpack`, `next build --webpack`) because Turbopack's resolution of the Engine's `.js`-specifier-to-`.ts` imports in Next 16.4.5 was not confirmed (cold starts and rebuilds are slower than the Next 16 default; risk R1).
 - L16. Design record: the Pane renders one element per code point of the text. Lines use `content-visibility: auto` to skip off-screen paint, but a filing of well over 50 000 characters makes the open Pane slow to build; the Editor is unaffected while the Pane is closed.
 - L17. Design record: spellcheck, autocorrect and dictation replacements reach ProseMirror as ordinary DOM edits and are indistinguishable from typing, so they are recorded as `HUM`. Text a browser extension writes into the editor is also `HUM`.
 - L18. Design record: an edit made while a Verify is running can re-key a citation; the result for the old key is skipped and counted (Requirement 3.6) and the author presses Verify again.
-- L19. Design record: the page runs on webpack, not Turbopack, so cold starts and rebuilds are slower than the Next 16 default (risk R1).
-- L20. Design record: the toolbar has `role="toolbar"` as Requirement 10.1 requires, but moves between buttons with Tab, not arrow keys.
-- L21. Design record: the `Id.` and party short forms show the result of their target citation in the Pane (`[CIT ✘]` for `Id. at 221`) but are not Issues of their own, so they are never overridden separately.
+- L19. Design record: the toolbar has `role="toolbar"` as Requirement 10.1 requires, but moves between buttons with Tab, not arrow keys.
+- L20. Design record: the `Id.` and party short forms show the result of their target citation in the Pane (`[CIT ✘]` for `Id. at 221`) but are not Issues of their own, so they are never overridden separately.
 
 ## Notes for the user
 
 Assumptions made while writing this design. None changes the Engine or the Verifier.
 
 - **Bundler.** Webpack through `--webpack`, because the Engine's `.js` import specifiers need `extensionAlias` and Turbopack has none that I could confirm in 16.4.5 (risk R1).
-- **Browser bundle and `node:` builtins.** The Verifier's single entry point re-exports the file cache, so the client webpack config maps `node:fs/promises` and `node:path` to empty modules. The alternative is an `exports` map in the Verifier's `package.json` with a browser-safe subpath for `checkQuote`; that edits the Verifier, which this spec does not, so I did not choose it.
+- **Browser bundle and `node:` builtins.** The Verifier root entry re-exports the file cache (`node:fs/promises`, `node:path`). Instead of aliasing builtins in webpack, `packages/verifier/package.json` gains a `"./quote"` export for `src/quote.ts`; I checked that file and its transitive imports for `node:` builtins (none). This edits package metadata only, no Verifier source (Requirement 1.8, 1.9).
 - **Versions.** TipTap packages at 3.33.0, `@testing-library/react` 16.3.3, `@testing-library/dom` 10.4.2, `jsdom` 28.1.0 (31.0.0 is newer but needs Node 22.22.2 or later, above the repository floor of 22.12.0), and for Tier 2 `ai` 7.0.165, `@ai-sdk/amazon-bedrock` 5.0.135, `@ai-sdk/anthropic` 4.0.99, `zod` 4.6.7 (a required peer). `fast-check` 4.10.2 is added to the web devDependencies.
 - **Initial Export count.** After loading the demo motion and before Verify, Export reads "Export (7 blocking)" (five unchecked citations and two unchecked quotes), measured on the real fixtures. Requirement 21 states only the 4 and 3.
 - **Origin of unflagged edits.** An edit that is not a paste, drop or Reconcile is `HUM`, even though product principle 1 says unknowable text is `PST`; Requirement 7.2 lists typing, IME, Enter, Backspace, Delete and cut as `HUM`, and ProseMirror cannot tell typing from autocorrect (L17). An unflagged paste or drop transaction is `PST`.
-- **Fallback with equal text.** Requirement 5.5 says the fallback returns one `replace`. When the texts before and after are equal, I return no operation instead, because an empty replace would add an empty Undo_Group.
+- **Fallback with equal text.** Requirement 5.5 now states that the fallback returns no operation when the text before equals the text after, because an empty replace would add an empty Undo_Group; the design follows it.
 - **Verify route ordering.** Structural faults (invalid JSON, extra property, non-array) are `400`; more than 500 records is `413`; then each record is checked and a bad one is `400`. The route also checks the fields of `citation.value` that the Verifier reads, which is stricter than Requirement 16.2, so a malformed record cannot make `lookup` throw.
 - **Interface shapes.** `layoutPane` returns `{ items, textLength }` rather than a bare list, because `itemIndexAtOffset(layout, offset)` needs the text length for the end position. `reduce` returns an `ActionResult` and a small `createStore` wraps it, because the Verify flow and the Editor need the skipped count, the error and the caret from a dispatch.
 - **Notices.** A successful edit, undo, redo or replace clears the Notice; the Verify flow and the other actions set it. The live-mode badge reads "Live CourtListener lookups" (Requirement 15 specifies only the Fixtures and unreachable texts).
 - **Assistant disclosure button (Tier 2).** It sits at the top of the left column; when collapsed the column is only wide enough for the button.
-- **Setup edits outside `apps/web`.** Root `vitest.config.ts` (the `web` entry), `.gitignore` (the generated demo copy), and `apps/web/tsconfig.json` (`references`).
+- **Setup edits outside `apps/web`.** Root `vitest.config.ts` (the `web` entry), `.gitignore` (the generated demo copy), `apps/web/tsconfig.json` (`references`), and `packages/verifier/package.json` (`exports`, adds `./quote`).
 
 ## Open Risks
 
 - **R1. Turbopack and `.js` specifiers.** If a smoke build shows Turbopack in 16.4.5 resolves `.js` to `.ts`, the `webpack` function and the `--webpack` flags can go. Until then webpack is the contract. Task group 1 builds a page that imports the Engine and the Verifier before anything else is written.
-- **R2. Client bundle.** The `node:` replacement plugin, the `fs` fallbacks and webpack's handling of `with { type: "json" }` are unverified. A failure shows at the first `next build`, not at runtime; the fallback is the Verifier `exports` map in the Notes.
+- **R2. Client bundle.** Low. The browser imports only `@reveal-codes/verifier/quote`, whose import closure was checked to be free of `node:` builtins; a regression would be caught by the boundary test (Requirement 2.9) and by the first `next build`.
 - **R3. TipTap, ProseMirror and AI SDK behaviour is unverified here.** None is installed. The first task installs the pins and runs a smoke test of API notes 1 to 12: `getSchema` in Node, `registerPlugin`, `handlePaste` and `handleDrop` ordering against TipTap's built-ins, the transaction metadata of paste, drop and cut, `Slice` open depths for `insertText` and `split`, and `useEditor` with `immediatelyRender: false`. The Tier 2 shapes (`streamText(...).textStream`, `createAmazonBedrock`, `createAnthropic`) are likewise checked before group 8.
 - **R4. `pre*` scripts.** `predev` and `prebuild` depend on pnpm running `pre` scripts, which pnpm 10 does by default; a test asserts the scripts exist and the checkpoint walk confirms `public/demo-motion.txt` appears. If it does not, the scripts become explicit `&&` chains.
 - **R5. ProseMirror under jsdom.** Rendering tests need the stubs in `test/support/dom-shims.ts`; a missing stub shows as a thrown error in a rendering test, not in the properties, which use no view.
