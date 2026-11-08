@@ -100,7 +100,7 @@ Deviations from the design's file layout, decided while planning:
     - Example tests `bucket.test.ts`: refill keeps partial ms (999 then 1) and caps at 60; backwards clock step; shortfall sleep `5 * 1000 - 400 = 4600`; the window counterexample (60 lines at t = 0, then 30 lines at t = 30 000 sleeps until t = 60 000); retry deducts tokens again. `gate.test.ts`: two concurrent calls on one `Deps` dispatch in order and never interleave.
     - Known limitation to record if met: L7 (clock steps).
     - _Requirements: 7.1, 7.3, 7.4, 7.12, 7.13_
-  - [-] 4.2 Transport: timeout race, auth rule, retries
+  - [x] 4.2 Transport: timeout race, auth rule, retries
     - File `src/transport.ts` (`requestOnce` racing `Deps.fetch` against `Deps.sleep(15000, signal)` and aborting the loser, `redirect: "error"`, token attached only when the URL starts with `{baseUrl}/`; `HttpOutcome` carries no request header; `withRetries` at most three attempts, retry only on 429 and 5xx, `retryDelayMs` = larger of `Retry-After` and `wait_until` interval, 1 000 ms when neither, capped at 30 000 ms, `before()` called again on each retry).
     - Example tests `transport.test.ts`: reject, hang (aborted at 15 s), 500, 404 not retried, bad JSON, redirect error; `Retry-After` integer, HTTP date and garbage; `wait_until` and `wait_util`; exhausted chunk keeps the last `waitUntil`; the recorded `http/throttle-429.json` shape replayed three times once task 6.1 lands (until then use an in-test body); token never appears in an outcome or thrown value.
     - Known limitation to record if met: L8 (opinion requests unmetered).
