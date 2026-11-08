@@ -11,5 +11,6 @@ export type {
   StatementQuote,
   StatementTool,
 } from "./types.js";
+export { buildStatement } from "./statement.js";
 export { ellipsize } from "./text.js";
 export { isInstant, localDate } from "./time.js";
