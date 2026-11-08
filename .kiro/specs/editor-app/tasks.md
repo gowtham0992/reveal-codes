@@ -118,7 +118,7 @@ Conventions that apply to every task:
     - Edit `apps/web/src/components/app-shell.tsx` (and `toolbar.tsx`): one capturing `window` `keydown` listener using `classifyKey` for `togglePane` (with `preventDefault`, ignored while a modal is open) and `saveStub`; toolbar button toggles the Pane with `aria-pressed`; F7 shows `Save document? Yes (No)` in the Status_Line for 2 000 ms through the injected timer and restarts the interval on a second press; F7 is left to the browser while the Pane is closed; `onItemClick` sets the Editor selection to `offsetToPos` and focuses the Editor, `onBackgroundClick` moves to the end; the status text is `statusOverride ?? statusText(...)` plus, while the head lies in a mismatched quote, two spaces and `Diverges at: ` and `divergenceWords(...)` computed from the current Document (F7 message takes precedence).
     - Example tests `app-shell.test.tsx` additions (jsdom, manual timer): Alt-F3 opens and closes the Pane from the Editor, from a toolbar button and from the body, and is ignored with a modal open; the toolbar button state; F7 message, restart and restoration; F7 does nothing while closed; clicking a Pane item moves the Editor selection; a Document with a mismatched quote under the cursor shows the divergence words in the Status_Line and they change when the quote text is edited.
     - _Requirements: 6.7, 13.3, 13.5, 13.6, 14.1, 14.2, 14.3, 14.4, 14.5_
-  - [~] 5.5 Checkpoint - editor and pane
+  - [x] 5.5 Checkpoint - editor and pane
     - Run `pnpm lint`, `pnpm typecheck` and `pnpm vitest run --project web`; run `FC_NUM_RUNS=500 pnpm vitest run --project web properties.test`; fix failures. Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 6. Server, routes, and Verify flow
