@@ -15,7 +15,7 @@ export function classifyKey(e: KeyLike, ctx: KeyContext): ShortcutAction | null 
     return e.altKey && !command && !ctx.modalOpen ? "togglePane" : null;
   }
   if (e.key === "F7") {
-    return ctx.paneOpen ? "saveStub" : null;
+    return ctx.paneOpen && !command && !e.altKey ? "saveStub" : null;
   }
   if ((e.key === "z" || e.key === "Z") && command && !e.altKey && ctx.editorFocused) {
     return e.shiftKey ? "redo" : "undo";

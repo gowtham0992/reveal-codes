@@ -12,6 +12,8 @@ import type { Store } from "../store-runtime";
 import { EditorSurface } from "./editor-surface";
 import { IssuesRegion } from "./issues-region";
 import { Toolbar } from "./toolbar";
+import { composeStatus, usePaneControl } from "./use-pane";
+import { Pane } from "../pane/pane";
 
 export type AppShellProps = Readonly<{ services?: AppServices }>;
 
@@ -76,7 +78,7 @@ function useStoreSlice<T>(store: Store, select: (state: ReturnType<Store["getSta
   );
 }
 
-export function AppShell({ services }: AppShellProps) {
+function useShellParts(services: AppServices | undefined) {
   const [svc] = useState<AppServices>(() => services ?? defaultServices());
   const [store] = useState(() => createStore(svc.now));
   const [autosave] = useState(() =>
@@ -89,18 +91,36 @@ export function AppShell({ services }: AppShellProps) {
       },
     }),
   );
-  const binding = useEditorBinding({ store, now: svc.now, onCaret: noCaret });
+  return { svc, store, autosave };
+}
+
+export function AppShell({ services }: AppShellProps) {
+  const { svc, store, autosave } = useShellParts(services);
+  const [cursor, setCursor] = useState(0);
+  const binding = useEditorBinding({ store, now: svc.now, onCaret: setCursor });
+  const paneControl = usePaneControl(svc);
   useAutosave(store, svc, autosave);
   const notice = useStoreSlice(store, (s) => s.notice);
-  const empty = useStoreSlice(store, (s) => s.document.text.length === 0);
-  // Pane region (5.3, 5.4) and the cursor Offset state land with the Pane.
+  const doc = useStoreSlice(store, (s) => s.document);
   return (
-    <div className="app">
-      <Toolbar notice={notice} paneOpen={false} verifyDisabled={true} exportDisabled={true} />
-      <EditorSurface editor={binding.editor} empty={empty} />
+    <div className="app" data-pane={paneControl.open ? "open" : undefined}>
+      <Toolbar
+        notice={notice}
+        paneOpen={paneControl.open}
+        verifyDisabled={true}
+        exportDisabled={true}
+        onTogglePane={paneControl.toggle}
+      />
+      <EditorSurface editor={binding.editor} empty={doc.text.length === 0} />
       <IssuesRegion />
+      <Pane
+        open={paneControl.open}
+        document={doc}
+        cursorOffset={cursor}
+        statusOverride={composeStatus(doc, cursor, paneControl.saveMessage)}
+        onItemClick={binding.focusAt}
+        onBackgroundClick={binding.focusEnd}
+      />
     </div>
   );
 }
-
-function noCaret(): void {}
