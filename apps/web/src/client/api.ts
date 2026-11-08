@@ -1,4 +1,5 @@
 import type { CitationRecord, IssueKey, Result, VerificationResult } from "@reveal-codes/engine";
+import { streamDraft } from "./assistant-client";
 
 export type ApiError =
   | Readonly<{ kind: "network" }>
@@ -6,7 +7,11 @@ export type ApiError =
   | Readonly<{ kind: "shape" }>;
 export type FullRecord = Extract<CitationRecord, { kind: "full" }>;
 export type VerifyPairs = readonly (readonly [IssueKey, VerificationResult])[];
-export type ModeInfo = Readonly<{ mode: "fixtures" | "live" }>;
+export type AssistantInfo = Readonly<{
+  provider: "bedrock" | "anthropic" | "fixture";
+  modelId: string | null;
+}>;
+export type ModeInfo = Readonly<{ mode: "fixtures" | "live"; assistant?: AssistantInfo }>;
 export type FetchFn = (
   input: string,
   init?: Readonly<{
@@ -25,6 +30,13 @@ export type ApiClient = Readonly<{
   opinion(clusterId: string, signal?: AbortSignal): Promise<Result<string | null, ApiError>>;
   mode(): Promise<Result<ModeInfo, ApiError>>;
   demoMotion(): Promise<Result<string, ApiError>>;
+  /** Tier 2. Calls `onChunk` with each decoded piece as it arrives; resolves when the stream ends. */
+  draft(
+    prompt: string,
+    context: string,
+    onChunk: (text: string) => void,
+    signal?: AbortSignal,
+  ): Promise<Result<void, ApiError>>;
 }>;
 
 type Init = NonNullable<Parameters<FetchFn>[1]>;
@@ -75,11 +87,21 @@ function toOpinion(body: unknown): Result<string | null, ApiError> {
   return { ok: false, error: { kind: "shape" } };
 }
 
+function toAssistant(value: unknown): AssistantInfo | null {
+  if (!isObject(value)) return null;
+  const { provider, modelId } = value;
+  const known = provider === "bedrock" || provider === "anthropic" || provider === "fixture";
+  if (!known || (modelId !== null && typeof modelId !== "string")) return null;
+  return { provider, modelId };
+}
+
+/** A missing or malformed `assistant` field is dropped, not an error: Tier 1 never needs it. */
 function toMode(body: unknown): Result<ModeInfo, ApiError> {
   if (!isObject(body)) return { ok: false, error: { kind: "shape" } };
   const mode = body["mode"];
-  if (mode === "fixtures" || mode === "live") return { ok: true, value: { mode } };
-  return { ok: false, error: { kind: "shape" } };
+  if (mode !== "fixtures" && mode !== "live") return { ok: false, error: { kind: "shape" } };
+  const assistant = toAssistant(body["assistant"]);
+  return { ok: true, value: assistant === null ? { mode } : { mode, assistant } };
 }
 
 /** Turns a rejection into a value so callers branch on it instead of catching. */
@@ -148,6 +170,8 @@ export function createApiClient(fetchFn: FetchFn): ApiClient {
       ),
     mode: () => request(fetchFn, "/api/mode", { method: "GET" }, jsonReader(toMode)),
     demoMotion: () => request(fetchFn, "/demo-motion.txt", { method: "GET" }, readText),
+    draft: (prompt, context, onChunk, signal) =>
+      streamDraft(fetchFn, prompt, context, onChunk, signal),
   };
 }
 

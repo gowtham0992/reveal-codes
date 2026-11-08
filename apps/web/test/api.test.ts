@@ -64,6 +64,17 @@ describe("Api client _Requirements: 17.1, 17.2_", () => {
     expect(await api.mode()).toEqual({ ok: false, error: { kind: "status", status: 404 } });
     const motion = await api.demoMotion();
     expect(motion.ok && motion.value).toContain("Iqbal");
+    const withAssistant = await createApiClient(() =>
+      json({ mode: "live", assistant: { provider: "bedrock", modelId: "m" } }),
+    ).mode();
+    expect(withAssistant).toEqual({
+      ok: true,
+      value: { mode: "live", assistant: { provider: "bedrock", modelId: "m" } },
+    });
+    const malformed = await createApiClient(() =>
+      json({ mode: "live", assistant: { provider: "other", modelId: 3 } }),
+    ).mode();
+    expect(malformed).toEqual({ ok: true, value: { mode: "live" } });
     const mode = await createApiClient(() => json({ mode: "fixtures" })).mode();
     expect(mode).toEqual({ ok: true, value: { mode: "fixtures" } });
   });

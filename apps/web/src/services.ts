@@ -9,6 +9,8 @@ function lazyApi(): ApiClient {
     opinion: (clusterId, signal) => browserApi().opinion(clusterId, signal),
     mode: () => browserApi().mode(),
     demoMotion: () => browserApi().demoMotion(),
+    draft: (prompt, context, onChunk, signal) =>
+      browserApi().draft(prompt, context, onChunk, signal),
   };
 }
 
