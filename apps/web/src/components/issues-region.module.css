@@ -1,0 +1,12 @@
+.issues {
+  grid-column: 2;
+  overflow: auto;
+  padding: 8px;
+  background: var(--paper);
+}
+
+.heading {
+  margin: 0 0 8px;
+  font-size: var(--size-ui);
+  font-weight: 700;
+}

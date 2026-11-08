@@ -16,6 +16,7 @@ import {
   lookup,
 } from "@reveal-codes/verifier";
 import type { Deps } from "@reveal-codes/verifier";
+import { quotesByCluster } from "../../src/client/verify-flow";
 
 export const ISO = "2026-11-02T12:00:00.000Z";
 
@@ -83,14 +84,15 @@ function fixtureDeps(): Deps {
 
 async function applyQuoteChecks(start: Document, deps: Deps): Promise<Document> {
   let doc = start;
-  for (const q of start.quotes) {
-    const owner = start.citations.find((c) => c.citation.start === q.quote.citationStart);
-    const cluster =
-      owner?.kind === "full" && owner.result.status === "verified" ? owner.result.clusterId : null;
-    const opinion = cluster === null ? null : await fetchOpinionText(cluster, deps);
+  // Owners resolve through Short_Form links, as the Verify flow does.
+  for (const [cluster, keys] of quotesByCluster(start)) {
+    const opinion = await fetchOpinionText(cluster, deps);
     if (opinion === null) continue;
-    const text = q.quote.text.replace(/^["\u201c]|["\u201d]$/g, "");
-    doc = must(setQuoteCheck(doc, q.key, checkQuote(opinion, text)));
+    for (const key of keys) {
+      const quote = start.quotes.find((q) => q.key === key);
+      if (quote === undefined) continue;
+      doc = must(setQuoteCheck(doc, key, checkQuote(opinion, quote.quote.text)));
+    }
   }
   return doc;
 }

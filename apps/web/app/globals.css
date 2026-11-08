@@ -1,0 +1,84 @@
+:root {
+  color-scheme: light;
+  --paper: #ffffff;
+  --ink: #111111;
+  --rule: #b0b0b0;
+  --ui-bg: #ececec;
+  --accent: #1f3a8a;
+  --font-ui: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-editor: Georgia, "Times New Roman", serif;
+  --font-pane: ui-monospace, Menlo, Consolas, monospace;
+  --size-ui: 13px;
+  --size-editor: 12pt;
+  --size-pane: 14px;
+  --line-editor: 1.5;
+  --page-max: 8.5in;
+  --toolbar-h: 32px;
+  --left-w: 260px;
+  --right-w: 300px;
+  --pane-h: 40vh;
+  --button-pad: 4px 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--ui-bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--size-ui);
+  font-weight: 400;
+}
+
+a {
+  color: var(--accent);
+}
+
+button {
+  appearance: none;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 400;
+  margin: 0;
+  padding: var(--button-pad);
+}
+
+button:hover:not(:disabled) {
+  background: var(--ui-bg);
+}
+
+button:disabled {
+  border-color: var(--rule);
+  color: var(--rule);
+  cursor: default;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+/* Fixed grid: toolbar, then main and Issues. The left column is added with the assistant. */
+.app {
+  display: grid;
+  grid-template-rows: var(--toolbar-h) minmax(0, 1fr) auto;
+  grid-template-columns: [main] minmax(0, 1fr) [issues] var(--right-w);
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* The Pane row takes its height while the Pane is open. */
+.app[data-pane="open"] {
+  grid-template-rows: var(--toolbar-h) minmax(0, 1fr) var(--pane-h);
+}

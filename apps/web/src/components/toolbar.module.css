@@ -1,0 +1,22 @@
+.toolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  background: var(--ui-bg);
+  border-bottom: 1px solid var(--rule);
+}
+
+.badge {
+  border-left: 1px solid var(--rule);
+  padding-left: 8px;
+}
+
+.notice {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

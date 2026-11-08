@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
-import { apply } from "@reveal-codes/engine";
+import { apply, createDocument } from "@reveal-codes/engine";
 import type { CallerOperation, Document } from "@reveal-codes/engine";
-import { arbCreatedDocument } from "../../../packages/engine/src/testing/arb-document";
+import { arbCreatedDocument, arbDocument } from "../../../packages/engine/src/testing/arb-document";
 import { arbBoundary, arbOpSequence } from "../../../packages/engine/src/testing/arb-ops";
 import { arbText, arbTimestamp } from "../../../packages/engine/src/testing/arb-text";
 import { docFromText } from "../src/editor/offsets";
@@ -147,4 +147,19 @@ export const arbHistoryPlan: fc.Arbitrary<HistoryPlan> = arbCreatedDocument.chai
       ),
     ),
   ),
+);
+
+/** Property 4 branch: a fresh Document over text built from the characters the Codes syntax escapes. */
+const arbEscapeHeavyDocument: fc.Arbitrary<Document> = fc
+  .array(fc.constantFrom("[", "]", "\\", "a", " ", "\n", "😀"), { maxLength: 30 })
+  .map((chars) => {
+    const created = createDocument(chars.join(""), "2024-01-01T00:00:00.000Z");
+    if (!created.ok) throw new Error(`createDocument failed: ${created.error.kind}`);
+    return created.value;
+  });
+
+/** Property 4 input: the Engine's `arbDocument` (weight 3) and escape-heavy fresh Documents (weight 1). */
+export const arbLayoutDocument: fc.Arbitrary<Document> = fc.oneof(
+  { arbitrary: arbDocument, weight: 3 },
+  { arbitrary: arbEscapeHeavyDocument, weight: 1 },
 );

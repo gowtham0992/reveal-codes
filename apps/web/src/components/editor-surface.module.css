@@ -1,0 +1,44 @@
+.main {
+  grid-column: 1;
+  overflow: auto;
+  padding: 16px;
+  background: var(--ui-bg);
+  border-right: 1px solid var(--rule);
+}
+
+.page {
+  position: relative;
+  max-width: var(--page-max);
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 48px 64px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  font-family: var(--font-editor);
+  font-size: var(--size-editor);
+  line-height: var(--line-editor);
+}
+
+.content {
+  min-height: 100%;
+}
+
+.content :global(.ProseMirror) {
+  min-height: 24em;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.content :global(.ProseMirror) p {
+  margin: 0;
+}
+
+.placeholder {
+  position: absolute;
+  top: 48px;
+  left: 64px;
+  right: 64px;
+  color: var(--rule);
+  pointer-events: none;
+}

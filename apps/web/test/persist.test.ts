@@ -81,6 +81,7 @@ describe("round trip _Requirements: 9.8_", () => {
     expect(statuses).toContain("verified");
     expect(statuses).toContain("not_found");
     expect(doc.quotes.map((q) => q.result.status)).toContain("match");
+    expect(doc.quotes.map((q) => q.result.status)).toContain("mismatch");
     expect(roundTrip(doc).document).toEqual(doc);
   });
 });
