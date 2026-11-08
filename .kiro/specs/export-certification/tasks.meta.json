@@ -23,6 +23,16 @@
         "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
         "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
         "timestamp": 1794154512625
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154614813
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154687259
       }
     ],
     "1.3 Save hook `export-tests-on-save`": [
@@ -30,6 +40,16 @@
         "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
         "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
         "timestamp": 1794154512647
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154614874
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154687301
       }
     ],
     "1.4 Demo_Document fixture builder": [
@@ -37,6 +57,16 @@
         "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
         "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
         "timestamp": 1794154512669
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154614930
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154687357
       }
     ],
     "2.1 Types and small helpers": [
@@ -177,6 +207,13 @@
         "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
         "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
         "timestamp": 1794154513131
+      }
+    ],
+    "1. Package scaffolding, hook, demo fixture, and webpack probe": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154687382
       }
     ]
   }

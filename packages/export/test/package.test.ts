@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
@@ -60,5 +60,58 @@ describe("root vitest.config.ts _Requirements: 10.2_", () => {
     expect(config).toContain('const EXPORT_TZ = "America/Los_Angeles"');
     expect(config).toContain("process.env.TZ = EXPORT_TZ");
     expect(config).toMatch(/\{\s*TZ:\s*EXPORT_TZ\s*\}/);
+  });
+});
+
+type HookFile = {
+  version: string;
+  hooks: {
+    name: string;
+    trigger: string;
+    matcher: string;
+    timeout_ms?: number;
+    action: { type: string; command: string };
+  }[];
+};
+
+const HOOKS_DIR = fileURLToPath(new URL("../../../.kiro/hooks/", import.meta.url));
+const readHook = (file: string): HookFile =>
+  JSON.parse(readFileSync(`${HOOKS_DIR}${file}`, "utf8")) as HookFile;
+const exportHook = readHook("export-tests-on-save.json").hooks[0];
+
+describe("export-tests-on-save hook _Requirements: 10.2_", () => {
+  it("parses with the expected name, trigger and version", () => {
+    expect(readHook("export-tests-on-save.json").version).toBe("v1");
+    expect(exportHook?.name).toBe("Export tests on save");
+    expect(exportHook?.trigger).toBe("PostFileSave");
+  });
+
+  it("has the same timeout as every other hook file", () => {
+    const others = readdirSync(HOOKS_DIR).filter(
+      (f) => f.endsWith(".json") && f !== "export-tests-on-save.json",
+    );
+    expect(others.length).toBeGreaterThan(0);
+    for (const file of others) {
+      for (const hook of readHook(file).hooks) {
+        if (hook.timeout_ms === undefined) continue;
+        expect(exportHook?.timeout_ms, file).toBe(hook.timeout_ms);
+      }
+    }
+    expect(exportHook?.timeout_ms).toBe(120000);
+  });
+
+  it("matches export src and test files only", () => {
+    const re = new RegExp(exportHook?.matcher ?? "$^");
+    expect(re.test("packages/export/src/a.ts")).toBe(true);
+    expect(re.test("packages/export/test/a.ts")).toBe(true);
+    expect(re.test("apps/web/src/a.ts")).toBe(false);
+    expect(re.test("packages/engine/src/a.ts")).toBe(false);
+  });
+
+  it("runs the export project once, not in watch mode", () => {
+    const command = exportHook?.action.command ?? "";
+    expect(command).toContain("--project export");
+    expect(command).not.toContain("--watch");
+    expect(command).toContain("vitest run");
   });
 });

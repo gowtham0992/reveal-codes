@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Export tests on save",
+      "trigger": "PostFileSave",
+      "matcher": "packages/export/(src|test)/.*\\.ts$",
+      "timeout_ms": 120000,
+      "action": {
+        "type": "command",
+        "command": "perl -e 'alarm shift; exec @ARGV' 120 pnpm vitest run --project export --passWithNoTests"
+      }
+    }
+  ]
+}
