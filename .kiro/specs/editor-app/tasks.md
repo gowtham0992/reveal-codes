@@ -82,7 +82,7 @@ Conventions that apply to every task:
     - Files: `apps/web/src/persist.ts` (`AUTOSAVE_KEY`, `serialise` storing `render(document, "full").text` as `codes`, `deserialise` validating the JSON shape then calling the Engine's `parse`, returning a `Result` with `PersistError`), `apps/web/src/autosave.ts` (`createAutosave` with injected storage and timers: 300 ms debounce, `flush`, `clear`, a throwing `setItem` calls `onError("Autosave failed. Your draft is kept in this tab only.")`).
     - Example tests `persist.test.ts` and `autosave.test.ts`: debounce and flush with the manual timer; write failure sets the error and keeps the Document; absent, non-JSON, wrong-shape and unparseable values give an `Err`; Undo and Redo stacks and Notices are never written; round trip over four fixed Documents (fresh, edited, verified with an override, the demo motion after a recorded Verify) is structurally equal.
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8_
-  - [~] 3.5 Checkpoint - store, history, and persistence
+  - [x] 3.5 Checkpoint - store, history, and persistence
     - Run `pnpm lint`, `pnpm typecheck` and `pnpm vitest run --project web`; run `FC_NUM_RUNS=500 pnpm vitest run --project web properties.test`; fix failures. Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 4. Editor component and page shell
@@ -110,7 +110,7 @@ Conventions that apply to every task:
     - Asserts that the item texts concatenated equal `render(doc, "display").text`; Code_Items equal the `positions` entries in order; one Text_Item per code point with the right `offset`; each Code_Item precedes the Text_Item at its Offset and those at `text.length` follow the last Text_Item; `itemIndexAtOffset` and `offsetOfItem` invert each other for Text_Items and `itemIndexAtOffset(L, text.length)` is the index after the last Text_Item.
     - **Validates: Requirements 11.1, 11.2, 11.3, 11.4, 11.6, 11.8**
     - _Requirements: 11.8_
-  - [~] 5.3 Pane component, divergence words, and cursor sync
+  - [-] 5.3 Pane component, divergence words, and cursor sync
     - Files: `apps/web/src/client/divergence.ts` (`divergenceWords(quoteText, prefixLength)`: the word containing `prefixLength`, or the next word when it falls in whitespace, up to six words, trailing `…` when more remain, `""` for empty text; `mismatchAt(document, offset)`), `apps/web/src/pane/pane.tsx` (memoised `layoutPane`, one `div` per line with `content-visibility: auto`, `data-offset` items, one delegated click handler, cursor block highlight, empty block at the end, `scrollIntoView({ block: "nearest" })`, `role="region"` named "Reveal Codes", Text_Items `aria-hidden`, Code_Items `role="img"` with `aria-label`, Status_Line from the `statusOverride` prop, nothing rendered while hidden, no logo or product name), `apps/web/src/pane/pane.module.css` (CGA palette and the code-family table of the design; exempt from the UI palette).
     - Example tests `divergence.test.ts` (`prefixLength` 0, inside a word, on whitespace, at the text length, more than six words remaining gives an ellipsis, exactly six gives none, empty text; `mismatchAt` inside and outside `[start, end)` and for non-mismatch results) and `pane.test.tsx` (jsdom): nothing in the accessibility tree while hidden; colours per family from the stylesheet; click on a Text_Item and a Code_Item calls `onItemClick` with its `offset`; background click calls `onBackgroundClick`; highlight follows `cursorOffset` and shows only the head; scroll into view is called; region name and Code_Item accessible names; re-renders when the Document changes. Static `css-rules.test.ts` checks the Pane stylesheet uses only Palette colours.
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.8, 12.9, 13.1, 13.2, 13.3, 13.4, 13.5_
@@ -134,7 +134,7 @@ Conventions that apply to every task:
     - Files: `apps/web/src/client/api.ts` (`createApiClient(fetchFn)` with `verify`, `opinion`, `mode`, `demoMotion`; responses narrowed from `unknown`; `browserApi()` wraps the global `fetch` and is the only `fetch(` call in the browser bundle; the Tier 2 `draft` method is added in 8.2), `apps/web/src/client/verify-flow.ts` (`buildVerifyBody` returning only `kind: "full"` records, `quotesByCluster`, `hasFullRecord`, `runVerifyFlow`: one `POST`, one `verification` dispatch, then sequential opinion requests per distinct verified cluster with attached quotes, `checkQuote(text, quote.text)` in the browser from `@reveal-codes/verifier/quote` reading `quote.text` from the current Document, epoch checked after every `await`, never rejects), `apps/web/src/client/verify-summary.ts` (`summaryNotice`).
     - Example tests `api.test.ts`, `verify-flow.test.ts`, `verify-summary.test.ts` (the fetch given to the Api client calls the route handlers in-process through `test/support/route-fetch.ts`): short-form records and quote text are never in the request body; a quote attached to a `verified` short form uses the target's cluster; no request for a quote whose citation is not `verified`; opinion requests run one after another; `text: null` counts as unavailable and the flow continues; a failed `POST` leaves the Document unchanged and sets "Verification could not be completed. Your citations are unchanged."; a `replace` dispatched mid-flow discards later results; exact Notice text; malformed response pairs are dropped.
     - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.7, 17.8, 17.9, 17.10, 17.11, 17.12_
-  - [~] 6.4 Property 5: only citations leave
+  - [-] 6.4 Property 5: only citations leave
     - File `apps/web/test/verify-flow.properties.test.ts`; `arbCitingDocument` and `arbVerifyScript` in `apps/web/test/arbitraries.ts` (Engine `arbTextWithCitations`, `arbCitingString`, `arbVerificationResult`, `arbOpinionWithQuotes`; verified results draw cluster ids from a small pool so quotes share clusters). The real `runVerifyFlow`, real Store, real `createApiClient` and real `checkQuote` run against a fake `fetch` that records every request.
     - **Property 5: Only citations leave**
     - Asserts that exactly one `POST` is sent and it is first; its body parses to an object whose only property is `records`, deeply equal to the `kind: "full"` entries of the starting `document.citations` in order; no run of 20 or more consecutive characters of `document.text` taken from outside the Full_Record ranges appears in the body (windows also inside a Full_Record's own text are exempt); every other request is a body-less `GET /api/opinion/<id>`; and the ids requested equal `quotesByCluster` computed independently from the final Document, each once, in first-encounter order.
@@ -216,17 +216,19 @@ Conventions that apply to every task:
     { "id": 4, "tasks": ["2.2", "2.3", "3.2"] },
     { "id": 5, "tasks": ["2.4", "3.4", "4.1", "5.1", "6.1"] },
     { "id": 6, "tasks": ["3.3", "4.2", "6.2"] },
-    { "id": 7, "tasks": ["4.3", "5.2", "6.3", "8.1"] },
-    { "id": 8, "tasks": ["5.3", "6.4", "8.2"] },
-    { "id": 9, "tasks": ["5.4", "9.1"] },
+    { "id": 7, "tasks": ["4.3", "5.2", "6.3"] },
+    { "id": 8, "tasks": ["5.3", "6.4"] },
+    { "id": 9, "tasks": ["5.4"] },
     { "id": 10, "tasks": ["6.5"] },
     { "id": 11, "tasks": ["7.1"] },
     { "id": 12, "tasks": ["7.2"] },
     { "id": 13, "tasks": ["7.3"] },
     { "id": 14, "tasks": ["7.4"] },
-    { "id": 15, "tasks": ["8.3"] },
-    { "id": 16, "tasks": ["9.2"] },
-    { "id": 17, "tasks": ["9.3"] }
+    { "id": 15, "tasks": ["8.1"] },
+    { "id": 16, "tasks": ["8.2"] },
+    { "id": 17, "tasks": ["8.3", "9.1"] },
+    { "id": 18, "tasks": ["9.2"] },
+    { "id": 19, "tasks": ["9.3"] }
   ]
 }
 ```
