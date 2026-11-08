@@ -187,12 +187,18 @@ Two web tests use `vi.mock` of `@reveal-codes/export`: the `buildDocx` rejection
 - `structure.md` and `tech.md` now name `packages/export`.
 
 ## 2026-11-08 shell-polish
+
 Before, the shell was a plain toolbar over an unframed editor with the mode badge in the toolbar; after, it has a wordmark and grouped toolbar, a 22px status line (or the pane status line) carrying the mode text, an 8.5in page, a ruled Issues region with a blocking count, a vertical assistant strip, a window title and favicon, and titled dialogs.
+
 ### Where Kiro got something wrong, and what fixed it
+
 Task numbers refer to `.kiro/specs/shell-polish/tasks.md`.
+
 - 2.1: the first `AppShell` version exceeded the 40-line function limit; the bottom region was extracted into `ShellBottom`.
 - 2.2: the pane `statusLine()` test helper had to change because the status block now holds the Mode_Text as well as the status text; it reads the first child only.
 - 1.1 and 2.1: the `css-rules` scan rejected the new font sizes (15px and 12px), so each task added its size to the accepted list; task 4.3 folded them into one list.
 - 4.4: the `inventory` scan requires every file in the spec folder to be listed, including `tasks.meta.json`; the Spec row names all five files.
+
 ### Steering changes
+
 - `ui.md` gained the favicon exception, the wordmark and status-line type sizes, the new layout line and the status-line copy rule.

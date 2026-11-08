@@ -68,7 +68,7 @@ Conventions that apply to every task:
     - Tests: in `assistant-panel.test.tsx`, collapsed state shows the "Assistant" disclosure with `aria-expanded="false"`, activating it sets `true` and shows the panel heading "Assistant" and the disclosure with `aria-expanded="true"`, and with no assistant rendered there is no Assistant button. The button name "Assistant", `aria-expanded` and `data-assistant` assertions stay valid. `app-shell.test.tsx` layout assertions must still pass.
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 14.7_
 
-- [ ] 4. Window identity, dialogs, scan, documentation, and checkpoint
+- [x] 4. Window identity, dialogs, scan, documentation, and checkpoint
   - [x] 4.1 Window title and favicon
     - Files: `apps/web/src/components/use-document-title.ts` (new), `apps/web/src/components/app-shell.tsx`, `apps/web/app/icon.svg` (new). `use-document-title.ts` exports `captionOf(text)` (first non-blank line, trimmed, cut to 60 UTF-16 code units; `null` when none, via `/\S[^\n]*/`), `windowTitle(text)` (`"Reveal Codes"` or `` `${caption} \u2014 Reveal Codes` ``) and `useDocumentTitle(text)` (one effect that sets `document.title` and depends on the computed title). `AppShell` calls `useDocumentTitle(doc.text)`. The static `title` in `app/layout.tsx` stays.
     - `app/icon.svg` is exactly the file of the design: a 32 by 32 viewBox, a `#FFFFFF` rect with a 1px `#111111` stroke inside the edge, and one `<text>` "RC" in Georgia bold, `#111111`. No other shape, text or colour.
@@ -88,7 +88,7 @@ Conventions that apply to every task:
     - `docs/KIRO_USAGE.md`: update the existing hook row for `scripts/commit-task.sh` to state the scope rule (`packages/<name>` or `apps/<name>` when every non-ignored path shares it, `.kiro/` and `docs/` ignored, `repo` otherwise or when nothing is left, and the `--print-scope` flag), with no second hook row. Add exactly one Spec row for shell-polish listing every file in `.kiro/specs/shell-polish/` by path (`.config.kiro`, `requirements.md`, `design.md`, `tasks.md`), because the inventory scan requires every spec file to appear. Add exactly one Steering row for the `ui.md` edit.
     - The README screenshot placeholder is not touched. Run `pnpm vitest run --project web` and confirm `static/inventory.test.ts` passes.
     - _Requirements: 15.1, 15.2, 15.3_
-  - [-] 4.5 Final checkpoint - full repository checks and browser walk
+  - [x] 4.5 Final checkpoint - full repository checks and browser walk
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm test` and `next build --webpack` (delete `.next` first), all four with exit code 0. Confirm no file under `packages/engine`, `packages/verifier`, `packages/export` or `packages/courtlistener-mcp` changed, no `package.json` dependency field and no lockfile changed (`git diff --stat`), and the README screenshot placeholder is byte-identical.
     - Then the user walks the app in a browser (not automatable here, say so rather than claiming it was verified): Wordmark and group rules (R1, R2), the 22px Status_Line and the 12px type with the Pane closed and the Pane at 40% when open (R4), the Page at 8.5in with 1in padding and the Placeholder at its top-left (R6, R7), the Issues heading rules and the left rule at full height (R8), the 32px vertical Assistant strip and its expanded heading (R9), the tab title and favicon (R10, R11), and the Modal title padding and rule in the Export, Override and New document dialogs (R12). Ensure all tests pass, ask the user if questions arise.
     - _Requirements: 15.4, 15.5, 15.6_
