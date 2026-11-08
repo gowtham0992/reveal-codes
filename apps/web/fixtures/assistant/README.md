@@ -1,0 +1,1 @@
+`default.txt`: hand-authored on 2026-11-08 (not recorded from any model) as the reply the assistant gives in demo mode when no `<hash>.txt` matches the prompt; it names no real case, statute or rule. A prompt-specific reply is `<hash>.txt`, where `<hash>` is `promptHash(prompt)` from `src/server/llm-fixture.ts`.

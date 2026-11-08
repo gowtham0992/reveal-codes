@@ -13,6 +13,12 @@ export type ServerEnv = Readonly<Record<string, string | undefined>>;
 
 export type ServerMode = "fixtures" | "live";
 
+/** Tier 2. A provider is non-null only when both of its variables are non-empty. Model ids come only from env. */
+export type AssistantConfig = Readonly<{
+  bedrock: Readonly<{ region: string; modelId: string }> | null;
+  anthropic: Readonly<{ apiKey: string; modelId: string }> | null;
+}>;
+
 export type ServerConfig = Readonly<{
   mode: ServerMode;
   /** Non-null only in live mode. Never logged, returned or sent to the browser. */
@@ -20,6 +26,8 @@ export type ServerConfig = Readonly<{
   baseUrl: string;
   /** `null` means `<home>/.reveal-codes/cache`. */
   cacheDir: string | null;
+  /** Tier 2. Holds the Anthropic key when set: never log it or send it to the browser. */
+  assistant: AssistantConfig;
 }>;
 
 export type ServerIo = Readonly<{
@@ -35,6 +43,18 @@ function nonEmpty(value: string | undefined): string | null {
   return value === undefined || value === "" ? null : value;
 }
 
+function readAssistant(env: ServerEnv): AssistantConfig {
+  const region = nonEmpty(env["AWS_REGION"]);
+  const bedrockModel = nonEmpty(env["BEDROCK_MODEL_ID"]);
+  const apiKey = nonEmpty(env["ANTHROPIC_API_KEY"]);
+  const anthropicModel = nonEmpty(env["ANTHROPIC_MODEL"]);
+  return {
+    bedrock: region !== null && bedrockModel !== null ? { region, modelId: bedrockModel } : null,
+    anthropic:
+      apiKey !== null && anthropicModel !== null ? { apiKey, modelId: anthropicModel } : null,
+  };
+}
+
 /** Pure: the Mode is `fixtures` unless a token is present and fixtures-only is not `1`. */
 export function readServerConfig(env: ServerEnv): ServerConfig {
   const token = nonEmpty(env["COURTLISTENER_TOKEN"]);
@@ -44,6 +64,7 @@ export function readServerConfig(env: ServerEnv): ServerConfig {
     token: live ? token : null,
     baseUrl: nonEmpty(env["COURTLISTENER_BASE_URL"]) ?? DEFAULT_BASE_URL,
     cacheDir: nonEmpty(env["REVEAL_CODES_CACHE_DIR"]),
+    assistant: readAssistant(env),
   };
 }
 

@@ -170,7 +170,7 @@ Conventions that apply to every task:
     - _Requirements: 6.7, 13.3, 18.4_
 
 - [ ] 8. Drafting assistant (Tier 2, cuttable)
-  - [~] 8.1 Tier 2: provider selection, fixture provider, and server config
+  - [x] 8.1 Tier 2: provider selection, fixture provider, and server config
     - Files: `apps/web/src/server/deps.ts` (add `AssistantConfig` and the `assistant` field of `readServerConfig`: Bedrock needs `AWS_REGION` and `BEDROCK_MODEL_ID`, Anthropic needs `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`, empty counts as absent), `apps/web/src/server/llm.ts` (`draft(prompt, context, options)`, pure `selectProvider(config)`: Bedrock, else Anthropic, else fixture; system prompt for a self-represented filer that forbids inventing citations; context limited to the last 4 000 code units cut at a code point boundary; no hard-coded model id), `apps/web/src/server/llm-fixture.ts` (`promptHash`: first 16 hex digits of SHA-256 of the trimmed, whitespace-collapsed prompt; `chunkText(text, 64)` never splitting a surrogate pair; reads `apps/web/fixtures/assistant/<hash>.txt` or `default.txt`), `apps/web/fixtures/assistant/default.txt` (a recorded reply with no invented real citations; add one line to `fixtures/assistant/README.md` saying where it came from and when), `next.config.ts` `outputFileTracingIncludes` entry for `/api/assistant`.
     - Example tests `llm.test.ts`: selection table (both pairs set, Bedrock partial, Anthropic only, neither); hash is stable under whitespace differences; unknown prompt returns `default.txt`; chunks are at most 64 characters, concatenate to the text and never split a surrogate pair; context truncation at a code point boundary; no model id literal in source (static).
     - _Requirements: 22.1, 22.2, 22.3, 22.4, 22.5, 22.6, 22.7_

@@ -81,6 +81,21 @@ describe("readServerConfig", () => {
     expect(config.cacheDir).toBe("/tmp/rc-cache");
   });
 
+  it("reads the assistant pairs and treats empty as absent (Tier 2)", () => {
+    expect(readServerConfig({}).assistant).toEqual({ bedrock: null, anthropic: null });
+    expect(
+      readServerConfig({
+        AWS_REGION: "us-test-1",
+        BEDROCK_MODEL_ID: "bedrock-model",
+        ANTHROPIC_API_KEY: "",
+        ANTHROPIC_MODEL: "anthropic-model",
+      }).assistant,
+    ).toEqual({ bedrock: { region: "us-test-1", modelId: "bedrock-model" }, anthropic: null });
+    expect(
+      readServerConfig({ ANTHROPIC_API_KEY: "k", ANTHROPIC_MODEL: "anthropic-model" }).assistant,
+    ).toEqual({ bedrock: null, anthropic: { apiKey: "k", modelId: "anthropic-model" } });
+  });
+
   it("does not echo the token in any field other than token", () => {
     const config = readServerConfig({ COURTLISTENER_TOKEN: SENTINEL });
     const { token, ...rest } = config;
