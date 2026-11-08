@@ -15,5 +15,6 @@
     "test",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-  ]
+  ],
+  "references": [{ "path": "../../packages/engine" }, { "path": "../../packages/verifier" }]
 }

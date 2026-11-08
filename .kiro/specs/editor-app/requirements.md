@@ -495,7 +495,7 @@ Standing rule (carried over from the provenance-engine and citation-verifier spe
 - L12. A paste, drop, or assistant text that contains an unpaired surrogate is rejected by the Engine (`split_surrogate`) and leaves the Document unchanged with a Notice.
 - L13. The Verify route has no per-client throttle; the shared Token_Bucket in the server's Verifier deps limits aggregate use. A public deployment should run in Fixtures_Mode.
 - L14. The Assistant_Panel sends only the current paragraph, so the model cannot see the rest of the filing, and markdown in a reply is inserted as plain text. (Tier 2)
-- L15. The app runs on webpack (`next dev --webpack`, `next build --webpack`) because Turbopack's resolution of the Engine's `.js`-specifier-to-`.ts` imports in Next 16.4.5 was not confirmed.
+- L15. The app runs on webpack (`next dev --webpack`, `next build --webpack`) because Turbopack in Next 16.4.5 fails with "Module not found" on the Engine's `.js`-specifier-to-`.ts` imports (smoke build, task 1.2).
 - Design and implementation record further entries here as L16, L17, and so on.
 
 ## Notes for the user

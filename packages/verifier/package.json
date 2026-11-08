@@ -5,7 +5,10 @@
   "description": "CourtListener client, quote matcher, and cache. Takes fetch as an injected dependency.",
   "license": "Apache-2.0",
   "type": "module",
-  "exports": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./quote": "./src/quote.ts"
+  },
   "dependencies": {
     "@reveal-codes/engine": "workspace:*"
   },
