@@ -12,7 +12,7 @@ inclusion: always
 - `packages/verifier` takes `fetch` as an injected dependency. Tests never touch the network; they use recorded fixtures in `packages/verifier/fixtures/`.
 - `packages/courtlistener-mcp` uses `@modelcontextprotocol/sdk` over stdio. Tool handlers are thin wrappers over `packages/verifier`.
 - `apps/web` is Next.js (App Router) with TipTap on ProseMirror. Provenance is captured in a ProseMirror plugin that inspects every transaction; it is the only place origin is assigned.
-- LLM access goes through one interface, `LlmProvider`, implemented for Amazon Bedrock (default) and Anthropic. Selected by `LLM_PROVIDER` env var. No other module imports a provider SDK.
+- LLM access goes through one interface, `draft(prompt, context): AsyncIterable<string>` in `apps/web/src/server/llm.ts`. The provider is chosen by which credentials are set: Amazon Bedrock (`AWS_REGION` and `BEDROCK_MODEL_ID`), else Anthropic (`ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`), else a recorded-response fixture provider. There is no `LLM_PROVIDER` variable and no hard-coded model id. No other module imports a provider SDK.
 - Export uses the `docx` package for DOCX and print CSS for PDF.
 
 ## Commands (must stay true; CI runs them)
@@ -53,5 +53,5 @@ pnpm mcp           # starts courtlistener-mcp on stdio
 ## Secrets and config
 
 - `.env.example` lists every variable with a comment. Never commit `.env`.
-- `COURTLISTENER_TOKEN` is optional; the verifier works unauthenticated at a lower rate limit and says so in the UI.
+- `COURTLISTENER_TOKEN` is required for live lookups: CourtListener's citation-lookup endpoint answers an anonymous POST with 401 (checked 2026-11-07). Without a token the app runs in demo mode on recorded responses and says so in the UI.
 - The demo corpus in `apps/web/demo/` must work with no tokens at all, served from recorded fixtures.
