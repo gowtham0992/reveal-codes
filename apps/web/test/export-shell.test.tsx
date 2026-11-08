@@ -23,7 +23,7 @@ function docOf(text: string): Document {
 async function mount(text: string): Promise<void> {
   const timers = createManualTimers();
   const storage = createMemoryStorage();
-  storage.setItem(AUTOSAVE_KEY, serialise(docOf(text), []));
+  storage.setItem(AUTOSAVE_KEY, serialise(docOf(text), [], null));
   const services: AppServices = {
     api: modeApi("fixtures").api,
     now: timers.clock.now,

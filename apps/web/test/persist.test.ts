@@ -18,8 +18,13 @@ const RUN: RunLogEntry = {
   timestamp: "2026-11-02T12:00:00.000Z",
 };
 
-function roundTrip(document: Document, runLog: readonly RunLogEntry[] = []) {
-  const back = deserialise(serialise(document, runLog));
+const STAMP = "2026-11-07T14:03:11.000Z";
+function roundTrip(
+  document: Document,
+  runLog: readonly RunLogEntry[] = [],
+  verifiedAt: string | null = null,
+) {
+  const back = deserialise(serialise(document, runLog, verifiedAt));
   if (!back.ok) throw new Error(`round trip failed: ${back.error.kind}`);
   return back.value;
 }
@@ -27,8 +32,14 @@ function roundTrip(document: Document, runLog: readonly RunLogEntry[] = []) {
 describe("serialise _Requirements: 9.2, 9.7_", () => {
   it("writes version, the full-mode codes and the run log, and nothing else", () => {
     const doc = editedDocument();
-    const json: unknown = JSON.parse(serialise(doc, [RUN]));
-    expect(json).toEqual({ version: 1, codes: render(doc, "full").text, runLog: [RUN] });
+    const json: unknown = JSON.parse(serialise(doc, [RUN], STAMP));
+    expect(json).toEqual({
+      version: 1,
+      codes: render(doc, "full").text,
+      runLog: [RUN],
+      verifiedAt: STAMP,
+    });
+    expect(Object.keys(json as object)).toEqual(["version", "codes", "runLog", "verifiedAt"]);
   });
 
   it("uses the documented key", () => {
@@ -46,6 +57,9 @@ describe("deserialise failures _Requirements: 9.4_", () => {
     ["codes not a string", '{"version":1,"codes":5,"runLog":[]}', "bad_shape"],
     ["runLog not an array", '{"version":1,"codes":"","runLog":{}}', "bad_shape"],
     ["malformed run entry", '{"version":1,"codes":"","runLog":[{"runId":1}]}', "bad_shape"],
+    ["verifiedAt numeric", '{"version":1,"codes":"","runLog":[],"verifiedAt":5}', "bad_shape"],
+    ["verifiedAt object", '{"version":1,"codes":"","runLog":[],"verifiedAt":{}}', "bad_shape"],
+    ["verifiedAt boolean", '{"version":1,"codes":"","runLog":[],"verifiedAt":true}', "bad_shape"],
     ["unparseable codes", '{"version":1,"codes":"[CIT \\u2713]x","runLog":[]}', "bad_codes"],
   ];
   it.each(cases)("%s gives an Err", (_name, raw, kind) => {
@@ -55,7 +69,19 @@ describe("deserialise failures _Requirements: 9.4_", () => {
   });
 });
 
+describe("verifiedAt _Requirements: 12.4, 12.5, 12.6_", () => {
+  it("an old value without the field loads with null", () => {
+    const codes = render(freshDocument(), "full").text;
+    const r = deserialise(JSON.stringify({ version: 1, codes, runLog: [] }));
+    expect(r.ok && r.value.verifiedAt).toBeNull();
+  });
+});
 describe("round trip _Requirements: 9.8_", () => {
+  it("carries verifiedAt, string or null", () => {
+    const doc = freshDocument();
+    expect(roundTrip(doc, [], STAMP).verifiedAt).toBe(STAMP);
+    expect(roundTrip(doc, [], null).verifiedAt).toBeNull();
+  });
   it("fresh document", () => {
     const doc = freshDocument();
     expect(roundTrip(doc).document).toEqual(doc);

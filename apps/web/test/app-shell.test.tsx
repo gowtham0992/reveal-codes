@@ -100,7 +100,7 @@ describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () =
 
   it("installs a stored Document on mount and hides the placeholder", async () => {
     const storage = createMemoryStorage();
-    storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Stored draft."), []));
+    storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Stored draft."), [], null));
     await mount(fixture(storage));
     expect(screen.queryByText(/Paste your draft here/)).toBeNull();
     expect(screen.getByRole("textbox", { name: "Document" }).textContent).toBe("Stored draft.");
@@ -232,7 +232,7 @@ describe("AppShell Pane wiring _Requirements: 6.7, 13.3, 13.5, 13.6, 14.1, 14.2,
 
   it("moves the Editor selection when a Pane item is clicked", async () => {
     const storage = createMemoryStorage();
-    storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Stored draft."), []));
+    storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Stored draft."), [], null));
     await mount(fixture(storage));
     pressKey(document.body, "F3", { altKey: true });
     const item = paneRegion()?.querySelector('span[aria-hidden="true"][data-offset="7"]');
@@ -247,7 +247,7 @@ describe("AppShell Pane wiring _Requirements: 6.7, 13.3, 13.5, 13.6, 14.1, 14.2,
 
   it("shows the divergence words for a mismatched quote under the cursor and updates them on edit", async () => {
     const storage = createMemoryStorage();
-    storage.setItem(AUTOSAVE_KEY, serialise(mismatchedDocument(), []));
+    storage.setItem(AUTOSAVE_KEY, serialise(mismatchedDocument(), [], null));
     await mount(fixture(storage));
     pressKey(document.body, "F3", { altKey: true });
     const at = QUOTE_TEXT.indexOf("quick") + 1;
@@ -280,7 +280,7 @@ const SUMMARY =
 
 function citingStorage(): MemoryStorage {
   const storage = createMemoryStorage();
-  storage.setItem(AUTOSAVE_KEY, serialise(storedDocument(CITING), []));
+  storage.setItem(AUTOSAVE_KEY, serialise(storedDocument(CITING), [], null));
   return storage;
 }
 

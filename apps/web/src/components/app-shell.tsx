@@ -46,20 +46,23 @@ function loadAutosave(services: AppServices, store: Store): void {
       type: "replace",
       document: restored.value.document,
       runLog: restored.value.runLog,
+      verifiedAt: restored.value.verifiedAt,
     });
   }
 }
 
-/** Schedules a save whenever the Document or Run_Log changes; flushes when the page is hidden. */
+/** Schedules a save whenever the Document, Run_Log or verifiedAt changes; flushes when the page is hidden. */
 function useAutosave(store: Store, services: AppServices, autosave: Autosave): void {
   useEffect(() => {
     loadAutosave(services, store);
     let last = store.getState();
     const unsubscribe = store.subscribe(() => {
       const next = store.getState();
-      if (next.document !== last.document || next.runLog !== last.runLog) {
-        autosave.schedule(next.document, next.runLog);
-      }
+      const changed =
+        next.document !== last.document ||
+        next.runLog !== last.runLog ||
+        next.verifiedAt !== last.verifiedAt;
+      if (changed) autosave.schedule(next.document, next.runLog, next.verifiedAt);
       last = next;
     });
     const onVisibility = (): void => {

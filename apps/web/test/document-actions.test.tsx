@@ -53,7 +53,7 @@ function apiWithDemo(base: ApiClient, reply: DemoReply): ApiClient {
 async function mount(stored: Document | null, reply: DemoReply = "fixture"): Promise<Mounted> {
   const timers = createManualTimers();
   const storage = createMemoryStorage();
-  if (stored !== null) storage.setItem(AUTOSAVE_KEY, serialise(stored, []));
+  if (stored !== null) storage.setItem(AUTOSAVE_KEY, serialise(stored, [], null));
   const mode = modeApi("fixtures");
   const services: AppServices = {
     api: apiWithDemo(mode.api, reply),

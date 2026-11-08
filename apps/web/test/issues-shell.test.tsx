@@ -24,7 +24,7 @@ function stored(): Document {
 async function mount(): Promise<void> {
   const timers = createManualTimers();
   const storage = createMemoryStorage();
-  storage.setItem(AUTOSAVE_KEY, serialise(stored(), []));
+  storage.setItem(AUTOSAVE_KEY, serialise(stored(), [], null));
   const services: AppServices = {
     api: modeApi("fixtures").api,
     now: timers.clock.now,

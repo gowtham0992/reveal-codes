@@ -16,14 +16,18 @@ export type AutosaveDeps = Readonly<{
 
 export type Autosave = Readonly<{
   /** Debounced write of the latest value (300 ms). */
-  schedule(document: Document, runLog: readonly RunLogEntry[]): void;
-  /** Writes a pending value now; does nothing when none is pending. */
-  flush(): void;
+  schedule(document: Document, runLog: readonly RunLogEntry[], verifiedAt: string | null): void;
+  /** Writes a pending value now. True when nothing was pending or the write succeeded. */
+  flush(): boolean;
   /** Cancels a pending write and removes the stored key. */
   clear(): void;
 }>;
 
-type Pending = Readonly<{ document: Document; runLog: readonly RunLogEntry[] }>;
+type Pending = Readonly<{
+  document: Document;
+  runLog: readonly RunLogEntry[];
+  verifiedAt: string | null;
+}>;
 
 type Failure = Readonly<{ thrown: unknown }>;
 
@@ -55,30 +59,36 @@ function createTimerSlot(deps: AutosaveDeps): TimerSlot {
   };
 }
 
+/** Writes one job; reports failure through `onError` and the return value. */
+function writeJob(deps: AutosaveDeps, job: Pending): boolean {
+  const text = serialise(job.document, job.runLog, job.verifiedAt);
+  const failure = storageFailure(() => {
+    deps.storage.setItem(AUTOSAVE_KEY, text);
+  });
+  if (failure === null) return true;
+  deps.onError(AUTOSAVE_FAILED);
+  return false;
+}
+
 export function createAutosave(deps: AutosaveDeps): Autosave {
   let pending: Pending | null = null;
   const slot = createTimerSlot(deps);
   const cancelTimer = slot.cancel;
 
-  const write = (): void => {
+  const write = (): boolean => {
     cancelTimer();
     const job = pending;
     pending = null;
-    if (job === null) return;
-    const text = serialise(job.document, job.runLog);
-    const failure = storageFailure(() => {
-      deps.storage.setItem(AUTOSAVE_KEY, text);
-    });
-    if (failure !== null) {
-      deps.onError(AUTOSAVE_FAILED);
-    }
+    return job === null ? true : writeJob(deps, job);
   };
 
   return {
-    schedule(document, runLog) {
-      pending = { document, runLog };
+    schedule(document, runLog, verifiedAt) {
+      pending = { document, runLog, verifiedAt };
       cancelTimer();
-      slot.start(write);
+      slot.start(() => {
+        write();
+      });
     },
     flush: write,
     clear() {

@@ -25,7 +25,7 @@ function setup(storage: MemoryStorage = createMemoryStorage()) {
 describe("debounce and flush _Requirements: 9.1, 9.5_", () => {
   it("writes nothing before 300 ms and once after", () => {
     const { timers, autosave, storage } = setup();
-    autosave.schedule(freshDocument(), []);
+    autosave.schedule(freshDocument(), [], null);
     timers.advance(299);
     expect(storage.writes()).toBe(0);
     timers.advance(1);
@@ -36,9 +36,9 @@ describe("debounce and flush _Requirements: 9.1, 9.5_", () => {
   it("restarts the interval and writes only the latest value", () => {
     const { timers, autosave, storage } = setup();
     const edited = editedDocument();
-    autosave.schedule(freshDocument(), []);
+    autosave.schedule(freshDocument(), [], null);
     timers.advance(200);
-    autosave.schedule(edited, []);
+    autosave.schedule(edited, [], null);
     timers.advance(200);
     expect(storage.writes()).toBe(0);
     timers.advance(100);
@@ -49,8 +49,8 @@ describe("debounce and flush _Requirements: 9.1, 9.5_", () => {
 
   it("flush writes a pending value now and cancels the timer", () => {
     const { timers, autosave, storage } = setup();
-    autosave.schedule(editedDocument(), []);
-    autosave.flush();
+    autosave.schedule(editedDocument(), [], null);
+    expect(autosave.flush()).toBe(true);
     expect(storage.writes()).toBe(1);
     expect(timers.pending()).toBe(0);
     timers.advance(1000);
@@ -59,17 +59,23 @@ describe("debounce and flush _Requirements: 9.1, 9.5_", () => {
 
   it("flush with nothing pending writes nothing", () => {
     const { autosave, storage } = setup();
-    autosave.flush();
+    expect(autosave.flush()).toBe(true);
     expect(storage.writes()).toBe(0);
+  });
+  it("flush returns false when setItem throws", () => {
+    const { autosave, errors } = setup(createMemoryStorage({ throwOnSet: true }));
+    autosave.schedule(editedDocument(), [], null);
+    expect(autosave.flush()).toBe(false);
+    expect(errors).toEqual([AUTOSAVE_FAILED]);
   });
 });
 
 describe("clear and failure _Requirements: 9.6_", () => {
   it("clear cancels a pending write and removes the key", () => {
     const { timers, autosave, storage } = setup();
-    autosave.schedule(freshDocument(), []);
+    autosave.schedule(freshDocument(), [], null);
     autosave.flush();
-    autosave.schedule(editedDocument(), []);
+    autosave.schedule(editedDocument(), [], null);
     autosave.clear();
     timers.advance(1000);
     expect(storage.writes()).toBe(1);
@@ -78,7 +84,7 @@ describe("clear and failure _Requirements: 9.6_", () => {
 
   it("a throwing setItem reports the error message and does not throw", () => {
     const { timers, errors, autosave } = setup(createMemoryStorage({ throwOnSet: true }));
-    autosave.schedule(editedDocument(), []);
+    autosave.schedule(editedDocument(), [], null);
     timers.advance(300);
     expect(errors).toEqual([AUTOSAVE_FAILED]);
     expect(AUTOSAVE_FAILED).toBe("Autosave failed. Your draft is kept in this tab only.");
@@ -95,10 +101,10 @@ describe("clear and failure _Requirements: 9.6_", () => {
       },
     };
     const { timers, errors, autosave } = setup(wrapped);
-    autosave.schedule(editedDocument(), []);
+    autosave.schedule(editedDocument(), [], null);
     timers.advance(300);
     fail = false;
-    autosave.schedule(editedDocument(), []);
+    autosave.schedule(editedDocument(), [], null);
     timers.advance(300);
     expect(errors).toHaveLength(1);
     expect(flaky.data.has(AUTOSAVE_KEY)).toBe(true);
@@ -106,11 +112,11 @@ describe("clear and failure _Requirements: 9.6_", () => {
 });
 
 describe("what is stored _Requirements: 9.7_", () => {
-  it("holds only version, codes and runLog", () => {
+  it("holds only version, codes, runLog and verifiedAt", () => {
     const { autosave, storage } = setup();
-    autosave.schedule(editedDocument(), []);
+    autosave.schedule(editedDocument(), [], "2026-11-07T14:03:11.000Z");
     autosave.flush();
     const stored = JSON.parse(storage.getItem(AUTOSAVE_KEY) ?? "null") as object;
-    expect(Object.keys(stored).sort()).toEqual(["codes", "runLog", "version"]);
+    expect(Object.keys(stored).sort()).toEqual(["codes", "runLog", "verifiedAt", "version"]);
   });
 });

@@ -8,18 +8,28 @@ export type PersistedValue = Readonly<{
   version: 1;
   codes: string;
   runLog: readonly RunLogEntry[];
+  verifiedAt: string | null;
 }>;
 
 export type PersistError = Readonly<{ kind: "absent" | "not_json" | "bad_shape" | "bad_codes" }>;
 
-export type Restored = Readonly<{ document: Document; runLog: readonly RunLogEntry[] }>;
+export type Restored = Readonly<{
+  document: Document;
+  runLog: readonly RunLogEntry[];
+  verifiedAt: string | null;
+}>;
 
 /** The Persisted_Value as JSON. Undo and Redo stacks and Notices are not inputs (Req 9.7). */
-export function serialise(document: Document, runLog: readonly RunLogEntry[]): string {
+export function serialise(
+  document: Document,
+  runLog: readonly RunLogEntry[],
+  verifiedAt: string | null,
+): string {
   const value: PersistedValue = {
     version: 1,
     codes: render(document, "full").text,
     runLog,
+    verifiedAt,
   };
   return JSON.stringify(value);
 }
@@ -66,8 +76,12 @@ export function deserialise(raw: string | null): Result<Restored, PersistError> 
   if (!isRecord(value) || value["version"] !== 1) return err({ kind: "bad_shape" });
   const codes = value["codes"];
   const runLog = asRunLog(value["runLog"]);
+  const stamp = value["verifiedAt"];
   if (typeof codes !== "string" || runLog === null) return err({ kind: "bad_shape" });
+  if (stamp !== undefined && stamp !== null && typeof stamp !== "string") {
+    return err({ kind: "bad_shape" });
+  }
   const parsed = parse(codes);
   if (!parsed.ok) return err({ kind: "bad_codes" });
-  return ok({ document: parsed.value, runLog });
+  return ok({ document: parsed.value, runLog, verifiedAt: stamp ?? null });
 }
