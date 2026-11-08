@@ -119,7 +119,7 @@ Deviations from the design's file layout, decided while planning:
     - **Property 3: Lines sent in any 60 000 ms window never exceed 60**
     - **Validates: Requirements 7.1, 7.3, 7.4, 7.5, 7.12, 7.13**
     - _Requirements: 7.5_
-  - [-] 4.6 Property 5: cache round trip and expiry hold for both stores
+  - [x] 4.6 Property 5: cache round trip and expiry hold for both stores
     - File `test/cache.properties.test.ts`; one `fc.assert` whose generated input includes the store kind, run against both `createMemoryCacheStore` and `createFileCacheStore` (temporary directory removed afterwards); keys from the engine's `arbAnyString`, results from the engine's `arbVerificationResult` without `unchecked`, a mutable manual clock; asserts equality before expiry, miss at and after, no cross-key reads, no file outside the directory.
     - **Property 5: Cache round trip and expiry hold for both stores**
     - **Validates: Requirements 10.3, 10.6, 10.8, 10.11**
