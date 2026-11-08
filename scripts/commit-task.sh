@@ -5,6 +5,32 @@
 set -u
 export LC_ALL=en_US.UTF-8
 
+# Scope from NUL-separated paths on stdin. Paths under .kiro/ and docs/ are
+# ignored. One packages/<name> or apps/<name> shared by every other path gives
+# <name>; anything else, or only ignored paths, gives "repo". No paths at all
+# prints nothing.
+scope_of() {
+  local key="" k rest path any=0
+  while IFS= read -r -d '' path; do
+    any=1
+    case "$path" in .kiro/*|docs/*) continue ;; esac
+    case "$path" in
+      packages/*/*) rest="${path#packages/}"; k="packages/${rest%%/*}" ;;
+      apps/*/*)     rest="${path#apps/}";     k="apps/${rest%%/*}" ;;
+      *) key="repo"; break ;;
+    esac
+    if [ -z "$key" ]; then key="$k"
+    elif [ "$key" != "$k" ]; then key="repo"; break; fi
+  done
+  if [ "$any" = 1 ] && [ -z "$key" ]; then key="repo"; fi
+  case "$key" in "" | repo) printf '%s' "$key" ;; *) printf '%s' "${key#*/}" ;; esac
+}
+
+if [ "${1:-}" = "--print-scope" ]; then
+  tr '\n' '\0' | scope_of
+  exit 0
+fi
+
 cd "$(dirname "$0")/.." || exit 0
 
 payload="$(cat)"
@@ -34,22 +60,7 @@ fi
 
 git add -A || exit $?
 
-# Scope comes from the paths being committed: one packages/<name>/ for all of
-# them gives <name>; anything else (several packages, root files, docs, .kiro)
-# gives "repo".
-scope=""
-while IFS= read -r -d '' path; do
-  case "$path" in
-    packages/*/*) name="${path#packages/}"; name="${name%%/*}" ;;
-    *) name="repo" ;;
-  esac
-  if [ -z "$scope" ]; then
-    scope="$name"
-  elif [ "$scope" != "$name" ]; then
-    scope="repo"
-  fi
-  [ "$scope" = "repo" ] && break
-done < <(git diff --cached --name-only -z)
+scope="$(git diff --cached --name-only -z | scope_of)"
 if [ -z "$scope" ]; then
   exit 0
 fi
