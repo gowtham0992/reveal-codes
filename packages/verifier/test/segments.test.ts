@@ -46,8 +46,12 @@ describe("matchSegments _Requirements: 8.14, 8.16_", () => {
   const opinion = "the court held that the statute is void because it burdens speech and remanded";
 
   it("matches short first and last segments", () => {
-    expect(matchSegments(opinion, ["the", "statute is void because", "and remanded"]).ok).toBe(true);
-    expect(matchSegments(opinion, ["the court held that", "it burdens speech", "ed"]).ok).toBe(true);
+    expect(matchSegments(opinion, ["the", "statute is void because", "and remanded"]).ok).toBe(
+      true,
+    );
+    expect(matchSegments(opinion, ["the court held that", "it burdens speech", "ed"]).ok).toBe(
+      true,
+    );
   });
 
   it("rejects segments that each occur but in the wrong order", () => {
@@ -82,7 +86,9 @@ describe("frontier _Requirements: 8.15_", () => {
   it("multi segment: partial prefix of the failing segment", () => {
     const v = "the court … remanded the cases";
     const o = "the court held; remanded the case.";
-    expect(frontier(v, segmentSpans(v), o, false)).toBe(v.indexOf("remanded") + "remanded the case".length);
+    expect(frontier(v, segmentSpans(v), o, false)).toBe(
+      v.indexOf("remanded") + "remanded the case".length,
+    );
   });
 
   it("multi segment: a short interior segment that occurs stops after its ellipsis", () => {

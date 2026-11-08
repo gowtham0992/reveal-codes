@@ -38,7 +38,7 @@ Deviations from the design's file layout, decided while planning:
     - Example tests `normalise.test.ts`: each step alone; `[t]he`; `[...]` and `.[.].`; `. . .` with NBSP and U+0085 runs; curly quotes and dashes; trailing `.,;:` with whitespace before them; empty and whitespace-only input. `segments.test.ts`: leading and trailing `…` ignored; a quote with no `…` has one segment; first and last segments under 12 characters still match; `next` index after the following `…`; segments that each occur but in the wrong order do not match (Req 8.16); a short interior segment does not match though it occurs (Req 8.16); the same segment twice must occur twice and may not overlap.
     - Known limitations to record as L-entries if met: L4 (case folding of U+0130 and astral letters), L10 (ellipsis inside the opinion). Do not stop for them.
     - _Requirements: 8.2, 8.3, 8.4, 8.5, 8.14, 8.16_
-  - [~] 2.2 Origin tracking, prefixLength, and checkQuote
+  - [x] 2.2 Origin tracking, prefixLength, and checkQuote
     - Files: `src/track.ts` (`trackQuote`: folded pre-trim normal form `V`, per-unit origins, dirty cuts; abandons tracking when NFC changes the quote), `src/quote.ts` (`checkQuote`, `prefixLength` per design A9: clean and dirty cut classification, frontier `J*`, descending scan, `MAX_PROBES = 64`, verified probes; never returns `unchecked`), `test/support/prefix-model.ts` (brute-force model: for every `n` in `0 <= n < L` normalise the prefix with the string pipeline in the mode of A9 and test it with `matchSegments`; used by Property 9).
     - Example tests `quote.test.ts`: the three worked examples of A9 with `prefixLength` 63, 30 and 22; single-segment quote under 12 characters absent gives `mismatch` 0 and present gives `match` (Req 8.7); a quote with no segment (`…`, empty, whitespace) gives `mismatch` 0 (Req 8.8); ellipsis cases: out-of-order segments, a short middle segment, a leading `…`, a trailing `…`, short first and last segments; non-monotone prefix cases from A9; probe-budget exhaustion; tracking abandoned for non-NFC input. Every result is below the quote length.
     - Known limitations to record as L-entries if met: L2 (probe budget), L3 (shortcut misses), L9 (altered word inside brackets or an ellipsis form). Do not stop for them.
@@ -73,7 +73,7 @@ Deviations from the design's file layout, decided while planning:
     - **Property 1: Status mapping yields verified only for Line_Status 200 and one result per line**
     - **Validates: Requirements 1.8, 2.6, 2.7, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8**
     - _Requirements: 3.8_
-  - [~] 3.3 Property 4: chunking caps hold and chunks concatenate to the input
+  - [x] 3.3 Property 4: chunking caps hold and chunks concatenate to the input
     - File `test/chunk.properties.test.ts`; lists of distinct Citation_Lines from the engine's `arbReporterValue` plus occasional lines over 64 000 characters.
     - **Property 4: Chunking caps hold and chunks concatenate to the input**
     - **Validates: Requirements 7.2, 7.7**
@@ -95,17 +95,17 @@ Deviations from the design's file layout, decided while planning:
     - _Requirements: 1.3, 1.4_
 
 - [ ] 4. Token bucket, retries, cache
-  - [~] 4.1 Token bucket, Window_Log, and dispatch gate
+  - [x] 4.1 Token bucket, Window_Log, and dispatch gate
     - Files: `src/bucket.ts` (complete the module: `CAPACITY`, `REFILL_MS`, `WINDOW_MS`, `refill` with integer-ms partial retention and no credit for a backwards step, `waitFor` as `max(bucket wait, window wait)`, `take`, `availableTokens`, `acquire(deps, n)` with exactly one `Deps.sleep` when the wait is positive and at most three iterations), `src/gate.ts` (`withGate(state, fn)` promise chain held in `deps.state`).
     - Example tests `bucket.test.ts`: refill keeps partial ms (999 then 1) and caps at 60; backwards clock step; shortfall sleep `5 * 1000 - 400 = 4600`; the window counterexample (60 lines at t = 0, then 30 lines at t = 30 000 sleeps until t = 60 000); retry deducts tokens again. `gate.test.ts`: two concurrent calls on one `Deps` dispatch in order and never interleave.
     - Known limitation to record if met: L7 (clock steps).
     - _Requirements: 7.1, 7.3, 7.4, 7.12, 7.13_
-  - [~] 4.2 Transport: timeout race, auth rule, retries
+  - [-] 4.2 Transport: timeout race, auth rule, retries
     - File `src/transport.ts` (`requestOnce` racing `Deps.fetch` against `Deps.sleep(15000, signal)` and aborting the loser, `redirect: "error"`, token attached only when the URL starts with `{baseUrl}/`; `HttpOutcome` carries no request header; `withRetries` at most three attempts, retry only on 429 and 5xx, `retryDelayMs` = larger of `Retry-After` and `wait_until` interval, 1 000 ms when neither, capped at 30 000 ms, `before()` called again on each retry).
     - Example tests `transport.test.ts`: reject, hang (aborted at 15 s), 500, 404 not retried, bad JSON, redirect error; `Retry-After` integer, HTTP date and garbage; `wait_until` and `wait_util`; exhausted chunk keeps the last `waitUntil`; the recorded `http/throttle-429.json` shape replayed three times once task 6.1 lands (until then use an in-test body); token never appears in an outcome or thrown value.
     - Known limitation to record if met: L8 (opinion requests unmetered).
     - _Requirements: 2.9, 2.10, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 7.6, 7.8, 7.9, 7.11, 11.4, 11.7_
-  - [~] 4.3 Cache access, FileCacheStore, and status
+  - [-] 4.3 Cache access, FileCacheStore, and status
     - Files: `src/cache-access.ts` (`cacheGet`, `cacheSet`: counters, 24 h TTL via `toIso`, shape guard `isTerminalResult`, rejection-safe), `src/cache-file.ts` (`createFileCacheStore({ dir, now, fs? })`, `encodeKey`, temp file plus rename, corrupt or missing file is a miss, failed write leaves the old entry and removes the temp file, over-long encoded name not written), `src/status.ts` (counters helpers and `verifierStatus(deps)` with `refill(...).tokens` computed from `Deps.now` and not stored).
     - Example tests `cache-file.test.ts` (keys `../x`, `a/b`, `opinion:7`, `.`, `..` stay inside the directory; atomic write with an injected failing `fs`; unparseable file is a miss; no token in any file or file name), `cache-access.test.ts` (unchecked never written, expired entry overwritten, bad-shape value counts as a miss), `status.test.ts` (counters after a scripted sequence, `verifierStatus` after idle refill, no key listing needed).
     - _Requirements: 10.1, 10.2, 10.3, 10.7, 10.8, 10.9, 10.10, 10.12, 10.13, 10.14_

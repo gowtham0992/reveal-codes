@@ -1,5 +1,10 @@
 {
-  "pbtResults": {},
+  "pbtResults": {
+    "3.3 Property 4: chunking caps hold and chunks concatenate to the input": {
+      "status": "passed",
+      "lastRunTimestamp": 1794101657597
+    }
+  },
   "executionHistory": {
     "1.1 Package config, vitest projects, guards, and hook": [
       {
@@ -57,6 +62,16 @@
         "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
         "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
         "timestamp": 1794098610637
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794101609904
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794101778066
       }
     ],
     "2.3 Property 7: pipeline idempotent and never longer than NFC": [
@@ -116,6 +131,16 @@
         "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
         "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
         "timestamp": 1794098610803
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794101609955
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794101778134
       }
     ],
     "3.4 Property 2: request bodies carry only Citation_Lines drawn from the records": [
@@ -144,6 +169,16 @@
         "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
         "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
         "timestamp": 1794098610913
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794101610072
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794101778191
       }
     ],
     "4.2 Transport: timeout race, auth rule, retries": [
@@ -151,6 +186,11 @@
         "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
         "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
         "timestamp": 1794098610933
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794101610632
       }
     ],
     "4.3 Cache access, FileCacheStore, and status": [
@@ -158,6 +198,11 @@
         "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
         "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
         "timestamp": 1794098610952
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794101611084
       }
     ],
     "4.4 lookup() wiring and combineParallel": [

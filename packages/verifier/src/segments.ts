@@ -15,8 +15,7 @@ export type SegmentSpan = {
 };
 
 export type MatchResult =
-  | { readonly ok: true }
-  | { readonly ok: false; readonly index: number; readonly pos: number };
+  { readonly ok: true } | { readonly ok: false; readonly index: number; readonly pos: number };
 
 /** Split a normalised string on `…`, trim spaces, drop empty pieces. */
 export function segmentSpans(s: string): SegmentSpan[] {

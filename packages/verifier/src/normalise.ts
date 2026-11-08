@@ -1,11 +1,12 @@
 // Normalisation_Pipeline (design A7, Req 8.2 to 8.4, 8.10, 8.11).
 
 /** Unicode White_Space, written out: `\s` omits U+0085 and includes U+FEFF. */
-export const WS_CLASS = "\\t-\\r \\u0085\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000";
+export const WS_CLASS =
+  "\\t-\\r \\u0085\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000";
 
-const WS_RUN = new RegExp(`[${WS_CLASS}]+`, "g");
+export const WS_RUN = new RegExp(`[${WS_CLASS}]+`, "g");
 const WS_CHAR = new RegExp(`^[${WS_CLASS}]$`);
-const ELLIPSIS = new RegExp(`\\.(?:[${WS_CLASS}]*\\.){2,}|…`, "g");
+export const ELLIPSIS = new RegExp(`\\.(?:[${WS_CLASS}]*\\.){2,}|…`, "g");
 const TAIL_PUNCTUATION = ".,;:";
 
 /** Step 2: curly quotes to straight quotes. */
@@ -18,26 +19,33 @@ export function straightenDashes(s: string): string {
   return s.replace(/[–—]/g, "-");
 }
 
-/** Step 4: delete the brackets of stack-matched pairs; unmatched brackets stay. */
-export function removeBracketPairs(s: string): string {
+/** Stack-matched bracket pairs as `[open, close]` index pairs. */
+export function matchedBrackets(s: string): Array<readonly [number, number]> {
   const open: number[] = [];
-  const drop = new Set<number>();
+  const pairs: Array<readonly [number, number]> = [];
   for (let i = 0; i < s.length; i += 1) {
     const ch = s[i];
     if (ch === "[") {
       open.push(i);
     } else if (ch === "]") {
       const o = open.pop();
-      if (o !== undefined) {
-        drop.add(o);
-        drop.add(i);
-      }
+      if (o !== undefined) pairs.push([o, i]);
     }
+  }
+  return pairs;
+}
+
+/** Step 4: delete the brackets of stack-matched pairs; unmatched brackets stay. */
+export function removeBracketPairs(s: string): string {
+  const drop = new Set<number>();
+  for (const [o, c] of matchedBrackets(s)) {
+    drop.add(o);
+    drop.add(c);
   }
   if (drop.size === 0) return s;
   let out = "";
   for (let i = 0; i < s.length; i += 1) {
-    if (!drop.has(i)) out += s[i];
+    if (!drop.has(i)) out += s.charAt(i);
   }
   return out;
 }
