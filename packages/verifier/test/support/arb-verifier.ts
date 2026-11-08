@@ -28,3 +28,26 @@ export const arbChunkInput: fc.Arbitrary<string[]> = fc.uniqueArray(
   ),
   { minLength: 0, maxLength: 200 },
 );
+
+/** Fragments that stress each stage of the Normalisation_Pipeline (Property 7). */
+const normalisableFragment: fc.Arbitrary<string> = fc.oneof(
+  { weight: 6, arbitrary: fc.string({ unit: "grapheme-ascii", maxLength: 6 }) },
+  {
+    weight: 6,
+    arbitrary: fc.constantFrom("“", "”", "‘", "’", "‚", "–", "—", "[", "]", "[...]", ".[.]."),
+  },
+  { weight: 6, arbitrary: fc.constantFrom(".", "..", "...", ". . .", "…", ",", ";", ":") },
+  {
+    weight: 5,
+    arbitrary: fc.constantFrom("\t", "\u0085", "\u00a0", "\ufeff", "\u2028", "\u3000", " ", "\n"),
+  },
+  { weight: 3, arbitrary: fc.constantFrom("\u0300", "\u0301", "\u0323", "e\u0301", "a\u0308") },
+  { weight: 2, arbitrary: fc.constantFrom("\ud800", "\udc00", "\ud83d\ude00", "\ud83d") },
+  { weight: 2, arbitrary: fc.constantFrom("\u1100", "\u1161", "\u11a8", "\uac00", "\u1100\u1161") },
+  { weight: 1, arbitrary: fc.constantFrom("İ", "ǅ", "ß", "Σ") },
+);
+
+/** Strings built from pipeline-relevant fragments (Property 7). */
+export const arbNormalisable: fc.Arbitrary<string> = fc
+  .array(normalisableFragment, { maxLength: 14 })
+  .map((parts) => parts.join(""));

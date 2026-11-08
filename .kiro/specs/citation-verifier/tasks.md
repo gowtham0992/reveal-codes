@@ -43,7 +43,7 @@ Deviations from the design's file layout, decided while planning:
     - Example tests `quote.test.ts`: the three worked examples of A9 with `prefixLength` 63, 30 and 22; single-segment quote under 12 characters absent gives `mismatch` 0 and present gives `match` (Req 8.7); a quote with no segment (`…`, empty, whitespace) gives `mismatch` 0 (Req 8.8); ellipsis cases: out-of-order segments, a short middle segment, a leading `…`, a trailing `…`, short first and last segments; non-monotone prefix cases from A9; probe-budget exhaustion; tracking abandoned for non-NFC input. Every result is below the quote length.
     - Known limitations to record as L-entries if met: L2 (probe budget), L3 (shortcut misses), L9 (altered word inside brackets or an ellipsis form). Do not stop for them.
     - _Requirements: 8.1, 8.6, 8.7, 8.8, 8.9, 8.15, 8.16_
-  - [~] 2.3 Property 7: pipeline idempotent and never longer than NFC
+  - [x] 2.3 Property 7: pipeline idempotent and never longer than NFC
     - File `test/normalise.properties.test.ts`; shared `arbAnyString` from the engine, verifier `arbNormalisable` in `test/support/arb-verifier.ts` (ASCII, curly quotes, dashes, brackets, dots, tabs, U+0085, U+00A0, U+FEFF, combining marks, surrogates, Hangul jamo).
     - **Property 7: The Normalisation_Pipeline is idempotent and never lengthens beyond NFC**
     - Asserts `normalise` and `normaliseQuote` idempotence, steps 2 to 6 never longer than their input, `normalise(s).length <= s.normalize("NFC").length`, and that `trackQuote` text with the tail trimmed equals `normaliseQuote(s)` when tracking holds.
@@ -137,8 +137,8 @@ Deviations from the design's file layout, decided while planning:
   - [~] 4.9 Checkpoint - lookup pipeline
     - Run `pnpm lint`, `pnpm typecheck` and `pnpm vitest run --project verifier`, and `FC_NUM_RUNS=500 pnpm vitest run --project verifier properties.test`; fix failures. Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 5. Opinion fetch and HTML stripping
-  - [~] 5.1 htmlToText and fetchOpinionText
+- [x] 5. Opinion fetch and HTML stripping
+  - [x] 5.1 htmlToText and fetchOpinionText
     - Files: `src/html.ts` (`htmlToText`: drop `<script>`, `<style>` and `star-pagination` elements, block tags to `\n`, other tags removed, named and numeric entities decoded, invalid code points to U+FFFD), `src/opinion.ts` (`fetchOpinionText`: validate `^[1-9][0-9]*$`, `opinion:<clusterId>` cache read, cluster GET with `?fields=`, opinion URLs rebuilt from `{baseUrl}` and the numeric tail and never followed as given, outer loop over opinions in cluster order and inner loop over `plain_text`, `html_with_citations`, `html`, `html_lawbox`, `html_columbia`, `xml_harvard`, a field that is empty after stripping counts as empty, only non-null text cached, any failure returns `null` uncached), `src/index.ts` export.
     - Example tests `opinion.test.ts` and `html.test.ts`: the examples of Req 9.4 and 9.5, field preference, HTML strip and entity decode, markup-only field skipped, request failure returns `null` and caches nothing, cache hit makes no call, zero opinions, hostile `sub_opinions` URL never receives the token.
     - Known limitations to record if met: L1 (multi-opinion clusters), L5 (page markers in live markup).
