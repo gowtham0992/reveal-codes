@@ -17,7 +17,7 @@ describe("Toolbar _Requirements: 10.1, 10.2, 10.6, 10.7_", () => {
     const names = within(bar)
       .getAllByRole("button")
       .map((b) => b.textContent);
-    expect(names).toEqual(["New", "Load demo motion", "Verify", "Reveal Codes (Alt-F3)", "Export"]);
+    expect(names).toEqual(["New", "Load demo motion", "Verify", "Show codes (Alt-F3)", "Export"]);
   });
 
   it("puts the badge after the buttons and before the status area", () => {
@@ -25,6 +25,19 @@ describe("Toolbar _Requirements: 10.1, 10.2, 10.6, 10.7_", () => {
     const bar = screen.getByRole("toolbar");
     const children = [...bar.children].map((c) => c.textContent);
     expect(children.slice(-2)).toEqual(["Demo mode", ""]);
+  });
+
+  it("renders the Wordmark first, then three groups in order", () => {
+    renderUi(<Toolbar {...BASE} />);
+    const bar = screen.getByRole("toolbar");
+    expect(bar.firstElementChild?.textContent).toBe("Reveal Codes");
+    const groups = within(bar).getAllByRole("group");
+    expect(groups).toHaveLength(3);
+    expect(groups.map((g) => [...g.querySelectorAll("button")].map((b) => b.textContent))).toEqual([
+      ["New", "Load demo motion"],
+      ["Verify"],
+      ["Show codes (Alt-F3)", "Export"],
+    ]);
   });
 
   it("shows the Notice only in a polite status region", () => {
@@ -39,10 +52,12 @@ describe("Toolbar _Requirements: 10.1, 10.2, 10.6, 10.7_", () => {
 
   it("reflects the Pane state in aria-pressed", () => {
     const { rerender } = renderUi(<Toolbar {...BASE} />);
-    const toggle = screen.getByRole("button", { name: "Reveal Codes (Alt-F3)" });
+    const toggle = screen.getByRole("button", { name: "Show codes (Alt-F3)" });
     expect(toggle.getAttribute("aria-pressed")).toBe("false");
     rerender(<Toolbar {...BASE} paneOpen={true} />);
-    expect(toggle.getAttribute("aria-pressed")).toBe("true");
+    const open = screen.getByRole("button", { name: "Hide codes (Alt-F3)" });
+    expect(open.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.queryByRole("button", { name: "Show codes (Alt-F3)" })).toBeNull();
   });
 
   it("disables Verify from its props and keeps New and Export enabled", () => {

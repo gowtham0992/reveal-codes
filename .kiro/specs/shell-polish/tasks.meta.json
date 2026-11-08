@@ -1,0 +1,104 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Wordmark, toolbar groups, and Codes_Toggle label (follows ui.md)": [
+      {
+        "executionId": "730197a6-6476-4461-9a53-20272667981c",
+        "chatSessionId": "sess_1f30ec56-0fc0-444e-bee3-61fc1af0510a",
+        "timestamp": 1794161067523
+      },
+      {
+        "executionId": "730197a6-6476-4461-9a53-20272667981c",
+        "chatSessionId": "sess_1f30ec56-0fc0-444e-bee3-61fc1af0510a",
+        "timestamp": 1794161074292
+      },
+      {
+        "executionId": "730197a6-6476-4461-9a53-20272667981c",
+        "chatSessionId": "sess_1f30ec56-0fc0-444e-bee3-61fc1af0510a",
+        "timestamp": 1794161200690
+      }
+    ],
+    "1.2 Commit hook scope fix and its example test": [
+      {
+        "executionId": "730197a6-6476-4461-9a53-20272667981c",
+        "chatSessionId": "sess_1f30ec56-0fc0-444e-bee3-61fc1af0510a",
+        "timestamp": 1794161067549
+      },
+      {
+        "executionId": "730197a6-6476-4461-9a53-20272667981c",
+        "chatSessionId": "sess_1f30ec56-0fc0-444e-bee3-61fc1af0510a",
+        "timestamp": 1794161200738
+      }
+    ],
+    "2.1 Status_Line strip and move of the Mode_Text (follows ui.md)": [
+      {
+        "executionId": "730197a6-6476-4461-9a53-20272667981c",
+        "chatSessionId": "sess_1f30ec56-0fc0-444e-bee3-61fc1af0510a",
+        "timestamp": 1794161067584
+      }
+    ],
+    "2.2 Mode_Text in the Pane status line (follows ui.md)": [
+      {
+        "executionId": "730197a6-6476-4461-9a53-20272667981c",
+        "chatSessionId": "sess_1f30ec56-0fc0-444e-bee3-61fc1af0510a",
+        "timestamp": 1794161067604
+      }
+    ],
+    "3.1 Page sheet and Placeholder (follows ui.md)": [
+      {
+        "executionId": "730197a6-6476-4461-9a53-20272667981c",
+        "chatSessionId": "sess_1f30ec56-0fc0-444e-bee3-61fc1af0510a",
+        "timestamp": 1794161067622
+      }
+    ],
+    "3.2 Issues heading and region rules (follows ui.md)": [
+      {
+        "executionId": "730197a6-6476-4461-9a53-20272667981c",
+        "chatSessionId": "sess_1f30ec56-0fc0-444e-bee3-61fc1af0510a",
+        "timestamp": 1794161067656
+      }
+    ],
+    "3.3 Assistant strip and expanded heading (follows ui.md)": [
+      {
+        "executionId": "730197a6-6476-4461-9a53-20272667981c",
+        "chatSessionId": "sess_1f30ec56-0fc0-444e-bee3-61fc1af0510a",
+        "timestamp": 1794161067674
+      }
+    ],
+    "4.1 Window title and favicon": [
+      {
+        "executionId": "730197a6-6476-4461-9a53-20272667981c",
+        "chatSessionId": "sess_1f30ec56-0fc0-444e-bee3-61fc1af0510a",
+        "timestamp": 1794161067692
+      }
+    ],
+    "4.2 Dialog titles in Modal (follows ui.md)": [
+      {
+        "executionId": "730197a6-6476-4461-9a53-20272667981c",
+        "chatSessionId": "sess_1f30ec56-0fc0-444e-bee3-61fc1af0510a",
+        "timestamp": 1794161067710
+      }
+    ],
+    "4.3 Css_Scan extension and `ui.md` amendments": [
+      {
+        "executionId": "730197a6-6476-4461-9a53-20272667981c",
+        "chatSessionId": "sess_1f30ec56-0fc0-444e-bee3-61fc1af0510a",
+        "timestamp": 1794161067728
+      }
+    ],
+    "4.4 BUILD_LOG entry and KIRO_USAGE rows": [
+      {
+        "executionId": "730197a6-6476-4461-9a53-20272667981c",
+        "chatSessionId": "sess_1f30ec56-0fc0-444e-bee3-61fc1af0510a",
+        "timestamp": 1794161067754
+      }
+    ],
+    "4.5 Final checkpoint - full repository checks and browser walk": [
+      {
+        "executionId": "730197a6-6476-4461-9a53-20272667981c",
+        "chatSessionId": "sess_1f30ec56-0fc0-444e-bee3-61fc1af0510a",
+        "timestamp": 1794161067784
+      }
+    ]
+  }
+}

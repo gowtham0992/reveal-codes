@@ -146,7 +146,7 @@ describe("Load demo motion _Requirements: 20.1, 20.2, 20.4, 20.5_", () => {
   it("shows [PST] and no [AI in the Pane", async () => {
     await mount(null);
     await click("Load demo motion");
-    await click("Reveal Codes (Alt-F3)");
+    await click("Show codes (Alt-F3)");
     const pane = screen.getByRole("region", { name: "Reveal Codes" });
     const labels = [...pane.querySelectorAll('[role="img"]')].map((e) =>
       e.getAttribute("aria-label"),

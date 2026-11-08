@@ -25,21 +25,28 @@ export function exportLabel(blocking: number): string {
 export function Toolbar(props: ToolbarProps) {
   return (
     <div role="toolbar" aria-label="Document actions" className={styles["toolbar"]}>
-      <button type="button" onClick={props.onNew}>
-        New
-      </button>
-      <button type="button" onClick={props.onLoadDemo}>
-        Load demo motion
-      </button>
-      <button type="button" disabled={props.verifyDisabled} onClick={props.onVerify}>
-        {props.verifyRunning === true ? "Verifying…" : "Verify"}
-      </button>
-      <button type="button" aria-pressed={props.paneOpen} onClick={props.onTogglePane}>
-        Reveal Codes (Alt-F3)
-      </button>
-      <button type="button" onClick={props.onExport}>
-        {exportLabel(props.blockingCount ?? 0)}
-      </button>
+      <span className={styles["wordmark"]}>Reveal Codes</span>
+      <div role="group" className={styles["group"]}>
+        <button type="button" onClick={props.onNew}>
+          New
+        </button>
+        <button type="button" onClick={props.onLoadDemo}>
+          Load demo motion
+        </button>
+      </div>
+      <div role="group" className={styles["group"]}>
+        <button type="button" disabled={props.verifyDisabled} onClick={props.onVerify}>
+          {props.verifyRunning === true ? "Verifying…" : "Verify"}
+        </button>
+      </div>
+      <div role="group" className={styles["group"]}>
+        <button type="button" aria-pressed={props.paneOpen} onClick={props.onTogglePane}>
+          {props.paneOpen ? "Hide codes (Alt-F3)" : "Show codes (Alt-F3)"}
+        </button>
+        <button type="button" onClick={props.onExport}>
+          {exportLabel(props.blockingCount ?? 0)}
+        </button>
+      </div>
       {props.badge === undefined ? null : <span className={styles["badge"]}>{props.badge}</span>}
       <div role="status" aria-live="polite" className={styles["notice"]}>
         {props.notice}

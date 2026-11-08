@@ -84,7 +84,7 @@ describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () =
       "New",
       "Load demo motion",
       "Verify",
-      "Reveal Codes (Alt-F3)",
+      "Show codes (Alt-F3)",
       "Export",
     ]);
     expect(
@@ -192,7 +192,7 @@ describe("AppShell Pane wiring _Requirements: 6.7, 13.3, 13.5, 13.6, 14.1, 14.2,
 
   it("keeps the toolbar button aria-pressed in step with the Pane", async () => {
     await mount(fixture());
-    const button = screen.getByRole("button", { name: "Reveal Codes (Alt-F3)" });
+    const button = screen.getByRole("button", { name: "Show codes (Alt-F3)" });
     expect(button.getAttribute("aria-pressed")).toBe("false");
     act(() => {
       fireEvent.click(button);
