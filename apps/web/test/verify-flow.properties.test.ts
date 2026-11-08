@@ -105,6 +105,8 @@ function checkGets(doc: Document, final: Document, requests: readonly RecordedRe
   }
 }
 
+const CLOCK = (): Date => new Date(ISO);
+
 describe("Property 5: only citations leave _Requirements: 17.14_", () => {
   // Property 5
   it("sends one POST of the Full_Records, then only cluster-id GETs for verified quotes", async () => {
@@ -114,7 +116,7 @@ describe("Property 5: only citations leave _Requirements: 17.14_", () => {
         store.dispatch({ type: "replace", document: doc });
         const start = store.getState().document;
         const { fetchFn, requests } = recordingFetch(script, start);
-        const outcome = await runVerifyFlow(createApiClient(fetchFn), store);
+        const outcome = await runVerifyFlow(createApiClient(fetchFn), store, CLOCK);
         expect(outcome.status).toBe("completed");
         checkPost(start, requests);
         checkGets(start, store.getState().document, requests);

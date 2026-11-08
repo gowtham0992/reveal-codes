@@ -115,7 +115,11 @@ async function runQuotePhase(api: ApiClient, store: FlowStore, epoch: number): P
 }
 
 /** Never rejects: failures are returned as an outcome and shown as a Notice. */
-export async function runVerifyFlow(api: ApiClient, store: FlowStore): Promise<VerifyOutcome> {
+export async function runVerifyFlow(
+  api: ApiClient,
+  store: FlowStore,
+  now: () => Date,
+): Promise<VerifyOutcome> {
   const epoch = store.getState().epoch;
   const verified = await api.verify(buildVerifyBody(store.getState().document).records);
   if (store.getState().epoch !== epoch) return outcome("discarded", store, 0, 0);
@@ -126,6 +130,7 @@ export async function runVerifyFlow(api: ApiClient, store: FlowStore): Promise<V
   const first = store.dispatch({ type: "verification", pairs: verified.value });
   const phase = await runQuotePhase(api, store, epoch);
   if (phase.discarded) return outcome("discarded", store, 0, 0);
+  store.dispatch({ type: "verified", at: now().toISOString() });
   const done = outcome("completed", store, first.skipped + phase.skipped, phase.unavailable);
   store.dispatch({ type: "notice", text: summaryNotice(done) });
   return done;

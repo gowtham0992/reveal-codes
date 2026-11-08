@@ -20,13 +20,31 @@ function demoStore() {
   return store;
 }
 
+const CLOCK = (): Date => new Date("2026-11-02T12:30:00.000Z");
+
+/** Counts `verified` dispatches while delegating to the real Store. */
+function countingStore(store: ReturnType<typeof demoStore>) {
+  let verified = 0;
+  const flow = {
+    getState: store.getState,
+    dispatch: ((action) => {
+      if (action.type === "verified") verified += 1;
+      return store.dispatch(action);
+    }) as typeof store.dispatch,
+  };
+  return { flow, count: () => verified };
+}
+
 const FAILED = "Verification could not be completed. Your citations are unchanged.";
 
 describe("Verify flow on the demo motion _Requirements: 17.2, 17.3, 17.4, 17.5, 17.6_", () => {
   it("finds 3 not_found citations, a Haines match and an Iqbal mismatch", async () => {
     const server = routeFetch();
     const store = demoStore();
-    const outcome = await runVerifyFlow(createApiClient(server.fetch), store);
+    const counted = countingStore(store);
+    const outcome = await runVerifyFlow(createApiClient(server.fetch), counted.flow, CLOCK);
+    expect(counted.count()).toBe(1);
+    expect(store.getState().verifiedAt).toBe(CLOCK().toISOString());
     const doc = store.getState().document;
     const statuses = doc.citations.flatMap((c) => (c.kind === "full" ? [c.result.status] : []));
     expect(statuses.filter((s) => s === "not_found")).toHaveLength(3);
@@ -42,7 +60,7 @@ describe("Verify flow on the demo motion _Requirements: 17.2, 17.3, 17.4, 17.5, 
     const server = routeFetch();
     const store = demoStore();
     const doc = store.getState().document;
-    await runVerifyFlow(createApiClient(server.fetch), store);
+    await runVerifyFlow(createApiClient(server.fetch), store, CLOCK);
     const [first, ...rest] = server.requests;
     expect(first?.method).toBe("POST");
     expect(rest.every((r) => r.method === "GET" && r.body === null)).toBe(true);
@@ -77,7 +95,7 @@ describe("Verify flow on the demo motion _Requirements: 17.2, 17.3, 17.4, 17.5, 
         ? Promise.resolve(new Response(JSON.stringify([]), { status: 200 }))
         : server.fetch(url, init);
     const store = demoStore();
-    const outcome = await runVerifyFlow(createApiClient(fetchFn), store);
+    const outcome = await runVerifyFlow(createApiClient(fetchFn), store, CLOCK);
     expect(server.requests.filter((r) => r.url.startsWith("/api/opinion"))).toHaveLength(0);
     expect(outcome.status).toBe("completed");
     expect(outcome.quotes.unchecked).toBe(2);
@@ -95,7 +113,7 @@ describe("Verify flow on the demo motion _Requirements: 17.2, 17.3, 17.4, 17.5, 
       inFlight -= 1;
       return response;
     };
-    await runVerifyFlow(createApiClient(fetchFn), demoStore());
+    await runVerifyFlow(createApiClient(fetchFn), demoStore(), CLOCK);
     expect(server.requests.filter((r) => r.url.startsWith("/api/opinion")).length).toBeGreaterThan(
       1,
     );
@@ -111,7 +129,7 @@ describe("Verify flow failures _Requirements: 17.7, 17.8, 17.10, 17.11_", () => 
         ? Promise.resolve(new Response(JSON.stringify({ clusterId: "1", text: null })))
         : server.fetch(url, init);
     const store = demoStore();
-    const outcome = await runVerifyFlow(createApiClient(fetchFn), store);
+    const outcome = await runVerifyFlow(createApiClient(fetchFn), store, CLOCK);
     expect(outcome.status).toBe("completed");
     expect(outcome.unavailable).toBe(2);
     expect(store.getState().notice).toContain("Opinions unavailable: 2.");
@@ -121,8 +139,11 @@ describe("Verify flow failures _Requirements: 17.7, 17.8, 17.10, 17.11_", () => 
     const store = demoStore();
     const before = store.getState().document;
     const api = createApiClient(() => Promise.reject(new Error("offline")));
-    const outcome = await runVerifyFlow(api, store);
+    const counted = countingStore(store);
+    const outcome = await runVerifyFlow(api, counted.flow, CLOCK);
     expect(outcome.status).toBe("failed");
+    expect(counted.count()).toBe(0);
+    expect(store.getState().verifiedAt).toBeNull();
     expect(store.getState().document).toBe(before);
     expect(store.getState().notice).toBe(FAILED);
   });
@@ -138,8 +159,11 @@ describe("Verify flow failures _Requirements: 17.7, 17.8, 17.10, 17.11_", () => 
         store.dispatch({ type: "replace", document: fresh.value });
       }
     };
-    const outcome = await runVerifyFlow(createApiClient(server.fetch), store);
+    const counted = countingStore(store);
+    const outcome = await runVerifyFlow(createApiClient(server.fetch), counted.flow, CLOCK);
     expect(outcome.status).toBe("discarded");
+    expect(counted.count()).toBe(0);
+    expect(store.getState().verifiedAt).toBeNull();
     expect(store.getState().document).toBe(fresh.value);
     expect(store.getState().notice).toBeNull();
     expect(server.requests.filter((r) => r.url.startsWith("/api/opinion"))).toHaveLength(1);

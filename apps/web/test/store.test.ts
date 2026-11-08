@@ -47,6 +47,7 @@ describe("initialState", () => {
     expect(s.undo).toEqual([]);
     expect(s.redo).toEqual([]);
     expect(s.runLog).toEqual([]);
+    expect(s.verifiedAt).toBeNull();
     expect(s.notice).toBeNull();
     expect(s.epoch).toBe(0);
   });
@@ -244,6 +245,38 @@ describe("replace and notice", () => {
     expect(r.state.runLog).toEqual([run1]);
   });
 
+  it("replace sets a supplied verifiedAt and clears it when absent", () => {
+    const at = "2026-03-05T02:30:00.000Z";
+    const set = reduce(
+      initialState(now),
+      { type: "replace", document: docOf(""), verifiedAt: at },
+      now,
+    );
+    expect(set.state.verifiedAt).toBe(at);
+    const cleared = reduce(set.state, { type: "replace", document: docOf("") }, now);
+    expect(cleared.state.verifiedAt).toBeNull();
+  });
+
+  it("verified stores the instant without a barrier or Document change", () => {
+    const s0 = run(initialState(now), { type: "edit", ops: [insert(0, "a")] });
+    const r = reduce(s0, { type: "verified", at: ISO }, now);
+    expect(r.state.verifiedAt).toBe(ISO);
+    expect(r.state.document).toBe(s0.document);
+    expect(r.state.undo).toBe(s0.undo);
+    expect(r.state.epoch).toBe(s0.epoch);
+    expect(r.changed).toBe(false);
+  });
+
+  it("edit, undo, redo and override leave verifiedAt untouched", () => {
+    const s0 = { ...citedState(), verifiedAt: ISO };
+    const { cit } = firstKeys(s0);
+    const edited = run(s0, { type: "edit", ops: [insert(0, "x")] });
+    const undone = run(edited, { type: "undo" });
+    const redone = run(undone, { type: "redo" });
+    const overridden = run(redone, { type: "override", key: cit, reason: "r", timestamp: ISO });
+    for (const s of [edited, undone, redone, overridden]) expect(s.verifiedAt).toBe(ISO);
+  });
+
   it("notice sets only the notice", () => {
     const s = initialState(now);
     const r = reduce(s, { type: "notice", text: "hello" }, now);
@@ -265,6 +298,7 @@ describe("immutability", () => {
       { type: "quoteCheck", pairs: [[quo ?? "", { status: "match" }]] },
       { type: "override", key: cit, reason: "r", timestamp: ISO },
       { type: "replace", document: docOf("q") },
+      { type: "verified", at: ISO },
       { type: "notice", text: "t" },
     ];
     for (const s of [base, withRedo]) {

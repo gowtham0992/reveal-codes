@@ -13,6 +13,7 @@ import {
   reduceHistory,
   reduceOverride,
   reduceReplace,
+  reduceVerified,
   reducePairs,
 } from "./store-actions";
 
@@ -33,6 +34,8 @@ export type StoreState = Readonly<{
   undo: readonly UndoEntry[];
   redo: readonly UndoEntry[];
   runLog: readonly RunLogEntry[];
+  /** ISO instant of the last completed Verify, or null. */
+  verifiedAt: string | null;
   notice: string | null;
   epoch: number;
 }>;
@@ -47,7 +50,13 @@ export type StoreAction =
     }>
   | Readonly<{ type: "quoteCheck"; pairs: readonly (readonly [IssueKey, QuoteCheckResult])[] }>
   | Readonly<{ type: "override"; key: IssueKey; reason: string; timestamp: string }>
-  | Readonly<{ type: "replace"; document: Document; runLog?: readonly RunLogEntry[] }>
+  | Readonly<{
+      type: "replace";
+      document: Document;
+      runLog?: readonly RunLogEntry[];
+      verifiedAt?: string | null;
+    }>
+  | Readonly<{ type: "verified"; at: string }>
   | Readonly<{ type: "notice"; text: string | null }>;
 
 export type ActionResult = Readonly<{
@@ -66,7 +75,15 @@ export type ActionResult = Readonly<{
 export function initialState(now: () => Date): StoreState {
   const created = createDocument("", now().toISOString());
   if (!created.ok) throw new Error(`initial document rejected: ${created.error.kind}`);
-  return { document: created.value, undo: [], redo: [], runLog: [], notice: null, epoch: 0 };
+  return {
+    document: created.value,
+    undo: [],
+    redo: [],
+    runLog: [],
+    verifiedAt: null,
+    notice: null,
+    epoch: 0,
+  };
 }
 
 /** Pure reducer. The clock is read only for coalescing (edit) and never mutates `state`. */
@@ -83,7 +100,9 @@ export function reduce(state: StoreState, action: StoreAction, now: () => Date):
     case "override":
       return reduceOverride(state, action);
     case "replace":
-      return reduceReplace(state, action.document, action.runLog);
+      return reduceReplace(state, action.document, action.runLog, action.verifiedAt);
+    case "verified":
+      return reduceVerified(state, action.at);
     case "notice":
       return {
         state: { ...state, notice: action.text },

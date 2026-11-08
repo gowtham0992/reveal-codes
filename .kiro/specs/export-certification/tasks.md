@@ -113,7 +113,7 @@ Conventions that apply to every task:
     - _Requirements: 1.6, 10.5, 10.6_
 
 - [ ] 5. Web: Store, persistence, export flow, dialog, and print view
-  - [-] 5.1 Store `verifiedAt` and Verify flow clock (follows ui.md)
+  - [x] 5.1 Store `verifiedAt` and Verify flow clock (follows ui.md)
     - Files: `apps/web/src/store.ts` (`StoreState.verifiedAt: string | null`, initial `null`; the `replace` action gains optional `verifiedAt`, absent means `null`; new action `{ type: "verified"; at: string }`), `apps/web/src/store-actions.ts` (`reduceReplace` sets `verifiedAt ?? null`; `reduceVerified` returns `changed: false` with the new field so subscribers are notified and no history barrier fires; `edit`, `undo`, `redo`, `verification`, `quoteCheck` and `override` leave the field untouched), `apps/web/src/client/verify-flow.ts` (`runVerifyFlow(api, store, now)` dispatches `{ type: "verified", at: now().toISOString() }` once, after the quote phase and before the summary Notice, only on the `completed` path; none on `failed` or `discarded`), and the `runVerifyFlow` caller in `apps/web/src/components/app-shell.tsx` passing `svc.now`.
     - Update the editor-app tests named in its revision note: `store.test.ts` (initial `null`; `replace` with and without `verifiedAt`; `verified` action; edit, undo, redo and override leave it), `store.properties.test.ts` (the `StoreState` literal in Property 3 gains `verifiedAt: null`; no new property), `verify-flow.test.ts` and `verify-flow.properties.test.ts` (clock argument on every call; one `verified` dispatch on completed flows, none on failed and discarded).
     - Modules at most 300 lines and functions at most 40.

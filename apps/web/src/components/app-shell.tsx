@@ -114,7 +114,7 @@ function useVerify(svc: AppServices, store: Store) {
   const [running, setRunning] = useState(false);
   const start = (): void => {
     setRunning(true);
-    void runVerifyFlow(svc.api, store).then(() => {
+    void runVerifyFlow(svc.api, store, svc.now).then(() => {
       setRunning(false);
     });
   };

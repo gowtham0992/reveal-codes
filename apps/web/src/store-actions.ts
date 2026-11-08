@@ -130,12 +130,19 @@ export function reduceReplace(
   state: StoreState,
   document: Document,
   runLog: readonly RunLogEntry[] | undefined,
+  verifiedAt?: string | null,
 ): ActionResult {
   const next: StoreState = {
     ...barrier(state, document),
     runLog: runLog ?? [],
+    verifiedAt: verifiedAt ?? null,
     notice: null,
     epoch: state.epoch + 1,
   };
   return result(next, { changed: true });
+}
+
+/** `verified`: records the Verify time; no Document change, so no history barrier. */
+export function reduceVerified(state: StoreState, at: string): ActionResult {
+  return result({ ...state, verifiedAt: at });
 }
