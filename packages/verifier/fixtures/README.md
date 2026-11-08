@@ -1,0 +1,1 @@
+See `manifest.json`: it lists every fixture here with its source, whether it was recorded (with date) or hand-authored, and where it came from. Cluster ids 999000003 and 999000004 (the synthetic `1 H. 150`) are placeholders, not real CourtListener ids. The files under `source/` are the verbatim opinion excerpts behind `opinions/`; see `source/README.md`.

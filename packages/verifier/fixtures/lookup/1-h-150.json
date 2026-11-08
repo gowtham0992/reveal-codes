@@ -1,0 +1,19 @@
+{
+  "line": "1 H. 150",
+  "entry": {
+    "citation": "1 H. 150",
+    "normalized_citations": ["1 H. 150", "1 Hill 150"],
+    "start_index": 0,
+    "end_index": 8,
+    "status": 300,
+    "error_message": "Multiple citations found: '1 H. 150'",
+    "clusters": [
+      {
+        "id": 999000003
+      },
+      {
+        "id": 999000004
+      }
+    ]
+  }
+}

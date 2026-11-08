@@ -14,6 +14,12 @@ describe("htmlToText", () => {
     expect(htmlToText(html)).toBe("less stringent standards");
   });
 
+  it("drops page-number elements and the XML declaration as recorded from the live API", () => {
+    const html =
+      '<?xml version="1.0" encoding="utf-8"?><p>doors of discovery for <page-number citation-index="1" label="679">*679</page-number>a plaintiff armed</p>';
+    expect(htmlToText(html)).toBe("\ndoors of discovery for a plaintiff armed\n");
+  });
+
   it("decodes named and numeric entities in a single pass", () => {
     expect(htmlToText("a&amp;b &lt;i&gt; &ldquo;q&rdquo; &#8212; &#x2019; &sect;1 &amp;lt;")).toBe(
       "a&b <i> \u201cq\u201d \u2014 \u2019 \u00a71 &lt;",

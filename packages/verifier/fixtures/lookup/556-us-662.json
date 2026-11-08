@@ -1,0 +1,26 @@
+{
+  "line": "556 U.S. 662",
+  "entry": {
+    "citation": "556 U.S. 662",
+    "normalized_citations": ["556 U.S. 662"],
+    "start_index": 0,
+    "end_index": 12,
+    "status": 200,
+    "error_message": "",
+    "clusters": [
+      {
+        "resource_uri": "https://www.courtlistener.com/api/rest/v4/clusters/145875/",
+        "id": 145875,
+        "absolute_url": "/opinion/145875/ashcroft-v-iqbal/",
+        "docket_id": 191796,
+        "sub_opinions": [
+          "https://www.courtlistener.com/api/rest/v4/opinions/9435340/",
+          "https://www.courtlistener.com/api/rest/v4/opinions/145875/",
+          "https://www.courtlistener.com/api/rest/v4/opinions/9435339/"
+        ],
+        "case_name": "Ashcroft v. Iqbal",
+        "date_filed": "2009-05-18"
+      }
+    ]
+  }
+}

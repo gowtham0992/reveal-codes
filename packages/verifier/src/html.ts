@@ -21,6 +21,10 @@ const REPLACEMENT = "\ufffd";
 const NON_CONTENT = /<(script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi;
 const STAR_PAGE =
   /<([a-z][a-z0-9]*)\b[^>]*\bclass\s*=\s*["'][^"']*star-pagination[^"']*["'][^>]*>[\s\S]*?<\/\1\s*>/gi;
+/** Live `html_with_citations` also marks pages with `<page-number label="678">*678</page-number>` (recorded 2026-11-07, L5). */
+const PAGE_NUMBER = /<page-number\b[^>]*>[\s\S]*?<\/page-number\s*>/gi;
+/** Live `html_with_citations` can start with `<?xml version="1.0" encoding="utf-8"?>`. */
+const XML_DECLARATION = /<\?xml\b[^>]*\?>/gi;
 const BLOCK_TAG = /<\/?(?:p|div|br|li|h[1-6]|blockquote|tr|footnote)\b[^>]*>/gi;
 const ANY_TAG = /<\/?[a-z!][^>]*>/gi;
 const ENTITY = /&(?:#([0-9]+)|#[xX]([0-9a-fA-F]+)|([a-zA-Z]+));/g;
@@ -44,13 +48,16 @@ function decodeEntity(
 
 /**
  * Strips markup from an opinion HTML or XML field (design A10). Drops script,
- * style and star-pagination elements, turns block tags into newlines, removes
- * other tags, then decodes entities in one pass so `&amp;lt;` becomes `&lt;`.
+ * style, star-pagination and page-number elements and any XML declaration,
+ * turns block tags into newlines, removes other tags, then decodes entities in
+ * one pass so `&amp;lt;` becomes `&lt;`.
  */
 export function htmlToText(s: string): string {
   return s
     .replace(NON_CONTENT, "")
     .replace(STAR_PAGE, "")
+    .replace(PAGE_NUMBER, "")
+    .replace(XML_DECLARATION, "")
     .replace(BLOCK_TAG, "\n")
     .replace(ANY_TAG, "")
     .replace(ENTITY, decodeEntity);

@@ -1,0 +1,106 @@
+[
+  {
+    "file": "lookup/556-us-662.json",
+    "kind": "lookup",
+    "line": "556 U.S. 662",
+    "source": "courtlistener-live",
+    "recorded": "2026-11-07",
+    "note": "citation-lookup entry for Ashcroft v. Iqbal, status 200, one cluster 145875; embedded cluster trimmed to identifying fields"
+  },
+  {
+    "file": "lookup/404-us-519.json",
+    "kind": "lookup",
+    "line": "404 U.S. 519",
+    "source": "courtlistener-live",
+    "recorded": "2026-11-07",
+    "note": "citation-lookup entry for Haines v. Kerner, status 200, one cluster 108432; embedded cluster trimmed to identifying fields"
+  },
+  {
+    "file": "lookup/1047-f3d-212.json",
+    "kind": "lookup",
+    "line": "1047 F.3d 212",
+    "source": "courtlistener-live",
+    "recorded": "2026-11-07",
+    "note": "status 404 as returned live; fabricated citation in the demo motion"
+  },
+  {
+    "file": "lookup/1012-f-supp-2d-88.json",
+    "kind": "lookup",
+    "line": "1012 F. Supp. 2d 88",
+    "source": "courtlistener-live",
+    "recorded": "2026-11-07",
+    "note": "status 404 as returned live; fabricated citation in the demo motion"
+  },
+  {
+    "file": "lookup/912-f4th-33.json",
+    "kind": "lookup",
+    "line": "912 F.4th 33",
+    "source": "courtlistener-live",
+    "recorded": "2026-11-07",
+    "note": "status 404 as returned live; fabricated citation in the demo motion (written 912 F. 4th 33)"
+  },
+  {
+    "file": "lookup/1-h-150.json",
+    "kind": "lookup",
+    "line": "1 H. 150",
+    "source": "hand-authored",
+    "hand_authored": true,
+    "synthetic": true,
+    "note": "documentation example of a 300 with two clusters; not observed for this line; cluster ids 999000003 and 999000004 are placeholders"
+  },
+  {
+    "file": "lookup/576-us-644.json",
+    "kind": "lookup",
+    "line": "576 U.S. 644",
+    "source": "hand-authored",
+    "hand_authored": true,
+    "synthetic": true,
+    "note": "per-line 429 with wait_until inside HTTP 200; not observed live (live throttling is HTTP-level); not in the demo motion"
+  },
+  {
+    "file": "http/throttle-429.json",
+    "kind": "http",
+    "source": "hand-authored",
+    "hand_authored": true,
+    "note": "HTTP-level 429 body for retry tests (live 429s carried Retry-After and a detail text but no wait_until); not routed by Fixture_Fetch"
+  },
+  {
+    "file": "clusters/145875.json",
+    "kind": "cluster",
+    "path": "/api/rest/v4/clusters/145875/",
+    "source": "courtlistener-live",
+    "recorded": "2026-11-07",
+    "note": "GET clusters/145875/?fields=id,sub_opinions for Ashcroft v. Iqbal, body as returned; first opinion with text is 9435339"
+  },
+  {
+    "file": "clusters/108432.json",
+    "kind": "cluster",
+    "path": "/api/rest/v4/clusters/108432/",
+    "source": "courtlistener-live",
+    "recorded": "2026-11-07",
+    "note": "GET clusters/108432/?fields=id,sub_opinions for Haines v. Kerner, body as returned"
+  },
+  {
+    "file": "opinions/9435339.json",
+    "kind": "opinion",
+    "path": "/api/rest/v4/opinions/9435339/",
+    "source": "supremecourt.gov",
+    "hand_authored": true,
+    "note": "Iqbal excerpt, 556 U.S. at 678-679, from fixtures/source/556-us-662-excerpt.txt; checked 2026-11-07 against live html_with_citations: paragraph 1 verbatim, paragraph 2 verbatim except one OCR error in the live text (hyperteehnical)"
+  },
+  {
+    "file": "opinions/108432.json",
+    "kind": "opinion",
+    "path": "/api/rest/v4/opinions/108432/",
+    "source": "supremecourt.gov",
+    "hand_authored": true,
+    "note": "Haines excerpt, 404 U.S. at 519-521, from fixtures/source/404-us-519-excerpt.txt; checked 2026-11-07 against live text: the two quoted passages match; elsewhere live differs in quote marks, Rule 12 (b) (6) spacing, and citation text (427 F.2d 71, Conley parallel cites)"
+  },
+  {
+    "file": "quotes.json",
+    "kind": "quotes",
+    "source": "hand-authored",
+    "hand_authored": true,
+    "note": "four genuine quotes copied from the excerpts (each also matches the live text) and the motion's fabricated Iqbal quote"
+  }
+]
