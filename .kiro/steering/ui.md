@@ -12,6 +12,7 @@ The app should look like a tool a lawyer's office would have used, not like a ge
 - No component library, no icon library, no Tailwind, no CSS-in-JS.
 - One global stylesheet defining CSS variables, plus one CSS module per component.
 - Text labels only. No icons, no emoji, no illustrations.
+- The favicon (the letters "RC" in Georgia bold) is the only place where letters serve as a mark.
 
 ## Palette (outside the pane)
 
@@ -23,7 +24,8 @@ The app should look like a tool a lawyer's office would have used, not like a ge
 
 - UI: system sans (`-apple-system, "Segoe UI", Helvetica, Arial, sans-serif`) at 13px.
 - Editor: `Georgia, "Times New Roman", serif` at 12pt.
-- Pane: `ui-monospace, Menlo, Consolas, monospace`.
+- Wordmark: the editor family at 15px.
+- Status line: the pane family (`ui-monospace, Menlo, Consolas, monospace`) at 12px.
 - Three families, no more. Weights regular and bold only.
 
 ## Controls
@@ -35,11 +37,17 @@ The app should look like a tool a lawyer's office would have used, not like a ge
 
 ## Layout
 
-- Fixed grid: 32px toolbar, 260px left panel, 300px right panel, pane 40% of the viewport height when open.
+- 32px toolbar.
+- 22px status line under the editor while the pane is closed.
+- 32px assistant strip while the assistant column is collapsed; 260px left panel while it is expanded.
+- 300px right panel.
+- Pane 40% of the viewport height when open.
+- The page is a fixed 8.5in sheet with 1in padding.
+- The Issues region has a 1px left rule.
 - Separate regions with 1px `#B0B0B0` rules, not whitespace and shadows.
 
 ## Copy
 
 - Short and plain. No exclamation marks, no "Oops", no "Let's", no sparkle characters, no marketing text.
-- No empty-state illustrations and no toasts. State is shown as text in the toolbar or the pane status line.
+- No empty-state illustrations and no toasts. State is shown as text in the toolbar, the status line under the editor, or the pane status line.
 - Severity is shown by the code colour in the pane and by words in the Issues list ("blocking", "not found"), not by coloured badges.

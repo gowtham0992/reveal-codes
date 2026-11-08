@@ -43,6 +43,10 @@ const VARIABLE_VALUES: Readonly<Record<string, string>> = {
   "--toolbar-h": "32px",
   "--left-w": "260px",
   "--right-w": "300px",
+  "--size-wordmark": "15px",
+  "--size-status": "12px",
+  "--status-h": "22px",
+  "--strip-w": "32px",
   "--pane-h": "40vh",
   "--button-pad": "4px 10px",
 };
@@ -168,7 +172,7 @@ function typeViolations(path: string, decls: CssDeclaration[]): Violation[] {
       found.push(at(path, d, "font-weight must be 400 or 700"));
     }
     if (d.prop === "font-size" && !sizes.includes(value))
-      found.push(at(path, d, "font-size must be 13px"));
+      found.push(at(path, d, "font-size must be 12px, 13px or 15px"));
   }
   return found;
 }
@@ -347,8 +351,15 @@ describe("static: stylesheet self-test (planted violations)", () => {
     expect(ui(text)).toEqual([
       "src/components/x.module.css:2 font-family must be one of the three variables",
       "src/components/x.module.css:3 font-weight must be 400 or 700",
-      "src/components/x.module.css:4 font-size must be 13px",
+      "src/components/x.module.css:4 font-size must be 12px, 13px or 15px",
       "src/components/x.module.css:5 outline removed",
+    ]);
+  });
+
+  it("accepts 12px and 15px and still reports 14px with its path and line", () => {
+    expect(ui(".a {\n  font-size: 12px;\n}\n.b {\n  font-size: 15px;\n}\n")).toEqual([]);
+    expect(ui(".a {\n  color: #111111;\n  font-size: 14px;\n}\n")).toEqual([
+      "src/components/x.module.css:3 font-size must be 12px, 13px or 15px",
     ]);
   });
 
