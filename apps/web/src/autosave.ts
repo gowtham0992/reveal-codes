@@ -37,16 +37,28 @@ function storageFailure(action: () => void): Failure | null {
   }
 }
 
-export function createAutosave(deps: AutosaveDeps): Autosave {
-  let pending: Pending | null = null;
+type TimerSlot = Readonly<{ cancel: () => void; start: (fn: () => void) => void }>;
+
+function createTimerSlot(deps: AutosaveDeps): TimerSlot {
   let handle: unknown = null;
   let hasHandle = false;
-
-  const cancelTimer = (): void => {
-    if (hasHandle) deps.clearTimer(handle);
-    hasHandle = false;
-    handle = null;
+  return {
+    cancel() {
+      if (hasHandle) deps.clearTimer(handle);
+      hasHandle = false;
+      handle = null;
+    },
+    start(fn) {
+      handle = deps.setTimer(fn, AUTOSAVE_DEBOUNCE_MS);
+      hasHandle = true;
+    },
   };
+}
+
+export function createAutosave(deps: AutosaveDeps): Autosave {
+  let pending: Pending | null = null;
+  const slot = createTimerSlot(deps);
+  const cancelTimer = slot.cancel;
 
   const write = (): void => {
     cancelTimer();
@@ -66,8 +78,7 @@ export function createAutosave(deps: AutosaveDeps): Autosave {
     schedule(document, runLog) {
       pending = { document, runLog };
       cancelTimer();
-      handle = deps.setTimer(write, AUTOSAVE_DEBOUNCE_MS);
-      hasHandle = true;
+      slot.start(write);
     },
     flush: write,
     clear() {

@@ -1,7 +1,6 @@
 import type { CallerOperation, Provenance } from "@reveal-codes/engine";
 import type { Node as PMNode } from "@tiptap/pm/model";
-import { ReplaceStep } from "@tiptap/pm/transform";
-import type { Step } from "@tiptap/pm/transform";
+import { ReplaceStep, Step } from "@tiptap/pm/transform";
 import { docFromText, docText, posToOffset } from "./offsets";
 import { editorSchema } from "./schema";
 import { sliceToText } from "./slice-text";
@@ -118,12 +117,21 @@ function fallbackOps(
   ];
 }
 
+/**
+ * A live Editor builds its own schema instance from the extensions, so its
+ * steps carry nodes that `editorSchema` documents reject. Re-read each step
+ * under `editorSchema` before applying it.
+ */
+function toEditorSchema(step: Step): Step {
+  return Step.fromJSON(editorSchema, step.toJSON());
+}
 /** Maps ProseMirror steps to Engine operations; falls back to one prefix/suffix replace. */
 export function mapSteps(
   beforeText: string,
-  steps: readonly Step[],
+  rawSteps: readonly Step[],
   provenance: Provenance,
 ): StepMapping {
+  const steps = rawSteps.map(toEditorSchema);
   const mapped = mapAll(beforeText, steps, provenance);
   if (mapped !== null) return { ops: mapped, path: "mapped" };
   const after = resultingText(beforeText, steps);
