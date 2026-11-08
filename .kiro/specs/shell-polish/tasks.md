@@ -52,11 +52,11 @@ Conventions that apply to every task:
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 12.5, 14.3_
 
 - [ ] 3. Page, Issues region, and Assistant column
-  - [~] 3.1 Page sheet and Placeholder (follows ui.md)
+  - [x] 3.1 Page sheet and Placeholder (follows ui.md)
     - Files: `apps/web/src/components/editor-surface.tsx` and `editor-surface.module.css`. `EDITOR_PLACEHOLDER` becomes "Type or paste your filing here. Load demo motion to see a worked example." CSS: `.main` gets `padding: 0; background: var(--ui-bg); overflow: auto;` and loses its `border-right` (the Issues_Region owns the rule, task 3.2). `.page` gets `width: 100%; max-width: var(--page-max); min-height: 11in; margin: 24px auto; padding: 1in; border: 1px solid var(--rule); background: var(--paper);` and keeps its editor family, `var(--size-editor)` and `line-height: var(--line-editor)`. `.placeholder` gets `top: 1in; left: 1in; right: 1in;` (the Page is `position: relative`).
     - Update tests: `editor-surface.test.tsx` (the literal expected placeholder), and the three placeholder assertions in `app-shell.test.tsx` use the new text. Add a case that the Placeholder is absent once the Document has one character.
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 7.1, 7.2, 7.3, 7.4, 14.7_
-  - [~] 3.2 Issues heading and region rules (follows ui.md)
+  - [-] 3.2 Issues heading and region rules (follows ui.md)
     - Files: `apps/web/src/components/issues-region.tsx` and `issues-region.module.css`. Export `issuesHeading(blocking: number): string`: "Issues" at zero, otherwise `Issues \u2014 <n> blocking` (U+2014, one space each side, `n` in plain digits). `IssuesRegion` computes `blockingIssues(document).length` (the Engine function `use-export.tsx` already uses) and renders `issuesHeading(n)` in the existing `h2#issues-heading`, so the landmark name follows the heading.
     - Split the markup into `aside > h2.heading` then `div.body` (demo note, list, Override_Dialog host). CSS: `.issues` gets `grid-column: issues; grid-row: 2 / 4; padding: 0; overflow: auto; border-left: 1px solid var(--rule); background: var(--ui-bg);`; `.heading` gets `margin: 0; padding: 8px; border-bottom: 1px solid var(--rule); font-size: var(--size-ui); font-weight: 700;`; `.body` gets `padding: 8px;`. The row span makes the left rule run the full height in both Pane states.
     - Tests: in `issues-list.test.tsx` (the existing `IssuesRegion` describe) the heading reads "Issues" for a Document with no blocking issue and "Issues — 4 blocking" for a Document with four citations, and updates when the Blocking_Count changes. Existing issues, override and export shell tests must still pass.

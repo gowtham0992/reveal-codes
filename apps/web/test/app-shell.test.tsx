@@ -4,6 +4,7 @@ import type { Document } from "@reveal-codes/engine";
 import type { Editor } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 import { AppShell } from "../src/components/app-shell";
+import { EDITOR_PLACEHOLDER } from "../src/components/editor-surface";
 import { AUTOSAVE_KEY, serialise } from "../src/persist";
 import type { AppServices } from "../src/services";
 import type { ApiClient } from "../src/client/api";
@@ -104,7 +105,7 @@ describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () =
     const storage = createMemoryStorage();
     storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Stored draft."), [], null));
     await mount(fixture(storage));
-    expect(screen.queryByText(/Paste your draft here/)).toBeNull();
+    expect(screen.queryByText(/Type or paste your filing here/)).toBeNull();
     expect(screen.getByRole("textbox", { name: "Document" }).textContent).toBe("Stored draft.");
   });
 
@@ -112,7 +113,7 @@ describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () =
     const storage = createMemoryStorage();
     storage.setItem(AUTOSAVE_KEY, "{not json");
     await mount(fixture(storage));
-    expect(screen.getByText("Paste your draft here, or start typing.")).not.toBeNull();
+    expect(screen.getByText(EDITOR_PLACEHOLDER)).not.toBeNull();
     expect(screen.getByRole("textbox", { name: "Document" }).textContent).toBe("");
   });
 
@@ -122,7 +123,7 @@ describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () =
       throw new Error("SecurityError");
     };
     await mount(fixture(storage));
-    expect(screen.getByText("Paste your draft here, or start typing.")).not.toBeNull();
+    expect(screen.getByText(EDITOR_PLACEHOLDER)).not.toBeNull();
   });
 });
 
