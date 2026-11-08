@@ -1,0 +1,31 @@
+.statement {
+  margin: 0 0 8px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+
+.field {
+  display: block;
+  width: 100%;
+  padding: 4px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: inherit;
+  resize: vertical;
+}
+
+.hint {
+  min-height: 1.5em;
+  margin: 4px 0 0;
+}
+
+.error {
+  margin: 4px 0 0;
+  font-weight: 700;
+}

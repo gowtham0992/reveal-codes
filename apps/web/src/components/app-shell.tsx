@@ -80,6 +80,12 @@ function useStoreSlice<T>(store: Store, select: (state: ReturnType<Store["getSta
   );
 }
 
+function useNoticeAndDocument(store: Store) {
+  const notice = useStoreSlice(store, (s) => s.notice);
+  const doc = useStoreSlice(store, (s) => s.document);
+  return { notice, doc };
+}
+
 function useShellParts(services: AppServices | undefined) {
   const [svc] = useState<AppServices>(() => services ?? defaultServices());
   const [store] = useState(() => createStore(svc.now));
@@ -114,8 +120,7 @@ export function AppShell({ services }: AppShellProps) {
   const binding = useEditorBinding({ store, now: svc.now, onCaret: setCursor });
   const paneControl = usePaneControl(svc);
   useAutosave(store, svc, autosave);
-  const notice = useStoreSlice(store, (s) => s.notice);
-  const doc = useStoreSlice(store, (s) => s.document);
+  const { notice, doc } = useNoticeAndDocument(store);
   const mode = useServerMode(svc.api);
   const verify = useVerify(svc, store);
   return (
@@ -131,7 +136,13 @@ export function AppShell({ services }: AppShellProps) {
         onTogglePane={paneControl.toggle}
       />
       <EditorSurface editor={binding.editor} empty={doc.text.length === 0} />
-      <IssuesRegion demoMode={mode === "fixtures"} />
+      <IssuesRegion
+        document={doc}
+        store={store}
+        now={svc.now}
+        onGo={binding.focusAt}
+        demoMode={mode === "fixtures"}
+      />
       <Pane
         open={paneControl.open}
         document={doc}

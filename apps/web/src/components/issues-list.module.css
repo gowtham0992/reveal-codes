@@ -1,0 +1,34 @@
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  padding: 6px 0;
+  border-top: 1px solid var(--rule);
+}
+
+.head {
+  display: flex;
+  gap: 8px;
+}
+
+.code {
+  font-weight: 700;
+}
+
+.text {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.empty {
+  margin: 0;
+}
