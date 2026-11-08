@@ -13,11 +13,11 @@ The shape of the work follows `structure.md`: anything pure goes in a package, a
 | D1 | The `docx` package is bundled for the browser. `POST /api/export` is not built. | Checked by a real build; see "Webpack decision". |
 | D2 | `buildStatement` returns data. `renderStatement` returns blocks. The docx builder and the print view both consume the same blocks. | One holder of the wording (Requirement 4, criterion 12). |
 | D3 | `Statement.quotes[].status` and `Statement.citations[].status` hold the Engine's status words. The tables show the product codes (`CIT ✓`, `CIT ✘`, `CIT ?`, `CIT …`, `QUO ✓`, `QUO ✘`, `QUO …`) in the status column. | The codes are binding vocabulary in `product.md`. Requirement 4, criterion 7 allows the Engine's names. |
-| D4 | Statement_Text has no title. The "bold headings" of Requirement 6, criterion 5 are the table header rows and the paragraph numbers. | Requirement 4, criterion 2 and Requirement 6, criterion 9 allow no sentence or body element beyond the listed ones. If a title is wanted, the requirements change first. |
+| D4 | Each part has one bold title and nothing else extra: "AI-Use and Verification Statement" at the top of the Statement_Text and "Provenance Appendix" at the top of the Appendix, in the docx and in the print view. A title is a block, not a sentence, and is not numbered. `StatementBlock` gains `{ kind: "title"; text }`, emitted first by `renderStatement`; the Appendix title comes from `wording.ts` and is the `title` field of `Appendix`. | A court reader needs to see where each part starts. Requirements 4 and 5 and Requirement 6, criterion 9 allow exactly these two titles and no other extra element. |
 | D5 | The signature block is two lines: `/s/ ________________` and the ISO date, with no "Date:" label. | Requirement 4, criterion 11 allows no wording that criteria 3 to 9 do not define. |
-| D6 | Page breaks are a `PageBreak` run at the start of the first paragraph of the Statement_Text and of the Appendix. They are not separate paragraphs. | A break-only paragraph puts one blank line at the top of the next page in Word. The paragraph count of the filing part is unchanged. |
+| D6 | Page breaks are a `PageBreak` run at the start of the title paragraph, which is the first paragraph of the Statement_Text and of the Appendix. They are not separate paragraphs. | A break-only paragraph puts one blank line at the top of the next page in Word. The paragraph count of the filing part is unchanged. |
 | D7 | Page size is US Letter (12240 by 15840 twips). | `docx` defaults to A4, and the target courts are US courts. Requirement 6, criterion 2 fixes margins only. |
-| D8 | Dates are UTC. The signature date is the UTC date of `meta.now`. | `toISOString` is the only clock format the package uses. The author can change the date in Word. |
+| D8 | Dates are local calendar dates, not UTC. `time.ts` exports `localDate(d: Date): string`, which formats `YYYY-MM-DD` from `getFullYear()`, `getMonth() + 1` and `getDate()`, zero-padded. `buildStatement` stores `generatedAt` (the ISO instant, unchanged) and adds `generatedDate = localDate(meta.now)` and `verifiedDate = localDate(new Date(meta.verifiedAt))` (`null` when `verifiedAt` is `null`). `renderStatement` reads only those two strings, so it stays a pure function of the Statement with no time zone dependence. `exportFileName(caption, now)` uses `localDate(now)`. Override timestamps in paragraph 5 are printed as stored (ISO instants). The `export` Vitest project pins `TZ=America/Los_Angeles`. | A filer in the evening in the US would otherwise get tomorrow's date in the file name and the signature. Keeping the time zone inside `buildStatement` and `exportFileName` keeps the rendering testable. The author can still change the date in Word. |
 | D9 | `buildStatement` returns `Err` with `invalid_timestamp` when `meta.now` is an invalid Date or `meta.verifiedAt` is not an ISO 8601 UTC instant. | `toISOString` throws on an invalid Date, and a garbled `verifiedAt` would print garbage in paragraph 3. |
 | D10 | `runVerifyFlow` gets a required third parameter `now`. | The clock is injected (Requirement 12, criterion 2). A default would hide a missing clock. |
 | D11 | `serialise` and `Autosave.schedule` get a required `verifiedAt` parameter. `Autosave.flush` returns `boolean`. | A forgotten caller must fail to compile instead of dropping the field. `flush` must report failure for Requirement 2, criterion 11. |
@@ -98,7 +98,7 @@ packages/export/
     types.ts              Meta, RunInfo, Statement and its parts, StatementBlock, Appendix (about 90)
     gate.ts               canExport (about 10); the only module that names blockingIssues
     text.ts               clip, ellipsize, captionOf (about 45)
-    time.ts               isInstant, datePart (about 25)
+    time.ts               isInstant, localDate (about 25); the only module that reads local date getters
     statement.ts          buildStatement (about 70)
     statement-parts.ts    countCharacters, countSentences, toolsOf, citationsOf, quotesOf, overridesOf (about 120)
     wording.ts            every fixed sentence and label; the only holder of the wording (about 130)
@@ -163,18 +163,23 @@ export type Statement = Readonly<{
   citations: readonly StatementCitation[];
   quotes: readonly StatementQuote[];
   overrides: readonly StatementOverride[];
-  generatedAt: string;                      // meta.now.toISOString()
-  verifiedAt: string | null;
+  generatedAt: string;                      // meta.now.toISOString(), an ISO instant
+  generatedDate: string;                    // localDate(meta.now), local YYYY-MM-DD
+  verifiedAt: string | null;                // ISO instant or null, as given
+  verifiedDate: string | null;              // localDate(new Date(verifiedAt)), or null
   caption: string;
 }>;
 
-/** What renderStatement returns: numbered paragraph, table, or signature (Requirement 4, criterion 1). */
+/** What renderStatement returns: title, numbered paragraph, table, or signature (Requirement 4, criterion 1). */
 export type StatementBlock =
+  | Readonly<{ kind: "title"; text: string }>
   | Readonly<{ kind: "paragraph"; number: number; text: string }>
   | Readonly<{ kind: "table"; columns: readonly string[]; rows: readonly (readonly string[])[] }>
   | Readonly<{ kind: "signature"; line: string; date: string }>;
 
 export type Appendix = Readonly<{
+  /** "Provenance Appendix", from wording.ts; rendered before the intro sentences. */
+  title: string;
   /** The two introductory sentences, in order. */
   intro: readonly [string, string];
   /** The lines of render(document, "full").text split on "\n", unmodified. */
@@ -182,7 +187,7 @@ export type Appendix = Readonly<{
 }>;
 ```
 
-`StatementBlock` has no explicit "override entry" kind: the entries of paragraph 5 are a `table` with the columns Code, Text, Reason and Timestamp. Table column labels (`Citation`, `Status`, `Cluster id`, `Quotation`, `Status`, `Code`, `Text`, `Reason`, `Timestamp`) are the only labels that are not sentences; they live in `wording.ts`.
+`title` is the only new block kind; it carries no number. `StatementBlock` has no explicit "override entry" kind: the entries of paragraph 5 are a `table` with the columns Code, Text, Reason and Timestamp. Table column labels (`Citation`, `Status`, `Cluster id`, `Quotation`, `Status`, `Code`, `Text`, `Reason`, `Timestamp`) are the only labels that are not sentences; they live in `wording.ts`.
 
 ### Functions
 
@@ -205,7 +210,10 @@ export function buildAppendix(document: Document): Appendix;
 export function buildDocx(document: Document, statement: Statement): Promise<Uint8Array>;
 
 // file-name.ts
-export function exportFileName(caption: string, now: Date): string;     // "<slug>-<YYYY-MM-DD>.docx"
+export function exportFileName(caption: string, now: Date): string;     // "<slug>-<YYYY-MM-DD>.docx", local date
+
+// time.ts
+export function localDate(d: Date): string;                              // local YYYY-MM-DD, zero-padded
 
 // text.ts (ellipsize is exported for the dialog; clip and captionOf are internal)
 export function clip(text: string, max: number): string;
@@ -214,16 +222,16 @@ export function ellipsize(text: string, max: number): string;
 
 How each behaves, beyond the requirements:
 
-- **`buildStatement`** validates `meta` first (D9), then calls `segment(document.text, document.spans)` and returns its error unchanged (Requirement 3, criterion 12). It then assembles the parts from `statement-parts.ts`. It never calls `canExport` or `blockingIssues`; it calls `issues(document)` for the override list, which Requirement 1, criterion 4 allows because the rule forbids only the gate functions.
+- **`buildStatement`** validates `meta` first (D9), then calls `segment(document.text, document.spans)` and returns its error unchanged (Requirement 3, criterion 12). It then assembles the parts from `statement-parts.ts`, setting `generatedDate` to `localDate(meta.now)` and `verifiedDate` to `localDate(new Date(meta.verifiedAt))` or `null` (D8). It never calls `canExport` or `blockingIssues`; it calls `issues(document)` for the override list, which Requirement 1, criterion 4 allows because the rule forbids only the gate functions.
 - **`toolsOf`** filters `runLog` to entries whose `runId` is in `document.runs`, keeps run-log order, maps `modelId` to `model`, and removes a later pair with equal `provider` and `model`. Run-log entries that share a `runId` are all kept (they may differ in provider), then deduplicated by pair.
 - **`overridesOf`** builds a `Map` from override key to override, walks `issues(document)` in order, and emits `{ code: issue.code, text: document.text.slice(issue.start, issue.end), reason, timestamp }` for each issue that has an override. An override whose key is no longer an issue is never visited, so it is omitted.
 - **`captionOf`** takes the first line of `document.text.split("\n")` whose `trim()` is non-empty, trims it, and applies `clip(…, 120)`. An all-blank text gives `""`.
 - **`clip(text, max)`** returns the first `max` UTF-16 code units, one fewer when the cut would split a surrogate pair, so a lone surrogate never reaches the DOM or the XML. **`ellipsize(text, max)`** returns `text` when `text.length <= max`, else `clip(text, max - 1) + "…"`. This is the 80-character rule of the dialog (79 characters and "…") and, through `clip(…, 80)`, of the quotation table.
 - **Percentage** (paragraph 2) is integer arithmetic: `tenths = Math.floor((2000 * a + t) / (2 * t))`, which is `a / t * 100` rounded half up to one decimal, and it is printed as `${Math.floor(tenths / 10)}.${tenths % 10}`; `t = 0` prints `0.0`. No floating point is involved, so 1 of 8 prints `12.5` and 1 of 16 prints `6.3`.
-- **`renderStatement`** returns blocks in this order: paragraph 1; paragraph 2; paragraph 3 and its table; paragraph 4 and its table; when `overrides` is non-empty, paragraph 5 and its table; the final paragraph (numbered 5 or 6); then the `signature` block. The signature date is `datePart(statement.generatedAt)`; the check date in paragraph 3 is `datePart(statement.verifiedAt)` or the "date that was not recorded" wording.
-- **`buildAppendix`** returns `{ intro: [S1, S2], lines: render(document, "full").text.split("\n") }`.
-- **`buildDocx`** composes the file in this order: the Filing_Paragraphs, the Statement_Text (first paragraph begins with a `PageBreak` run), then the Appendix (first intro paragraph begins with a `PageBreak` run), then one paragraph per appendix line. It calls `Packer.toBuffer`, stores the result as `unknown`, and returns it only if it is a `Uint8Array`; otherwise it throws, which rejects the promise. This avoids `any` if the `docx` type declarations need Node's `Buffer` type. It sets `creator: "Reveal Codes"`, `lastModifiedBy: "Reveal Codes"`, and `title: statement.caption`. The page is US Letter with 1440-twip margins on every side (D7). Filing paragraphs use `spacing: { line: 480, lineRule: AUTO }` and `AlignmentType.LEFT`; the Statement uses `line: 240`; table borders are `BorderStyle.SINGLE` on the six edge kinds (top, bottom, left, right, inside horizontal, inside vertical); the Appendix uses Courier New at size 18 (half-points) and the rest Times New Roman at size 24.
-- **`exportFileName`** applies the steps of Requirement 7, criterion 1 in order and takes the date from `now.toISOString().slice(0, 10)`. `now` must be a valid Date; the Web_App only calls it after `buildStatement` has accepted `now`.
+- **`renderStatement`** returns blocks in this order: the title block "AI-Use and Verification Statement"; paragraph 1; paragraph 2; paragraph 3 and its table; paragraph 4 and its table; when `overrides` is non-empty, paragraph 5 and its table; the final paragraph (numbered 5 or 6); then the `signature` block. The signature date is `statement.generatedDate`; the check date in paragraph 3 is `statement.verifiedDate` or the "date that was not recorded" wording. No date is computed in this function.
+- **`buildAppendix`** returns `{ title, intro: [S1, S2], lines: render(document, "full").text.split("\n") }`.
+- **`buildDocx`** composes the file in this order: the Filing_Paragraphs, the Statement_Text (its first paragraph is the title, a paragraph of bold `TextRun`s that begins with a `PageBreak` run), then the Appendix (its first paragraph is the Appendix title, bold, beginning with a `PageBreak` run), the two intro paragraphs, then one paragraph per appendix line. Both titles are Times New Roman size 24, single spaced. It calls `Packer.toBuffer`, stores the result as `unknown`, and returns it only if it is a `Uint8Array`; otherwise it throws, which rejects the promise. This avoids `any` if the `docx` type declarations need Node's `Buffer` type. It sets `creator: "Reveal Codes"`, `lastModifiedBy: "Reveal Codes"`, and `title: statement.caption`. The page is US Letter with 1440-twip margins on every side (D7). Filing paragraphs use `spacing: { line: 480, lineRule: AUTO }` and `AlignmentType.LEFT`; the Statement uses `line: 240`; table borders are `BorderStyle.SINGLE` on the six edge kinds (top, bottom, left, right, inside horizontal, inside vertical); the Appendix uses Courier New at size 18 (half-points) and the rest Times New Roman at size 24.
+- **`exportFileName`** applies the steps of Requirement 7, criterion 1 in order and takes the date from `localDate(now)`. `now` must be a valid Date; the Web_App only calls it after `buildStatement` has accepted `now`.
 
 ### Web app changes
 
@@ -397,7 +405,7 @@ The component states are therefore: nothing rendered before mount, then one of t
 | unreadable | "The saved document could not be read." |
 | ready | Print button, Filing_Paragraphs, Statement_Text, Appendix, in that order |
 
-The ready state renders three `<section>` elements. `print-view.module.css` gives the second and third `break-before: page` inside `@media print`, hides the `.controls` wrapper that holds the Print button in print, and sets `@page { size: letter; margin: 1in; }`. The filing and statement use `var(--font-editor)`, the appendix `var(--font-pane)`, and all colours come from the existing palette variables (`ui.md`). Statement blocks render through one `StatementBlocks` component that maps `paragraph` to `<p>` with the number and text, `table` to a bordered `<table>` with a header row, and `signature` to two lines. The Print button calls `window.print()` once per click. The component takes an optional `services` prop (`AppServices`) so tests inject storage and the clock.
+The ready state renders three `<section>` elements; the Statement section starts with its title and the Appendix section with its title, both in bold weight (regular and bold only, `ui.md`). `print-view.module.css` gives the second and third `break-before: page` inside `@media print`, hides the `.controls` wrapper that holds the Print button in print, and sets `@page { size: letter; margin: 1in; }`. The filing and statement use `var(--font-editor)`, the appendix `var(--font-pane)`, and all colours come from the existing palette variables (`ui.md`). Statement blocks render through one `StatementBlocks` component that maps `title` to a bold `<p>` (no number), `paragraph` to `<p>` with the number and text, `table` to a bordered `<table>` with a header row, and `signature` to two lines. The Print button calls `window.print()` once per click. The component takes an optional `services` prop (`AppServices`) so tests inject storage and the clock.
 
 #### Wiring in the build
 
@@ -414,7 +422,7 @@ The ready state renders three `<section>` elements. `print-view.module.css` give
 project("export", "packages/export"),
 ```
 
-The default include `test/**/*.test.ts` and the shared setup file (60 s timeout for `*.properties.test.ts`) apply unchanged.
+The default include `test/**/*.test.ts` and the shared setup file (60 s timeout for `*.properties.test.ts`) apply unchanged. The `export` project pins the time zone: `vitest.config.ts` sets `process.env.TZ = "America/Los_Angeles"` at the top of the file, before any worker starts, so that worker processes inherit it (the project helper for `export` also passes `TZ` in its `env`). A test in `packages/export/test/tz.test.ts` asserts `new Date(2026, 0, 1).getTimezoneOffset() === 480`, so a run in the wrong zone fails loudly instead of passing by luck. Other projects are not pinned.
 
 `.kiro/hooks/export-tests-on-save.json`, with the same timeout as the other hooks (`120000`):
 
@@ -499,7 +507,7 @@ For any Document, `canExport(document)` is `true` if and only if `blockingIssues
 
 ### Property 2: Statement data
 
-For any Document, any Run_Log and any Meta with a valid `now` and a valid `verifiedAt`, `buildStatement` returns `Ok` and the Statement satisfies all of the following: `characters` has non-negative integer counts that sum to `document.text.length` and equal the span lengths per origin; `aiUsed` is `true` exactly when some span has origin `AI` or `AI>HUM`; `sentences.total` equals the length of `segment(document.text, document.spans)` and `byDominantOrigin` sums to `total` and matches the per-origin tally of those sentences; `citations` has one entry for each `kind: "full"` record in document order with the Document's status, and `clusterId` only for `verified`; `quotes` has one entry for each quote record in document order with the Document's status, and `prefixLength` only for `mismatch`; `overrides` equals the Document's overrides that belong to `issues(document)`, in issue order, with the code and text of their issue; every tool pair comes from a Run_Log entry whose `runId` is in `document.runs`, with no duplicate pair; `generatedAt` equals `meta.now.toISOString()`; and a second call with the same arguments returns a deep-equal result.
+For any Document, any Run_Log and any Meta with a valid `now` and a valid `verifiedAt`, `buildStatement` returns `Ok` and the Statement satisfies all of the following: `characters` has non-negative integer counts that sum to `document.text.length` and equal the span lengths per origin; `aiUsed` is `true` exactly when some span has origin `AI` or `AI>HUM`; `sentences.total` equals the length of `segment(document.text, document.spans)` and `byDominantOrigin` sums to `total` and matches the per-origin tally of those sentences; `citations` has one entry for each `kind: "full"` record in document order with the Document's status, and `clusterId` only for `verified`; `quotes` has one entry for each quote record in document order with the Document's status, and `prefixLength` only for `mismatch`; `overrides` equals the Document's overrides that belong to `issues(document)`, in issue order, with the code and text of their issue; every tool pair comes from a Run_Log entry whose `runId` is in `document.runs`, with no duplicate pair; `generatedAt` equals `meta.now.toISOString()`; `generatedDate` equals the local-getter date of `meta.now` and `verifiedDate` equals that of the parsed `verifiedAt` (or `null`), both computed independently in the test from `getFullYear`, `getMonth` and `getDate`; and a second call with the same arguments returns a deep-equal result.
 
 **Validates: Requirements 3.2, 3.5, 3.6, 3.7, 3.8, 3.9, 3.11, 3.13**
 
@@ -511,7 +519,7 @@ For any Document, joining the lines of `buildAppendix(document)` with `\n` equal
 
 ### Property 4: DOCX content
 
-For any Document, the paragraph list read from `word/document.xml` of `buildDocx(document, statement)` (with page breaks as `"\f"` markers, in order) holds exactly two page-break markers; the entries before the first marker are the Filing_Paragraphs, with empty paragraphs kept; the first entry after the first marker begins with `1. This filing was prepared with the drafting tool Reveal Codes`; and the first entry after the second marker is "The following is the complete provenance record of this filing in Reveal Codes form."
+For any Document, the paragraph list read from `word/document.xml` of `buildDocx(document, statement)` (with page breaks as `"\f"` markers, in order) holds exactly two page-break markers; the entries before the first marker are the Filing_Paragraphs, with empty paragraphs kept; the first entry after the first marker is the statement title "AI-Use and Verification Statement" and the entry after it begins with `1. This filing was prepared with the drafting tool Reveal Codes`; and the first entry after the second marker is the appendix title "Provenance Appendix" and the entry after it is "The following is the complete provenance record of this filing in Reveal Codes form." The "statement's first sentence" and "appendix first line" of Requirement 6, criterion 10 are the entries that follow the titles.
 
 **Validates: Requirements 6.3, 6.4, 6.9, 6.10**
 
@@ -563,12 +571,12 @@ In Properties 2 and 4 the Statement comes from `buildStatement`; if it returns `
 
 **Example tests (string equality unless noted)**
 
-- `render-statement.test.ts`: Statement_Text for the Demo_Document (2 verified, 3 not found, 1 mismatch, 4 overrides, paragraph 5 with four rows), for a Document with no AI text and no overrides, for AI spans with an empty Run_Log ("Tools: not recorded."), and paragraph 3 with a `verifiedAt` date and with `verifiedAt` null. Percentage cases: 0 of 0, 1 of 3, 1 of 8, 1 of 16, 2 of 3. Final paragraph numbered 5 without overrides and 6 with them.
+- `render-statement.test.ts`: the first block is the title "AI-Use and Verification Statement" and no other block is a title; Statement_Text for the Demo_Document (2 verified, 3 not found, 1 mismatch, 4 overrides, paragraph 5 with four rows), for a Document with no AI text and no overrides, for AI spans with an empty Run_Log ("Tools: not recorded."), and paragraph 3 with a `verifiedAt` date and with `verifiedAt` null. Percentage cases: 0 of 0, 1 of 3, 1 of 8, 1 of 16, 2 of 3. Final paragraph numbered 5 without overrides and 6 with them.
 - `statement.test.ts`: tool de-duplication, `model` null, unknown `runId`; caption cases (leading blank lines, all blank, 121 characters, astral character at the cut); the hand-built Document whose spans break coverage returns `Err`; invalid `now` and garbled `verifiedAt` return `Err`.
-- `text.test.ts`, `file-name.test.ts`: `clip`, `ellipsize` at 79, 80 and 81 characters and at a surrogate pair; `exportFileName` for spaces, punctuation, a 60-character cut ending in a dash, an empty caption, non-ASCII, and a UTC date near midnight.
-- `appendix.test.ts`: empty Document gives the `[DOC]` header line only; a Document with leading and trailing spaces keeps every line unmodified.
-- `docx.test.ts`: document.xml has `w:spacing w:line="480"` for filing paragraphs and `240` for the Statement, Times New Roman at `w:sz` 24, Courier New at 18, US Letter and 1440 margins, `single` borders on all six table edges, bold header cells; `docProps/core.xml` has creator "Reveal Codes" and the caption as title, and an empty Document's file has no title and unzips; every Appendix paragraph equals the matching line (Demo_Document and a leading-space case); no `fetch` call.
-- `package.test.ts`: exact version strings, no range operators, `docx` is the only third-party runtime dependency, the hook file exists with the 120000 timeout and the pattern from this design.
+- `text.test.ts`, `time.test.ts`, `file-name.test.ts`: `clip`, `ellipsize` at 79, 80 and 81 characters and at a surrogate pair; `localDate` zero-padding and year boundary; `exportFileName` for spaces, punctuation, a 60-character cut ending in a dash, an empty caption, non-ASCII, and local dates: the instant `2026-03-05T02:30:00Z` gives `2026-03-04` in the file name (UTC would give `2026-03-05`). `statement.test.ts` asserts the same instant gives `generatedDate` `2026-03-04`, and as `verifiedAt` gives `verifiedDate` `2026-03-04`; `render-statement.test.ts` shows that date in the signature and in paragraph 3. `tz.test.ts` asserts `new Date(2026, 0, 1).getTimezoneOffset() === 480`.
+- `appendix.test.ts`: `title` is "Provenance Appendix"; empty Document gives the `[DOC]` header line only; a Document with leading and trailing spaces keeps every line unmodified.
+- `docx.test.ts`: the first paragraph of the Statement part is "AI-Use and Verification Statement" and the first paragraph of the Appendix part is "Provenance Appendix", each with bold runs (`<w:b/>`) and the page break, and no other paragraph in those parts is a title; document.xml has `w:spacing w:line="480"` for filing paragraphs and `240` for the Statement, Times New Roman at `w:sz` 24, Courier New at 18, US Letter and 1440 margins, `single` borders on all six table edges, bold header cells; `docProps/core.xml` has creator "Reveal Codes" and the caption as title, and an empty Document's file has no title and unzips; every Appendix paragraph equals the matching line (Demo_Document and a leading-space case); no `fetch` call.
+- `package.test.ts`: exact version strings, no range operators, `docx` is the only third-party runtime dependency, the hook file exists with the 120000 timeout and the pattern from this design; the `export` project pins `TZ`.
 - `static/boundaries.test.ts`: no `fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`, `node:`, `react` or DOM import under `packages/export/src`; `blockingIssues` and `canExport` appear only in `gate.ts`; statement sentences appear only in `wording.ts`; no `Date.now`, `new Date()` without arguments, `Math.random` or `process` in `src`; every module at most 300 lines and every function at most 40.
 - Web: `export-docx.test.ts` (success with a fake `download` and a fixed clock; blocked Document leaves `download` uncalled and the Store unchanged; `buildStatement` `Err`; `buildDocx` rejection; `download` throwing; a corrupted appendix; zero `fetch` calls). `export-dialog.test.tsx` and `export-shell.test.tsx` (both states, count labels, 79/80/81-character text, `Go`, `Override…` and focus return, live update after an override without advancing timers, print flush order, print failure by throwing `setItem` and by `openPrint` returning `false`). `print-model.test.ts` and `print-view.test.tsx` (absent, unreadable by throw, JSON, shape, codes and bad `verifiedAt`, blocked with the exact sentence and no filing, Statement or Print button, ready order and `window.print` called once). `store.test.ts`, `persist.test.ts`, `autosave.test.ts` and `verify-flow.test.ts` for `verifiedAt` (initial, `verified`, `replace` with and without it, edit, undo and override leave it, shape accept and reject, one `verified` dispatch per completed Verify and none on failure or discard).
 
