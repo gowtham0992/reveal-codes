@@ -106,7 +106,7 @@ function expectRedAndGreenCodes(): void {
   expect(count(after, "[QUO ✘]")).toBe(1);
   expect(count(after, "[QUO ✓]")).toBe(1);
   expect(button(/^Export/).textContent).toBe("Export (4 blocking)");
-  expect(button(/^Export/).disabled).toBe(true);
+  expect(button(/^Export/).disabled).toBe(false);
 }
 
 function expectIssuesAndGo(): void {
@@ -133,7 +133,7 @@ function overrideOne(): void {
   });
   expect(codes().some((c) => c.startsWith("[OVR:"))).toBe(true);
   expect(button(/^Export/).textContent).toBe("Export (3 blocking)");
-  expect(button(/^Export/).disabled).toBe(true);
+  expect(button(/^Export/).disabled).toBe(false);
 }
 
 function expectOnlyCitationsLeft(mode: ModeApi): void {

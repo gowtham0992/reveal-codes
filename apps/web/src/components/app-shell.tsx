@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { blockingIssues } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
 import { createAutosave } from "../autosave";
 import type { Autosave } from "../autosave";
@@ -13,12 +12,12 @@ import { createStore } from "../store-runtime";
 import type { Store } from "../store-runtime";
 import { hasFullRecord, runVerifyFlow } from "../client/verify-flow";
 import { EditorSurface } from "./editor-surface";
-import { ExportDialog } from "./export-dialog";
 import { useAssistantSlot } from "./assistant-column";
 import { ModeBadge, useModeResult } from "./mode-badge";
 import type { ServerMode } from "./mode-badge";
 import { IssuesRegion } from "./issues-region";
 import { Toolbar } from "./toolbar";
+import { useExport } from "./use-export";
 import { useDocumentActions } from "./use-document-actions";
 import { composeStatus, usePaneControl } from "./use-pane";
 import { Pane } from "../pane/pane";
@@ -124,48 +123,20 @@ function useVerify(svc: AppServices, store: Store) {
   return { running, start };
 }
 
-/** Export gate (Requirement 19): the count comes from the Engine, the dialog is a placeholder. */
-function useExportGate(doc: Document) {
-  const [opener, setOpener] = useState<HTMLElement | null>(null);
-  const [open, setOpen] = useState(false);
-  const blocking = blockingIssues(doc).length;
-  return {
-    toolbar: {
-      exportDisabled: blocking > 0,
-      blockingCount: blocking,
-      onExport: (): void => {
-        const active = document.activeElement;
-        setOpener(active instanceof HTMLElement ? active : null);
-        setOpen(true);
-      },
-    },
-    dialog:
-      open && blocking === 0 ? (
-        <ExportDialog
-          restoreFocus={opener}
-          onClose={() => {
-            setOpen(false);
-          }}
-        />
-      ) : null,
-  };
-}
-
-function useGates(svc: AppServices, store: Store, doc: Document) {
-  return { verify: useVerify(svc, store), exportGate: useExportGate(doc) };
-}
-
 type ShellToolbarProps = Readonly<{
   notice: string | null;
   doc: Document;
   mode: ServerMode;
-  verify: ReturnType<typeof useVerify>;
-  exportGate: ReturnType<typeof useExportGate>;
+  svc: AppServices;
+  store: Store;
+  exportGate: ReturnType<typeof useExport>;
   pane: ReturnType<typeof usePaneControl>;
   actions: ReturnType<typeof useDocumentActions>;
 }>;
 
-function ShellToolbar({ notice, doc, mode, verify, exportGate, pane, actions }: ShellToolbarProps) {
+function ShellToolbar(props: ShellToolbarProps) {
+  const { notice, doc, mode, exportGate, pane, actions } = props;
+  const verify = useVerify(props.svc, props.store);
   return (
     <Toolbar
       notice={notice}
@@ -201,9 +172,9 @@ export function AppShell({ services }: AppShellProps) {
   const { notice, doc } = useNoticeAndDocument(store);
   const { mode, assistant } = useModeResult(svc.api);
   const slot = useAssistantSlot({ svc, store, info: assistant, getCaret });
-  const { verify, exportGate } = useGates(svc, store, doc);
+  const exportGate = useExport({ svc, store, autosave, doc, notice, onGo: binding.focusAt });
   const actions = useDocumentActions({ store, svc, autosave, doc });
-  const toolbar = { notice, doc, mode, verify, exportGate, pane: paneControl, actions };
+  const toolbar = { notice, doc, mode, svc, store, exportGate, pane: paneControl, actions };
   return (
     <div
       className="app"

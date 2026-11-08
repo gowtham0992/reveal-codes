@@ -7,7 +7,6 @@ export type ToolbarProps = Readonly<{
   verifyDisabled: boolean;
   /** While true the Verify button reads "Verifying…". */
   verifyRunning?: boolean;
-  exportDisabled: boolean;
   /** Blocking issue count; the Export label reads "Export (<n> blocking)" when above zero. */
   blockingCount?: number;
   /** Mode badge slot (Requirement 15); nothing is rendered when absent. */
@@ -38,7 +37,7 @@ export function Toolbar(props: ToolbarProps) {
       <button type="button" aria-pressed={props.paneOpen} onClick={props.onTogglePane}>
         Reveal Codes (Alt-F3)
       </button>
-      <button type="button" disabled={props.exportDisabled} onClick={props.onExport}>
+      <button type="button" onClick={props.onExport}>
         {exportLabel(props.blockingCount ?? 0)}
       </button>
       {props.badge === undefined ? null : <span className={styles["badge"]}>{props.badge}</span>}

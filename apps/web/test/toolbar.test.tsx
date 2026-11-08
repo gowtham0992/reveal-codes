@@ -8,7 +8,6 @@ const BASE: ToolbarProps = {
   notice: null,
   paneOpen: false,
   verifyDisabled: false,
-  exportDisabled: false,
 };
 
 describe("Toolbar _Requirements: 10.1, 10.2, 10.6, 10.7_", () => {
@@ -46,11 +45,11 @@ describe("Toolbar _Requirements: 10.1, 10.2, 10.6, 10.7_", () => {
     expect(toggle.getAttribute("aria-pressed")).toBe("true");
   });
 
-  it("disables Verify and Export from its props and keeps New enabled", () => {
-    renderUi(<Toolbar {...BASE} verifyDisabled={true} exportDisabled={true} />);
+  it("disables Verify from its props and keeps New and Export enabled", () => {
+    renderUi(<Toolbar {...BASE} verifyDisabled={true} />);
     expect(screen.getByRole("button", { name: "Verify" })).toHaveProperty("disabled", true);
-    expect(screen.getByRole("button", { name: "Export" })).toHaveProperty("disabled", true);
     expect(screen.getByRole("button", { name: "New" })).toHaveProperty("disabled", false);
+    expect(screen.getByRole("button", { name: "Export" })).toHaveProperty("disabled", false);
   });
 
   it("labels Verify 'Verifying…' while running and calls onVerify when enabled", () => {

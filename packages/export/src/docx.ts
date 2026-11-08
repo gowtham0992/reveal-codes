@@ -36,6 +36,7 @@ export async function buildDocx(document: Document, statement: Statement): Promi
     ],
   });
   const packed: unknown = await Packer.toBuffer(file);
-  if (!(packed instanceof Uint8Array)) throw new Error("docx packer did not return bytes");
-  return packed;
+  // isView rather than instanceof: a Buffer from another realm (jsdom) is still bytes.
+  if (!ArrayBuffer.isView(packed)) throw new Error("docx packer did not return bytes");
+  return new Uint8Array(packed.buffer, packed.byteOffset, packed.byteLength);
 }
