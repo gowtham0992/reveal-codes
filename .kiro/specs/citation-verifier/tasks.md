@@ -129,7 +129,7 @@ Deviations from the design's file layout, decided while planning:
     - **Property 6: A fully cached lookup makes no network or sleep calls**
     - **Validates: Requirements 10.2, 10.4, 10.5**
     - _Requirements: 10.5_
-  - [-] 4.8 Property 10: retries are bounded and exhaustion keeps the last wait
+  - [x] 4.8 Property 10: retries are bounded and exhaustion keeps the last wait
     - File `test/transport.properties.test.ts`; `arbResponseScript` and `arbClock`; at most three `Deps.fetch` calls per chunk, stop at the first non-429 and non-5xx, each retry sleeps `min(30000, max(...))` or 1 000 ms, exhausted chunk is `unchecked` with the last valid `waitUntil` or none.
     - **Property 10: Retries are bounded and exhaustion keeps the last wait**
     - **Validates: Requirements 4.3, 4.5, 4.6, 4.7, 7.6, 7.8, 7.9, 7.10, 7.11**
