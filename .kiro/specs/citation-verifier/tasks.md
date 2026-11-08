@@ -78,7 +78,7 @@ Deviations from the design's file layout, decided while planning:
     - **Property 4: Chunking caps hold and chunks concatenate to the input**
     - **Validates: Requirements 7.2, 7.7**
     - _Requirements: 7.7_
-  - [~] 3.4 Property 2: request bodies carry only Citation_Lines drawn from the records
+  - [x] 3.4 Property 2: request bodies carry only Citation_Lines drawn from the records
     - File `test/lookup.properties.test.ts`; `arbRecords` (from the engine's `arbDocument`, all kinds, keys preserved) in `test/support/arb-verifier.ts`, plus the engine's `arbDocumentText` as the draft. Until task 4.4 the harness reads the requests from `planLookup` and `request.ts`; task 4.4 swaps it for `lookup()` with a scripted fetch returning 404 entries, keeping one `fc.assert`.
     - **Property 2: Request bodies carry only Citation_Lines drawn from the records**
     - **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5, 2.8**

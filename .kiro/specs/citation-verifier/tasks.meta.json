@@ -19,6 +19,10 @@
     "2.5 Property 9: an altered quotation mismatches and prefixLength locates the divergence": {
       "status": "passed",
       "lastRunTimestamp": 1794102352782
+    },
+    "3.4 Property 2: request bodies carry only Citation_Lines drawn from the records": {
+      "status": "passed",
+      "lastRunTimestamp": 1794102514086
     }
   },
   "executionHistory": {
@@ -214,6 +218,16 @@
         "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
         "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
         "timestamp": 1794098610832
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794102455293
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794102524369
       }
     ],
     "3.5 Property 11: database citations are never sent and always map to unchecked": [
