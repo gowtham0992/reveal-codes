@@ -1,5 +1,10 @@
 {
-  "pbtResults": {},
+  "pbtResults": {
+    "2.3 Property 2: statement data": {
+      "status": "passed",
+      "lastRunTimestamp": 1794155008665
+    }
+  },
   "executionHistory": {
     "1.1 Scaffold `packages/export` and wire the workspace": [
       {
@@ -108,6 +113,16 @@
         "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
         "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
         "timestamp": 1794154512732
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154937004
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794155102557
       }
     ],
     "2.4 Statement wording and `renderStatement`": [
@@ -115,6 +130,11 @@
         "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
         "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
         "timestamp": 1794154512751
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154937042
       }
     ],
     "3.1 `buildAppendix`": [
@@ -136,6 +156,11 @@
         "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
         "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
         "timestamp": 1794154512814
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154937089
       }
     ],
     "3.4 Checkpoint - statement, appendix, and file name": [
