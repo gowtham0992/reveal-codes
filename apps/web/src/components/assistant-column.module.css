@@ -1,0 +1,14 @@
+.column {
+  grid-column: assistant;
+  grid-row: 2 / 4;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 0;
+  background: var(--paper);
+  border-right: 1px solid var(--rule);
+}
+
+.column > button {
+  margin: 8px;
+}

@@ -1,5 +1,5 @@
 .main {
-  grid-column: 1;
+  grid-column: main;
   overflow: auto;
   padding: 16px;
   background: var(--ui-bg);

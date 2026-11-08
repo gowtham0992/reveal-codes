@@ -1,5 +1,5 @@
 .issues {
-  grid-column: 2;
+  grid-column: issues;
   overflow: auto;
   padding: 8px;
   background: var(--paper);

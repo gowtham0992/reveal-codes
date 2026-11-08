@@ -38,7 +38,7 @@ export type StoreState = Readonly<{
 }>;
 
 export type StoreAction =
-  | Readonly<{ type: "edit"; ops: readonly CallerOperation[] }>
+  | Readonly<{ type: "edit"; ops: readonly CallerOperation[]; run?: RunLogEntry }>
   | Readonly<{ type: "undo" }>
   | Readonly<{ type: "redo" }>
   | Readonly<{
@@ -73,7 +73,7 @@ export function initialState(now: () => Date): StoreState {
 export function reduce(state: StoreState, action: StoreAction, now: () => Date): ActionResult {
   switch (action.type) {
     case "edit":
-      return reduceEdit(state, action.ops, now().getTime());
+      return reduceEdit(state, action.ops, now().getTime(), action.run);
     case "undo":
     case "redo":
       return reduceHistory(state, action.type);

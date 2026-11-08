@@ -40,13 +40,22 @@ export function reduceEdit(
   state: StoreState,
   ops: readonly CallerOperation[],
   nowMs: number,
+  run?: RunLogEntry,
 ): ActionResult {
   const applied = applyOps(state.document, ops);
   if ("error" in applied) return rejected(state, applied.error, noticeForError(applied.error));
   if (applied.inverses.length === 0) return result(state);
   const undo = pushEdit(state.undo, applied.inverses, ops, nowMs);
-  const next = { ...state, document: applied.document, undo, redo: [], notice: null };
+  const runLog = run === undefined ? state.runLog : withRun(state.runLog, run);
+  const next = { ...state, document: applied.document, undo, redo: [], runLog, notice: null };
   return result(next, { changed: true });
+}
+
+/** Appends `run`, replacing an entry with the same Run_Id (Requirement 23.6). */
+function withRun(log: readonly RunLogEntry[], run: RunLogEntry): readonly RunLogEntry[] {
+  const index = log.findIndex((entry) => entry.runId === run.runId);
+  if (index === -1) return [...log, run];
+  return log.map((entry, i) => (i === index ? run : entry));
 }
 
 /** `undo` and `redo` (Requirements 8.5 to 8.9). */

@@ -275,3 +275,53 @@ describe("immutability", () => {
     }
   });
 });
+
+describe("edit with a run entry _Requirements: 23.6_", () => {
+  const entry = (runId: string, prompt: string) => ({
+    runId,
+    provider: "fixture",
+    modelId: null,
+    prompt,
+    timestamp: ISO,
+  });
+  const ai = (at: number, text: string, runId: string): CallerOperation => ({
+    kind: "insert",
+    at,
+    text,
+    provenance: { origin: "AI", runId, timestamp: ISO },
+  });
+
+  it("appends the entry in the same action as the text and one undo group", () => {
+    const r = reduce(
+      initialState(now),
+      { type: "edit", ops: [ai(0, "drafted", "r1")], run: entry("r1", "p") },
+      now,
+    );
+    expect(r.state.document.text).toBe("drafted");
+    expect(r.state.runLog).toEqual([entry("r1", "p")]);
+    expect(r.state.undo).toHaveLength(1);
+  });
+
+  it("replaces an entry with the same run id and keeps the others", () => {
+    const first = run(
+      initialState(now),
+      { type: "edit", ops: [ai(0, "a", "r1")], run: entry("r1", "one") },
+      { type: "edit", ops: [ai(1, "b", "r2")], run: entry("r2", "two") },
+      { type: "edit", ops: [ai(2, "c", "r2")], run: entry("r2", "again") },
+    );
+    expect(first.runLog.map((e) => [e.runId, e.prompt])).toEqual([
+      ["r1", "one"],
+      ["r2", "again"],
+    ]);
+  });
+
+  it("leaves the run log alone when the edit is rejected", () => {
+    const r = reduce(
+      initialState(now),
+      { type: "edit", ops: [ai(99, "x", "r1")], run: entry("r1", "p") },
+      now,
+    );
+    expect(r.error).not.toBeNull();
+    expect(r.state.runLog).toEqual([]);
+  });
+});

@@ -16,7 +16,7 @@ import {
 
 const NEXT_ROUTE_FILE = /^app\/(?:.*\/)?(?:page|layout|route)\.tsx?$/;
 const FETCH_OWNERS = /^(?:src\/client\/api\.ts|src\/server\/deps\.ts|src\/server\/llm[\w-]*\.ts)$/;
-const SDK_ADAPTERS = /^src\/server\/llm-(?:bedrock|anthropic)\.ts$/;
+const SDK_ADAPTERS = /^src\/server\/llm-(?:bedrock|anthropic|default)\.ts$/;
 const CLOCK_FREE =
   /^src\/(?:store|store-runtime|history|notices|persist|autosave)\.ts$|^src\/editor\//;
 const SDK_SPEC = /^(?:ai|@ai-sdk\/.+)(?:\/.*)?$/;
@@ -256,6 +256,16 @@ describe("static: forbidden constructs self-test (planted violations)", () => {
         'import { streamText } from "ai";\n',
       ),
     ).toEqual([]);
+    expect(
+      reported(
+        libraryViolations,
+        "src/server/llm-default.ts",
+        'import { streamText } from "ai";\n',
+      ),
+    ).toEqual([]);
+    expect(
+      reported(libraryViolations, "src/server/llm.ts", 'import { streamText } from "ai";\n'),
+    ).toEqual(["src/server/llm.ts:1 provider SDK import ai outside the adapters"]);
   });
 
   it("reports vi.mock of the Engine and the Verifier but not of other modules", () => {

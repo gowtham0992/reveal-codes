@@ -59,7 +59,12 @@ async function mount(f: Fixture): Promise<void> {
 
 describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () => {
   it("lays out the toolbar, main region and Issues region in that order, with no left column", async () => {
-    await mount(fixture());
+    const base = modeApi("fixtures").api;
+    const noAssistant: ApiClient = {
+      ...base,
+      mode: () => Promise.resolve({ ok: true, value: { mode: "fixtures" } }),
+    };
+    await mount(fixture(createMemoryStorage(), noAssistant));
     const app = document.querySelector(".app");
     if (app === null) throw new Error("no .app root");
     const roles = [...app.children].map((c) => c.getAttribute("role") ?? c.tagName.toLowerCase());

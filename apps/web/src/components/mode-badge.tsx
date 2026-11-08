@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { ApiClient } from "../client/api";
+import type { ApiClient, AssistantInfo } from "../client/api";
 import styles from "./mode-badge.module.css";
 
 /** `loading` shows nothing; `unreachable` is a failed request (Requirement 15.8). */
@@ -15,17 +15,26 @@ export const BADGE_TEXT = {
 
 /** Asks `GET /api/mode` once after mount. A rejected request becomes `unreachable`, never a throw. */
 export function useServerMode(api: ApiClient): ServerMode {
-  const [mode, setMode] = useState<ServerMode>("loading");
+  return useModeResult(api).mode;
+}
+
+export type ModeResult = Readonly<{ mode: ServerMode; assistant: AssistantInfo | null }>;
+
+/** The same single request, also exposing the Tier 2 `assistant` field (null when absent). */
+export function useModeResult(api: ApiClient): ModeResult {
+  const [result, setResult] = useState<ModeResult>({ mode: "loading", assistant: null });
   useEffect(() => {
     let current = true;
-    void api.mode().then((result) => {
-      if (current) setMode(result.ok ? result.value.mode : "unreachable");
+    void api.mode().then((r) => {
+      if (!current) return;
+      if (r.ok) setResult({ mode: r.value.mode, assistant: r.value.assistant ?? null });
+      else setResult({ mode: "unreachable", assistant: null });
     });
     return () => {
       current = false;
     };
   }, [api]);
-  return mode;
+  return result;
 }
 
 export type ModeBadgeProps = Readonly<{ mode: ServerMode }>;

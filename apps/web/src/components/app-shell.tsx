@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { blockingIssues } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
 import { createAutosave } from "../autosave";
@@ -14,7 +14,9 @@ import type { Store } from "../store-runtime";
 import { hasFullRecord, runVerifyFlow } from "../client/verify-flow";
 import { EditorSurface } from "./editor-surface";
 import { ExportDialog } from "./export-dialog";
-import { ModeBadge, useServerMode } from "./mode-badge";
+import { useAssistantSlot } from "./assistant-column";
+import { ModeBadge, useModeResult } from "./mode-badge";
+import type { ServerMode } from "./mode-badge";
 import { IssuesRegion } from "./issues-region";
 import { Toolbar } from "./toolbar";
 import { useDocumentActions } from "./use-document-actions";
@@ -103,6 +105,7 @@ function useShellParts(services: AppServices | undefined) {
       },
     }),
   );
+  useAutosave(store, svc, autosave);
   return { svc, store, autosave };
 }
 
@@ -145,10 +148,14 @@ function useExportGate(doc: Document) {
   };
 }
 
+function useGates(svc: AppServices, store: Store, doc: Document) {
+  return { verify: useVerify(svc, store), exportGate: useExportGate(doc) };
+}
+
 type ShellToolbarProps = Readonly<{
   notice: string | null;
   doc: Document;
-  mode: ReturnType<typeof useServerMode>;
+  mode: ServerMode;
   verify: ReturnType<typeof useVerify>;
   exportGate: ReturnType<typeof useExportGate>;
   pane: ReturnType<typeof usePaneControl>;
@@ -172,21 +179,36 @@ function ShellToolbar({ notice, doc, mode, verify, exportGate, pane, actions }: 
   );
 }
 
+/** The caret Offset as a ref, so a draft that ends later inserts where the caret is then. */
+function useCaretRef() {
+  const caret = useRef(0);
+  const [cursor, setCursor] = useState(0);
+  const onCaret = (offset: number): void => {
+    caret.current = offset;
+    setCursor(offset);
+  };
+  return { cursor, onCaret, getCaret: () => caret.current };
+}
+
 export function AppShell({ services }: AppShellProps) {
   const { svc, store, autosave } = useShellParts(services);
-  const [cursor, setCursor] = useState(0);
-  const binding = useEditorBinding({ store, now: svc.now, onCaret: setCursor });
+  const { cursor, onCaret, getCaret } = useCaretRef();
+  const binding = useEditorBinding({ store, now: svc.now, onCaret });
   const paneControl = usePaneControl(svc);
-  useAutosave(store, svc, autosave);
   const { notice, doc } = useNoticeAndDocument(store);
-  const mode = useServerMode(svc.api);
-  const verify = useVerify(svc, store);
-  const exportGate = useExportGate(doc);
+  const { mode, assistant } = useModeResult(svc.api);
+  const slot = useAssistantSlot({ svc, store, info: assistant, getCaret });
+  const { verify, exportGate } = useGates(svc, store, doc);
   const actions = useDocumentActions({ store, svc, autosave, doc });
   const toolbar = { notice, doc, mode, verify, exportGate, pane: paneControl, actions };
   return (
-    <div className="app" data-pane={paneControl.open ? "open" : undefined}>
+    <div
+      className="app"
+      data-pane={paneControl.open ? "open" : undefined}
+      data-assistant={slot.attr}
+    >
       <ShellToolbar {...toolbar} />
+      {slot.node}
       <EditorSurface editor={binding.editor} empty={doc.text.length === 0} />
       <IssuesRegion
         document={doc}
