@@ -1211,3 +1211,26 @@ Assumptions made while writing this design. None changes the Engine or the Verif
 - **R5. ProseMirror under jsdom.** Rendering tests need the stubs in `test/support/dom-shims.ts`; a missing stub shows as a thrown error in a rendering test, not in the properties, which use no view.
 - **R6. Plugin flush.** The plugin keeps one pending operation list per state update. If an `appendTransaction` plugin is ever added, operations from earlier transactions in the same update could be lost; the drift check Reconciles, so the effect is a reverted keystroke, never a silent divergence.
 - **R7. Vitest 5 with Vite 8.** JSX is transformed by Oxc; the `web` project sets the automatic runtime explicitly. If a different Vite is installed the key is `esbuild`.
+
+## Revision note
+
+The export-certification spec (`.kiro/specs/export-certification/`) changes this design in three places. Nothing else in this document is changed; read the sections above as written, with these exceptions.
+
+- **Requirement 19 and the Export_Dialog.** The Export_Button is now always enabled. It keeps the labels "Export" and "Export (<n> blocking)" and opens the Export_Dialog in both states. The placeholder dialog, its `EXPORT_PLACEHOLDER` text and the rule that the dialog opens only when nothing blocks are replaced by the working dialog of export-certification (blocking list, Go, Override…, Download .docx, Open print view). The `Toolbar` prop `exportDisabled` is removed.
+- **Persisted_Value.** The value gains `verifiedAt` (an ISO 8601 string or `null`) beside `runLog`. Values written before this change have no such field and load with `verifiedAt` `null`; a `verifiedAt` of any other type is `bad_shape`. `serialise` and `Autosave.schedule` take `verifiedAt` as a required third argument, `Restored` carries it, and `Autosave.flush` returns a boolean.
+- **Store and Verify flow.** `StoreState` gains `verifiedAt` (initially `null`), the `replace` action gains an optional `verifiedAt` (absent means `null`, so New clears it), and a new action `{ type: "verified"; at: string }` is dispatched once at the end of each completed Verify. `runVerifyFlow` takes the injected clock as a required third argument.
+
+Editor-app tests under `apps/web/test` that change (found by searching for the affected names):
+
+- `export-dialog.test.tsx`: rewritten against the new dialog; the `EXPORT_PLACEHOLDER` import and both placeholder assertions go.
+- `export-shell.test.tsx`: the "counts one blocking issue", "counts several blocking issues" and "updates the label after an override" tests assert a disabled button and now assert an enabled one; "opens the placeholder dialog and returns focus to Export on close" is rewritten for the new dialog, which also opens while issues block.
+- `toolbar.test.tsx`: `BASE` drops `exportDisabled`; "disables Verify and Export from its props and keeps New enabled" loses its Export assertion.
+- `demo-path.test.tsx`: the two `expect(button(/^Export/).disabled).toBe(true)` assertions (in `expectRedAndGreenCodes` and `overrideOne`) become `false`; the "Export (n blocking)" label assertions stay.
+- `store.test.ts`: `initialState` gains a `verifiedAt` null assertion; the two `replace` tests gain `verifiedAt` cases; new `verified` action tests.
+- `store.properties.test.ts`: the `StoreState` literal in Property 3 gains `verifiedAt: null`.
+- `persist.test.ts`: the "writes version, the full-mode codes and the run log, and nothing else" test now expects `verifiedAt`; the failure table gains a bad `verifiedAt` row; round-trip tests check `verifiedAt`; every `serialise` call gains the third argument.
+- `autosave.test.ts`: "holds only version, codes and runLog" now expects `verifiedAt` too; the ten `schedule` calls gain the third argument; `flush` return values are asserted.
+- `verify-flow.test.ts` and `verify-flow.properties.test.ts`: every `runVerifyFlow` call gains the clock argument; the completed-flow tests assert one `verified` dispatch, the failed and discarded tests assert none.
+- Call sites of `serialise` that only need the extra argument: `document-actions.test.tsx`, `app-shell.test.tsx` (four calls), `issues-shell.test.tsx`, `assistant-panel.test.tsx`, `export-shell.test.tsx`.
+- `static/forbidden.test.ts`: the rule that bans `createObjectURL` everywhere in `src` and `app` is relaxed to every file except `src/client/download.ts`, and its self-test (the "reports provider SDK, export library and download code" case) changes with it. The `docx` import ban stays: only `packages/export` imports `docx`.
+- `static/package-json.test.ts`: the `WORKSPACE` list gains `@reveal-codes/export`.
