@@ -46,7 +46,7 @@ Conventions that apply to every task:
     - _Requirements: 10.3, 10.8_
 
 - [ ] 2. Statement data and statement text
-  - [~] 2.1 Types and small helpers
+  - [x] 2.1 Types and small helpers
     - Files in `packages/export/src/`: `types.ts` (`Meta`, `RunInfo`, `OriginCounts`, `StatementTool`, `StatementCitation`, `StatementQuote`, `StatementOverride`, `Statement`, `StatementBlock` with its `title` kind, `Appendix` with its `title` field, and `Statement` with `generatedDate` and `verifiedDate`, exactly as in the design), `text.ts` (`clip` backing off one code unit at a surrogate pair, `ellipsize` giving 79 characters and `…` when over the limit, internal `captionOf`: first non-empty line of `document.text.split("\n")`, trimmed, `clip(…, 120)`, `""` when all blank), `time.ts` (`isInstant` for ISO 8601 UTC instants, `localDate(d: Date): string` giving local `YYYY-MM-DD` from `getFullYear`, `getMonth() + 1` and `getDate()`, zero-padded, with no string slicing; the only module that reads local date getters). Re-export the public names from `index.ts`.
     - Example tests `text.test.ts` and `time.test.ts`: `clip` and `ellipsize` at 79, 80 and 81 characters and with an astral character at the cut; caption cases (leading blank lines, all blank, 121 characters, astral character at 120); `isInstant` accepts valid instants and rejects garbage and non-UTC offsets; `localDate` zero-padding of month and day (2026-01-05), a year boundary built with local-component constructors, and the instant `2026-03-05T02:30:00Z` giving `2026-03-04`.
     - No `Date.now`, `new Date()` without arguments, or `Math.random`. Modules within 300 lines, functions within 40.

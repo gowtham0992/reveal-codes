@@ -24,10 +24,10 @@ describe("buildDemoDocument", () => {
   it("makes no request outside the recorded fixtures", async () => {
     const original = globalThis.fetch;
     const calls: string[] = [];
-    globalThis.fetch = ((input: unknown) => {
+    globalThis.fetch = (input: unknown) => {
       calls.push(String(input));
       return Promise.reject(new Error("network is not allowed"));
-    }) as typeof fetch;
+    };
     try {
       await buildDemoDocument();
     } finally {

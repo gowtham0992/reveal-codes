@@ -17,9 +17,7 @@ import {
   lookup,
 } from "@reveal-codes/verifier";
 import type { Deps } from "@reveal-codes/verifier";
-
-/** Structural shape of one assistant run (matches the design's RunInfo). */
-type DemoRun = Readonly<{ runId: string; provider: string; modelId: string | null }>;
+import type { RunInfo } from "../../src/index.js";
 
 export const DEMO_NOW = new Date("2026-11-20T18:30:00.000Z");
 export const DEMO_VERIFIED_AT = "2026-11-20T18:25:00.000Z";
@@ -29,7 +27,7 @@ export const DEMO_OVERRIDE_REASONS = [
   "Quotation taken from a bench ruling transcript, not the opinion.",
   "Authority is cited for background only and will be removed.",
 ] as const;
-export const DEMO_RUN_LOG: readonly DemoRun[] = [
+export const DEMO_RUN_LOG: readonly RunInfo[] = [
   { runId: "run-1", provider: "fixture", modelId: "fixture-model" },
   { runId: "run-9", provider: "fixture", modelId: null },
 ];
@@ -134,7 +132,9 @@ function assertDemo(doc: Document): void {
   };
   const want = { verified: 2, notFound: 3, mismatch: 1, overrides: 4, runs: 1, blocking: 0 };
   if (JSON.stringify(counts) !== JSON.stringify(want)) {
-    throw new Error(`demo document counts ${JSON.stringify(counts)}, expected ${JSON.stringify(want)}`);
+    throw new Error(
+      `demo document counts ${JSON.stringify(counts)}, expected ${JSON.stringify(want)}`,
+    );
   }
 }
 
