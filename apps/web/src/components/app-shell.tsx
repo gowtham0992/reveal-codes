@@ -17,6 +17,7 @@ import { ExportDialog } from "./export-dialog";
 import { ModeBadge, useServerMode } from "./mode-badge";
 import { IssuesRegion } from "./issues-region";
 import { Toolbar } from "./toolbar";
+import { useDocumentActions } from "./use-document-actions";
 import { composeStatus, usePaneControl } from "./use-pane";
 import { Pane } from "../pane/pane";
 
@@ -151,12 +152,15 @@ type ShellToolbarProps = Readonly<{
   verify: ReturnType<typeof useVerify>;
   exportGate: ReturnType<typeof useExportGate>;
   pane: ReturnType<typeof usePaneControl>;
+  actions: ReturnType<typeof useDocumentActions>;
 }>;
 
-function ShellToolbar({ notice, doc, mode, verify, exportGate, pane }: ShellToolbarProps) {
+function ShellToolbar({ notice, doc, mode, verify, exportGate, pane, actions }: ShellToolbarProps) {
   return (
     <Toolbar
       notice={notice}
+      onNew={actions.onNew}
+      onLoadDemo={actions.onLoadDemo}
       paneOpen={pane.open}
       verifyDisabled={verify.running || !hasFullRecord(doc)}
       verifyRunning={verify.running}
@@ -178,7 +182,8 @@ export function AppShell({ services }: AppShellProps) {
   const mode = useServerMode(svc.api);
   const verify = useVerify(svc, store);
   const exportGate = useExportGate(doc);
-  const toolbar = { notice, doc, mode, verify, exportGate, pane: paneControl };
+  const actions = useDocumentActions({ store, svc, autosave, doc });
+  const toolbar = { notice, doc, mode, verify, exportGate, pane: paneControl, actions };
   return (
     <div className="app" data-pane={paneControl.open ? "open" : undefined}>
       <ShellToolbar {...toolbar} />
@@ -191,6 +196,7 @@ export function AppShell({ services }: AppShellProps) {
         demoMode={mode === "fixtures"}
       />
       {exportGate.dialog}
+      {actions.dialog}
       <Pane
         open={paneControl.open}
         document={doc}

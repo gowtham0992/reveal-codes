@@ -1,0 +1,99 @@
+"use client";
+
+import { apply, createDocument } from "@reveal-codes/engine";
+import type { Document } from "@reveal-codes/engine";
+import { useState } from "react";
+import type { Autosave } from "../autosave";
+import { noticeForError } from "../notices";
+import type { AppServices } from "../services";
+import type { Store } from "../store-runtime";
+import { ConfirmDialog } from "./confirm-dialog";
+
+export const DEMO_FAILED = "Could not load the demo motion.";
+
+type Pending = "new" | "demo";
+
+/** One PST insert over an empty Document; the whole text is a single span (Requirement 20). */
+function pastedDocument(text: string, iso: string): Document | string {
+  const empty = createDocument("", iso);
+  if (!empty.ok) return noticeForError(empty.error);
+  const inserted = apply(empty.value, {
+    kind: "insert",
+    at: 0,
+    text,
+    provenance: { origin: "PST", timestamp: iso },
+  });
+  return inserted.ok ? inserted.value.document : noticeForError(inserted.error);
+}
+
+function installDocument(store: Store, svc: AppServices, text: string): void {
+  const doc = pastedDocument(text, svc.now().toISOString());
+  if (typeof doc === "string") store.dispatch({ type: "notice", text: doc });
+  else store.dispatch({ type: "replace", document: doc });
+}
+
+async function loadDemo(store: Store, svc: AppServices): Promise<void> {
+  const fetched = await svc.api.demoMotion();
+  if (!fetched.ok) store.dispatch({ type: "notice", text: DEMO_FAILED });
+  else installDocument(store, svc, fetched.value);
+}
+
+function startNew(store: Store, svc: AppServices, autosave: Autosave): void {
+  installDocument(store, svc, "");
+  autosave.clear();
+}
+
+type Deps = Readonly<{ store: Store; svc: AppServices; autosave: Autosave; doc: Document }>;
+
+const COPY = {
+  new: {
+    title: "New document",
+    message: "Discard the current draft and start a new document?",
+    confirmLabel: "Discard and start new",
+  },
+  demo: {
+    title: "Load demo motion",
+    message: "Replace the current draft with the demo motion?",
+    confirmLabel: "Replace draft",
+  },
+} as const;
+
+/** New and Load demo motion: both confirm first (Load demo only when the draft is non-empty). */
+export function useDocumentActions({ store, svc, autosave, doc }: Deps) {
+  const [pending, setPending] = useState<Pending | null>(null);
+  const [opener, setOpener] = useState<HTMLElement | null>(null);
+  const ask = (kind: Pending): void => {
+    const active = document.activeElement;
+    setOpener(active instanceof HTMLElement ? active : null);
+    setPending(kind);
+  };
+  const run = (kind: Pending): void => {
+    if (kind === "new") startNew(store, svc, autosave);
+    else void loadDemo(store, svc);
+  };
+  const confirm = (): void => {
+    const kind = pending;
+    setPending(null);
+    if (kind !== null) run(kind);
+  };
+  return {
+    onNew: (): void => {
+      ask("new");
+    },
+    onLoadDemo: (): void => {
+      if (doc.text.length === 0) run("demo");
+      else ask("demo");
+    },
+    dialog:
+      pending === null ? null : (
+        <ConfirmDialog
+          {...COPY[pending]}
+          restoreFocus={opener}
+          onConfirm={confirm}
+          onCancel={() => {
+            setPending(null);
+          }}
+        />
+      ),
+  };
+}
