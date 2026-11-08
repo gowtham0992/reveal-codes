@@ -62,7 +62,7 @@ Deviations from the design's file layout, decided while planning:
   - [x] 2.6 Checkpoint - quote checking
     - Run `pnpm lint`, `pnpm typecheck` and `pnpm vitest run --project verifier`; fix failures. Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 3. Request building, chunking, status mapping
+- [x] 3. Request building, chunking, status mapping
   - [x] 3.1 JSON/time helpers, lines, chunks, request, and status mapping
     - Files: `src/json.ts` (`parseJson` returning `Result`, the only `try/catch` in `src/`, plus `isRecord`, `asArray`), `src/time.ts` (`nowMs`, `toIso` rejecting years outside 0000 to 9999, `parseWaitUntil`, `parseRetryAfter` for integer seconds and HTTP dates), `src/unresolvable.ts` (`UNRESOLVABLE_FORMS`: WL and LEXIS entries, non-empty, at most 200 characters, naming the form and saying CourtListener does not resolve it), `src/lines.ts` (`memberLines`, `buildLines`: Citation_Line via the engine's `format` on a pincite-free reporter value, first-occurrence de-duplication, `database` and `invalid` handling, zero-member parallel is `invalid`), `src/chunk.ts` (`chunkLines`, A2: at most 60 lines and 64 000 characters, `oversize` flag), `src/request.ts` (URL `{baseUrl}/citation-lookup/`, `Content-Type: application/x-www-form-urlencoded`, `Accept: application/json`, body `text=` + `encodeURIComponent(lines.join("\n"))`, `Authorization: Token <token>` only when a token is set and the URL starts with `{baseUrl}/`), `src/map-status.ts` (`parseLookupBody`, `mapEntry`, `mapChunk` per A5: position mapping, count check, 200 with two or more clusters is `ambiguous`, both `wait_until` and `wait_util` read), and in `src/lookup.ts` a pure `planLookup(records)` returning the unique lines, chunks and per-record member index, plus `resultsForRecords(index, lineResults)` (database and invalid give bare `unchecked`; one member gives its result; several members call `combineParallel`, wired in 4.4).
     - Example tests: `time.test.ts` (`Retry-After` as integer, date, garbage; `wait_until` in several forms), `lines.test.ts` (parallel order, duplicates, database, short and other skipped, `912 F. 4th 33` normalises to `912 F.4th 33`), `chunk.test.ts` (60-line cap, 64 000-character cap, oversize line alone), `request.test.ts` (body is lines joined by `\n`, no token off-Base_URL, no token without a configured token, no headers besides `Authorization`, `Content-Type`, `Accept`), `map-status.test.ts` (one example per row of A5, plus malformed entry, wrong length, non-array body), `unresolvable.test.ts`.
@@ -88,7 +88,7 @@ Deviations from the design's file layout, decided while planning:
     - **Property 11: Database citations are never sent and always map to unchecked**
     - **Validates: Requirements 5.1, 5.3, 5.4, 5.5**
     - _Requirements: 5.5_
-  - [-] 3.6 Property 12: short and other records are never sent and never in the result map
+  - [x] 3.6 Property 12: short and other records are never sent and never in the result map
     - Same file `test/lookup.properties.test.ts`; same harness and swap in task 4.4.
     - **Property 12: Short and other records are never sent and never in the result map**
     - **Validates: Requirements 1.2, 1.3, 1.4, 1.5, 1.6**

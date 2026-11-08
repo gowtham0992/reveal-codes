@@ -27,6 +27,10 @@
     "3.5 Property 11: database citations are never sent and always map to unchecked": {
       "status": "passed",
       "lastRunTimestamp": 1794102583336
+    },
+    "3.6 Property 12: short and other records are never sent and never in the result map": {
+      "status": "passed",
+      "lastRunTimestamp": 1794102711156
     }
   },
   "executionHistory": {
@@ -261,6 +265,11 @@
         "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
         "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
         "timestamp": 1794102624995
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794102723237
       }
     ],
     "4.1 Token bucket, Window_Log, and dispatch gate": [
@@ -448,6 +457,13 @@
         "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
         "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
         "timestamp": 1794102451689
+      }
+    ],
+    "3. Request building, chunking, status mapping": [
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794102723285
       }
     ]
   }

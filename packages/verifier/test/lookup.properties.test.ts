@@ -6,6 +6,7 @@ import { buildLookupRequest } from "../src/request";
 import type { LookupRequest } from "../src/request";
 import { planLookup, resultsForRecords } from "../src/lookup";
 import { arbDatabaseCase } from "./support/arb-db-records";
+import { arbMixedCase } from "./support/arb-mixed-records";
 import { arbLookupCase } from "./support/arb-records";
 import type { LookupCase } from "./support/arb-records";
 import { runs } from "./support/fc";
@@ -111,6 +112,67 @@ describe("Property 11: database citations _Requirements: 5.1, 5.3, 5.4, 5.5_", (
           rs.map((r) => r.spec.body);
         expect(bodies(reqs)).toEqual(bodies(requestsFor(c.withoutDatabase)));
         if (c.onlyDatabase) expect(reqs).toHaveLength(0);
+      }),
+      { numRuns: runs() },
+    );
+  });
+});
+
+// Stub until task 4.4: results that depend on the line, so equal lines must give equal
+// results and different lines usually do not. The combine stub depends on its members only.
+function stubLineResult(line: string): VerificationResult {
+  const n = line.length % 3;
+  if (n === 0) return { status: "verified", clusterId: line };
+  if (n === 1) return { status: "not_found" };
+  return { status: "ambiguous", candidates: [line, `${line}!`] };
+}
+
+function variedResults(c: LookupCase): ReadonlyMap<IssueKey, VerificationResult> {
+  const plan = planLookup(c.records);
+  const lineResults = new Map(plan.lines.map((l) => [l, stubLineResult(l)] as const));
+  return resultsForRecords(plan.index, lineResults, (members) => ({
+    status: "ambiguous",
+    candidates: members.map((m) => JSON.stringify(m)),
+  }));
+}
+
+// Property 12
+// Feature: citation-verifier, Property 12: Short and other records are never sent and never in the result map
+describe("Property 12: short and other records _Requirements: 1.2, 1.3, 1.4, 1.5, 1.6_", () => {
+  it("are never sent, never keyed, and equal Citation_Lines get equal results", () => {
+    fc.assert(
+      fc.property(arbMixedCase, (m) => {
+        const c = m.lookup;
+        const expected = new Set(expectedLines(c.records));
+        const allowedText = [...expected].join("\n");
+        const sent = requestsFor(c).flatMap((r) => decodedText(r.spec.body).split("\n"));
+        for (const line of sent) {
+          if (line !== "" && !expected.has(line)) expect(m.derivedTexts).not.toContain(line);
+        }
+        for (const d of m.derivedTexts) {
+          if (d !== "" && !allowedText.includes(d)) {
+            for (const r of requestsFor(c))
+              expect(decodedText(r.spec.body).includes(d)).toBe(false);
+          }
+        }
+        const fullKeys = c.records.flatMap((r) => (r.kind === "full" ? [r.key] : []));
+        const results = variedResults(c);
+        expect(new Set(fullKeys).size).toBe(fullKeys.length);
+        expect(results.size).toBe(fullKeys.length);
+        expect([...results.keys()].sort()).toEqual([...fullKeys].sort());
+        for (const key of m.shortKeys) expect(results.has(key)).toBe(false);
+        // Req 1.6: equal Citation_Lines, equal results.
+        const byLines = new Map<string, VerificationResult>();
+        const plan = planLookup(c.records);
+        for (const [key, members] of plan.index.members) {
+          if (typeof members === "string") continue;
+          const result = results.get(key);
+          expect(result).toBeDefined();
+          const id = members.join("\n");
+          const seen = byLines.get(id);
+          if (seen !== undefined) expect(result).toEqual(seen);
+          else if (result !== undefined) byLines.set(id, result);
+        }
       }),
       { numRuns: runs() },
     );
