@@ -1,5 +1,6 @@
 "use client";
 
+import { blockingIssues } from "@reveal-codes/engine";
 import type { Document, Issue } from "@reveal-codes/engine";
 import { useState } from "react";
 import type { Store } from "../store-runtime";
@@ -21,6 +22,11 @@ export type IssuesRegionProps = Readonly<{
 
 type Target = Readonly<{ issue: Issue; opener: HTMLElement }>;
 
+/** "Issues" at zero; "Issues — <n> blocking" above zero (U+2014, one space each side). */
+export function issuesHeading(blocking: number): string {
+  return blocking > 0 ? `Issues \u2014 ${String(blocking)} blocking` : "Issues";
+}
+
 /** The Issues region: Fixtures_Mode line (15.7), the list and the Override_Dialog (Req 18). */
 export function IssuesRegion(props: IssuesRegionProps) {
   const { document, store, now, onGo, demoMode = false } = props;
@@ -28,28 +34,30 @@ export function IssuesRegion(props: IssuesRegionProps) {
   return (
     <aside aria-labelledby="issues-heading" className={styles["issues"]}>
       <h2 id="issues-heading" className={styles["heading"]}>
-        Issues
+        {issuesHeading(blockingIssues(document).length)}
       </h2>
-      {demoMode ? <p className={styles["note"]}>{DEMO_MODE_LINE}</p> : null}
-      <IssuesList
-        document={document}
-        onGo={onGo}
-        onOverride={(issue, opener) => {
-          setTarget({ issue, opener });
-        }}
-      />
-      {target === null ? null : (
-        <OverrideDialog
-          issueKey={target.issue.key}
-          code={target.issue.code}
-          store={store}
-          now={now}
-          restoreFocus={target.opener}
-          onClose={() => {
-            setTarget(null);
+      <div className={styles["body"]}>
+        {demoMode ? <p className={styles["note"]}>{DEMO_MODE_LINE}</p> : null}
+        <IssuesList
+          document={document}
+          onGo={onGo}
+          onOverride={(issue, opener) => {
+            setTarget({ issue, opener });
           }}
         />
-      )}
+        {target === null ? null : (
+          <OverrideDialog
+            issueKey={target.issue.key}
+            code={target.issue.code}
+            store={store}
+            now={now}
+            restoreFocus={target.opener}
+            onClose={() => {
+              setTarget(null);
+            }}
+          />
+        )}
+      </div>
     </aside>
   );
 }

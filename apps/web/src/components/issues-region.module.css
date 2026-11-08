@@ -1,14 +1,22 @@
 .issues {
   grid-column: issues;
+  grid-row: 2 / 4;
   overflow: auto;
-  padding: 8px;
-  background: var(--paper);
+  padding: 0;
+  border-left: 1px solid var(--rule);
+  background: var(--ui-bg);
 }
 
 .heading {
-  margin: 0 0 8px;
+  margin: 0;
+  padding: 8px;
+  border-bottom: 1px solid var(--rule);
   font-size: var(--size-ui);
   font-weight: 700;
+}
+
+.body {
+  padding: 8px;
 }
 
 .note {

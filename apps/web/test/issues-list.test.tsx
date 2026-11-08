@@ -130,4 +130,17 @@ describe("IssuesRegion _Requirements: 15.7_", () => {
     expect(screen.getByText(/^Demo mode checks only the recorded demo citations/)).not.toBeNull();
     expect(screen.getByText("No issues.")).not.toBeNull();
   });
+
+  it("reads Issues with no blocking issue and Issues — 4 blocking with four citations", () => {
+    const store = createStore(() => new Date(ISO));
+    const props = { store, now: () => new Date(ISO), onGo: noop };
+    const view = renderUi(<IssuesRegion {...props} document={build("Plain text.")} />);
+    expect(screen.getByRole("heading", { name: "Issues" })).not.toBeNull();
+    const four = build(
+      "A 1 U.S. 1 (1900). B 2 U.S. 2 (1901). C 3 U.S. 3 (1902). D 4 U.S. 4 (1903).",
+    );
+    view.rerender(<IssuesRegion {...props} document={four} />);
+    expect(screen.getByRole("heading", { name: "Issues \u2014 4 blocking" })).not.toBeNull();
+    expect(screen.getByRole("complementary", { name: "Issues \u2014 4 blocking" })).not.toBeNull();
+  });
 });
