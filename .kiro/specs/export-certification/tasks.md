@@ -80,7 +80,7 @@ Conventions that apply to every task:
     - Asserts that joining `buildAppendix(document).lines` with `\n` equals `render(document, "full").text`; `parse` of that text returns `Ok`; the parsed Document's `text`, `spans`, `citations`, `quotes`, `overrides` and `runs` are deeply equal to the original's; a second `buildAppendix` call is deep-equal to the first and the input is unchanged.
     - **Validates: Requirements 5.2, 5.3, 5.4**
     - _Requirements: 5.4, 10.5, 10.6_
-  - [-] 3.3 `exportFileName`
+  - [x] 3.3 `exportFileName`
     - File `packages/export/src/file-name.ts`: `exportFileName(caption, now): string` returns `<slug>-<YYYY-MM-DD>.docx`, local date from `localDate(now)` (host time zone, not UTC); slug steps in order: lowercase, each run of characters outside `a-z0-9` becomes one `-`, strip leading and trailing `-`, cut to 60 characters, strip trailing `-` again, `filing` when empty. Precondition: `now` is a valid Date (unreachable from the app because `buildStatement` rejects the Date first).
     - Example tests `file-name.test.ts`: spaces, punctuation, a 60-character cut that ends in a dash, an empty caption, non-ASCII caption, and local dates near midnight in the pinned zone (local 23:59:59 and 00:00:00) plus the instant `2026-03-05T02:30:00Z` giving a file name ending `-2026-03-04.docx`. Module about 30 lines.
     - _Requirements: 7.1, 10.8_
