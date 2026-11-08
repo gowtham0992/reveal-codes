@@ -68,7 +68,7 @@ Conventions that apply to every task:
     - Keep `render-statement.ts` near 110 lines and every function under 40.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 4.10, 4.11, 4.12, 10.8_
 
-- [ ] 3. Appendix and file name
+- [x] 3. Appendix and file name
   - [x] 3.1 `buildAppendix`
     - File `packages/export/src/appendix.ts`: `buildAppendix(document): Appendix` returns `{ title, intro: [S1, S2], lines: render(document, "full").text.split("\n") }` with the title "Provenance Appendix" and the two sentences taken from `wording.ts`; lines are not trimmed or altered. Pure: no clock, network or mutation.
     - Example tests `appendix.test.ts`: `title` is "Provenance Appendix"; an empty Document yields the `[DOC]` header line only; a Document with leading and trailing spaces and empty lines keeps every line unmodified; the Demo_Document lines join to `render(demo, "full").text`; two calls on deeply equal Documents are deeply equal.
@@ -84,7 +84,7 @@ Conventions that apply to every task:
     - File `packages/export/src/file-name.ts`: `exportFileName(caption, now): string` returns `<slug>-<YYYY-MM-DD>.docx`, local date from `localDate(now)` (host time zone, not UTC); slug steps in order: lowercase, each run of characters outside `a-z0-9` becomes one `-`, strip leading and trailing `-`, cut to 60 characters, strip trailing `-` again, `filing` when empty. Precondition: `now` is a valid Date (unreachable from the app because `buildStatement` rejects the Date first).
     - Example tests `file-name.test.ts`: spaces, punctuation, a 60-character cut that ends in a dash, an empty caption, non-ASCII caption, and local dates near midnight in the pinned zone (local 23:59:59 and 00:00:00) plus the instant `2026-03-05T02:30:00Z` giving a file name ending `-2026-03-04.docx`. Module about 30 lines.
     - _Requirements: 7.1, 10.8_
-  - [~] 3.4 Checkpoint - statement, appendix, and file name
+  - [x] 3.4 Checkpoint - statement, appendix, and file name
     - Run `pnpm lint`, `pnpm typecheck` and `pnpm vitest run --project export`; run `FC_NUM_RUNS=500 pnpm vitest run --project export properties.test`; fix failures. Ensure all tests pass, ask the user if questions arise.
 
 - [x] 4. DOCX builder and gate
@@ -113,7 +113,7 @@ Conventions that apply to every task:
     - _Requirements: 1.6, 10.5, 10.6_
 
 - [ ] 5. Web: Store, persistence, export flow, dialog, and print view
-  - [~] 5.1 Store `verifiedAt` and Verify flow clock (follows ui.md)
+  - [-] 5.1 Store `verifiedAt` and Verify flow clock (follows ui.md)
     - Files: `apps/web/src/store.ts` (`StoreState.verifiedAt: string | null`, initial `null`; the `replace` action gains optional `verifiedAt`, absent means `null`; new action `{ type: "verified"; at: string }`), `apps/web/src/store-actions.ts` (`reduceReplace` sets `verifiedAt ?? null`; `reduceVerified` returns `changed: false` with the new field so subscribers are notified and no history barrier fires; `edit`, `undo`, `redo`, `verification`, `quoteCheck` and `override` leave the field untouched), `apps/web/src/client/verify-flow.ts` (`runVerifyFlow(api, store, now)` dispatches `{ type: "verified", at: now().toISOString() }` once, after the quote phase and before the summary Notice, only on the `completed` path; none on `failed` or `discarded`), and the `runVerifyFlow` caller in `apps/web/src/components/app-shell.tsx` passing `svc.now`.
     - Update the editor-app tests named in its revision note: `store.test.ts` (initial `null`; `replace` with and without `verifiedAt`; `verified` action; edit, undo, redo and override leave it), `store.properties.test.ts` (the `StoreState` literal in Property 3 gains `verifiedAt: null`; no new property), `verify-flow.test.ts` and `verify-flow.properties.test.ts` (clock argument on every call; one `verified` dispatch on completed flows, none on failed and discarded).
     - Modules at most 300 lines and functions at most 40.
