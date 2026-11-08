@@ -30,8 +30,8 @@ Two choices that go slightly past the literal requirements, both to make the rul
 | `components/status-line.tsx`, `status-line.module.css` | New. Presentational. Position left, Mode_Text middle, Key_Legend right. |
 | `components/use-pane.ts` | `positionText(doc, cursor)` added next to `composeStatus`. No change to `composeStatus` or the F7 logic. |
 | `pane/pane.tsx`, `pane/pane.module.css` | New optional prop `modeText`. The status div becomes a flex row with the left text and the Mode_Text. |
-| `components/use-document-title.ts` | New. `captionOf`, `windowTitle` (pure) and `useDocumentTitle` (one effect). |
-| `components/app-shell.tsx` | Calls `useDocumentTitle`, renders `StatusLine` while the Pane is closed, passes `modeText` to `Pane`, stops passing `badge`. |
+| `components/use-document-title.ts` | New. `captionOf` and `windowTitle` (pure). No hook and no effect. |
+| `components/app-shell.tsx` | Renders `<title>{windowTitle(doc.text)}</title>`, renders `StatusLine` while the Pane is closed, passes `modeText` to `Pane`, stops passing `badge`. |
 | `components/editor-surface.tsx`, `.module.css` | New placeholder text; the Page becomes a fixed sheet. |
 | `components/issues-region.tsx`, `.module.css` | `issuesHeading(blocking)`; heading and body split so the heading rule spans the region; left rule; same background as the Editor_Column. |
 | `components/assistant-column.tsx`, `.module.css`, `assistant-panel.tsx`, `.module.css` | Collapsed strip with vertical text; expanded heading in the Issues form. |
@@ -77,7 +77,7 @@ flowchart TD
   Shell -->|"modeText(mode)"| SL
   Shell -->|"composeStatus(doc, cursor, saveMessage)"| Pane["Pane"]
   Shell -->|"modeText(mode)"| Pane
-  Shell -->|"windowTitle(doc.text)"| Title["document.title"]
+  Shell -->|"windowTitle(doc.text)"| Title["rendered title element"]
 ```
 
 - `composeStatus` still returns the F7 text, or the position text plus divergence words inside a mismatched quote, or `null`. The Pane keeps its `?? statusText(...)` fallback. This is unchanged, so the F7 tests keep their meaning.
@@ -88,7 +88,9 @@ flowchart TD
 
 ### Window_Title
 
-`useDocumentTitle(doc.text)` runs in `AppShell`. `windowTitle(text)` is pure. The effect depends on the computed title string, so it runs on mount (R10.4: the empty Document gives "Reveal Codes") and again after the mount-time autosave load or any edit changes the string (R10.3). The static title `Reveal Codes` in `app/layout.tsx` metadata stays; it is what the server renders and equals the empty-Document value.
+`AppShell` renders `<title>{windowTitle(doc.text)}</title>`, which React 19 hoists into the document head. `windowTitle(text)` is pure. The title is part of the render, so it is correct on the first client render (R10.4: the empty Document gives "Reveal Codes") and follows the mount-time autosave load or any edit (R10.3).
+
+Cause of the earlier defect: an effect that assigned `document.title` was overwritten when Next streamed `metadata.title` from `app/layout.tsx` after hydration, and the effect did not re-run because its dependency was unchanged. The fix removes `title` from the layout metadata and renders the `<title>` element instead. `app/print/page.tsx` exports its own `metadata.title` of "Print — Reveal Codes".
 
 ## Components and Interfaces
 
@@ -219,12 +221,6 @@ export function windowTitle(text: string): string {
   return caption === null ? SUFFIX : `${caption} \u2014 ${SUFFIX}`;
 }
 
-export function useDocumentTitle(text: string): void {
-  const title = windowTitle(text);
-  useEffect(() => {
-    document.title = title;
-  }, [title]);
-}
 ```
 
 `/\S[^\n]*/` starts at the first non-whitespace character, so blank and whitespace-only leading lines are skipped without splitting the whole text on every keystroke. Cutting after the trim follows R-glossary order ("trimmed, and cut"), so a cut can leave a trailing space before the dash. L1 and L2 stay as recorded.
@@ -392,7 +388,7 @@ A correctness property needs a universally quantified statement over generated i
 No new error handling is added.
 
 - `modeText` is total over `ServerMode`; `loading` returns `null` and the Status_Line and Pane render nothing for it. A failed mode request is already `unreachable`.
-- `useDocumentTitle` runs only in an effect, so server rendering never touches `document`. Storage failures are still handled by the existing mount-time load; the title then stays "Reveal Codes".
+- The `<title>` element is rendered by `AppShell`, so server rendering never touches `document`. Storage failures are still handled by the existing mount-time load; the title then stays "Reveal Codes".
 - `windowTitle` is total: any string yields a title, including text with no non-blank line.
 - `scope_of` has no failure path. Empty stdin gives empty output, which keeps the existing "nothing to commit" exit. Unknown path shapes give `repo`.
 
@@ -411,7 +407,7 @@ All tests are example tests. There is no property test, no new `vi.mock`, and no
 | Pane closed: a region named "Status line" is present, has no live attribute, shows the Position_Text and the Key_Legend. Pane opened with Alt-F3: that region is absent. | `app-shell.test.tsx` | 4.1, 4.2, 4.5, 4.8, 14.2 |
 | `it.each` over `fixtures`, `live` and `down`: the Status_Line contains the Mode_Text, and the toolbar does not. | `app-shell.test.tsx` | 4.6, 4.10, 2.8, 14.2 |
 | Pane open: the Pane status line contains the Mode_Text for the current mode. | `app-shell.test.tsx` | 5.1, 14.3 |
-| `it.each` for four stored documents, reading `document.title` after mount: empty; first line blank (`"\n  \nText"` gives "Text — Reveal Codes"); a plain Caption; a first line of 61 or more characters cut to 60. | `app-shell.test.tsx` | 10.1 to 10.4, 14.4 |
+| `it.each` for four stored documents, reading the rendered `<title>` element after mount (also: a saved document loaded on mount, an update after an edit, and a static check that the layout metadata has no `title`): empty; first line blank (`"\n  \nText"` gives "Text — Reveal Codes"); a plain Caption; a first line of 61 or more characters cut to 60. | `app-shell.test.tsx` | 10.1 to 10.4, 14.4 |
 | `IssuesRegion` heading reads "Issues" for a Document with no blocking issue and "Issues — 4 blocking" for a Document with four citations. | `issues-list.test.tsx` (the existing `IssuesRegion` describe) | 8.1, 8.2, 14.5 |
 
 ### Existing tests that must be updated

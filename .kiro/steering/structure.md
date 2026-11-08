@@ -43,7 +43,7 @@ reveal-codes/
         pane/                 Reveal Codes pane: layout.ts, pane.tsx, pane.module.css
         client/               browser-side flows: api.ts, verify-flow.ts, verify-summary.ts, divergence.ts, assistant-client.ts
         server/               route logic: deps.ts (only reader of process.env), http.ts, body.ts, verify, opinion, mode and assistant routes, llm*.ts (draft provider selection)
-        components/           React components with one CSS module each: app-shell, toolbar, editor-surface, issues list and region, dialogs, mode badge, assistant column and panel
+        components/           React components with one CSS module each: app-shell, toolbar, editor-surface, issues list and region, dialogs, status line, assistant column and panel
       scripts/                copy-demo.ts (predev and prebuild)
       fixtures/assistant/     recorded assistant response used by the fixture LLM provider
       public/                 demo-motion.txt, copied from packages/engine/fixtures by copy-demo.ts; gitignored

@@ -399,6 +399,11 @@ describe("AppShell mode badge and Verify _Requirements: 15.7, 15.8, 17.1, 17.12,
   });
 });
 
+/** Text of the rendered <title> element React hoisted into the head. */
+function titleElement(): string | undefined {
+  return document.head.querySelector("title")?.textContent ?? undefined;
+}
+
 describe("AppShell Window_Title _Requirements: 10.1, 10.2, 10.3, 10.4, 14.4_", () => {
   const LONG = "A".repeat(70);
   it.each([
@@ -410,6 +415,27 @@ describe("AppShell Window_Title _Requirements: 10.1, 10.2, 10.3, 10.4, 14.4_", (
     const storage = createMemoryStorage();
     if (text !== "") storage.setItem(AUTOSAVE_KEY, serialise(storedDocument(text), [], null));
     await mount(fixture(storage));
-    expect(document.title).toBe(expected);
+    expect(titleElement()).toBe(expected);
+    expect(document.head.querySelectorAll("title")).toHaveLength(1);
+  });
+
+  it("yields the Caption title for a saved Document loaded from storage on mount", async () => {
+    const storage = createMemoryStorage();
+    storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Saved Motion\nBody."), [], null));
+    await mount(fixture(storage));
+    expect(titleElement()).toBe("Saved Motion \u2014 Reveal Codes");
+  });
+
+  it("updates the rendered title after an edit", async () => {
+    await mount(fixture());
+    expect(titleElement()).toBe("Reveal Codes");
+    const ed = editorOf();
+    act(() => {
+      ed.view.dispatch(ed.state.tr.insertText("Edited Caption", 1));
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(titleElement()).toBe("Edited Caption \u2014 Reveal Codes");
   });
 });

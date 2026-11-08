@@ -1,7 +1,3 @@
-"use client";
-
-import { useEffect } from "react";
-
 const MAX_CAPTION = 60;
 const SUFFIX = "Reveal Codes";
 
@@ -16,12 +12,4 @@ export function captionOf(text: string): string | null {
 export function windowTitle(text: string): string {
   const caption = captionOf(text);
   return caption === null ? SUFFIX : `${caption} \u2014 ${SUFFIX}`;
-}
-
-/** Keeps `document.title` in step with the Document text. */
-export function useDocumentTitle(text: string): void {
-  const title = windowTitle(text);
-  useEffect(() => {
-    document.title = title;
-  }, [title]);
 }
