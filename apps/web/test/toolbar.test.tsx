@@ -53,6 +53,18 @@ describe("Toolbar _Requirements: 10.1, 10.2, 10.6, 10.7_", () => {
     expect(screen.getByRole("button", { name: "New" })).toHaveProperty("disabled", false);
   });
 
+  it("labels Verify 'Verifying…' while running and calls onVerify when enabled", () => {
+    const onVerify = vi.fn();
+    const { rerender } = renderUi(<Toolbar {...BASE} onVerify={onVerify} />);
+    fireEvent.click(screen.getByRole("button", { name: "Verify" }));
+    expect(onVerify).toHaveBeenCalledTimes(1);
+    rerender(<Toolbar {...BASE} verifyDisabled={true} verifyRunning={true} onVerify={onVerify} />);
+    const running = screen.getByRole("button", { name: "Verifying…" });
+    expect(running).toHaveProperty("disabled", true);
+    fireEvent.click(running);
+    expect(onVerify).toHaveBeenCalledTimes(1);
+  });
+
   it("calls the handler of the button that is clicked", () => {
     const onNew = vi.fn();
     const onTogglePane = vi.fn();

@@ -1,10 +1,22 @@
 import type { AutosaveDeps, StorageLike } from "./autosave";
+import { browserApi } from "./client/api";
+import type { ApiClient } from "./client/api";
+
+/** Builds `browserApi()` on first call, so server rendering never touches `fetch`. */
+function lazyApi(): ApiClient {
+  return {
+    verify: (records, signal) => browserApi().verify(records, signal),
+    opinion: (clusterId, signal) => browserApi().opinion(clusterId, signal),
+    mode: () => browserApi().mode(),
+    demoMotion: () => browserApi().demoMotion(),
+  };
+}
 
 /**
  * Browser services the shell depends on. Tests supply fakes.
- * The `api` client is added with the Verify flow (task 6.5).
  */
 export type AppServices = Readonly<{
+  api: ApiClient;
   now: () => Date;
   setTimer: AutosaveDeps["setTimer"];
   clearTimer: AutosaveDeps["clearTimer"];
@@ -17,6 +29,7 @@ export type AppServices = Readonly<{
  */
 export function defaultServices(): AppServices {
   return {
+    api: lazyApi(),
     now: () => new Date(),
     setTimer: (fn, ms) => window.setTimeout(fn, ms),
     clearTimer: (handle) => {

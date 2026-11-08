@@ -9,7 +9,9 @@ import { defaultServices } from "../services";
 import type { AppServices } from "../services";
 import { createStore } from "../store-runtime";
 import type { Store } from "../store-runtime";
+import { hasFullRecord, runVerifyFlow } from "../client/verify-flow";
 import { EditorSurface } from "./editor-surface";
+import { ModeBadge, useServerMode } from "./mode-badge";
 import { IssuesRegion } from "./issues-region";
 import { Toolbar } from "./toolbar";
 import { composeStatus, usePaneControl } from "./use-pane";
@@ -94,6 +96,18 @@ function useShellParts(services: AppServices | undefined) {
   return { svc, store, autosave };
 }
 
+/** Verify wiring (Requirement 17.1): one flow at a time; the flow reports through the Store. */
+function useVerify(svc: AppServices, store: Store) {
+  const [running, setRunning] = useState(false);
+  const start = (): void => {
+    setRunning(true);
+    void runVerifyFlow(svc.api, store).then(() => {
+      setRunning(false);
+    });
+  };
+  return { running, start };
+}
+
 export function AppShell({ services }: AppShellProps) {
   const { svc, store, autosave } = useShellParts(services);
   const [cursor, setCursor] = useState(0);
@@ -102,17 +116,22 @@ export function AppShell({ services }: AppShellProps) {
   useAutosave(store, svc, autosave);
   const notice = useStoreSlice(store, (s) => s.notice);
   const doc = useStoreSlice(store, (s) => s.document);
+  const mode = useServerMode(svc.api);
+  const verify = useVerify(svc, store);
   return (
     <div className="app" data-pane={paneControl.open ? "open" : undefined}>
       <Toolbar
         notice={notice}
         paneOpen={paneControl.open}
-        verifyDisabled={true}
+        verifyDisabled={verify.running || !hasFullRecord(doc)}
+        verifyRunning={verify.running}
         exportDisabled={true}
+        badge={mode === "loading" ? undefined : <ModeBadge mode={mode} />}
+        onVerify={verify.start}
         onTogglePane={paneControl.toggle}
       />
       <EditorSurface editor={binding.editor} empty={doc.text.length === 0} />
-      <IssuesRegion />
+      <IssuesRegion demoMode={mode === "fixtures"} />
       <Pane
         open={paneControl.open}
         document={doc}

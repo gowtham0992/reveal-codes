@@ -5,6 +5,8 @@ export type ToolbarProps = Readonly<{
   notice: string | null;
   paneOpen: boolean;
   verifyDisabled: boolean;
+  /** While true the Verify button reads "Verifying…". */
+  verifyRunning?: boolean;
   exportDisabled: boolean;
   /** Mode badge slot (Requirement 15); nothing is rendered when absent. */
   badge?: ReactNode;
@@ -25,7 +27,7 @@ export function Toolbar(props: ToolbarProps) {
         Load demo motion
       </button>
       <button type="button" disabled={props.verifyDisabled} onClick={props.onVerify}>
-        Verify
+        {props.verifyRunning === true ? "Verifying…" : "Verify"}
       </button>
       <button type="button" aria-pressed={props.paneOpen} onClick={props.onTogglePane}>
         Reveal Codes (Alt-F3)

@@ -10,3 +10,7 @@
   font-size: var(--size-ui);
   font-weight: 700;
 }
+
+.note {
+  margin: 0 0 8px;
+}

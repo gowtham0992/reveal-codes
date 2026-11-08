@@ -140,7 +140,7 @@ Conventions that apply to every task:
     - Asserts that exactly one `POST` is sent and it is first; its body parses to an object whose only property is `records`, deeply equal to the `kind: "full"` entries of the starting `document.citations` in order; no run of 20 or more consecutive characters of `document.text` taken from outside the Full_Record ranges appears in the body (windows also inside a Full_Record's own text are exempt); every other request is a body-less `GET /api/opinion/<id>`; and the ids requested equal `quotesByCluster` computed independently from the final Document, each once, in first-encounter order.
     - **Validates: Requirements 17.2, 17.3, 17.5, 17.6, 17.9, 17.14**
     - _Requirements: 17.14_
-  - [~] 6.5 Mode badge and Verify wiring
+  - [x] 6.5 Mode badge and Verify wiring
     - Edit `apps/web/src/components/app-shell.tsx` and `toolbar.tsx`; add `apps/web/src/components/mode-badge.tsx` (+ module CSS): fetch `/api/mode` after mount; badge "Demo mode: recorded CourtListener responses" in Fixtures_Mode, "Live CourtListener lookups" in live mode, "Server unreachable" when the request fails (Verify stays enabled); Verify enabled while the Document has a Full_Record and no flow is running (`hasFullRecord`), label "Verifying…" and disabled while running; on activation call `runVerifyFlow` and show `summaryNotice` in the status area.
     - Example tests `mode-badge.test.tsx` and `app-shell.test.tsx` additions (jsdom, route-backed Api client): each badge text; Verify disabled with no citations, enabled after typing a reporter citation, disabled with "Verifying…" during a flow; Notice after a flow matches the summary text; flow discarded after New.
     - _Requirements: 15.7, 15.8, 17.1, 17.12, 17.13_

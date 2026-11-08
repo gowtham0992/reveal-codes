@@ -6,6 +6,9 @@ import { describe, expect, it } from "vitest";
 import { AppShell } from "../src/components/app-shell";
 import { AUTOSAVE_KEY, serialise } from "../src/persist";
 import type { AppServices } from "../src/services";
+import type { ApiClient } from "../src/client/api";
+import { modeApi } from "./support/mode-fetch";
+import type { ModeSetting } from "./support/mode-fetch";
 import { createManualTimers } from "./support/clock";
 import type { ManualTimers } from "./support/clock";
 import { createMemoryStorage } from "./support/memory-storage";
@@ -30,9 +33,13 @@ function storedDocument(text: string): Document {
 
 type Fixture = { services: AppServices; storage: MemoryStorage; timers: ManualTimers };
 
-function fixture(storage: MemoryStorage = createMemoryStorage()): Fixture {
+function fixture(
+  storage: MemoryStorage = createMemoryStorage(),
+  api: ApiClient = modeApi("fixtures").api,
+): Fixture {
   const timers = createManualTimers();
   const services: AppServices = {
+    api,
     now: timers.clock.now,
     setTimer: (fn, ms) => timers.setTimeout(fn, ms),
     clearTimer: (h) => {
@@ -258,5 +265,86 @@ describe("AppShell Pane wiring _Requirements: 6.7, 13.3, 13.5, 13.6, 14.1, 14.2,
     });
     const second = statusLine();
     expect(second).not.toBe(first);
+  });
+});
+
+const CITING = "See Roe v. Wade, 410 U.S. 113 (1973).";
+const SUMMARY =
+  "Citations: 0 verified, 1 not found, 0 ambiguous, 0 unchecked. " +
+  "Quotes: 0 match, 0 mismatch, 0 unchecked. Skipped: 0. Opinions unavailable: 0.";
+
+function citingStorage(): MemoryStorage {
+  const storage = createMemoryStorage();
+  storage.setItem(AUTOSAVE_KEY, serialise(storedDocument(CITING), []));
+  return storage;
+}
+
+function verifyButton(): HTMLButtonElement {
+  return screen.getByRole("button", { name: /^Verify/ });
+}
+
+async function settle(): Promise<void> {
+  await act(async () => {
+    await new Promise((r) => setTimeout(r, 30));
+  });
+}
+
+async function mountWith(setting: ModeSetting, storage?: MemoryStorage) {
+  const mode = modeApi(setting);
+  await mount(fixture(storage, mode.api));
+  await settle();
+  return mode;
+}
+
+describe("AppShell mode badge and Verify _Requirements: 15.7, 15.8, 17.1, 17.12, 17.13_", () => {
+  it("shows the mode badge and the Issues line only in fixtures mode", async () => {
+    await mountWith("fixtures");
+    const bar = screen.getByRole("toolbar");
+    expect(within(bar).getByText("Demo mode: recorded CourtListener responses")).not.toBeNull();
+    expect(screen.getByText(/^Demo mode checks only the recorded demo citations/)).not.toBeNull();
+  });
+
+  it("shows the live badge without the Issues line", async () => {
+    await mountWith("live");
+    expect(screen.getByText("Live CourtListener lookups")).not.toBeNull();
+    expect(screen.queryByText(/Demo mode checks only/)).toBeNull();
+  });
+
+  it("keeps Verify enabled when the server is unreachable", async () => {
+    await mountWith("down", citingStorage());
+    expect(screen.getByText("Server unreachable")).not.toBeNull();
+    expect(verifyButton().disabled).toBe(false);
+  });
+
+  it("disables Verify with no citation and enables it after a reporter citation is typed", async () => {
+    await mountWith("fixtures");
+    expect(verifyButton().disabled).toBe(true);
+    const ed = editorOf();
+    act(() => {
+      ed.view.dispatch(ed.state.tr.insertText("See 410 U.S. 113 (1973).", 1));
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(verifyButton().disabled).toBe(false);
+  });
+
+  it("reads Verifying… and is disabled during a flow, then shows the summary Notice", async () => {
+    const mode = modeApi("fixtures");
+    let release: () => void = () => undefined;
+    mode.gate.current = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await mount(fixture(citingStorage(), mode.api));
+    await settle();
+    act(() => {
+      fireEvent.click(verifyButton());
+    });
+    expect(verifyButton().textContent).toBe("Verifying…");
+    expect(verifyButton().disabled).toBe(true);
+    release();
+    await settle();
+    expect(verifyButton().textContent).toBe("Verify");
+    expect(screen.getByRole("status").textContent).toBe(SUMMARY);
   });
 });
