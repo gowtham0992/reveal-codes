@@ -93,4 +93,11 @@
   color: #aaaaaa;
   background: #0000aa;
   white-space: pre;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.modeText {
+  white-space: nowrap;
 }

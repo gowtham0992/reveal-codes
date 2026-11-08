@@ -180,6 +180,7 @@ function ShellBottom({ paneControl, doc, cursor, mode, binding }: ShellBottomPro
         document={doc}
         cursorOffset={cursor}
         statusOverride={composeStatus(doc, cursor, paneControl.saveMessage)}
+        modeText={modeText(mode)}
         onItemClick={binding.focusAt}
         onBackgroundClick={binding.focusEnd}
       />

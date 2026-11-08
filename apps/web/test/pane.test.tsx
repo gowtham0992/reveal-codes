@@ -78,6 +78,20 @@ describe("Pane status line _Requirements: 12.6, 13.6_", () => {
   });
 });
 
+describe("Pane mode text _Requirements: 5.1, 5.2_", () => {
+  it("renders modeText at the right end and nothing when absent or null", () => {
+    const { container, rerender } = renderUi(
+      <Pane {...props(docOf("ab"), { modeText: "Live CourtListener lookups" })} />,
+    );
+    const status = container.querySelector("section")?.lastElementChild;
+    expect(status?.lastElementChild?.textContent).toBe("Live CourtListener lookups");
+    rerender(<Pane {...props(docOf("ab"), { modeText: null })} />);
+    expect(container.querySelector("section")?.lastElementChild?.childElementCount).toBe(1);
+    rerender(<Pane {...props(docOf("ab"))} />);
+    expect(container.querySelector("section")?.lastElementChild?.childElementCount).toBe(1);
+  });
+});
+
 describe("Pane clicks and cursor _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5_", () => {
   it("reports the offset of a clicked Text_Item and Code_Item", () => {
     const onItemClick = vi.fn();

@@ -158,7 +158,7 @@ function pressKey(target: Element, key: string, init: KeyboardEventInit = {}): b
 }
 
 function statusLine(): string {
-  return paneRegion()?.lastElementChild?.textContent ?? "";
+  return paneRegion()?.lastElementChild?.firstElementChild?.textContent ?? "";
 }
 
 describe("AppShell Pane wiring _Requirements: 6.7, 13.3, 13.5, 13.6, 14.1, 14.2, 14.3, 14.4, 14.5_", () => {
@@ -340,6 +340,25 @@ describe("AppShell mode badge and Verify _Requirements: 15.7, 15.8, 17.1, 17.12,
     expect(screen.queryByRole("region", { name: "Status line" })).toBeNull();
     expect(paneRegion()).not.toBeNull();
   });
+  it.each([
+    ["fixtures", "Demo mode: recorded CourtListener responses"],
+    ["live", "Live CourtListener lookups"],
+    ["down", "Server unreachable"],
+  ] as const)("shows the %s Mode_Text in the Pane status line", async (setting, text) => {
+    await mountWith(setting);
+    pressKey(document.body, "F3", { altKey: true });
+    const status = paneRegion()?.lastElementChild;
+    expect(status?.lastElementChild?.textContent).toBe(text);
+    expect(status?.firstElementChild?.textContent).toMatch(/^Doc 1/);
+  });
+
+  it("shows no Mode_Text in the Pane status line while the mode is loading", async () => {
+    const api = { ...modeApi("live").api, mode: () => new Promise<never>(() => undefined) };
+    await mount(fixture(undefined, api));
+    pressKey(document.body, "F3", { altKey: true });
+    expect(paneRegion()?.lastElementChild?.childElementCount).toBe(1);
+  });
+
   it("keeps Verify enabled when the server is unreachable", async () => {
     await mountWith("down", citingStorage());
     expect(screen.getByText("Server unreachable")).not.toBeNull();

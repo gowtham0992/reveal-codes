@@ -16,6 +16,8 @@ export type PaneProps = Readonly<{
   onBackgroundClick: () => void;
   /** Nothing is rendered while false (Requirement 12.1). Defaults to true. */
   open?: boolean;
+  /** Mode_Text for the right end of the status line; null or absent shows nothing. */
+  modeText?: string | null;
 }>;
 
 /** Class name of a family: lowercased with non-letters removed (`AI>HUM` is `aihum`). */
@@ -135,7 +137,8 @@ export function Pane(props: PaneProps) {
         ))}
       </div>
       <div className={cls("status")}>
-        {statusOverride ?? statusText(document.text, cursorOffset)}
+        <span>{statusOverride ?? statusText(document.text, cursorOffset)}</span>
+        {props.modeText == null ? null : <span className={cls("modeText")}>{props.modeText}</span>}
       </div>
     </section>
   );
