@@ -69,7 +69,7 @@ Conventions that apply to every task:
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 4.10, 4.11, 4.12, 10.8_
 
 - [ ] 3. Appendix and file name
-  - [~] 3.1 `buildAppendix`
+  - [x] 3.1 `buildAppendix`
     - File `packages/export/src/appendix.ts`: `buildAppendix(document): Appendix` returns `{ title, intro: [S1, S2], lines: render(document, "full").text.split("\n") }` with the title "Provenance Appendix" and the two sentences taken from `wording.ts`; lines are not trimmed or altered. Pure: no clock, network or mutation.
     - Example tests `appendix.test.ts`: `title` is "Provenance Appendix"; an empty Document yields the `[DOC]` header line only; a Document with leading and trailing spaces and empty lines keeps every line unmodified; the Demo_Document lines join to `render(demo, "full").text`; two calls on deeply equal Documents are deeply equal.
     - Module about 30 lines.
