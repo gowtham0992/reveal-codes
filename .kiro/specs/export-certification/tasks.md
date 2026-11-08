@@ -4,7 +4,7 @@
 
 The plan builds `packages/export` (`@reveal-codes/export`), a pure TypeScript package with the gate, the statement data and wording, the appendix, the docx builder and the file name, and then wires the Export flow into `apps/web`: the `verifiedAt` Store field, persistence, the working Export dialog, the download, and the print view at `/print`. The Engine and the Verifier are not changed. Order follows the design's task order: probe the `docx` bundling path inside `apps/web` first, then package modules each followed by the property that tests them, then the web changes, then docs.
 
-Task count: **24 tasks**, counted as leaf sub-tasks (numbered `N.M`), checkpoints included (3.4, 5.6, 6.2). The six group headings are not counted. The dependency graph lists the 21 non-checkpoint leaves, as in editor-app. Exactly four properties exist: P1 in 4.4, P2 in 2.3, P3 in 3.2, P4 in 4.2. Each is its own task and none is optional.
+Task count: **25 tasks**, counted as leaf sub-tasks (numbered `N.M`), checkpoints included (3.4, 5.6, 6.2). The seven group headings are not counted. The dependency graph lists the 22 non-checkpoint leaves, as in editor-app. Exactly four properties exist: P1 in 4.4, P2 in 2.3, P3 in 3.2, P4 in 4.2. Each is its own task and none is optional.
 
 Conventions that apply to every task:
 
@@ -153,10 +153,20 @@ Conventions that apply to every task:
   - [x] 6.2 Final checkpoint - full repository checks
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `FC_NUM_RUNS=500 pnpm test:pbt` and `next build --webpack` (delete `.next` first); confirm the export package has exactly four `// Property N` comments and that `git diff --exit-code .env.example` passes. Ensure all tests pass, ask the user if questions arise.
 
+- [x] 7. Cosmetic follow-ups
+  - [x] 7.1 Local override timestamps and marked quotation cut
+    - Two display changes to the Statement, no new property. (a) Override timestamps in the paragraph 5 table print as local `YYYY-MM-DD HH:MM`; the stored ISO instant is kept in the Statement and the Appendix keeps the raw ISO instants. (b) A quotation longer than 80 characters in the paragraph 4 table is shown as `ellipsize(text, 80)` (79 characters and `…`), so a cut row ends in a mark; 80 characters or fewer are shown whole.
+    - `packages/export/src/time.ts`: add `localDateTime(d: Date): string` giving local `YYYY-MM-DD HH:MM` from `getFullYear`, `getMonth() + 1`, `getDate`, `getHours` and `getMinutes`, each zero-padded, 24-hour, with no string slicing; export it from `index.ts`. `localDate` is unchanged.
+    - `packages/export/src/types.ts` and `statement-parts.ts`/`statement.ts`: `StatementOverride` keeps `timestamp` (the stored ISO instant) and gains `timestampLocal: string`. `overridesOf` (called from `buildStatement`) computes it with `localDateTime(new Date(timestamp))`; when `new Date(timestamp)` is not a valid instant, `timestampLocal` is the stored `timestamp` string unchanged and `buildStatement` still returns `Ok`.
+    - `render-statement.ts` and `wording.ts`: the Timestamp column prints `timestampLocal`, so `renderStatement` stays timezone-free; the quotation column of the paragraph 4 table uses `ellipsize(text, 80)` instead of `clip(text, 80)`. `clip` stays internal to `text.ts`.
+    - Update tests (all in the pinned `TZ=America/Los_Angeles`): `time.test.ts` (`localDateTime` zero-padding of month, day, hour and minute, midnight `00:00`, `23:59`, and the instant `2026-03-05T02:30:00Z` giving `2026-03-04 18:30`); `statement.test.ts` (`timestampLocal` for a valid instant, `timestamp` still the stored ISO string, and an invalid timestamp falling back to the stored string with `Ok`); `statement.properties.test.ts` (Property 2 expectation: each override also has `timestampLocal` equal to a string the test builds from `getFullYear`, `getMonth`, `getDate`, `getHours` and `getMinutes` of `new Date(timestamp)`, and `timestamp` equal to the stored value; no new property and no new `fc.assert`); `render-statement.test.ts` (expected strings for the four Demo_Document override rows now carry local timestamps, and the quotation cut cases at 80 and 81 characters expect `ellipsize` output ending in `…`); `docx.test.ts` (override and cut-quotation cells read from `word/document.xml`; Appendix lines still carry raw ISO instants); and in `apps/web`, `print-view.test.tsx`, `print-model.test.ts` and `export-flow.test.tsx` wherever they assert an override timestamp or quotation text.
+    - Modules at most 300 lines and functions at most 40. The `boundaries` scan keeps passing: no clock reads, wording only in `wording.ts`.
+    - _Requirements: 3.9, 4.7, 4.8, 4.10, 6.10, 8.1_
+
 ## Notes
 
 - Tasks run in order. Property tasks sit right after the module they test: P2 after the statement (2.3), P3 after the appendix (3.2), P4 after the docx builder (4.2) and P1 after `canExport` (4.4). The design's step list puts the gate first; the requested group shape puts `canExport` with the docx builder, so P1 lands in group 4. Nothing before 4.3 calls `canExport`, and 1.4 uses `blockingIssues` directly.
-- Checkpoints are tasks 3.4, 5.6 and 6.2.
+- Checkpoints are tasks 3.4, 5.6 and 6.2. Group 7 is a follow-up after the final checkpoint; task 7.1 re-runs the affected suites itself.
 - No task is marked optional with `*`: every test is an example test inside its implementation task and every property is core.
 - Shared arbitraries live in `packages/export/test/support/arbitraries.ts` (not in the Engine's `testing/` folder), so tasks that edit it (2.3, 4.4) sit in different waves.
 - The Engine and the Verifier source are not edited by any task.
@@ -180,7 +190,8 @@ Conventions that apply to every task:
     { "id": 10, "tasks": ["5.3"] },
     { "id": 11, "tasks": ["5.4"] },
     { "id": 12, "tasks": ["5.5"] },
-    { "id": 13, "tasks": ["6.1"] }
+    { "id": 13, "tasks": ["6.1"] },
+    { "id": 14, "tasks": ["7.1"] }
   ]
 }
 ```

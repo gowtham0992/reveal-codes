@@ -1,4 +1,4 @@
-import { clip } from "./text.js";
+import { ellipsize } from "./text.js";
 import type { Statement, StatementBlock } from "./types.js";
 import {
   CITATION_CODES,
@@ -66,12 +66,12 @@ function quoteBlocks(s: Statement, number: number): StatementBlock[] {
     countOf(s.quotes, "mismatch"),
     countOf(s.quotes, "unchecked"),
   );
-  const rows = s.quotes.map((q) => [clip(q.text, QUOTATION_MAX), QUOTE_CODES[q.status]]);
+  const rows = s.quotes.map((q) => [ellipsize(q.text, QUOTATION_MAX), QUOTE_CODES[q.status]]);
   return [paragraph(number, text), { kind: "table", columns: QUOTE_COLUMNS, rows }];
 }
 
 function overrideBlocks(s: Statement, number: number): StatementBlock[] {
-  const rows = s.overrides.map((o) => [o.code, o.text, o.reason, o.timestamp]);
+  const rows = s.overrides.map((o) => [o.code, o.text, o.reason, o.timestampLocal]);
   return [paragraph(number, OVERRIDES_INTRO), { kind: "table", columns: OVERRIDE_COLUMNS, rows }];
 }
 

@@ -80,7 +80,7 @@ describe("renderStatement on the Demo_Document", () => {
         columns: ["Quotation", "Status"],
         rows: [
           ["less stringent standards than formal pleadings drafted by lawyers", "QUO ✓"],
-          [long.slice(0, 80), "QUO ✘"],
+          [`${long.slice(0, 79)}…`, "QUO ✘"],
         ],
       },
       {
@@ -96,21 +96,21 @@ describe("renderStatement on the Demo_Document", () => {
             "CIT ✘",
             "1047 F.3d 212, 219 (9th Cir. 2019)",
             "Cited from the client's court notice; copy requested from the clerk.",
-            "2026-11-20T18:25:00.000Z",
+            "2026-11-20 10:25",
           ],
           [
             "CIT ✘",
             "1012 F. Supp. 2d 88, 95 (D. Or. 2015)",
             "Reporter volume is being confirmed with the court library.",
-            "2026-11-20T18:25:00.000Z",
+            "2026-11-20 10:25",
           ],
           [
             "CIT ✘",
             "912 F. 4th 33, 41 (9th Cir. 2023)",
             "Quotation taken from a bench ruling transcript, not the opinion.",
-            "2026-11-20T18:25:00.000Z",
+            "2026-11-20 10:25",
           ],
-          ["QUO ✘", long, REASON, "2026-11-20T18:25:00.000Z"],
+          ["QUO ✘", long, REASON, "2026-11-20 10:25"],
         ],
       },
       {
@@ -179,7 +179,7 @@ describe("renderStatement structure", () => {
       columns: ["Quotation", "Status"],
       rows: [
         [q80, "QUO …"],
-        [q80, "QUO …"],
+        [`${"q".repeat(79)}…`, "QUO …"],
       ],
     });
   });

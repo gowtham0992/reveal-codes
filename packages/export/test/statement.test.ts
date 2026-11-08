@@ -167,4 +167,24 @@ describe("buildStatement on the demo document", () => {
     expect(s.overrides).toHaveLength(4);
     expect(s.overrides.some((o) => o.reason === "stale")).toBe(false);
   });
+
+  it("keeps the stored instant and adds the local timestamp", async () => {
+    const doc = await buildDemoDocument();
+    const s = ok(doc, DEMO_RUN_LOG);
+    for (const o of s.overrides) {
+      expect(o.timestamp).toBe(DEMO_VERIFIED_AT);
+      expect(o.timestampLocal).toBe("2026-11-20 10:25");
+    }
+  });
+
+  it("falls back to the stored string for an invalid override timestamp, still Ok", async () => {
+    const doc = await buildDemoDocument();
+    const overrides = doc.overrides.map((o) => ({ ...o, timestamp: "not a time" }));
+    const s = ok({ ...doc, overrides }, DEMO_RUN_LOG);
+    expect(s.overrides).toHaveLength(4);
+    for (const o of s.overrides) {
+      expect(o.timestamp).toBe("not a time");
+      expect(o.timestampLocal).toBe("not a time");
+    }
+  });
 });

@@ -18,6 +18,13 @@ function expectedDate(d: Date): string {
   return [String(d.getFullYear()), pad(d.getMonth() + 1), pad(d.getDate())].join("-");
 }
 
+/** Local YYYY-MM-DD HH:MM computed from the date getters, independently of the package. */
+function expectedDateTime(d: Date): string {
+  const year = String(d.getFullYear()).padStart(4, "0");
+  const day = [year, pad(d.getMonth() + 1), pad(d.getDate())].join("-");
+  return `${day} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 function tally(origins: readonly Origin[]): Record<Origin, number> {
   const out: Record<Origin, number> = { HUM: 0, PST: 0, AI: 0, "AI>HUM": 0 };
   for (const o of origins) out[o] += 1;
@@ -84,6 +91,7 @@ function checkOverridesAndTools(c: ExportCase, s: Statement): void {
         text: doc.text.slice(issue.start, issue.end),
         reason: o.reason,
         timestamp: o.timestamp,
+        timestampLocal: expectedDateTime(new Date(o.timestamp)),
       })),
   );
   expect(s.overrides).toEqual(expected);

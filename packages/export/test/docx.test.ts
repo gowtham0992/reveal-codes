@@ -123,4 +123,15 @@ describe("buildDocx", () => {
       vi.unstubAllGlobals();
     }
   });
+
+  it("writes local override timestamps and marked cut quotations; the Appendix keeps raw instants", async () => {
+    const { statement } = await buildDemoDocumentStatement();
+    const d = await buildDemoDocument();
+    const bytes = await buildDocx(d, statement);
+    const xml = readDocxPart(bytes, "word/document.xml");
+    expect(xml).toContain("2026-11-20 10:25");
+    expect(xml).toMatch(/…<\/w:t>/);
+    const appendix = readDocxParagraphs(bytes).slice(-buildAppendix(d).lines.length);
+    expect(appendix.some((l) => l.includes("2026-11-20T18:25"))).toBe(true);
+  });
 });

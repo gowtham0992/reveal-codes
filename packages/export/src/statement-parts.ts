@@ -1,5 +1,6 @@
 import { issues } from "@reveal-codes/engine";
 import type { Document, Origin, Sentence } from "@reveal-codes/engine";
+import { localDateTime } from "./time.js";
 import type {
   OriginCounts,
   RunInfo,
@@ -69,6 +70,12 @@ export function quotesOf(document: Document): readonly StatementQuote[] {
   });
 }
 
+/** Local `YYYY-MM-DD HH:MM` of a stored instant; the stored string when it is not a valid instant. */
+function localTimestamp(timestamp: string): string {
+  const d = new Date(timestamp);
+  return Number.isNaN(d.getTime()) ? timestamp : localDateTime(d);
+}
+
 /** Overrides that belong to a current issue, in issue order. */
 export function overridesOf(document: Document): readonly StatementOverride[] {
   const byKey = new Map(document.overrides.map((o) => [o.key, o]));
@@ -81,6 +88,7 @@ export function overridesOf(document: Document): readonly StatementOverride[] {
       text: document.text.slice(issue.start, issue.end),
       reason: o.reason,
       timestamp: o.timestamp,
+      timestampLocal: localTimestamp(o.timestamp),
     });
   }
   return out;

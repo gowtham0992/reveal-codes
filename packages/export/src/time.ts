@@ -9,6 +9,11 @@ function pad(n: number, width: number): string {
   return String(n).padStart(width, "0");
 }
 
+/** Local date and time `YYYY-MM-DD HH:MM` (24-hour) of `d` in the host time zone. */
+export function localDateTime(d: Date): string {
+  return `${localDate(d)} ${pad(d.getHours(), 2)}:${pad(d.getMinutes(), 2)}`;
+}
+
 /** Local calendar date `YYYY-MM-DD` of `d` in the host time zone. */
 export function localDate(d: Date): string {
   return `${pad(d.getFullYear(), 4)}-${pad(d.getMonth() + 1, 2)}-${pad(d.getDate(), 2)}`;

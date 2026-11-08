@@ -24,7 +24,10 @@ export type StatementOverride = Readonly<{
   code: IssueCode;
   text: string;
   reason: string;
+  /** The stored ISO instant, unchanged. */
   timestamp: string;
+  /** Local `YYYY-MM-DD HH:MM`; the stored string when `timestamp` is not a valid instant. */
+  timestampLocal: string;
 }>;
 
 export type Statement = Readonly<{
