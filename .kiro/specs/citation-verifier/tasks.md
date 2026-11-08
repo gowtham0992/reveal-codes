@@ -94,7 +94,7 @@ Deviations from the design's file layout, decided while planning:
     - **Validates: Requirements 1.2, 1.3, 1.4, 1.5, 1.6**
     - _Requirements: 1.3, 1.4_
 
-- [ ] 4. Token bucket, retries, cache
+- [x] 4. Token bucket, retries, cache
   - [x] 4.1 Token bucket, Window_Log, and dispatch gate
     - Files: `src/bucket.ts` (complete the module: `CAPACITY`, `REFILL_MS`, `WINDOW_MS`, `refill` with integer-ms partial retention and no credit for a backwards step, `waitFor` as `max(bucket wait, window wait)`, `take`, `availableTokens`, `acquire(deps, n)` with exactly one `Deps.sleep` when the wait is positive and at most three iterations), `src/gate.ts` (`withGate(state, fn)` promise chain held in `deps.state`).
     - Example tests `bucket.test.ts`: refill keeps partial ms (999 then 1) and caps at 60; backwards clock step; shortfall sleep `5 * 1000 - 400 = 4600`; the window counterexample (60 lines at t = 0, then 30 lines at t = 30 000 sleeps until t = 60 000); retry deducts tokens again. `gate.test.ts`: two concurrent calls on one `Deps` dispatch in order and never interleave.
@@ -134,7 +134,7 @@ Deviations from the design's file layout, decided while planning:
     - **Property 10: Retries are bounded and exhaustion keeps the last wait**
     - **Validates: Requirements 4.3, 4.5, 4.6, 4.7, 7.6, 7.8, 7.9, 7.10, 7.11**
     - _Requirements: 7.10_
-  - [~] 4.9 Checkpoint - lookup pipeline
+  - [x] 4.9 Checkpoint - lookup pipeline
     - Run `pnpm lint`, `pnpm typecheck` and `pnpm vitest run --project verifier`, and `FC_NUM_RUNS=500 pnpm vitest run --project verifier properties.test`; fix failures. Ensure all tests pass, ask the user if questions arise.
 
 - [x] 5. Opinion fetch and HTML stripping
