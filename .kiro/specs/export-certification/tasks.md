@@ -112,7 +112,7 @@ Conventions that apply to every task:
     - **Validates: Requirements 1.1, 1.2, 1.6**
     - _Requirements: 1.6, 10.5, 10.6_
 
-- [ ] 5. Web: Store, persistence, export flow, dialog, and print view
+- [x] 5. Web: Store, persistence, export flow, dialog, and print view
   - [x] 5.1 Store `verifiedAt` and Verify flow clock (follows ui.md)
     - Files: `apps/web/src/store.ts` (`StoreState.verifiedAt: string | null`, initial `null`; the `replace` action gains optional `verifiedAt`, absent means `null`; new action `{ type: "verified"; at: string }`), `apps/web/src/store-actions.ts` (`reduceReplace` sets `verifiedAt ?? null`; `reduceVerified` returns `changed: false` with the new field so subscribers are notified and no history barrier fires; `edit`, `undo`, `redo`, `verification`, `quoteCheck` and `override` leave the field untouched), `apps/web/src/client/verify-flow.ts` (`runVerifyFlow(api, store, now)` dispatches `{ type: "verified", at: now().toISOString() }` once, after the quote phase and before the summary Notice, only on the `completed` path; none on `failed` or `discarded`), and the `runVerifyFlow` caller in `apps/web/src/components/app-shell.tsx` passing `svc.now`.
     - Update the editor-app tests named in its revision note: `store.test.ts` (initial `null`; `replace` with and without `verifiedAt`; `verified` action; edit, undo, redo and override leave it), `store.properties.test.ts` (the `StoreState` literal in Property 3 gains `verifiedAt: null`; no new property), `verify-flow.test.ts` and `verify-flow.properties.test.ts` (clock argument on every call; one `verified` dispatch on completed flows, none on failed and discarded).
@@ -139,7 +139,7 @@ Conventions that apply to every task:
     - Add exactly one line to the README section "What leaves your machine" stating that exporting and printing send nothing (Req 9.5).
     - Example tests `print-model.test.ts` and `print-view.test.tsx` for every state above, the ready order (filing, Statement title, Statement, Appendix title, Appendix), both titles bold, `window.print` called once, and zero `fetch` calls.
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9, 9.3, 9.5, 10.8_
-  - [-] 5.6 Checkpoint - end-to-end export flow
+  - [x] 5.6 Checkpoint - end-to-end export flow
     - Add `apps/web/test/export-flow.test.tsx` (jsdom, fixture fetch only, fixed clock, fake `download` capturing bytes): load the demo motion, Verify, open the Export dialog and assert it is blocked with 4 items and both export buttons disabled, override all four with distinct reasons, assert the buttons enable without closing the dialog, activate Download, and assert the captured file's Statement (read with `readDocxParagraphs` from the export package's test support, or a copy under `apps/web/test/support/`) lists 2 verified, 3 not found, 1 mismatched quote and 4 overrides, with the four reasons in paragraph 5.
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm vitest run --project export`, `pnpm vitest run --project web` and `next build --webpack` (delete `.next` first); fix failures. The real-browser check (Word or LibreOffice) is not automatable here and is left to the user. Ensure all tests pass, ask the user if questions arise.
 
