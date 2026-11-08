@@ -49,7 +49,7 @@ Deviations from the design's file layout, decided while planning:
     - Asserts `normalise` and `normaliseQuote` idempotence, steps 2 to 6 never longer than their input, `normalise(s).length <= s.normalize("NFC").length`, and that `trackQuote` text with the tail trimmed equals `normaliseQuote(s)` when tracking holds.
     - **Validates: Requirements 8.10, 8.11**
     - _Requirements: 8.10, 8.11_
-  - [~] 2.4 Property 8: a lifted quotation matches however it is typeset
+  - [x] 2.4 Property 8: a lifted quotation matches however it is typeset
     - File `test/quote.properties.test.ts`; arbitraries `arbQuoteSource` (engine `arbOpinionWithQuotes` filtered to no ellipsis form, `[` or `]`) and `arbEllipsisJoin` in `test/support/arb-verifier.ts`; one to three in-order non-overlapping word-boundary substrings, each at least 12 characters after trailing `.,;:` and preceding whitespace are removed, joined by `…`, `...` or `. . .`, then curly quotes, wider White_Space runs and swapped ellipsis forms applied.
     - **Property 8: A quotation lifted from an opinion matches however it is typeset**
     - **Validates: Requirements 8.4, 8.5, 8.12, 8.14**

@@ -7,6 +7,10 @@
     "2.3 Property 7: pipeline idempotent and never longer than NFC": {
       "status": "passed",
       "lastRunTimestamp": 1794101827034
+    },
+    "2.4 Property 8: a lifted quotation matches however it is typeset": {
+      "status": "passed",
+      "lastRunTimestamp": 1794101962986
     }
   },
   "executionHistory": {
@@ -100,6 +104,16 @@
         "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
         "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
         "timestamp": 1794098610693
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794101880691
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794101978641
       }
     ],
     "2.5 Property 9: an altered quotation mismatches and prefixLength locates the divergence": [

@@ -51,3 +51,122 @@ const normalisableFragment: fc.Arbitrary<string> = fc.oneof(
 export const arbNormalisable: fc.Arbitrary<string> = fc
   .array(normalisableFragment, { maxLength: 14 })
   .map((parts) => parts.join(""));
+
+// ---- Property 8 (quote typesetting) ----
+import { arbOpinionWithQuotes } from "../../../engine/src/testing/arb-opinion";
+
+/** Any ellipsis form of Req 8.2 step 5, or an alteration bracket. */
+const ELLIPSIS_OR_BRACKET = /…|\.(?:\s*\.){2,}|[[\]]/;
+const MIN_SEGMENT = 12;
+
+/** Tail removal of Req 8.3 applied to one candidate segment, for the length floor of Req 8.12. */
+function floorLength(segment: string): number {
+  return segment.replace(/[\s.,;:]+$/u, "").length;
+}
+
+/** An opinion text with no ellipsis form and no bracket, long enough to cut a segment from. */
+export const arbQuoteSource: fc.Arbitrary<string> = arbOpinionWithQuotes
+  .map((o) => o.text)
+  .filter((t) => !ELLIPSIS_OR_BRACKET.test(t) && floorLength(t.trim()) >= MIN_SEGMENT);
+
+type Cut = { readonly start: number; readonly end: number };
+
+/** Word-boundary starts (after whitespace or at 0) and ends (before whitespace or at the end). */
+function boundaries(text: string): { starts: number[]; ends: number[] } {
+  const starts: number[] = [];
+  const ends: number[] = [];
+  for (let i = 0; i < text.length; i += 1) {
+    const here = /\s/u.test(text.charAt(i));
+    const before = i === 0 || /\s/u.test(text.charAt(i - 1));
+    if (!here && before) starts.push(i);
+    if (!here && (i === text.length - 1 || /\s/u.test(text.charAt(i + 1)))) ends.push(i + 1);
+  }
+  return { starts, ends };
+}
+
+/** Choose in-order, non-overlapping, word-boundary cuts, each over the floor; never empty. */
+function chooseCuts(text: string, picks: ReadonlyArray<readonly [number, number]>): Cut[] {
+  const { starts, ends } = boundaries(text);
+  const cuts: Cut[] = [];
+  let prevEnd = 0;
+  for (const [u, v] of picks) {
+    const startOptions = starts.filter((s) => s >= prevEnd);
+    if (startOptions.length === 0) break;
+    const start = startOptions[u % startOptions.length] as number;
+    const endOptions = ends.filter(
+      (e) => e > start && floorLength(text.slice(start, e)) >= MIN_SEGMENT,
+    );
+    if (endOptions.length === 0) continue;
+    const end = endOptions[v % endOptions.length] as number;
+    cuts.push({ start, end });
+    prevEnd = end;
+  }
+  if (cuts.length > 0) return cuts;
+  const whole = text.trim();
+  return [{ start: text.indexOf(whole), end: text.indexOf(whole) + whole.length }];
+}
+
+const arbPick: fc.Arbitrary<readonly [number, number]> = fc.tuple(fc.nat(), fc.nat());
+
+/** An opinion and one to three lifted segments of it (the first and last may be anywhere). */
+export const arbLiftedSegments: fc.Arbitrary<{ text: string; segments: string[] }> = fc
+  .tuple(arbQuoteSource, fc.array(arbPick, { minLength: 1, maxLength: 3 }))
+  .map(([text, picks]) => ({
+    text,
+    segments: chooseCuts(text, picks).map((c) => text.slice(c.start, c.end)),
+  }));
+
+/** A function joining segments by ellipsis forms `…`, `...`, `. . .`, optionally space-padded. */
+export const arbEllipsisJoin: fc.Arbitrary<(segments: readonly string[]) => string> = fc
+  .array(
+    fc.record({
+      form: fc.constantFrom("…", "...", ". . ."),
+      before: fc.boolean(),
+      after: fc.boolean(),
+    }),
+    { minLength: 2, maxLength: 2 },
+  )
+  .map((joins) => (segments) => {
+    let out = segments[0] ?? "";
+    for (let i = 1; i < segments.length; i += 1) {
+      const j = joins[i - 1] ?? { form: "…", before: false, after: false };
+      out += `${j.before ? " " : ""}${j.form}${j.after ? " " : ""}${segments[i] as string}`;
+    }
+    return out;
+  });
+
+/** How a lifted quote is retyped: curly marks, and White_Space runs of the same or greater length. */
+export type Typeset = {
+  readonly curly: boolean;
+  readonly extra: ReadonlyArray<number>;
+  readonly kinds: ReadonlyArray<number>;
+};
+
+export const arbTypeset: fc.Arbitrary<Typeset> = fc.record({
+  curly: fc.boolean(),
+  extra: fc.array(fc.nat({ max: 3 }), { minLength: 1, maxLength: 6 }),
+  kinds: fc.array(fc.nat(), { minLength: 1, maxLength: 6 }),
+});
+
+const WIDE_SPACES = [" ", "\t", "\u00a0", "\u2003", "\u0085", "\u3000", "\n", "\u2028"];
+const SPACE_RUN = /[\t-\r \u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+/gu;
+
+/** Apply a `Typeset` to a quote. */
+export function typeset(quote: string, t: Typeset): string {
+  let n = 0;
+  const spaced = quote.replace(SPACE_RUN, (run) => {
+    const kind = WIDE_SPACES[
+      (t.kinds[n % t.kinds.length] as number) % WIDE_SPACES.length
+    ] as string;
+    const extra = t.extra[n % t.extra.length] as number;
+    n += 1;
+    return kind.repeat(run.length + extra);
+  });
+  if (!t.curly) return spaced;
+  let open = true;
+  return spaced.replace(/["']/gu, (ch) => {
+    const out = ch === '"' ? (open ? "“" : "”") : "’";
+    if (ch === '"') open = !open;
+    return out;
+  });
+}
