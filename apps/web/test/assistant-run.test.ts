@@ -1,7 +1,9 @@
-import { createDocument } from "@reveal-codes/engine";
+import { apply, createDocument, parse, render } from "@reveal-codes/engine";
+import type { Document } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import {
   CONTEXT_LIMIT,
+  buildInsertion,
   disclosure,
   normaliseNewlines,
   nextRunId,
@@ -42,5 +44,98 @@ describe("assistant-run _Requirements: 22.7, 23.1, 23.4, 23.5_", () => {
     );
     expect(disclosure({ provider: "bedrock", modelId: "m" })).toContain("Amazon Bedrock");
     expect(disclosure({ provider: "fixture", modelId: null })).toContain("nothing is sent");
+  });
+});
+
+const ISO = "2026-11-02T12:00:00.000Z";
+const REPLY = "The plaintiff asks the Court to deny the motion.";
+
+function docOf(text: string): Document {
+  const created = createDocument("", ISO);
+  if (!created.ok) throw new Error("fixture rejected");
+  if (text === "") return created.value;
+  const applied = apply(created.value, {
+    kind: "insert",
+    at: 0,
+    text,
+    provenance: { origin: "HUM", timestamp: ISO },
+  });
+  if (!applied.ok) throw new Error("fixture rejected");
+  return applied.value.document;
+}
+
+function insertAt(text: string, caret: number, reply = REPLY) {
+  const document = docOf(text);
+  const { ops, run } = buildInsertion({
+    document,
+    runLog: [],
+    caret,
+    text: reply,
+    prompt: "p",
+    info: { provider: "fixture", modelId: null },
+    timestamp: ISO,
+  });
+  expect(ops).toHaveLength(1);
+  const op = ops[0];
+  if (op === undefined) throw new Error("no op");
+  const applied = apply(document, op);
+  if (!applied.ok) throw new Error("apply rejected");
+  return { op, run, document, applied: applied.value };
+}
+
+describe("buildInsertion paragraph boundaries _Requirements: 7.8, 24_", () => {
+  it("puts the reply on its own line after a heading when the caret is at its end", () => {
+    const r = insertAt("III. ARGUMENT\nNext paragraph", 13);
+    expect(r.applied.document.text).toBe(`III. ARGUMENT\n${REPLY}\nNext paragraph`);
+    expect(r.op).toMatchObject({ at: 13, provenance: { origin: "AI", runId: "r1" } });
+    expect(r.run.runId).toBe("r1");
+  });
+
+  it("splits a paragraph with a newline on both sides when the caret is mid-paragraph", () => {
+    const r = insertAt("Alpha beta", 5);
+    expect(r.applied.document.text).toBe(`Alpha\n${REPLY}\n beta`);
+  });
+
+  it("adds only a trailing newline at paragraph start", () => {
+    const r = insertAt("Alpha\nBeta", 6);
+    expect(r.applied.document.text).toBe(`Alpha\n${REPLY}\nBeta`);
+    const start = insertAt("Alpha", 0);
+    expect(start.applied.document.text).toBe(`${REPLY}\nAlpha`);
+  });
+
+  it("adds only a leading newline at the end of the last paragraph", () => {
+    const r = insertAt("Alpha", 5);
+    expect(r.applied.document.text).toBe(`Alpha\n${REPLY}`);
+  });
+
+  it("adds no newline in an empty document", () => {
+    const r = insertAt("", 0);
+    expect(r.applied.document.text).toBe(REPLY);
+  });
+
+  it("adds no newline on an empty line between paragraphs", () => {
+    const r = insertAt("Alpha\n\nBeta", 6);
+    expect(r.applied.document.text).toBe(`Alpha\n${REPLY}\nBeta`);
+  });
+
+  it("trims newlines of the reply so no empty paragraph appears, and the AI span covers the insert", () => {
+    const r = insertAt("Alpha", 5, `\r\n\n${REPLY}\n\n`);
+    expect(r.applied.document.text).toBe(`Alpha\n${REPLY}`);
+    expect(r.applied.document.spans.at(-1)).toMatchObject({
+      start: 5,
+      end: 5 + 1 + REPLY.length,
+      provenance: { origin: "AI", runId: "r1" },
+    });
+  });
+
+  it("undo restores the text and the Document round-trips through the codes", () => {
+    const r = insertAt("III. ARGUMENT\nNext", 13);
+    const back = apply(r.applied.document, r.applied.inverse);
+    if (!back.ok) throw new Error("inverse rejected");
+    expect(back.value.document.text).toBe(r.document.text);
+    const parsed = parse(render(r.applied.document, "full").text);
+    if (!parsed.ok) throw new Error("parse rejected");
+    expect(parsed.value.text).toBe(r.applied.document.text);
+    expect(render(parsed.value, "full").text).toBe(render(r.applied.document, "full").text);
   });
 });

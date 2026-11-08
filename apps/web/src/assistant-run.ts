@@ -51,14 +51,24 @@ export type InsertionInput = Readonly<{
   timestamp: string;
 }>;
 
+/** The reply as its own paragraph: a `\n` before it unless the caret starts a paragraph, after it unless the caret ends one. */
+function asParagraph(reply: string, text: string, at: number): string {
+  const body = reply.replace(/^\n+|\n+$/g, "");
+  if (body === "") return reply;
+  const atStart = at === 0 || text[at - 1] === "\n";
+  const atEnd = at === text.length || text[at] === "\n";
+  return (atStart ? "" : "\n") + body + (atEnd ? "" : "\n");
+}
+
 /** One `AI` insert at the caret and its Run_Log entry; the app never builds `AI>HUM`. */
 export function buildInsertion(input: InsertionInput): Insertion {
   const runId = nextRunId(input.document, input.runLog);
-  const at = Math.max(0, Math.min(input.caret, input.document.text.length));
+  const docText = input.document.text;
+  const at = Math.max(0, Math.min(input.caret, docText.length));
   const op: CallerOperation = {
     kind: "insert",
     at,
-    text: normaliseNewlines(input.text),
+    text: asParagraph(normaliseNewlines(input.text), docText, at),
     provenance: { origin: "AI", runId, timestamp: input.timestamp },
   };
   const run: RunLogEntry = {

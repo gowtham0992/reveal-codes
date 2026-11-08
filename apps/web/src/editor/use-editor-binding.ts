@@ -9,6 +9,7 @@ import { docText, offsetToPos, posToOffset } from "./offsets";
 import { createProvenancePlugin } from "./provenance-plugin";
 import { reconcile } from "./reconcile";
 import { EDITOR_EXTENSIONS } from "./schema";
+import { requestCentre } from "./scroll-centre";
 import { classifyKey } from "./shortcuts";
 
 export type EditorBinding = Readonly<{
@@ -57,9 +58,11 @@ function placeCaret(editor: Editor, offset: number): void {
   const pos = offsetToPos(editor.state.doc, offset);
   if (pos === null) return;
   const selection = TextSelection.create(editor.state.doc, pos);
-  // scrollIntoView so Go and Pane clicks bring the selection into view.
-  editor.view.dispatch(editor.state.tr.setSelection(selection).scrollIntoView());
+  // ProseMirror ignores scrollIntoView on an unfocused view, so scrolling is requested
+  // explicitly after focus, in the next frame, centring the line (Go, Pane clicks, focusEnd).
+  editor.view.dispatch(editor.state.tr.setSelection(selection));
   editor.view.focus();
+  requestCentre(editor.view);
 }
 
 export function useEditorBinding(args: EditorBindingArgs): EditorBinding {

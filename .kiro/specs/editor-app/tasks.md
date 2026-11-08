@@ -198,6 +198,15 @@ Conventions that apply to every task:
     - _Requirements: 25.1, 25.2, 25.3, 25.4, 25.5, 25.7, 26.4, 26.5, 26.6_
   - [x] 9.4 Final checkpoint - full run
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm test:pbt`; all must pass with `CI=1` set once so the 500-run path is exercised. Run `next build --webpack` once for `apps/web`. Confirm `git status` shows no change under `packages/engine` and, in `packages/verifier`, only `package.json`. Ensure all tests pass, ask the user if questions arise.
+  - [x] 9.5 Go scrolls on the first click and centres the target line
+    - Defect from the by-hand walk of groups 8 and 9: the first Go after page load moves the selection (caret measured 1,300px below the viewport) but `main.scrollTop` stays 0; the second Go scrolls but lands the line on the bottom edge. Fix `placeCaret` and the focus path in `apps/web/src/editor/use-editor-binding.ts` so the first Go scrolls (the scroll request must run after the editor is focused and laid out, for example selection, then focus, then a scroll computed from `view.coordsAtPos` in a `requestAnimationFrame`) and so the target line is centred in the editor's scroll container (`main`) rather than minimally scrolled. Keep the behaviour for Pane clicks and `focusEnd`.
+    - Verify with a real layout, not jsdom: with `pnpm dev` started in the background and `COURTLISTENER_TOKEN` unset, open the page in headless Chrome driven over the DevTools protocol with Node's built-in WebSocket (no new dependency, no Playwright; a throwaway script outside the repo, deleted afterwards), load the demo motion, verify, click Go once, and read `main.scrollTop` and the caret rect. Record the numbers in the completion notes. If no Chrome can be driven, say so plainly and do not claim verification. Stop the dev server afterwards.
+    - Example test (jsdom): the scroll is requested after focus (order of dispatches), once per Go, using the same path for Go and Pane clicks. _Requirements: 6.7, 13.3, 18.4_
+  - [-] 9.6 Assistant reply is inserted as its own paragraph
+    - Defect from the by-hand walk: the reply joins the current paragraph ("III. ARGUMENTThe plaintiff respectfully asks..."). In `apps/web/src/assistant-run.ts` `buildInsertion` prefix one `\n` to the inserted text when the caret is not at the start of a paragraph (offset 0 or the previous character is `\n`) and suffix one `\n` when it is not at the end of a paragraph (offset at text end or next character is `\n`). It stays one `AI` insert operation with the same run entry; the caret behaviour is unchanged. Update `test/assistant-run.test.ts` and `test/assistant-panel.test.tsx` (mid-paragraph, at paragraph start, at paragraph end, empty document, between paragraphs).
+    - _Requirements: 7.8, 24_
+  - [~] 9.7 Final checks after the walk fixes
+    - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `FC_NUM_RUNS=500 pnpm test:pbt`, the web project three times and `next build --webpack` (delete `.next`); add two lines to the BUILD_LOG `editor-app` entry for the two defects and their fixes. Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
 
@@ -233,7 +242,9 @@ Conventions that apply to every task:
     { "id": 17, "tasks": ["8.2"] },
     { "id": 18, "tasks": ["8.3", "9.1"] },
     { "id": 19, "tasks": ["9.2"] },
-    { "id": 20, "tasks": ["9.3"] }
+    { "id": 20, "tasks": ["9.3"] },
+    { "id": 21, "tasks": ["9.5", "9.6"] },
+    { "id": 22, "tasks": ["9.7"] }
   ]
 }
 ```

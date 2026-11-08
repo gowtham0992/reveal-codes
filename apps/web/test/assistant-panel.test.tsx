@@ -158,9 +158,12 @@ describe("AssistantPanel _Requirements: 7.8, 10.8, 10.15, 23.1 to 23.9_", () => 
     hold.resolve();
     await finished();
     const text = editorOf().state.doc.textBetween(0, editorOf().state.doc.content.size, "\n");
-    expect(text.startsWith("Alpha" + REPLY)).toBe(true);
+    expect(text.startsWith(`Alpha\n${REPLY}`)).toBe(true);
     expect(text.endsWith("\nBeta")).toBe(true);
-    expect(paneText()).toContain("[AI:r1]");
+    expect(text.split("\n")).toHaveLength(3);
+    expect(paneText()).toMatch(/\[HUM\]Alpha\[AI:r1\]\s+The plaintiff respectfully/);
+    expect(paneText().indexOf("[AI:r1]")).toBeGreaterThan(paneText().indexOf("Alpha"));
+    expect(paneText().indexOf("[AI:r1]")).toBeLessThan(paneText().indexOf("Beta"));
     const body: unknown = JSON.parse(f.server.bodies[0] ?? "{}");
     expect(body).toEqual({ prompt: "Write a reply", context: "Alpha" });
     const stamp = f.t.clock.now().toISOString();

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { EditorContent } from "@tiptap/react";
 import { TextSelection } from "@tiptap/pm/state";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { docText, offsetToPos, posToOffset } from "../src/editor/offsets";
 import { useEditorBinding } from "../src/editor/use-editor-binding";
 import type { EditorBinding } from "../src/editor/use-editor-binding";
@@ -169,27 +169,38 @@ describe("useEditorBinding", () => {
     expect(h.carets[h.carets.length - 1]).toBe(5);
   });
 
-  it("focusAt (Go and Pane click) and focusEnd request a scroll to the selection", async () => {
+  it("focusAt and focusEnd request one centring scroll each, after the editor is focused", async () => {
     const h = await mount();
     externalInsert(h, 0, Array.from({ length: 200 }, (_, i) => `line ${String(i)}`).join("\n"));
     const v = view(h);
-    const seen: boolean[] = [];
+    const frames: FrameRequestCallback[] = [];
+    vi.spyOn(globalThis, "cancelAnimationFrame").mockImplementation(() => undefined);
+    const focusedAtRequest: boolean[] = [];
+    vi.spyOn(globalThis, "requestAnimationFrame").mockImplementation((cb) => {
+      focusedAtRequest.push(v.hasFocus());
+      frames.push(cb);
+      return frames.length;
+    });
+    const dispatched: boolean[] = [];
     const original = v.dispatch.bind(v);
     v.dispatch = (tr) => {
-      seen.push(tr.scrolledIntoView);
+      dispatched.push(tr.scrolledIntoView);
       original(tr);
     };
     act(() => {
-      h.binding().focusAt(1000);
+      h.binding().focusAt(1000); // Go and Pane clicks share this path
     });
-    const afterGo = seen.length;
+    expect(focusedAtRequest).toEqual([true]);
+    expect(dispatched.every((s) => !s)).toBe(true);
     act(() => {
       h.binding().focusEnd();
     });
-    // The selection transaction is the first dispatch of each call; focus may add others.
-    expect(seen[0]).toBe(true);
-    expect(seen[afterGo]).toBe(true);
+    expect(focusedAtRequest).toEqual([true, true]);
+    act(() => {
+      for (const f of frames) f(0); // no layout in jsdom: must not throw
+    });
     expect(posToOffset(v.state.doc, v.state.selection.head)).toBe(docText(v.state.doc).length);
+    vi.restoreAllMocks();
   });
 
   it("focusEnd moves the caret to the end of the text", async () => {
