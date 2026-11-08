@@ -1,0 +1,159 @@
+// @vitest-environment jsdom
+import { describe, expect, it } from "vitest";
+import { AppShell } from "../src/components/app-shell";
+import type { AppServices } from "../src/services";
+import { createManualTimers } from "./support/clock";
+import { createMemoryStorage } from "./support/memory-storage";
+import { modeApi } from "./support/mode-fetch";
+import type { ModeApi } from "./support/mode-fetch";
+import { act, fireEvent, renderUi, screen, waitFor, within } from "./support/render";
+
+const SUMMARY =
+  "Citations: 2 verified, 3 not found, 0 ambiguous, 0 unchecked. " +
+  "Quotes: 1 match, 1 mismatch, 0 unchecked. Skipped: 0. Opinions unavailable: 0.";
+
+async function mountDemo(): Promise<ModeApi> {
+  const timers = createManualTimers();
+  const mode = modeApi("fixtures");
+  const services: AppServices = {
+    api: mode.api,
+    now: timers.clock.now,
+    setTimer: (fn, ms) => timers.setTimeout(fn, ms),
+    clearTimer: (h) => {
+      timers.clearTimeout(h as number);
+    },
+    storage: createMemoryStorage(),
+  };
+  await act(async () => {
+    renderUi(<AppShell services={services} />);
+    await Promise.resolve();
+  });
+  return mode;
+}
+
+function button(name: RegExp | string): HTMLButtonElement {
+  const b = screen.getByRole("button", { name });
+  if (!(b instanceof HTMLButtonElement)) throw new Error("not a button");
+  return b;
+}
+
+function pane(): HTMLElement {
+  return screen.getByRole("region", { name: "Reveal Codes" });
+}
+
+/** Text of every Code_Item in the Pane, in order. */
+function codes(): string[] {
+  return [...pane().querySelectorAll('[role="img"]')].map((e) => e.textContent);
+}
+
+function count(all: readonly string[], code: string): number {
+  return all.filter((c) => c === code).length;
+}
+
+function rows(): HTMLElement[] {
+  return [...document.querySelectorAll("aside li")].filter(
+    (e): e is HTMLElement => e instanceof HTMLElement,
+  );
+}
+
+function rowWith(code: string): HTMLElement {
+  const row = rows().find((r) => r.textContent.includes(code));
+  if (row === undefined) throw new Error(`no Issues row with ${code}`);
+  return row;
+}
+
+function statusLine(): string {
+  return pane().lastElementChild?.textContent ?? "";
+}
+
+async function loadAndOpenPane(): Promise<void> {
+  await act(async () => {
+    fireEvent.click(button("Load demo motion"));
+    await Promise.resolve();
+  });
+  await waitFor(() => {
+    expect(button(/^Export/).textContent).toBe("Export (7 blocking)");
+  });
+  act(() => {
+    fireEvent.keyDown(document.body, { key: "F3", altKey: true, bubbles: true });
+  });
+  const before = codes();
+  expect(count(before, "[PST]")).toBeGreaterThan(0);
+  expect(before.some((c) => c.startsWith("[AI"))).toBe(false);
+  expect(count(before, "[CIT …]")).toBe(7);
+  expect(count(before, "[QUO …]")).toBe(2);
+}
+
+async function verifyAndWait(): Promise<void> {
+  const started = Date.now();
+  await act(async () => {
+    fireEvent.click(button("Verify"));
+    await Promise.resolve();
+  });
+  await waitFor(() => {
+    expect(button(/^Verify/).textContent).toBe("Verify");
+    expect(screen.getByRole("status").textContent).toBe(SUMMARY);
+  });
+  expect(Date.now() - started).toBeLessThan(10_000);
+}
+
+function expectRedAndGreenCodes(): void {
+  const after = codes();
+  expect(count(after, "[CIT ✘]")).toBe(4);
+  expect(count(after, "[CIT ✓]")).toBe(3);
+  expect(count(after, "[QUO ✘]")).toBe(1);
+  expect(count(after, "[QUO ✓]")).toBe(1);
+  expect(button(/^Export/).textContent).toBe("Export (4 blocking)");
+  expect(button(/^Export/).disabled).toBe(true);
+}
+
+function expectIssuesAndGo(): void {
+  expect(rows()).toHaveLength(4);
+  expect(rows().filter((r) => r.textContent.includes("not found"))).toHaveLength(4);
+  expect(rowWith("QUO ✘").textContent).toContain("Diverges at: ");
+  act(() => {
+    fireEvent.click(within(rowWith("QUO ✘")).getByRole("button", { name: "Go" }));
+  });
+  expect(statusLine()).toMatch(/Diverges at: \S/);
+}
+
+function overrideOne(): void {
+  act(() => {
+    fireEvent.click(within(rowWith("CIT ✘")).getByRole("button", { name: "Override…" }));
+  });
+  act(() => {
+    fireEvent.change(screen.getByLabelText("Reason"), {
+      target: { value: "Cite checked by hand" },
+    });
+  });
+  act(() => {
+    fireEvent.click(screen.getByRole("button", { name: "Save override" }));
+  });
+  expect(codes().some((c) => c.startsWith("[OVR:"))).toBe(true);
+  expect(button(/^Export/).textContent).toBe("Export (3 blocking)");
+  expect(button(/^Export/).disabled).toBe(true);
+}
+
+function expectOnlyCitationsLeft(mode: ModeApi): void {
+  const verifies = mode.routes.requests.filter((r) => r.url === "/api/verify");
+  expect(verifies).toHaveLength(1);
+  for (const r of mode.routes.requests) {
+    expect(r.body === null || r.url === "/api/verify").toBe(true);
+  }
+  const body = verifies[0]?.body ?? "";
+  expect(body).not.toContain("less stringent standards");
+  expect(body).not.toContain("entitled to discovery");
+}
+
+describe("Demo path _Requirements: 21.1, 21.2, 21.3, 21.4, 21.5, 21.7, 20.7_", () => {
+  it("walks Load, Alt-F3, Verify, Go, Override with 7, 4, 3 blocking and no quote text on the wire", async () => {
+    const mode = await mountDemo();
+    expect(button("Verify").disabled).toBe(true);
+    await loadAndOpenPane();
+    await verifyAndWait();
+    expectRedAndGreenCodes();
+    expectIssuesAndGo();
+    overrideOne();
+    expectOnlyCitationsLeft(mode);
+  });
+});

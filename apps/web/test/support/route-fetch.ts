@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { handleOpinion } from "../../src/server/opinion-route";
 import { handleVerify } from "../../src/server/verify-route";
 import type { FetchFn } from "../../src/client/api";
@@ -33,8 +34,8 @@ export function routeFetch(): RouteFetch {
     }
     if (opinion?.[1] !== undefined) return handleOpinion(decodeURIComponent(opinion[1]), deps);
     if (input === "/demo-motion.txt") {
-      const url = new URL("../../../../packages/engine/fixtures/demo-motion.txt", import.meta.url);
-      return new Response(readFileSync(url, "utf8"));
+      const file = resolve(__dirname, "../../../../packages/engine/fixtures/demo-motion.txt");
+      return new Response(readFileSync(file, "utf8"));
     }
     return new Response("not found", { status: 404 });
   };
