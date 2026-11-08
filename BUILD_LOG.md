@@ -147,6 +147,8 @@ Task numbers refer to `.kiro/specs/editor-app/tasks.md`.
 - The offsets property file had four `fc.assert` calls against the one-per-property rule; merged in 7.5.
 - The scheduler wave graph put Tier 2 tasks ahead of Tier 1; the dependency graph was edited.
 - 7.5: an agent without a browser could not complete the walkthrough. The user walked it and found that Go did not scroll the editor; task 7.6 was added because `placeCaret` lacked `scrollIntoView`.
+- 7.6 fix was incomplete: ProseMirror ignores `scrollIntoView` on an unfocused view, so the first Go did not scroll. The user's by-hand walk found it, not the tests (jsdom has no layout). Fixed in 9.5 with a post-focus `requestAnimationFrame` centring scroll, measured in headless Chrome.
+- The assistant reply joined the current paragraph. The by-hand walk found it; fixed in 9.6.
 - `streamText.textStream` swallows errors and logs the provider message through `onError`; `sdkStreamText` records errors silently and throws a fixed error.
 - `update_pbt_status` failed with a tool error for property tasks; the orchestrator set the statuses.
 - The first `task_update` call per task returns a tool error but applies.

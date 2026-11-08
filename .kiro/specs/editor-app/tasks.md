@@ -205,7 +205,7 @@ Conventions that apply to every task:
   - [x] 9.6 Assistant reply is inserted as its own paragraph
     - Defect from the by-hand walk: the reply joins the current paragraph ("III. ARGUMENTThe plaintiff respectfully asks..."). In `apps/web/src/assistant-run.ts` `buildInsertion` prefix one `\n` to the inserted text when the caret is not at the start of a paragraph (offset 0 or the previous character is `\n`) and suffix one `\n` when it is not at the end of a paragraph (offset at text end or next character is `\n`). It stays one `AI` insert operation with the same run entry; the caret behaviour is unchanged. Update `test/assistant-run.test.ts` and `test/assistant-panel.test.tsx` (mid-paragraph, at paragraph start, at paragraph end, empty document, between paragraphs).
     - _Requirements: 7.8, 24_
-  - [~] 9.7 Final checks after the walk fixes
+  - [x] 9.7 Final checks after the walk fixes
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `FC_NUM_RUNS=500 pnpm test:pbt`, the web project three times and `next build --webpack` (delete `.next`); add two lines to the BUILD_LOG `editor-app` entry for the two defects and their fixes. Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
