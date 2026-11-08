@@ -119,7 +119,13 @@ describe("auth rule", () => {
   const TOKEN = "s3cret-token-value";
 
   it("sends the token to the base URL only", async () => {
-    const t = makeDeps([{ status: 200, body: [] }, { status: 200, body: [] }], { token: TOKEN });
+    const t = makeDeps(
+      [
+        { status: 200, body: [] },
+        { status: 200, body: [] },
+      ],
+      { token: TOKEN },
+    );
     const req = buildLookupRequest(t.deps, [LINE]);
     await requestOnce(t.deps, req.url, req.spec);
     await requestOnce(t.deps, "https://evil.test/api/rest/v4/opinions/1/", {

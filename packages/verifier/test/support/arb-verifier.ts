@@ -3,6 +3,7 @@ import { format } from "@reveal-codes/engine";
 import { trackQuote } from "../../src/track";
 // The engine's `testing/` folder is deliberately not exported from its index (engine Req 1.2).
 import { arbReporterValue } from "../../../engine/src/testing/arb-citation";
+import { arbOpinionWithQuotes } from "../../../engine/src/testing/arb-opinion";
 
 /** A pincite-free Citation_Line built from the engine's `arbReporterValue`. */
 export const arbCitationLine: fc.Arbitrary<string> = arbReporterValue.chain((v) => {
@@ -54,7 +55,6 @@ export const arbNormalisable: fc.Arbitrary<string> = fc
   .map((parts) => parts.join(""));
 
 // ---- Property 8 (quote typesetting) ----
-import { arbOpinionWithQuotes } from "../../../engine/src/testing/arb-opinion";
 
 /** Any ellipsis form of Req 8.2 step 5, or an alteration bracket. */
 const ELLIPSIS_OR_BRACKET = /…|\.(?:\s*\.){2,}|[[\]]/;

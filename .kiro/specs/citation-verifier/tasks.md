@@ -32,7 +32,7 @@ Deviations from the design's file layout, decided while planning:
     - Example tests: `create-deps.test.ts` (two `createDeps` calls share no state, fresh state values, trailing slash trimmed), `cache-memory.test.ts` (expiry at and after the boundary, `delete`), a self-test of the manual clock (hang step reaches the 15 000 ms timer, aborted timers do not move time).
     - _Requirements: 10.3, 10.11, 11.1, 11.8, 11.9, 11.10, 16.4, 16.6_
 
-- [ ] 2. Quote normalisation and checkQuote
+- [x] 2. Quote normalisation and checkQuote
   - [x] 2.1 Normalisation pipeline, KMP search, and segments
     - Files: `src/normalise.ts` (`normalise`, `normaliseQuote`, `foldCase`, `trimTail`, stages in the order of Req 8.2 with the explicit White_Space class; bracket removal by stack matching; ellipsis regex `/\.(?:WS*\.){2,}|…/g`), `src/kmp.ts` (`indexFrom`, `longestPrefixOccurring`, both linear), `src/segments.ts` (`segmentSpans`, `splitSegments`, `matchSegments` with the 12-character floor for interior segments only, `frontier`).
     - Example tests `normalise.test.ts`: each step alone; `[t]he`; `[...]` and `.[.].`; `. . .` with NBSP and U+0085 runs; curly quotes and dashes; trailing `.,;:` with whitespace before them; empty and whitespace-only input. `segments.test.ts`: leading and trailing `…` ignored; a quote with no `…` has one segment; first and last segments under 12 characters still match; `next` index after the following `…`; segments that each occur but in the wrong order do not match (Req 8.16); a short interior segment does not match though it occurs (Req 8.16); the same segment twice must occur twice and may not overlap.
@@ -59,7 +59,7 @@ Deviations from the design's file layout, decided while planning:
     - **Property 9: An altered quotation mismatches, and prefixLength locates the divergence**
     - **Validates: Requirements 8.6, 8.13, 8.15**
     - _Requirements: 8.13_
-  - [~] 2.6 Checkpoint - quote checking
+  - [x] 2.6 Checkpoint - quote checking
     - Run `pnpm lint`, `pnpm typecheck` and `pnpm vitest run --project verifier`; fix failures. Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 3. Request building, chunking, status mapping

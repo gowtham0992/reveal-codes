@@ -79,10 +79,11 @@ describe("createFileCacheStore _Requirements: 10.8, 10.9, 10.10, 10.12_", () => 
     await store.set("556 U.S. 662", { status: "verified", clusterId: "1" }, EXP);
     const [file] = await readdir(dir);
     const text = await readFile(path.join(dir, file as string), "utf8");
+    const fileName = file as string;
     expect(JSON.parse(text)).toEqual({
       expiresAt: EXP,
       value: { status: "verified", clusterId: "1" },
     });
-    expect(`${file}${text}`.toLowerCase()).not.toContain("authorization");
+    expect(`${fileName}${text}`.toLowerCase()).not.toContain("authorization");
   });
 });

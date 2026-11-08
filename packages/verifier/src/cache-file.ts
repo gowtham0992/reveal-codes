@@ -98,7 +98,7 @@ export function createFileCacheStore(
       const name = nameFor(key);
       if (name === null) return Promise.resolve();
       counter += 1;
-      const temp = path.join(c.dir, `${name}.${process.pid}.${counter}.tmp`);
+      const temp = path.join(c.dir, `${name}.${String(process.pid)}.${String(counter)}.tmp`);
       return writeEntry(c, name, temp, () => JSON.stringify({ expiresAt, value }));
     },
     delete(key) {
