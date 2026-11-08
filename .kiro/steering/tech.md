@@ -54,4 +54,4 @@ pnpm mcp           # starts courtlistener-mcp on stdio
 
 - `.env.example` lists every variable with a comment. Never commit `.env`.
 - `COURTLISTENER_TOKEN` is required for live lookups: CourtListener's citation-lookup endpoint answers an anonymous POST with 401 (checked 2026-11-07). Without a token the app runs in demo mode on recorded responses and says so in the UI.
-- The demo corpus in `apps/web/demo/` must work with no tokens at all, served from recorded fixtures.
+- The demo motion comes from `packages/engine/fixtures/demo-motion.txt`, copied to `apps/web/public/` by `apps/web/scripts/copy-demo.ts`, and must work with no tokens at all, with citation lookups served from recorded fixtures.

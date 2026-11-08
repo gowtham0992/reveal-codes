@@ -130,3 +130,27 @@ Task numbers refer to `.kiro/specs/citation-verifier/tasks.md`.
 
 - Counterexample regression: the 2.5 `wordEndCuts` bug (the cut just after a space) is recorded as a named example beside Property 9 in `test/quote.properties.test.ts`.
 - No other hard-to-write tests are recorded in the completion notes of tasks 1.1 to 7.2.
+
+## 2026-11-07 editor-app
+
+### Where Kiro got something wrong, and what fixed it
+
+Task numbers refer to `.kiro/specs/editor-app/tasks.md`.
+
+- 1.2: a generated `vitest.config.d.ts` was committed by accident and found when lint failed; fixed with a `.gitignore` entry, an eslint ignore, and adding `scripts` to the tsconfig.
+- 3.2: guessed the Engine error kind `offset_out_of_range`; the real kind is `out_of_range`. The `CitationRecord` `other` variant has no key.
+- 4.1: the transaction mapping dropped typing from a live TipTap editor, because the editor's schema instance differs from `editorSchema`. Task 4.2 fixed it with `Step.fromJSON`. The 4.1 tests missed it because they used `editorSchema` directly.
+- Step.apply throws `RangeError` on out-of-range positions instead of returning `failed`; an `inBounds` pre-check was added.
+- The demo's fabricated Iqbal quote hangs on a short-form citation, so the Verify flow and the test fixtures first missed the `QUO ✘`; fixed by resolving via `targetStart`.
+- An instantly-resolving `sleep` makes every Verifier request time out; route tests use a real abortable timer.
+- Tests that used `new URL(import.meta.url)` throw under jsdom; `__dirname` is used instead.
+- The offsets property file had four `fc.assert` calls against the one-per-property rule; merged in 7.5.
+- The scheduler wave graph put Tier 2 tasks ahead of Tier 1; the dependency graph was edited.
+- 7.5: an agent without a browser could not complete the walkthrough. The user walked it and found that Go did not scroll the editor; task 7.6 was added because `placeCaret` lacked `scrollIntoView`.
+- `streamText.textStream` swallows errors and logs the provider message through `onError`; `sdkStreamText` records errors silently and throws a fixed error.
+- `update_pbt_status` failed with a tool error for property tasks; the orchestrator set the statuses.
+- The first `task_update` call per task returns a tool error but applies.
+
+### Steering changes
+
+- `structure.md` described `apps/web/components`, `lib/` and `demo/`, none of which exist; rewritten in 9.3 to the real `apps/web/src` layout. The `apps/web/demo/` mentions in `tech.md`, `testing.md` and `release.md` now say the demo motion comes from `packages/engine/fixtures/demo-motion.txt` through `copy-demo.ts`.

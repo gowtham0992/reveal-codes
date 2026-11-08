@@ -25,13 +25,31 @@ reveal-codes/
     verifier/                 CourtListener client, quote matcher, cache, fixtures
     courtlistener-mcp/        MCP server exposing verifier as tools
   apps/
-    web/                      Next.js editor
-      app/                    routes
-      components/editor/      TipTap setup, provenance plugin, RevealCodesPane
-      components/assistant/   LLM side panel
-      lib/llm/                LlmProvider + bedrock.ts + anthropic.ts
-      lib/export/             docx + certification
-      demo/                   seeded motion with planted errors + fixtures
+    web/                      Next.js editor (source under apps/web/src/ and apps/web/app/, tests under apps/web/test/)
+      app/                    Next App Router: layout.tsx, page.tsx, globals.css, api/ route files (assistant, mode, opinion/[clusterId], verify) that import only src/server/
+      src/
+        store.ts              app Store: Document, selection, notices, run log; actions return new state
+        store-actions.ts      Store action handlers
+        store-runtime.ts      subscription and dispatch runtime around the Store
+        history.ts            undo and redo stacks, emptied by the history barrier
+        persist.ts            Persisted_Value encode and decode for localStorage
+        autosave.ts           debounced autosave and mount-time load
+        services.ts           AppServices (fetch, storage, clock, timers) and defaultServices
+        notices.ts            Notice text for the status region
+        assistant-run.ts      assistant run bookkeeping (Tier 2)
+        index.ts              package entry
+        editor/               TipTap setup, provenance plugin, clipboard, reconcile, shortcuts, offset mapping
+        pane/                 Reveal Codes pane: layout.ts, pane.tsx, pane.module.css
+        client/               browser-side flows: api.ts, verify-flow.ts, verify-summary.ts, divergence.ts, assistant-client.ts
+        server/               route logic: deps.ts (only reader of process.env), http.ts, body.ts, verify, opinion, mode and assistant routes, llm*.ts (draft provider selection)
+        components/           React components with one CSS module each: app-shell, toolbar, editor-surface, issues list and region, dialogs, mode badge, assistant column and panel
+      scripts/                copy-demo.ts (predev and prebuild)
+      fixtures/assistant/     recorded assistant response used by the fixture LLM provider
+      public/                 demo-motion.txt, copied from packages/engine/fixtures by copy-demo.ts; gitignored
+      test/                   *.test.ts(x) examples and *.properties.test.ts (PBT)
+        static/               source scans: boundaries, css-rules, copy-rules, limits, forbidden, env-and-size, package-json, docs, inventory
+        support/              shared test helpers: fc.ts, clock.ts, memory-storage.ts, dom-shims.ts, render.tsx, scan.ts, fetch fakes
+        smoke/                API assumption regression tests for ProseMirror and TipTap
   crew/
     sentinel/                 Kiro Crew app: app.json, agents, schedule
   docs/
