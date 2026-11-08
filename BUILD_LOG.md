@@ -86,3 +86,47 @@ Named example tests added after a property found a bug. The property was not wea
 - `test/relabel.properties.test.ts`: an AI insert inside a relabelled span merges and keeps that span's Timestamp (Property 13).
 
 Requirement faults found during the build were fixed in requirements.md and design.md (commits `5996e92`, `55d348e`, `72ab937`, `ae5203f`, `4a95508`) rather than by weakening a test.
+
+## 2026-11-07 citation-verifier
+
+### Where Kiro got something wrong, and what fixed it
+
+Task numbers refer to `.kiro/specs/citation-verifier/tasks.md`.
+
+- 1.1: the silent pnpm reporter hid a failed `pnpm install`. The template scanner closed a template literal on its opening backtick. An 80-line `stripNonCode` broke the 40-line rule. The limits test excluded `describe` callbacks. Each was fixed in the task.
+- 1.2: a 70-line clock helper (split), a nonexistent import (corrected), and a conflict with the old `citations.md` steering (aligned in 8.1).
+- 2.1: `trim()` strips U+FEFF, so step 6 needed explicit trimming.
+- 2.2: three example tests had wrong expectations; the code was right and the tests were corrected.
+- 2.5: `wordEndCuts` missed the cut just after a space (a real bug, fixed). The prefix model ignored Req 8.7. The non-NFC adversarial vocabulary only exercised L3. Requirement 8.15 lacked "subject to criterion 7" (fixed). Requirement 8.12 was false as written for segments ending in a dot (fixed). The closing sentence of Requirement 8.15 disagreed with its largest-n definition (fixed).
+- 3.1: the workspace dependency was not linked until `pnpm install` ran. `parseRetryAfter` used `Date.parse`, which accepts bare numbers.
+- 3.2: the arbitraries file went over the 300-line limit (split). `fc.date` produced invalid dates.
+- 3.3: the engine `testing/` directory was not exported, so the verifier used relative imports. A design snippet used `runs()` as an options object.
+- 3.4: the first draft of the draft-assertion was a tautology.
+- 3.5: the `CitationRecord` union has no key.
+- 3.6: an arbitrary used an index fast-check does not provide.
+- 4.1: the shortfall example test was wrong because `acquire` fills the Window_Log.
+- 4.2: the timeout race sketch let a synchronous throw escape, and a `text()` rejection went unhandled. A test expected an absolute `wait_until` as a relative one.
+- 4.3: design A12 encoded keys with `encodeURIComponent`, which throws on lone surrogates and does not separate keys that differ only in case on case-insensitive file systems. A custom injective encoding replaced it in `src/cache-file.ts`, and design A12 was updated in 8.1.
+- 4.4: a stale `resultsForRecords` comment.
+- 4.5: the task text named `arb-verifier.ts` for the script arbitraries; they live in `arb-script.ts`.
+- 4.8: the expected `waitUntil` was computed from the lookup start, not the reply time.
+- 5.1: none.
+- 6.1: an earlier attempt used placeholder ids and made-up offsets. It also assumed star-pagination only (live markup uses `<page-number>`), assumed opinion GETs are unthrottled (live: 5 per minute), assumed `plain_text` is the usual source, and recorded excerpts that were not fully verbatim against the live text (OCR). Design A10 and L5 were updated in 8.1 and L11 added for the throttle.
+- 6.2: `1 H. 150` was never run through the engine `extract` (the engine reads Hill), so the ambiguous fixture was unreachable by `lookup()`. Vitest was run from the wrong directory.
+- 7.1: helper typing, BSD `sed` edits, and lint errors.
+- 7.2: the `mcp.json` write was blocked by a permission rule until granted. The pnpm install failure was forced by the `CI=true` lockfile freeze. A commit hook swept `pnpm-lock.yaml` into the 6.1 commit. One single vitest run failed without explanation; six later runs were clean.
+- 8.1: none found beyond the above (see the task completion notes).
+
+### Pinned versions
+
+`@modelcontextprotocol/sdk` 1.32.2 and `zod` 3.25.76, both exact in `packages/courtlistener-mcp/package.json`.
+
+### Limitations found
+
+- L5 (design.md) now covers `<page-number>` markers and a leading `<?xml ...?>` declaration.
+- L11 (design.md) and L3 (requirements.md): CourtListener throttles the clusters and opinions endpoints at 5 requests per minute; a throttled opinion fetch returns `null`, `check_quote` reports `unchecked`, and the null is not cached.
+
+### Tests that were hard to write and counterexample regressions
+
+- Counterexample regression: the 2.5 `wordEndCuts` bug (the cut just after a space) is recorded as a named example beside Property 9 in `test/quote.properties.test.ts`.
+- No other hard-to-write tests are recorded in the completion notes of tasks 1.1 to 7.2.

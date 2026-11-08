@@ -354,6 +354,7 @@ Standing rule (carried over from the provenance-engine spec, user decision): any
 
 - L1. A quote from a dissent or concurrence in a multi-opinion cluster is checked only against the first opinion that has text (Requirement 9.2), so it may show `QUO ✘` although the quote is real. The failure direction is safe (red, never a false pass). Follow-up: a `fetchOpinionTexts` that returns every opinion's text, with the quote checked against each.
 - L2. A quote whose ellipsis is formed only by deleting a bracket pair (`.[.].`), or whose NFC form differs from its text (tracking abandoned), loses the clean-cut shortcut for the affected cuts; the `prefixLength` found by word-end probes may be smaller than the largest n of Requirement 8.15. The value is a display hint and never changes `match` or `mismatch`.
+- L3. CourtListener throttles the clusters and opinions endpoints at 5 requests per minute for the account in use ("Rate limit exceeded: 5/min"), answering HTTP 429 with a `Retry-After` header and no `wait_until`. The verifier retries per Requirement 7. A throttled opinion fetch returns `null`, so `check_quote` reports `unchecked`, and it is not cached.
 - Design and implementation record further entries here as L2, L3, and so on.
 
 ## Notes for the user

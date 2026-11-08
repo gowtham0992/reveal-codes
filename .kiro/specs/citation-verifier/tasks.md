@@ -170,7 +170,7 @@ Deviations from the design's file layout, decided while planning:
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `FC_NUM_RUNS=500 pnpm test:pbt`; fix failures. Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 8. Wrap-up
-  - [~] 8.1 Docs, steering alignment, and docs tests
+  - [x] 8.1 Docs, steering alignment, and docs tests
     - README: add the section "What leaves your machine" stating that only citation strings are sent to CourtListener and that draft text is sent to an LLM provider only when the author uses the assistant; update the status line to mention the verifier and MCP server if it is stale.
     - `.env.example`: add `REVEAL_CODES_CACHE_DIR` (comment: directory of the verifier's on-disk cache, default `~/.reveal-codes/cache`) and `REVEAL_CODES_FIXTURES_ONLY` (comment: when `1`, serve every request from recorded fixtures and make no network call), each after a comment line; extend the `COURTLISTENER_TOKEN` comment to say it is read only by the MCP server and the web app.
     - `.kiro/steering/citations.md`: the lookup bullet says the request body is the formatted citation strings joined by newline characters; the design-consequences paragraph says the verifier sends one request per chunk of at most 60 lines and 64 000 characters and no longer says the whole document is sent in one request; the `lookup(documentText)` bullet becomes `lookup(records, deps)`.
