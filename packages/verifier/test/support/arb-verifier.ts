@@ -1,5 +1,6 @@
 import * as fc from "fast-check";
 import { format } from "@reveal-codes/engine";
+import { trackQuote } from "../../src/track";
 // The engine's `testing/` folder is deliberately not exported from its index (engine Req 1.2).
 import { arbReporterValue } from "../../../engine/src/testing/arb-citation";
 
@@ -170,3 +171,113 @@ export function typeset(quote: string, t: Typeset): string {
     return out;
   });
 }
+// ---- Property 9 (altered quotation, prefixLength) ----
+
+/** A lifted contiguous quote with one interior word replaced by a word absent from the opinion. */
+export type AlteredQuote = {
+  readonly opinion: string;
+  readonly altered: string;
+  /** Offset of the replaced word in `altered`. */
+  readonly offset: number;
+};
+
+/** Words that cannot occur in an opinion built by `arbOpinionWithQuotes` (checked by the filter). */
+const arbAbsentWord: fc.Arbitrary<string> = fc
+  .array(fc.constantFrom("q", "z", "x", "j", "v"), { minLength: 8, maxLength: 12 })
+  .map((cs) => cs.join(""));
+
+function tokenSpans(quote: string): Array<{ start: number; end: number }> {
+  return [...quote.matchAll(/\S+/gu)].map((m) => ({
+    start: m.index,
+    end: m.index + m[0].length,
+  }));
+}
+
+/** Alter one interior token of a word-boundary lifted quote; undefined when the quote cannot host one. */
+function alterQuote(opinion: string, pick: readonly [number, number, number], word: string) {
+  const { starts, ends } = boundaries(opinion);
+  const start = starts[pick[0] % starts.length] as number;
+  const endOptions = ends.filter((e) => e > start && e - start >= MIN_SEGMENT);
+  if (endOptions.length === 0) return undefined;
+  const end = endOptions[pick[1] % endOptions.length] as number;
+  const quote = opinion.slice(start, end);
+  const tokens = tokenSpans(quote);
+  if (tokens.length < 3) return undefined;
+  const t = tokens[1 + (pick[2] % (tokens.length - 2))] as { start: number; end: number };
+  const altered = quote.slice(0, t.start) + word + quote.slice(t.end);
+  const normalAbsent = !opinion.toLowerCase().includes(word);
+  if (!normalAbsent || altered.replace(/[\s.,;:]+$/u, "").length < MIN_SEGMENT) return undefined;
+  return { opinion, altered, offset: t.start };
+}
+
+export const arbAlteredQuote: fc.Arbitrary<AlteredQuote> = fc
+  .tuple(arbQuoteSource, fc.tuple(fc.nat(), fc.nat(), fc.nat()), arbAbsentWord)
+  .map(([opinion, pick, word]) => alterQuote(opinion, pick, word))
+  .filter((x): x is AlteredQuote => x !== undefined);
+
+/** Vocabulary shared by small adversarial opinions and quotes, so partial matches are common. */
+const ADVERSARIAL_TOKENS = [
+  "a",
+  "b",
+  "ab",
+  "the court",
+  "remanded the case",
+  "see id",
+  "burdens speech",
+  "caf\u00e9",
+  "cafe\u0301",
+  "[x]",
+  "[a b]",
+  "[[a]b]",
+  "[",
+  "]",
+  "e\u0301",
+  "x\u0323",
+  "\u0301",
+  "\u1100\u1161",
+  "x.",
+  ",",
+];
+
+/** Quote vocabulary: the shared one minus tokens NFC would change, plus NFC-stable marks and jamo. */
+const QUOTE_TOKENS = [
+  ...ADVERSARIAL_TOKENS.filter((t) => t.normalize("NFC") === t),
+  "x\u0323\u0301",
+  "a\u11a8",
+  "\u1161",
+];
+
+const arbTokens = (max: number): fc.Arbitrary<string[]> =>
+  fc.array(fc.constantFrom(...QUOTE_TOKENS), { minLength: 1, maxLength: max });
+
+const arbJoinForm: fc.Arbitrary<string> = fc.constantFrom(
+  "…",
+  "...",
+  " ... ",
+  ". . .",
+  " … ",
+  "[...]",
+);
+
+/** A small opinion and a one-to-three segment quote, each from the shared vocabulary. */
+export const arbAdversarialPair: fc.Arbitrary<{ opinion: string; quote: string }> = fc
+  .tuple(
+    fc.array(fc.oneof(fc.constantFrom(...ADVERSARIAL_TOKENS), fc.constant("...")), {
+      minLength: 1,
+      maxLength: 12,
+    }),
+    fc.array(arbTokens(5), { minLength: 1, maxLength: 3 }),
+    fc.array(arbJoinForm, { minLength: 2, maxLength: 2 }),
+    fc.boolean(),
+  )
+  .map(([oTokens, segs, forms, trailing]) => {
+    let quote = (segs[0] as string[]).join(" ");
+    for (let i = 1; i < segs.length; i += 1) {
+      quote += `${forms[i - 1] as string}${(segs[i] as string[]).join(" ")}`;
+    }
+    return { opinion: oTokens.join(" "), quote: trailing ? `${quote}.` : quote };
+  })
+  // Known limitation L3: when NFC changes the quote, tracking is abandoned and prefixLength
+  // may be smaller than the largest n. Joins can still compose (a jamo after a syllable), so
+  // the model comparison is kept to quotes where tracking holds.
+  .filter((p) => trackQuote(p.quote) !== null);

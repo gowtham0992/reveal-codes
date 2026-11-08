@@ -54,7 +54,7 @@ Deviations from the design's file layout, decided while planning:
     - **Property 8: A quotation lifted from an opinion matches however it is typeset**
     - **Validates: Requirements 8.4, 8.5, 8.12, 8.14**
     - _Requirements: 8.12_
-  - [~] 2.5 Property 9: an altered quotation mismatches and prefixLength locates the divergence
+  - [x] 2.5 Property 9: an altered quotation mismatches and prefixLength locates the divergence
     - Same file `test/quote.properties.test.ts`; one `fc.assert` over `fc.oneof` of two tagged cases: (a) a contiguous lifted quote of at least 12 characters with one interior word replaced by a word absent from the opinion, asserting `mismatch` and `offset <= prefixLength < quote length`; (b) small adversarial quote and opinion pairs (brackets, ellipsis forms, combining marks, one to three segments, interior segments under 12 characters) asserting `prefixLength` equals `test/support/prefix-model.ts`.
     - **Property 9: An altered quotation mismatches, and prefixLength locates the divergence**
     - **Validates: Requirements 8.6, 8.13, 8.15**
@@ -68,7 +68,7 @@ Deviations from the design's file layout, decided while planning:
     - Example tests: `time.test.ts` (`Retry-After` as integer, date, garbage; `wait_until` in several forms), `lines.test.ts` (parallel order, duplicates, database, short and other skipped, `912 F. 4th 33` normalises to `912 F.4th 33`), `chunk.test.ts` (60-line cap, 64 000-character cap, oversize line alone), `request.test.ts` (body is lines joined by `\n`, no token off-Base_URL, no token without a configured token, no headers besides `Authorization`, `Content-Type`, `Accept`), `map-status.test.ts` (one example per row of A5, plus malformed entry, wrong length, non-array body), `unresolvable.test.ts`.
     - Known limitation to record if met: L6 (one unparseable line unchecks its chunk).
     - _Requirements: 1.2, 1.3, 1.4, 1.5, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.9, 2.10, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 5.1, 5.2, 5.3, 5.4, 7.2_
-  - [~] 3.2 Property 1: status mapping yields verified only for Line_Status 200
+  - [x] 3.2 Property 1: status mapping yields verified only for Line_Status 200
     - File `test/map-status.properties.test.ts`; `arbLookupEntry` and `arbLookupBody(lines)` in `test/support/arb-verifier.ts` (statuses 200, 300, 400, 404, 429 and out-of-set values, 0 to 3 clusters with valid, duplicate and malformed ids, optional `wait_until`, wrong-length and non-array variants).
     - **Property 1: Status mapping yields verified only for Line_Status 200 and one result per line**
     - **Validates: Requirements 1.8, 2.6, 2.7, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8**

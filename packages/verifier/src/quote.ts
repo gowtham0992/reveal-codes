@@ -83,7 +83,10 @@ function trackedLength(quote: string, opinion: string, single: boolean, tr: Trac
 function wordEndCuts(quote: string): number[] {
   const cuts = new Set<number>();
   for (let n = 1; n < quote.length; n += 1) {
-    if (WS_UNIT.test(quote.charAt(n))) cuts.add(n);
+    if (!WS_UNIT.test(quote.charAt(n))) continue;
+    cuts.add(n);
+    // A cut right after the space can keep more than one before it (Req 8.15: largest n).
+    if (n + 1 < quote.length) cuts.add(n + 1);
   }
   for (const m of quote.matchAll(ELLIPSIS)) {
     const end = m.index + m[0].length;
