@@ -31,6 +31,14 @@
     "3.6 Property 12: short and other records are never sent and never in the result map": {
       "status": "passed",
       "lastRunTimestamp": 1794102711156
+    },
+    "4.6 Property 5: cache round trip and expiry hold for both stores": {
+      "status": "passed",
+      "lastRunTimestamp": 1794102983633
+    },
+    "4.7 Property 6: a fully cached lookup makes no network or sleep calls": {
+      "status": "passed",
+      "lastRunTimestamp": 1794103025969
     }
   },
   "executionHistory": {
@@ -345,6 +353,16 @@
         "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
         "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
         "timestamp": 1794098610990
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794102902953
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794103039496
       }
     ],
     "4.6 Property 5: cache round trip and expiry hold for both stores": [
@@ -352,6 +370,11 @@
         "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
         "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
         "timestamp": 1794098611009
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794102903023
       }
     ],
     "4.7 Property 6: a fully cached lookup makes no network or sleep calls": [
@@ -359,6 +382,11 @@
         "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
         "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
         "timestamp": 1794098611027
+      },
+      {
+        "executionId": "d2acc42f-c287-4dbc-8540-c7529332f372",
+        "chatSessionId": "sess_a8d594f4-eaab-4aad-bc74-7e930b9ba55c",
+        "timestamp": 1794102903552
       }
     ],
     "4.8 Property 10: retries are bounded and exhaustion keeps the last wait": [

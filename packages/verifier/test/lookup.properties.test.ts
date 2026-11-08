@@ -2,7 +2,11 @@ import * as fc from "fast-check";
 import { format } from "@reveal-codes/engine";
 import type { CitationRecord, IssueKey, VerificationResult } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
+import type { CacheStore } from "../src/deps";
 import { lookup, planLookup } from "../src/lookup";
+import type { LookupPlan } from "../src/lookup";
+import { chunkLines } from "../src/chunk";
+import { arbCachedCase } from "./support/arb-cached";
 import { arbDatabaseCase } from "./support/arb-db-records";
 import { arbMixedCase } from "./support/arb-mixed-records";
 import { arbLookupCase } from "./support/arb-records";
@@ -133,6 +137,60 @@ function variedEntry(line: string): unknown {
   if (n === 1) return { status: 404, clusters: [] };
   return { status: 300, clusters: [{ id: line.length + 1 }, { id: line.length + 2 }] };
 }
+
+// A line is terminal the first time exactly when the store holds it afterwards; a
+// single-line record that came back checked must have its line stored.
+async function terminalLines(
+  cache: CacheStore,
+  plan: LookupPlan,
+  first: ReadonlyMap<IssueKey, VerificationResult>,
+): Promise<Set<string>> {
+  const terminal = new Set<string>();
+  for (const line of plan.lines) if ((await cache.get(line)) !== undefined) terminal.add(line);
+  for (const [key, members] of plan.index.members) {
+    if (typeof members === "string" || members.length !== 1) continue;
+    if (first.get(key)?.status !== "unchecked") expect(terminal.has(members[0] ?? "")).toBe(true);
+  }
+  return terminal;
+}
+
+// Property 6
+// Feature: citation-verifier, Property 6: A fully cached lookup makes no network or sleep calls
+describe("Property 6: cached lookup _Requirements: 10.2, 10.4, 10.5_", () => {
+  it("resends only lines that were not terminal, and nothing when all were", async () => {
+    await fc.assert(
+      fc.asyncProperty(arbCachedCase, async (c) => {
+        const steps: ScriptStep[] = c.bodies.map((body) => ({ status: 200, body }));
+        const t = makeDeps(steps);
+        const plan = planLookup(c.records);
+        const first = await lookup(c.records, t.deps);
+        const terminal = await terminalLines(t.cache, plan, first);
+        const missing = plan.lines.filter((l) => !terminal.has(l));
+        for (const chunk of chunkLines(missing)) {
+          if (!chunk.oversize) steps.push({ status: 200, body: chunk.lines.map(notFoundEntry) });
+        }
+        t.clock.advance(c.gapMs);
+        const fetchBefore = t.fetch.calls.length;
+        const sleepBefore = t.clock.sleeps.length;
+        const second = await lookup(c.records, t.deps);
+        const sent = t.fetch.calls
+          .slice(fetchBefore)
+          .flatMap((r) => decodedText(r.body).split("\n"));
+        expect(sent.filter((l) => l !== "")).toEqual(missing.filter((l) => l.length <= 64_000));
+        if (missing.length === 0) {
+          expect(t.fetch.calls.length).toBe(fetchBefore);
+          expect(t.clock.sleeps.length).toBe(sleepBefore);
+        }
+        for (const [key, members] of plan.index.members) {
+          const settled = typeof members === "string" || members.every((l) => terminal.has(l));
+          if (settled) expect(second.get(key)).toEqual(first.get(key));
+        }
+        expect([...second.keys()]).toEqual([...first.keys()]);
+      }),
+      { numRuns: runs() },
+    );
+  });
+});
 
 // Property 12
 // Feature: citation-verifier, Property 12: Short and other records are never sent and never in the result map

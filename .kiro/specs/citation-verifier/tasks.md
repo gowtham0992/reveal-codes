@@ -114,17 +114,17 @@ Deviations from the design's file layout, decided while planning:
     - Re-point the Property 2, 11 and 12 harness (tasks 3.4 to 3.6) at `lookup()` with a scripted fetch; keep one `fc.assert` per property and do not weaken any assertion.
     - Example tests `combine.test.ts` (one per A6 row, including no members and the `reason` rule), `lookup.test.ts` (zero Full_Records makes no calls; fault isolation where chunk 2 of 3 fails and chunks 1 and 3 keep results; cached lines are not resent; all-database list makes zero calls; two equal calls give equal maps).
     - _Requirements: 1.1, 1.5, 1.6, 1.7, 1.9, 1.10, 5.4, 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 7.9, 10.4, 10.5_
-  - [~] 4.5 Property 3: lines sent in any 60 000 ms window never exceed 60
+  - [x] 4.5 Property 3: lines sent in any 60 000 ms window never exceed 60
     - File `test/bucket.properties.test.ts`; `arbClock` (non-decreasing, gaps 0 to 120 000) and `arbResponseScript` (429 with and without `Retry-After`, `wait_until`, `wait_util`, 5xx, other 4xx, valid 200) in `test/support/arb-verifier.ts`; sequences of `lookup` calls over fresh lines through the manual clock, retries included.
     - **Property 3: Lines sent in any 60 000 ms window never exceed 60**
     - **Validates: Requirements 7.1, 7.3, 7.4, 7.5, 7.12, 7.13**
     - _Requirements: 7.5_
-  - [~] 4.6 Property 5: cache round trip and expiry hold for both stores
+  - [-] 4.6 Property 5: cache round trip and expiry hold for both stores
     - File `test/cache.properties.test.ts`; one `fc.assert` whose generated input includes the store kind, run against both `createMemoryCacheStore` and `createFileCacheStore` (temporary directory removed afterwards); keys from the engine's `arbAnyString`, results from the engine's `arbVerificationResult` without `unchecked`, a mutable manual clock; asserts equality before expiry, miss at and after, no cross-key reads, no file outside the directory.
     - **Property 5: Cache round trip and expiry hold for both stores**
     - **Validates: Requirements 10.3, 10.6, 10.8, 10.11**
     - _Requirements: 10.6_
-  - [~] 4.7 Property 6: a fully cached lookup makes no network or sleep calls
+  - [-] 4.7 Property 6: a fully cached lookup makes no network or sleep calls
     - Same file `test/lookup.properties.test.ts`; scripted fetch driven by `arbLookupBody` with a mix of terminal and `unchecked` outcomes; repeat the call and assert zero fetch and sleep calls when all lines were terminal, and that any request carries only lines that were not terminal the first time.
     - **Property 6: A fully cached lookup makes no network or sleep calls**
     - **Validates: Requirements 10.2, 10.4, 10.5**
