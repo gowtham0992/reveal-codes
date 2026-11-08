@@ -7,7 +7,7 @@
   "type": "module",
   "exports": "./src/index.ts",
   "scripts": {
-    "start": "node --eval \"console.error('courtlistener-mcp: server not implemented yet'); process.exit(1)\""
+    "start": "node --import jiti/register src/main.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.2",

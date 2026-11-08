@@ -1,3 +1,17 @@
 {
-  "mcpServers": {}
+  "mcpServers": {
+    "courtlistener": {
+      "command": "pnpm",
+      "args": [
+        "mcp"
+      ],
+      "env": {
+        "REVEAL_CODES_FIXTURES_ONLY": "1"
+      },
+      "autoApprove": [
+        "lookup_citations",
+        "verifier_status"
+      ]
+    }
+  }
 }
