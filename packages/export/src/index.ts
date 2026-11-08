@@ -18,3 +18,4 @@ export { exportFileName } from "./file-name.js";
 export { ellipsize } from "./text.js";
 export { isInstant, localDate } from "./time.js";
 export { buildDocx } from "./docx.js";
+export { canExport } from "./gate.js";
