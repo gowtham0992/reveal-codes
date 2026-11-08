@@ -25,8 +25,8 @@ describe("documentation _Requirements: 2.11, 15.7, 17.1, 17.2, 17.3, 17.4_", () 
     const rest = readme.slice(at + 1);
     const next = rest.indexOf("\n## ", 1);
     const section = next < 0 ? rest : rest.slice(0, next);
-    expect(section).toContain("Only citation strings go to CourtListener");
-    expect(section).toContain("only when you use the assistant");
+    expect(section).toContain("only citation strings go to CourtListener");
+    expect(section).toContain("Nothing is sent to a provider unless you use Draft");
     expect(section).toContain("no telemetry");
   });
 
@@ -56,7 +56,9 @@ describe("documentation _Requirements: 2.11, 15.7, 17.1, 17.2, 17.3, 17.4_", () 
   it(".env.example token comment says the token is read only by the MCP server and the web app", () => {
     const i = lineIndex("COURTLISTENER_TOKEN");
     expect(i).toBeGreaterThan(0);
-    expect(envLines()[i - 1]).toBe("# Read only by the MCP server and the web app.");
+    expect(envLines()[i - 1]).toBe(
+      "# Never sent to the browser. Read by the MCP server and the web app.",
+    );
   });
 
   it("BUILD_LOG.md has an entry headed with a date and citation-verifier", () => {

@@ -150,6 +150,8 @@ Task numbers refer to `.kiro/specs/editor-app/tasks.md`.
 - `streamText.textStream` swallows errors and logs the provider message through `onError`; `sdkStreamText` records errors silently and throws a fixed error.
 - `update_pbt_status` failed with a tool error for property tasks; the orchestrator set the statuses.
 - The first `task_update` call per task returns a tool error but applies.
+- 1.1: the API smoke tests found no wrong ProseMirror or TipTap API assumption.
+- Risk R1 confirmed: Turbopack fails on the Engine's `.js` specifiers in Next 16.4.5; webpack is used (`next build --webpack`).
 
 ### Steering changes
 
