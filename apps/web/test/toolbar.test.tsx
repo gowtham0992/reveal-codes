@@ -20,11 +20,10 @@ describe("Toolbar _Requirements: 10.1, 10.2, 10.6, 10.7_", () => {
     expect(names).toEqual(["New", "Load demo motion", "Verify", "Show codes (Alt-F3)", "Export"]);
   });
 
-  it("puts the badge after the buttons and before the status area", () => {
-    renderUi(<Toolbar {...BASE} badge="Demo mode" />);
-    const bar = screen.getByRole("toolbar");
-    const children = [...bar.children].map((c) => c.textContent);
-    expect(children.slice(-2)).toEqual(["Demo mode", ""]);
+  it("contains no Mode_Text", () => {
+    renderUi(<Toolbar {...BASE} />);
+    const text = screen.getByRole("toolbar").textContent;
+    expect(text).not.toMatch(/Demo mode|Live CourtListener|Server unreachable/);
   });
 
   it("renders the Wordmark first, then three groups in order", () => {

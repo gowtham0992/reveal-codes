@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import styles from "./toolbar.module.css";
 
 export type ToolbarProps = Readonly<{
@@ -9,8 +8,6 @@ export type ToolbarProps = Readonly<{
   verifyRunning?: boolean;
   /** Blocking issue count; the Export label reads "Export (<n> blocking)" when above zero. */
   blockingCount?: number;
-  /** Mode badge slot (Requirement 15); nothing is rendered when absent. */
-  badge?: ReactNode;
   onNew?: () => void;
   onLoadDemo?: () => void;
   onVerify?: () => void;
@@ -47,7 +44,6 @@ export function Toolbar(props: ToolbarProps) {
           {exportLabel(props.blockingCount ?? 0)}
         </button>
       </div>
-      {props.badge === undefined ? null : <span className={styles["badge"]}>{props.badge}</span>}
       <div role="status" aria-live="polite" className={styles["notice"]}>
         {props.notice}
       </div>

@@ -13,13 +13,14 @@ import type { Store } from "../store-runtime";
 import { hasFullRecord, runVerifyFlow } from "../client/verify-flow";
 import { EditorSurface } from "./editor-surface";
 import { useAssistantSlot } from "./assistant-column";
-import { ModeBadge, useModeResult } from "./mode-badge";
-import type { ServerMode } from "./mode-badge";
+import { modeText, useModeResult } from "./use-server-mode";
+import type { ServerMode } from "./use-server-mode";
+import { StatusLine } from "./status-line";
 import { IssuesRegion } from "./issues-region";
 import { Toolbar } from "./toolbar";
 import { useExport } from "./use-export";
 import { useDocumentActions } from "./use-document-actions";
-import { composeStatus, usePaneControl } from "./use-pane";
+import { composeStatus, positionText, usePaneControl } from "./use-pane";
 import { Pane } from "../pane/pane";
 
 export type AppShellProps = Readonly<{ services?: AppServices }>;
@@ -126,7 +127,6 @@ function useVerify(svc: AppServices, store: Store) {
 type ShellToolbarProps = Readonly<{
   notice: string | null;
   doc: Document;
-  mode: ServerMode;
   svc: AppServices;
   store: Store;
   exportGate: ReturnType<typeof useExport>;
@@ -135,7 +135,7 @@ type ShellToolbarProps = Readonly<{
 }>;
 
 function ShellToolbar(props: ShellToolbarProps) {
-  const { notice, doc, mode, exportGate, pane, actions } = props;
+  const { notice, doc, exportGate, pane, actions } = props;
   const verify = useVerify(props.svc, props.store);
   return (
     <Toolbar
@@ -146,7 +146,6 @@ function ShellToolbar(props: ShellToolbarProps) {
       verifyDisabled={verify.running || !hasFullRecord(doc)}
       verifyRunning={verify.running}
       {...exportGate.toolbar}
-      badge={mode === "loading" ? undefined : <ModeBadge mode={mode} />}
       onVerify={verify.start}
       onTogglePane={pane.toggle}
     />
@@ -164,6 +163,33 @@ function useCaretRef() {
   return { cursor, onCaret, getCaret: () => caret.current };
 }
 
+type ShellBottomProps = Readonly<{
+  paneControl: ReturnType<typeof usePaneControl>;
+  doc: Document;
+  cursor: number;
+  mode: ServerMode;
+  binding: ReturnType<typeof useEditorBinding>;
+}>;
+
+/** The Pane while open; the Status_Line while closed. */
+function ShellBottom({ paneControl, doc, cursor, mode, binding }: ShellBottomProps) {
+  return (
+    <>
+      <Pane
+        open={paneControl.open}
+        document={doc}
+        cursorOffset={cursor}
+        statusOverride={composeStatus(doc, cursor, paneControl.saveMessage)}
+        onItemClick={binding.focusAt}
+        onBackgroundClick={binding.focusEnd}
+      />
+      {paneControl.open ? null : (
+        <StatusLine position={positionText(doc, cursor)} mode={modeText(mode)} />
+      )}
+    </>
+  );
+}
+
 export function AppShell({ services }: AppShellProps) {
   const { svc, store, autosave } = useShellParts(services);
   const { cursor, onCaret, getCaret } = useCaretRef();
@@ -174,7 +200,7 @@ export function AppShell({ services }: AppShellProps) {
   const slot = useAssistantSlot({ svc, store, info: assistant, getCaret });
   const exportGate = useExport({ svc, store, autosave, doc, notice, onGo: binding.focusAt });
   const actions = useDocumentActions({ store, svc, autosave, doc });
-  const toolbar = { notice, doc, mode, svc, store, exportGate, pane: paneControl, actions };
+  const toolbar = { notice, doc, svc, store, exportGate, pane: paneControl, actions };
   return (
     <div
       className="app"
@@ -193,13 +219,12 @@ export function AppShell({ services }: AppShellProps) {
       />
       {exportGate.dialog}
       {actions.dialog}
-      <Pane
-        open={paneControl.open}
-        document={doc}
-        cursorOffset={cursor}
-        statusOverride={composeStatus(doc, cursor, paneControl.saveMessage)}
-        onItemClick={binding.focusAt}
-        onBackgroundClick={binding.focusEnd}
+      <ShellBottom
+        paneControl={paneControl}
+        doc={doc}
+        cursor={cursor}
+        mode={mode}
+        binding={binding}
       />
     </div>
   );

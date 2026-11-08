@@ -35,11 +35,6 @@
   padding-left: 8px;
 }
 
-.badge {
-  border-left: 1px solid var(--rule);
-  padding-left: 8px;
-}
-
 .notice {
   flex: 1;
   min-width: 0;

@@ -2,16 +2,20 @@
 
 import { useEffect, useState } from "react";
 import type { ApiClient, AssistantInfo } from "../client/api";
-import styles from "./mode-badge.module.css";
 
 /** `loading` shows nothing; `unreachable` is a failed request (Requirement 15.8). */
 export type ServerMode = "loading" | "fixtures" | "live" | "unreachable";
 
-export const BADGE_TEXT = {
+const MODE_TEXT = {
   fixtures: "Demo mode: recorded CourtListener responses",
   live: "Live CourtListener lookups",
   unreachable: "Server unreachable",
 } as const;
+
+/** The words for a mode; `loading` has none. */
+export function modeText(mode: ServerMode): string | null {
+  return mode === "loading" ? null : MODE_TEXT[mode];
+}
 
 /** Asks `GET /api/mode` once after mount. A rejected request becomes `unreachable`, never a throw. */
 export function useServerMode(api: ApiClient): ServerMode {
@@ -35,11 +39,4 @@ export function useModeResult(api: ApiClient): ModeResult {
     };
   }, [api]);
   return result;
-}
-
-export type ModeBadgeProps = Readonly<{ mode: ServerMode }>;
-
-export function ModeBadge({ mode }: ModeBadgeProps) {
-  if (mode === "loading") return null;
-  return <span className={styles["modeBadge"]}>{BADGE_TEXT[mode]}</span>;
 }

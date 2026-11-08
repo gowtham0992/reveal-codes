@@ -26,6 +26,11 @@ export function composeStatus(doc: Document, cursor: number, f7: string | null):
   return `${statusText(doc.text, cursor)}  Diverges at: ${words}`;
 }
 
+/** Position_Text: the position, plus the divergence words inside a mismatched quote. */
+export function positionText(doc: Document, cursor: number): string {
+  return composeStatus(doc, cursor, null) ?? statusText(doc.text, cursor);
+}
+
 export type PaneControl = Readonly<{
   open: boolean;
   toggle: () => void;

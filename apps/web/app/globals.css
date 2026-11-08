@@ -12,9 +12,11 @@
   --size-editor: 12pt;
   --size-pane: 14px;
   --size-wordmark: 15px;
+  --size-status: 12px;
   --line-editor: 1.5;
   --page-max: 8.5in;
   --toolbar-h: 32px;
+  --status-h: 22px;
   --left-w: 260px;
   --right-w: 300px;
   --pane-h: 40vh;
@@ -73,7 +75,7 @@ button:disabled {
 /* Fixed grid: toolbar, then main and Issues. The left column is added with the assistant. */
 .app {
   display: grid;
-  grid-template-rows: var(--toolbar-h) minmax(0, 1fr) auto;
+  grid-template-rows: var(--toolbar-h) minmax(0, 1fr) var(--status-h);
   grid-template-columns: [main] minmax(0, 1fr) [issues] var(--right-w);
   height: 100vh;
   overflow: hidden;

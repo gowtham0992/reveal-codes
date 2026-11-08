@@ -70,7 +70,7 @@ describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () =
     const app = document.querySelector(".app");
     if (app === null) throw new Error("no .app root");
     const roles = [...app.children].map((c) => c.getAttribute("role") ?? c.tagName.toLowerCase());
-    expect(roles).toEqual(["toolbar", "main", "aside"]);
+    expect(roles).toEqual(["toolbar", "main", "aside", "region"]);
     expect(screen.getByRole("complementary", { name: "Issues" })).not.toBeNull();
     expect(screen.queryByRole("region", { name: "Reveal Codes" })).toBeNull();
     expect(screen.queryByRole("complementary", { name: "Assistant" })).toBeNull();
@@ -304,19 +304,42 @@ async function mountWith(setting: ModeSetting, storage?: MemoryStorage) {
 }
 
 describe("AppShell mode badge and Verify _Requirements: 15.7, 15.8, 17.1, 17.12, 17.13_", () => {
-  it("shows the mode badge and the Issues line only in fixtures mode", async () => {
+  it("shows the fixtures Mode_Text and the Issues line only in fixtures mode", async () => {
     await mountWith("fixtures");
-    const bar = screen.getByRole("toolbar");
-    expect(within(bar).getByText("Demo mode: recorded CourtListener responses")).not.toBeNull();
+    const line = screen.getByRole("region", { name: "Status line" });
+    expect(within(line).getByText("Demo mode: recorded CourtListener responses")).not.toBeNull();
     expect(screen.getByText(/^Demo mode checks only the recorded demo citations/)).not.toBeNull();
   });
 
-  it("shows the live badge without the Issues line", async () => {
+  it("shows the live Mode_Text without the Issues line", async () => {
     await mountWith("live");
     expect(screen.getByText("Live CourtListener lookups")).not.toBeNull();
     expect(screen.queryByText(/Demo mode checks only/)).toBeNull();
   });
 
+  it.each([
+    ["fixtures", "Demo mode: recorded CourtListener responses"],
+    ["live", "Live CourtListener lookups"],
+    ["down", "Server unreachable"],
+  ] as const)(
+    "shows the %s Mode_Text in the Status_Line and not in the toolbar",
+    async (setting, text) => {
+      await mountWith(setting);
+      const line = screen.getByRole("region", { name: "Status line" });
+      expect(within(line).getByText(text)).not.toBeNull();
+      expect(within(screen.getByRole("toolbar")).queryByText(text)).toBeNull();
+    },
+  );
+  it("shows the Status_Line while the Pane is closed and removes it when the Pane opens", async () => {
+    await mountWith("live");
+    const line = screen.getByRole("region", { name: "Status line" });
+    expect(line.hasAttribute("aria-live")).toBe(false);
+    expect(within(line).getByText("Doc 1 Pg 1 Ln 1 Pos 1")).not.toBeNull();
+    expect(line.textContent).toContain("Alt-F3 Codes   F7 Exit");
+    pressKey(document.body, "F3", { altKey: true });
+    expect(screen.queryByRole("region", { name: "Status line" })).toBeNull();
+    expect(paneRegion()).not.toBeNull();
+  });
   it("keeps Verify enabled when the server is unreachable", async () => {
     await mountWith("down", citingStorage());
     expect(screen.getByText("Server unreachable")).not.toBeNull();
