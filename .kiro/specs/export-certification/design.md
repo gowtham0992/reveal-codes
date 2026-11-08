@@ -41,6 +41,8 @@ Evidence, from a scratch Next project with the same pins as `apps/web` (`next` 1
 
 What I could not verify: a build of the real `apps/web` (with `transpilePackages`, the `.js` to `.ts` `extensionAlias` and the new workspace package), and a run of `Packer.toBuffer` inside a real browser (the probe ran the compile and a Node run, not a browser). Task 1 of the plan repeats the probe inside `apps/web` before anything depends on it. If that build fails, the fallback of Requirement 7, criterion 5 is built instead: `app/api/export/route.ts` over a new `src/server/export-route.ts`, with the same `exportDocx` flow posting `{ codes, runLog }`. The design of everything else is the same on both paths, because `buildStatement` and `buildDocx` take a `Document`, and the server would obtain it with `parse`.
 
+Confirmed in the repository (tasks 1.2 and 5.4): the client path stands. The probe inside `apps/web` (real `transpilePackages`, `extensionAlias` and workspace package) and the later `next build --webpack` both succeeded; the chunk holding `docx` is 215 to 222 KB and has 0 `node:` imports. A real-browser run of `Packer.toBuffer` was not performed.
+
 ## Architecture
 
 ```mermaid
@@ -551,6 +553,8 @@ The standing rule applies: a fault that only affects malformed input is a value 
 | A cut at 80 characters falls inside a surrogate pair | `clip` backs off one code unit; the cut text is 79 units | 2.3, 4.7 |
 
 Known limitations to carry into the README and `BUILD_LOG.md` if they matter to a reader: the bytes of the `.docx` are not deterministic because `docx` writes the real clock into `docProps/core.xml`; the Statement text is deterministic. Tool names come from the app's run log, not from the Appendix, so a Document re-read from the Appendix alone lists no tools (L3).
+
+- L5. The `docx` package silently drops XML-illegal control characters (for example U+000C form feed from a pasted PDF), so a Filing_Paragraph or Appendix line that contains one is shorter in the .docx than in the Document; the Engine's `arbDocument` never generates them, so Property 4 does not cover it.
 
 ## Testing Strategy
 

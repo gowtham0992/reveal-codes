@@ -158,3 +158,30 @@ Task numbers refer to `.kiro/specs/editor-app/tasks.md`.
 ### Steering changes
 
 - `structure.md` described `apps/web/components`, `lib/` and `demo/`, none of which exist; rewritten in 9.3 to the real `apps/web/src` layout. The `apps/web/demo/` mentions in `tech.md`, `testing.md` and `release.md` now say the demo motion comes from `packages/engine/fixtures/demo-motion.txt` through `copy-demo.ts`.
+
+## 2026-11-08 export-certification
+
+### Where Kiro got something wrong, and what fixed it
+
+Task numbers refer to `.kiro/specs/export-certification/tasks.md`.
+
+- 1.2 probe: `docx` bundled for the browser inside `apps/web` with `next build --webpack`; the chunk was 215 to 222 KB with 0 `node:` imports (the 5.4 build agreed). The client path was taken and `POST /api/export` was not built. A real-browser run of `Packer.toBuffer` was not performed and is left to the user, as is opening the .docx in Word or LibreOffice.
+- 1.1: the root `vitest.config.ts` `project()` helper had no `env` parameter, so the `TZ` pin could not be set for the `export` project; the parameter was added. `packages/export/test` needed its own tsconfig reference.
+- 2.2: the first time-zone assertions matched a literal instead of the shared constant; they now use the constant.
+- 1.4: the Demo_Document builder's quote-owner lookup had to be copied, because `quotesByCluster` lives in `apps/web`.
+- 4.1: `docx-blocks` first emitted a "Date:" label and empty paragraphs after tables, which violated D5 and Req 6.9; both were removed. The `Packer.toBuffer` result failed `instanceof Uint8Array` under jsdom (cross-realm Buffer); the check became `ArrayBuffer.isView` plus a re-wrap into a `Uint8Array`.
+- 5.3: the first swallowing `catch` in `exportDocx` failed the limits scan; failures are now returned as values.
+- 5.5: the `css-rules` scan allowed 12pt only for the editor surface; it was extended to `print-view.module.css`.
+- Web tests that import the Demo fixture through `import.meta.url` fail under jsdom, so the views build their documents inline.
+
+### Deviation from testing.md
+
+Two web tests use `vi.mock` of `@reveal-codes/export`: the `buildDocx` rejection branch and the appendix parse-failure branch of `exportDocx` cannot be reached with a valid Document, so no real input triggers them. This departs from the rule "mock only fetch and LlmProvider". The mock replaces only the export package, never the Engine or the Verifier, and only those two branches use it.
+
+### Limitations found
+
+- L5 (requirements.md and design.md): `docx` silently drops XML-illegal control characters such as U+000C, so such a line is shorter in the .docx than in the Document. Property 4 does not cover it.
+
+### Steering changes
+
+- `structure.md` and `tech.md` now name `packages/export`.

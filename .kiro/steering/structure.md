@@ -24,6 +24,7 @@ reveal-codes/
       test/                   *.test.ts (examples) and *.properties.test.ts (PBT)
     verifier/                 CourtListener client, quote matcher, cache, fixtures
     courtlistener-mcp/        MCP server exposing verifier as tools
+    export/                   pure export package: gate, certification statement, appendix, DOCX builder, file name (depends on engine and docx)
   apps/
     web/                      Next.js editor (source under apps/web/src/ and apps/web/app/, tests under apps/web/test/)
       app/                    Next App Router: layout.tsx, page.tsx, globals.css, api/ route files (assistant, mode, opinion/[clusterId], verify) that import only src/server/
