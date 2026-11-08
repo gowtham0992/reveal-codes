@@ -124,7 +124,7 @@ Deviations from the design's file layout, decided while planning:
     - **Property 5: Cache round trip and expiry hold for both stores**
     - **Validates: Requirements 10.3, 10.6, 10.8, 10.11**
     - _Requirements: 10.6_
-  - [-] 4.7 Property 6: a fully cached lookup makes no network or sleep calls
+  - [x] 4.7 Property 6: a fully cached lookup makes no network or sleep calls
     - Same file `test/lookup.properties.test.ts`; scripted fetch driven by `arbLookupBody` with a mix of terminal and `unchecked` outcomes; repeat the call and assert zero fetch and sleep calls when all lines were terminal, and that any request carries only lines that were not terminal the first time.
     - **Property 6: A fully cached lookup makes no network or sleep calls**
     - **Validates: Requirements 10.2, 10.4, 10.5**
