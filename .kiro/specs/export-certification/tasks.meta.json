@@ -11,6 +11,10 @@
     "4.2 Property 4: docx content": {
       "status": "passed",
       "lastRunTimestamp": 1794155464161
+    },
+    "4.4 Property 1: gate": {
+      "status": "passed",
+      "lastRunTimestamp": 1794155623358
     }
   },
   "executionHistory": {
@@ -264,6 +268,16 @@
         "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
         "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
         "timestamp": 1794154512916
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794155575701
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794155635650
       }
     ],
     "5.1 Store `verifiedAt` and Verify flow clock (follows ui.md)": [
@@ -334,6 +348,13 @@
         "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
         "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
         "timestamp": 1794155102808
+      }
+    ],
+    "4. DOCX builder and gate": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794155635676
       }
     ]
   }

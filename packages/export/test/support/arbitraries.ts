@@ -1,4 +1,5 @@
 import * as fc from "fast-check";
+import { blockingIssues, recordOverride } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
 import { arbDocument } from "../../../engine/src/testing/arb-document";
 import type { Meta, RunInfo } from "../../src/index.js";
@@ -59,4 +60,28 @@ export const arbExportCase: fc.Arbitrary<ExportCase> = arbDocument.chain((docume
     runLog: arbRunLog(document),
     meta: arbMeta,
   }),
+);
+
+const OVERRIDE_AT = "2026-11-20T18:25:00.000Z";
+
+/** `doc` with an Override recorded, through the Engine API, for every blocking issue. */
+function overrideAll(doc: Document): Document {
+  let current = doc;
+  for (const issue of blockingIssues(doc)) {
+    const next = recordOverride(current, issue.key, "reason", OVERRIDE_AT);
+    if (!next.ok) throw new Error(`recordOverride failed: ${next.error.kind}`);
+    current = next.value;
+  }
+  return current;
+}
+
+/** Documents with no blocking issue: `arbDocument` with every blocking issue overridden. */
+export const arbGateClearDocument: fc.Arbitrary<Document> = arbDocument.map(overrideAll);
+
+export type GateCase = Readonly<{ doc: Document; clear: boolean }>;
+
+/** Either an arbitrary Document (`clear: false`) or the clear variant (`clear: true`). */
+export const arbGateDocument: fc.Arbitrary<GateCase> = fc.oneof(
+  arbDocument.map((doc): GateCase => ({ doc, clear: false })),
+  arbGateClearDocument.map((doc): GateCase => ({ doc, clear: true })),
 );
