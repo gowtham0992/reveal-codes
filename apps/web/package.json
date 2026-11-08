@@ -16,6 +16,7 @@
     "@ai-sdk/amazon-bedrock": "5.0.135",
     "@ai-sdk/anthropic": "4.0.99",
     "@reveal-codes/engine": "workspace:*",
+    "@reveal-codes/export": "workspace:*",
     "@reveal-codes/verifier": "workspace:*",
     "@tiptap/core": "3.33.0",
     "@tiptap/extension-document": "3.33.0",

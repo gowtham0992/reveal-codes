@@ -1,0 +1,18 @@
+{
+  "name": "@reveal-codes/export",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Export gate, AI-use and verification statement, provenance appendix, and DOCX builder. Pure functions over plain data.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@reveal-codes/engine": "workspace:*",
+    "docx": "9.15.3"
+  },
+  "devDependencies": {
+    "@reveal-codes/verifier": "workspace:*",
+    "fast-check": "4.10.2",
+    "fflate": "0.8.3"
+  }
+}

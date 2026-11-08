@@ -16,7 +16,7 @@ function readManifest(relative: string): Manifest {
 const web = readManifest("../../package.json");
 const verifier = readManifest("../../../../packages/verifier/package.json");
 const deps = { ...web.dependencies, ...web.devDependencies };
-const WORKSPACE = ["@reveal-codes/engine", "@reveal-codes/verifier"];
+const WORKSPACE = ["@reveal-codes/engine", "@reveal-codes/verifier", "@reveal-codes/export"];
 const COPY_STEP = "node --import jiti/register scripts/copy-demo.ts";
 const BANNED =
   /^(tailwindcss|@tailwindcss\/.*|styled-components|@emotion\/.*|@mui\/.*|@chakra-ui\/.*|@radix-ui\/.*|antd|@mantine\/.*|lucide-react|react-icons|@heroicons\/.*|@stitches\/.*|@vanilla-extract\/.*|@tiptap\/starter-kit)$/;

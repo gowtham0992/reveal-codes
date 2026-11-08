@@ -1,0 +1,183 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Scaffold `packages/export` and wire the workspace": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512599
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154517169
+      },
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154607486
+      }
+    ],
+    "1.2 Probe the `docx` browser path inside `apps/web` (follows ui.md)": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512625
+      }
+    ],
+    "1.3 Save hook `export-tests-on-save`": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512647
+      }
+    ],
+    "1.4 Demo_Document fixture builder": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512669
+      }
+    ],
+    "2.1 Types and small helpers": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512690
+      }
+    ],
+    "2.2 `buildStatement` and statement parts": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512710
+      }
+    ],
+    "2.3 Property 2: statement data": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512732
+      }
+    ],
+    "2.4 Statement wording and `renderStatement`": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512751
+      }
+    ],
+    "3.1 `buildAppendix`": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512772
+      }
+    ],
+    "3.2 Property 3: appendix round trip": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512794
+      }
+    ],
+    "3.3 `exportFileName`": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512814
+      }
+    ],
+    "3.4 Checkpoint - statement, appendix, and file name": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512834
+      }
+    ],
+    "4.1 `buildDocx` and the docx text reader": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512856
+      }
+    ],
+    "4.2 Property 4: docx content": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512876
+      }
+    ],
+    "4.3 `canExport` and package boundary tests": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512895
+      }
+    ],
+    "4.4 Property 1: gate": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512916
+      }
+    ],
+    "5.1 Store `verifiedAt` and Verify flow clock (follows ui.md)": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512936
+      }
+    ],
+    "5.2 Persistence and autosave carry `verifiedAt` (follows ui.md)": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512957
+      }
+    ],
+    "5.3 `exportDocx`, `browserDownload`, services, and notices (follows ui.md)": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154512979
+      }
+    ],
+    "5.4 Export dialog with gate (follows ui.md)": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154513001
+      }
+    ],
+    "5.5 Print view at `/print` and README privacy line (follows ui.md)": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154513022
+      }
+    ],
+    "5.6 Checkpoint - end-to-end export flow": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154513057
+      }
+    ],
+    "6.1 README, KIRO_USAGE, BUILD_LOG, and steering rows": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154513091
+      }
+    ],
+    "6.2 Final checkpoint - full repository checks": [
+      {
+        "executionId": "9264b9a8-3e80-49f8-b560-39357b62d535",
+        "chatSessionId": "sess_8dc883f5-66e5-4d43-bad8-db395689017d",
+        "timestamp": 1794154513131
+      }
+    ]
+  }
+}
