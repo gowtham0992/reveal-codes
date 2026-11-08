@@ -56,8 +56,9 @@ function flushEdit(view: EditorView, store: Store, ops: readonly CallerOperation
 function placeCaret(editor: Editor, offset: number): void {
   const pos = offsetToPos(editor.state.doc, offset);
   if (pos === null) return;
-  const tr = editor.state.tr.setSelection(TextSelection.create(editor.state.doc, pos));
-  editor.view.dispatch(tr);
+  const selection = TextSelection.create(editor.state.doc, pos);
+  // scrollIntoView so Go and Pane clicks bring the selection into view.
+  editor.view.dispatch(editor.state.tr.setSelection(selection).scrollIntoView());
   editor.view.focus();
 }
 

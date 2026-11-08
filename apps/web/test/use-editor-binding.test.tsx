@@ -169,6 +169,29 @@ describe("useEditorBinding", () => {
     expect(h.carets[h.carets.length - 1]).toBe(5);
   });
 
+  it("focusAt (Go and Pane click) and focusEnd request a scroll to the selection", async () => {
+    const h = await mount();
+    externalInsert(h, 0, Array.from({ length: 200 }, (_, i) => `line ${String(i)}`).join("\n"));
+    const v = view(h);
+    const seen: boolean[] = [];
+    const original = v.dispatch.bind(v);
+    v.dispatch = (tr) => {
+      seen.push(tr.scrolledIntoView);
+      original(tr);
+    };
+    act(() => {
+      h.binding().focusAt(1000);
+    });
+    const afterGo = seen.length;
+    act(() => {
+      h.binding().focusEnd();
+    });
+    // The selection transaction is the first dispatch of each call; focus may add others.
+    expect(seen[0]).toBe(true);
+    expect(seen[afterGo]).toBe(true);
+    expect(posToOffset(v.state.doc, v.state.selection.head)).toBe(docText(v.state.doc).length);
+  });
+
   it("focusEnd moves the caret to the end of the text", async () => {
     const h = await mount();
     externalInsert(h, 0, "abc\ndef");
