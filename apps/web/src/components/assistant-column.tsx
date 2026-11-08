@@ -28,7 +28,9 @@ export function AssistantColumn({
 }: AssistantColumnProps) {
   const run = useAssistantRun({ svc, store, info, getCaret });
   return (
-    <div className={styles["column"]}>
+    <div
+      className={open ? styles["column"] : `${styles["column"] ?? ""} ${styles["closed"] ?? ""}`}
+    >
       <button type="button" aria-expanded={open} onClick={onToggle}>
         Assistant
       </button>

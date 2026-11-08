@@ -138,6 +138,8 @@ describe("AssistantPanel _Requirements: 7.8, 10.8, 10.15, 23.1 to 23.9_", () => 
     openPanel();
     expect(button.getAttribute("aria-expanded")).toBe("true");
     expect(document.querySelector(".app")?.getAttribute("data-assistant")).toBe("open");
+    expect(screen.getByRole("heading", { name: "Assistant" })).not.toBeNull();
+    expect(screen.getAllByRole("button", { name: "Assistant" })).toHaveLength(1);
     expect(
       screen.getByText("Demo mode: replies are recorded and nothing is sent to a model."),
     ).not.toBeNull();

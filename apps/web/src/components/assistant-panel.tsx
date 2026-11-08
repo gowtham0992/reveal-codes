@@ -16,26 +16,28 @@ export function AssistantPanel({ info, run }: AssistantPanelProps) {
       <h2 id="assistant-heading" className={styles["heading"]}>
         Assistant
       </h2>
-      <p className={styles["note"]}>{disclosure(info)}</p>
-      <label htmlFor="assistant-prompt" className={styles["label"]}>
-        Prompt
-      </label>
-      <textarea
-        id="assistant-prompt"
-        className={styles["prompt"]}
-        rows={4}
-        maxLength={PROMPT_LIMIT}
-        value={prompt}
-        disabled={run.streaming}
-        onChange={(e) => {
-          setPrompt(e.target.value);
-        }}
-      />
-      <DraftButton run={run} prompt={prompt} />
-      <div role="log" aria-live="off" aria-label="Streamed reply" className={styles["stream"]}>
-        {run.text}
+      <div className={styles["body"]}>
+        <p className={styles["note"]}>{disclosure(info)}</p>
+        <label htmlFor="assistant-prompt" className={styles["label"]}>
+          Prompt
+        </label>
+        <textarea
+          id="assistant-prompt"
+          className={styles["prompt"]}
+          rows={4}
+          maxLength={PROMPT_LIMIT}
+          value={prompt}
+          disabled={run.streaming}
+          onChange={(e) => {
+            setPrompt(e.target.value);
+          }}
+        />
+        <DraftButton run={run} prompt={prompt} />
+        <div role="log" aria-live="off" aria-label="Streamed reply" className={styles["stream"]}>
+          {run.text}
+        </div>
+        {run.message === null ? null : <p className={styles["error"]}>{run.message}</p>}
       </div>
-      {run.message === null ? null : <p className={styles["error"]}>{run.message}</p>}
     </aside>
   );
 }

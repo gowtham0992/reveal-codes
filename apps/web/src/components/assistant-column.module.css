@@ -12,3 +12,15 @@
 .column > button {
   margin: 8px;
 }
+
+/* Collapsed: the disclosure button is the 32px strip. */
+.column.closed {
+  align-items: stretch;
+  border-right: 0;
+}
+
+.column.closed > button {
+  flex: 1;
+  margin: 0;
+  writing-mode: vertical-rl;
+}

@@ -17,6 +17,7 @@
   --page-max: 8.5in;
   --toolbar-h: 32px;
   --status-h: 22px;
+  --strip-w: 32px;
   --left-w: 260px;
   --right-w: 300px;
   --pane-h: 40vh;
@@ -86,9 +87,9 @@ button:disabled {
   grid-template-rows: var(--toolbar-h) minmax(0, 1fr) var(--pane-h);
 }
 
-/* Tier 2: the left column exists only while the assistant is present (Requirement 10.15). */
-.app[data-assistant] {
-  grid-template-columns: [assistant] auto [main] minmax(0, 1fr) [issues] var(--right-w);
+/* Tier 2: the left column exists only while the assistant is present; a strip when collapsed. */
+.app[data-assistant="closed"] {
+  grid-template-columns: [assistant] var(--strip-w) [main] minmax(0, 1fr) [issues] var(--right-w);
 }
 
 .app[data-assistant="open"] {
