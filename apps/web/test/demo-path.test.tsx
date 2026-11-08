@@ -155,5 +155,6 @@ describe("Demo path _Requirements: 21.1, 21.2, 21.3, 21.4, 21.5, 21.7, 20.7_", (
     expectIssuesAndGo();
     overrideOne();
     expectOnlyCitationsLeft(mode);
-  });
+    // The 10 s Verify bound is asserted above; the full jsdom walk needs more than vitest's 5 s default on a cold run.
+  }, 30_000);
 });
