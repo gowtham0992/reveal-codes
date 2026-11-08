@@ -69,7 +69,7 @@ Conventions that apply to every task:
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 14.7_
 
 - [ ] 4. Window identity, dialogs, scan, documentation, and checkpoint
-  - [-] 4.1 Window title and favicon
+  - [x] 4.1 Window title and favicon
     - Files: `apps/web/src/components/use-document-title.ts` (new), `apps/web/src/components/app-shell.tsx`, `apps/web/app/icon.svg` (new). `use-document-title.ts` exports `captionOf(text)` (first non-blank line, trimmed, cut to 60 UTF-16 code units; `null` when none, via `/\S[^\n]*/`), `windowTitle(text)` (`"Reveal Codes"` or `` `${caption} \u2014 Reveal Codes` ``) and `useDocumentTitle(text)` (one effect that sets `document.title` and depends on the computed title). `AppShell` calls `useDocumentTitle(doc.text)`. The static `title` in `app/layout.tsx` stays.
     - `app/icon.svg` is exactly the file of the design: a 32 by 32 viewBox, a `#FFFFFF` rect with a 1px `#111111` stroke inside the edge, and one `<text>` "RC" in Georgia bold, `#111111`. No other shape, text or colour.
     - Tests in `app-shell.test.tsx`: an `it.each` over four stored documents, reading `document.title` after mount: an empty Document gives "Reveal Codes"; a first line that is blank (`"\n  \nText"`) gives "Text — Reveal Codes"; a plain Caption gives "<Caption> — Reveal Codes"; a first line of 61 or more characters is cut to 60. A later edit updates the title. A small static example test for the favicon (file exists, contains "RC", contains only the colours `#FFFFFF` and `#111111`) goes in the existing static test folder as `favicon.test.ts`.

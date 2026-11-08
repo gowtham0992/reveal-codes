@@ -398,3 +398,18 @@ describe("AppShell mode badge and Verify _Requirements: 15.7, 15.8, 17.1, 17.12,
     expect(screen.getByRole("status").textContent).toBe(SUMMARY);
   });
 });
+
+describe("AppShell Window_Title _Requirements: 10.1, 10.2, 10.3, 10.4, 14.4_", () => {
+  const LONG = "A".repeat(70);
+  it.each([
+    ["an empty Document", "", "Reveal Codes"],
+    ["a blank first line", "\n  \nText", "Text \u2014 Reveal Codes"],
+    ["a plain Caption", "  Motion to Dismiss  \nBody.", "Motion to Dismiss \u2014 Reveal Codes"],
+    ["a first line over 60 characters", LONG, `${"A".repeat(60)} \u2014 Reveal Codes`],
+  ])("sets the title for %s", async (_name, text, expected) => {
+    const storage = createMemoryStorage();
+    if (text !== "") storage.setItem(AUTOSAVE_KEY, serialise(storedDocument(text), [], null));
+    await mount(fixture(storage));
+    expect(document.title).toBe(expected);
+  });
+});

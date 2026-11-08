@@ -15,6 +15,7 @@ import { EditorSurface } from "./editor-surface";
 import { useAssistantSlot } from "./assistant-column";
 import { modeText, useModeResult } from "./use-server-mode";
 import type { ServerMode } from "./use-server-mode";
+import { useDocumentTitle } from "./use-document-title";
 import { StatusLine } from "./status-line";
 import { IssuesRegion } from "./issues-region";
 import { Toolbar } from "./toolbar";
@@ -197,6 +198,7 @@ export function AppShell({ services }: AppShellProps) {
   const binding = useEditorBinding({ store, now: svc.now, onCaret });
   const paneControl = usePaneControl(svc);
   const { notice, doc } = useNoticeAndDocument(store);
+  useDocumentTitle(doc.text);
   const { mode, assistant } = useModeResult(svc.api);
   const slot = useAssistantSlot({ svc, store, info: assistant, getCaret });
   const exportGate = useExport({ svc, store, autosave, doc, notice, onGo: binding.focusAt });
