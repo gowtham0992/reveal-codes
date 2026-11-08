@@ -55,6 +55,19 @@ describe("Modal _Requirements: 18.5, 18.9_", () => {
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "First" }));
   });
 
+  it("renders the title as an h2 labelling the dialog, before the body that holds the children", () => {
+    renderUi(<Harness />);
+    openModal();
+    const dialog = screen.getByRole("dialog", { name: "Sample" });
+    const title = screen.getByRole("heading", { level: 2, name: "Sample" });
+    expect(dialog.getAttribute("aria-labelledby")).toBe(title.id);
+    expect(dialog.firstElementChild).toBe(title);
+    const body = title.nextElementSibling;
+    expect(body).not.toBeNull();
+    expect(body?.contains(screen.getByRole("button", { name: "First" }))).toBe(true);
+    expect(body?.contains(screen.getByRole("button", { name: "Second" }))).toBe(true);
+  });
+
   it("cycles Tab and Shift-Tab inside the dialog", () => {
     renderUi(<Harness />);
     openModal();

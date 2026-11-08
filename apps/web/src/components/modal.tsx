@@ -99,7 +99,7 @@ export function Modal({ title, onClose, restoreFocus, children }: ModalProps) {
         <h2 id={titleId} className={styles["title"]}>
           {title}
         </h2>
-        {children}
+        <div className={styles["body"]}>{children}</div>
       </div>
     </div>,
     document.body,

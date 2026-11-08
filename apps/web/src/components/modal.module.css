@@ -9,16 +9,22 @@
 .dialog {
   width: 420px;
   max-width: 90vw;
-  padding: 12px;
+  padding: 0;
   background: var(--paper);
   color: var(--ink);
   border: 1px solid var(--ink);
 }
 
 .title {
-  margin: 0 0 8px;
+  margin: 0;
+  padding: 12px;
+  border-bottom: 1px solid var(--rule);
   font-size: var(--size-ui);
   font-weight: 700;
+}
+
+.body {
+  padding: 12px;
 }
 
 .actions {
