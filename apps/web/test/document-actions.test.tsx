@@ -63,6 +63,8 @@ async function mount(stored: Document | null, reply: DemoReply = "fixture"): Pro
       timers.clearTimeout(h as number);
     },
     storage,
+    download: () => undefined,
+    openPrint: () => true,
   };
   await act(async () => {
     renderUi(<AppShell services={services} />);

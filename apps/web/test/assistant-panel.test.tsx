@@ -55,6 +55,8 @@ async function mount(text = ""): Promise<Fixture> {
       t.clearTimeout(h as number);
     },
     storage,
+    download: () => undefined,
+    openPrint: () => true,
   };
   await act(async () => {
     renderUi(<AppShell services={services} />);

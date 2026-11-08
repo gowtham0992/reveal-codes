@@ -1,6 +1,7 @@
 import type { AutosaveDeps, StorageLike } from "./autosave";
 import { browserApi } from "./client/api";
 import type { ApiClient } from "./client/api";
+import { browserDownload } from "./client/download";
 
 /** Builds `browserApi()` on first call, so server rendering never touches `fetch`. */
 function lazyApi(): ApiClient {
@@ -23,7 +24,18 @@ export type AppServices = Readonly<{
   setTimer: AutosaveDeps["setTimer"];
   clearTimer: AutosaveDeps["clearTimer"];
   storage: StorageLike;
+  download: (bytes: Uint8Array, fileName: string) => void;
+  /** True when the print tab opened. */
+  openPrint: () => boolean;
 }>;
+
+/** No `noopener` feature: it makes `window.open` return null even on success. */
+function openPrintTab(): boolean {
+  const w = window.open("/print", "_blank");
+  if (w === null) return false;
+  w.opener = null;
+  return true;
+}
 
 /**
  * Every browser global is read lazily, inside a method, so building the
@@ -46,5 +58,9 @@ export function defaultServices(): AppServices {
         window.localStorage.removeItem(key);
       },
     },
+    download: (bytes, fileName) => {
+      browserDownload(bytes, fileName);
+    },
+    openPrint: openPrintTab,
   };
 }

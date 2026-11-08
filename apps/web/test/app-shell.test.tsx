@@ -46,6 +46,8 @@ function fixture(
       timers.clearTimeout(h as number);
     },
     storage,
+    download: () => undefined,
+    openPrint: () => true,
   };
   return { services, storage, timers };
 }

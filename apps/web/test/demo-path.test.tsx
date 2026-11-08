@@ -23,6 +23,8 @@ async function mountDemo(): Promise<ModeApi> {
       timers.clearTimeout(h as number);
     },
     storage: createMemoryStorage(),
+    download: () => undefined,
+    openPrint: () => true,
   };
   await act(async () => {
     renderUi(<AppShell services={services} />);

@@ -1,5 +1,13 @@
 import type { EngineError } from "@reveal-codes/engine";
 
+export const EXPORT_FAILED = "Export failed. Your document is unchanged.";
+export const PRINT_FAILED = "The print view did not open.";
+
+/** Notice after a successful download. */
+export function exportedNotice(fileName: string): string {
+  return `Exported ${fileName}.`;
+}
+
 export type HistoryDirection = "undo" | "redo";
 
 /** Notice for an edit the Engine rejected (Error Handling table, row 1). */

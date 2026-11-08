@@ -32,6 +32,8 @@ async function mount(text: string): Promise<void> {
       timers.clearTimeout(h as number);
     },
     storage,
+    download: () => undefined,
+    openPrint: () => true,
   };
   await act(async () => {
     renderUi(<AppShell services={services} />);

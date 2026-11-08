@@ -19,6 +19,7 @@ const FETCH_OWNERS = /^(?:src\/client\/api\.ts|src\/server\/deps\.ts|src\/server
 const SDK_ADAPTERS = /^src\/server\/llm-(?:bedrock|anthropic|default)\.ts$/;
 const CLOCK_FREE =
   /^src\/(?:store|store-runtime|history|notices|persist|autosave)\.ts$|^src\/editor\//;
+const DOWNLOAD_OWNER = "src/client/download.ts";
 const SDK_SPEC = /^(?:ai|@ai-sdk\/.+)(?:\/.*)?$/;
 const EXPORT_LIBS = /^(?:docx|file-saver|jspdf|html2canvas)(?:\/.*)?$/;
 const ENGINE_OR_VERIFIER =
@@ -140,7 +141,7 @@ function libraryViolations(file: SourceText): Violation[] {
     }
   }
   for (const n of collect(sf, ts.isPropertyAccessExpression)) {
-    if (n.name.text === "createObjectURL") {
+    if (n.name.text === "createObjectURL" && file.path !== DOWNLOAD_OWNER) {
       found.push(violation(file.path, lineOfNode(sf, n), "createObjectURL (download code)"));
     }
   }
@@ -249,6 +250,12 @@ describe("static: forbidden constructs self-test (planted violations)", () => {
       "src/components/x.tsx:2 export library import docx",
       "src/components/x.tsx:3 createObjectURL (download code)",
     ]);
+    expect(
+      reported(libraryViolations, "src/client/download.ts", "const u = URL.createObjectURL(b);\n"),
+    ).toEqual([]);
+    expect(
+      reported(libraryViolations, "src/client/other.ts", "const u = URL.createObjectURL(b);\n"),
+    ).toEqual(["src/client/other.ts:1 createObjectURL (download code)"]);
     expect(
       reported(
         libraryViolations,
