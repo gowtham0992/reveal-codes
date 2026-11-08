@@ -11,4 +11,5 @@ export type { VerifierStatus } from "./status";
 export { checkQuote } from "./quote";
 export { fetchOpinionText } from "./opinion";
 export { UNRESOLVABLE_FORMS } from "./unresolvable";
+export { createFixtureFetch } from "./fixtures";
 export type { CacheStore, Deps, DepsInit, FetchInit, FetchLike, HttpResponse } from "./deps";

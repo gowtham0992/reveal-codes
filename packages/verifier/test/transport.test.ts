@@ -9,17 +9,17 @@ import {
   type Attempted,
   type HttpOutcome,
 } from "../src/transport";
+import throttle429 from "../fixtures/http/throttle-429.json" with { type: "json" };
 import { makeDeps, TEST_BASE_URL, type TestDeps } from "./support/make-deps";
 import type { ScriptStep } from "./support/scripted-fetch";
 
 const START = Date.UTC(2026, 0, 1);
 const LINE = "410 U.S. 113";
 
-/** In-test stand-in for the recorded `http/throttle-429.json` (task 6.1 replaces it). */
-const THROTTLE_BODY = {
-  detail: "Request was throttled. Expected available in 20 seconds.",
-  wait_until: "2026-01-01T00:00:20.000Z",
-};
+/** The recorded HTTP-level 429 (fixtures/http/throttle-429.json), started 30 s before its `wait_until`. */
+const { body: THROTTLE_BODY, headers: THROTTLE_HEADERS } = throttle429;
+const FIXTURE_START = Date.parse(THROTTLE_BODY.wait_until) - 30_000;
+const AT_FIXTURE = { startMs: FIXTURE_START };
 
 function once(t: TestDeps): Promise<HttpOutcome> {
   const req = buildLookupRequest(t.deps, [LINE]);
@@ -223,9 +223,12 @@ describe("withRetries", () => {
   });
 
   it("reads wait_until from the body", async () => {
-    const t = makeDeps([throttled(undefined, THROTTLE_BODY), { status: 200, body: [] }]);
+    const t = makeDeps(
+      [throttled(undefined, THROTTLE_BODY), { status: 200, body: [] }],
+      AT_FIXTURE,
+    );
     await retried(t);
-    expect(retrySleeps(t)).toEqual([20_000]);
+    expect(retrySleeps(t)).toEqual([30_000]);
   });
 
   it("reads the misspelt wait_util too", async () => {
@@ -251,10 +254,12 @@ describe("withRetries", () => {
   });
 
   it("replays the throttle body three times and ends unchecked with its waitUntil", async () => {
-    const t = makeDeps([1, 2, 3].map(() => throttled({ "Retry-After": "2" }, THROTTLE_BODY)));
+    const steps = [1, 2, 3].map(() => throttled(THROTTLE_HEADERS, THROTTLE_BODY));
+    const t = makeDeps(steps, AT_FIXTURE);
     const r = await retried(t);
     expect(r.attempts).toBe(3);
-    expect(waitUntilOf(r.outcome, START)).toBe("2026-01-01T00:00:20.000Z");
+    const last = new Date(THROTTLE_BODY.wait_until).toISOString();
+    expect(waitUntilOf(r.outcome, FIXTURE_START)).toBe(last);
   });
 
   it("falls back to Retry-After for waitUntil and omits it when neither is present", async () => {
