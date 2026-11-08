@@ -169,7 +169,7 @@ Deviations from the design's file layout, decided while planning:
   - [x] 7.3 Checkpoint - MCP server
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `FC_NUM_RUNS=500 pnpm test:pbt`; fix failures. Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 8. Wrap-up
+- [x] 8. Wrap-up
   - [x] 8.1 Docs, steering alignment, and docs tests
     - README: add the section "What leaves your machine" stating that only citation strings are sent to CourtListener and that draft text is sent to an LLM provider only when the author uses the assistant; update the status line to mention the verifier and MCP server if it is stale.
     - `.env.example`: add `REVEAL_CODES_CACHE_DIR` (comment: directory of the verifier's on-disk cache, default `~/.reveal-codes/cache`) and `REVEAL_CODES_FIXTURES_ONLY` (comment: when `1`, serve every request from recorded fixtures and make no network call), each after a comment line; extend the `COURTLISTENER_TOKEN` comment to say it is read only by the MCP server and the web app.
@@ -179,12 +179,19 @@ Deviations from the design's file layout, decided while planning:
     - _Requirements: 2.11, 15.7, 16.1, 16.2, 17.1, 17.2, 17.3, 17.4, 17.5_
   - [x] 8.2 Final checkpoint - full run
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm test:pbt`; all must pass with `CI=1` set once so the 500-run path is exercised. Confirm `git status` shows no engine changes. Ensure all tests pass, ask the user if questions arise.
-  - [~] 8.3 Proof: lookup_citations through the registered courtlistener tool (final task)
+  - [x] 8.3 Proof: lookup_citations through the registered courtlistener tool (final task)
     - Compute the strings: run the engine's `extract` on `packages/engine/fixtures/demo-motion.txt` and take `text.slice(start, end)` for every citation it returns.
     - Call `lookup_citations` through the registered `courtlistener` MCP tool in Kiro (not by importing or running `packages/verifier` directly), with every one of those strings, running with `REVEAL_CODES_FIXTURES_ONLY=1` as registered.
     - Expect `verified` for `556 U.S. 662` and `404 U.S. 519` and `not_found` for `1047 F.3d 212`, `1012 F. Supp. 2d 88` and `912 F.4th 33`. Paste the complete returned result, one entry per citation with its verification status, into this task's completion notes.
     - If the call fails or the `courtlistener` server is not reachable from Kiro, record the failure in the completion notes and do not mark this task complete.
     - _Requirements: 14.5, 14.6, 14.7_
+    - Completion notes: `lookup_citations` was called through the registered `courtlistener` MCP tool from a Kiro chat (fixtures-only mode, `REVEAL_CODES_FIXTURES_ONLY=1`), with the ten strings that the engine's `extract` returns for `packages/engine/fixtures/demo-motion.txt`. Result as returned:
+
+      ```json
+      {"results":[{"index":0,"citations":[{"index":0,"text":"Fed. R. Civ. P. 12(b)(6)","start":0,"end":24,"kind":"other","result":null}]},{"index":1,"citations":[{"index":0,"text":"42 U.S.C. § 3617","start":0,"end":16,"kind":"other","result":null}]},{"index":2,"citations":[{"index":0,"text":"556 U.S. 662, 678 (2009)","start":0,"end":24,"kind":"full","result":{"status":"verified","clusterId":"145875"}}]},{"index":3,"citations":[{"index":0,"text":"404 U.S. 519, 520 (1972)","start":0,"end":24,"kind":"full","result":{"status":"verified","clusterId":"108432"}}]},{"index":4,"citations":[{"index":0,"text":"1047 F.3d 212, 219 (9th Cir. 2019)","start":0,"end":34,"kind":"full","result":{"status":"not_found"}}]},{"index":5,"citations":[{"index":0,"text":"Id. at 221","start":0,"end":10,"kind":"short","result":{"status":"unchecked"}}]},{"index":6,"citations":[{"index":0,"text":"1012 F. Supp. 2d 88, 95 (D. Or. 2015)","start":0,"end":37,"kind":"full","result":{"status":"not_found"}}]},{"index":7,"citations":[{"index":0,"text":"912 F. 4th 33, 41 (9th Cir. 2023)","start":0,"end":33,"kind":"full","result":{"status":"not_found"}}]},{"index":8,"citations":[{"index":0,"text":"Iqbal, 556 U.S. at 679","start":0,"end":22,"kind":"short","result":{"status":"unchecked"}}]},{"index":9,"citations":[{"index":0,"text":"Fed. R. Civ. P. 15(a)(2)","start":0,"end":24,"kind":"other","result":null}]}]}
+      ```
+
+      Statuses: `556 U.S. 662` verified (cluster 145875); `404 U.S. 519` verified (cluster 108432); `1047 F.3d 212`, `1012 F. Supp. 2d 88` and `912 F. 4th 33` (engine form `912 F.4th 33`) not_found; the three rules and statutes have `result: null`; `Id. at 221` and `Iqbal, 556 U.S. at 679` are short forms and are `unchecked` because each string is checked on its own, with no earlier citation to attach to. A dispatched subagent session could not call the tool (its tool list does not include MCP server tools), so the call was made from the main Kiro chat. Task text lessons: say that 8.3 runs in the main session, and whether "every citation" includes rules and short forms.
 
 ## Notes
 
