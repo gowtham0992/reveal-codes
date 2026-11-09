@@ -1,10 +1,8 @@
 import { createDeps, createMemoryCacheStore } from "@reveal-codes/verifier";
 import type { Deps, FetchLike } from "@reveal-codes/verifier";
+import { DEFAULT_BASE_URL } from "../../src/deps.js";
 
 export const FIXED_NOW = new Date("2026-11-20T18:30:00.000Z");
-
-// Task 2.3 switches this to DEFAULT_BASE_URL from src/deps.ts.
-const TEST_BASE_URL = "https://www.courtlistener.com/api/rest/v4";
 
 /**
  * Resolves at once without a signal (the retry delay). With a signal it is a real timer that
@@ -34,7 +32,7 @@ export function testDeps(fetch: FetchLike): Deps {
     now,
     sleep: testSleep,
     cache: createMemoryCacheStore({ now }),
-    baseUrl: TEST_BASE_URL,
+    baseUrl: DEFAULT_BASE_URL,
   });
 }
 

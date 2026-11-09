@@ -1,5 +1,10 @@
 {
-  "pbtResults": {},
+  "pbtResults": {
+    "2.6 Property 1: round trip": {
+      "status": "passed",
+      "lastRunTimestamp": 1794200199056
+    }
+  },
   "executionHistory": {
     "1.1 Package manifest, tsconfig, root script, Export_Package titles, lockfile, and import probe": [
       {
@@ -108,6 +113,16 @@
         "executionId": "b173cbf3-323b-4826-a863-dac484319761",
         "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
         "timestamp": 1794199903295
+      },
+      {
+        "executionId": "b173cbf3-323b-4826-a863-dac484319761",
+        "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
+        "timestamp": 1794200166829
+      },
+      {
+        "executionId": "b173cbf3-323b-4826-a863-dac484319761",
+        "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
+        "timestamp": 1794200259770
       }
     ],
     "2.2 `reverify`": [
@@ -122,6 +137,11 @@
         "executionId": "b173cbf3-323b-4826-a863-dac484319761",
         "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
         "timestamp": 1794199903334
+      },
+      {
+        "executionId": "b173cbf3-323b-4826-a863-dac484319761",
+        "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
+        "timestamp": 1794200166858
       }
     ],
     "2.4 Findings: `status-text.ts`, `lines.ts`, `findings.ts`": [
@@ -143,6 +163,11 @@
         "executionId": "b173cbf3-323b-4826-a863-dac484319761",
         "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
         "timestamp": 1794199903408
+      },
+      {
+        "executionId": "b173cbf3-323b-4826-a863-dac484319761",
+        "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
+        "timestamp": 1794200166908
       }
     ],
     "3.1 Report rendering: `report-table.ts` and `report.ts`": [
