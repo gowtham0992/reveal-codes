@@ -127,7 +127,7 @@ Conventions that apply to every task:
   - [x] 4.3 `BUILD_LOG.md` entry
     - Complete the single entry that task 1.1 created (no second entry, existing entries unchanged): what was built, at least one thing Kiro got wrong with the change that fixed it taken from the completion notes (or, if nothing went wrong, a sentence containing the words "Kiro got nothing wrong"), the criterion-17 outcome recorded in 1.1, and a line saying the result of the `pnpm sentinel check` confirmation is added by task 4.6.
     - _Requirements: 13.3, 13.4, 12.17_
-  - [-] 4.4 Steering edits: `structure.md` and `tech.md`
+  - [x] 4.4 Steering edits: `structure.md` and `tech.md`
     - `.kiro/steering/structure.md`: the `crew/sentinel` line reads "the sweep CLI that the Reveal Codes Sentinel Crew app (separate repository) runs on a schedule"; no other description of `crew/sentinel` names it a Crew app.
     - `.kiro/steering/tech.md`: in the Stack list replace "Crew app: `crew/sentinel`" with the sweep CLI `crew/sentinel`; add one line `pnpm sentinel   # sweep a folder of exported .docx files for drift` to the Commands code block; existing commands unchanged.
     - _Requirements: 13.5, 13.6_
