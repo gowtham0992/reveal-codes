@@ -3,6 +3,10 @@
     "2.6 Property 1: round trip": {
       "status": "passed",
       "lastRunTimestamp": 1794200199056
+    },
+    "3.2 Property 2: sweep is a function of its inputs": {
+      "status": "passed",
+      "lastRunTimestamp": 1794200776966
     }
   },
   "executionHistory": {
@@ -232,6 +236,16 @@
         "executionId": "b173cbf3-323b-4826-a863-dac484319761",
         "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
         "timestamp": 1794199903450
+      },
+      {
+        "executionId": "b173cbf3-323b-4826-a863-dac484319761",
+        "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
+        "timestamp": 1794200735527
+      },
+      {
+        "executionId": "b173cbf3-323b-4826-a863-dac484319761",
+        "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
+        "timestamp": 1794200830797
       }
     ],
     "3.3 `args.ts`": [
@@ -273,6 +287,16 @@
         "executionId": "b173cbf3-323b-4826-a863-dac484319761",
         "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
         "timestamp": 1794199903519
+      },
+      {
+        "executionId": "b173cbf3-323b-4826-a863-dac484319761",
+        "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
+        "timestamp": 1794200735562
+      },
+      {
+        "executionId": "b173cbf3-323b-4826-a863-dac484319761",
+        "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
+        "timestamp": 1794200830876
       }
     ],
     "3.6 Save hook `sentinel-tests-on-save`": [
