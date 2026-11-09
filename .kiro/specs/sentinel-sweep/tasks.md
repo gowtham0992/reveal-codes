@@ -118,16 +118,16 @@ Conventions that apply to every task:
     - _Requirements: 1.5, 1.8, 1.9, 1.10, 1.11, 1.12, 1.14, 12.1, 12.14, 12.16_
 
 - [ ] 4. Documentation, steering, and final checkpoint
-  - [~] 4.1 README "Sentinel" section
+  - [x] 4.1 README "Sentinel" section
     - Add exactly one section headed "Sentinel" to `README.md` that (a) lists the checks (body edited, citation changed, quote changed, override no longer needed, recheck unavailable, unreadable), (b) shows `pnpm sentinel sweep ~/Filings`, (c) names `COURTLISTENER_TOKEN`, `REVEAL_CODES_FIXTURES_ONLY`, `REVEAL_CODES_CACHE_DIR` and `COURTLISTENER_BASE_URL`, each with a one-line description, and (d) states in exactly one line that the Kiro Crew app that schedules the Sentinel lives in a separate repository, using the placeholder `<crew app repo>`. Plain text, short, no marketing copy.
     - _Requirements: 13.1_
-  - [~] 4.2 `docs/KIRO_USAGE.md` rows
+  - [x] 4.2 `docs/KIRO_USAGE.md` rows
     - Add exactly three rows in the existing column layout, existing rows unchanged: (a) the five files of `.kiro/specs/sentinel-sweep` (`.config.kiro`, `requirements.md`, `design.md`, `tasks.md`, `tasks.meta.json`), (b) the hook, path `.kiro/hooks/sentinel-tests-on-save.json`, (c) the edits to `structure.md` and `tech.md`.
     - _Requirements: 13.2_
-  - [~] 4.3 `BUILD_LOG.md` entry
+  - [-] 4.3 `BUILD_LOG.md` entry
     - Complete the single entry that task 1.1 created (no second entry, existing entries unchanged): what was built, at least one thing Kiro got wrong with the change that fixed it taken from the completion notes (or, if nothing went wrong, a sentence containing the words "Kiro got nothing wrong"), the criterion-17 outcome recorded in 1.1, and a line saying the result of the `pnpm sentinel check` confirmation is added by task 4.6.
     - _Requirements: 13.3, 13.4, 12.17_
-  - [~] 4.4 Steering edits: `structure.md` and `tech.md`
+  - [-] 4.4 Steering edits: `structure.md` and `tech.md`
     - `.kiro/steering/structure.md`: the `crew/sentinel` line reads "the sweep CLI that the Reveal Codes Sentinel Crew app (separate repository) runs on a schedule"; no other description of `crew/sentinel` names it a Crew app.
     - `.kiro/steering/tech.md`: in the Stack list replace "Crew app: `crew/sentinel`" with the sweep CLI `crew/sentinel`; add one line `pnpm sentinel   # sweep a folder of exported .docx files for drift` to the Commands code block; existing commands unchanged.
     - _Requirements: 13.5, 13.6_

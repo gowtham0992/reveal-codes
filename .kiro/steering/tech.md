@@ -7,7 +7,7 @@ inclusion: always
 ## Stack
 
 - TypeScript 5.x, strict mode, everywhere. No JavaScript source files.
-- pnpm workspaces. Packages: `packages/engine`, `packages/verifier`, `packages/courtlistener-mcp`, `packages/export`; apps: `apps/web`; Crew app: `crew/sentinel`.
+- pnpm workspaces. Packages: `packages/engine`, `packages/verifier`, `packages/courtlistener-mcp`, `packages/export`; apps: `apps/web`; sweep CLI: `crew/sentinel`.
 - `packages/engine` has **zero runtime dependencies** and must not import from `node:` or the DOM. It is pure functions over plain data.
 - `packages/verifier` takes `fetch` as an injected dependency. Tests never touch the network; they use recorded fixtures in `packages/verifier/fixtures/`.
 - `packages/courtlistener-mcp` uses `@modelcontextprotocol/sdk` over stdio. Tool handlers are thin wrappers over `packages/verifier`.
@@ -25,6 +25,7 @@ pnpm test          # vitest unit + property tests, all packages
 pnpm test:pbt      # property tests only, numRuns=500
 pnpm dev           # apps/web on :3000
 pnpm mcp           # starts courtlistener-mcp on stdio
+pnpm sentinel   # sweep a folder of exported .docx files for drift
 ```
 
 ## Property-based testing

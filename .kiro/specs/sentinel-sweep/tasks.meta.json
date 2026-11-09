@@ -338,6 +338,16 @@
         "executionId": "b173cbf3-323b-4826-a863-dac484319761",
         "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
         "timestamp": 1794199903588
+      },
+      {
+        "executionId": "b173cbf3-323b-4826-a863-dac484319761",
+        "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
+        "timestamp": 1794201029065
+      },
+      {
+        "executionId": "b173cbf3-323b-4826-a863-dac484319761",
+        "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
+        "timestamp": 1794201059580
       }
     ],
     "4.2 `docs/KIRO_USAGE.md` rows": [
@@ -345,6 +355,16 @@
         "executionId": "b173cbf3-323b-4826-a863-dac484319761",
         "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
         "timestamp": 1794199903608
+      },
+      {
+        "executionId": "b173cbf3-323b-4826-a863-dac484319761",
+        "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
+        "timestamp": 1794201029120
+      },
+      {
+        "executionId": "b173cbf3-323b-4826-a863-dac484319761",
+        "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
+        "timestamp": 1794201059646
       }
     ],
     "4.3 `BUILD_LOG.md` entry": [
@@ -352,6 +372,11 @@
         "executionId": "b173cbf3-323b-4826-a863-dac484319761",
         "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
         "timestamp": 1794199903630
+      },
+      {
+        "executionId": "b173cbf3-323b-4826-a863-dac484319761",
+        "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
+        "timestamp": 1794201029150
       }
     ],
     "4.4 Steering edits: `structure.md` and `tech.md`": [
@@ -359,6 +384,11 @@
         "executionId": "b173cbf3-323b-4826-a863-dac484319761",
         "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
         "timestamp": 1794199903650
+      },
+      {
+        "executionId": "b173cbf3-323b-4826-a863-dac484319761",
+        "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
+        "timestamp": 1794201029205
       }
     ],
     "4.5 Extend `package.test.ts` for docs and the `.env.example` names": [

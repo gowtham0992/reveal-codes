@@ -53,6 +53,30 @@ The appendix starts on its own page under the title "Provenance Appendix". It ho
 - A CourtListener token is required for live lookups, because the citation-lookup endpoint answers anonymous requests with 401. Without `COURTLISTENER_TOKEN` the app runs in demo mode on recorded responses and says so in the interface.
 - The CourtListener token, if set, is sent only to the CourtListener base URL. It is never cached, logged or sent to the browser.
 
+## Sentinel
+
+The Sentinel re-checks exported filings. It reads each `.docx` in a folder, reads the Provenance Appendix back out of it, asks CourtListener the same questions the editor asked, and reports where the answer differs from the record the file carries. It reports these checks:
+
+- Body edited: the filing text no longer matches the text the Appendix records.
+- Citation changed: a citation's verification status differs from the recorded one, or now points at another decision.
+- Quote changed: a quotation's check result differs from the recorded one.
+- Override no longer needed: an override sits on an issue that is no longer an issue.
+- Recheck unavailable: CourtListener could not be reached or throttled the request, so the record was left as is.
+- Unreadable: the file is not a Reveal Codes export, or could not be read or parsed.
+
+```
+pnpm sentinel sweep ~/Filings
+```
+
+The report is Markdown on stdout. Its second line states the mode, `fixtures` or `live`. Only citation strings and cluster ids go to CourtListener; no draft text is sent. The Sentinel reads four environment variables:
+
+- `COURTLISTENER_TOKEN`: token for live lookups; without it the Sentinel runs on recorded fixtures.
+- `REVEAL_CODES_FIXTURES_ONLY`: set to `1` to force fixtures mode even when a token is set.
+- `REVEAL_CODES_CACHE_DIR`: directory for the lookup cache; the default is `~/.reveal-codes/cache`, shared with the web app.
+- `COURTLISTENER_BASE_URL`: overrides the CourtListener API base URL.
+
+The Kiro Crew app that schedules the Sentinel lives in a separate repository: <crew app repo>.
+
 ## How Kiro built this
 
 See docs/KIRO_USAGE.md.

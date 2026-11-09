@@ -202,7 +202,27 @@ Task numbers refer to `.kiro/specs/shell-polish/tasks.md`.
 ### Steering changes
 
 - `ui.md` gained the favicon exception, the wordmark and status-line type sizes, the new layout line and the status-line copy rule.
+
 ## 2026-11-08 sentinel-sweep
+
 Before, `crew/sentinel` was an empty placeholder package; task 1.1 gives it the real manifest, project references and the `pnpm sentinel` root script, and exports `STATEMENT_TITLE` and `APPENDIX_TITLE` from the Export_Package.
+
 ### Criterion 17 outcome (Req 12.17)
+
 The relative import of the export test support (`packages/export/test/support/demo-document` and `demo-statement`) from `crew/sentinel/test/support/export-support.ts` compiled under `tsc -b` with the added `packages/export/test` project reference. The `src/testing` fallback was not needed.
+
+### What was built
+
+`crew/sentinel` is now the sweep CLI (`pnpm sentinel`) that checks a folder of exported `.docx` files for drift. It reads each file's Statement and Appendix, parses the recorded Document with the Engine, compares it with the body text, and rechecks the citations through the Verifier. It reports one finding per problem and never throws past its boundary. The `.docx` editing helpers and the `fc.ts` run-count helpers live in `crew/sentinel/test/support/`.
+
+### What Kiro got wrong
+
+- Test setup: the `throwingDeps` and `throwOnceDeps` fetch getters are caught by the Verifier and become `recheck_unavailable`, so they never reach the last-resort catch. The tests use a deps copy with a throwing `state` getter for that path.
+- The analyse test first rewrote k0 to `not_found`. The Engine rejects an unverified k0 because the short form k8 links to it, so the test rewrites k1 (Haines) instead.
+- The Engine and Verifier never reach the `notRechecked` path with real data, so there is no Lexis rejection test. The path is not covered by a test that would have to fake the data.
+- `xml-text` failed eslint `restrict-plus-operands` under `noUncheckedIndexedAccess`, because indexed reads are `string | undefined`. The fix narrows each read before concatenating.
+- The 1.3 tests first forgot `await` on the async demo helpers, so they compared promises. Adding `await` fixed them.
+
+### Open item
+
+The result of the `pnpm sentinel check` confirmation is added by task 4.6.

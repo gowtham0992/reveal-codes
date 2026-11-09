@@ -52,7 +52,7 @@ reveal-codes/
         support/              shared test helpers: fc.ts, clock.ts, memory-storage.ts, dom-shims.ts, render.tsx, scan.ts, fetch fakes
         smoke/                API assumption regression tests for ProseMirror and TipTap
   crew/
-    sentinel/                 Kiro Crew app: app.json, agents, schedule
+    sentinel/                 the sweep CLI that the Reveal Codes Sentinel Crew app (separate repository) runs on a schedule
   docs/
     KIRO_USAGE.md             inventory of specs/hooks/steering/agents/MCP with file paths
     demo-script.md            the 90-second demo, step by step
