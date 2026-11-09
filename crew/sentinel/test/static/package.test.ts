@@ -118,6 +118,118 @@ describe("export package titles", () => {
   });
 });
 
+function readRepoFile(...parts: string[]): string {
+  return readFileSync(join(REPO_ROOT, ...parts), "utf8");
+}
+
+function countMatches(text: string, pattern: RegExp): number {
+  return text.split("\n").filter((line) => pattern.test(line)).length;
+}
+
+function sentinelSection(readme: string): string {
+  const lines = readme.split("\n");
+  const start = lines.findIndex((line) => /^#{1,6}\s+Sentinel\s*$/.test(line));
+  const rest = lines.slice(start + 1);
+  const end = rest.findIndex((line) => /^#{1,6}\s/.test(line));
+  return (end === -1 ? rest : rest.slice(0, end)).join("\n");
+}
+
+describe("README Sentinel section", () => {
+  const readme = readRepoFile("README.md");
+  const section = sentinelSection(readme);
+
+  it("has exactly one Sentinel heading", () => {
+    expect(countMatches(readme, /^#{1,6}\s+Sentinel\s*$/)).toBe(1);
+  });
+
+  it("names the four environment variables", () => {
+    for (const name of [
+      "COURTLISTENER_TOKEN",
+      "REVEAL_CODES_FIXTURES_ONLY",
+      "REVEAL_CODES_CACHE_DIR",
+      "COURTLISTENER_BASE_URL",
+    ]) {
+      expect(section, name).toContain(name);
+    }
+  });
+
+  it("shows the sweep command", () => {
+    expect(section).toContain("pnpm sentinel sweep ~/Filings");
+  });
+
+  it("has exactly one line with the crew app repo placeholder", () => {
+    expect(countMatches(readme, /<crew app repo>/)).toBe(1);
+    expect(countMatches(section, /<crew app repo>/)).toBe(1);
+  });
+});
+
+describe("docs/KIRO_USAGE.md rows", () => {
+  const rows = readRepoFile("docs", "KIRO_USAGE.md")
+    .split("\n")
+    .filter((line) => line.startsWith("|") && /sentinel/i.test(line));
+
+  it("holds exactly three sentinel rows", () => {
+    expect(rows).toHaveLength(3);
+  });
+
+  it("has a spec row naming all five spec files", () => {
+    const row = rows.find((r) => r.startsWith("| Spec | sentinel-sweep |")) ?? "";
+    for (const file of [
+      ".config.kiro",
+      "requirements.md",
+      "design.md",
+      "tasks.md",
+      "tasks.meta.json",
+    ]) {
+      expect(row, file).toContain(`.kiro/specs/sentinel-sweep/${file}`);
+    }
+  });
+
+  it("has a hook row with the hook path", () => {
+    const row = rows.find((r) => r.startsWith("| Hook |")) ?? "";
+    expect(row).toContain(".kiro/hooks/sentinel-tests-on-save.json");
+  });
+
+  it("has a steering row for structure.md and tech.md", () => {
+    const row = rows.find((r) => r.startsWith("| Steering |")) ?? "";
+    expect(row).toContain(".kiro/steering/structure.md");
+    expect(row).toContain(".kiro/steering/tech.md");
+  });
+});
+
+describe("steering files", () => {
+  it("structure.md carries the required crew/sentinel line", () => {
+    const structure = readRepoFile(".kiro", "steering", "structure.md");
+    expect(structure).toContain(
+      "sentinel/                 the sweep CLI that the Reveal Codes Sentinel Crew app (separate repository) runs on a schedule",
+    );
+    expect(countMatches(structure, /crew\/sentinel.*Crew app|Crew app.*crew\/sentinel/)).toBe(0);
+  });
+
+  it("tech.md has pnpm sentinel once in the Commands block and no Crew app entry", () => {
+    const tech = readRepoFile(".kiro", "steering", "tech.md");
+    expect(tech).not.toContain("Crew app: `crew/sentinel`");
+    const afterHeading = tech.slice(tech.indexOf("## Commands"));
+    const block = afterHeading.split("```")[1] ?? "";
+    expect(countMatches(block, /^pnpm sentinel\s+#\s+\S/)).toBe(1);
+    expect(countMatches(tech, /^pnpm sentinel\b/)).toBe(1);
+  });
+});
+
+describe(".env.example", () => {
+  it("contains the four variable names", () => {
+    const env = readRepoFile(".env.example");
+    for (const name of [
+      "COURTLISTENER_TOKEN",
+      "COURTLISTENER_BASE_URL",
+      "REVEAL_CODES_FIXTURES_ONLY",
+      "REVEAL_CODES_CACHE_DIR",
+    ]) {
+      expect(env, name).toContain(name);
+    }
+  });
+});
+
 describe("BUILD_LOG entry", () => {
   it("names the criterion-17 outcome for sentinel-sweep", () => {
     const log = readFileSync(join(REPO_ROOT, "BUILD_LOG.md"), "utf8");

@@ -131,7 +131,7 @@ Conventions that apply to every task:
     - `.kiro/steering/structure.md`: the `crew/sentinel` line reads "the sweep CLI that the Reveal Codes Sentinel Crew app (separate repository) runs on a schedule"; no other description of `crew/sentinel` names it a Crew app.
     - `.kiro/steering/tech.md`: in the Stack list replace "Crew app: `crew/sentinel`" with the sweep CLI `crew/sentinel`; add one line `pnpm sentinel   # sweep a folder of exported .docx files for drift` to the Commands code block; existing commands unchanged.
     - _Requirements: 13.5, 13.6_
-  - [~] 4.5 Extend `package.test.ts` for docs and the `.env.example` names
+  - [x] 4.5 Extend `package.test.ts` for docs and the `.env.example` names
     - Extend `crew/sentinel/test/static/package.test.ts` (from 3.6): the README has exactly one "Sentinel" section containing the four variable names and exactly one line with `<crew app repo>`; `docs/KIRO_USAGE.md` contains the three new rows (spec files, hook path, steering edits); `structure.md` has the required `crew/sentinel` line; `tech.md` has `pnpm sentinel` once in the Commands block and no "Crew app: `crew/sentinel`"; `.env.example` contains each of `COURTLISTENER_TOKEN`, `COURTLISTENER_BASE_URL`, `REVEAL_CODES_FIXTURES_ONLY` and `REVEAL_CODES_CACHE_DIR`, and the test asserts nothing more about it.
     - _Requirements: 13.1, 13.2, 13.5, 13.6, 13.7_
   - [~] 4.6 Final checkpoint
