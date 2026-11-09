@@ -19,3 +19,4 @@ export { ellipsize } from "./text.js";
 export { isInstant, localDate, localDateTime } from "./time.js";
 export { buildDocx } from "./docx.js";
 export { canExport } from "./gate.js";
+export { APPENDIX_TITLE, STATEMENT_TITLE } from "./wording.js";

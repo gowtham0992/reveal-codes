@@ -202,3 +202,7 @@ Task numbers refer to `.kiro/specs/shell-polish/tasks.md`.
 ### Steering changes
 
 - `ui.md` gained the favicon exception, the wordmark and status-line type sizes, the new layout line and the status-line copy rule.
+## 2026-11-08 sentinel-sweep
+Before, `crew/sentinel` was an empty placeholder package; task 1.1 gives it the real manifest, project references and the `pnpm sentinel` root script, and exports `STATEMENT_TITLE` and `APPENDIX_TITLE` from the Export_Package.
+### Criterion 17 outcome (Req 12.17)
+The relative import of the export test support (`packages/export/test/support/demo-document` and `demo-statement`) from `crew/sentinel/test/support/export-support.ts` compiled under `tsc -b` with the added `packages/export/test` project reference. The `src/testing` fallback was not needed.

@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:pbt": "FC_NUM_RUNS=500 vitest run --passWithNoTests properties.test",
     "dev": "pnpm --filter @reveal-codes/web dev",
-    "mcp": "pnpm --filter @reveal-codes/courtlistener-mcp start"
+    "mcp": "pnpm --filter @reveal-codes/courtlistener-mcp start",
+    "sentinel": "pnpm --filter @reveal-codes/sentinel run cli --"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

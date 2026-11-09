@@ -1,7 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist",
+    "types": ["node"]
   },
-  "include": ["src", "test"]
+  "include": ["src", "test"],
+  "references": [
+    { "path": "../../packages/engine" },
+    { "path": "../../packages/verifier" },
+    { "path": "../../packages/export" },
+    { "path": "../../packages/export/test" }
+  ]
 }
