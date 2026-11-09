@@ -20,7 +20,7 @@ Conventions that apply to every task:
 
 ## Tasks
 
-- [ ] 1. Package setup, reading and splitting a .docx
+- [x] 1. Package setup, reading and splitting a .docx
   - [x] 1.1 Package manifest, tsconfig, root script, Export_Package titles, lockfile, and import probe
     - Replace `crew/sentinel/package.json` with the manifest of the design: name `@reveal-codes/sentinel`, `exports` `./src/index.ts`, script `cli` equal to `node --import jiti/register src/cli.ts`, `dependencies` exactly `@reveal-codes/engine`, `@reveal-codes/export`, `@reveal-codes/verifier` (all `workspace:*`) and `fflate` `0.8.3`, `devDependencies` exactly `fast-check` `4.10.2` and `vitest` `5.1.0`. No `docx` entry, no other entry.
     - Replace `crew/sentinel/tsconfig.json`: extends the base, `"types": ["node"]`, `outDir` `dist`, include `src` and `test`, references `../../packages/engine`, `../../packages/verifier`, `../../packages/export` and `../../packages/export/test`. The `packages/export/test` reference is what lets `tsc -b` accept the relative import.
@@ -50,7 +50,7 @@ Conventions that apply to every task:
     - Example tests `xml-text.test.ts`: `<w:pPr>` is not `w:p`; `<w:tab/>`, `<w:tbl>`, `<w:tc>`, `<w:tr>`, `<w:tcPr>` are not `w:t`; `<w:p/>` reads `""`; a table-cell paragraph is listed in order; `w:br` plain, `textWrapping`, `page` and `column`; `&amp;lt;` decodes to `&lt;`; decimal and hexadecimal references; references to 0, `&#xD800;`, `&#x110000;` and a very long digit string stay as written; a nested `w:p` opens a new entry (L4).
     - Example tests `docx-read.test.ts`: `readDocx(buildDocx(buildDemoDocument(), buildDemoDocumentStatement()))` returns `Ok` whose list starts with `doc.text.split("\n")`, then `STATEMENT_TITLE`, then `APPENDIX_TITLE`, and ends with `buildAppendix(doc).lines`, each in document order; a zip from `zipWithout`, a non-zip byte sequence, an empty array, three arbitrary bytes, and a zip whose `word/document.xml` entry is corrupt each return `not_docx`.
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.13, 12.4, 12.6_
-  - [~] 1.6 `splitExport`
+  - [x] 1.6 `splitExport`
     - File `crew/sentinel/src/split.ts`: `splitExport(paragraphs): Result<ExportParts, SentinelError>` with `EMPTY_DOCUMENT` and `INTRO_LENGTH = buildAppendix(EMPTY_DOCUMENT).intro.length` read from the Export_Package, not written as a literal. `s = indexOf(STATEMENT_TITLE)`, `a = indexOf(APPENDIX_TITLE, s + 1)`; either `-1` gives `{ kind: "not_reveal_codes_export" }`; `body = slice(0, s)` with nothing trimmed (D1); `appendix = slice(a + 1 + INTRO_LENGTH)`. Input unmodified, deterministic.
     - Example tests `split.test.ts`: `splitExport` of the demo export returns the filing lines and the Appendix lines; a `renameTitles` output returns `not_reveal_codes_export` (Req 12.5); an empty list, a list without the Appendix title after the Statement title, an Appendix title before the Statement title, an Appendix title that is last, and one followed by fewer than `INTRO_LENGTH` paragraphs (`appendix` is `[]`); the input list is unchanged after the call; `body` keeps an empty last paragraph.
     - _Requirements: 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 12.5_
