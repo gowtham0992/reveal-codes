@@ -97,7 +97,7 @@ Conventions that apply to every task:
     - `numRuns: runs(process.env)`.
     - **Validates: Requirements 9.1, 9.2, 9.7, 9.8, 9.10**
     - _Requirements: 9.10, 12.14, 12.16_
-  - [-] 3.3 `args.ts`
+  - [x] 3.3 `args.ts`
     - File `crew/sentinel/src/args.ts`: `Command`, `UsageError`, `USAGE` (two lines as in the design), `parseArgs(argv): Result<Command, UsageError>`: `argv[0]` is `sweep` or `check`, one operand, options `--json <file>` and `--out <file>` in any order; an option with no value (or a value starting with `--`), a repeated option, an unknown option (a literal `--` included), no operand, a second operand, no command or an unknown command is a `UsageError`.
     - Example tests `args.test.ts`: both commands with and without options in either order; each usage error listed above.
     - _Requirements: 10.1, 10.2, 10.3, 10.5, 10.8_
