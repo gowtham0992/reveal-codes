@@ -62,7 +62,7 @@ The Sentinel reads four environment variables, `COURTLISTENER_TOKEN`, `REVEAL_CO
 4. THE Sentinel SHALL add to the lockfile no package other than `fflate@0.8.3` and the transitive dependencies of the pinned `vitest` and `fast-check`, and SHALL add no XML library, command-line parsing library, or build tool.
 5. WHEN the Sentinel is built, THE Sentinel SHALL contain neither the export `PACKAGE_NAME` nor the file `crew/sentinel/test/index.test.ts`, and no remaining file SHALL reference `PACKAGE_NAME`.
 6. THE Sentinel SHALL define a package script `cli` equal to `node --import jiti/register src/cli.ts`, the same runner `apps/web/scripts/copy-demo.ts` uses.
-7. THE root `package.json` SHALL define a script `sentinel` equal to `pnpm --filter @reveal-codes/sentinel run cli --`.
+7. THE root `package.json` SHALL define a script `sentinel` equal to `pnpm --filter @reveal-codes/sentinel run cli`.
 8. THE Sentinel MAY import from `node:fs`, `node:path`, and `node:os`, and SHALL import from no other `node:` module; the Sentinel is not the Engine.
 9. THE Sentinel SHALL reference `process.env` in exactly one source module, `crew/sentinel/src/cli.ts`, and SHALL read from the Sentinel_Env no variable other than `COURTLISTENER_TOKEN`, `REVEAL_CODES_FIXTURES_ONLY`, `REVEAL_CODES_CACHE_DIR`, and `COURTLISTENER_BASE_URL`.
 10. THE Sentinel SHALL use named exports only, plain data types and discriminated unions in place of classes, and no `any`, in every source file.
