@@ -124,7 +124,7 @@ Conventions that apply to every task:
   - [x] 4.2 `docs/KIRO_USAGE.md` rows
     - Add exactly three rows in the existing column layout, existing rows unchanged: (a) the five files of `.kiro/specs/sentinel-sweep` (`.config.kiro`, `requirements.md`, `design.md`, `tasks.md`, `tasks.meta.json`), (b) the hook, path `.kiro/hooks/sentinel-tests-on-save.json`, (c) the edits to `structure.md` and `tech.md`.
     - _Requirements: 13.2_
-  - [-] 4.3 `BUILD_LOG.md` entry
+  - [x] 4.3 `BUILD_LOG.md` entry
     - Complete the single entry that task 1.1 created (no second entry, existing entries unchanged): what was built, at least one thing Kiro got wrong with the change that fixed it taken from the completion notes (or, if nothing went wrong, a sentence containing the words "Kiro got nothing wrong"), the criterion-17 outcome recorded in 1.1, and a line saying the result of the `pnpm sentinel check` confirmation is added by task 4.6.
     - _Requirements: 13.3, 13.4, 12.17_
   - [-] 4.4 Steering edits: `structure.md` and `tech.md`
