@@ -223,6 +223,6 @@ The relative import of the export test support (`packages/export/test/support/de
 - `xml-text` failed eslint `restrict-plus-operands` under `noUncheckedIndexedAccess`, because indexed reads are `string | undefined`. The fix narrows each read before concatenating.
 - The 1.3 tests first forgot `await` on the async demo helpers, so they compared promises. Adding `await` fixed them.
 
-### Open item
+### `pnpm sentinel check` confirmation (task 4.6)
 
-The result of the `pnpm sentinel check` confirmation is added by task 4.6.
+The root script `pnpm --filter @reveal-codes/sentinel run cli --` did not behave as design D11 assumed: pnpm passed the literal `--` through, so `cli.ts` saw `--` as `argv[2]` and `pnpm sentinel check <file>` exited 2 with `unknown command: --`. The fix drops the `--` (the script is now `pnpm --filter @reveal-codes/sentinel run cli`), and the static test in `crew/sentinel/test/static/package.test.ts` was updated to match. After the change, `pnpm sentinel check <demo export>` delivered `check` as the first argument, printed `No drift.` and exited 0, and `--json <file>` was passed through and written. The demo `.docx` came from a throwaway script that was deleted afterwards. The final run of lint, typecheck, test (2159 tests) and `FC_NUM_RUNS=500 pnpm test:pbt` (135 tests) passed.

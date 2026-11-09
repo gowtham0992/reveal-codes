@@ -68,7 +68,7 @@ describe("sentinel package manifest", () => {
   it("defines the cli script and the root sentinel script", () => {
     expect(stringMap(manifest["scripts"])["cli"]).toBe("node --import jiti/register src/cli.ts");
     expect(stringMap(rootManifest["scripts"])["sentinel"]).toBe(
-      "pnpm --filter @reveal-codes/sentinel run cli --",
+      "pnpm --filter @reveal-codes/sentinel run cli",
     );
   });
 });
