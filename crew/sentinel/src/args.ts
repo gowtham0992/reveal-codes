@@ -27,7 +27,8 @@ function parseRest(rest: readonly string[]): Result<Parsed, UsageError> {
     const token = rest[i] as string;
     if (token === "--json" || token === "--out") {
       const value = rest[i + 1];
-      if (value === undefined || value.startsWith("--")) return usage(`option ${token} needs a file`);
+      if (value === undefined || value.startsWith("--"))
+        return usage(`option ${token} needs a file`);
       if ((token === "--json" ? json : out) !== null) return usage(`option ${token} given twice`);
       if (token === "--json") json = value;
       else out = value;

@@ -26,7 +26,7 @@ function sectionOf(lines: readonly string[], file: string): readonly string[] {
 const arbCase = arbSweepReport.chain((report) =>
   fc.shuffledSubarray([...report.files], { minLength: report.files.length }).map((files) => ({
     report,
-    shuffled: { ...report, files } as SweepReport,
+    shuffled: { ...report, files },
   })),
 );
 

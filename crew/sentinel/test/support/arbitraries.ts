@@ -23,9 +23,7 @@ const arbDriftKind = fc.constantFrom(
 /** A Finding of any of the six kinds, belonging to `file`. */
 export function arbFinding(file: string): fc.Arbitrary<Finding> {
   const base = fc.record({ line: arbLine, before: arbText, after: arbText });
-  const drift = fc
-    .tuple(arbDriftKind, base)
-    .map(([kind, b]): Finding => ({ kind, file, ...b }));
+  const drift = fc.tuple(arbDriftKind, base).map(([kind, b]): Finding => ({ kind, file, ...b }));
   const recheck = fc
     .tuple(base, fc.option(arbText, { nil: null }))
     .map(([b, waitUntil]): Finding => ({ kind: "recheck_unavailable", file, waitUntil, ...b }));

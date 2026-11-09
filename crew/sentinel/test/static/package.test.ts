@@ -16,13 +16,16 @@ function stringMap(value: unknown): Record<string, string> {
   return value as Record<string, string>;
 }
 
+function thrown(message: string): never {
+  throw new Error(message);
+}
 type HookFile = {
   version: string;
   hooks: {
     name: string;
     trigger: string;
     matcher: string;
-    timeout_ms: number;
+    timeout_ms?: number;
     action: { type: string; command: string };
   }[];
 };
@@ -30,7 +33,7 @@ type HookFile = {
 const manifest = readJson(join(REPO_ROOT, "crew", "sentinel", "package.json"));
 const rootManifest = readJson(join(REPO_ROOT, "package.json"));
 const hookFile = readJson(join(HOOKS_DIR, "sentinel-tests-on-save.json")) as unknown as HookFile;
-const hook = hookFile.hooks[0]!;
+const hook = hookFile.hooks.at(0) ?? thrown("sentinel-tests-on-save.json holds no hook");
 const matcher = new RegExp(hook.matcher);
 
 describe("sentinel package manifest", () => {
@@ -89,8 +92,7 @@ describe("sentinel-tests-on-save hook", () => {
     for (const name of files) {
       const other = readJson(join(HOOKS_DIR, name)) as unknown as HookFile;
       for (const h of other.hooks) {
-        if (h.timeout_ms === undefined) continue;
-        expect(h.timeout_ms, name).toBe(hook.timeout_ms);
+        if (h.timeout_ms !== undefined) expect(h.timeout_ms, name).toBe(hook.timeout_ms);
       }
     }
   });

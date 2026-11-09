@@ -99,10 +99,10 @@ describe("analyseAll", () => {
       { file: "b.docx", findings: [] },
     ]);
     expect(log).toEqual([
-      `start ${paths[0]}`,
-      `end ${paths[0]}`,
-      `start ${paths[1]}`,
-      `end ${paths[1]}`,
+      `start ${String(paths[0])}`,
+      `end ${String(paths[0])}`,
+      `start ${String(paths[1])}`,
+      `end ${String(paths[1])}`,
     ]);
     paths.forEach((p, i) => {
       const after = statSync(p);
