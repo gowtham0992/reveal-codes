@@ -4,7 +4,7 @@
 
 ## What is in it
 
-39 entries across 27 courts: 19 that require a disclosure or certificate when generative AI was used, 5 that require a statement in every filing, 2 that prohibit AI drafting, 8 that require verification without disclosure, and 5 advisory texts. Five entries are no longer in force and are kept for their history (Judge Starr's 2023 certification, superseded by N.D. Tex. Local Civil Rule 7.2(f); the Fifth Circuit's proposed rule, declined in 2024; two orders of judges who have left the bench; one withdrawn disclosure requirement).
+40 entries across 27 courts: 19 that require a disclosure or certificate when generative AI was used, 6 that require a statement in every filing, 2 that prohibit AI drafting, 8 that require verification without disclosure, and 5 advisory texts. Five entries are no longer in force and are kept for their history (Judge Starr's 2023 certification, superseded by N.D. Tex. Local Civil Rule 7.2(f); the Fifth Circuit's proposed rule, declined in 2024; two orders of judges who have left the bench; one withdrawn disclosure requirement).
 
 Each entry records the court, the judge where the instrument is judge-specific, the instrument and its title, the date and how that date was established, what kind of requirement it is, whom it applies to, the elements a compliant statement must contain, any required caption, one key sentence quoted from the instrument, the source URL, when it was retrieved, and its status. The `vocabulary` object at the top of the file defines every enumerated value.
 

@@ -63,7 +63,7 @@ describe("loadOrders on the shipped file _Requirements: 1.1, 1.12, 9.1_", () => 
     expect(ORDERS.version).toBe(1);
     expect(ORDERS.entries.map((e) => e.id)).toEqual(fileEntries.map((e) => e.id));
     expect(ORDERS.entries).toEqual(fileEntries);
-    expect(ORDERS.entries.length).toBe(39);
+    expect(ORDERS.entries.length).toBe(40);
   });
 
   it("loadOrders of the file equals ORDERS", () => {

@@ -498,6 +498,34 @@
       "notes": "Example wording supplied by the order: The undersigned counsel certifies/certify that generative artificial intelligence was not used to draft this filing. Non-compliant filings may be stricken with leave to re-file."
     },
     {
+      "id": "dcolo-prose-2024",
+      "court": {
+        "name": "United States District Court for the District of Colorado",
+        "abbreviation": "D. Colo.",
+        "level": "district"
+      },
+      "judge": { "name": "Susan Prose", "role": "magistrate" },
+      "instrument": "Standing order",
+      "title": "Standing Order Requiring Certification Re: Use of Artificial Intelligence (AI) in Filings",
+      "date": "2024-10-21",
+      "date_note": "Date of the order (\"DATED: October 21, 2024\").",
+      "kind": "certification_every_filing",
+      "applies_to": "all",
+      "elements": [
+        "accuracy_certification",
+        "citations_verified",
+        "human_review",
+        "negative_certification_when_unused"
+      ],
+      "caption": null,
+      "key_language": "The preparer of the filing must certify either that (a) no portion of the filing was drafted by AI, or that (b) any language drafted by AI (even if later edited by a human being) was personally reviewed by the filer or another human being for accuracy using print reporters or traditional legal databases and attesting that the legal citations are to actual existing cases or cited authority.",
+      "source_url": "https://www.cod.uscourts.gov/Portals/0/Documents/Judges/SP/SP_Standing_Order_AI_Filings.pdf",
+      "source_kind": "primary",
+      "retrieved": "2026-11-09",
+      "status": "current",
+      "notes": "Applies in cases where the parties have consented to magistrate judge jurisdiction, and only to motions under Fed. R. Civ. P. 12 or 56, motions to amend a pleading, and any opposed motion with its response and reply. Where the court is in the referral role, it applies only to nondispositive, opposed referred motions. The certification is in addition to the Certification of Conferral. The court will strike a covered filing that lacks it. The order does not prescribe a heading."
+    },
+    {
       "id": "mdfla-berger-2026",
       "court": {
         "name": "United States District Court for the Middle District of Florida",
