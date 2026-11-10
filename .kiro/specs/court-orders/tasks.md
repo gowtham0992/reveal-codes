@@ -66,7 +66,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Update the header comment of `wording.ts`; no exclamation marks; if the file would pass 300 lines or a function 40, move the block to `wording-orders.ts` and change the wording scan per D12
     - _Requirements: 4.7, 4.8, 4.9, 4.10, 4.11, 4.12, 4.14, 4.15, 4.16, 4.17, 4.20, 5.5, 7.3_
 
-  - [~] 2.4 Implement the order rules and the render helpers
+  - [x] 2.4 Implement the order rules and the render helpers
     - Create `packages/export/src/order-rules.ts` with `aiSpanCount`, `needsConfidentiality` and `prohibitionNotice`
     - Create `packages/export/src/statement-order.ts` with `orderOf`, `statementTitle` and `firstPageHeading` (`FirstPageHeading` type)
     - Create `packages/export/src/render-order.ts` with `citingParagraph`, `orderSentences` (in the design's order, appended to the paragraph that already covers the topic) and `signatureLine`
