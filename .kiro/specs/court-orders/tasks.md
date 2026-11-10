@@ -168,7 +168,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Confirm `crew/sentinel/test/split.test.ts` and `static/package.test.ts` still pass
     - _Requirements: 9.13, 12.11, 12.14_
 
-  - [~] 4.2 Move the demo motion to the Northern District of Texas
+  - [x] 4.2 Move the demo motion to the Northern District of Texas
     - Change line 2 of `packages/engine/fixtures/demo-motion.txt` to `FOR THE NORTHERN DISTRICT OF TEXAS`; keep `3:26-cv-00000` and the fabricated citations and quote
     - Search `apps`, `packages`, `crew` and `docs` for literal Offsets and the old line before editing, and again after
     - In `packages/engine/test/demo.test.ts` add 8 to every literal Offset (D20) and add an assertion that line 2 is `FOR THE NORTHERN DISTRICT OF TEXAS` and that the `Case No. 3:26-cv-00000` line is present

@@ -12,30 +12,30 @@ const text = readFileSync(new URL("../fixtures/demo-motion.txt", import.meta.url
 const at = (start: number, end: number) => ({ start, end, text: text.slice(start, end) });
 
 const FABRICATED_CITATIONS = [
-  { start: 1466, written: "1047 F.3d 212, 219 (9th Cir. 2019)" },
-  { start: 1696, written: "1012 F. Supp. 2d 88, 95 (D. Or. 2015)" },
-  { start: 2004, written: "912 F. 4th 33, 41 (9th Cir. 2023)" },
+  { start: 1474, written: "1047 F.3d 212, 219 (9th Cir. 2019)" },
+  { start: 1704, written: "1012 F. Supp. 2d 88, 95 (D. Or. 2015)" },
+  { start: 2012, written: "912 F. 4th 33, 41 (9th Cir. 2023)" },
 ];
 
 const FABRICATED_QUOTE = {
-  start: 2117,
+  start: 2125,
   written:
     "a pro se plaintiff who alleges retaliation is entitled to discovery before a motion to dismiss may be granted.",
 };
 
 const EXPECTED_CITATIONS = [
-  { ...at(337, 361), value: { kind: "other", form: "fed_rule", section: "12(b)(6)" } },
-  { ...at(779, 795), value: { kind: "other", form: "usc", title: 42, section: "3617" } },
+  { ...at(345, 369), value: { kind: "other", form: "fed_rule", section: "12(b)(6)" } },
+  { ...at(787, 803), value: { kind: "other", form: "usc", title: 42, section: "3617" } },
   {
-    ...at(954, 978),
+    ...at(962, 986),
     value: { kind: "reporter", volume: 556, reporter: "U.S.", page: 662, pincite: 678, year: 2009 },
   },
   {
-    ...at(1062, 1086),
+    ...at(1070, 1094),
     value: { kind: "reporter", volume: 404, reporter: "U.S.", page: 519, pincite: 520, year: 1972 },
   },
   {
-    ...at(1466, 1500),
+    ...at(1474, 1508),
     value: {
       kind: "reporter",
       volume: 1047,
@@ -46,9 +46,9 @@ const EXPECTED_CITATIONS = [
       year: 2019,
     },
   },
-  { ...at(1573, 1583), value: { kind: "short", form: "id", pincite: 221, targetStart: 1466 } },
+  { ...at(1581, 1591), value: { kind: "short", form: "id", pincite: 221, targetStart: 1474 } },
   {
-    ...at(1696, 1733),
+    ...at(1704, 1741),
     value: {
       kind: "reporter",
       volume: 1012,
@@ -60,7 +60,7 @@ const EXPECTED_CITATIONS = [
     },
   },
   {
-    ...at(2004, 2037),
+    ...at(2012, 2045),
     value: {
       kind: "reporter",
       volume: 912,
@@ -73,7 +73,7 @@ const EXPECTED_CITATIONS = [
     normalised: "912 F.4th 33, 41 (9th Cir. 2023)",
   },
   {
-    ...at(2229, 2251),
+    ...at(2237, 2259),
     value: {
       kind: "short",
       form: "party",
@@ -81,15 +81,15 @@ const EXPECTED_CITATIONS = [
       volume: 556,
       reporter: "U.S.",
       pincite: 679,
-      targetStart: 954,
+      targetStart: 962,
     },
   },
-  { ...at(2342, 2366), value: { kind: "other", form: "fed_rule", section: "15(a)(2)" } },
+  { ...at(2350, 2374), value: { kind: "other", form: "fed_rule", section: "15(a)(2)" } },
 ];
 
 const EXPECTED_QUOTES = [
-  { ...at(1089, 1154), citationStart: 1062, rule: "following" },
-  { ...at(2117, 2227), citationStart: 2229, rule: "preceding" },
+  { ...at(1097, 1162), citationStart: 1070, rule: "following" },
+  { ...at(2125, 2235), citationStart: 2237, rule: "preceding" },
 ];
 
 describe("demo motion fixture _Requirements: 9.1, 9.2, 13.1_", () => {
@@ -99,11 +99,17 @@ describe("demo motion fixture _Requirements: 9.1, 9.2, 13.1_", () => {
     }
     const q = FABRICATED_QUOTE;
     expect(text.slice(q.start, q.start + q.written.length)).toBe(q.written);
-    expect(text.slice(1089, 1154)).toBe(
+    expect(text.slice(1097, 1162)).toBe(
       "less stringent standards than formal pleadings drafted by lawyers",
     );
-    expect(text.slice(1573, 1583)).toBe("Id. at 221");
-    expect(text.slice(2229, 2251)).toBe("Iqbal, 556 U.S. at 679");
+    expect(text.slice(1581, 1591)).toBe("Id. at 221");
+    expect(text.slice(2237, 2259)).toBe("Iqbal, 556 U.S. at 679");
+  });
+
+  it("names the Northern District of Texas on line 2 and keeps the case number line", () => {
+    const lines = text.split("\n");
+    expect(lines[1]).toBe("FOR THE NORTHERN DISTRICT OF TEXAS");
+    expect(lines).toContain("Case No. 3:26-cv-00000");
   });
 
   it("extracts exactly the expected citations, links, and Normalised_Forms", () => {

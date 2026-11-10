@@ -59,7 +59,11 @@ describe("analyseFile", () => {
 
   it("reports body_edited with the 1-based line and both ellipsized paragraphs", async () => {
     const bytes = editDocumentXml(await demoExport(), (xml) =>
-      replaceFirst(xml, ">FOR THE DISTRICT OF OREGON</w:t>", ">FOR THE DISTRICT OF IDAHO</w:t>"),
+      replaceFirst(
+        xml,
+        ">FOR THE NORTHERN DISTRICT OF TEXAS</w:t>",
+        ">FOR THE SOUTHERN DISTRICT OF TEXAS</w:t>",
+      ),
     );
     const found = await analyseFile(FILE, bytes, testDeps(recordedFetch().fetch));
     expect(found).toEqual([
@@ -67,8 +71,8 @@ describe("analyseFile", () => {
         kind: "body_edited",
         file: FILE,
         line: 2,
-        before: "FOR THE DISTRICT OF OREGON",
-        after: "FOR THE DISTRICT OF IDAHO",
+        before: "FOR THE NORTHERN DISTRICT OF TEXAS",
+        after: "FOR THE SOUTHERN DISTRICT OF TEXAS",
       },
     ]);
   });
