@@ -258,3 +258,33 @@ The `edtex-love` and `dhaw` Sentinel proof tests assert a clean report. They do 
 Requirements: 12.3, 12.13.
 
 - Court-orders task 6.4: the demo motion now cites the Fifth Circuit and N.D. Tex. (volumes, reporters and pages unchanged, so recorded lookups still resolve). `N.D. Tex.` is 3 characters longer than `D. Or.`, so every later Offset shifted +3 and the Statement character count went from 2619 to 2622. The Engine grammar accepted both courts with no change.
+
+## 2026-11-10 court-orders follow-up (browser walkthrough)
+
+A walkthrough of the court-orders feature in the browser found eight problems. Task numbers refer to `.kiro/specs/court-orders/tasks.md`.
+
+### What the walkthrough found, and the eight fixes
+
+- Passages, not bare paragraph numbers (6.1): the portions sentence and the prohibition line named paragraph numbers only. They now name passages: the paragraph plus the first words, from `aiPassages` in `packages/export/src/ai-paragraphs.ts`.
+- Plurals (6.1): `plural(n, one, many)` now drives "1 prompt", "3 prompts", "1 run", "1 passage remains" and "2 passages remain".
+- Prohibition block (6.3): the Export dialog printed the prohibition line and then the `key_language` again. It now shows the line once; the key language appears once, in the Order_Summary.
+- Fixture provider wording (6.2): `toolText` prints "a recorded demonstration response (no model was called)" for the `fixture` provider, in both the `Tools:` clause and the tool_name sentence.
+- Stale export notice (6.3): "Exported ….docx." stayed on screen after reopening the dialog or changing the court. It is now cleared on open and on court change.
+- Picker width and ellipsis (6.3): the select is `width: 100%` and option text is cut at 60 characters with an ellipsis, keeping the year.
+- Demo motion consistency (6.4): the motion now cites the Fifth Circuit and N.D. Tex. Later Offsets shifted +3 and the Statement character count went from 2619 to 2622. The Engine grammar accepted both courts unchanged.
+- Header spacing and Sentinel assertions (6.5): the first-page header pointer paragraph has `w:after="240"`, and the `edtex-love-2025` and `dhaw-go-23-1` Sentinel tests now assert that the body, split from the export and joined with newlines, equals `document.text`.
+
+### Where Kiro got something wrong, and what fixed it
+
+- The original sentence counted blank lines when numbering paragraphs, so the number it printed could not be found in the filing. Passages count non-empty paragraphs only, and the sentence says so.
+- "(1 prompts)" and "1 span remain" were wrong plurals. Both came from the spec's literal "(s)" templates. `plural` replaced them.
+- The `key_language` quote repeated the summary in the prohibition block. It is shown once now.
+- The demo statement named a model that was never called. The fixture provider now prints the demonstration wording.
+
+### Earlier entries
+
+- The "Known wording gap" in the 2026-11-09 court-orders entry ("1 AI-origin span remain") is resolved by the plural fix above.
+- The Sentinel proof tests recorded there as weaker than they look are now stronger: they assert the body equals `document.text`, not only a clean report.
+- The 2026-11-09 entry's demo motion note is superseded by the 6.4 change above.
+
+Requirements: 12.15, 13.7.

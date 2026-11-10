@@ -218,7 +218,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
   - State in the final report that the browser check (Picker, prohibition block, confidentiality tick, print view, first-page header) is left to the user
   - _Requirements: 12.15_
 
-- [ ] 6. Group 6: follow-up fixes from the browser walkthrough
+- [x] 6. Group 6: follow-up fixes from the browser walkthrough
   - [x] 6.1 Passages and plurals in the export package
     - In `packages/export/src/ai-paragraphs.ts` replace `ParagraphRange`, `aiParagraphRanges` and `formatRanges` with `AiPassage` (`{ paragraph, words }`) and `aiPassages(document)` as in the design (D21, D22): join adjacent `AI` and `AI>HUM` spans, drop runs with no non-whitespace character, count the paragraph among non-empty paragraphs, keep the first eight words
     - In `packages/export/src/types.ts` replace `aiRanges` with `aiPassages`; update `statement.ts`, `render-order.ts`, `index.ts` (export `AiPassage`, drop `ParagraphRange`) and the `base()` literal in `packages/export/test/render-statement.test.ts` (`aiPassages: []`)
@@ -256,7 +256,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - In `crew/sentinel/test/court-orders.test.ts` make the `edtex-love-2025` and `dhaw-go-23-1` tests also assert that the body of `splitExport(readDocx(bytes))` joined with `\n` equals `document.text`
     - _Requirements: 7.8, 12.10_
 
-  - [~] 6.6 Docs and checkpoint
+  - [x] 6.6 Docs and checkpoint
     - Update `README.md` (the Court-specific certification section: passages in the portions sentence, the demonstration wording) and append a dated entry to `BUILD_LOG.md` listing what the walkthrough found and the eight fixes (passages, plurals, prohibition block, demo provider wording, stale notice, picker width and ellipsis, demo motion consistency, header spacing and Sentinel body assertions); append, do not rewrite earlier entries
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt` and `pnpm --filter @reveal-codes/web exec next build --webpack`; fix every failure
     - State in the final report that the browser check is left to the user

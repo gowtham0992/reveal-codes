@@ -22,7 +22,7 @@ The web app runs on webpack (`next dev --webpack`, `next build --webpack`), not 
 No account and no token are needed.
 
 1. Run `pnpm dev` and open the app.
-2. Select Load demo motion. The text enters as one `PST` span.
+2. Select Load demo motion. The text enters as one `PST` span. The motion cites the Fifth Circuit and N.D. Tex.
 3. Press Alt-F3 to open the Reveal Codes pane.
 4. Select Verify. Citations and quotations get their codes; the planted errors show as red codes and in the Issues list as blocking.
 5. Select Export. The button reads "Export (n blocking)" while any blocking issue remains, and the dialog disables both export buttons.
@@ -45,13 +45,17 @@ The appendix starts on its own page under the title "Provenance Appendix". It ho
 
 ## Court-specific certification
 
-Some federal courts and judges ask for their own AI statement. The Export dialog has a Picker labelled "Court or judge", above the Issues list. Choose a court or judge and the dialog shows a one-line summary of the instrument, its key language and a link to the source. The choice is saved in your browser, and the print view uses it too. The default is no selection, which gives the standard statement. Reveal Codes states what the order says; it does not tell you what the law requires, so read the source before you file.
+Some federal courts and judges ask for their own AI statement. The Export dialog has a Picker labelled "Court or judge", above the Issues list. Long titles in the Picker are cut at 60 characters with an ellipsis. Choose a court or judge and the dialog shows a one-line summary of the instrument, its key language and a link to the source. The choice is saved in your browser, and the print view uses it too. The default is no selection, which gives the standard statement. Reveal Codes states what the order says; it does not tell you what the law requires, so read the source before you file.
 
 Three examples:
 
 - N.D. Tex., Local Civil Rule 7.2(f): a brief prepared with generative AI must say so on its first page under the heading "Use of Generative Artificial Intelligence". The DOCX and the print view put that heading on the first page of the filing.
 - E.D. Tex., Judge Love: every filing carries a "Certificate of Generative Artificial Intelligence Usage". The statement takes that title, and the Sentinel recognises it when it reads the file back.
-- S.D. Ohio, Judge Newman: the standing order bars the use of AI in preparing any filing. The dialog shows this as a notice with no override, because it is not a red code. It does not count toward the "Export (n blocking)" label.
+- S.D. Ohio, Judge Newman: the standing order bars the use of AI in preparing any filing. The dialog shows this as a notice with no override, because it is not a red code. It does not count toward the "Export (n blocking)" label. The notice states the prohibition once, in a single line that counts the AI-origin passages left in the filing and quotes the first, for example "1 AI-origin passage remains: paragraph 2, beginning "…"." The key language of the order appears once, in the summary.
+
+Where an order asks how AI was used, the statement says where. It lists the passages the program drafted: each is a paragraph number plus the first words of the passage, up to five, then a count of any more. Paragraphs are counted from the first line of the caption, skipping blank lines. Counts use the right singular or plural ("1 prompt", "3 prompts").
+
+If the only AI text was drafted by the demo assistant with no provider configured, the statement does not name a model. It says the text came from a recorded demonstration response and that no model was called.
 
 The orders come from `data/standing-orders.json`. See [data/README.md](data/README.md) for its fields and sources. The dataset is released under CC0.
 
