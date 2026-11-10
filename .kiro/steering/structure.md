@@ -53,6 +53,9 @@ reveal-codes/
         smoke/                API assumption regression tests for ProseMirror and TipTap
   crew/
     sentinel/                 the sweep CLI that the Reveal Codes Sentinel Crew app (separate repository) runs on a schedule
+  data/
+    standing-orders.json      public, CC0 dataset of court orders; validated by packages/export/src/orders.ts
+    README.md
   docs/
     KIRO_USAGE.md             inventory of specs/hooks/steering/agents/MCP with file paths
     demo-script.md            the 90-second demo, step by step

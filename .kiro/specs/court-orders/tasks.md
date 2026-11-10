@@ -178,7 +178,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Run the engine, verifier, export, web and sentinel test projects
     - _Requirements: 12.7, 12.8, 12.9_
 
-  - [~] 4.3 Write the three Sentinel proof tests
+  - [x] 4.3 Write the three Sentinel proof tests
     - Create `crew/sentinel/test/court-orders.test.ts`; each test builds the demo Document (one AI span) with `buildDemoDocumentStatement(orderContext)`, packs it with `buildDocx`, writes a temporary file, runs `run(["check", file], io)` with the `io` shape used in `sweep.test.ts` (no token, recorded fixtures, a `fetch` that rejects), and asserts exit code 0 and a report ending in `No drift.`
     - `ndtex-lr-7-2-f` (first-page header): also assert the zip holds `word/header1.xml`, so the test cannot pass because no header was written
     - `edtex-love-2025` (renamed title): the body is cut at the renamed title
@@ -186,18 +186,18 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Remove the temporary files afterwards; no `try/catch` that hides an error
     - _Requirements: 7.4, 9.11, 12.10, 12.11_
 
-  - [~] 4.4 Update the sentinel-sweep spec
+  - [x] 4.4 Update the sentinel-sweep spec
     - In `.kiro/specs/sentinel-sweep/requirements.md` change "the Statement_Title" to "any Statement_Title" in Requirement 3 criteria 4 and 5, and check the Statement_Title definition, Requirement 1 criterion 15 and Requirement 3 criteria 1 and 3 name `STATEMENT_TITLES`
     - In `.kiro/specs/sentinel-sweep/design.md` update D1 (`equal to STATEMENT_TITLE` becomes "equal to a member of `STATEMENT_TITLES`", and the emitted title wording), Property 1 (`buildStatement(d, [], meta, null)` and "a member of `STATEMENT_TITLES`"), and the `package.test.ts` line (exported names include `STATEMENT_TITLES`)
     - Locate lines by content; do not edit `.kiro/specs/sentinel-sweep/tasks.md`; call `validate_spec_format` on each edited spec file
     - _Requirements: 12.12_
 
-  - [~] 4.5 Add the README section
+  - [-] 4.5 Add the README section
     - Add "Court-specific certification" to `README.md`: what the Picker in the Export dialog does, three example courts (N.D. Tex. first-page heading, E.D. Tex. Judge Love's certificate title, S.D. Ohio Judge Newman's prohibition), a link to `data/README.md`, and one sentence that the dataset is released under CC0
     - Plain copy, no exclamation marks
     - _Requirements: 12.1_
 
-  - [~] 4.6 Add the `docs/KIRO_USAGE.md` rows
+  - [-] 4.6 Add the `docs/KIRO_USAGE.md` rows
     - Add a `Spec` row for court-orders (`.config.kiro`, `requirements.md`, `design.md`, `tasks.md`, and `tasks.meta.json` if it exists) and a `Steering` row for the `structure.md` and `product.md` edits, with file paths
     - This feature adds no hook, agent or MCP tool, so there are no other rows; make sure the web `inventory.test.ts` still passes
     - _Requirements: 12.2_
@@ -207,7 +207,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Append to the file; do not rewrite earlier entries
     - _Requirements: 12.3, 12.13_
 
-  - [~] 4.8 Edit the steering files
+  - [-] 4.8 Edit the steering files
     - In `.kiro/steering/structure.md` add `data/` to the repository layout: `standing-orders.json` (public, CC0, validated by `packages/export/src/orders.ts`) and `README.md`
     - In `.kiro/steering/product.md` add one unnumbered line under the principles: `The statement follows the selected court's instrument. The dataset behind it, data/standing-orders.json, is public and CC0.`
     - _Requirements: 12.4, 12.5_

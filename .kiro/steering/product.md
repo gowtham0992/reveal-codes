@@ -37,6 +37,8 @@ Courts have sanctioned lawyers in several hundred decisions for filings that cit
 6. **Quotes are checked, not just citations.** A real case with an invented quotation is the failure mode that existence checkers miss. `QUO ✘` is a headline result, shown with where the quote diverges from the opinion.
 7. **Respect the period.** The pane looks like 1989 (blue field, grey text, bracketed codes, monospace). The editor above it looks like 2026. The contrast is the point. Spooky theming is not; this is not a Costume entry.
 
+The statement follows the selected court's instrument. The dataset behind it, data/standing-orders.json, is public and CC0.
+
 ## Vocabulary
 
 Use these words consistently in code, specs, UI, and docs:

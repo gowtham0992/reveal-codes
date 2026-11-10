@@ -43,6 +43,18 @@ The statement starts on a new page under the title "AI-Use and Verification Stat
 
 The appendix starts on its own page under the title "Provenance Appendix". It holds the full Reveal Codes record of the filing in monospace, one line per line of the record, so the filing and its provenance can be re-read exactly.
 
+## Court-specific certification
+
+Some federal courts and judges ask for their own AI statement. The Export dialog has a Picker labelled "Court or judge", above the Issues list. Choose a court or judge and the dialog shows a one-line summary of the instrument, its key language and a link to the source. The choice is saved in your browser, and the print view uses it too. The default is no selection, which gives the standard statement. Reveal Codes states what the order says; it does not tell you what the law requires, so read the source before you file.
+
+Three examples:
+
+- N.D. Tex., Local Civil Rule 7.2(f): a brief prepared with generative AI must say so on its first page under the heading "Use of Generative Artificial Intelligence". The DOCX and the print view put that heading on the first page of the filing.
+- E.D. Tex., Judge Love: every filing carries a "Certificate of Generative Artificial Intelligence Usage". The statement takes that title, and the Sentinel recognises it when it reads the file back.
+- S.D. Ohio, Judge Newman: the standing order bars the use of AI in preparing any filing. The dialog shows this as a notice with no override, because it is not a red code. It does not count toward the "Export (n blocking)" label.
+
+The orders come from `data/standing-orders.json`. See [data/README.md](data/README.md) for its fields and sources. The dataset is released under CC0.
+
 ## What leaves your machine
 
 - Verify sends only citation records to this app's own server, and from there only citation strings go to CourtListener. Your draft text is not sent.

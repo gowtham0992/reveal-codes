@@ -440,6 +440,16 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994493
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794276095776
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794276181572
       }
     ],
     "4.4 Update the sentinel-sweep spec": [
@@ -447,6 +457,16 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994539
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794276096516
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794276181657
       }
     ],
     "4.5 Add the README section": [
@@ -454,6 +474,11 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994576
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794276097068
       }
     ],
     "4.6 Add the `docs/KIRO_USAGE.md` rows": [
@@ -461,6 +486,11 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994619
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794276097867
       }
     ],
     "4.7 Add the BUILD_LOG entry": [
@@ -475,6 +505,11 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994683
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794276098402
       }
     ],
     "5. Final checkpoint": [
