@@ -20,6 +20,10 @@ function base(over: Partial<Statement> = {}): Statement {
     verifiedAt: "2026-03-05T02:30:00.000Z",
     verifiedDate: "2026-03-04",
     caption: "",
+    order: null,
+    aiRanges: [],
+    runCount: 0,
+    confidentialityCertified: false,
     ...over,
   };
 }

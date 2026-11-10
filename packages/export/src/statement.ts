@@ -1,5 +1,6 @@
 import { err, ok, segment } from "@reveal-codes/engine";
 import type { Document, EngineError, Result } from "@reveal-codes/engine";
+import { aiParagraphRanges } from "./ai-paragraphs.js";
 import {
   citationsOf,
   countCharacters,
@@ -45,6 +46,11 @@ export function buildStatement(
   const sentences = segment(document.text, document.spans);
   if (!sentences.ok) return sentences;
   return ok({
+    // Temporary defaults until task 2.5 wires the order context.
+    order: null,
+    aiRanges: aiParagraphRanges(document),
+    runCount: runLog.length,
+    confidentialityCertified: false,
     aiUsed: usedAi(document),
     tools: toolsOf(document, runLog),
     characters: countCharacters(document),

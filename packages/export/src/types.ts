@@ -1,4 +1,6 @@
 import type { IssueCode, Origin, QuoteCheckResult, VerificationResult } from "@reveal-codes/engine";
+import type { ParagraphRange } from "./ai-paragraphs.js";
+import type { OrderCaption, OrderElement, OrderKind } from "./orders-types.js";
 
 /** The only clock the package sees. `now` must be a valid Date. */
 export type Meta = Readonly<{ now: Date; verifiedAt: string | null }>;
@@ -30,7 +32,31 @@ export type StatementOverride = Readonly<{
   timestampLocal: string;
 }>;
 
+/** The selected instrument as the Statement carries it (plain data; `elements` per design D7). */
+export type StatementOrder = Readonly<{
+  id: string;
+  instrument: string;
+  title: string;
+  /** court.name */
+  court: string;
+  /** judge.name, or null for a court-wide entry. */
+  judge: string | null;
+  date: string;
+  /** source_url */
+  sourceUrl: string;
+  kind: OrderKind;
+  caption: OrderCaption | null;
+  elements: readonly OrderElement[];
+}>;
+
 export type Statement = Readonly<{
+  /** The selected instrument, or null when none. */
+  order: StatementOrder | null;
+  /** Filing_Paragraph ranges that hold AI-origin text, ascending; [] when none. */
+  aiRanges: readonly ParagraphRange[];
+  /** runLog.length; the run count and the prompt count of the order sentences. */
+  runCount: number;
+  confidentialityCertified: boolean;
   aiUsed: boolean;
   tools: readonly StatementTool[];
   characters: OriginCounts;

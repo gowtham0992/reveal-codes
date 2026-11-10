@@ -30,7 +30,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - No `node:` imports, no DOM, no `any`, named exports only, functions under 40 lines, modules under 300
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10, 1.11, 1.12, 1.13, 2.7, 2.8, 11.2, 11.4, 11.5_
 
-  - [~] 1.3 Write the Orders_Module example tests
+  - [x] 1.3 Write the Orders_Module example tests
     - Create `packages/export/test/orders.test.ts`: the shipped file loads `ok` and `ORDERS` equals its entries in order
     - Add the mutation table: version, one missing field per required field, one unknown vocabulary word per vocabulary field (including a word the file lists but the code does not), duplicate and non-kebab ids, dangling `supersedes` and `superseded_by`, the date table (leap years, month lengths, bad format), the URL table (`http:`, bare `uscourts.gov`, userinfo, port, `edrm.net`), and `key_language` lengths 0, 1, 400 and 401; each row expects `err` naming the mutated field
     - Add the two-failure fixtures of D1 (a bad `date` in entry 1 and a bad `kind` in entry 2 reports `kind`) and malformed roots (`null`, array, missing `entries`)
@@ -38,7 +38,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - No `try/catch`, no snapshots
     - _Requirements: 1.1 to 1.12, 2.7, 2.8, 9.1, 9.2, 9.3, 9.11_
 
-  - [~] 1.4 Implement the Selection_Store and the UI copy functions
+  - [x] 1.4 Implement the Selection_Store and the UI copy functions
     - Create `apps/web/src/order-selection.ts`: `ORDER_KEY` (`reveal-codes:order:v1`), `OrderSelection`, `readOrderSelection`, `writeOrderSelection`, `createOrderSelectionStore` (localStorage authoritative, memory used only after a failed write, D16); use the injected `StorageLike` from `autosave.ts` and read no global
     - Create `apps/web/src/order-copy.ts`: `NO_ORDER_LABEL`, `optionText`, `kindWords` (typed `Record<OrderKind, string>`), `appliesWords`, `summaryLine`, `CONFIDENTIALITY_LABEL`, `CONFIDENTIALITY_REQUIRED`, `quoted`
     - Leave `store.ts`, `history.ts`, `persist.ts` and the autosave Persisted_Value unchanged
@@ -50,7 +50,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - _Requirements: 2.2 to 2.6, 2.9, 3.5, 3.9, 3.10, 9.3_
 
 - [ ] 2. Group 2: Statement changes, wording, Property 1, prohibition gate, Property 2
-  - [~] 2.1 Add the Statement data fields and the paragraph-range computation
+  - [x] 2.1 Add the Statement data fields and the paragraph-range computation
     - In `packages/export/src/types.ts` add `StatementOrder` (including `elements`, D7) and the Statement fields `order`, `aiRanges`, `runCount`, `confidentialityCertified`
     - Export `isAiSpan` from `packages/export/src/statement-parts.ts` and make `usedAi` use it
     - Create `packages/export/src/ai-paragraphs.ts` with `ParagraphRange`, `aiParagraphRanges` (reads only `document.spans` and `document.text`, overlap test excludes the terminating `\n`, D18) and `formatRanges` (`27`, `12–14` with an en dash, `, ` separator)

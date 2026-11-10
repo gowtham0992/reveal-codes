@@ -94,9 +94,12 @@ export function overridesOf(document: Document): readonly StatementOverride[] {
   return out;
 }
 
+/** True when the span's origin is AI or AI>HUM. */
+export function isAiSpan(span: Document["spans"][number]): boolean {
+  return span.provenance.origin === "AI" || span.provenance.origin === "AI>HUM";
+}
+
 /** True when some span has origin AI or AI>HUM. */
 export function usedAi(document: Document): boolean {
-  return document.spans.some(
-    (s) => s.provenance.origin === "AI" || s.provenance.origin === "AI>HUM",
-  );
+  return document.spans.some(isAiSpan);
 }
