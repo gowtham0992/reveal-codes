@@ -23,5 +23,11 @@ export default defineConfig(
       },
     },
   },
+  {
+    // Plain Node scripts sit outside every tsconfig, so they get no type-aware rules.
+    files: ["scripts/**/*.mjs"],
+    extends: [tseslint.configs.disableTypeChecked],
+    languageOptions: { globals: { process: "readonly", console: "readonly" } },
+  },
   prettier,
 );
