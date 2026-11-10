@@ -20,7 +20,7 @@ const EXPECTED: readonly StatementBlock[] = [
   {
     kind: "paragraph",
     number: 2,
-    text: "Generative artificial intelligence was used in preparing this filing. Tools: fixture: fixture-model. Text inserted by the tool accounts for 48 of 2619 characters (1.8%); of that, 0 characters were subsequently edited by the author.",
+    text: "Generative artificial intelligence was used in preparing this filing. Tools: a recorded demonstration response (no model was called). Text inserted by the tool accounts for 48 of 2619 characters (1.8%); of that, 0 characters were subsequently edited by the author.",
   },
   {
     kind: "paragraph",

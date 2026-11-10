@@ -42,9 +42,23 @@ export const QUOTE_CODES = {
   unchecked: "QUO …",
 } as const;
 
+/** The provider string the app records for the credential-free fixture provider (apps/web/src/server/llm.ts). */
+const FIXTURE_PROVIDER = "fixture";
+
+export const DEMO_RESPONSE_WORDS = "a recorded demonstration response (no model was called)";
+
+/**
+ * One tool as wording (D24). The fixture provider prints the demonstration words;
+ * any other provider prints `<provider><separator><model>`, or the provider alone for a null model.
+ */
+export function toolText(tool: StatementTool, separator: string): string {
+  if (tool.provider === FIXTURE_PROVIDER) return DEMO_RESPONSE_WORDS;
+  return tool.model === null ? tool.provider : `${tool.provider}${separator}${tool.model}`;
+}
+
 function toolList(tools: readonly StatementTool[]): string {
   if (tools.length === 0) return "not recorded";
-  return tools.map((t) => (t.model === null ? t.provider : `${t.provider}: ${t.model}`)).join(", ");
+  return tools.map((t) => toolText(t, ": ")).join(", ");
 }
 
 export type AiFigures = Readonly<{
@@ -124,7 +138,7 @@ export function toolsSentence(tools: readonly StatementTool[]): string {
   if (tools.length === 0) {
     return "The generative artificial intelligence program used is not recorded.";
   }
-  const list = tools.map((t) => (t.model === null ? t.provider : `${t.provider} ${t.model}`));
+  const list = tools.map((t) => toolText(t, " "));
   return `The generative artificial intelligence program used was ${list.join("; ")}.`;
 }
 

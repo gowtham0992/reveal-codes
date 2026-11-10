@@ -228,7 +228,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Tests include a no-"lines" check on every sentence and the plural table over 0, 1, 2 and 3 for prompt, run, passage and remain/remains
     - _Requirements: 4.11, 4.12, 4.15, 4.21, 4.22, 4.25, 5.5, 9.12_
 
-  - [~] 6.2 Demo provider wording
+  - [x] 6.2 Demo provider wording
     - In `wording.ts` add `DEMO_RESPONSE_WORDS` (`a recorded demonstration response (no model was called)`) and `toolText(tool)` (D24); make `toolList` (the `Tools: …` clause of `aiParagraph`) and `toolsSentence` (the tool_name order sentence) both call `toolText`, so a tool with `provider` `fixture` prints the demonstration words and any other provider prints as before
     - Confirm the exact provider string `fixture` in `apps/web/src/server/llm*.ts` and in the run log of the fixture provider; do not change that code
     - Update the export-certification wording expectations in `packages/export/test` that quote `Tools:` only where they use a fixture provider

@@ -22,6 +22,7 @@ import { ORDER_ELEMENTS } from "../src/orders-types.js";
 import {
   ALL_DRAFTERS_SUFFIX,
   CONFIDENTIALITY_SENTENCE,
+  DEMO_RESPONSE_WORDS,
   PARAGRAPH_NO_AI,
   RESPONSIBILITY,
   SIGNATURE_LINE,
@@ -236,25 +237,62 @@ describe("tool sentence under edtex-love-2025 _Requirements: 4.9, 4.10, 9.5_", (
   const love = entry("edtex-love-2025");
   const lead = "The generative artificial intelligence program used";
 
-  it("names one tool with its model", () => {
-    const s = stmt(aiDoc(), logOf(1), ctx(love));
-    expect(para(s, 3)).toContain(`${lead} was fixture m.`);
+  it("names one real tool with its model", () => {
+    const log: RunInfo[] = [{ runId: "r1", provider: "bedrock", modelId: "m" }];
+    const s = stmt(aiDoc(), log, ctx(love));
+    expect(para(s, 3)).toContain(`${lead} was bedrock m.`);
   });
 
-  it("joins two tools with a semicolon", () => {
+  it("joins two real tools with a semicolon", () => {
+    const log: RunInfo[] = [
+      { runId: "r1", provider: "anthropic", modelId: "m-1" },
+      { runId: "r2", provider: "bedrock", modelId: "m-2" },
+    ];
+    const s = stmt(aiDoc(["r1", "r2"]), log, ctx(love));
+    expect(para(s, 3)).toContain(`${lead} was anthropic m-1; bedrock m-2.`);
+  });
+
+  it("writes the provider alone for a null model", () => {
+    const log: RunInfo[] = [{ runId: "r1", provider: "bedrock", modelId: null }];
+    const s = stmt(aiDoc(), log, ctx(love));
+    expect(para(s, 3)).toContain(`${lead} was bedrock.`);
+    expect(para(s, 3)).not.toContain("bedrock null");
+  });
+
+  it("prints the demonstration words for a fixture-only run (D24)", () => {
+    const s = stmt(aiDoc(), logOf(1), ctx(love));
+    expect(para(s, 3)).toContain(`${lead} was ${DEMO_RESPONSE_WORDS}.`);
+    expect(para(s, 3)).not.toContain("fixture");
+  });
+
+  it("prints the demonstration words for a fixture run with a null model", () => {
+    const log: RunInfo[] = [{ runId: "r1", provider: "fixture", modelId: null }];
+    const s = stmt(aiDoc(), log, ctx(love));
+    expect(para(s, 3)).toContain(`${lead} was ${DEMO_RESPONSE_WORDS}.`);
+  });
+
+  it("prints each tool as its own when fixture and real tools are mixed", () => {
     const log: RunInfo[] = [
       { runId: "r1", provider: "fixture", modelId: "m-1" },
       { runId: "r2", provider: "bedrock", modelId: "m-2" },
     ];
     const s = stmt(aiDoc(["r1", "r2"]), log, ctx(love));
-    expect(para(s, 3)).toContain(`${lead} was fixture m-1; bedrock m-2.`);
+    expect(para(s, 3)).toContain(`${lead} was ${DEMO_RESPONSE_WORDS}; bedrock m-2.`);
   });
 
-  it("writes the provider alone for a null model", () => {
-    const log: RunInfo[] = [{ runId: "r1", provider: "fixture", modelId: null }];
-    const s = stmt(aiDoc(), log, ctx(love));
-    expect(para(s, 3)).toContain(`${lead} was fixture.`);
-    expect(para(s, 3)).not.toContain("fixture null");
+  it("uses the same words in the base AI paragraph Tools clause", () => {
+    const fixture = stmt(aiDoc(), logOf(1), ctx(null));
+    expect(para(fixture, 2)).toContain(`Tools: ${DEMO_RESPONSE_WORDS}. `);
+    const log: RunInfo[] = [
+      { runId: "r1", provider: "fixture", modelId: "m-1" },
+      { runId: "r2", provider: "bedrock", modelId: "m-2" },
+    ];
+    const mixed = stmt(aiDoc(["r1", "r2"]), log, ctx(null));
+    expect(para(mixed, 2)).toContain(`Tools: ${DEMO_RESPONSE_WORDS}, bedrock: m-2. `);
+    const real: RunInfo[] = [{ runId: "r1", provider: "bedrock", modelId: "m" }];
+    expect(para(stmt(aiDoc(), real, ctx(null)), 2)).toContain("Tools: bedrock: m. ");
+    const nullModel: RunInfo[] = [{ runId: "r1", provider: "bedrock", modelId: null }];
+    expect(para(stmt(aiDoc(), nullModel, ctx(null)), 2)).toContain("Tools: bedrock. ");
   });
 
   it("says no tool is recorded when there is none", () => {
