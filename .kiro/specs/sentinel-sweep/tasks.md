@@ -2,9 +2,9 @@
 
 ## Overview
 
-The plan builds the sweep CLI in `crew/sentinel` (`@reveal-codes/sentinel`) in four groups. Group 1 sets up the package and builds the read side: `readDocx`, `splitExport`, the error kinds, `recordedDocument`, and the test support every later test uses. Group 2 builds the re-check side: `reverify`, `buildDeps`, the Findings and `analyseFile`, plus Property 1. Group 3 builds the report side and the runner: renderers, argument parsing, file access, the sweep, `run`, `cli`, Property 2, the save hook, and the static boundary tests. Group 4 writes the documentation and steering edits and ends with the single final checkpoint. The Engine, Verifier, MCP server and `apps/web` are not changed. `packages/export` changes only by the two added exports of task 1.1.
+The plan builds the sweep CLI in `crew/sentinel` (`@reveal-codes/sentinel`) in four groups and a fifth follow-up group. Group 1 sets up the package and builds the read side: `readDocx`, `splitExport`, the error kinds, `recordedDocument`, and the test support every later test uses. Group 2 builds the re-check side: `reverify`, `buildDeps`, the Findings and `analyseFile`, plus Property 1. Group 3 builds the report side and the runner: renderers, argument parsing, file access, the sweep, `run`, `cli`, Property 2, the save hook, and the static boundary tests. Group 4 writes the documentation and steering edits and ends with the single final checkpoint. The Engine, Verifier, MCP server and `apps/web` are not changed. `packages/export` changes only by the two added exports of task 1.1. Group 5 (after the final checkpoint 4.6) makes the `body_edited` excerpts show the edit (Requirement 14) and records the Crew app link; it touches `crew/sentinel/src/findings.ts`, one new module, tests, `README.md`, `docs/KIRO_USAGE.md` and `BUILD_LOG.md`, and no other package.
 
-Task count: **25 tasks**, counted as leaf sub-tasks (numbered `N.M`), the final checkpoint (4.6) included. The four group headings are not counted. The dependency graph lists the 24 non-checkpoint leaves. Exactly two properties exist: Property 1 in 2.6 and Property 2 in 3.2. Each is its own task and neither is optional.
+Task count: **30 tasks**, counted as leaf sub-tasks (numbered `N.M`), the two checkpoints (4.6 and 5.5) included. The five group headings are not counted. The dependency graph lists the 28 non-checkpoint leaves. Exactly three properties exist: Property 1 in 2.6, Property 2 in 3.2 and Property 3 in 5.2. Each is its own task and none is optional.
 
 Conventions that apply to every task:
 
@@ -114,7 +114,7 @@ Conventions that apply to every task:
     - Create `crew/sentinel/test/static/package.test.ts` with the checks that exist now: exact `dependencies` and `devDependencies` lists and versions, no range operator, no `docx` entry; the `cli` script; the root `sentinel` script; the hook parses, has name, trigger, timeout 120000 and the command above, its timeout equals the timeout of every other file in `.kiro/hooks/`, its matcher accepts `crew/sentinel/src/run.ts` and `crew/sentinel/test/report.test.ts` and rejects `crew/sentinel/package.json`, `packages/export/src/index.ts` and `apps/web/src/a.ts`, and the command names `--project sentinel` and not `--watch`; the Export_Package exports `STATEMENT_TITLE` and `APPENDIX_TITLE` with their values; the `BUILD_LOG.md` entry names the criterion-17 outcome. Task 4.5 extends this file.
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 1.2, 1.3, 1.6, 1.7, 3.1, 12.17_
   - [x] 3.7 Static boundary tests
-    - Files: `crew/sentinel/test/support/scan.ts` (re-exports the export package's scan helpers by relative path) and `crew/sentinel/test/static/boundaries.test.ts`, each scan with a self-test that a planted violation is reported with `file:line`: `process.env` appears only in `cli.ts` and only the four variable names are read; `node:` specifiers in `src` are only `node:fs`, `node:path`, `node:os`, and `node:fs` only in `files.ts`; no `any`; no default exports; no class; no `try/catch` with an empty block or one that neither returns, rethrows nor records; every module at most 300 lines and every function at most 40; no `PACKAGE_NAME` and no `index.test.ts`; no `app.json` under `crew/sentinel`; no `docx` import in `src` or `test`; no `new Date()` outside `cli.ts`; no snapshot test and no `expect(true)`; exactly two `// Property N` comments, numbered 1 and 2, each above one `fc.assert`.
+    - Files: `crew/sentinel/test/support/scan.ts` (re-exports the export package's scan helpers by relative path) and `crew/sentinel/test/static/boundaries.test.ts`, each scan with a self-test that a planted violation is reported with `file:line`: `process.env` appears only in `cli.ts` and only the four variable names are read; `node:` specifiers in `src` are only `node:fs`, `node:path`, `node:os`, and `node:fs` only in `files.ts`; no `any`; no default exports; no class; no `try/catch` with an empty block or one that neither returns, rethrows nor records; every module at most 300 lines and every function at most 40; no `PACKAGE_NAME` and no `index.test.ts`; no `app.json` under `crew/sentinel`; no `docx` import in `src` or `test`; no `new Date()` outside `cli.ts`; no snapshot test and no `expect(true)`; exactly two `// Property N` comments, numbered 1 and 2, each above one `fc.assert` (task 5.2 changes this to three).
     - _Requirements: 1.5, 1.8, 1.9, 1.10, 1.11, 1.12, 1.14, 12.1, 12.14, 12.16_
 
 - [x] 4. Documentation, steering, and final checkpoint
@@ -141,10 +141,41 @@ Conventions that apply to every task:
     - Record the confirmation result in the `BUILD_LOG.md` entry. Confirm `git status` shows no stray file. Ensure all tests pass, ask the user if questions arise.
     - _Requirements: 10.13, 10.16, 13.3, 12.17_
 
+- [ ] 5. Group 5: `body_edited` excerpts, Crew app link, README trim
+  - [ ] 5.1 Windowed excerpts in `excerpt.ts` and `bodyFinding`
+    - Create `crew/sentinel/src/excerpt.ts` as in the design (D18): `LEAD = 30` and `excerptPair(before, after, max)`. Both strings at most `max`: returned whole. Otherwise `d` is the common prefix length in UTF-16 code units, `start = Math.max(0, d - LEAD)` moved back by one when the unit at `start` is a low surrogate after a high one, and each result is `ellipsize(text.slice(start), max)` from `@reveal-codes/export`, prefixed with "…" when `start > 0`. Two local one-line helpers `isHigh` and `isLow`. Named exports only, function under 40 lines.
+    - In `crew/sentinel/src/findings.ts` make `bodyFinding` take `before` and `after` from `excerptPair(recordedLine, bodyLine, MAX)`; the line number, the absent-line rule (`""`) and every other Finding kind stay as they are. Add `excerpt.ts` to the public surface in `index.ts` only if `index.ts` exports `findings.ts` helpers today; otherwise leave `index.ts` alone.
+    - Example tests in `crew/sentinel/test/excerpt.test.ts` for every case listed in Requirement 14, criteria 7 and 8. The demo motion case builds the body from `buildDemoDocument()`: line 30 (index 29) of `document.text` with "timing alone is enough at the pleading stage" replaced by "timing alone is always enough at every stage", run through `deriveFindings`; assert `line` 30, two different cells, both containing "timing alone is", both starting with "…", each at most 82 characters.
+    - Check that the existing cases still pass unchanged: `findings.test.ts` (the 200-character `x` case and the absent-line case) and `analyse.test.ts` (the short one-paragraph case, shown whole).
+    - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.7, 14.8_
+  - [ ] 5.2 Property 3: excerpts differ and stay inside their lines
+    - File `crew/sentinel/test/excerpt.properties.test.ts`, `// Property 3` above its single `fc.assert(fc.property(...))`, in a `describe` whose title ends in `_Requirements: 14.4, 14.5, 14.6_`. Arbitrary: a shared prefix and two tails over an alphabet of ASCII, "…" and astral characters (no line feed), so that `a = prefix + tailA` and `b = prefix + tailB` with `a !== b`, with prefix lengths that put the first difference both before and past index 80; add the arbitrary to `test/support/arbitraries.ts`. `numRuns: runs(process.env)`.
+    - Asserts, for `excerptPair(b, a, 80)`: the two excerpts are different strings; each is at most 82 characters; each, with one leading and one trailing "…" removed when present, is a substring of its own line; and when `b` and `a` are well-formed UTF-16, both excerpts are well-formed (a small scan for a lone surrogate; do not depend on `String.prototype.isWellFormed` types).
+    - In `crew/sentinel/test/static/boundaries.test.ts` change the property-count test to expect the numbers 1, 2 and 3 (title "exactly three Property comments, 1, 2 and 3, each above one fc.assert") and update the long-form comment of Requirement 12.14 there.
+    - **Property 3: Body_edited excerpts differ and stay inside their lines**
+    - **Validates: Requirements 14.4, 14.5, 14.6**
+    - _Requirements: 14.6, 14.9, 12.14, 12.16_
+  - [ ] 5.3 README: Crew app link, Court-specific trim, Sentinel example
+    - `README.md` (Sentinel section, the line that reads "The Kiro Crew app that schedules the Sentinel lives in a separate repository: <crew app repo>."): replace `<crew app repo>` with https://github.com/gowtham0992/reveal-codes-sentinel and add, on the same line, the sentence: "The app was installed in Kiro Crew 0.12.0 and its nightly job run once over three sample filings on 2026-11-09; the run swept all three and reported the one edited after export." Keep it one line.
+    - `README.md` "Court-specific certification": delete the sentence "Long titles in the Picker are cut at 60 characters with an ellipsis." and the sentence "Counts use the right singular or plural ("1 prompt", "3 prompts")." and nothing else; keep the spacing of the remaining sentences.
+    - The Sentinel section shows no table row today (checked when this group was written). If it still shows none, leave it alone; if a Body edited row has been added since, change it to the new windowed form.
+    - In `crew/sentinel/test/static/package.test.ts` replace the test "has exactly one line with the crew app repo placeholder" with one that expects no `<crew app repo>` anywhere in the README and exactly one line in the Sentinel section that contains both `https://github.com/gowtham0992/reveal-codes-sentinel` and "separate repository". Add a test that the README contains neither deleted sentence.
+    - _Requirements: 14.10, 14.11, 14.12_
+  - [ ] 5.4 `docs/KIRO_USAGE.md` row and `BUILD_LOG.md` entry
+    - `docs/KIRO_USAGE.md`: append exactly one row in the existing column layout, Kind `Spec`, Name `sentinel-sweep group 5`, Path the changed spec files (`.kiro/specs/sentinel-sweep/requirements.md`, `design.md`, `tasks.md`, `tasks.meta.json`), Why: "Adds Requirement 14 and Group 5: `body_edited` excerpts that show the edit, the Crew app link in the README, and the README trim." Existing rows unchanged. The row must not start with `| Spec | sentinel-sweep |`, which belongs to the first spec row.
+    - In `crew/sentinel/test/static/package.test.ts` change "holds exactly three sentinel rows" to four, and keep the row lookups pointing at the original three (select the spec row by `startsWith("| Spec | sentinel-sweep |")`, which the new name does not match).
+    - `BUILD_LOG.md`: append one dated entry (`## <YYYY-MM-DD> sentinel-sweep follow-up (body_edited excerpts)`, the day the task runs) with what changed (windows over one span, the report row that showed two identical cells, the README link and trim), what Kiro got wrong with the fix (or a sentence containing "Kiro got nothing wrong"), and a line saying the checkpoint result is added by task 5.5. Do not edit the `## 2026-11-08 sentinel-sweep` entry the static test reads.
+    - _Requirements: 14.13, 14.14_
+  - [ ] 5.5 Final checkpoint
+    - Run `pnpm lint`, `pnpm typecheck`, `pnpm test` and `FC_NUM_RUNS=500 pnpm test:pbt`; fix failures.
+    - Add the result to the `BUILD_LOG.md` entry of 5.4.
+    - Push `main` to `origin`. Wait for the CI run on the new HEAD and confirm it is green (`gh run list --branch main --limit 1`, then `gh run watch <id>` or `gh run view <id>`). Report the CI run id and the new HEAD SHA (`git rev-parse HEAD`); the Crew app pins that commit. If CI fails, fix it and push again; report the final green run.
+    - _Requirements: 14.14, 14.15_
 ## Notes
 
 - Tasks run in order. Property 1 (2.6) sits after the Findings because it needs `readDocx`, `splitExport` and `recordedDocument`, which all land in group 1; Property 2 (3.2) sits right after the renderers it tests.
-- The only checkpoint is task 4.6, as the user fixed the plan: no intermediate checkpoints.
+- The only checkpoint of groups 1 to 4 is task 4.6, as the user fixed the plan: no intermediate checkpoints. Group 5 ends with its own checkpoint, 5.5, which also pushes and confirms CI.
+- Group 5 amends four earlier statements, each named in Requirement 14: the cut of Requirement 6, criterion 2 (only for `body_edited`), the property count of Requirement 12, criterion 14 (three), the README placeholder of Requirement 13, criterion 1(d), and the three rows of Requirement 13, criterion 2 (four).
 - No task is marked optional with `*`: every test is an example test inside its implementation task and both properties are core.
 - `crew/sentinel/test/support/test-deps.ts` is created in 1.4 with a local base URL constant because `deps.ts` lands in 2.3; 2.3 switches it to `DEFAULT_BASE_URL`.
 - `crew/sentinel/src/index.ts` is emptied in 1.1 and written in 3.5 only, so no two tasks in one wave edit it. `sweep.test.ts` (3.4, 3.5) and `package.test.ts` (3.6, 4.5) are each edited in different waves.
@@ -169,7 +200,10 @@ Conventions that apply to every task:
     { "id": 9, "tasks": ["3.2", "3.5"] },
     { "id": 10, "tasks": ["3.7"] },
     { "id": 11, "tasks": ["4.1", "4.2", "4.3", "4.4"] },
-    { "id": 12, "tasks": ["4.5"] }
+    { "id": 12, "tasks": ["4.5"] },
+    { "id": 13, "tasks": ["5.1"] },
+    { "id": 14, "tasks": ["5.2", "5.3"] },
+    { "id": 15, "tasks": ["5.4"] }
   ]
 }
 ```

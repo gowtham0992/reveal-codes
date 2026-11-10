@@ -29,6 +29,7 @@ Changes outside `crew/sentinel`: three added named exports in `packages/export/s
 | D15 | **The test fetch records a miss as well as throwing.** `recordedFetch` throws an error naming the unmatched request (Requirement 12, criterion 3), and also records it and registers an `onTestFinished` check, because the Verifier turns a rejecting `fetch` into `unchecked` (`transport.ts`: `() => NETWORK`) and a throw alone would not fail the test. | Without the recorded miss, an unrecorded request would pass as `recheck_unavailable`. |
 | D16 | **"Differs" for a citation** means the status differs, or both are `verified` and the cluster ids differ (Requirement 6, criterion 5). A change in the candidate count of two `ambiguous` results is not a change. | Requirement 6, criteria 3 and 5 name no other case. |
 | D17 | **`analyseFile` has a last-resort `catch`** that turns an unexpected thrown error into one `unreadable` Finding with `after` `read_failed`, and the run continues with the next file (Requirement 8, criterion 8). A run-level failure outside `analyseFile`, including a failed `--out` or `--json` write, is an unexpected error: a message with the Token replaced by `[redacted]` on standard error, exit 1 (Requirement 10, criterion 17). | Requirement 8, criteria 1 and 8; Requirement 10, criteria 11 and 17. Tests: Requirement 12, criteria 19 and 20. |
+| D18 | **`body_edited` excerpts are windows over one span (Requirement 14).** When both lines fit in 80 code units they are shown whole. Otherwise both are cut from the same start, 30 code units before the first differing index (0 when that index is under 30), moved back by one when it would split a surrogate pair, prefixed with "…" when above 0, and ended by the Export_Package's `ellipsize` to 80. A line that fits is windowed too when the other line does not, so the two cells always show the same span. | The old cut took both lines from index 0, so an edit past character 79 gave two identical cells. A shared start keeps the cells comparable by eye; the first difference always lands in the first 32 characters of both. |
 
 ### Facts checked in the repository
 
@@ -66,6 +67,7 @@ crew/sentinel/
     status-text.ts       statusText, quoteText (about 30)
     lines.ts             lineAt, firstDifferingLine (about 30)
     findings.ts          deriveFindings and its parts (about 200)
+    excerpt.ts           excerptPair: the shared-start windows of D18 (about 40)
     analyse.ts           analyseFile (about 50)
     sleep.ts             realSleep: copy of apps/web/src/server/deps.ts (about 25)
     deps.ts              SentinelEnv, readSentinelConfig, buildDeps (about 70)
@@ -89,8 +91,9 @@ crew/sentinel/
       scan.ts            re-exports the export package's scan helpers
     docx-read.properties.test.ts   Property 1
     report.properties.test.ts      Property 2
+    excerpt.properties.test.ts     Property 3
     docx-read.test.ts, xml-text.test.ts, split.test.ts, recorded.test.ts, owners.test.ts, reverify.test.ts,
-    findings.test.ts, analyse.test.ts, deps.test.ts, report.test.ts, args.test.ts, sweep.test.ts,
+    findings.test.ts, excerpt.test.ts, analyse.test.ts, deps.test.ts, report.test.ts, args.test.ts, sweep.test.ts,
     redact.test.ts, recorded-fetch.test.ts, fc.test.ts
     static/boundaries.test.ts, static/package.test.ts
 ```
@@ -263,7 +266,7 @@ export function unreadable(file: string, kind: SentinelError["kind"]): Finding;
 
 `deriveFindings` is a pure function of `input`. It builds, in this order:
 
-- `bodyFinding`: when `bodyText !== recorded.text` (exact code-unit equality), one `body_edited` with `line = firstDifferingLine(recorded.text, bodyText)`, `before = ellipsize(recordedLines[line - 1] ?? "", 80)` and `after = ellipsize(bodyLines[line - 1] ?? "", 80)`. Because the comparison is on the split lines, a body that only lacks a trailing empty paragraph yields a Finding whose `before` and `after` are both `""`; the line number still tells the reader where to look.
+- `bodyFinding`: when `bodyText !== recorded.text` (exact code-unit equality), one `body_edited` with `line = firstDifferingLine(recorded.text, bodyText)`, `before` and `after` from `excerptPair(recordedLines[line - 1] ?? "", bodyLines[line - 1] ?? "", 80)` (D18; the plain `ellipsize` cut of the first version is superseded). Because the comparison is on the split lines, a body that only lacks a trailing empty paragraph yields a Finding whose `before` and `after` are both `""`; the line number still tells the reader where to look.
 - `citationFindings`: for each full record of `recorded.citations`, find the record with the same key in `outcome.document.citations`. Make a `citation_changed` when `newResult.status !== "unchecked"` and either the statuses differ or both are `verified` with different `clusterId` (D16). `line = lineAt(recorded.text, citation.start)`, `before = statusText(old)`, `after = statusText(new)`.
 - `quoteFindings`: for each record of `recorded.quotes`, find the same key in the Reverified_Document. A `quote_changed` when the new status is not `unchecked` and differs from the recorded one. `line = lineAt(recorded.text, quote.start)`, `before` and `after` from `quoteText`. A quote whose owner is no longer `verified`, or whose cluster text was unavailable, keeps its recorded result, so its statuses are equal and no Finding appears (Requirement 6, criteria 14 and 15).
 - `overrideFindings` (D2): `const live = new Set(issues(outcome.document).map((i) => i.key))`. For each override of `recorded.overrides` whose key is not in `live`, one `override_stale` with `line` the `lineAt` of the start of the citation or quote record with that key in the Recorded_Document (or `null` when none), `before = ellipsize(reason, 80)`, `after = "no longer an issue"`.
@@ -273,6 +276,17 @@ The middle three groups are tagged with `{ position, rank, index }` (`rank` 0, 1
 
 `unreadable(file, kind)` returns `{ kind: "unreadable", file, line: null, before: "", after: kind }`.
 
+### `excerpt.ts`
+```ts
+export const LEAD = 30;
+export function excerptPair(before: string, after: string, max: number): readonly [string, string];
+```
+Pure, imports `ellipsize` from `@reveal-codes/export` and nothing else. `findings.ts` calls it from `bodyFinding` with `max` 80 and keeps its own `MAX`.
+- If `before.length <= max && after.length <= max`, return `[before, after]`.
+- `d` is the length of the common prefix of the two strings in UTF-16 code units (the shorter length when one is a prefix of the other).
+- `start = Math.max(0, d - LEAD)`. When `start > 0`, `isLow(before.charCodeAt(start))` and `isHigh(before.charCodeAt(start - 1))`, `start` is one less. The check reads `before` alone, because both strings are equal below `d` and `start < d`. `isHigh` and `isLow` are two one-line local helpers (the Export_Package's are not exported).
+- Each excerpt is `` `${start > 0 ? "…" : ""}${ellipsize(text.slice(start), max)}` ``. `ellipsize` ends the text with "…" after `max - 1` code units, and its `clip` already steps back one unit rather than split a pair, so the end needs no code here.
+Why the excerpts differ: the first difference sits at most 31 code units into `text.slice(start)`, and `ellipsize` keeps at least 78 units, so the unit at `d` (or the end of the shorter line) survives in both. Length: at most `1 + max` characters, within the 82 of Requirement 14. Worked case: line 30 of the demo motion with "timing alone is enough at the pleading stage" changed to "timing alone is always enough at every stage". `d` is 324, the index of "enough" against "always", so `start` is 294 and both cells begin "…xplained that timing alone is " and differ right after it (the cut falls inside "explained", which is why the leading character is missing; Requirement 14 allows it).
 ### `analyse.ts`
 
 ```ts
@@ -564,7 +578,7 @@ Finding text by kind:
 
 *A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
 
-Reflection on redundancy: Requirement 12, criterion 14 fixes the property set at two. Criteria 2.14 and 4.6 are one round trip and collapse into Property 1. Criterion 9.10 is Property 2. Other candidates (totality of `readDocx`, immutability of `splitExport`, the order of Findings, redaction) vary little with input or depend on the Verifier with recorded fixtures, so they are example and integration tests. A static test counts the `// Property N` comments and expects exactly two.
+Reflection on redundancy: Requirement 12, criterion 14 fixed the property set at two; Requirement 14, criterion 9 adds Property 3 and makes it three. Criteria 2.14 and 4.6 are one round trip and collapse into Property 1. Criterion 9.10 is Property 2. Other candidates (totality of `readDocx`, immutability of `splitExport`, the order of Findings, redaction) vary little with input or depend on the Verifier with recorded fixtures, so they are example and integration tests. A static test counts the `// Property N` comments and expects exactly three (1, 2 and 3) after Requirement 14.
 
 ### Property 1: Round trip
 
@@ -578,6 +592,9 @@ For any Sweep_Report whose file names are distinct (and hold no line feed): `ren
 
 **Validates: Requirements 9.1, 9.2, 9.7, 9.8, 9.10**
 
+### Property 3: Body_edited excerpts differ and stay inside their lines
+For any two different strings `b` and `a` without a line feed, built from a shared prefix and two tails so that the first difference falls both inside and beyond the first 80 code units, over an alphabet that mixes ASCII, "…" and astral characters: `excerptPair(b, a, 80)` returns two different strings, each at most 82 characters long; each, with one leading and one trailing "…" removed when present, is a substring of its own line; and when `b` and `a` are well-formed UTF-16, both excerpts are well-formed.
+**Validates: Requirements 14.4, 14.5, 14.6**
 ## Error Handling
 
 The standing rule applies: a fault that affects only malformed input is a value or one line here. Nothing swallows an error: each `catch` returns a value, a Finding, or an exit code with a message.
@@ -612,7 +629,7 @@ The standing rule applies: a fault that affects only malformed input is a value 
 
 ## Testing Strategy
 
-Property-based testing applies to two pure behaviors: the file round trip and the report renderers. It does not apply to the Verifier calls (INTEGRATION against recorded fixtures), to the file system and exit codes (examples with a temporary directory), or to the manifest, hook and documentation checks (SMOKE).
+Property-based testing applies to three pure behaviors: the file round trip, the report renderers and the excerpt windows. It does not apply to the Verifier calls (INTEGRATION against recorded fixtures), to the file system and exit codes (examples with a temporary directory), or to the manifest, hook and documentation checks (SMOKE).
 
 **Library and configuration.** fast-check with vitest, in files named `<module>.properties.test.ts`. Each property is one `fc.assert(fc.property(...))` (an `asyncProperty` for Property 1), preceded by `// Property N`, inside a `describe` whose title ends in `_Requirements: x.y_`. Property 1 uses `numRuns: docxRuns(process.env)`: 50 when `FC_NUM_RUNS` is unset, else `min(FC_NUM_RUNS, 100)`, with a comment that packing a `.docx` is slow. Property 2 uses `runs(process.env)` (200 locally, 500 in CI, or `FC_NUM_RUNS`). Seeds print on failure and reproduce with `fc.assert(..., { seed })`. Each tag reads: Feature: sentinel-sweep, Property N: title.
 
@@ -622,6 +639,7 @@ Property-based testing applies to two pure behaviors: the file round trip and th
 |---|---|---|---|
 | `docx-read.properties.test.ts` | 1 | `arbDocument` filtered, `buildStatement` with a fixed `meta`, `buildDocx` | paragraph prefix, titles, `body.join("\n")` equals `text`, `parse(appendix.join("\n"))` `toEqual` `d` |
 | `report.properties.test.ts` | 2 | `arbSweepReport` | equal text for deep copies and reorderings; each file once in order; `No drift.` iff no Findings; `sweptAt` ISO; one trailing line feed |
+| `excerpt.properties.test.ts` | 3 | `b = prefix + tailB`, `a = prefix + tailA`, filtered to `a !== b`, over ASCII, "…" and astral characters | different strings; at most 82 characters; substring after removing the marks; well-formed in, well-formed out |
 
 **Example and integration tests** (all `.docx` inputs come from `buildDocx`; all lookups from recorded fixtures through `recordedFetch`, with zero network requests)
 
@@ -631,6 +649,7 @@ Property-based testing applies to two pure behaviors: the file round trip and th
 - `recorded.test.ts`: a malformed Appendix returns `appendix_unparseable` with a non-empty `detail` naming the Engine kind, `index` and `rule`; the body text comparison treats trailing whitespace, a tab versus spaces, and NFC versus NFD as different, and `""` equal to `""`.
 - `owners.test.ts`: the copy gives the same groups as `quotesByCluster` of `apps/web` for the demo Document (the test reproduces the expected map by hand: Haines quote under `108432`, Iqbal quote under `145875`, short-form quote owned by its target).
 - `reverify.test.ts`: `lookup` is called once (wrapped `fetch` counts the POSTs); opinion fetches run one at a time in first-encounter order (the wrapper records start and end events and asserts no overlap); a 429 for everything leaves statuses in place with `unavailable.waitUntil` set; `null` opinions are reported once per cluster; a Lexis citation that the Engine rejects goes to `notRechecked`; `document.text` is unchanged; the input Document equals a clone taken before the call.
+- `excerpt.test.ts` (R14.3, R14.4, R14.5, R14.7, R14.8): the demo motion case (line 30 edited as in Requirement 14, criterion 7) through `deriveFindings`, asserting two different cells that both contain "timing alone is", both start with "…", each at most 82 characters; both lines at or under 80 shown whole; a difference at index 0, 29, 30 and 31 of a long line (start 0 up to index 30, then "…" and a start of 1 at index 31); one line a prefix of the other; an absent line against a long line; a pair whose low surrogate sits at the computed start (the excerpt starts at the pair), and a pair that straddles the cut at 79 (the excerpt ends before it); and a body that lacks a trailing empty paragraph still gives `""` and `""`. The existing 200-character case in `findings.test.ts` keeps passing because its first difference is at index 0.
 - `findings.test.ts`: order (`body_edited` first, tiebreak kinds at one position, `recheck_unavailable` last, `unreadable` alone); `override_stale` is computed from the Recorded_Document's overrides while the Reverified_Document has dropped them (D2); verified-to-verified with another cluster is `citation_changed`; ambiguous with a changed count is not (D16); a quote with an unverified owner produces nothing; `body_edited` line and the 79-plus-`…` cut at 80; an absent line reads as `""`; the `after` of `recheck_unavailable` for a `waitUntil` and for none.
 - `analyse.test.ts`: `body_edited` (R12.7): one body paragraph changed in the XML before reading; the Finding names that paragraph's 1-based line and carries the two ellipsized strings. `citation_changed` (R12.8): `[CIT ✓{k=k0;cl=145875}]` rewritten to `[CIT ✘{k=k0}]` in the Appendix paragraph; the Finding reads `not_found` then `verified 145875`, on the line the test computes from `doc.text`; it is the only Finding. `recheck_unavailable` (R12.9): `throttleFetch` for every request; one Finding with `waitUntil` `2026-11-02T12:00:30.000Z` and `after` `retry after ` plus `localDateTime` of it. `override_stale` (R12.10): the demo Document with `k0` set to `not_found` and an override recorded on it, then exported; the sweep reports `citation_changed` then `override_stale` for `k0`, the latter with the override reason as `before` and `no longer an issue` as `after`. An unmodified demo export gives no Finding. A non-docx file, a renamed-title file and a bad Appendix each give exactly one `unreadable` Finding, and the wrapped `fetch` records no call for them. `citation_changed` identity (R12.18, D16): a recorded `ambiguous` citation that the fixtures resolve as `ambiguous` with a different candidate count (Appendix text edited to another count) produces no `citation_changed` Finding, and a recorded `verified` citation whose cluster id is edited to another id produces exactly one `citation_changed` Finding reading `verified <recorded id>` then `verified <fixture id>`. Thrown dependency (R12.19, D17): a rejecting `fetch` is not enough, because the Verifier turns it into `unchecked`; the test passes `throwingDeps(deps)` from `test-deps.ts`, a copy of `testDeps` whose `fetch` is a getter that throws when the Verifier reads it, so the throw happens inside `reverify` and escapes the Verifier; `analyseFile` returns exactly one `unreadable` Finding with `after` `read_failed` and does not reject. `bytes` is deep-equal to its clone after the call; two calls with the same inputs and a fresh `testDeps` give equal results.
 - `deps.test.ts` (R12.13): `buildDeps` with a plain object, in fixtures mode without a Token and in live mode with a Token; the mode table of `readSentinelConfig` (token absent, empty, present with `REVEAL_CODES_FIXTURES_ONLY` of `1`, `0`, absent); live uses the injected `fetch` and a file cache under `<home>/.reveal-codes/cache` or `REVEAL_CODES_CACHE_DIR` (temporary directory, removed afterwards); `COURTLISTENER_BASE_URL` used when non-empty. `JSON.stringify(verifierStatus(deps))` and the text of every error (a `run` that crashes on a throwing `fetch`) do not contain the Token string. A timer test races `realSleep(15000)` against a 50 ms real timer and aborts it, as the editor-app `deps.test.ts` does.
@@ -639,7 +658,7 @@ Property-based testing applies to two pure behaviors: the file round trip and th
 - `args.test.ts`: both commands with and without options in either order; each usage error of Requirement 10, criterion 8 (the `parseArgs` rules).
 - `sweep.test.ts` (R12.11, R12.12): a temporary directory (`mkdtempSync` under `tmpdir()`, removed in `afterEach`) holding `b-bad.docx` (a text file), `A-good.docx` (the demo export), `~$A-good.docx`, `notes.txt`, `sub/` with a `.docx` in it, and an upper-case `C.DOCX`. A wrapper `FilePort` logs reads, so the test asserts the order is the `localeCompare("en")` order of the kept names and that each analysis ended before the next read began. With a fixed Clock (`new Date(2026, 10, 20, 10, 30)`) it asserts exit code 0, the exact Markdown (computed in the test, with the Fixtures_Notice) and the parsed JSON. A second case lists a name that is then removed before its read: `unreadable` with `read_failed`, exit 0. Sizes, modification times and bytes of the analysed files are unchanged. `check` runs on one file and on a `~$` file; missing and non-file operands, a missing directory, and a usage error each exit 2 with empty standard output and no file written; `--out` suppresses standard output; `--json` writes the JSON; a throwing `FilePort.write` exits 1 with the Token redacted. Continue after a throw (R12.19): `analyseAll` over a demo export `a-throws.docx` and a demo export `b-good.docx`, with `throwOnceDeps(deps)` from `test-deps.ts` (a copy of `testDeps` whose `fetch` getter throws on its first read and returns the recorded fetch afterwards); the result holds one `unreadable` Finding with `after` `read_failed` for the first file and the normal result for the second, and the read log shows `b-good.docx` was read after the first settled. Unwritable output (R12.20): a run with `--out` set to a path inside a directory that does not exist, and a run with `--json` set to the same kind of path, each with a live-mode environment holding a Token; each exits 1, standard error is non-empty and does not contain the Token string, and `existsSync` of the unwritable path is false (an unwritable `--json` path leaves the Markdown on standard output, since `--out` is absent). A second variant injects a `FilePort` whose `write` rejects with an error whose message contains the Token, and asserts `[redacted]` in standard error.
 - `recorded-fetch.test.ts`: a recorded request is answered, an unrecorded request throws an error naming it and appears in `misses` (with `failOnMiss: false`).
-- `static/boundaries.test.ts` (R1.5, R1.8 to R1.12, R12.16, using the export package's `scan.ts` helpers through `support/scan.ts`): `process.env` appears only in `cli.ts` and only the four names are read from the `SentinelEnv`; `node:` specifiers only `node:fs`, `node:path`, `node:os` in `src`; no `any`; no default exports; no `try/catch` with an empty block or a block that neither returns, rethrows nor records; each module at most 300 lines and each function at most 40; no `PACKAGE_NAME` and no `index.test.ts`; no `app.json`; no snapshot test; no `expect(true)`; no `new Date()` outside `cli.ts`; exactly two `// Property N` comments.
+- `static/boundaries.test.ts` (R1.5, R1.8 to R1.12, R12.16, using the export package's `scan.ts` helpers through `support/scan.ts`): `process.env` appears only in `cli.ts` and only the four names are read from the `SentinelEnv`; `node:` specifiers only `node:fs`, `node:path`, `node:os` in `src`; no `any`; no default exports; no `try/catch` with an empty block or a block that neither returns, rethrows nor records; each module at most 300 lines and each function at most 40; no `PACKAGE_NAME` and no `index.test.ts`; no `app.json`; no snapshot test; no `expect(true)`; no `new Date()` outside `cli.ts`; exactly three `// Property N` comments (1, 2 and 3, after Requirement 14).
 - `static/package.test.ts` (R1, R11, R13): exact dependency lists and versions; the `cli` script; the root `sentinel` script; the hook file (name, trigger, timeout, command) and its matcher accepting `crew/sentinel/src/run.ts` and `crew/sentinel/test/report.test.ts` and rejecting `crew/sentinel/package.json` and `packages/export/src/index.ts`; the Export_Package exports `STATEMENT_TITLE`, `STATEMENT_TITLES` and `APPENDIX_TITLE` with their values; the README has exactly one "Sentinel" section with the four variable names; `docs/KIRO_USAGE.md` has the three rows; `.env.example` contains each of the four names `COURTLISTENER_TOKEN`, `COURTLISTENER_BASE_URL`, `REVEAL_CODES_FIXTURES_ONLY` and `REVEAL_CODES_CACHE_DIR`, and the test asserts nothing more about it.
 
 **Requirement 12 coverage.** Every criterion maps to at least one file.
@@ -659,7 +678,7 @@ Property-based testing applies to two pure behaviors: the file round trip and th
 | 12.11 | Sweep of a temporary directory: order, exit code, Markdown, JSON | `sweep.test.ts` |
 | 12.12 | Temporary directory deleted | `sweep.test.ts` (`afterEach`), `deps.test.ts` (cache directory) |
 | 12.13 | `buildDeps` in fixtures and live mode; Token absent from `verifierStatus` and errors | `deps.test.ts`, `redact.test.ts` |
-| 12.14 | Property 1 and Property 2 present | `docx-read.properties.test.ts`, `report.properties.test.ts`, `static/boundaries.test.ts` (exactly two `// Property N`) |
+| 12.14 (amended by 14.9) | Properties 1, 2 and 3 present | `docx-read.properties.test.ts`, `report.properties.test.ts`, `static/boundaries.test.ts` (exactly three `// Property N`) |
 | 12.15 | `numRuns` 50, or `min(FC_NUM_RUNS, 100)` | `docx-read.properties.test.ts` (`docxRuns`), `fc.test.ts` for the `docxRuns` function over a table of environments |
 | 12.16 | `tech.md` and `testing.md` conventions | `static/boundaries.test.ts` |
 | 12.17 | Relative import of export test support, or the fallback | `export-support.ts` compiled by `pnpm typecheck`; outcome in `BUILD_LOG.md` (checked by `static/package.test.ts`) |
@@ -679,3 +698,16 @@ Property-based testing applies to two pure behaviors: the file round trip and th
 5. `report.ts`, `report-table.ts`, arbitraries, Property 2.
 6. `args.ts`, `files.ts`, `sweep.ts`, `run.ts`, `cli.ts`, `index.ts`, the sweep test.
 7. Hook, static tests, README, `docs/KIRO_USAGE.md`, steering edits, `BUILD_LOG.md`, final checkpoint.
+
+### Group 5: coverage of Requirement 14
+| Criterion | What it requires | Test file |
+|---|---|---|
+| 14.1, 14.2 | Only `before` and `after` of `body_edited` change; the line stays | `findings.test.ts` (existing case), `analyse.test.ts` (existing one-paragraph case, whole lines) |
+| 14.3, 14.4 | Whole when both fit; shared start 30 before the first difference, "…" prefix | `excerpt.test.ts` |
+| 14.5 | No split surrogate pair at either end | `excerpt.test.ts`, `excerpt.properties.test.ts` |
+| 14.6 | Property 3 | `excerpt.properties.test.ts` |
+| 14.7 | The demo motion case | `excerpt.test.ts` |
+| 14.8 | The listed edge cases | `excerpt.test.ts` |
+| 14.9 | Three properties, counted by the static test | `static/boundaries.test.ts` |
+| 14.10 to 14.13 | README link and sentence, trimmed sentences, Sentinel section, `KIRO_USAGE.md` row | `static/package.test.ts` |
+| 14.14, 14.15 | `BUILD_LOG.md` entry, checkpoint, push, CI | final checkpoint 5.5 |
