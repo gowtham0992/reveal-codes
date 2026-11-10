@@ -61,7 +61,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Assert no formatted range contains the word "lines"
     - _Requirements: 4.11, 4.22, 9.12_
 
-  - [-] 2.3 Add the court-orders wording to `wording.ts`
+  - [x] 2.3 Add the court-orders wording to `wording.ts`
     - Add constants `NO_PROGRAM_SENTENCE`, `CONFIDENTIALITY_SENTENCE`, `ALL_DRAFTERS_SUFFIX` and functions `citingSentence` (with the separate-declaration clause replacing the full stop, D10), `toolsSentence` (including the "not recorded" case), `portionsSentence`, `howUsedSentence`, `promptRecordsSentence`, `headerPointer`, `prohibitionLine` (including the `between paragraphs` form, D18)
     - Update the header comment of `wording.ts`; no exclamation marks; if the file would pass 300 lines or a function 40, move the block to `wording-orders.ts` and change the wording scan per D12
     - _Requirements: 4.7, 4.8, 4.9, 4.10, 4.11, 4.12, 4.14, 4.15, 4.16, 4.17, 4.20, 5.5, 7.3_
