@@ -300,10 +300,10 @@ describe("no AI under dcolo-wang-2025 _Requirements: 4.16, 4.17, 9.6_", () => {
 });
 
 describe("element sentences and run counts _Requirements: 4.11, 4.12, 4.15_", () => {
-  const RUN_NOUN: readonly (readonly [number, string])[] = [
-    [0, "runs"],
-    [1, "run"],
-    [3, "runs"],
+  const RUN_NOUN: readonly (readonly [number, string, string])[] = [
+    [0, "runs", "prompts"],
+    [1, "run", "prompt"],
+    [3, "runs", "prompts"],
   ];
 
   it.each(RUN_NOUN)("how_used with %i run(s)", (n, noun) => {
@@ -315,21 +315,21 @@ describe("element sentences and run counts _Requirements: 4.11, 4.12, 4.15_", ()
     );
   });
 
-  it.each(RUN_NOUN)("prompt_records with %i run(s)", (n) => {
+  it.each(RUN_NOUN)("prompt_records with %i run(s)", (n, _run, prompts) => {
     const e = withElements("edtex-love-2025", ["prompt_records"]);
     const base = para(stmt(aiDoc(), logOf(n)), 2);
     const s = stmt(aiDoc(), logOf(n), ctx(e));
     expect(para(s, 3)).toBe(
-      `${base} Prompt records are retained in the document's run log (${String(n)} prompts).`,
+      `${base} Prompt records are retained in the document's run log (${String(n)} ${prompts}).`,
     );
   });
 
-  it("portions lists the paragraph range with an en dash", () => {
+  it("portions names the passage by paragraph number and opening words", () => {
     const e = withElements("edtex-love-2025", ["portions"]);
     const base = para(stmt(longAiDoc(), logOf(1)), 2);
     const s = stmt(longAiDoc(), logOf(1), ctx(e));
     expect(para(s, 3)).toBe(
-      `${base} The text drafted with the program appears at paragraphs 12\u201314 of the filing.`,
+      `${base} The text drafted with the program appears in 1 passage of the filing: paragraph 12, beginning "Paragraph 12. Paragraph 13. Paragraph 14.\u2026". Paragraphs are counted from the first line of the caption, skipping blank lines.`,
     );
   });
 
@@ -347,8 +347,16 @@ describe("element sentences and run counts _Requirements: 4.11, 4.12, 4.15_", ()
     for (const e of ALL_ENTRIES) {
       const all: OrderEntry = { ...e, elements: ORDER_ELEMENTS };
       const text = para(stmt(longAiDoc(), logOf(1), ctx(all, true)), 3);
-      expect(text, e.id).toContain("appears at paragraphs 12\u201314 of the filing.");
-      expect(text, e.id).not.toMatch(/\blines?\b/i);
+      expect(text, e.id).toContain(
+        'appears in 1 passage of the filing: paragraph 12, beginning "Paragraph 12. Paragraph 13. Paragraph 14.\u2026".',
+      );
+      expect(
+        text.replace(
+          /Paragraphs are counted from the first line of the caption, skipping blank lines\./,
+          "",
+        ),
+        e.id,
+      ).not.toMatch(/\blines?\b/i);
     }
   });
 });

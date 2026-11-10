@@ -21,7 +21,7 @@ function base(over: Partial<Statement> = {}): Statement {
     verifiedDate: "2026-03-04",
     caption: "",
     order: null,
-    aiRanges: [],
+    aiPassages: [],
     runCount: 0,
     confidentialityCertified: false,
     ...over,

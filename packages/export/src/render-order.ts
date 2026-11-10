@@ -1,4 +1,3 @@
-import { formatRanges } from "./ai-paragraphs.js";
 import type { OrderElement } from "./orders-types.js";
 import type { Statement, StatementOrder } from "./types.js";
 import {
@@ -36,8 +35,7 @@ function toolSentences(s: Statement, has: (e: OrderElement) => boolean): string[
 function usageSentences(s: Statement, has: (e: OrderElement) => boolean): string[] {
   if (!s.aiUsed) return [];
   const out: string[] = [];
-  if (has("portions") && s.aiRanges.length > 0)
-    out.push(portionsSentence(formatRanges(s.aiRanges)));
+  if (has("portions") && s.aiPassages.length > 0) out.push(portionsSentence(s.aiPassages));
   if (has("how_used")) out.push(howUsedSentence(s.runCount));
   if (has("confidentiality") && s.confidentialityCertified) out.push(CONFIDENTIALITY_SENTENCE);
   if (has("prompt_records")) out.push(promptRecordsSentence(s.runCount));

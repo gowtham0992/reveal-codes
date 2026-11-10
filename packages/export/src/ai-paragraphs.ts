@@ -1,8 +1,10 @@
 import type { Document } from "@reveal-codes/engine";
 import { isAiSpan } from "./statement-parts.js";
 
-/** Inclusive, 1-based range of Filing_Paragraph indexes. */
-export type ParagraphRange = Readonly<{ from: number; to: number }>;
+/** One AI-drafted passage: its 1-based paragraph among non-empty paragraphs and its opening words. */
+export type AiPassage = Readonly<{ paragraph: number; words: string }>;
+
+const EXCERPT_WORDS = 8;
 
 /** Start offset of every paragraph: 0, then the index after each "\n". */
 function paragraphStarts(text: string): readonly number[] {
@@ -25,43 +27,52 @@ function paragraphAt(starts: readonly number[], offset: number): number {
   return lo;
 }
 
-function markSpan(
-  marks: Set<number>,
-  starts: readonly number[],
-  textLength: number,
-  spanStart: number,
-  spanEnd: number,
-): void {
-  for (let k = paragraphAt(starts, spanStart); k < starts.length; k += 1) {
-    const from = starts[k] ?? 0;
-    if (from >= spanEnd) break;
-    // The terminating "\n" is not part of the paragraph (D18).
-    const to = k + 1 < starts.length ? (starts[k + 1] ?? 0) - 1 : textLength;
-    if (Math.max(spanStart, from) < Math.min(spanEnd, to)) marks.add(k + 1);
-  }
+/** Start offsets of the paragraphs that hold at least one non-whitespace character. */
+function nonEmptyStarts(text: string, starts: readonly number[]): readonly number[] {
+  return starts.filter((from, k) => {
+    const to = k + 1 < starts.length ? (starts[k + 1] ?? 0) - 1 : text.length;
+    return text.slice(from, to).trim() !== "";
+  });
 }
 
-/** Paragraphs (split on "\n") overlapped by an AI or AI>HUM span, merged into ranges. */
-export function aiParagraphRanges(document: Document): readonly ParagraphRange[] {
-  const starts = paragraphStarts(document.text);
-  const marks = new Set<number>();
+type Run = Readonly<{ start: number; end: number }>;
+
+/** Maximal runs of touching AI-origin spans (D21). */
+function aiRuns(document: Document): readonly Run[] {
+  const runs: Run[] = [];
+  let open: Run | null = null;
   for (const span of document.spans) {
-    if (!isAiSpan(span) || span.start >= span.end) continue;
-    markSpan(marks, starts, document.text.length, span.start, span.end);
+    if (!isAiSpan(span)) {
+      if (open !== null) runs.push(open);
+      open = null;
+    } else if (span.start < span.end) {
+      if (open !== null && open.end === span.start) open = { start: open.start, end: span.end };
+      else {
+        if (open !== null) runs.push(open);
+        open = { start: span.start, end: span.end };
+      }
+    }
   }
-  const sorted = [...marks].sort((a, b) => a - b);
-  const out: ParagraphRange[] = [];
-  for (const n of sorted) {
-    const last = out[out.length - 1];
-    if (last !== undefined && last.to + 1 === n) out[out.length - 1] = { from: last.from, to: n };
-    else out.push({ from: n, to: n });
+  if (open !== null) runs.push(open);
+  return runs;
+}
+
+/**
+ * The AI-drafted passages in document order. A run with no non-whitespace character is not a
+ * passage (D18). The paragraph number counts non-empty paragraphs only (D21).
+ */
+export function aiPassages(document: Document): readonly AiPassage[] {
+  const { text } = document;
+  const starts = paragraphStarts(text);
+  const filled = nonEmptyStarts(text, starts);
+  const out: AiPassage[] = [];
+  for (const run of aiRuns(document)) {
+    const slice = text.slice(run.start, run.end);
+    if (slice.trim() === "") continue;
+    const first = run.start + (slice.length - slice.trimStart().length);
+    const paragraph = filled.indexOf(starts[paragraphAt(starts, first)] ?? 0) + 1;
+    const words = slice.trim().split(/\s+/).slice(0, EXCERPT_WORDS).join(" ");
+    out.push({ paragraph, words });
   }
   return out;
-}
-
-/** `27`, `12–14` (en dash), joined by ", "; "" for no ranges. */
-export function formatRanges(ranges: readonly ParagraphRange[]): string {
-  return ranges
-    .map((r) => (r.from === r.to ? String(r.from) : `${String(r.from)}\u2013${String(r.to)}`))
-    .join(", ");
 }

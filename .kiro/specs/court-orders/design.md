@@ -11,6 +11,8 @@ The work is four things:
 3. Web changes: a Selection_Store, a Picker with an Order_Summary and a confidentiality checkbox in the Export_Dialog, the same summary and a separate checkbox in the Print_View, a prohibition block, and a first-page heading in the DOCX and the print view.
 4. Sentinel title matching through `STATEMENT_TITLES`, a demo motion court change, three sentinel proof tests, and documentation edits.
 
+A follow-up after a browser walkthrough (D21 to D29) changes how the Statement points at AI-drafted text (passages with a paragraph number and opening words, instead of bare paragraph numbers), makes every count noun agree with its number, names a recorded demonstration response as such, trims the Export_Dialog (one prohibition line, no stale notice, a fixed-width Picker), and aligns the demo motion argument with its N.D. Tex. caption.
+
 The Engine and the Verifier do not change. `crew/sentinel` changes in one source file, `src/split.ts`, and its tests.
 
 Product principles that bind this design: principle 1 (the gate counts spans, it never detects AI), principle 2 (same Document and same entry give the same Statement), principle 3 (the selection stays in `localStorage`, nothing is sent anywhere), principle 4 (the prohibition has no override because it is not a red code), principle 7 (the picker is plain UI).
@@ -38,9 +40,18 @@ This design refers to two criteria of Requirement 9 by content: "the paragraphs-
 | D15 | **Order arbitraries live in `packages/export/test/support/arbitraries.ts`.** | The Engine has no knowledge of `OrderEntry` and may not import the Export_Package. Requirement 10, criterion 4 asks for reuse of the shared arbitraries; `arbDocument` and `arbGateClearDocument` are reused as they are. |
 | D16 | **The Selection_Store keeps `localStorage` authoritative and uses memory only after a failed write.** | Requirement 2, criterion 6. This lets another tab's change show when the dialog opens and keeps the in-memory fallback to one flag. |
 | D17 | **The `blocked` print model keeps its shape; a new `prohibited` kind carries the notice.** | `print-model.test.ts` asserts `toEqual({ kind: "blocked", blocking })`. Adding a field to `blocked` would break it. |
-| D18 | **A span of line breaks only has no paragraph.** If every AI-origin span lies on `\n` characters, the AI ranges are empty. The portions sentence is then omitted, and the prohibition line says `between paragraphs` instead of `at paragraphs <ranges>`. | The requirements do not cover this case. A paragraph is "contained" only when an AI span overlaps characters of the paragraph, not its terminating `\n`. This is a small gap in the requirements; see the summary at the end of the conversation. |
+| D18 | **A run of line breaks and spaces only is not a passage.** If every AI-origin run holds no non-whitespace character, the AI passages are empty. The portions sentence is then omitted, and the prohibition line says `AI-origin text remains, consisting of line breaks only.` in place of the passage clause. | The requirements do not cover this case. A passage needs words to quote and a paragraph to point at (follow-up, D21). The Gate still returns `false`, because it counts spans, not passages. |
 | D19 | **The dataset file is formatted with Prettier before it is used.** `prettier --check data` reports `data/standing-orders.json` today. The task runs `prettier --write` on it and compares `JSON.parse` of the file before and after for deep equality. | `pnpm lint` ends with `prettier --check .` and would fail. Only whitespace changes; no fact changes (Requirement 1, criterion 12). |
 | D20 | **Changing line 2 of the demo motion shifts every later Offset by +8.** `FOR THE DISTRICT OF OREGON` is 26 characters and `FOR THE NORTHERN DISTRICT OF TEXAS` is 34. | `packages/engine/test/demo.test.ts` holds literal Offsets (337 through 2342) and `packages/engine/fixtures/README.md` quotes four of them. Requirement 12, criterion 9 names only the sentinel test; these are further tests that "quote" the old text by position. They are updated mechanically in the same task. |
+| D21 | **Passages replace paragraph ranges (follow-up).** An AI_Passage is a maximal run of consecutive characters that lie in spans of origin `AI` or `AI>HUM`. Its Paragraph_Number is the 1-based index, among the non-empty Filing_Paragraphs, of the paragraph that holds its first non-whitespace character. Its excerpt is its first eight whitespace-separated words. | The old sentence counted blank lines, so `paragraphs 21` pointed at nothing a reader could find in a document whose blank lines are invisible. The opening words let the reader search; skipping blank lines makes the number match what a court clerk counts. Adjacent `AI` and `AI>HUM` spans join, because the reader sees one block of text. |
+| D22 | **The Statement carries `aiPassages: readonly AiPassage[]`, with `AiPassage = { paragraph: number; words: string }`.** `words` is the first eight words joined by single spaces, without the ellipsis; the wording adds `…`. `aiRanges`, `ParagraphRange` and `formatRanges` are removed. | `renderStatement` reads only the Statement (Requirement 4, criterion 21). The ellipsis is wording, so it lives in `wording.ts` (the wording scan). |
+| D23 | **One plural helper, `plural(n, one, many)`, in `wording.ts`.** It serves `prompt/prompts`, `run/runs`, `passage/passages`, and the verb pair `remains/remain`. | Four sentences had hand-written plurals and one (`(1 prompts)`) was wrong. A single function with a table test over 0, 1, 2 and 3 closes the class of bug. |
+| D24 | **The recorded demonstration provider is named by one constant.** `wording.ts` exports `DEMO_RESPONSE_WORDS = "a recorded demonstration response (no model was called)"` and a function `toolText(tool)` that returns it when `tool.provider === "fixture"`, and `<provider>: <model>` or `<provider>` otherwise. `toolList` (the `Tools: …` clause of the base AI paragraph) and `toolsSentence` (the tool_name order sentence) both call `toolText`. | The fixture provider is the one the app uses with no credentials, so a judge sees the demo statement; naming a model that was never called would be false. Today `toolList` prints `provider: model` and the order sentence prints `provider model`; both go through `toolText`, so the two cannot drift. The task checks the exact provider string in `apps/web/src/server/llm*.ts`. |
+| D25 | **The prohibition block in the Export_Dialog shows the prohibition line only.** `prohibitionNotice` keeps its `{ line, keyLanguage }` shape; the dialog renders `line` and not `keyLanguage`; the Print_View renders both. | The Order_Summary directly above already quotes the `key_language`. The Print_View has no such summary beside the notice in its blocked view and is unchanged. |
+| D26 | **The export result notice is cleared on dialog open and on picker change.** The notice belongs to the export flow state in `use-export.tsx` (the status line text "Exported ….docx."); the dialog opening and `select` in `useOrderGate` both call a `clearNotice` callback. | A notice that survives a close and reopen, or a court change, describes a file made under a different court. |
+| D27 | **Option text shortens only the title part, with the Export_Package `ellipsize`.** `optionText` imports `ellipsize` from `@reveal-codes/export` and applies it with a limit of 60 to the `title` of a Judge_Entry and to the `instrument` of a Court_Wide_Entry. | The select is `width: 100%` of the dialog, so a long title no longer widens it; the year stays visible at the end. Re-using `ellipsize` avoids a second truncation rule. The task confirms the exported name and signature. |
+| D28 | **The demo motion keeps volumes, reporters and pages; only the court words change.** `Ninth` becomes `Fifth` (same length), `9th Cir.` becomes `5th Cir.` (same length), `D. Or.` becomes `N.D. Tex.` (+3). | The recorded CourtListener fixtures are keyed by citation, so the lookups are unchanged. The N.D. Tex. caption and the Fifth Circuit now agree. |
+| D29 | **The DOCX pointer paragraph has 240 twips of spacing after it.** Only the second header paragraph changes; the heading paragraph and the body keep their spacing. | Without it the caption of the first page sits against the pointer line. The Sentinel does not read headers, so no drift results. |
 
 ### Research findings that inform the design
 
@@ -50,7 +61,7 @@ This design refers to two criteria of Requirement 9 by content: "the paragraphs-
 - **Wording scan.** `boundaries.test.ts` fails if any `src` file other than `wording.ts` holds a literal of 20 or more characters that overlaps a `wording.ts` export. New Statement sentences therefore go through `wording.ts`, and the prohibition line (shared by the dialog and the print view) is built in the Export_Package.
 - **Property-file scan.** `boundaries.test.ts` knows four property files, each with one `// Property N` and one `fc.assert`, and requires the comments to be exactly 1 to 4. Two new files with Property 1 and Property 2 need the table changed (see "Static scans").
 - **Project references.** `packages/export/tsconfig.json` is `composite` with `include: ["src"]`. A JSON import from `../../../data` is outside `rootDir` and not in the file list, which TypeScript reports as TS6059 and TS6307. The design widens `rootDir` and `include` (see "Dataset import and project settings").
-- **Offsets in the demo motion.** All Offsets in `packages/engine/test/demo.test.ts` are after line 2, so all shift by +8 (D20).
+- **Offsets in the demo motion.** All Offsets in `packages/engine/test/demo.test.ts` are after line 2, so all shift by +8 (D20), and by a further +3 after the "(D. Or. 2015)" citation (D28).
 
 ## Architecture
 
@@ -109,8 +120,8 @@ sequenceDiagram
 | `src/orders-parse.ts` | new | 130 | Checks 2 to 4: root shape, `version`, entry fields and types |
 | `src/orders-check.ts` | new | 140 | Checks 5 to 10: vocabulary, ids, references, dates, URLs, key language |
 | `src/orders.ts` | new | 90 | `loadOrders`, `ORDERS`, `selectableOrders`, `orderById`, `judgeSurname`, `statementTitles` |
-| `src/ai-paragraphs.ts` | new | 70 | `aiParagraphRanges`, `formatRanges`, `ParagraphRange` |
-| `src/order-rules.ts` | new | 60 | `aiSpanCount`, `needsConfidentiality`, `prohibitionNotice` |
+| `src/ai-paragraphs.ts` | new | 70 | `aiPassages`, `AiPassage` |
+| `src/order-rules.ts` | new | 60 | `needsConfidentiality`, `prohibitionNotice` |
 | `src/statement-order.ts` | new | 70 | `orderOf`, `statementTitle`, `firstPageHeading` |
 | `src/render-order.ts` | new | 70 | `orderSentences`, `signatureLine`, `citingParagraph` |
 | `src/wording.ts` | changed | 195 | the court-orders block, `STATEMENT_TITLES`; header comment updated |
@@ -206,29 +217,28 @@ export function statementTitles(orders: OrderSet, standardTitle: string): readon
 ### `ai-paragraphs.ts`
 
 ```ts
-export type ParagraphRange = Readonly<{ from: number; to: number }>;   // 1-based, inclusive
-export function aiParagraphRanges(document: Document): readonly ParagraphRange[];
-export function formatRanges(ranges: readonly ParagraphRange[]): string;
+export type AiPassage = Readonly<{ paragraph: number; words: string }>;   // paragraph is 1-based among non-empty paragraphs
+export function aiPassages(document: Document): readonly AiPassage[];
 ```
 
-A Filing_Paragraph is a substring of `document.text` between `\n` characters, and its 1-based index is the "line" number the Sentinel reports. The computation reads only `document.spans` and `document.text`:
+A Filing_Paragraph is a substring of `document.text` between `\n` characters. The computation reads only `document.spans` and `document.text`:
 
-1. `starts` is `[0]` plus `i + 1` for every `\n` at index `i`. Paragraph `k` (0-based) covers `[starts[k], end(k))` where `end(k)` is `starts[k + 1] - 1`, or `text.length` for the last one. The terminating `\n` is not part of the paragraph.
-2. For every span with `isAiSpan(span)` (origin `AI` or `AI>HUM`) and `start < end`, binary-search the greatest `k` with `starts[k] <= span.start`, then walk `k` upward while `starts[k] < span.end`. Mark `k + 1` when `max(span.start, starts[k]) < min(span.end, end(k))`.
-3. Sort the marks, merge consecutive indexes into `{from, to}` ranges.
+1. Walk the spans in order and join every maximal run of consecutive spans with `isAiSpan(span)` (origin `AI` or `AI>HUM`) and `start < end` that touch (`next.start === previous.end`) into one run `[start, end)`. A span of another origin ends the run (D21).
+2. For each run, take `text = document.text.slice(start, end)`. When `text` has no non-whitespace character the run is not a passage (D18). Otherwise `words` is the first eight tokens of `text.trim().split(/\s+/)` joined by single spaces.
+3. The paragraph number is the count of non-empty paragraphs (those with at least one non-whitespace character) that start at or before the paragraph holding the run's first non-whitespace character, including that paragraph. It is computed from one pass over `document.text` that lists the start offset of each non-empty paragraph; a binary search finds the greatest start not above the offset.
+4. The passages are returned in document order.
 
-The overlap test is why a span consisting only of `\n` marks nothing (D18) and why an empty paragraph is never marked. `formatRanges` writes `27` for a single index, `12–14` (en dash U+2013) for a run, and joins items with `, `; two consecutive indexes are written `12–13`. It returns `""` for no ranges. No origin is re-derived: `isAiSpan` is the same predicate `usedAi` uses.
+No origin is re-derived: `isAiSpan` is the same predicate `usedAi` uses. The list is plain data and is stored in the Statement as `aiPassages` (D22).
 
 ### `order-rules.ts`
 
 ```ts
-export function aiSpanCount(document: Document): number;      // spans with isAiSpan
 export function needsConfidentiality(document: Document, entry: OrderEntry | null): boolean;
 export type ProhibitionNotice = Readonly<{ line: string; keyLanguage: string }>;
 export function prohibitionNotice(document: Document, entry: OrderEntry | null): ProhibitionNotice | null;
 ```
 
-`needsConfidentiality` is `entry !== null && entry.elements.includes("confidentiality") && usedAi(document)`. `prohibitionNotice` returns `null` unless `entry.kind === "prohibition"` and `usedAi(document)`. Otherwise it builds `line` with `prohibitionLine` from `wording.ts` (below), `aiSpanCount(document)` and `formatRanges(aiParagraphRanges(document))`, and returns the entry's `key_language` unchanged. The dialog and the print view both render this one value, so the "paragraphs, never lines" rule is tested in one place. The notice is shown if and only if the Gate returns `false` for the prohibition reason.
+`needsConfidentiality` is `entry !== null && entry.elements.includes("confidentiality") && usedAi(document)`. `prohibitionNotice` returns `null` unless `entry.kind === "prohibition"` and `usedAi(document)`. Otherwise it builds `line` with `prohibitionLine` from `wording.ts` (below) from the entry, the `aiPassages(document)` list (count and first passage), and returns the entry's `key_language` unchanged. The dialog renders `line` only (D25); the print view renders `line` and the quoted `keyLanguage`. Both render this one value, so the passage wording is tested in one place. The notice is shown if and only if the Gate returns `false` for the prohibition reason.
 
 ### `gate.ts`
 
@@ -258,7 +268,7 @@ Every caller found by searching `apps`, `packages`, `crew` and `docs` for `canEx
 | `packages/export/src/index.ts` | re-export only |
 | `buildStatement` in `docx.properties.test.ts`, `statement.test.ts` (four calls), `statement.properties.test.ts` (two), `support/demo-statement.ts`, `docx.test.ts`, and `crew/sentinel/test/docx-read.properties.test.ts` | no change: the parameter defaults to `null` (D11). `demo-statement.ts` gains an optional `orderContext` parameter for the sentinel proof tests |
 
-`packages/export/test/render-statement.test.ts` builds a `Statement` literal in `base()`. It gains the four new fields (`order: null`, `aiRanges: []`, `runCount: 0`, `confidentialityCertified: false`) so it still typechecks; its expectations do not change.
+`packages/export/test/render-statement.test.ts` builds a `Statement` literal in `base()`. It gains the four new fields (`order: null`, `aiPassages: []`, `runCount: 0`, `confidentialityCertified: false`) so it still typechecks; its expectations do not change.
 
 ### Statement data and rendering
 
@@ -266,14 +276,14 @@ Every caller found by searching `apps`, `packages`, `crew` and `docs` for `canEx
 
 ```ts
 order: StatementOrder | null;
-/** Filing_Paragraph ranges that hold AI-origin text, ascending; [] when none. */
-aiRanges: readonly ParagraphRange[];
+/** AI-origin passages in document order, each with its paragraph number and first eight words; [] when none. */
+aiPassages: readonly AiPassage[];
 /** runLog.length; the run count and the prompt count of the order sentences. */
 runCount: number;
 confidentialityCertified: boolean;
 ```
 
-`buildStatement(document, runLog, meta, orderContext = null)` sets `order` with `orderOf(orderContext)` (`null` for `null`), `aiRanges` with `aiParagraphRanges(document)`, `runCount` with `runLog.length` and `confidentialityCertified` with `orderContext?.confidentialityCertified ?? false`. The meta check and the segmentation error path are unchanged. The function stays under 40 lines because the new fields come from helpers.
+`buildStatement(document, runLog, meta, orderContext = null)` sets `order` with `orderOf(orderContext)` (`null` for `null`), `aiPassages` with `aiPassages(document)`, `runCount` with `runLog.length` and `confidentialityCertified` with `orderContext?.confidentialityCertified ?? false`. The meta check and the segmentation error path are unchanged. The function stays under 40 lines because the new fields come from helpers.
 
 **`orderOf(ctx)`** copies `id`, `instrument`, `title`, `date`, `kind`, `caption`, `elements` from the entry, `court` from `court.name`, `judge` from `judge?.name ?? null`, and `sourceUrl` from `source_url`. It copies arrays and objects so the Statement shares nothing mutable with the dataset.
 
@@ -302,21 +312,21 @@ For `edtex-love-2025` this reads `...of the United States District Court for the
 
 | Condition on `order.elements` and the Statement | Sentence |
 |---|---|
-| `tool_name`, `aiUsed` | `The generative artificial intelligence program used was <provider> <model>.` per tool, tools joined by `; `, `<provider>` alone when `model` is `null`; with no tool recorded, `The generative artificial intelligence program used is not recorded.` |
+| `tool_name`, `aiUsed` | `The generative artificial intelligence program used was <tool>.` per tool, tools joined by `; `, where `<tool>` is `toolText(tool)` (D24): `<provider> <model>`, `<provider>` alone when `model` is `null`, and `a recorded demonstration response (no model was called)` when `provider` is `fixture`; with no tool recorded, `The generative artificial intelligence program used is not recorded.` |
 | `tool_name`, not `aiUsed` | `No program was used.` |
-| `portions`, `aiUsed`, `aiRanges` not empty | `The text drafted with the program appears at paragraphs <ranges> of the filing.` |
-| `how_used`, `aiUsed` | `The program was used to draft text inserted at the author's request in <n> run(s); each prompt is recorded in the run log.` with `run` for 1 and `runs` otherwise |
+| `portions`, `aiUsed`, `aiPassages` not empty | `The text drafted with the program appears in <n> passage(s) of the filing: paragraph <k>, beginning "<words>…"; paragraph <k2>, beginning "<words2>…". Paragraphs are counted from the first line of the caption, skipping blank lines.` with `passage` for 1 and `passages` otherwise; at most five items, and with more, the items end ` and <m> more, each marked with an AI code in the Provenance Appendix.` in place of the full stop after the fifth |
+| `how_used`, `aiUsed` | `The program was used to draft text inserted at the author's request in <n> run(s); each prompt is recorded in the run log.` with `plural(n, "run", "runs")` |
 | `confidentiality`, `aiUsed`, `confidentialityCertified` | `The author certifies that no confidential or business proprietary information was entered into the program.` |
-| `prompt_records`, `aiUsed` | `Prompt records are retained in the document's run log (<n> prompts).` with `<n>` = `runCount` |
+| `prompt_records`, `aiUsed` | `Prompt records are retained in the document's run log (<n> prompt(s)).` with `<n>` = `runCount` and `plural(n, "prompt", "prompts")`: `(1 prompt)`, `(3 prompts)` |
 | `accuracy_certification`, `citations_verified`, `human_review` | nothing; `citationParagraph`, `quoteParagraph` and `RESPONSIBILITY` are always rendered |
 
-The wording is one place: `wording.ts` holds the constants (`NO_PROGRAM_SENTENCE`, `CONFIDENTIALITY_SENTENCE`, `ALL_DRAFTERS_SUFFIX`) and the functions `citingSentence`, `toolsSentence`, `portionsSentence`, `howUsedSentence`, `promptRecordsSentence`, `headerPointer` and `prohibitionLine`. None contains an exclamation mark.
+The wording is one place: `wording.ts` holds the constants (`NO_PROGRAM_SENTENCE`, `CONFIDENTIALITY_SENTENCE`, `ALL_DRAFTERS_SUFFIX`, `DEMO_RESPONSE_WORDS`) and the functions `plural` (D23), `toolText` (D24), `citingSentence`, `toolsSentence`, `portionsSentence`, `howUsedSentence`, `promptRecordsSentence`, `headerPointer` and `prohibitionLine`. `toolList` of the base AI paragraph calls `toolText` for each tool, so the `Tools: …` clause prints the demonstration words for a fixture run and `provider: model` for any other. `prohibitionLine` writes `<subject> prohibits AI-drafted text. 1 AI-origin passage remains: paragraph <k>, beginning "<words>…".` for one passage and `<subject> prohibits AI-drafted text. <n> AI-origin passages remain, the first at paragraph <k>, beginning "<words>…".` for more, with `<subject>` `Judge <surname>'s order` or the instrument. None contains an exclamation mark.
 
 ### First-page heading in the DOCX
 
 `firstPageHeading(statement): FirstPageHeading | null` in `statement-order.ts` returns `{ heading: caption.text, pointer: headerPointer(statementTitle(statement)) }` when `order?.caption?.placement === "first_page_heading"` and `aiUsed`, and `null` otherwise. `headerPointer(title)` is `This filing was prepared using generative artificial intelligence. See the <title> following the filing.` The Export_Package exports the function so the print view uses the same two strings.
 
-`docx-blocks.ts` gains `headerElements(h)`: a centred bold 12 pt paragraph for `heading` (the existing `bodyRun(text, true)`) and `singleParagraph(h.pointer)` for the pointer. `docx.ts` builds the section as before, and when the heading is not `null` adds `titlePage: true` to `properties` and `headers: { first: new Header({ children: headerElements(h) }) }`:
+`docx-blocks.ts` gains `headerElements(h)`: a centred bold 12 pt paragraph for `heading` (the existing `bodyRun(text, true)`) and `singleParagraph(h.pointer)` for the pointer with `spacing: { after: 240 }` (12 pt) so the caption does not sit against it (D29). `singleParagraph` gains an optional `after` argument, or a local paragraph with the spacing is built; the body paragraphs keep their spacing. `docx.ts` builds the section as before, and when the heading is not `null` adds `titlePage: true` to `properties` and `headers: { first: new Header({ children: headerElements(h) }) }`:
 
 ```ts
 function headerOptions(heading: FirstPageHeading | null) {
@@ -332,7 +342,7 @@ With a heading `null` the options are the ones used today, so the file is unchan
 
 ### `index.ts`
 
-New exports: types `OrderEntry`, `OrderSet`, `OrderContext`, `OrderGroup`, `OrderKind`, `OrderElement`, `StatementOrder`, `ParagraphRange`, `ProhibitionNotice`, `FirstPageHeading`; values `ORDERS`, `loadOrders`, `selectableOrders`, `orderById`, `judgeSurname`, `STATEMENT_TITLES`, `prohibitionNotice`, `needsConfidentiality`, `firstPageHeading`. `canExport` and `buildStatement` keep their export.
+New exports: types `OrderEntry`, `OrderSet`, `OrderContext`, `OrderGroup`, `OrderKind`, `OrderElement`, `StatementOrder`, `AiPassage`, `ProhibitionNotice`, `FirstPageHeading`; values `ORDERS`, `loadOrders`, `selectableOrders`, `orderById`, `judgeSurname`, `STATEMENT_TITLES`, `prohibitionNotice`, `needsConfidentiality`, `firstPageHeading`. `canExport` and `buildStatement` keep their export.
 
 ### Web app: Selection_Store (`apps/web/src/order-selection.ts`)
 
@@ -358,7 +368,7 @@ Pure functions, tested without React:
 | Function | Result |
 |---|---|
 | `NO_ORDER_LABEL` | `No specific order — general statement` |
-| `optionText(entry)` | `Court-wide — <instrument> (<year>)` or `Judge <surname> — <title> (<year>)`; year is `date.slice(0, 4)` |
+| `optionText(entry)` | `Court-wide — <instrument ellipsized to 60> (<year>)` or `Judge <surname> — <title ellipsized to 60> (<year>)`, using `ellipsize` from `@reveal-codes/export` (D27); year is `date.slice(0, 4)` |
 | `kindWords(kind)` | `Statement in every filing`, `Disclosure when AI is used`, `AI drafting prohibited`, `Verification required`, `Guidance`; typed as `Record<OrderKind, string>` so a new kind fails to compile |
 | `appliesWords(a)` | `attorneys and self-represented parties`, `attorneys`, `self-represented parties` |
 | `summaryLine(entry)` | `<kindWords> · <appliesWords> · <date>` |
@@ -372,7 +382,7 @@ All new files are in `apps/web/src/components/`. No new top-level directory is a
 
 **`order-picker.tsx`** exports `OrderPicker` and `OrderSummary`.
 
-- `OrderPicker({ selection, onSelect })` renders `<label htmlFor=id>Court or judge</label>` and a native `<select id=id>`. The first `<option value="">` is `NO_ORDER_LABEL`. Then one `<optgroup label={group.court}>` per group of `selectableOrders(ORDERS)`, each with `<option value={entry.id}>{optionText(entry)}</option>`. The value of the select is `selection?.entryId ?? ""`. `onSelect` receives `string | null`.
+- `OrderPicker({ selection, onSelect })` renders `<label htmlFor=id>Court or judge</label>` and a native `<select id=id>` with `width: 100%` of the dialog (the CSS module sets `width: 100%`; `min-width: 0`). The first `<option value="">` is `NO_ORDER_LABEL`. Then one `<optgroup label={group.court}>` per group of `selectableOrders(ORDERS)`, each with `<option value={entry.id}>{optionText(entry)}</option>`; `optionText` shortens the title part to 60 characters (D27). The value of the select is `selection?.entryId ?? ""`. `onSelect` receives `string | null`, and the dialog also clears its export notice (D26).
 - `OrderSummary({ entry })` renders nothing for `null`. For an entry it renders the line `summaryLine(entry)`, the `key_language` in straight quotation marks, and `<a href={entry.source_url} target="_blank" rel="noreferrer">Source</a>`. The `href` can only be a value that passed the `https` and host check of the loader, so no `javascript:` URL can reach it. `key_language` is rendered as text by React, never as HTML.
 - Styles are in `order-picker.module.css`: the select uses `font-family: var(--font-ui)`, `font-size: var(--size-ui)`, `border: 1px solid var(--rule)`, `background: var(--paper)`, `color: var(--ink)`, no radius, no shadow; its focus outline is `2px solid var(--accent)`; the summary has a 1px `var(--rule)` top border. Every value is already allowed by `css-rules.test.ts`, so no scan changes.
 
@@ -401,7 +411,8 @@ export function useOrderGate(document: Document, orderStore: OrderSelectionStore
 
 - `ExportDialogProps` gains `orderStore: OrderSelectionStore`, and `onDownload` becomes `(context: OrderContext) => void`. `onPrint` keeps its signature: the print view reads the persisted selection itself and receives no tick (Requirement 6, criterion 8).
 - The body renders, in this order: `OrderPicker`, `OrderSummary` (only with an entry), the `ConfidentialityCheckbox` (only when `needsTick`), the existing lead and `ExportIssues` (only when there are blocking issues), and the prohibition notice. The Picker is above the Issues list (Requirement 3, criterion 1).
-- The notice is two paragraphs, `notice.line` and `quoted(notice.keyLanguage)`, in the place above the action buttons. There is no override control for it, and `ExportIssues` receives only `blockingIssues(document)`, so the Issues list and its count are unchanged (Requirement 5, criterion 7).
+- The notice is one paragraph, `notice.line`, in the place above the action buttons; the `key_language` is not repeated because the Order_Summary above already shows it (D25). There is no override control for it, and `ExportIssues` receives only `blockingIssues(document)`, so the Issues list and its count are unchanged (Requirement 5, criterion 7).
+- Opening the dialog shows no export result notice, and changing the Picker clears it (D26): `use-export.tsx` passes a `clearNotice` callback to the dialog, which calls it in an effect on mount and in `select`.
 - The buttons use `disabled={!gate.clear || busy}` and `disabled={!gate.clear}`. Their labels still come from `downloadLabel(blocking.length)` and `printLabel(blocking.length)`, which count Blocking_Issues only. `use-export.tsx` still computes the toolbar count from `blockingIssues(doc).length`, so the "Export (n blocking)" label does not count the Prohibition_Block (Requirement 5, criterion 8).
 - `ExportDialog` is 35 lines today. To stay under 40 with the new hook and JSX, the three buttons move into a new component `ExportActions({ clear, busy, blocking, onDownload, onPrint, onClose })` in the same file, and the picker, tick and notice live in `ExportOrder({ gate })`. The file stays near 190 lines.
 - The first focusable control is now the Picker, not the first button. The tests that check initial focus are checked in the implementation task.
@@ -458,7 +469,7 @@ Nothing else in `crew/sentinel/src` changes. `crew/sentinel/test/split.test.ts` 
 
 A filing paragraph equal to any member of `STATEMENT_TITLES` (for example `AI Certification`) cuts the body early; this is the case already described by row L1 of the sentinel-sweep error table, now widened to the seven members.
 
-`buildDemoDocumentStatement(orderContext: OrderContext = null)` in `packages/export/test/support/demo-statement.ts` passes the context to `buildStatement`. Three example tests in a new file `crew/sentinel/test/court-orders.test.ts` each build the demo Document (which has one AI span) and a Statement under one entry, pack it with `buildDocx`, write it to a temp file and run `run(["check", file], io)` with an `io` of the same shape as in `sweep.test.ts` (no token, so the recorded fixtures are used, and a `fetch` that rejects). Each asserts exit code 0 and `No drift.` in the report:
+`buildDemoDocumentStatement(orderContext: OrderContext = null)` in `packages/export/test/support/demo-statement.ts` passes the context to `buildStatement`. Three example tests in a new file `crew/sentinel/test/court-orders.test.ts` each build the demo Document (which has one AI span) and a Statement under one entry, pack it with `buildDocx`, write it to a temp file and run `run(["check", file], io)` with an `io` of the same shape as in `sweep.test.ts` (no token, so the recorded fixtures are used, and a `fetch` that rejects). Each asserts exit code 0 and `No drift.` in the report; the `edtex-love-2025` and `dhaw-go-23-1` tests also assert that `splitExport(readDocx(bytes))` returns a body that, joined with `\n`, equals `document.text`:
 
 | Test | Entry | What it proves |
 |---|---|---|
@@ -473,7 +484,7 @@ A filing paragraph equal to any member of `STATEMENT_TITLES` (for example `AI Ce
 - `crew/sentinel/test/analyse.test.ts` lines 62 and 70: `>FOR THE NORTHERN DISTRICT OF TEXAS</w:t>` is replaced by `>FOR THE SOUTHERN DISTRICT OF TEXAS</w:t>`, and `before` and `after` become `FOR THE NORTHERN DISTRICT OF TEXAS` and `FOR THE SOUTHERN DISTRICT OF TEXAS`. Line 2 stays line 2.
 - `packages/engine/test/demo.test.ts`: every literal Offset gains 8 (D20): the starts `1466`, `1696`, `2004`, `2117`; the `at(...)` pairs from `(337, 361)` to `(2342, 2366)`; `targetStart` `1466` and `954`; `citationStart` `1062` and `2229`; and the three `slice` calls. `packages/engine/fixtures/README.md` line 3 quotes `1466`, `1696`, `2004` and `2117`, which become `1474`, `1704`, `2012` and `2125`.
 - A search for the other Offsets in `apps`, `packages`, `crew` and `docs` found only those two files. The implementation task repeats the search before and after the edit and runs the engine, verifier, web and sentinel test projects.
-- The motion cites Ninth Circuit and D. Or. authority, which now sits oddly under a Texas caption. Requirement 12 changes line 2 only, so the design leaves the citations alone: they are the fabricated citations the verifier fixtures and the demo script depend on.
+- The Demo_Motion argument is edited to match its caption (D28, Requirement 13, criteria 3 to 5): `The Ninth Circuit has held` becomes `The Fifth Circuit has held`, both `(9th Cir. …)` become `(5th Cir. …)`, and `(D. Or. 2015)` becomes `(N.D. Tex. 2015)`. Volumes, reporters and pages stay, so the recorded lookups are unchanged. The `D. Or.` to `N.D. Tex.` edit adds 3 characters, so every literal Offset after that citation in `packages/engine/test/demo.test.ts` and `packages/engine/fixtures/README.md` moves by 3 (and the Offsets of text before it stay), and the character count asserted in the Statement tests goes from 2619 to 2622. The engine demo test, the README Offsets and any test that quotes these lines are updated. The extract `court` field becomes `N.D. Tex.` and `5th Cir.`; the task verifies that the citation grammar supports both courts and reports it if it does not (the Engine is not changed).
 
 ### Documentation and steering
 
@@ -548,7 +559,7 @@ export type StatementOrder = Readonly<{
 }>;
 ```
 
-`Statement` gains `order`, `aiRanges`, `runCount` and `confidentialityCertified` (see "Statement data and rendering"). Every value is a string, number, boolean, `null`, array or plain object, so `JSON.parse(JSON.stringify(statement))` equals the Statement (Requirement 8, criterion 1).
+`Statement` gains `order`, `aiPassages`, `runCount` and `confidentialityCertified` (see "Statement data and rendering"). Every value is a string, number, boolean, `null`, array or plain object, so `JSON.parse(JSON.stringify(statement))` equals the Statement (Requirement 8, criterion 1).
 
 ### Persisted selection
 
@@ -613,7 +624,8 @@ Requirement 10 names two properties, and this design keeps exactly those. The pr
 | The Prohibition_Block holds when `exportDocx` is called | `{ status: "blocked" }`, no notice; the dialog already disables the buttons | 5.2, 5.6 |
 | The confidentiality tick is missing when `exportDocx` is called | `{ status: "blocked" }`, no notice | 6.2 |
 | Prohibition and Blocking_Issues hold together | the dialog shows both: the Issues list as today and the notice; the print view shows the `prohibited` model with the blocking list and the notice, and no Statement_Text | 5.7, 5.11 |
-| Every AI-origin span lies on line breaks only | AI ranges are empty; the portions sentence is omitted; the notice reads `between paragraphs` (D18) | 4.11, 5.5 |
+| Every AI-origin run holds only whitespace | AI passages are empty; the portions sentence is omitted; the notice reads `AI-origin text remains, consisting of line breaks only.` (D18) | 4.11, 5.5 |
+| A fixture-provider run is recorded in the run log | the Tools clause and the tool sentence print `a recorded demonstration response (no model was called)` (D24) | 4.24 |
 | An AI-origin run has no entry in the run log | the tool sentence reads `The generative artificial intelligence program used is not recorded.` | 4.9 |
 | The run log is empty and `how_used` applies | `...in 0 runs; each prompt is recorded in the run log.` | 4.12 |
 | `docx` fails to pack the header | the existing `pack` failure path: `Error` value, failure notice, Document unchanged | 7.1 |
@@ -640,8 +652,8 @@ Each file has one `// Property N` comment above one `fc.assert(fc.property(...))
 Export package (`packages/export/test`):
 
 - `orders.test.ts`: the shipped file loads `ok` and `ORDERS` equals its entries in order; the mutation table (version, a missing field for every required field, one unknown vocabulary word per vocabulary field including a word that the file lists but the code does not, duplicate and non-kebab ids, dangling `supersedes` and `superseded_by`, the date table, the URL table, the `key_language` boundaries 0, 1, 400, 401); the two-failure fixtures of D1; malformed roots; `selectableOrders` on the shipped file and on synthetic sets (ties, accents, two court-wide entries, a later entry of an earlier court); `statementTitles` and `STATEMENT_TITLES` (the seven strings in order, including the superseded entry's caption and without the first-page heading caption).
-- `ai-paragraphs.test.ts`: a table of Documents with expected ranges (one paragraph, a span over three paragraphs, adjacent spans, a span on `\n` only, an empty paragraph inside a span, a span ending at the last character) and a table for `formatRanges` (`27`, `12–14`, `12–13`, `3, 7–8, 20`, empty).
-- `statement-orders.test.ts`: `order` for every entry against an expected object built in the test; paragraph numbering shift; the exact citing sentence for `edtex-love-2025`, `ndtex-lr-7-2-f` and `dhaw-go-23-1` (no doubled stop); `ndtex-lr-7-2-f` with AI used (Standard_Title and heading); `edtex-love-2025` (renamed title and tool sentence, tool lists of none, one, two, and a `null` model); `dcolo-wang-2025` with no AI (no-AI sentence and signature line); the sentence for each element in the table above, with run counts 0, 1 and 3; `cit-choe-groves-2025` with the tick on and off; for every entry whose elements are only `accuracy_certification`, `citations_verified` or `human_review`, the verification sentences and no added sentence; the paragraph count of every entry equals the count with `order === null` plus one; the sentence `The text drafted with the program appears at paragraphs 12–14 of the filing.`; no range text contains the word "lines"; JSON round trip of the Statement for every entry; `renderStatement` of a structured clone equals the original; `exportFileName` equal for every entry.
+- `ai-paragraphs.test.ts`: a table of Documents with expected passages (one paragraph; a passage over three paragraphs; adjacent `AI` and `AI>HUM` spans joining into one passage; an `HUM` span between two AI spans giving two passages; blank lines before the passage, which do not count; an empty paragraph inside a passage; a run of line breaks only, which is no passage; fewer than eight words; more than eight words cut at eight; a passage ending at the last character), plus `plural` over 0, 1, 2 and 3 and `portionsSentence` and `prohibitionLine` for 1, 2, 5, 6 and 7 passages (the `and <m> more` tail appears only above five). No text contains the word "lines" for a paragraph number.
+- `statement-orders.test.ts`: `order` for every entry against an expected object built in the test; paragraph numbering shift; the exact citing sentence for `edtex-love-2025`, `ndtex-lr-7-2-f` and `dhaw-go-23-1` (no doubled stop); `ndtex-lr-7-2-f` with AI used (Standard_Title and heading); `edtex-love-2025` (renamed title and tool sentence, tool lists of none, one, two, and a `null` model); `dcolo-wang-2025` with no AI (no-AI sentence and signature line); the sentence for each element in the table above, with run counts 0, 1 and 3; `cit-choe-groves-2025` with the tick on and off; for every entry whose elements are only `accuracy_certification`, `citations_verified` or `human_review`, the verification sentences and no added sentence; the paragraph count of every entry equals the count with `order === null` plus one; the sentence `The text drafted with the program appears in 1 passage of the filing: paragraph 21, beginning "…". Paragraphs are counted from the first line of the caption, skipping blank lines.` for one passage and the five-plus-more form for seven; `Prompt records … (1 prompt)` and `(3 prompts)`; the fixture-provider wording in the `Tools:` clause and in the tool_name sentence, and a real provider printed as before; JSON round trip of the Statement for every entry; `renderStatement` of a structured clone equals the original; `exportFileName` equal for every entry.
 - `null-order.test.ts`: `renderStatement` of the Demo_Document Statement built with the default argument and with `null` equal the existing expected blocks in `render-statement.test.ts`.
 - `order-rules.test.ts` and `gate-orders.test.ts`: `prohibitionNotice` for a Judge_Entry and a synthetic Court_Wide_Entry, with 1 and 2 spans; `sdohio-newman` on the Demo_Document (one AI span, so `canExport` is `false`); the same Document after an edit beyond the relabel threshold turns the span into `AI>HUM` (still `false`); after the AI text is deleted (`true`); `needsConfidentiality` truth table.
 - `docx-orders.test.ts`: with `ndtex-lr-7-2-f` and AI used, the unzipped file has `word/header1.xml`, `w:titlePg` in `word/document.xml`, a first paragraph with bold, centred and size 24, and the pointer sentence; the body paragraph list from the existing docx text reader equals the one without the heading; with AI not used, with another placement, and with `order === null`, there is no `header1.xml` and no `w:titlePg`.
@@ -651,7 +663,7 @@ Web app (`apps/web/test`):
 - `order-selection.test.ts`: write and read for `null` and every selectable entry with working storage and with write-failing storage; the table of stored values of Requirement 2, criteria 4 and 5, including `ndtex-starr-2023` (superseded) and a throwing `getItem`; the autosave key is unchanged by a selection.
 - `order-copy.test.ts`: `optionText` for every selectable entry against a template written in the test; `kindWords` over `ORDER_KINDS`; `appliesWords` over `APPLIES_TO`.
 - `order-picker.test.tsx`: label and native select; first option; optgroups equal `selectableOrders(ORDERS)` and no non-current option; choosing an option updates the store; opening with a stored id, with an unknown id; the Order_Summary lines and the Source link with `target="_blank"` and `rel="noreferrer"`; no summary without a selection.
-- `export-dialog-orders.test.tsx`: `sdohio-newman` with one AI span shows the line of Requirement 5, criterion 5 and the quoted `key_language`, both buttons disabled, no Override button for it, the Issues list unchanged, and the toolbar label unchanged (blocking count only); a synthetic Court_Wide_Entry shows the `<instrument> prohibits` form; "paragraphs" and never "lines"; `cit-choe-groves-2025` checkbox shown only with AI used, gates both buttons, reset on reopen and on a change of selection, not persisted; download passes the tick (the downloaded Statement has the confidentiality sentence only when ticked).
+- `export-dialog-orders.test.tsx`: `sdohio-newman` with one AI span shows the line of Requirement 5, criterion 5 and the quoted `key_language`, both buttons disabled, no Override button for it, the Issues list unchanged, and the toolbar label unchanged (blocking count only); a synthetic Court_Wide_Entry shows the `<instrument> prohibits` form; the passage wording and never "lines"; the prohibition block holds the prohibition line only and the `key_language` appears once in the dialog; the export notice is cleared when the dialog opens and when the court changes; `cit-choe-groves-2025` checkbox shown only with AI used, gates both buttons, reset on reopen and on a change of selection, not persisted; download passes the tick (the downloaded Statement has the confidentiality sentence only when ticked).
 - `export-docx-orders.test.ts`: `exportDocx` returns `blocked` for a prohibition with AI text and for a missing tick, and passes the context to `buildStatement`.
 - `print-model-orders.test.ts` and `print-view-orders.test.tsx`: `ready` carries `heading` and `certifiedBlocks` as described; `prohibited` for `sdohio-newman`; the summary in the controls block; the first-page block present with the class that carries `break-after: avoid` (the test also reads `print-view.module.css`) and absent otherwise; the print checkbox unticked on every load, the one-line stand-in until ticked, then the same blocks as `buildStatement` with the tick; after ticking in the dialog and opening print, the only storage keys are the autosave key and the order key.
 
@@ -660,7 +672,7 @@ Sentinel (`crew/sentinel/test`):
 - `court-orders.test.ts`: the three proof tests of Requirement 12, criterion 10 through `run(["check", file], io)`.
 - `analyse.test.ts`: lines 62 and 70 updated (see "Demo motion and tests that quote it").
 
-Engine (`packages/engine/test/demo.test.ts`): Offsets shifted by 8 and one new assertion that line 2 is `FOR THE NORTHERN DISTRICT OF TEXAS` and that the `Case No. 3:26-cv-00000` line is present.
+Engine (`packages/engine/test/demo.test.ts`): Offsets shifted by 8 (earlier follow-up, D20) and by a further 3 after the "N.D. Tex." edit (D28), assertions that the argument reads `Fifth Circuit` and `(5th Cir.` twice and `(N.D. Tex. 2015)`, that the extract court fields are `5th Cir.` and `N.D. Tex.`, and one assertion that line 2 is `FOR THE NORTHERN DISTRICT OF TEXAS` and that the `Case No. 3:26-cv-00000` line is present.
 
 ### Static scans that change
 
@@ -676,3 +688,4 @@ The later task list follows the requirement groups named in `requirements.md`.
 2. **Group 2, Requirements 4 and 5 with Properties 1 and 2.** Types, `statement.ts`, `ai-paragraphs.ts`, `order-rules.ts`, `statement-order.ts`, `render-order.ts`, `wording.ts` (including `STATEMENT_TITLES`), `render-statement.ts`, `gate.ts`, `index.ts`; update the callers in the export tests and the three web callers so the repository typechecks; add the order arbitraries, the two property files, the example tests and the `boundaries.test.ts` table change.
 3. **Group 3, Requirements 3, 6 and 7.** `order-picker`, `confidentiality-checkbox`, `use-order-gate`, the dialog and `use-export` changes, `export-docx.ts` deps, `print-model.ts`, `print-view.tsx`, `print-order.tsx`, the CSS modules, `docx.ts` and `docx-blocks.ts`, and the web and DOCX tests.
 4. **Group 4, Requirement 12 and one final checkpoint.** `split.ts`, the demo motion and the Offsets, `analyse.test.ts`, the three proof tests, README, `KIRO_USAGE.md`, `BUILD_LOG.md`, `structure.md`, `product.md`, and the sentinel-sweep spec edits. The checkpoint runs `pnpm lint`, `pnpm typecheck`, `pnpm test` and `next build --webpack`, and states that the browser check is left to the user.
+5. **Group 6, Requirement 13 and the follow-up amendments (D21 to D29).** Passages and plurals in the export package, then the fixture-provider wording (both edit `wording.ts` and the statement tests, so they run in that order), then the web changes (prohibition block, stale notice, Picker width and ellipsis), which need the new statement text; the demo motion edit, the DOCX header spacing and the two Sentinel body assertions are independent of those; the last task updates README and BUILD_LOG and runs the final checkpoint with `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt` and the web webpack build.

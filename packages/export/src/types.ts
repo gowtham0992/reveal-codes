@@ -1,5 +1,5 @@
 import type { IssueCode, Origin, QuoteCheckResult, VerificationResult } from "@reveal-codes/engine";
-import type { ParagraphRange } from "./ai-paragraphs.js";
+import type { AiPassage } from "./ai-paragraphs.js";
 import type { OrderCaption, OrderElement, OrderKind } from "./orders-types.js";
 
 /** The only clock the package sees. `now` must be a valid Date. */
@@ -52,8 +52,8 @@ export type StatementOrder = Readonly<{
 export type Statement = Readonly<{
   /** The selected instrument, or null when none. */
   order: StatementOrder | null;
-  /** Filing_Paragraph ranges that hold AI-origin text, ascending; [] when none. */
-  aiRanges: readonly ParagraphRange[];
+  /** AI-drafted passages in document order; [] when none. */
+  aiPassages: readonly AiPassage[];
   /** runLog.length; the run count and the prompt count of the order sentences. */
   runCount: number;
   confidentialityCertified: boolean;

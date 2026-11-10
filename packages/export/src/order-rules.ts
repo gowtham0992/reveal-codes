@@ -1,14 +1,9 @@
 import type { Document } from "@reveal-codes/engine";
-import { aiParagraphRanges, formatRanges } from "./ai-paragraphs.js";
+import { aiPassages } from "./ai-paragraphs.js";
 import { judgeSurname } from "./orders.js";
 import type { OrderEntry } from "./orders-types.js";
-import { isAiSpan, usedAi } from "./statement-parts.js";
+import { usedAi } from "./statement-parts.js";
 import { prohibitionLine } from "./wording.js";
-
-/** Number of spans whose origin is AI or AI>HUM. */
-export function aiSpanCount(document: Document): number {
-  return document.spans.filter(isAiSpan).length;
-}
 
 /** True when the entry asks for a confidentiality statement and the document holds AI text. */
 export function needsConfidentiality(document: Document, entry: OrderEntry | null): boolean {
@@ -26,8 +21,7 @@ export function prohibitionNotice(
   const line = prohibitionLine({
     judgeSurname: entry.judge === null ? null : judgeSurname(entry.judge),
     instrument: entry.instrument,
-    spans: aiSpanCount(document),
-    ranges: formatRanges(aiParagraphRanges(document)),
+    passages: aiPassages(document),
   });
   return { line, keyLanguage: entry.key_language };
 }

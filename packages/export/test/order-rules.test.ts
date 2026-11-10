@@ -48,44 +48,48 @@ const NEWMAN = entry("sdohio-newman");
 const COURT_WIDE: OrderEntry = { ...NEWMAN, judge: null, instrument: "General Order 99-1" };
 
 describe("prohibitionNotice _Requirements: 5.5, 5.12, 9.12_", () => {
-  it("names the judge's surname for a Judge_Entry with one span", () => {
+  it("names the judge's surname for a Judge_Entry with one passage", () => {
     expect(prohibitionNotice(ONE_SPAN, NEWMAN)).toEqual({
-      line: "Judge Newman's order prohibits AI-drafted text. 1 AI-origin span remain at paragraphs 2.",
+      line: 'Judge Newman\'s order prohibits AI-drafted text. 1 AI-origin passage remains: paragraph 2, beginning "two\u2026".',
       keyLanguage: NEWMAN.key_language,
     });
   });
 
-  it("names the judge's surname for a Judge_Entry with two spans", () => {
+  it("names the judge's surname for a Judge_Entry with two passages", () => {
     expect(prohibitionNotice(TWO_SPANS, NEWMAN)).toEqual({
-      line: "Judge Newman's order prohibits AI-drafted text. 2 AI-origin spans remain at paragraphs 1, 3.",
+      line: 'Judge Newman\'s order prohibits AI-drafted text. 2 AI-origin passages remain, the first at paragraph 1, beginning "one\u2026".',
       keyLanguage: NEWMAN.key_language,
     });
   });
 
-  it("names the instrument for a Court_Wide_Entry with one span", () => {
+  it("names the instrument for a Court_Wide_Entry", () => {
     expect(prohibitionNotice(ONE_SPAN, COURT_WIDE)?.line).toBe(
-      "General Order 99-1 prohibits AI-drafted text. 1 AI-origin span remain at paragraphs 2.",
+      'General Order 99-1 prohibits AI-drafted text. 1 AI-origin passage remains: paragraph 2, beginning "two\u2026".',
     );
-  });
-
-  it("names the instrument for a Court_Wide_Entry with two spans", () => {
     expect(prohibitionNotice(TWO_SPANS, COURT_WIDE)?.line).toBe(
-      "General Order 99-1 prohibits AI-drafted text. 2 AI-origin spans remain at paragraphs 1, 3.",
+      'General Order 99-1 prohibits AI-drafted text. 2 AI-origin passages remain, the first at paragraph 1, beginning "one\u2026".',
     );
   });
 
-  it("joins consecutive paragraphs with an en dash", () => {
+  it("counts one passage when adjacent AI spans touch", () => {
     const doc = withAi(TEXT, [[0, 13]]);
     expect(prohibitionNotice(doc, NEWMAN)?.line).toBe(
-      "Judge Newman's order prohibits AI-drafted text. 1 AI-origin span remain at paragraphs 1\u20133.",
+      'Judge Newman\'s order prohibits AI-drafted text. 1 AI-origin passage remains: paragraph 1, beginning "one two three\u2026".',
     );
   });
 
-  it("says paragraphs and never lines", () => {
+  it("says line breaks only when no AI run holds a word", () => {
+    const doc = withAi("a\n\nb", [[1, 3]]);
+    expect(prohibitionNotice(doc, NEWMAN)?.line).toBe(
+      "Judge Newman's order prohibits AI-drafted text. AI-origin text remains, consisting of line breaks only.",
+    );
+  });
+
+  it("never writes the word lines or span", () => {
     for (const doc of [ONE_SPAN, TWO_SPANS]) {
-      const notice = prohibitionNotice(doc, NEWMAN);
-      expect(notice?.line).toContain("paragraphs");
-      expect(notice?.line.toLowerCase()).not.toContain("lines");
+      const line = prohibitionNotice(doc, NEWMAN)?.line ?? "";
+      expect(line).toContain("paragraph");
+      expect(line).not.toMatch(/\blines?\b|\bspans?\b/i);
     }
   });
 

@@ -581,6 +581,58 @@
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794276248196
       }
+    ],
+    "6.1 Passages and plurals in the export package": [
+      {
+        "executionId": "1def91ba-7860-4de8-abd7-6aa63dc6dd80",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794277134923
+      },
+      {
+        "executionId": "1def91ba-7860-4de8-abd7-6aa63dc6dd80",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794277137348
+      },
+      {
+        "executionId": "1def91ba-7860-4de8-abd7-6aa63dc6dd80",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794277376910
+      }
+    ],
+    "6.2 Demo provider wording": [
+      {
+        "executionId": "1def91ba-7860-4de8-abd7-6aa63dc6dd80",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794277134968
+      }
+    ],
+    "6.3 Web: prohibition block, stale notice, picker width and ellipsis": [
+      {
+        "executionId": "1def91ba-7860-4de8-abd7-6aa63dc6dd80",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794277134989
+      }
+    ],
+    "6.4 Demo motion consistency": [
+      {
+        "executionId": "1def91ba-7860-4de8-abd7-6aa63dc6dd80",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794277135010
+      }
+    ],
+    "6.5 DOCX header spacing and Sentinel body-equality assertions": [
+      {
+        "executionId": "1def91ba-7860-4de8-abd7-6aa63dc6dd80",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794277135043
+      }
+    ],
+    "6.6 Docs and checkpoint": [
+      {
+        "executionId": "1def91ba-7860-4de8-abd7-6aa63dc6dd80",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794277135071
+      }
     ]
   }
 }

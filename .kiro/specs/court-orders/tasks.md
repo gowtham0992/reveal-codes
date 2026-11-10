@@ -10,6 +10,7 @@ Implementation is TypeScript throughout, as the design uses TypeScript. The task
 2. Group 2: Statement changes, wording, Property 1, the prohibition gate, Property 2.
 3. Group 3: picker, confidentiality checkbox, blocked state, print view, first-page header.
 4. Group 4: demo motion court, `STATEMENT_TITLES`, Sentinel changes and proof tests, documentation and steering.
+5. Group 6 (after the final checkpoint of task 5): follow-up fixes from the browser walkthrough.
 
 All commands run from the repository root. Property tests live in `<module>.properties.test.ts` with `// Property N` above the single `fc.assert`, `_Requirements: x.y_` in the describe title, and `numRuns` of 200 locally and 500 in CI (the shared `runs()` helper).
 
@@ -217,6 +218,50 @@ All commands run from the repository root. Property tests live in `<module>.prop
   - State in the final report that the browser check (Picker, prohibition block, confidentiality tick, print view, first-page header) is left to the user
   - _Requirements: 12.15_
 
+- [ ] 6. Group 6: follow-up fixes from the browser walkthrough
+  - [x] 6.1 Passages and plurals in the export package
+    - In `packages/export/src/ai-paragraphs.ts` replace `ParagraphRange`, `aiParagraphRanges` and `formatRanges` with `AiPassage` (`{ paragraph, words }`) and `aiPassages(document)` as in the design (D21, D22): join adjacent `AI` and `AI>HUM` spans, drop runs with no non-whitespace character, count the paragraph among non-empty paragraphs, keep the first eight words
+    - In `packages/export/src/types.ts` replace `aiRanges` with `aiPassages`; update `statement.ts`, `render-order.ts`, `index.ts` (export `AiPassage`, drop `ParagraphRange`) and the `base()` literal in `packages/export/test/render-statement.test.ts` (`aiPassages: []`)
+    - In `wording.ts` add `plural(n, one, many)` (D23), rewrite `portionsSentence` (`appears in <n> passage(s) of the filing: paragraph <k>, beginning "<words>…"; … Paragraphs are counted from the first line of the caption, skipping blank lines.`, at most five items, then ` and <m> more, each marked with an AI code in the Provenance Appendix.`), rewrite `prohibitionLine` (`1 AI-origin passage remains: paragraph <k>, beginning "…".` and `<n> AI-origin passages remain, the first at paragraph <k>, beginning "…".`, and the line-breaks-only form of D18), and use `plural` in `howUsedSentence` and `promptRecordsSentence` (`(1 prompt)`, `(3 prompts)`)
+    - In `order-rules.ts` change `prohibitionNotice` to count and quote passages and remove `aiSpanCount` if nothing else uses it
+    - Update every export test that quotes the old sentences: `ai-paragraphs.test.ts` (passage table, `plural`, `portionsSentence`, `prohibitionLine` for 1, 2, 5, 6 and 7 passages), `statement-orders.test.ts`, `order-rules.test.ts` and `gate-orders.test.ts`; leave `null-order.test.ts` untouched, and search `apps`, `packages`, `crew` and `docs` for `aiRanges`, `formatRanges`, `at paragraphs`, `span remain` and `(1 prompts)` to find any other quote
+    - Tests include a no-"lines" check on every sentence and the plural table over 0, 1, 2 and 3 for prompt, run, passage and remain/remains
+    - _Requirements: 4.11, 4.12, 4.15, 4.21, 4.22, 4.25, 5.5, 9.12_
+
+  - [~] 6.2 Demo provider wording
+    - In `wording.ts` add `DEMO_RESPONSE_WORDS` (`a recorded demonstration response (no model was called)`) and `toolText(tool)` (D24); make `toolList` (the `Tools: …` clause of `aiParagraph`) and `toolsSentence` (the tool_name order sentence) both call `toolText`, so a tool with `provider` `fixture` prints the demonstration words and any other provider prints as before
+    - Confirm the exact provider string `fixture` in `apps/web/src/server/llm*.ts` and in the run log of the fixture provider; do not change that code
+    - Update the export-certification wording expectations in `packages/export/test` that quote `Tools:` only where they use a fixture provider
+    - Tests (`statement-orders.test.ts`, `statement.test.ts`, `render-statement.test.ts`): fixture run prints the words in both places; a real provider prints `provider: model` in the Tools clause and `provider model` in the order sentence; mixed tools print each as its own; a `null` model is unchanged
+    - _Requirements: 4.9, 4.24, 13.6_
+
+  - [~] 6.3 Web: prohibition block, stale notice, picker width and ellipsis
+    - In `apps/web/src/components/export-dialog.tsx` render only `notice.line` in the prohibition block and remove the second `quoted(notice.keyLanguage)` copy; leave `ProhibitedView` in the Print_View unchanged
+    - Clear the export result notice ("Exported ….docx.") when the Export_Dialog opens and when `select` changes the court (D26): add a `clearNotice` callback from `use-export.tsx` to the dialog and `useOrderGate`
+    - In `order-picker.module.css` set the select to `width: 100%`; in `order-copy.ts` make `optionText` use `ellipsize` from `@reveal-codes/export` with limit 60 on the title (Judge_Entry) and the instrument (Court_Wide_Entry), keeping the `Judge <surname> — … (<year>)` and `Court-wide — … (<year>)` forms (D27)
+    - Update web tests that quote the old prohibition line, "span remain" or the doubled `key_language`: `export-dialog-orders.test.tsx`, `order-picker.test.tsx`, `order-copy.test.ts`, `print-view-orders.test.tsx`, `print-model-orders.test.ts`
+    - Tests: the dialog shows the prohibition line once and the `key_language` once (in the Order_Summary); the notice is gone after reopen and after changing the court; `optionText` of a long title ends in the ellipsis at 60 characters and keeps the year; the CSS module contains `width: 100%` for the select; the css-rules scan still passes
+    - _Requirements: 3.2, 3.5, 5.5, 5.11, 13.1, 13.2_
+
+  - [~] 6.4 Demo motion consistency
+    - In `packages/engine/fixtures/demo-motion.txt` change `The Ninth Circuit has held` to `The Fifth Circuit has held`, both `(9th Cir. …)` to `(5th Cir. …)`, and `(D. Or. 2015)` to `(N.D. Tex. 2015)`; keep volumes, reporters and pages
+    - Update the literal Offsets after the `D. Or.` citation by +3 in `packages/engine/test/demo.test.ts` and `packages/engine/fixtures/README.md`; update the character count 2619 to 2622 in the Statement tests, and every test that quotes these lines (search `apps`, `packages`, `crew` and `docs` before and after)
+    - Check that the citation extractor reports the court `5th Cir.` and `N.D. Tex.` for the edited citations; if the grammar does not support either court, report it in the task result and `BUILD_LOG.md` and do not change the Engine
+    - Tests: the engine demo test asserts the three edited phrases and the extract court fields; the verifier fixture tests (recorded lookups) pass unchanged
+    - _Requirements: 13.3, 13.4, 13.5_
+
+  - [~] 6.5 DOCX header spacing and Sentinel body-equality assertions
+    - In `packages/export/src/docx-blocks.ts` give the pointer paragraph of `headerElements` `spacing: { after: 240 }`; leave the heading paragraph and the body unchanged
+    - In `packages/export/test/docx-orders.test.ts` assert `w:spacing` with `w:after="240"` on the second paragraph of `word/header1.xml` and not on the first
+    - In `crew/sentinel/test/court-orders.test.ts` make the `edtex-love-2025` and `dhaw-go-23-1` tests also assert that the body of `splitExport(readDocx(bytes))` joined with `\n` equals `document.text`
+    - _Requirements: 7.8, 12.10_
+
+  - [~] 6.6 Docs and checkpoint
+    - Update `README.md` (the Court-specific certification section: passages in the portions sentence, the demonstration wording) and append a dated entry to `BUILD_LOG.md` listing what the walkthrough found and the eight fixes (passages, plurals, prohibition block, demo provider wording, stale notice, picker width and ellipsis, demo motion consistency, header spacing and Sentinel body assertions); append, do not rewrite earlier entries
+    - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt` and `pnpm --filter @reveal-codes/web exec next build --webpack`; fix every failure
+    - State in the final report that the browser check is left to the user
+    - _Requirements: 12.15, 13.7_
+
 ## Notes
 
 - Test sub-tasks are not marked optional here: Requirements 9 and 10 make them deliverables, and CI runs them.
@@ -239,7 +284,11 @@ All commands run from the repository root. Property tests live in `<module>.prop
     { "id": 7, "tasks": ["2.8", "2.9", "2.11", "3.2", "3.4", "3.5"] },
     { "id": 8, "tasks": ["2.10", "3.6", "3.7"] },
     { "id": 9, "tasks": ["4.2"] },
-    { "id": 10, "tasks": ["4.3", "4.4", "4.5", "4.6", "4.7", "4.8"] }
+    { "id": 10, "tasks": ["4.3", "4.4", "4.5", "4.6", "4.7", "4.8"] },
+    { "id": 11, "tasks": ["6.1"] },
+    { "id": 12, "tasks": ["6.2", "6.4", "6.5"] },
+    { "id": 13, "tasks": ["6.3"] },
+    { "id": 14, "tasks": ["6.6"] }
   ]
 }
 ```

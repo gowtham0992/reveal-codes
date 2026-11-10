@@ -3,6 +3,7 @@
 // Every sentence is defined by export-certification Requirements 4 and 5 and by court-orders
 // Requirements 4, 5 and 7; nothing else may be added. No sentence contains an exclamation mark.
 import { ORDERS, statementTitles } from "./orders.js";
+import type { AiPassage } from "./ai-paragraphs.js";
 import type { StatementTool } from "./types.js";
 
 export const STATEMENT_TITLE = "AI-Use and Verification Statement";
@@ -127,13 +128,34 @@ export function toolsSentence(tools: readonly StatementTool[]): string {
   return `The generative artificial intelligence program used was ${list.join("; ")}.`;
 }
 
-/** `ranges` is the text produced by formatRanges; the caller omits the sentence when it is empty. */
-export function portionsSentence(ranges: string): string {
-  return `The text drafted with the program appears at paragraphs ${ranges} of the filing.`;
+/** `one` when n is 1, else `many` (D23). */
+export function plural(n: number, one: string, many: string): string {
+  return n === 1 ? one : many;
+}
+
+const MAX_PASSAGE_ITEMS = 5;
+
+function passageItem(p: AiPassage): string {
+  return `paragraph ${String(p.paragraph)}, beginning "${p.words}\u2026"`;
+}
+
+/** The caller omits the sentence when there are no passages. */
+export function portionsSentence(passages: readonly AiPassage[]): string {
+  const n = passages.length;
+  const items = passages.slice(0, MAX_PASSAGE_ITEMS).map(passageItem).join("; ");
+  const more = n - MAX_PASSAGE_ITEMS;
+  const tail =
+    more > 0
+      ? ` and ${String(more)} more, each marked with an AI code in the Provenance Appendix.`
+      : ".";
+  return (
+    `The text drafted with the program appears in ${String(n)} ${plural(n, "passage", "passages")} of the filing: ` +
+    `${items}${tail} Paragraphs are counted from the first line of the caption, skipping blank lines.`
+  );
 }
 
 export function howUsedSentence(runCount: number): string {
-  const noun = runCount === 1 ? "run" : "runs";
+  const noun = plural(runCount, "run", "runs");
   return (
     `The program was used to draft text inserted at the author's request in ${String(runCount)} ${noun}; ` +
     "each prompt is recorded in the run log."
@@ -141,7 +163,8 @@ export function howUsedSentence(runCount: number): string {
 }
 
 export function promptRecordsSentence(runCount: number): string {
-  return `Prompt records are retained in the document's run log (${String(runCount)} prompts).`;
+  const noun = plural(runCount, "prompt", "prompts");
+  return `Prompt records are retained in the document's run log (${String(runCount)} ${noun}).`;
 }
 
 export function headerPointer(title: string): string {
@@ -152,17 +175,20 @@ export type ProhibitionParts = Readonly<{
   /** Judge surname for a Judge_Entry, else null. */
   judgeSurname: string | null;
   instrument: string;
-  spans: number;
-  /** Text produced by formatRanges; "" when no paragraph holds AI text (design D18). */
-  ranges: string;
+  /** AI passages in document order; [] when AI text holds line breaks only (design D18). */
+  passages: readonly AiPassage[];
 }>;
 
 export function prohibitionLine(p: ProhibitionParts): string {
   const subject = p.judgeSurname === null ? p.instrument : `Judge ${p.judgeSurname}'s order`;
-  const noun = p.spans === 1 ? "span" : "spans";
-  const where = p.ranges === "" ? "between paragraphs" : `at paragraphs ${p.ranges}`;
-  return (
-    `${subject} prohibits AI-drafted text. ` +
-    `${String(p.spans)} AI-origin ${noun} remain ${where}.`
-  );
+  const head = `${subject} prohibits AI-drafted text.`;
+  const first = p.passages[0];
+  if (first === undefined) return `${head} AI-origin text remains, consisting of line breaks only.`;
+  const n = p.passages.length;
+  const where =
+    n === 1
+      ? passageItem(first)
+      : `the first at paragraph ${String(first.paragraph)}, beginning "${first.words}\u2026"`;
+  const clause = n === 1 ? ":" : ",";
+  return `${head} ${String(n)} AI-origin ${plural(n, "passage", "passages")} ${plural(n, "remains", "remain")}${clause} ${where}.`;
 }

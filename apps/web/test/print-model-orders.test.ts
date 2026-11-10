@@ -71,7 +71,7 @@ describe("printModel with an order _Requirements: 3.12, 5.11, 6.8, 6.9, 7.6_", (
     expect(model.blocking).toEqual([]);
     expect(model.notice.keyLanguage).toBe(entry.key_language);
     expect(model.notice.line).toBe(
-      "Judge Newman's order prohibits AI-drafted text. 1 AI-origin span remain at paragraphs 2.",
+      'Judge Newman\'s order prohibits AI-drafted text. 1 AI-origin passage remains: paragraph 2, beginning "The Court has discretion to extend the period.\u2026".',
     );
     expect(model.notice.line).not.toContain("lines");
   });

@@ -130,7 +130,7 @@ describe("prohibition block _Requirements: 5.5, 5.6, 5.7, 5.8, 9.7, 9.12_", () =
     const entry = entryOf("sdohio-newman");
     const text = dialog().textContent;
     expect(text).toContain(
-      "Judge Newman's order prohibits AI-drafted text. 1 AI-origin span remain at paragraphs 2.",
+      'Judge Newman\'s order prohibits AI-drafted text. 1 AI-origin passage remains: paragraph 2, beginning "The movant relies on the record.\u2026".',
     );
     expect(text).toContain(quoted(entry.key_language));
     expect(button("Download .docx").disabled).toBe(true);
@@ -174,26 +174,26 @@ describe("prohibition block _Requirements: 5.5, 5.6, 5.7, 5.8, 9.7, 9.12_", () =
     closeDialog();
   });
 
-  it("shows the instrument form for a Court_Wide_Entry, in paragraphs and never lines", () => {
+  it("shows the instrument form for a Court_Wide_Entry, by paragraph and never lines", () => {
     mount(aiDocument());
     openDialog();
     choose(SYNTHETIC_ID);
     const text = screen.getByText(/prohibits AI-drafted text/).textContent;
     expect(text).toBe(
-      "Local Rule 99 prohibits AI-drafted text. 1 AI-origin span remain at paragraphs 2.",
+      'Local Rule 99 prohibits AI-drafted text. 1 AI-origin passage remains: paragraph 2, beginning "The movant relies on the record.\u2026".',
     );
     expect(text).not.toContain("Judge");
-    expect(text).toContain("paragraphs");
+    expect(text).toContain("paragraph 2");
     expect(text).not.toMatch(/\blines?\b/i);
     expect(button("Download .docx").disabled).toBe(true);
   });
 
-  it("uses the word paragraphs, never lines, under the judge entry too", () => {
+  it("uses the word paragraph, never lines, under the judge entry too", () => {
     mount(aiDocument());
     openDialog();
     choose("sdohio-newman");
     const text = screen.getByText(/prohibits AI-drafted text/).textContent;
-    expect(text).toContain("at paragraphs 2.");
+    expect(text).toContain("paragraph 2, beginning");
     expect(text).not.toMatch(/\blines?\b/i);
   });
 });
