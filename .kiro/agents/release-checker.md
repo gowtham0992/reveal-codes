@@ -11,7 +11,6 @@ permissions:
       effect: deny
     - capability: fs_write
       match: ["**"]
-      exclude: ["/tmp/**", "/private/tmp/**", "/var/folders/**"]
       effect: deny
 ---
 
@@ -30,7 +29,7 @@ Then check:
 
 7. `git status --porcelain` prints nothing.
 8. README.md contains no `<…>` placeholder (an angle-bracket token such as `<crew app repo>`).
-9. The counts stated in data/README.md and README.md equal the counts in data/standing-orders.json: entries, courts, and the per-kind counts. Compute them from the JSON. If README.md states none, say so in the evidence.
+9. The counts stated in data/README.md and README.md equal the counts in data/standing-orders.json: entries, courts, and the per-kind counts. Also compare the number of entries whose status is not `current` with the number of entries data/README.md says are no longer in force (it may be written as a word, such as "Five"). Compute every count from the JSON. If README.md states none, say so in the evidence.
 10. The last heading in BUILD_LOG.md is not dated in the future. Compare its date with today's date from the system clock.
 11. LICENSE exists.
 

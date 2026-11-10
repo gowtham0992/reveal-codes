@@ -322,7 +322,7 @@ Configuration work done in chat, without a spec. Before each kind of file the ma
 
 ### What was built
 
-- `.kiro/agents/release-checker.md`: read-only release gate (tools `read` and `shell`; deny rules for `git commit`, `git push`, `git reset`, `git checkout` and for `fs_write` outside the temp directories).
+- `.kiro/agents/release-checker.md`: read-only release gate (tools `read` and `shell`; deny rules for `git commit`, `git push`, `git reset`, `git checkout` and for `fs_write`; see the last two lines of this entry for the temp-directory exclusion that was removed).
 - `.kiro/agents/orders-curator.md`: adds or updates one entry in `data/standing-orders.json` from a `.uscourts.gov` source, using the `add-standing-order` skill.
 - `.kiro/skills/add-standing-order/SKILL.md`: the procedure for one dataset entry.
 - `.kiro/hooks/orders-check-on-save.json`: PostFileSave agent hook on `data/standing-orders.json`.
@@ -344,3 +344,5 @@ Configuration work done in chat, without a spec. Before each kind of file the ma
 
 - The new `.mjs` script failed `pnpm eslint` with a project-service parsing error; the eslint block above fixed it.
 - `.kiro/steering/structure.md` already listed `agents/` as "one JSON file per custom agent"; the first edit added a second `agents/` line, and the line was replaced instead.
+- The IDE reported "Kiro loaded your permission settings but skipped some invalid rules" for `release-checker`; the log said the `/tmp/**` pattern in the `fs_write` rule references a path outside the workspace, and that workspace permissions must use workspace-relative paths. The rule is now `match: ["**"]`, `effect: deny`, with no exclude list, so the agent has no file-write permission anywhere. Temp-directory writes from the shell are no longer covered by a rule and rest on the prompt.
+- The first release check missed a README count: `data/README.md` said "Four entries are no longer in force" while listing five, and the file has five entries whose status is not `current` (2 inactive, 1 superseded, 1 rescinded, 1 not_adopted). The text now says "Five", and check 9 of `release-checker`, the `orders-check-on-save` hook and step 9 of the `add-standing-order` skill compare that count too.

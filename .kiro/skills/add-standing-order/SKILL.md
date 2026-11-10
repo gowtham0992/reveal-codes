@@ -27,7 +27,7 @@ Add or update one entry in `data/standing-orders.json`. Work as a careful person
 6. Fill every other field as the existing entries do: `court`, `judge`, `instrument`, `title`, `source_url`, `source_kind` (`primary`), `retrieved` (today's date), `notes`.
 7. If the new entry replaces an older one, set `supersedes` on the new entry and `superseded_by` on the old one, and set the old entry's `status` to `superseded`. Change nothing else on the old entry.
 8. Show the new entry and the quoted sentence with the page it came from. Then save.
-9. Update the counts in `data/README.md`: the total entries, the number of courts, the per-kind counts, and the sentence about entries no longer in force. Update the same counts in `README.md` wherever it states them.
+9. Update the counts in `data/README.md`: the total entries, the number of courts, the per-kind counts, the number of entries whose status is not `current`, and the sentence about entries no longer in force (it must list each of them). Update the same counts in `README.md` wherever it states them.
 10. Run the orders tests: `pnpm vitest run --project export orders`. Report the result. If they fail, fix the entry, not the test.
 
 ## Out of scope

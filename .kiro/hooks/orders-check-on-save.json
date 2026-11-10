@@ -7,7 +7,7 @@
       "matcher": "data/standing-orders\\.json$",
       "action": {
         "type": "agent",
-        "prompt": "data/standing-orders.json was saved. Run the orders tests in the export project. Compare the entry count, the court count and the per-kind counts in data/README.md and README.md with the file. Report any mismatch in one short list. Change nothing."
+        "prompt": "data/standing-orders.json was saved. Run the orders tests in the export project. Compare the entry count, the court count, the per-kind counts and the number of entries whose status is not current in data/README.md and README.md with the file. Report any mismatch in one short list. Change nothing."
       }
     }
   ]
