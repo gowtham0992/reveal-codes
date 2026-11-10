@@ -207,7 +207,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Append to the file; do not rewrite earlier entries
     - _Requirements: 12.3, 12.13_
 
-  - [-] 4.8 Edit the steering files
+  - [x] 4.8 Edit the steering files
     - In `.kiro/steering/structure.md` add `data/` to the repository layout: `standing-orders.json` (public, CC0, validated by `packages/export/src/orders.ts`) and `README.md`
     - In `.kiro/steering/product.md` add one unnumbered line under the principles: `The statement follows the selected court's instrument. The dataset behind it, data/standing-orders.json, is public and CC0.`
     - _Requirements: 12.4, 12.5_
