@@ -62,7 +62,7 @@ function deliver(deps: ExportDeps, bytes: Uint8Array, fileName: string): Error |
  */
 export async function exportDocx(store: ExportStore, deps: ExportDeps): Promise<ExportOutcome> {
   const { document, runLog, verifiedAt } = store.getState();
-  if (!canExport(document)) return { status: "blocked" };
+  if (!canExport(document, null)) return { status: "blocked" };
   const now = deps.now();
   const built = buildStatement(document, runLog, { now, verifiedAt });
   if (!built.ok || !appendixParses(document)) return fail(store);

@@ -38,7 +38,7 @@ export function printModel(raw: string | null | Thrown, now: Date): PrintModel {
     return restored.error.kind === "absent" ? { kind: "absent" } : { kind: "unreadable" };
   }
   const { document, runLog, verifiedAt } = restored.value;
-  if (!canExport(document)) return { kind: "blocked", blocking: blockedItems(document) };
+  if (!canExport(document, null)) return { kind: "blocked", blocking: blockedItems(document) };
   const statement = buildStatement(document, runLog, { now, verifiedAt });
   if (!statement.ok) return { kind: "unreadable" };
   return {

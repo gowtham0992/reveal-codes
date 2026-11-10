@@ -72,14 +72,14 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Create `packages/export/src/render-order.ts` with `citingParagraph`, `orderSentences` (in the design's order, appended to the paragraph that already covers the topic) and `signatureLine`
     - _Requirements: 4.2, 4.5 to 4.19, 5.5, 6.1, 7.1, 7.3, 7.5_
 
-  - [~] 2.5 Wire the Statement builder and renderer
+  - [x] 2.5 Wire the Statement builder and renderer
     - Add the optional fourth parameter `orderContext = null` to `buildStatement` in `packages/export/src/statement.ts` and fill `order`, `aiRanges`, `runCount` (`runLog.length`, D8) and `confidentialityCertified`
     - Update `packages/export/src/render-statement.ts`: title via `statementTitle`, paragraph 1 and the numbering shift only when `order !== null`, order sentences in the AI and no-AI paragraphs, `signatureLine`; with `order === null` the blocks must equal today's blocks
     - Add the four new fields to the `base()` literal in `packages/export/test/render-statement.test.ts` (`order: null`, `aiRanges: []`, `runCount: 0`, `confidentialityCertified: false`) without changing its expectations
     - Export from `packages/export/src/index.ts`: `StatementOrder`, `ParagraphRange`, `ProhibitionNotice`, `FirstPageHeading`, `prohibitionNotice`, `needsConfidentiality`, `firstPageHeading`
     - _Requirements: 4.1 to 4.4, 4.13, 4.18, 4.19, 4.21, 4.23, 8.1, 8.2_
 
-  - [~] 2.6 Add the prohibition rule to the Gate and update every `canExport` caller
+  - [x] 2.6 Add the prohibition rule to the Gate and update every `canExport` caller
     - Change `canExport(document, order)` in `packages/export/src/gate.ts` (required second parameter; `false` for `kind === "prohibition"` with an AI-origin span, else `blockingIssues(document).length === 0`), using `usedAi` from `statement-parts.ts`
     - Update every caller to pass the argument: `packages/export/test/gate.test.ts` (four calls, add `, null`), `packages/export/test/gate.properties.test.ts` (two calls, add `, null`), `apps/web/src/client/export-docx.ts`, `apps/web/src/print-model.ts` and `apps/web/src/components/export-dialog.tsx` (pass `null` for now; Group 3 replaces these with the real entry)
     - Leave the planted `canExport(d);` source string in `boundaries.test.ts` unchanged

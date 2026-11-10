@@ -7,6 +7,7 @@ export type {
   Statement,
   StatementBlock,
   StatementCitation,
+  StatementOrder,
   StatementOverride,
   StatementQuote,
   StatementTool,
@@ -14,6 +15,11 @@ export type {
 export { buildStatement } from "./statement.js";
 export { buildAppendix } from "./appendix.js";
 export { renderStatement } from "./render-statement.js";
+export { prohibitionNotice, needsConfidentiality } from "./order-rules.js";
+export type { ProhibitionNotice } from "./order-rules.js";
+export { firstPageHeading } from "./statement-order.js";
+export type { FirstPageHeading } from "./statement-order.js";
+export type { ParagraphRange } from "./ai-paragraphs.js";
 export { exportFileName } from "./file-name.js";
 export { ellipsize } from "./text.js";
 export { isInstant, localDate, localDateTime } from "./time.js";

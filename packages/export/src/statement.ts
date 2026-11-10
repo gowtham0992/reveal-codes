@@ -10,6 +10,9 @@ import {
   toolsOf,
   usedAi,
 } from "./statement-parts.js";
+import { needsConfidentiality } from "./order-rules.js";
+import type { OrderContext } from "./orders-types.js";
+import { orderOf } from "./statement-order.js";
 import { captionOf } from "./text.js";
 import { isInstant, localDate } from "./time.js";
 import type { Meta, RunInfo, Statement } from "./types.js";
@@ -32,6 +35,11 @@ function validMeta(meta: Meta): Result<null, EngineError> {
   return ok(null);
 }
 
+/** The author's tick counts only when the order asks for it and AI text is present. */
+function certified(document: Document, ctx: OrderContext): boolean {
+  return ctx !== null && ctx.confidentialityCertified && needsConfidentiality(document, ctx.entry);
+}
+
 /**
  * Builds the Statement data from the Document alone. Reads no clock: `meta` is
  * the only source of time. Does not apply the export gate.
@@ -40,17 +48,17 @@ export function buildStatement(
   document: Document,
   runLog: readonly RunInfo[],
   meta: Meta,
+  orderContext: OrderContext = null,
 ): Result<Statement, EngineError> {
   const checked = validMeta(meta);
   if (!checked.ok) return checked;
   const sentences = segment(document.text, document.spans);
   if (!sentences.ok) return sentences;
   return ok({
-    // Temporary defaults until task 2.5 wires the order context.
-    order: null,
+    order: orderOf(orderContext),
     aiRanges: aiParagraphRanges(document),
     runCount: runLog.length,
-    confidentialityCertified: false,
+    confidentialityCertified: certified(document, orderContext),
     aiUsed: usedAi(document),
     tools: toolsOf(document, runLog),
     characters: countCharacters(document),

@@ -111,7 +111,7 @@ export function ExportDialog(props: ExportDialogProps) {
     setTarget(null);
   };
   const blocking = blockingIssues(document);
-  const clear = canExport(document);
+  const clear = canExport(document, null);
   return (
     <>
       <Modal title="Export" onClose={onClose} restoreFocus={restoreFocus}>

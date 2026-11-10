@@ -1,3 +1,5 @@
+import { citingParagraph, orderSentences, signatureLine } from "./render-order.js";
+import { statementTitle } from "./statement-order.js";
 import { ellipsize } from "./text.js";
 import type { Statement, StatementBlock } from "./types.js";
 import {
@@ -10,8 +12,6 @@ import {
   QUOTE_CODES,
   QUOTE_COLUMNS,
   RESPONSIBILITY,
-  SIGNATURE_LINE,
-  STATEMENT_TITLE,
   aiParagraph,
   citationParagraph,
   quoteParagraph,
@@ -42,6 +42,11 @@ function aiText(s: Statement): string {
     percent: percent(ai, total),
     edited: c["AI>HUM"],
   });
+}
+
+/** The AI (or no-AI) paragraph with the order's sentences appended, one space apart. */
+function aiParagraphText(s: Statement): string {
+  return [aiText(s), ...orderSentences(s)].join(" ");
 }
 
 function countOf(items: readonly { status: string }[], status: string): number {
@@ -78,14 +83,17 @@ function overrideBlocks(s: Statement, number: number): StatementBlock[] {
 /** The Statement_Text as blocks: pure, and dependent only on the Statement. */
 export function renderStatement(statement: Statement): readonly StatementBlock[] {
   const hasOverrides = statement.overrides.length > 0;
+  const order = statement.order;
+  const n = order === null ? 0 : 1;
   return [
-    { kind: "title", text: STATEMENT_TITLE },
-    paragraph(1, PARAGRAPH_1),
-    paragraph(2, aiText(statement)),
-    ...citationBlocks(statement, 3),
-    ...quoteBlocks(statement, 4),
-    ...(hasOverrides ? overrideBlocks(statement, 5) : []),
-    paragraph(hasOverrides ? 6 : 5, RESPONSIBILITY),
-    { kind: "signature", line: SIGNATURE_LINE, date: statement.generatedDate },
+    { kind: "title", text: statementTitle(statement) },
+    ...(order === null ? [] : [paragraph(1, citingParagraph(order))]),
+    paragraph(1 + n, PARAGRAPH_1),
+    paragraph(2 + n, aiParagraphText(statement)),
+    ...citationBlocks(statement, 3 + n),
+    ...quoteBlocks(statement, 4 + n),
+    ...(hasOverrides ? overrideBlocks(statement, 5 + n) : []),
+    paragraph((hasOverrides ? 6 : 5) + n, RESPONSIBILITY),
+    { kind: "signature", line: signatureLine(statement), date: statement.generatedDate },
   ];
 }
