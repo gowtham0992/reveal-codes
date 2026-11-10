@@ -128,7 +128,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - With AI not used, with another placement, and with `order === null`, there is no `header1.xml` and no `w:titlePg`
     - _Requirements: 7.1 to 7.5, 9.4_
 
-  - [-] 3.3 Build the picker, the confidentiality checkbox and the order-gate hook
+  - [x] 3.3 Build the picker, the confidentiality checkbox and the order-gate hook
     - Create `apps/web/src/components/order-picker.tsx` (`OrderPicker` with a labelled native select, first option `NO_ORDER_LABEL`, one `optgroup` per `selectableOrders(ORDERS)` group; `OrderSummary` with the summary line, the quoted `key_language` as text, and a "Source" link with `target="_blank"` and `rel="noreferrer"`) and `order-picker.module.css` using existing variables only (13px `var(--font-ui)`, 1px `var(--rule)` border, no radius, no shadow, 2px `var(--accent)` focus outline)
     - Create `apps/web/src/components/confidentiality-checkbox.tsx` (native checkbox in its label, text `CONFIDENTIALITY_LABEL`)
     - Create `apps/web/src/components/use-order-gate.ts` with `useOrderGate(document, orderStore)` returning `selection`, `entry`, `select`, `needsTick`, `ticked`, `setTicked`, `notice`, `clear` and `context`; the tick clears on selection change and when `needsTick` becomes false
