@@ -20,3 +20,12 @@ export { isInstant, localDate, localDateTime } from "./time.js";
 export { buildDocx } from "./docx.js";
 export { canExport } from "./gate.js";
 export { APPENDIX_TITLE, STATEMENT_TITLE } from "./wording.js";
+export { ORDERS, loadOrders, selectableOrders, orderById, judgeSurname } from "./orders.js";
+export type { OrderGroup } from "./orders.js";
+export type {
+  OrderContext,
+  OrderElement,
+  OrderEntry,
+  OrderKind,
+  OrderSet,
+} from "./orders-types.js";

@@ -22,7 +22,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Run `pnpm typecheck` once to settle the JSON import path; if widening `rootDir` breaks declaration layout for `apps/web` or `crew/sentinel`, apply the design's fallback (`declarationDir: "dist"`) and note it in `BUILD_LOG.md` later
     - _Requirements: 1.1, 1.12_
 
-  - [~] 1.2 Implement the Orders_Module
+  - [x] 1.2 Implement the Orders_Module
     - Create `packages/export/src/orders-types.ts` (vocabulary lists, unions, `OrderEntry`, `OrderSet`, `OrderContext`, court, judge and caption types)
     - Create `packages/export/src/orders-parse.ts` (root shape, `version`, entry fields and types) and `packages/export/src/orders-check.ts` (vocabulary membership, ids, references, calendar dates with a days-in-month table, hand-written `hostOf` URL check, `key_language` length), running check by check in file order (D1 to D6)
     - Create `packages/export/src/orders.ts` with `loadOrders`, `ORDERS` (throws at module load only if the shipped file is invalid), `selectableOrders`, `orderById`, `judgeSurname` and `statementTitles(orders, standardTitle)`
