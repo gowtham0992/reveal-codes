@@ -118,7 +118,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - _Requirements: 4.1 to 4.23, 5.2, 5.5, 5.9, 5.10, 5.12, 8.1, 8.2, 9.4, 9.5, 9.6, 9.7, 9.9, 9.10, 9.11, 9.12_
 
 - [ ] 3. Group 3: picker, confidentiality checkbox, blocked state, print view, first-page header
-  - [-] 3.1 Add the first-page header to the DOCX builder
+  - [x] 3.1 Add the first-page header to the DOCX builder
     - In `packages/export/src/docx-blocks.ts` add `headerElements(h)` (bold, centred, 12 pt heading paragraph; 12 pt pointer paragraph via `singleParagraph`)
     - In `packages/export/src/docx.ts` add `headerOptions(heading)` so that a non-null `firstPageHeading(statement)` adds `titlePage: true` and `headers: { first: new Header(...) }`, and `null` keeps today's options; add nothing to the body paragraphs
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
