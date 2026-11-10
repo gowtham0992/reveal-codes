@@ -1,13 +1,16 @@
 // @vitest-environment jsdom
 import { blockingIssues, createDocument } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
+import { ORDERS } from "@reveal-codes/export";
 import { useSyncExternalStore } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { ExportDialog } from "../src/components/export-dialog";
 import type { ExportDialogProps } from "../src/components/export-dialog";
 import { ExportIssues } from "../src/components/export-issues";
+import { createOrderSelectionStore } from "../src/order-selection";
 import { createStore } from "../src/store-runtime";
 import type { Store } from "../src/store-runtime";
+import { createMemoryStorage } from "./support/memory-storage";
 import { act, fireEvent, renderUi, screen } from "./support/render";
 
 const ISO = "2026-11-02T12:00:00.000Z";
@@ -26,6 +29,7 @@ function props(document: Document, extra: Partial<ExportDialogProps> = {}): Expo
   return {
     document,
     store,
+    orderStore: createOrderSelectionStore(createMemoryStorage(), ORDERS),
     now: () => new Date(ISO),
     notice: null,
     busy: false,

@@ -6,14 +6,17 @@ import {
   buildStatement,
   canExport,
   exportFileName,
+  needsConfidentiality,
 } from "@reveal-codes/export";
-import type { Statement } from "@reveal-codes/export";
+import type { OrderContext, Statement } from "@reveal-codes/export";
 import { EXPORT_FAILED, exportedNotice } from "../notices";
 import type { StoreAction, StoreState } from "../store";
 
 export type ExportDeps = Readonly<{
   now: () => Date;
   download: (bytes: Uint8Array, fileName: string) => void;
+  /** The dialog's selected order and tick; null when no order is selected. */
+  orderContext: OrderContext | null;
 }>;
 
 export type ExportOutcome =
@@ -56,15 +59,22 @@ function deliver(deps: ExportDeps, bytes: Uint8Array, fileName: string): Error |
   }
 }
 
+/** The Gate and the confidentiality tick, checked again at the moment of export. */
+function orderBlocks(document: Document, context: OrderContext | null): boolean {
+  const entry = context === null ? null : context.entry;
+  if (!canExport(document, entry)) return true;
+  return needsConfidentiality(document, entry) && context?.confidentialityCertified !== true;
+}
+
 /**
  * The whole Download flow. Failures are returned as values and shown as a
  * notice; the Document is never changed. Makes no network request.
  */
 export async function exportDocx(store: ExportStore, deps: ExportDeps): Promise<ExportOutcome> {
   const { document, runLog, verifiedAt } = store.getState();
-  if (!canExport(document, null)) return { status: "blocked" };
+  if (orderBlocks(document, deps.orderContext)) return { status: "blocked" };
   const now = deps.now();
-  const built = buildStatement(document, runLog, { now, verifiedAt });
+  const built = buildStatement(document, runLog, { now, verifiedAt }, deps.orderContext);
   if (!built.ok || !appendixParses(document)) return fail(store);
   const bytes = await pack(document, built.value);
   if (bytes instanceof Error) return fail(store);

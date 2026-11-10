@@ -1,5 +1,14 @@
 {
-  "pbtResults": {},
+  "pbtResults": {
+    "2.9 Write Property 2: gate": {
+      "status": "passed",
+      "lastRunTimestamp": 1794275014680
+    },
+    "2.8 Write Property 1: order citation is total": {
+      "status": "passed",
+      "lastRunTimestamp": 1794275041157
+    }
+  },
   "executionHistory": {
     "1.1 Format the dataset and widen the export project settings": [
       {
@@ -210,6 +219,16 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994202
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794274987667
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794275250701
       }
     ],
     "2.9 Write Property 2: gate": [
@@ -217,6 +236,16 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994226
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794274987716
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794275250748
       }
     ],
     "2.10 Update the property-file table in `boundaries.test.ts`": [
@@ -231,6 +260,11 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994281
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794274988052
       }
     ],
     "3.1 Add the first-page header to the DOCX builder": [
@@ -255,6 +289,11 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994320
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794274988857
       }
     ],
     "3.3 Build the picker, the confidentiality checkbox and the order-gate hook": [
@@ -279,6 +318,11 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994363
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794274989413
       }
     ],
     "3.5 Wire the Print_View": [

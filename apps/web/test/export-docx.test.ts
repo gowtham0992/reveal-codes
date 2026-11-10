@@ -22,7 +22,11 @@ describe("exportDocx _Requirements: 1.5, 5.5, 7.2, 7.3, 7.4, 9.2, 9.4_", () => {
     const store = storeWith(await gateClearDocument(), EXPORT_VERIFIED_AT);
     const fetchSpy = vi.spyOn(globalThis, "fetch");
     const rec = recorder();
-    const outcome = await exportDocx(store, { now: () => EXPORT_NOW, download: rec.download });
+    const outcome = await exportDocx(store, {
+      now: () => EXPORT_NOW,
+      download: rec.download,
+      orderContext: null,
+    });
     expect(outcome.status).toBe("exported");
     expect(rec.calls).toHaveLength(1);
     const name = rec.calls[0]?.name ?? "";
@@ -38,7 +42,11 @@ describe("exportDocx _Requirements: 1.5, 5.5, 7.2, 7.3, 7.4, 9.2, 9.4_", () => {
     const store = storeWith(await verifiedDemoDocument(), EXPORT_VERIFIED_AT);
     const before = store.getState();
     const rec = recorder();
-    const outcome = await exportDocx(store, { now: () => EXPORT_NOW, download: rec.download });
+    const outcome = await exportDocx(store, {
+      now: () => EXPORT_NOW,
+      download: rec.download,
+      orderContext: null,
+    });
     expect(outcome).toEqual({ status: "blocked" });
     expect(rec.calls).toHaveLength(0);
     expect(store.getState()).toBe(before);
@@ -52,6 +60,7 @@ describe("exportDocx _Requirements: 1.5, 5.5, 7.2, 7.3, 7.4, 9.2, 9.4_", () => {
       download: () => {
         throw new Error("no anchor");
       },
+      orderContext: null,
     });
     expect(outcome).toEqual({ status: "failed" });
     expect(store.getState().notice).toBe(EXPORT_FAILED);
@@ -64,6 +73,7 @@ describe("exportDocx _Requirements: 1.5, 5.5, 7.2, 7.3, 7.4, 9.2, 9.4_", () => {
     const outcome = await exportDocx(store, {
       now: () => new Date(Number.NaN),
       download: rec.download,
+      orderContext: null,
     });
     expect(outcome).toEqual({ status: "failed" });
     expect(rec.calls).toHaveLength(0);
@@ -73,7 +83,11 @@ describe("exportDocx _Requirements: 1.5, 5.5, 7.2, 7.3, 7.4, 9.2, 9.4_", () => {
   it("fails when a Document does not segment (broken span coverage)", async () => {
     const broken = storeWith({ ...freshDocument(), text: "abc" }, null);
     const rec = recorder();
-    const outcome = await exportDocx(broken, { now: () => EXPORT_NOW, download: rec.download });
+    const outcome = await exportDocx(broken, {
+      now: () => EXPORT_NOW,
+      download: rec.download,
+      orderContext: null,
+    });
     expect(outcome).toEqual({ status: "failed" });
     expect(rec.calls).toHaveLength(0);
     expect(broken.getState().notice).toBe(EXPORT_FAILED);
@@ -82,7 +96,11 @@ describe("exportDocx _Requirements: 1.5, 5.5, 7.2, 7.3, 7.4, 9.2, 9.4_", () => {
   it("exports an empty Document", async () => {
     const store = storeWith(freshDocument(), null);
     const rec = recorder();
-    const outcome = await exportDocx(store, { now: () => EXPORT_NOW, download: rec.download });
+    const outcome = await exportDocx(store, {
+      now: () => EXPORT_NOW,
+      download: rec.download,
+      orderContext: null,
+    });
     expect(outcome.status).toBe("exported");
     expect(rec.calls[0]?.name).toBe("filing-2026-11-20.docx");
   });

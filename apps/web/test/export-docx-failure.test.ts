@@ -29,7 +29,11 @@ describe("exportDocx failure branches _Requirements: 5.5, 7.4_", () => {
     hooks.docx = "reject";
     const store = storeWith(await gateClearDocument(), null);
     const download = vi.fn();
-    const outcome = await exportDocx(store, { now: () => EXPORT_NOW, download });
+    const outcome = await exportDocx(store, {
+      now: () => EXPORT_NOW,
+      download,
+      orderContext: null,
+    });
     hooks.docx = "real";
     expect(outcome).toEqual({ status: "failed" });
     expect(download).not.toHaveBeenCalled();
@@ -40,7 +44,11 @@ describe("exportDocx failure branches _Requirements: 5.5, 7.4_", () => {
     hooks.appendix = "bad";
     const store = storeWith(await gateClearDocument(), null);
     const download = vi.fn();
-    const outcome = await exportDocx(store, { now: () => EXPORT_NOW, download });
+    const outcome = await exportDocx(store, {
+      now: () => EXPORT_NOW,
+      download,
+      orderContext: null,
+    });
     hooks.appendix = "real";
     expect(outcome).toEqual({ status: "failed" });
     expect(download).not.toHaveBeenCalled();

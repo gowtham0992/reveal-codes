@@ -2,10 +2,13 @@
 
 import { blockingIssues } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
-import { useEffect, useState } from "react";
+import { ORDERS } from "@reveal-codes/export";
+import type { OrderContext } from "@reveal-codes/export";
+import { useEffect, useMemo, useState } from "react";
 import type { Autosave } from "../autosave";
 import { exportDocx } from "../client/export-docx";
 import { PRINT_FAILED } from "../notices";
+import { createOrderSelectionStore } from "../order-selection";
 import type { AppServices } from "../services";
 import type { Store } from "../store-runtime";
 import { ExportDialog } from "./export-dialog";
@@ -36,9 +39,10 @@ function startDownload(
   store: Store,
   setBusy: (busy: boolean) => void,
   close: () => void,
+  orderContext: OrderContext | null,
 ): void {
   setBusy(true);
-  void exportDocx(store, { now: svc.now, download: svc.download }).then((outcome) => {
+  void exportDocx(store, { now: svc.now, download: svc.download, orderContext }).then((outcome) => {
     setBusy(false);
     if (outcome.status === "exported") close();
   });
@@ -60,6 +64,7 @@ export function useExport({ svc, store, autosave, doc, notice, onGo }: UseExport
   const [open, setOpen] = useState(false);
   const [opener, setOpener] = useState<HTMLElement | null>(null);
   const [busy, setBusy] = useState(false);
+  const orderStore = useMemo(() => createOrderSelectionStore(svc.storage, ORDERS), [svc.storage]);
   const setGoTo = useDeferredGo(open, onGo);
   const close = (): void => {
     setOpen(false);
@@ -77,13 +82,14 @@ export function useExport({ svc, store, autosave, doc, notice, onGo }: UseExport
       <ExportDialog
         document={doc}
         store={store}
+        orderStore={orderStore}
         now={svc.now}
         notice={notice}
         busy={busy}
         restoreFocus={opener}
         onGo={setGoTo}
-        onDownload={() => {
-          startDownload(svc, store, setBusy, close);
+        onDownload={(context) => {
+          startDownload(svc, store, setBusy, close, context);
         }}
         onPrint={() => {
           printFlow(svc, store, autosave);

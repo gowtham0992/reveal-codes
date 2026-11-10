@@ -92,14 +92,14 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - If an arbitrary is useful to the Engine as well, add it to `packages/engine/src/testing/arbitraries.ts` instead
     - _Requirements: 10.4_
 
-  - [~] 2.8 Write Property 1: order citation is total
+  - [x] 2.8 Write Property 1: order citation is total
     - Create `packages/export/test/order-citation.properties.test.ts` with one `fc.assert(fc.property(...))` over `arbExportCase` and `arbOrderContext`
     - **Property 1: Order citation is total**
     - Assert that the joined text of `renderStatement` and paragraph 1 contain `instrument`, `court.name` and `source_url`, and that the title block equals `caption.text` for `statement_title` and `separate_declaration` and the Standard_Title otherwise
     - Add `// Property 1` and `// Feature: court-orders, Property 1: Order citation is total` above the assert; `_Requirements: 4.5, 4.6, 4.7, 10.2_` in the describe title; `{ numRuns: runs() }`
     - **Validates: Requirements 4.5, 4.6, 4.7, 10.2**
 
-  - [~] 2.9 Write Property 2: gate
+  - [x] 2.9 Write Property 2: gate
     - Create `packages/export/test/order-gate.properties.test.ts` with one `fc.assert(fc.property(...))` over `arbGateClearAiDocument` and `arbAnyEntry`
     - **Property 2: Gate**
     - Assert `canExport(document, entry)` equals `!(entry.kind === "prohibition" && hasAiOrigin(document))`, with `hasAiOrigin` written in the test as `document.spans.some(s => s.provenance.origin === "AI" || s.provenance.origin === "AI>HUM")`
@@ -111,7 +111,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Change the message "not one of the four known files" to "not one of the known files"; assert the comment numbers per spec (`[1, 2, 3, 4]` for export-certification, `[1, 2]` for court-orders); keep the one-comment-one-assert rule
     - _Requirements: 10.1, 11.2_
 
-  - [~] 2.11 Write the Statement, gate and null-order example tests
+  - [-] 2.11 Write the Statement, gate and null-order example tests
     - Create `packages/export/test/statement-orders.test.ts`: `order` for every entry against an expected object built in the test; paragraph-number shift (every entry has one more paragraph than `order === null`); exact citing sentences for `edtex-love-2025`, `ndtex-lr-7-2-f` and `dhaw-go-23-1` (no doubled full stop); `ndtex-lr-7-2-f` with AI (Standard_Title); `edtex-love-2025` (title "Certificate of Generative Artificial Intelligence Usage", tool sentence; tool lists of none, one, two, and a `null` model); `dcolo-wang-2025` with no AI (no-AI sentence and "(all contributors to the drafting)"); each element sentence with run counts 0, 1 and 3; `cit-choe-groves-2025` with the tick on and off; entries with only `accuracy_certification`, `citations_verified` or `human_review` keep the verification sentences and gain none; the sentence `The text drafted with the program appears at paragraphs 12–14 of the filing.`; no "lines" in any range text; JSON round trip of the Statement for every entry; `renderStatement` of a structured clone equals the original; `exportFileName` equal for every entry; determinism of `buildStatement`
     - Create `packages/export/test/null-order.test.ts`: `renderStatement` of the Demo_Document Statement built with the default argument and with `null` equals the existing expected blocks of `render-statement.test.ts`
     - Create `packages/export/test/order-rules.test.ts` and `packages/export/test/gate-orders.test.ts`: `prohibitionNotice` for a Judge_Entry and a synthetic Court_Wide_Entry with 1 and 2 spans, `needsConfidentiality` truth table, `sdohio-newman` on the Demo_Document (`canExport` false), still false after an edit beyond the relabel threshold makes the span `AI>HUM`, true only after the AI text is deleted
@@ -123,7 +123,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - In `packages/export/src/docx.ts` add `headerOptions(heading)` so that a non-null `firstPageHeading(statement)` adds `titlePage: true` and `headers: { first: new Header(...) }`, and `null` keeps today's options; add nothing to the body paragraphs
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-  - [~] 3.2 Write the DOCX header tests
+  - [-] 3.2 Write the DOCX header tests
     - Create `packages/export/test/docx-orders.test.ts`: with `ndtex-lr-7-2-f` and AI used the unzipped file holds `word/header1.xml`, `w:titlePg` in `word/document.xml`, a first paragraph that is bold, centred and size 24, and the pointer sentence; the body paragraph list from the existing docx text reader equals the one without the heading
     - With AI not used, with another placement, and with `order === null`, there is no `header1.xml` and no `w:titlePg`
     - _Requirements: 7.1 to 7.5, 9.4_
@@ -135,7 +135,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Plain copy, no icons, no exclamation marks
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 11.1_
 
-  - [~] 3.4 Wire the Export_Dialog, `use-export` and `exportDocx`
+  - [-] 3.4 Wire the Export_Dialog, `use-export` and `exportDocx`
     - In `apps/web/src/components/export-dialog.tsx` add `orderStore` and `onDownload(context)` props; render `OrderPicker`, `OrderSummary`, the checkbox (when `needsTick`), the existing lead and `ExportIssues`, and the prohibition notice (`notice.line` plus the quoted `keyLanguage`) with no override control; split into `ExportActions` and `ExportOrder` so each function stays under 40 lines; buttons use `disabled={!gate.clear || busy}` and `disabled={!gate.clear}`; button labels and the toolbar count still use Blocking_Issues only
     - In `apps/web/src/components/use-export.tsx` create the store once with `createOrderSelectionStore(svc.storage, ORDERS)` and pass the dialog's context to the download flow
     - In `apps/web/src/client/export-docx.ts` add `orderContext` to `ExportDeps`; return `{ status: "blocked" }` when `!canExport(document, entry)` or when `needsConfidentiality` holds and the tick is missing; pass the context to `buildStatement`; leave `exportFileName` untouched

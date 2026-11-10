@@ -39,3 +39,14 @@
   border-top: 1px solid var(--rule);
   padding-top: 6px;
 }
+
+.order {
+  margin: 0 0 8px;
+}
+
+.prohibition {
+  margin: 8px 0 0;
+  border-top: 1px solid var(--rule);
+  padding-top: 6px;
+  font-weight: 700;
+}

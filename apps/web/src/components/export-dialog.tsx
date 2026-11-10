@@ -2,24 +2,31 @@
 
 import { blockingIssues } from "@reveal-codes/engine";
 import type { Document, Issue } from "@reveal-codes/engine";
-import { canExport } from "@reveal-codes/export";
+import type { OrderContext } from "@reveal-codes/export";
 import { useEffect, useRef, useState } from "react";
+import { quoted } from "../order-copy";
+import type { OrderSelectionStore } from "../order-selection";
 import type { Store } from "../store-runtime";
+import { ConfidentialityCheckbox } from "./confidentiality-checkbox";
 import styles from "./export-dialog.module.css";
 import { ExportIssues } from "./export-issues";
 import { Modal, ModalActions } from "./modal";
+import { OrderPicker, OrderSummary } from "./order-picker";
 import { OverrideDialog } from "./override-dialog";
+import { useOrderGate } from "./use-order-gate";
+import type { OrderGate } from "./use-order-gate";
 
 export type ExportDialogProps = Readonly<{
   document: Document;
   store: Store;
+  orderStore: OrderSelectionStore;
   now: () => Date;
   notice: string | null;
   /** A download is in progress. */
   busy: boolean;
   restoreFocus?: HTMLElement | null | undefined;
   onGo: (offset: number) => void;
-  onDownload: () => void;
+  onDownload: (context: OrderContext | null) => void;
   onPrint: () => void;
   onClose: () => void;
 }>;
@@ -101,39 +108,93 @@ function OverrideTarget({ target, store, now, onClose }: OverrideTargetProps) {
   );
 }
 
-/** Export_Dialog (Requirement 2): the gate is recomputed on every render, so no timer is needed. */
+type OrderProps = Readonly<{ gate: OrderGate }>;
+
+/** Picker, summary, confidentiality checkbox and prohibition notice (no override control). */
+function ExportOrder({ gate }: OrderProps) {
+  return (
+    <div className={styles["order"]}>
+      <OrderPicker selection={gate.selection} onSelect={gate.select} />
+      <OrderSummary entry={gate.entry} />
+      {gate.needsTick ? (
+        <ConfidentialityCheckbox checked={gate.ticked} onChange={gate.setTicked} />
+      ) : null}
+      {gate.notice === null ? null : (
+        <div className={styles["prohibition"]}>
+          <p className={styles["text"]}>{gate.notice.line}</p>
+          <p className={styles["text"]}>{quoted(gate.notice.keyLanguage)}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+type ActionsProps = Readonly<{
+  gate: OrderGate;
+  blocking: number;
+  busy: boolean;
+  onDownload: (context: OrderContext | null) => void;
+  onPrint: () => void;
+  onClose: () => void;
+}>;
+
+function ExportActions({ gate, blocking, busy, onDownload, onPrint, onClose }: ActionsProps) {
+  return (
+    <ModalActions>
+      <button
+        type="button"
+        disabled={!gate.clear || busy}
+        onClick={() => {
+          onDownload(gate.context);
+        }}
+      >
+        {downloadLabel(blocking)}
+      </button>
+      <button type="button" disabled={!gate.clear} onClick={onPrint}>
+        {printLabel(blocking)}
+      </button>
+      <button type="button" onClick={onClose}>
+        Close
+      </button>
+    </ModalActions>
+  );
+}
+
+/** Export_Dialog (Requirements 2, 3, 5, 6): the gate is recomputed on every render. */
 export function ExportDialog(props: ExportDialogProps) {
-  const { document, store, now, notice, busy, restoreFocus, onClose } = props;
+  const { document, store, orderStore, now, notice, busy, restoreFocus, onClose } = props;
   const [target, setTarget] = useState<Target | null>(null);
   const root = useRef<HTMLDivElement | null>(null);
   useReclaimFocus(root, target);
-  const clearTarget = (): void => {
-    setTarget(null);
-  };
+  const gate = useOrderGate(document, orderStore);
   const blocking = blockingIssues(document);
-  const clear = canExport(document, null);
   return (
     <>
       <Modal title="Export" onClose={onClose} restoreFocus={restoreFocus}>
         <div ref={root} className={styles["body"]}>
+          <ExportOrder gate={gate} />
           <ExportBody {...props} blocking={blocking} onOverride={setTarget} />
         </div>
         <p role="status" className={styles["status"]}>
           {notice}
         </p>
-        <ModalActions>
-          <button type="button" disabled={!clear || busy} onClick={props.onDownload}>
-            {downloadLabel(blocking.length)}
-          </button>
-          <button type="button" disabled={!clear} onClick={props.onPrint}>
-            {printLabel(blocking.length)}
-          </button>
-          <button type="button" onClick={onClose}>
-            Close
-          </button>
-        </ModalActions>
+        <ExportActions
+          gate={gate}
+          blocking={blocking.length}
+          busy={busy}
+          onDownload={props.onDownload}
+          onPrint={props.onPrint}
+          onClose={onClose}
+        />
       </Modal>
-      <OverrideTarget target={target} store={store} now={now} onClose={clearTarget} />
+      <OverrideTarget
+        target={target}
+        store={store}
+        now={now}
+        onClose={() => {
+          setTarget(null);
+        }}
+      />
     </>
   );
 }
