@@ -288,3 +288,23 @@ A walkthrough of the court-orders feature in the browser found eight problems. T
 - The 2026-11-09 entry's demo motion note is superseded by the 6.4 change above.
 
 Requirements: 12.15, 13.7.
+
+## 2026-11-09 sentinel-sweep follow-up (body_edited excerpts)
+
+### What changed
+
+- `body_edited` findings now show two windows over one span of the two lines (`excerptPair` in `crew/sentinel/src/excerpt.ts`): both lines whole when each fits, otherwise both cut from the same start, 30 code units before the first difference, with a leading "…" when the cut is not at index 0 and a trailing "…" from `ellipsize`. The cut never splits a surrogate pair.
+- The report row for a `body_edited` finding used to show two identical cells. The edit was past the cut, so the reader could not see what changed. The two cells now differ and show the edit.
+- Property 3 (excerpts differ and stay inside their lines) was added in `crew/sentinel/test/excerpt.properties.test.ts`.
+- The README Sentinel section links the Crew app repository (https://github.com/gowtham0992/reveal-codes-sentinel) and the "Court-specific certification" section lost two sentences (the Picker title cut and the singular/plural counts).
+- `docs/KIRO_USAGE.md` has one new row, `sentinel-sweep group 5`; the static test now expects four sentinel rows.
+
+### Where Kiro got something wrong, and what fixed it
+
+- The old excerpt cut took both lines from index 0 and kept the first 80 characters of each. When two lines shared a longer prefix, both cells were the same string and the report showed no difference. The fix is the shared-start window above, and Property 3 asserts that the two excerpts differ whenever the lines differ.
+
+### Checkpoint
+
+The result of lint, typecheck, test and `FC_NUM_RUNS=500 pnpm test:pbt` is added by task 5.5.
+
+Requirements: 14.13, 14.14.

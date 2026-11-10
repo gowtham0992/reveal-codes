@@ -182,8 +182,8 @@ describe("docs/KIRO_USAGE.md rows", () => {
     .split("\n")
     .filter((line) => line.startsWith("|") && /sentinel/i.test(line));
 
-  it("holds exactly three sentinel rows", () => {
-    expect(rows).toHaveLength(3);
+  it("holds exactly four sentinel rows", () => {
+    expect(rows).toHaveLength(4);
   });
 
   it("has a spec row naming all five spec files", () => {
