@@ -49,7 +49,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Create `apps/web/test/order-copy.test.ts`: `optionText` for every selectable entry against a template written in the test; `kindWords` over `ORDER_KINDS`; `appliesWords` over `APPLIES_TO`; `summaryLine` and `quoted`
     - _Requirements: 2.2 to 2.6, 2.9, 3.5, 3.9, 3.10, 9.3_
 
-- [ ] 2. Group 2: Statement changes, wording, Property 1, prohibition gate, Property 2
+- [x] 2. Group 2: Statement changes, wording, Property 1, prohibition gate, Property 2
   - [x] 2.1 Add the Statement data fields and the paragraph-range computation
     - In `packages/export/src/types.ts` add `StatementOrder` (including `elements`, D7) and the Statement fields `order`, `aiRanges`, `runCount`, `confidentialityCertified`
     - Export `isAiSpan` from `packages/export/src/statement-parts.ts` and make `usedAi` use it
@@ -106,7 +106,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Add `// Property 2` and `// Feature: court-orders, Property 2: Gate` above the assert; `_Requirements: 5.2, 5.3, 5.4, 5.12, 10.3_` in the describe title; `{ numRuns: runs() }`
     - **Validates: Requirements 5.2, 5.3, 5.4, 5.12, 10.3**
 
-  - [~] 2.10 Update the property-file table in `boundaries.test.ts`
+  - [x] 2.10 Update the property-file table in `boundaries.test.ts`
     - In `packages/export/test/static/boundaries.test.ts` change `PROPERTY_FILES` to rows of `{ spec, file, number }`: the four export-certification files and `order-citation.properties.test.ts` (1) and `order-gate.properties.test.ts` (2)
     - Change the message "not one of the four known files" to "not one of the known files"; assert the comment numbers per spec (`[1, 2, 3, 4]` for export-certification, `[1, 2]` for court-orders); keep the one-comment-one-assert rule
     - _Requirements: 10.1, 11.2_
@@ -117,7 +117,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Create `packages/export/test/order-rules.test.ts` and `packages/export/test/gate-orders.test.ts`: `prohibitionNotice` for a Judge_Entry and a synthetic Court_Wide_Entry with 1 and 2 spans, `needsConfidentiality` truth table, `sdohio-newman` on the Demo_Document (`canExport` false), still false after an edit beyond the relabel threshold makes the span `AI>HUM`, true only after the AI text is deleted
     - _Requirements: 4.1 to 4.23, 5.2, 5.5, 5.9, 5.10, 5.12, 8.1, 8.2, 9.4, 9.5, 9.6, 9.7, 9.9, 9.10, 9.11, 9.12_
 
-- [ ] 3. Group 3: picker, confidentiality checkbox, blocked state, print view, first-page header
+- [x] 3. Group 3: picker, confidentiality checkbox, blocked state, print view, first-page header
   - [x] 3.1 Add the first-page header to the DOCX builder
     - In `packages/export/src/docx-blocks.ts` add `headerElements(h)` (bold, centred, 12 pt heading paragraph; 12 pt pointer paragraph via `singleParagraph`)
     - In `packages/export/src/docx.ts` add `headerOptions(heading)` so that a non-null `firstPageHeading(statement)` adds `titlePage: true` and `headers: { first: new Header(...) }`, and `null` keeps today's options; add nothing to the body paragraphs
@@ -149,13 +149,13 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Add `.firstPage { break-after: avoid; }` and `.firstPageHeading { font-weight: 700; text-align: center; }` to `print-view.module.css`
     - _Requirements: 3.12, 5.11, 6.8, 6.9, 6.10, 6.11, 7.6, 7.7_
 
-  - [~] 3.6 Write the picker, dialog and export-flow tests
+  - [x] 3.6 Write the picker, dialog and export-flow tests
     - Create `apps/web/test/order-picker.test.tsx`: label and native select; first option; optgroups equal `selectableOrders(ORDERS)` with no non-current option; choosing an option updates the store; opening with a stored id and with an unknown id; Order_Summary lines and the Source link attributes; no summary without a selection
     - Create `apps/web/test/export-dialog-orders.test.tsx`: `sdohio-newman` with one AI span shows the prohibition line and quoted key language, both buttons disabled, no override control, Issues list and toolbar label unchanged; a synthetic Court_Wide_Entry shows the `<instrument> prohibits` form; "paragraphs" and never "lines"; `cit-choe-groves-2025` checkbox shown only with AI used, gates both buttons, reset on reopen and on selection change, not persisted; the downloaded Statement has the confidentiality sentence only when ticked
     - Create `apps/web/test/export-docx-orders.test.ts`: `exportDocx` returns `blocked` for a prohibition with AI text and for a missing tick, and passes the context to `buildStatement`
     - _Requirements: 3.1 to 3.11, 5.5 to 5.8, 6.1 to 6.7, 9.3, 9.7, 9.8, 9.12_
 
-  - [~] 3.7 Write the print model and print view tests
+  - [x] 3.7 Write the print model and print view tests
     - Create `apps/web/test/print-model-orders.test.ts`: `ready` carries `heading` and `certifiedBlocks` as designed; `prohibited` for `sdohio-newman`; `blocked` keeps its existing shape; `order === null` gives today's model plus `heading: null` and `certifiedBlocks: null`
     - Create `apps/web/test/print-view-orders.test.tsx`: Order_Summary in the controls block; first-page block present with the class that carries `break-after: avoid` (also read `print-view.module.css`) and absent otherwise; the print checkbox unticked on every load, the one-line stand-in until ticked, then the same blocks as `buildStatement` with the tick; after ticking in the dialog and opening print, the only storage keys are the autosave key and the order key
     - _Requirements: 3.12, 5.11, 6.8 to 6.11, 7.6, 7.7, 9.8_

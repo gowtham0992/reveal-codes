@@ -243,13 +243,23 @@ describe("package boundaries _Requirements: 9.1, 10.9_", () => {
   });
 });
 
-type PropertyFile = { readonly file: string; readonly number: number };
+type PropertyFile = {
+  readonly spec: "export-certification" | "court-orders";
+  readonly file: string;
+  readonly number: number;
+};
 const PROPERTY_FILES: readonly PropertyFile[] = [
-  { file: "gate.properties.test.ts", number: 1 },
-  { file: "statement.properties.test.ts", number: 2 },
-  { file: "appendix.properties.test.ts", number: 3 },
-  { file: "docx.properties.test.ts", number: 4 },
+  { spec: "export-certification", file: "gate.properties.test.ts", number: 1 },
+  { spec: "export-certification", file: "statement.properties.test.ts", number: 2 },
+  { spec: "export-certification", file: "appendix.properties.test.ts", number: 3 },
+  { spec: "export-certification", file: "docx.properties.test.ts", number: 4 },
+  { spec: "court-orders", file: "order-citation.properties.test.ts", number: 1 },
+  { spec: "court-orders", file: "order-gate.properties.test.ts", number: 2 },
 ];
+const EXPECTED_NUMBERS: Readonly<Record<PropertyFile["spec"], readonly number[]>> = {
+  "export-certification": [1, 2, 3, 4],
+  "court-orders": [1, 2],
+};
 
 /** Each `// Property N` comment must be followed by exactly one `fc.assert` before the next one. */
 function propertyViolations(file: Source, expected: number): Violation[] {
@@ -292,28 +302,29 @@ describe("property files _Requirements: 10.5_", () => {
     const sources = readDir(TEST_DIR, ".properties.test.ts");
     const violations = sources.flatMap((s) => {
       const entry = PROPERTY_FILES.find((p) => p.file === basename(s.path));
-      if (entry === undefined)
-        return [at(s, 1, "property file is not one of the four known files")];
+      if (entry === undefined) return [at(s, 1, "property file is not one of the known files")];
       return propertyViolations(s, entry.number);
     });
     expect(format(violations)).toEqual([]);
     expect(present.length).toBe(sources.length);
   });
 
-  it("when all four property files exist, their comments are exactly Property 1 to 4", () => {
-    const sources = readDir(TEST_DIR, ".properties.test.ts");
-    if (sources.length < PROPERTY_FILES.length) {
-      // Becomes strict once gate.properties.test.ts (task 4.4) and docx.properties.test.ts exist.
-      expect(sources.length).toBeLessThan(PROPERTY_FILES.length);
-      return;
-    }
-    const numbers = sources.flatMap((s) =>
-      s.text
-        .split("\n")
-        .map((l) => /^\s*\/\/ Property (\d+)\s*$/.exec(l)?.[1])
-        .filter((v): v is string => v !== undefined)
-        .map(Number),
-    );
-    expect(numbers.sort()).toEqual([1, 2, 3, 4]);
-  });
+  it.each(Object.keys(EXPECTED_NUMBERS) as PropertyFile["spec"][])(
+    "the %s property comments are exactly its expected numbers",
+    (spec) => {
+      const files = PROPERTY_FILES.filter((p) => p.spec === spec).map((p) => p.file);
+      const sources = readDir(TEST_DIR, ".properties.test.ts").filter((s) =>
+        files.includes(basename(s.path)),
+      );
+      expect(sources.length).toBe(files.length);
+      const numbers = sources.flatMap((s) =>
+        s.text
+          .split("\n")
+          .map((l) => /^\s*\/\/ Property (\d+)\s*$/.exec(l)?.[1])
+          .filter((v): v is string => v !== undefined)
+          .map(Number),
+      );
+      expect(numbers.sort((a, b) => a - b)).toEqual(EXPECTED_NUMBERS[spec]);
+    },
+  );
 });

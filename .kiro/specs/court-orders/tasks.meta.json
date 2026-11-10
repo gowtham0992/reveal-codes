@@ -253,6 +253,16 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994260
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794275439218
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794275832990
       }
     ],
     "2.11 Write the Statement, gate and null-order example tests": [
@@ -362,6 +372,16 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994403
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794275439974
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794275833060
       }
     ],
     "3.7 Write the print model and print view tests": [
@@ -369,6 +389,16 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994424
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794275440569
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794275833119
       }
     ],
     "4.1 Add `STATEMENT_TITLES` and use it in the Sentinel splitter": [
@@ -449,6 +479,20 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794274496934
+      }
+    ],
+    "2. Group 2: Statement changes, wording, Property 1, prohibition gate, Property 2": [
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794275833034
+      }
+    ],
+    "3. Group 3: picker, confidentiality checkbox, blocked state, print view, first-page header": [
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794275833142
       }
     ]
   }
