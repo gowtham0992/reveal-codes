@@ -197,7 +197,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Plain copy, no exclamation marks
     - _Requirements: 12.1_
 
-  - [-] 4.6 Add the `docs/KIRO_USAGE.md` rows
+  - [x] 4.6 Add the `docs/KIRO_USAGE.md` rows
     - Add a `Spec` row for court-orders (`.config.kiro`, `requirements.md`, `design.md`, `tasks.md`, and `tasks.meta.json` if it exists) and a `Steering` row for the `structure.md` and `product.md` edits, with file paths
     - This feature adds no hook, agent or MCP tool, so there are no other rows; make sure the web `inventory.test.ts` still passes
     - _Requirements: 12.2_
