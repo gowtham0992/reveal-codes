@@ -155,7 +155,7 @@ Conventions that apply to every task:
     - **Property 3: Body_edited excerpts differ and stay inside their lines**
     - **Validates: Requirements 14.4, 14.5, 14.6**
     - _Requirements: 14.6, 14.9, 12.14, 12.16_
-  - [-] 5.3 README: Crew app link, Court-specific trim, Sentinel example
+  - [x] 5.3 README: Crew app link, Court-specific trim, Sentinel example
     - `README.md` (Sentinel section, the line that reads "The Kiro Crew app that schedules the Sentinel lives in a separate repository: <crew app repo>."): replace `<crew app repo>` with https://github.com/gowtham0992/reveal-codes-sentinel and add, on the same line, the sentence: "The app was installed in Kiro Crew 0.12.0 and its nightly job run once over three sample filings on 2026-11-09; the run swept all three and reported the one edited after export." Keep it one line.
     - `README.md` "Court-specific certification": delete the sentence "Long titles in the Picker are cut at 60 characters with an ellipsis." and the sentence "Counts use the right singular or plural ("1 prompt", "3 prompts")." and nothing else; keep the spacing of the remaining sentences.
     - The Sentinel section shows no table row today (checked when this group was written). If it still shows none, leave it alone; if a Body edited row has been added since, change it to the new windowed form.
