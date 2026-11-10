@@ -250,7 +250,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Tests: the engine demo test asserts the three edited phrases and the extract court fields; the verifier fixture tests (recorded lookups) pass unchanged
     - _Requirements: 13.3, 13.4, 13.5_
 
-  - [~] 6.5 DOCX header spacing and Sentinel body-equality assertions
+  - [x] 6.5 DOCX header spacing and Sentinel body-equality assertions
     - In `packages/export/src/docx-blocks.ts` give the pointer paragraph of `headerElements` `spacing: { after: 240 }`; leave the heading paragraph and the body unchanged
     - In `packages/export/test/docx-orders.test.ts` assert `w:spacing` with `w:after="240"` on the second paragraph of `word/header1.xml` and not on the first
     - In `crew/sentinel/test/court-orders.test.ts` make the `edtex-love-2025` and `dhaw-go-23-1` tests also assert that the body of `splitExport(readDocx(bytes))` joined with `\n` equals `document.text`

@@ -63,6 +63,16 @@ describe("first-page header with ndtex-lr-7-2-f and AI used _Requirements: 7.1-7
     expect(paras.map(textOfXml)).toContain(POINTER);
   });
 
+  it("puts 12 pt (240 twips) of spacing after the pointer paragraph and not the heading", async () => {
+    const { statement } = await buildDemoDocumentStatement(contextOf("ndtex-lr-7-2-f"));
+    const bytes = await buildDocx(await buildDemoDocument(), statement);
+    const paras = paragraphXml(readDocxPart(bytes, "word/header1.xml"));
+    expect(textOfXml(paras[0] ?? "")).toBe(HEADING);
+    expect(textOfXml(paras[1] ?? "")).toBe(POINTER);
+    expect(paras[0]).not.toMatch(/<w:spacing[^>]*w:after="240"/);
+    expect(paras[1]).toMatch(/<w:spacing[^>]*w:after="240"/);
+  });
+
   it("leaves the body paragraphs equal to those of the same Statement without the heading", async () => {
     const d = await buildDemoDocument();
     const { statement } = await buildDemoDocumentStatement(contextOf("ndtex-lr-7-2-f"));

@@ -5,7 +5,9 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+import { readDocx } from "../src/docx-read.js";
 import { nodeFiles } from "../src/files.js";
+import { splitExport } from "../src/split.js";
 import { run } from "../src/run.js";
 import type { RunIo } from "../src/run.js";
 import { buildDemoDocument, buildDemoDocumentStatement } from "./support/export-support.js";
@@ -53,22 +55,34 @@ async function exportAndCheck(
   return { bytes, code, out: out.join("") };
 }
 
+/** The body that splitExport returns, joined by newlines, must equal the document text. */
+async function expectBodyEqualsDocument(bytes: Uint8Array): Promise<void> {
+  const read = readDocx(bytes);
+  if (!read.ok) throw new Error(read.error.kind);
+  const split = splitExport(read.value);
+  if (!split.ok) throw new Error(split.error.kind);
+  expect(split.value.body.join("\n")).toBe((await buildDemoDocument()).text);
+}
+
 describe("Sentinel on court-specific exports _Requirements: 7.4, 9.11, 12.10, 12.11_", () => {
   it("ndtex-lr-7-2-f: a first-page header leaves the body clean", async () => {
     const { bytes, code, out } = await exportAndCheck("ndtex-lr-7-2-f");
     expect(Object.keys(unzipSync(bytes))).toContain("word/header1.xml");
+    await expectBodyEqualsDocument(bytes);
     expect(code).toBe(0);
     expect(out.trimEnd().endsWith("No drift.")).toBe(true);
   });
 
   it("edtex-love-2025: the body is cut at the renamed title", async () => {
-    const { code, out } = await exportAndCheck("edtex-love-2025");
+    const { bytes, code, out } = await exportAndCheck("edtex-love-2025");
+    await expectBodyEqualsDocument(bytes);
     expect(code).toBe(0);
     expect(out.trimEnd().endsWith("No drift.")).toBe(true);
   });
 
   it("dhaw-go-23-1: the body is cut at the separate declaration caption", async () => {
-    const { code, out } = await exportAndCheck("dhaw-go-23-1");
+    const { bytes, code, out } = await exportAndCheck("dhaw-go-23-1");
+    await expectBodyEqualsDocument(bytes);
     expect(code).toBe(0);
     expect(out.trimEnd().endsWith("No drift.")).toBe(true);
   });

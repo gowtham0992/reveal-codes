@@ -62,7 +62,11 @@ export function headerElements(h: FirstPageHeading): Paragraph[] {
     spacing: STATEMENT_SPACING,
     children: [bodyRun(h.heading, true)],
   });
-  return [heading, singleParagraph(h.pointer)];
+  const pointer = new Paragraph({
+    spacing: { ...STATEMENT_SPACING, after: 240 },
+    children: [bodyRun(h.pointer)],
+  });
+  return [heading, pointer];
 }
 
 /** One Courier New paragraph per appendix line; leading and trailing spaces are kept. */
