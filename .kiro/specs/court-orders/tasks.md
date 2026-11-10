@@ -135,7 +135,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Plain copy, no icons, no exclamation marks
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 11.1_
 
-  - [-] 3.4 Wire the Export_Dialog, `use-export` and `exportDocx`
+  - [x] 3.4 Wire the Export_Dialog, `use-export` and `exportDocx`
     - In `apps/web/src/components/export-dialog.tsx` add `orderStore` and `onDownload(context)` props; render `OrderPicker`, `OrderSummary`, the checkbox (when `needsTick`), the existing lead and `ExportIssues`, and the prohibition notice (`notice.line` plus the quoted `keyLanguage`) with no override control; split into `ExportActions` and `ExportOrder` so each function stays under 40 lines; buttons use `disabled={!gate.clear || busy}` and `disabled={!gate.clear}`; button labels and the toolbar count still use Blocking_Issues only
     - In `apps/web/src/components/use-export.tsx` create the store once with `createOrderSelectionStore(svc.storage, ORDERS)` and pass the dialog's context to the download flow
     - In `apps/web/src/client/export-docx.ts` add `orderContext` to `ExportDeps`; return `{ status: "blocked" }` when `!canExport(document, entry)` or when `needsConfidentiality` holds and the tick is missing; pass the context to `buildStatement`; leave `exportFileName` untouched
