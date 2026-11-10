@@ -2,8 +2,9 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
+    "rootDir": "../..",
     "types": []
   },
-  "include": ["src"],
+  "include": ["src", "../../data/standing-orders.json"],
   "references": [{ "path": "../engine" }]
 }

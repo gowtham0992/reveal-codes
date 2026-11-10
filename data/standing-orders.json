@@ -46,7 +46,11 @@
   "entries": [
     {
       "id": "ndtex-lr-7-2-f",
-      "court": { "name": "United States District Court for the Northern District of Texas", "abbreviation": "N.D. Tex.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Northern District of Texas",
+        "abbreviation": "N.D. Tex.",
+        "level": "district"
+      },
       "judge": null,
       "instrument": "Local Civil Rule 7.2(f); Local Criminal Rule 47.2(e)",
       "title": "Disclosure of Use of Generative Artificial Intelligence",
@@ -55,7 +59,10 @@
       "kind": "disclosure_when_used",
       "applies_to": "all",
       "elements": ["negative_certification_when_unused"],
-      "caption": { "placement": "first_page_heading", "text": "Use of Generative Artificial Intelligence" },
+      "caption": {
+        "placement": "first_page_heading",
+        "text": "Use of Generative Artificial Intelligence"
+      },
       "key_language": "A brief prepared using generative artificial intelligence must disclose this fact on the first page under the heading 'Use of Generative Artificial Intelligence.'",
       "source_url": "https://www.txnd.uscourts.gov/sites/default/files/orders/2-98.pdf",
       "source_kind": "primary",
@@ -66,7 +73,11 @@
     },
     {
       "id": "ndtex-starr-2023",
-      "court": { "name": "United States District Court for the Northern District of Texas", "abbreviation": "N.D. Tex.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Northern District of Texas",
+        "abbreviation": "N.D. Tex.",
+        "level": "district"
+      },
       "judge": { "name": "Brantley Starr", "role": "district" },
       "instrument": "Judge-specific requirement",
       "title": "Mandatory Certification Regarding Generative Artificial Intelligence",
@@ -75,7 +86,10 @@
       "kind": "certification_every_filing",
       "applies_to": "attorneys",
       "elements": ["human_review", "citations_verified"],
-      "caption": { "placement": "statement_title", "text": "Certificate Regarding Judge-Specific Requirements" },
+      "caption": {
+        "placement": "statement_title",
+        "text": "Certificate Regarding Judge-Specific Requirements"
+      },
       "key_language": "I further certify that no portion of any filing in this case will be drafted by generative artificial intelligence or that any language drafted by generative artificial intelligence—including quotations, citations, paraphrased assertions, and legal analysis—will be checked for accuracy, using print reporters or traditional legal databases, by a human being before it is submitted to the Court.",
       "source_url": "https://www.txnd.uscourts.gov/sites/default/files/documents/CertReStarrJSR.doc",
       "source_kind": "primary",
@@ -86,7 +100,11 @@
     },
     {
       "id": "edtex-lr-cv-11-g",
-      "court": { "name": "United States District Court for the Eastern District of Texas", "abbreviation": "E.D. Tex.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Eastern District of Texas",
+        "abbreviation": "E.D. Tex.",
+        "level": "district"
+      },
       "judge": null,
       "instrument": "Local Rule CV-11(g); Local Rule AT-3(m)",
       "title": "Use of Generative Artificial Intelligence Technology by Pro Se Litigants",
@@ -105,15 +123,27 @@
     },
     {
       "id": "edtex-love-2025",
-      "court": { "name": "United States District Court for the Eastern District of Texas", "abbreviation": "E.D. Tex.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Eastern District of Texas",
+        "abbreviation": "E.D. Tex.",
+        "level": "district"
+      },
       "judge": { "name": "John D. Love", "role": "magistrate" },
       "instrument": "Standing order",
       "title": "Standing Order on Disclosure and Certification Requirements for Use of Generative Artificial Intelligence",
       "date": "2025-04-09",
       "kind": "certification_every_filing",
       "applies_to": "all",
-      "elements": ["tool_name", "how_used", "accuracy_certification", "negative_certification_when_unused"],
-      "caption": { "placement": "statement_title", "text": "Certificate of Generative Artificial Intelligence Usage" },
+      "elements": [
+        "tool_name",
+        "how_used",
+        "accuracy_certification",
+        "negative_certification_when_unused"
+      ],
+      "caption": {
+        "placement": "statement_title",
+        "text": "Certificate of Generative Artificial Intelligence Usage"
+      },
       "key_language": "any party, whether appearing pro se or through counsel, must include with all filings a 'Certificate of Generative Artificial Intelligence Usage' that discloses: (1) 'generative artificial intelligence' was used (or not used); (2) the specific tool the party used; (3) how the party used the tool",
       "source_url": "https://coop.txed.uscourts.gov/sites/default/files/judgeFiles/JDL%20Standing%20Order%20on%20AI%204.9.25.pdf",
       "source_kind": "primary",
@@ -123,7 +153,11 @@
     },
     {
       "id": "edtex-crone-mc-11",
-      "court": { "name": "United States District Court for the Eastern District of Texas", "abbreviation": "E.D. Tex.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Eastern District of Texas",
+        "abbreviation": "E.D. Tex.",
+        "level": "district"
+      },
       "judge": { "name": "Marcia A. Crone", "role": "district" },
       "instrument": "Standing Order MC-11 (Beaumont Division)",
       "title": "Disclosure and Certification Requirements for Use of Generative Artificial Intelligence",
@@ -131,7 +165,10 @@
       "kind": "disclosure_when_used",
       "applies_to": "all",
       "elements": ["tool_name", "accuracy_certification", "confidentiality"],
-      "caption": { "placement": "statement_title", "text": "Certificate of Generative Artificial Intelligence Usage" },
+      "caption": {
+        "placement": "statement_title",
+        "text": "Certificate of Generative Artificial Intelligence Usage"
+      },
       "key_language": "all parties—represented or appearing pro se in criminal cases and/or civil cases",
       "source_url": "https://www.txed.uscourts.gov/sites/default/files/judgeFiles/Standing%20Order%20MC-11%20%287.15.26%29.pdf",
       "source_kind": "primary",
@@ -141,7 +178,11 @@
     },
     {
       "id": "sdtex-go-2025-04",
-      "court": { "name": "United States District Court for the Southern District of Texas", "abbreviation": "S.D. Tex.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Southern District of Texas",
+        "abbreviation": "S.D. Tex.",
+        "level": "district"
+      },
       "judge": null,
       "instrument": "General Order 2025-04",
       "title": "In re: Use of Generative Artificial Intelligence in Court Filings",
@@ -159,7 +200,11 @@
     },
     {
       "id": "wdtex-gonzalez-2026",
-      "court": { "name": "United States District Court for the Western District of Texas", "abbreviation": "W.D. Tex.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Western District of Texas",
+        "abbreviation": "W.D. Tex.",
+        "level": "district"
+      },
       "judge": { "name": "Ernest Gonzalez", "role": "district" },
       "instrument": "Standing order (Del Rio Division)",
       "title": "Standing Order Concerning the Use of Artificial Intelligence in the Preparation of Filings",
@@ -167,7 +212,10 @@
       "kind": "disclosure_when_used",
       "applies_to": "all",
       "elements": ["tool_name", "accuracy_certification"],
-      "caption": { "placement": "statement_title", "text": "Certificate of Generative Artificial Intelligence Usage" },
+      "caption": {
+        "placement": "statement_title",
+        "text": "Certificate of Generative Artificial Intelligence Usage"
+      },
       "key_language": "This document was generated with the assistance of [Name of Program], a generative artificial intelligence tool. I hereby certify that I have independently verified the accuracy of the legal and factual assertions contained in this document",
       "source_url": "https://www.txwd.uscourts.gov/wp-content/uploads/2026/06/EG-Standing-Order-on-AI-1st-draft-6-24-2026.pdf",
       "source_kind": "primary",
@@ -177,7 +225,11 @@
     },
     {
       "id": "bankr-ndtex-go-2023-03",
-      "court": { "name": "United States Bankruptcy Court for the Northern District of Texas", "abbreviation": "Bankr. N.D. Tex.", "level": "bankruptcy" },
+      "court": {
+        "name": "United States Bankruptcy Court for the Northern District of Texas",
+        "abbreviation": "Bankr. N.D. Tex.",
+        "level": "bankruptcy"
+      },
       "judge": null,
       "instrument": "General Order 2023-03",
       "title": "Pleadings Using Generative Artificial Intelligence",
@@ -195,7 +247,11 @@
     },
     {
       "id": "epa-baylson-2023",
-      "court": { "name": "United States District Court for the Eastern District of Pennsylvania", "abbreviation": "E.D. Pa.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Eastern District of Pennsylvania",
+        "abbreviation": "E.D. Pa.",
+        "level": "district"
+      },
       "judge": { "name": "Michael M. Baylson", "role": "senior" },
       "instrument": "Standing order",
       "title": "Standing Order Re: Artificial Intelligence (\"AI\") in Cases Assigned to Judge Baylson",
@@ -213,7 +269,11 @@
     },
     {
       "id": "epa-scott-2025",
-      "court": { "name": "United States District Court for the Eastern District of Pennsylvania", "abbreviation": "E.D. Pa.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Eastern District of Pennsylvania",
+        "abbreviation": "E.D. Pa.",
+        "level": "district"
+      },
       "judge": { "name": "Kai N. Scott", "role": "district" },
       "instrument": "Standing order",
       "title": "Standing Order Re: Artificial Intelligence in Cases Assigned to Judge Scott",
@@ -231,7 +291,11 @@
     },
     {
       "id": "wdokla-palk-2023",
-      "court": { "name": "United States District Court for the Western District of Oklahoma", "abbreviation": "W.D. Okla.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Western District of Oklahoma",
+        "abbreviation": "W.D. Okla.",
+        "level": "district"
+      },
       "judge": { "name": "Scott L. Palk", "role": "chief" },
       "instrument": "Chambers requirement",
       "title": "Disclosure and Certification Requirements – Generative Artificial Intelligence",
@@ -250,7 +314,11 @@
     },
     {
       "id": "dhaw-kobayashi-2023",
-      "court": { "name": "United States District Court for the District of Hawaii", "abbreviation": "D. Haw.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the District of Hawaii",
+        "abbreviation": "D. Haw.",
+        "level": "district"
+      },
       "judge": { "name": "Leslie E. Kobayashi", "role": "district" },
       "instrument": "Chambers requirement",
       "title": "Disclosure and Certification Requirements – Generative Artificial Intelligence",
@@ -269,7 +337,11 @@
     },
     {
       "id": "dhaw-go-23-1",
-      "court": { "name": "United States District Court for the District of Hawaii", "abbreviation": "D. Haw.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the District of Hawaii",
+        "abbreviation": "D. Haw.",
+        "level": "district"
+      },
       "judge": null,
       "instrument": "General Order 23-1",
       "title": "In re: Use of Unverified Sources",
@@ -287,7 +359,11 @@
     },
     {
       "id": "dnm-strickland-2025",
-      "court": { "name": "United States District Court for the District of New Mexico", "abbreviation": "D.N.M.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the District of New Mexico",
+        "abbreviation": "D.N.M.",
+        "level": "district"
+      },
       "judge": { "name": "Margaret I. Strickland", "role": "district" },
       "instrument": "Standing order",
       "title": "Standing Order Establishing Disclosure and Certification Requirements for Generative Artificial Intelligence",
@@ -306,7 +382,11 @@
     },
     {
       "id": "sdohio-newman",
-      "court": { "name": "United States District Court for the Southern District of Ohio", "abbreviation": "S.D. Ohio", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Southern District of Ohio",
+        "abbreviation": "S.D. Ohio",
+        "level": "district"
+      },
       "judge": { "name": "Michael J. Newman", "role": "district" },
       "instrument": "Standing Order Governing Civil Cases, § VI",
       "title": "Artificial Intelligence (\"AI\") Provision",
@@ -325,7 +405,11 @@
     },
     {
       "id": "sdohio-graham-2025",
-      "court": { "name": "United States District Court for the Southern District of Ohio", "abbreviation": "S.D. Ohio", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Southern District of Ohio",
+        "abbreviation": "S.D. Ohio",
+        "level": "district"
+      },
       "judge": { "name": "James L. Graham", "role": "senior" },
       "instrument": "Standing order",
       "title": "Standing Order on the Use of Generative Artificial Intelligence",
@@ -333,7 +417,10 @@
       "kind": "disclosure_when_used",
       "applies_to": "all",
       "elements": ["tool_name", "portions", "accuracy_certification"],
-      "caption": { "placement": "separate_declaration", "text": "Disclosure of the Use of Generative AI" },
+      "caption": {
+        "placement": "separate_declaration",
+        "text": "Disclosure of the Use of Generative AI"
+      },
       "key_language": "any party, including a pro se litigant",
       "source_url": "https://www.ohsd.uscourts.gov/sites/ohsd/files/10-21-25%20JLG%20Standing%20Order%20on%20the%20Use%20of%20Generative%20AI.pdf",
       "source_kind": "primary",
@@ -343,7 +430,11 @@
     },
     {
       "id": "ndohio-boyko-2023",
-      "court": { "name": "United States District Court for the Northern District of Ohio", "abbreviation": "N.D. Ohio", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Northern District of Ohio",
+        "abbreviation": "N.D. Ohio",
+        "level": "district"
+      },
       "judge": { "name": "Christopher A. Boyko", "role": "district" },
       "instrument": "Standing order",
       "title": "Court's Standing Order on the Use of Generative AI",
@@ -362,7 +453,11 @@
     },
     {
       "id": "ndcal-martinez-olguin",
-      "court": { "name": "United States District Court for the Northern District of California", "abbreviation": "N.D. Cal.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Northern District of California",
+        "abbreviation": "N.D. Cal.",
+        "level": "district"
+      },
       "judge": { "name": "Araceli Martínez-Olguín", "role": "district" },
       "instrument": "Standing Order for Civil Cases, § H.4",
       "title": "Artificial Intelligence (AI)",
@@ -381,7 +476,11 @@
     },
     {
       "id": "dcolo-wang-2025",
-      "court": { "name": "United States District Court for the District of Colorado", "abbreviation": "D. Colo.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the District of Colorado",
+        "abbreviation": "D. Colo.",
+        "level": "district"
+      },
       "judge": { "name": "Nina Y. Wang", "role": "district" },
       "instrument": "Standing order",
       "title": "Standing Order Regarding the Use of Generative Artificial Intelligence (\"AI\") in Court Filings",
@@ -400,7 +499,11 @@
     },
     {
       "id": "mdfla-berger-2026",
-      "court": { "name": "United States District Court for the Middle District of Florida", "abbreviation": "M.D. Fla.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Middle District of Florida",
+        "abbreviation": "M.D. Fla.",
+        "level": "district"
+      },
       "judge": { "name": "Wendy W. Berger", "role": "district" },
       "instrument": "Standing order (Jacksonville Division)",
       "title": "In re: Use of Generative Artificial Intelligence",
@@ -418,7 +521,11 @@
     },
     {
       "id": "sdny-subramanian",
-      "court": { "name": "United States District Court for the Southern District of New York", "abbreviation": "S.D.N.Y.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Southern District of New York",
+        "abbreviation": "S.D.N.Y.",
+        "level": "district"
+      },
       "judge": { "name": "Arun Subramanian", "role": "district" },
       "instrument": "Individual Practices in Civil Cases, § 5.F",
       "title": "Use of ChatGPT and Other Tools",
@@ -437,7 +544,11 @@
     },
     {
       "id": "ndill-johnston-2023",
-      "court": { "name": "United States District Court for the Northern District of Illinois", "abbreviation": "N.D. Ill.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Northern District of Illinois",
+        "abbreviation": "N.D. Ill.",
+        "level": "district"
+      },
       "judge": { "name": "Iain D. Johnston", "role": "district" },
       "instrument": "Case procedures",
       "title": "Artificial Intelligence (AI)",
@@ -454,7 +565,11 @@
     },
     {
       "id": "ndill-fuentes-2023",
-      "court": { "name": "United States District Court for the Northern District of Illinois", "abbreviation": "N.D. Ill.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Northern District of Illinois",
+        "abbreviation": "N.D. Ill.",
+        "level": "district"
+      },
       "judge": { "name": "Gabriel A. Fuentes", "role": "magistrate" },
       "instrument": "Standing Order for Civil Cases",
       "title": "Generative AI disclosure provision",
@@ -473,7 +588,11 @@
     },
     {
       "id": "ndill-cole-2023",
-      "court": { "name": "United States District Court for the Northern District of Illinois", "abbreviation": "N.D. Ill.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Northern District of Illinois",
+        "abbreviation": "N.D. Ill.",
+        "level": "district"
+      },
       "judge": { "name": "Jeffrey Cole", "role": "magistrate" },
       "instrument": "Standing order",
       "title": "The Use of \"Artificial Intelligence\" in the Preparation of Documents Filed Before This Court",
@@ -491,14 +610,24 @@
     },
     {
       "id": "cit-choe-groves-2025",
-      "court": { "name": "United States Court of International Trade", "abbreviation": "Ct. Int'l Trade", "level": "trade" },
+      "court": {
+        "name": "United States Court of International Trade",
+        "abbreviation": "Ct. Int'l Trade",
+        "level": "trade"
+      },
       "judge": { "name": "Jennifer Choe-Groves", "role": "district" },
       "instrument": "Standing order",
       "title": "Standing Order on the Use of Artificial Intelligence",
       "date": "2025-07-03",
       "kind": "disclosure_when_used",
       "applies_to": "all",
-      "elements": ["tool_name", "how_used", "portions", "accuracy_certification", "confidentiality"],
+      "elements": [
+        "tool_name",
+        "how_used",
+        "portions",
+        "accuracy_certification",
+        "confidentiality"
+      ],
       "caption": null,
       "key_language": "(1) A disclosure notice that identifies the program used, the manner in which it was used, and the specific portions of text that have been drafted; (2) A certification that counsel or the party has reviewed the included text and legal research for factual and legal accuracy",
       "source_url": "https://www.cit.uscourts.gov/sites/cit/files/Choe-Groves.StandingOrder.ArtificialIntelligence.pdf",
@@ -509,7 +638,11 @@
     },
     {
       "id": "cit-restani-2025",
-      "court": { "name": "United States Court of International Trade", "abbreviation": "Ct. Int'l Trade", "level": "trade" },
+      "court": {
+        "name": "United States Court of International Trade",
+        "abbreviation": "Ct. Int'l Trade",
+        "level": "trade"
+      },
       "judge": { "name": "Jane A. Restani", "role": "senior" },
       "instrument": "Order",
       "title": "Order on Artificial Intelligence",
@@ -527,7 +660,11 @@
     },
     {
       "id": "cit-kelly-2025",
-      "court": { "name": "United States Court of International Trade", "abbreviation": "Ct. Int'l Trade", "level": "trade" },
+      "court": {
+        "name": "United States Court of International Trade",
+        "abbreviation": "Ct. Int'l Trade",
+        "level": "trade"
+      },
       "judge": { "name": "Claire R. Kelly", "role": "district" },
       "instrument": "Order",
       "title": "Order on Artificial Intelligence",
@@ -545,7 +682,11 @@
     },
     {
       "id": "cit-vaden-2023",
-      "court": { "name": "United States Court of International Trade", "abbreviation": "Ct. Int'l Trade", "level": "trade" },
+      "court": {
+        "name": "United States Court of International Trade",
+        "abbreviation": "Ct. Int'l Trade",
+        "level": "trade"
+      },
       "judge": { "name": "Stephen A. Vaden", "role": "district" },
       "instrument": "Order",
       "title": "Order on Artificial Intelligence",
@@ -563,7 +704,11 @@
     },
     {
       "id": "dneb-necivr-7-1-d-2",
-      "court": { "name": "United States District Court for the District of Nebraska", "abbreviation": "D. Neb.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the District of Nebraska",
+        "abbreviation": "D. Neb.",
+        "level": "district"
+      },
       "judge": null,
       "instrument": "NECivR 7.1(d)(2)",
       "title": "Generative Artificial Intelligence",
@@ -582,7 +727,11 @@
     },
     {
       "id": "dkan-so-26-01",
-      "court": { "name": "United States District Court for the District of Kansas", "abbreviation": "D. Kan.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the District of Kansas",
+        "abbreviation": "D. Kan.",
+        "level": "district"
+      },
       "judge": null,
       "instrument": "Standing Order 26-01",
       "title": "In re: Use of Artificial Intelligence (\"AI\") in Preparing Court Filings",
@@ -600,7 +749,11 @@
     },
     {
       "id": "wdnc-in-re-ai-2026",
-      "court": { "name": "United States District Court for the Western District of North Carolina", "abbreviation": "W.D.N.C.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Western District of North Carolina",
+        "abbreviation": "W.D.N.C.",
+        "level": "district"
+      },
       "judge": null,
       "instrument": "Order, No. 3:24-mc-104",
       "title": "In re: Use of Artificial Intelligence",
@@ -619,7 +772,11 @@
     },
     {
       "id": "dwyo-go-25-01",
-      "court": { "name": "United States District Court for the District of Wyoming", "abbreviation": "D. Wyo.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the District of Wyoming",
+        "abbreviation": "D. Wyo.",
+        "level": "district"
+      },
       "judge": null,
       "instrument": "General Order 25-01",
       "title": "Use of Artificial Intelligence in the Preparation of Filings",
@@ -637,7 +794,11 @@
     },
     {
       "id": "bankr-wdokla-go-23-01",
-      "court": { "name": "United States Bankruptcy Court for the Western District of Oklahoma", "abbreviation": "Bankr. W.D. Okla.", "level": "bankruptcy" },
+      "court": {
+        "name": "United States Bankruptcy Court for the Western District of Oklahoma",
+        "abbreviation": "Bankr. W.D. Okla.",
+        "level": "bankruptcy"
+      },
       "judge": null,
       "instrument": "General Order 23-01",
       "title": "General Order 23-01",
@@ -656,7 +817,11 @@
     },
     {
       "id": "bankr-sdny-lbr-9011-1-d",
-      "court": { "name": "United States Bankruptcy Court for the Southern District of New York", "abbreviation": "Bankr. S.D.N.Y.", "level": "bankruptcy" },
+      "court": {
+        "name": "United States Bankruptcy Court for the Southern District of New York",
+        "abbreviation": "Bankr. S.D.N.Y.",
+        "level": "bankruptcy"
+      },
       "judge": null,
       "instrument": "Local Bankruptcy Rule 9011-1(d), adopted by General Order M-641",
       "title": "Generative AI",
@@ -675,7 +840,11 @@
     },
     {
       "id": "bankr-sdcal-go-210",
-      "court": { "name": "United States Bankruptcy Court for the Southern District of California", "abbreviation": "Bankr. S.D. Cal.", "level": "bankruptcy" },
+      "court": {
+        "name": "United States Bankruptcy Court for the Southern District of California",
+        "abbreviation": "Bankr. S.D. Cal.",
+        "level": "bankruptcy"
+      },
       "judge": null,
       "instrument": "General Order 210; Local Form CSD 5013",
       "title": "In re: Filings Using Generative Artificial Intelligence",
@@ -684,7 +853,10 @@
       "kind": "disclosure_when_used",
       "applies_to": "all",
       "elements": ["tool_name", "accuracy_certification"],
-      "caption": { "placement": "statement_title", "text": "Disclosure and Certification on Generative Artificial Intelligence Use" },
+      "caption": {
+        "placement": "statement_title",
+        "text": "Disclosure and Certification on Generative Artificial Intelligence Use"
+      },
       "key_language": "any paper prepared in any aspect with generative AI must carry an attestation identifying the program and certifying accuracy check",
       "source_url": "https://www.casb.uscourts.gov/news/using-generative-artificial-intelligence-filings",
       "source_kind": "primary",
@@ -694,7 +866,11 @@
     },
     {
       "id": "bap10-go-11",
-      "court": { "name": "United States Bankruptcy Appellate Panel of the Tenth Circuit", "abbreviation": "10th Cir. BAP", "level": "appellate" },
+      "court": {
+        "name": "United States Bankruptcy Appellate Panel of the Tenth Circuit",
+        "abbreviation": "10th Cir. BAP",
+        "level": "appellate"
+      },
       "judge": null,
       "instrument": "General Order No. 11",
       "title": "In re: Use of Artificial Intelligence in Court Submissions",
@@ -712,7 +888,11 @@
     },
     {
       "id": "ndill-genai-page",
-      "court": { "name": "United States District Court for the Northern District of Illinois", "abbreviation": "N.D. Ill.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Northern District of Illinois",
+        "abbreviation": "N.D. Ill.",
+        "level": "district"
+      },
       "judge": null,
       "instrument": "Court guidance page",
       "title": "Using Generative Artificial Intelligence (GenAI) in Your Court Case",
@@ -730,7 +910,11 @@
     },
     {
       "id": "mdga-prose-guidance-2026",
-      "court": { "name": "United States District Court for the Middle District of Georgia", "abbreviation": "M.D. Ga.", "level": "district" },
+      "court": {
+        "name": "United States District Court for the Middle District of Georgia",
+        "abbreviation": "M.D. Ga.",
+        "level": "district"
+      },
       "judge": null,
       "instrument": "Court guidance",
       "title": "Use of Artificial Intelligence (Guidance for Pro Se Litigants)",
@@ -748,7 +932,11 @@
     },
     {
       "id": "ca5-proposed-rule-32-3",
-      "court": { "name": "United States Court of Appeals for the Fifth Circuit", "abbreviation": "5th Cir.", "level": "appellate" },
+      "court": {
+        "name": "United States Court of Appeals for the Fifth Circuit",
+        "abbreviation": "5th Cir.",
+        "level": "appellate"
+      },
       "judge": null,
       "instrument": "Proposed amendment to 5th Cir. R. 32.3 and Form 6",
       "title": "Proposed certification regarding generative artificial intelligence",
