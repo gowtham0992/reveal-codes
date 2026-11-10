@@ -2,9 +2,12 @@
 // court-orders additions (citing sentence, order sentences, first-page pointer, prohibition line).
 // Every sentence is defined by export-certification Requirements 4 and 5 and by court-orders
 // Requirements 4, 5 and 7; nothing else may be added. No sentence contains an exclamation mark.
+import { ORDERS, statementTitles } from "./orders.js";
 import type { StatementTool } from "./types.js";
 
 export const STATEMENT_TITLE = "AI-Use and Verification Statement";
+/** The standard title plus every statement-title caption in the dataset (any status). */
+export const STATEMENT_TITLES = statementTitles(ORDERS, STATEMENT_TITLE);
 export const APPENDIX_TITLE = "Provenance Appendix";
 export const APPENDIX_INTRO_1 =
   "The following is the complete provenance record of this filing in Reveal Codes form.";

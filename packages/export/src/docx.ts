@@ -1,19 +1,30 @@
 // buildDocx: filing, then the Statement, then the Appendix, in one US Letter section.
-import { Document as DocxDocument, Packer } from "docx";
+import { Document as DocxDocument, Header, Packer } from "docx";
 import type { Document } from "@reveal-codes/engine";
 import { buildAppendix } from "./appendix.js";
 import {
   appendixLine,
   filingParagraph,
+  headerElements,
   singleParagraph,
   statementElements,
   titleParagraph,
 } from "./docx-blocks.js";
 import { PAGE } from "./docx-style.js";
 import { renderStatement } from "./render-statement.js";
+import { type FirstPageHeading, firstPageHeading } from "./statement-order.js";
 import type { Statement } from "./types.js";
 
 const CREATOR = "Reveal Codes";
+
+/** Section options: today's page setup, plus a first-page header when there is a heading. */
+function headerOptions(heading: FirstPageHeading | null) {
+  if (heading === null) return { properties: { page: PAGE } };
+  return {
+    properties: { page: PAGE, titlePage: true },
+    headers: { first: new Header({ children: headerElements(heading) }) },
+  };
+}
 
 /** Packs the filing, Statement_Text and Appendix. Rejects if the packer result is not bytes. */
 export async function buildDocx(document: Document, statement: Statement): Promise<Uint8Array> {
@@ -24,7 +35,7 @@ export async function buildDocx(document: Document, statement: Statement): Promi
     title: statement.caption,
     sections: [
       {
-        properties: { page: PAGE },
+        ...headerOptions(firstPageHeading(statement)),
         children: [
           ...document.text.split("\n").map(filingParagraph),
           ...statementElements(renderStatement(statement)),

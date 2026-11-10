@@ -1,0 +1,47 @@
+.field {
+  display: block;
+  margin: 0 0 8px;
+}
+
+.label {
+  display: block;
+  margin: 0 0 4px;
+}
+
+.select {
+  font: inherit;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  padding: 4px 6px;
+  max-width: 100%;
+}
+
+.select:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+.summary {
+  margin: 0 0 8px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+.summaryLine {
+  margin: 0 0 4px;
+}
+
+.keyLanguage {
+  margin: 0 0 4px;
+  overflow-wrap: anywhere;
+}
+
+.summary a {
+  color: var(--accent);
+}
+
+.summary a:focus-visible {
+  outline: 2px solid var(--accent);
+}

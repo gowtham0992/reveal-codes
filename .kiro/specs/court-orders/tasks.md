@@ -86,7 +86,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Search `apps`, `packages`, `crew` and `docs` for `canExport(` and confirm no call is left with one argument; run `pnpm typecheck`
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.9, 5.10, 5.12_
 
-  - [~] 2.7 Add the order test arbitraries
+  - [x] 2.7 Add the order test arbitraries
     - Create `packages/export/test/support/arbitraries.ts` additions (file under `test/support/`): `arbSelectableEntry`, `arbAnyEntry`, `arbOrderContext`, `arbGateClearAiDocument` (reusing `arbDocument` and `arbGateClearDocument`; half the cases append an AI-origin sentence through the Engine's `apply`, kept only if no Blocking_Issue results); built from fast-check combinators over `ORDERS`, so shrinking works
     - Give `buildDemoDocumentStatement` in `packages/export/test/support/demo-statement.ts` an optional `orderContext: OrderContext = null` parameter passed to `buildStatement`
     - If an arbitrary is useful to the Engine as well, add it to `packages/engine/src/testing/arbitraries.ts` instead
@@ -118,7 +118,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - _Requirements: 4.1 to 4.23, 5.2, 5.5, 5.9, 5.10, 5.12, 8.1, 8.2, 9.4, 9.5, 9.6, 9.7, 9.9, 9.10, 9.11, 9.12_
 
 - [ ] 3. Group 3: picker, confidentiality checkbox, blocked state, print view, first-page header
-  - [~] 3.1 Add the first-page header to the DOCX builder
+  - [-] 3.1 Add the first-page header to the DOCX builder
     - In `packages/export/src/docx-blocks.ts` add `headerElements(h)` (bold, centred, 12 pt heading paragraph; 12 pt pointer paragraph via `singleParagraph`)
     - In `packages/export/src/docx.ts` add `headerOptions(heading)` so that a non-null `firstPageHeading(statement)` adds `titlePage: true` and `headers: { first: new Header(...) }`, and `null` keeps today's options; add nothing to the body paragraphs
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
@@ -128,7 +128,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - With AI not used, with another placement, and with `order === null`, there is no `header1.xml` and no `w:titlePg`
     - _Requirements: 7.1 to 7.5, 9.4_
 
-  - [~] 3.3 Build the picker, the confidentiality checkbox and the order-gate hook
+  - [-] 3.3 Build the picker, the confidentiality checkbox and the order-gate hook
     - Create `apps/web/src/components/order-picker.tsx` (`OrderPicker` with a labelled native select, first option `NO_ORDER_LABEL`, one `optgroup` per `selectableOrders(ORDERS)` group; `OrderSummary` with the summary line, the quoted `key_language` as text, and a "Source" link with `target="_blank"` and `rel="noreferrer"`) and `order-picker.module.css` using existing variables only (13px `var(--font-ui)`, 1px `var(--rule)` border, no radius, no shadow, 2px `var(--accent)` focus outline)
     - Create `apps/web/src/components/confidentiality-checkbox.tsx` (native checkbox in its label, text `CONFIDENTIALITY_LABEL`)
     - Create `apps/web/src/components/use-order-gate.ts` with `useOrderGate(document, orderStore)` returning `selection`, `entry`, `select`, `needsTick`, `ticked`, `setTicked`, `notice`, `clear` and `context`; the tick clears on selection change and when `needsTick` becomes false
@@ -161,7 +161,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - _Requirements: 3.12, 5.11, 6.8 to 6.11, 7.6, 7.7, 9.8_
 
 - [ ] 4. Group 4: demo motion court, `STATEMENT_TITLES`, Sentinel, documentation and steering
-  - [~] 4.1 Add `STATEMENT_TITLES` and use it in the Sentinel splitter
+  - [-] 4.1 Add `STATEMENT_TITLES` and use it in the Sentinel splitter
     - In `packages/export/src/wording.ts` add `export const STATEMENT_TITLES = statementTitles(ORDERS, STATEMENT_TITLE);` and export it from `packages/export/src/index.ts`
     - In `crew/sentinel/src/split.ts` import `STATEMENT_TITLES` and find the first paragraph with `STATEMENT_TITLES.includes(p)`; change no other Sentinel source file and nothing in the Verifier
     - Create `packages/export/test/statement-titles.test.ts`: `STATEMENT_TITLES` holds `STATEMENT_TITLE` and the distinct `caption.text` of every dataset entry of any status with `statement_title` or `separate_declaration` placement (seven strings, in order, including the superseded entry's caption, without any first-page heading caption), and no other caption text; also check `statementTitles` on a synthetic set

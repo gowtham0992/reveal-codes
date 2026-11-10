@@ -1,6 +1,6 @@
 import { err, ok } from "@reveal-codes/engine";
 import type { Document, Result } from "@reveal-codes/engine";
-import { APPENDIX_TITLE, STATEMENT_TITLE, buildAppendix } from "@reveal-codes/export";
+import { APPENDIX_TITLE, STATEMENT_TITLES, buildAppendix } from "@reveal-codes/export";
 import type { ExportParts, SentinelError } from "./types.js";
 
 // A Document with no content: only intro.length is used, so the count of intro
@@ -21,7 +21,7 @@ const INTRO_LENGTH = buildAppendix(EMPTY_DOCUMENT).intro.length;
  * The input is not modified; nothing is trimmed from the body.
  */
 export function splitExport(paragraphs: readonly string[]): Result<ExportParts, SentinelError> {
-  const s = paragraphs.indexOf(STATEMENT_TITLE);
+  const s = paragraphs.findIndex((p) => STATEMENT_TITLES.includes(p));
   if (s === -1) return err({ kind: "not_reveal_codes_export" });
   const a = paragraphs.indexOf(APPENDIX_TITLE, s + 1);
   if (a === -1) return err({ kind: "not_reveal_codes_export" });

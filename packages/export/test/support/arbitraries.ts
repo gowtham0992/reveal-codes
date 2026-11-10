@@ -1,8 +1,9 @@
 import * as fc from "fast-check";
-import { blockingIssues, recordOverride } from "@reveal-codes/engine";
+import { apply, blockingIssues, recordOverride } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
 import { arbDocument } from "../../../engine/src/testing/arb-document";
-import type { Meta, RunInfo } from "../../src/index.js";
+import { ORDERS } from "../../src/index.js";
+import type { Meta, OrderContext, OrderEntry, RunInfo } from "../../src/index.js";
 
 /**
  * Number of runs for every property test: `FC_NUM_RUNS` if set to a positive
@@ -84,4 +85,47 @@ export type GateCase = Readonly<{ doc: Document; clear: boolean }>;
 export const arbGateDocument: fc.Arbitrary<GateCase> = fc.oneof(
   arbDocument.map((doc): GateCase => ({ doc, clear: false })),
   arbGateClearDocument.map((doc): GateCase => ({ doc, clear: true })),
+);
+
+const SELECTABLE_ENTRIES: readonly OrderEntry[] = ORDERS.entries.filter(
+  (e) => e.status === "current",
+);
+
+/** A current (selectable) entry of the shipped Order_Set. */
+export const arbSelectableEntry: fc.Arbitrary<OrderEntry> = fc.constantFrom(...SELECTABLE_ENTRIES);
+
+/** Any entry of the shipped Order_Set, of every status. */
+export const arbAnyEntry: fc.Arbitrary<OrderEntry> = fc.constantFrom(...ORDERS.entries);
+
+/** No order (null) or a selectable entry with the author's confidentiality tick. */
+export const arbOrderContext: fc.Arbitrary<OrderContext> = fc.option(
+  fc.record({ entry: arbSelectableEntry, confidentialityCertified: fc.boolean() }),
+  { nil: null },
+);
+
+const AI_SENTENCES = [
+  "The movant relies on the record.",
+  "This motion should be granted.",
+  "The facts are not in dispute.",
+] as const;
+
+/** `doc` with an AI-origin sentence appended through `apply`, or `doc` if a Blocking_Issue results. */
+function appendAiSentence(doc: Document, sentence: string): Document {
+  const op = {
+    kind: "insert",
+    at: doc.text.length,
+    text: ` ${sentence}`,
+    provenance: { origin: "AI", runId: "ai-run-1", timestamp: OVERRIDE_AT },
+  } as const;
+  const applied = apply(doc, op);
+  if (!applied.ok) return doc;
+  return blockingIssues(applied.value.document).length === 0 ? applied.value.document : doc;
+}
+
+/** Gate-clear documents; in half the cases an AI-origin sentence is appended (kept only if still clear). */
+export const arbGateClearAiDocument: fc.Arbitrary<Document> = fc.oneof(
+  arbGateClearDocument,
+  fc
+    .tuple(arbGateClearDocument, fc.constantFrom(...AI_SENTENCES))
+    .map(([doc, sentence]) => appendAiSentence(doc, sentence)),
 );

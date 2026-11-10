@@ -12,11 +12,11 @@ export type OrderSelectionStore = Readonly<{
 }>;
 
 /** Boundary for `localStorage`, which throws on quota or private mode: the throw becomes a value. */
-function attempt<T>(action: () => T): { ok: true; value: T } | { ok: false } {
+function attempt<T>(action: () => T): { ok: true; value: T } | { ok: false; thrown: unknown } {
   try {
     return { ok: true, value: action() };
-  } catch {
-    return { ok: false };
+  } catch (e) {
+    return { ok: false, thrown: e };
   }
 }
 

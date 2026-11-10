@@ -11,6 +11,7 @@ import {
   TextRun,
   WidthType,
 } from "docx";
+import type { FirstPageHeading } from "./statement-order.js";
 import type { StatementBlock } from "./types.js";
 import {
   BODY_FONT,
@@ -52,6 +53,16 @@ export function titleParagraph(text: string): Paragraph {
 
 export function singleParagraph(text: string): Paragraph {
   return new Paragraph({ spacing: STATEMENT_SPACING, children: [bodyRun(text)] });
+}
+
+/** First-page header: a bold centred heading, then the pointer paragraph. */
+export function headerElements(h: FirstPageHeading): Paragraph[] {
+  const heading = new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: STATEMENT_SPACING,
+    children: [bodyRun(h.heading, true)],
+  });
+  return [heading, singleParagraph(h.pointer)];
 }
 
 /** One Courier New paragraph per appendix line; leading and trailing spaces are kept. */
