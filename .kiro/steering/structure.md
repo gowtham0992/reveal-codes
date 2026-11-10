@@ -10,7 +10,8 @@ reveal-codes/
     steering/                 this folder; product.md, tech.md, structure.md are always included
     specs/<feature>/          requirements.md, design.md, tasks.md per feature
     hooks/                    one JSON file per hook
-    agents/                   one JSON file per custom agent
+    agents/                   one file per custom agent: release-checker.md, orders-curator.md
+    skills/<name>/SKILL.md    one folder per skill: add-standing-order
     settings/mcp.json         MCP servers available to Kiro in this workspace
   packages/
     engine/                   pure provenance + citation-extraction engine (no deps)

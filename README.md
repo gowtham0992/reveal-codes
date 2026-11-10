@@ -93,6 +93,13 @@ The report is Markdown on stdout. Its second line states the mode, `fixtures` or
 
 The Kiro Crew app that schedules the Sentinel lives in a separate repository: https://github.com/gowtham0992/reveal-codes-sentinel. The app was installed in Kiro Crew 0.12.0 and its nightly job run once over three sample filings on 2026-11-09; the run swept all three and reported the one edited after export.
 
+## Working on this repo with Kiro
+
+- Pick the `release-checker` agent before a release. It is read-only: it runs the runbook checks and prints one table with the HEAD SHA.
+- Pick the `orders-curator` agent to add or update one court order in `data/standing-orders.json`, from a `.uscourts.gov` source.
+- The `add-standing-order` skill holds the procedure the curator follows; it also activates when you ask to add a standing order.
+- `pnpm kiro:check` fails if a file under `.kiro/` is missing from `docs/KIRO_USAGE.md`, or if the table names a path that does not exist.
+
 ## How Kiro built this
 
 See docs/KIRO_USAGE.md.

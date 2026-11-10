@@ -259,7 +259,7 @@ Requirements: 12.3, 12.13.
 
 - Court-orders task 6.4: the demo motion now cites the Fifth Circuit and N.D. Tex. (volumes, reporters and pages unchanged, so recorded lookups still resolve). `N.D. Tex.` is 3 characters longer than `D. Or.`, so every later Offset shifted +3 and the Statement character count went from 2619 to 2622. The Engine grammar accepted both courts with no change.
 
-## 2026-11-10 court-orders follow-up (browser walkthrough)
+## 2026-11-09 court-orders follow-up (browser walkthrough)
 
 A walkthrough of the court-orders feature in the browser found eight problems. Task numbers refer to `.kiro/specs/court-orders/tasks.md`.
 
@@ -289,7 +289,7 @@ A walkthrough of the court-orders feature in the browser found eight problems. T
 
 Requirements: 12.15, 13.7.
 
-## 2026-11-10 sentinel-sweep follow-up (body_edited excerpts)
+## 2026-11-09 sentinel-sweep follow-up (body_edited excerpts)
 
 ### What changed
 
@@ -312,6 +312,35 @@ Task 5.5 ran all four commands on the working tree and every one passed on the f
 - `pnpm test`: 241 test files and 2678 tests passed.
 - `FC_NUM_RUNS=500 pnpm test:pbt`: 36 test files and 138 tests passed.
 
-The push to `origin` and the CI run check of task 5.5 are recorded separately once done.
+The push of task 5.5: pushed as 703ee09, CI run 42759370222 passed.
 
 Requirements: 14.13, 14.14.
+
+## 2026-11-09 kiro-agents-and-usage-check
+
+Configuration work done in chat, without a spec. Before each kind of file the matching kiro.dev page was read (custom agents: creating and configuration reference; skills; hook types and actions), and only fields documented there were used.
+
+### What was built
+
+- `.kiro/agents/release-checker.md`: read-only release gate (tools `read` and `shell`; deny rules for `git commit`, `git push`, `git reset`, `git checkout` and for `fs_write` outside the temp directories).
+- `.kiro/agents/orders-curator.md`: adds or updates one entry in `data/standing-orders.json` from a `.uscourts.gov` source, using the `add-standing-order` skill.
+- `.kiro/skills/add-standing-order/SKILL.md`: the procedure for one dataset entry.
+- `.kiro/hooks/orders-check-on-save.json`: PostFileSave agent hook on `data/standing-orders.json`.
+- `scripts/kiro-usage-check.mjs` and `pnpm kiro:check`: fails on a `.kiro` file with no row in `docs/KIRO_USAGE.md` or a dead path in the Path column. CI runs it after lint. Example tests are in `apps/web/test/static/kiro-usage-check.test.ts`.
+- `eslint.config.ts` gained a block for `scripts/**/*.mjs` without type-aware rules, because those files are outside every tsconfig and the type-aware parser rejected them.
+
+### Limits found in the documented fields
+
+- The `web` tool selector covers web search as well as web fetch; the pages read name no way to select fetch alone. The curator's host restriction (`.uscourts.gov` only) is therefore in its prompt, not enforced.
+- The `fs_write` deny rule on the release checker covers the file-write capability. The pages read do not say it covers a shell redirect or a build step writing under `apps/web/.next`, so that part of "no writes outside temp" rests on the prompt.
+- The hook files documented for the IDE have no timeout for an agent action; none was set.
+
+### Corrections to earlier entries
+
+- The headings "court-orders follow-up" and "sentinel-sweep follow-up" said 2026-11-10; their commits are dated 2026-11-09 and the headings now say so.
+- The Checkpoint of the sentinel-sweep follow-up said the push of task 5.5 was recorded separately. It now states the fact: pushed as 703ee09, CI run 42759370222 passed.
+
+### Where Kiro got something wrong, and what fixed it
+
+- The new `.mjs` script failed `pnpm eslint` with a project-service parsing error; the eslint block above fixed it.
+- `.kiro/steering/structure.md` already listed `agents/` as "one JSON file per custom agent"; the first edit added a second `agents/` line, and the line was replaced instead.
