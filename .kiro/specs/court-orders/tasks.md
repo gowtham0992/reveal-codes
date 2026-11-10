@@ -161,7 +161,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - _Requirements: 3.12, 5.11, 6.8 to 6.11, 7.6, 7.7, 9.8_
 
 - [ ] 4. Group 4: demo motion court, `STATEMENT_TITLES`, Sentinel, documentation and steering
-  - [-] 4.1 Add `STATEMENT_TITLES` and use it in the Sentinel splitter
+  - [x] 4.1 Add `STATEMENT_TITLES` and use it in the Sentinel splitter
     - In `packages/export/src/wording.ts` add `export const STATEMENT_TITLES = statementTitles(ORDERS, STATEMENT_TITLE);` and export it from `packages/export/src/index.ts`
     - In `crew/sentinel/src/split.ts` import `STATEMENT_TITLES` and find the first paragraph with `STATEMENT_TITLES.includes(p)`; change no other Sentinel source file and nothing in the Verifier
     - Create `packages/export/test/statement-titles.test.ts`: `STATEMENT_TITLES` holds `STATEMENT_TITLE` and the distinct `caption.text` of every dataset entry of any status with `statement_title` or `separate_declaration` placement (seven strings, in order, including the superseded entry's caption, without any first-page heading caption), and no other caption text; also check `statementTitles` on a synthetic set
