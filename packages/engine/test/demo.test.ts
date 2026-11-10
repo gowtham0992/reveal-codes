@@ -12,13 +12,13 @@ const text = readFileSync(new URL("../fixtures/demo-motion.txt", import.meta.url
 const at = (start: number, end: number) => ({ start, end, text: text.slice(start, end) });
 
 const FABRICATED_CITATIONS = [
-  { start: 1474, written: "1047 F.3d 212, 219 (9th Cir. 2019)" },
-  { start: 1704, written: "1012 F. Supp. 2d 88, 95 (D. Or. 2015)" },
-  { start: 2012, written: "912 F. 4th 33, 41 (9th Cir. 2023)" },
+  { start: 1474, written: "1047 F.3d 212, 219 (5th Cir. 2019)" },
+  { start: 1704, written: "1012 F. Supp. 2d 88, 95 (N.D. Tex. 2015)" },
+  { start: 2015, written: "912 F. 4th 33, 41 (5th Cir. 2023)" },
 ];
 
 const FABRICATED_QUOTE = {
-  start: 2125,
+  start: 2128,
   written:
     "a pro se plaintiff who alleges retaliation is entitled to discovery before a motion to dismiss may be granted.",
 };
@@ -42,38 +42,38 @@ const EXPECTED_CITATIONS = [
       reporter: "F.3d",
       page: 212,
       pincite: 219,
-      court: "9th Cir.",
+      court: "5th Cir.",
       year: 2019,
     },
   },
   { ...at(1581, 1591), value: { kind: "short", form: "id", pincite: 221, targetStart: 1474 } },
   {
-    ...at(1704, 1741),
+    ...at(1704, 1744),
     value: {
       kind: "reporter",
       volume: 1012,
       reporter: "F. Supp. 2d",
       page: 88,
       pincite: 95,
-      court: "D. Or.",
+      court: "N.D. Tex.",
       year: 2015,
     },
   },
   {
-    ...at(2012, 2045),
+    ...at(2015, 2048),
     value: {
       kind: "reporter",
       volume: 912,
       reporter: "F.4th",
       page: 33,
       pincite: 41,
-      court: "9th Cir.",
+      court: "5th Cir.",
       year: 2023,
     },
-    normalised: "912 F.4th 33, 41 (9th Cir. 2023)",
+    normalised: "912 F.4th 33, 41 (5th Cir. 2023)",
   },
   {
-    ...at(2237, 2259),
+    ...at(2240, 2262),
     value: {
       kind: "short",
       form: "party",
@@ -84,12 +84,12 @@ const EXPECTED_CITATIONS = [
       targetStart: 962,
     },
   },
-  { ...at(2350, 2374), value: { kind: "other", form: "fed_rule", section: "15(a)(2)" } },
+  { ...at(2353, 2377), value: { kind: "other", form: "fed_rule", section: "15(a)(2)" } },
 ];
 
 const EXPECTED_QUOTES = [
   { ...at(1097, 1162), citationStart: 1070, rule: "following" },
-  { ...at(2125, 2235), citationStart: 2237, rule: "preceding" },
+  { ...at(2128, 2238), citationStart: 2240, rule: "preceding" },
 ];
 
 describe("demo motion fixture _Requirements: 9.1, 9.2, 13.1_", () => {
@@ -103,7 +103,7 @@ describe("demo motion fixture _Requirements: 9.1, 9.2, 13.1_", () => {
       "less stringent standards than formal pleadings drafted by lawyers",
     );
     expect(text.slice(1581, 1591)).toBe("Id. at 221");
-    expect(text.slice(2237, 2259)).toBe("Iqbal, 556 U.S. at 679");
+    expect(text.slice(2240, 2262)).toBe("Iqbal, 556 U.S. at 679");
   });
 
   it("names the Northern District of Texas on line 2 and keeps the case number line", () => {
@@ -112,6 +112,15 @@ describe("demo motion fixture _Requirements: 9.1, 9.2, 13.1_", () => {
     expect(lines).toContain("Case No. 3:26-cv-00000");
   });
 
+  it("places the cited cases in the Fifth Circuit and the Northern District of Texas", () => {
+    expect(text).toContain("The Fifth Circuit has held that");
+    expect(text).toContain("95 (N.D. Tex. 2015)");
+    expect(text).not.toMatch(/Ninth Circuit|9th Cir|D\. Or\./u);
+    const courts = extract(text).citations.flatMap((c) =>
+      c.value.kind === "reporter" && c.value.court !== undefined ? [c.value.court] : [],
+    );
+    expect(courts).toEqual(["5th Cir.", "N.D. Tex.", "5th Cir."]);
+  });
   it("extracts exactly the expected citations, links, and Normalised_Forms", () => {
     expect(extract(text).citations).toEqual(EXPECTED_CITATIONS);
   });

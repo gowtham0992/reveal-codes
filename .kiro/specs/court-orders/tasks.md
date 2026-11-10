@@ -243,7 +243,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Tests: the dialog shows the prohibition line once and the `key_language` once (in the Order_Summary); the notice is gone after reopen and after changing the court; `optionText` of a long title ends in the ellipsis at 60 characters and keeps the year; the CSS module contains `width: 100%` for the select; the css-rules scan still passes
     - _Requirements: 3.2, 3.5, 5.5, 5.11, 13.1, 13.2_
 
-  - [~] 6.4 Demo motion consistency
+  - [x] 6.4 Demo motion consistency
     - In `packages/engine/fixtures/demo-motion.txt` change `The Ninth Circuit has held` to `The Fifth Circuit has held`, both `(9th Cir. …)` to `(5th Cir. …)`, and `(D. Or. 2015)` to `(N.D. Tex. 2015)`; keep volumes, reporters and pages
     - Update the literal Offsets after the `D. Or.` citation by +3 in `packages/engine/test/demo.test.ts` and `packages/engine/fixtures/README.md`; update the character count 2619 to 2622 in the Statement tests, and every test that quotes these lines (search `apps`, `packages`, `crew` and `docs` before and after)
     - Check that the citation extractor reports the court `5th Cir.` and `N.D. Tex.` for the edited citations; if the grammar does not support either court, report it in the task result and `BUILD_LOG.md` and do not change the Engine

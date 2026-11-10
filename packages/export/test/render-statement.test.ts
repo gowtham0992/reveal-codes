@@ -56,7 +56,7 @@ describe("renderStatement on the Demo_Document", () => {
       {
         kind: "paragraph",
         number: 2,
-        text: "Generative artificial intelligence was used in preparing this filing. Tools: a recorded demonstration response (no model was called). Text inserted by the tool accounts for 48 of 2619 characters (1.8%); of that, 0 characters were subsequently edited by the author.",
+        text: "Generative artificial intelligence was used in preparing this filing. Tools: a recorded demonstration response (no model was called). Text inserted by the tool accounts for 48 of 2622 characters (1.8%); of that, 0 characters were subsequently edited by the author.",
       },
       {
         kind: "paragraph",
@@ -69,9 +69,9 @@ describe("renderStatement on the Demo_Document", () => {
         rows: [
           ["556 U.S. 662, 678 (2009)", "CIT ✓", "145875"],
           ["404 U.S. 519, 520 (1972)", "CIT ✓", "108432"],
-          ["1047 F.3d 212, 219 (9th Cir. 2019)", "CIT ✘", ""],
-          ["1012 F. Supp. 2d 88, 95 (D. Or. 2015)", "CIT ✘", ""],
-          ["912 F. 4th 33, 41 (9th Cir. 2023)", "CIT ✘", ""],
+          ["1047 F.3d 212, 219 (5th Cir. 2019)", "CIT ✘", ""],
+          ["1012 F. Supp. 2d 88, 95 (N.D. Tex. 2015)", "CIT ✘", ""],
+          ["912 F. 4th 33, 41 (5th Cir. 2023)", "CIT ✘", ""],
         ],
       },
       {
@@ -98,19 +98,19 @@ describe("renderStatement on the Demo_Document", () => {
         rows: [
           [
             "CIT ✘",
-            "1047 F.3d 212, 219 (9th Cir. 2019)",
+            "1047 F.3d 212, 219 (5th Cir. 2019)",
             "Cited from the client's court notice; copy requested from the clerk.",
             "2026-11-20 10:25",
           ],
           [
             "CIT ✘",
-            "1012 F. Supp. 2d 88, 95 (D. Or. 2015)",
+            "1012 F. Supp. 2d 88, 95 (N.D. Tex. 2015)",
             "Reporter volume is being confirmed with the court library.",
             "2026-11-20 10:25",
           ],
           [
             "CIT ✘",
-            "912 F. 4th 33, 41 (9th Cir. 2023)",
+            "912 F. 4th 33, 41 (5th Cir. 2023)",
             "Quotation taken from a bench ruling transcript, not the opinion.",
             "2026-11-20 10:25",
           ],

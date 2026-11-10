@@ -256,3 +256,5 @@ The prohibition line reads "1 AI-origin span remain". This follows the spec's "s
 The `edtex-love` and `dhaw` Sentinel proof tests assert a clean report. They do not assert the cut position.
 
 Requirements: 12.3, 12.13.
+
+- Court-orders task 6.4: the demo motion now cites the Fifth Circuit and N.D. Tex. (volumes, reporters and pages unchanged, so recorded lookups still resolve). `N.D. Tex.` is 3 characters longer than `D. Or.`, so every later Offset shifted +3 and the Statement character count went from 2619 to 2622. The Engine grammar accepted both courts with no change.
