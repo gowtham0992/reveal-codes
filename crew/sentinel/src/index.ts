@@ -7,6 +7,7 @@ export type { SentinelConfig, SentinelEnv, SentinelIo } from "./deps.js";
 export { readDocx } from "./docx-read.js";
 export { nodeFiles } from "./files.js";
 export type { FilePort, PathKind } from "./files.js";
+export { excerptPair, LEAD } from "./excerpt.js";
 export { deriveFindings, unreadable } from "./findings.js";
 export { recordedDocument } from "./recorded.js";
 export { redact } from "./redact.js";

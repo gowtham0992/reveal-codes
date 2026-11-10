@@ -1,6 +1,7 @@
 import { issues } from "@reveal-codes/engine";
 import type { Document, VerificationResult } from "@reveal-codes/engine";
 import { ellipsize, localDateTime } from "@reveal-codes/export";
+import { excerptPair } from "./excerpt.js";
 import { firstDifferingLine, lineAt } from "./lines.js";
 import type { ReverifyOutcome } from "./reverify.js";
 import { quoteText, statusText } from "./status-text.js";
@@ -27,17 +28,10 @@ function bodyFinding(input: FindingInput): readonly Finding[] {
   if (bodyText === recorded.text) return [];
   const line = firstDifferingLine(recorded.text, bodyText);
   if (line === null) return [];
-  const before = recorded.text.split("\n")[line - 1] ?? "";
-  const after = bodyText.split("\n")[line - 1] ?? "";
-  return [
-    {
-      kind: "body_edited",
-      file,
-      line,
-      before: ellipsize(before, MAX),
-      after: ellipsize(after, MAX),
-    },
-  ];
+  const recordedLine = recorded.text.split("\n")[line - 1] ?? "";
+  const bodyLine = bodyText.split("\n")[line - 1] ?? "";
+  const [before, after] = excerptPair(recordedLine, bodyLine, MAX);
+  return [{ kind: "body_edited", file, line, before, after }];
 }
 
 /** D16: the status differs, or both are verified with different cluster ids. */

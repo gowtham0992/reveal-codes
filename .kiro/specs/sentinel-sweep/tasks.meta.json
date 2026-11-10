@@ -462,6 +462,51 @@
         "chatSessionId": "sess_30fcd5c5-67e0-4b95-8bcf-973ce55341fa",
         "timestamp": 1794201293481
       }
+    ],
+    "5.1 Windowed excerpts in `excerpt.ts` and `bodyFinding`": [
+      {
+        "executionId": "5579eccb-5be6-490f-a608-6422fe71dc1e",
+        "chatSessionId": "sess_4715634c-a885-41b1-9c00-0c015e3ad93f",
+        "timestamp": 1794286286746
+      },
+      {
+        "executionId": "5579eccb-5be6-490f-a608-6422fe71dc1e",
+        "chatSessionId": "sess_4715634c-a885-41b1-9c00-0c015e3ad93f",
+        "timestamp": 1794286289574
+      },
+      {
+        "executionId": "5579eccb-5be6-490f-a608-6422fe71dc1e",
+        "chatSessionId": "sess_4715634c-a885-41b1-9c00-0c015e3ad93f",
+        "timestamp": 1794286398238
+      }
+    ],
+    "5.2 Property 3: excerpts differ and stay inside their lines": [
+      {
+        "executionId": "5579eccb-5be6-490f-a608-6422fe71dc1e",
+        "chatSessionId": "sess_4715634c-a885-41b1-9c00-0c015e3ad93f",
+        "timestamp": 1794286286776
+      }
+    ],
+    "5.3 README: Crew app link, Court-specific trim, Sentinel example": [
+      {
+        "executionId": "5579eccb-5be6-490f-a608-6422fe71dc1e",
+        "chatSessionId": "sess_4715634c-a885-41b1-9c00-0c015e3ad93f",
+        "timestamp": 1794286286801
+      }
+    ],
+    "5.4 `docs/KIRO_USAGE.md` row and `BUILD_LOG.md` entry": [
+      {
+        "executionId": "5579eccb-5be6-490f-a608-6422fe71dc1e",
+        "chatSessionId": "sess_4715634c-a885-41b1-9c00-0c015e3ad93f",
+        "timestamp": 1794286286824
+      }
+    ],
+    "5.5 Final checkpoint": [
+      {
+        "executionId": "5579eccb-5be6-490f-a608-6422fe71dc1e",
+        "chatSessionId": "sess_4715634c-a885-41b1-9c00-0c015e3ad93f",
+        "timestamp": 1794286286849
+      }
     ]
   }
 }
