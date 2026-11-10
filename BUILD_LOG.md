@@ -289,7 +289,7 @@ A walkthrough of the court-orders feature in the browser found eight problems. T
 
 Requirements: 12.15, 13.7.
 
-## 2026-11-09 sentinel-sweep follow-up (body_edited excerpts)
+## 2026-11-10 sentinel-sweep follow-up (body_edited excerpts)
 
 ### What changed
 
@@ -305,6 +305,13 @@ Requirements: 12.15, 13.7.
 
 ### Checkpoint
 
-The result of lint, typecheck, test and `FC_NUM_RUNS=500 pnpm test:pbt` is added by task 5.5.
+Task 5.5 ran all four commands on the working tree and every one passed on the first run, with no fixes needed:
+
+- `pnpm lint`: Prettier reported all matched files in code style; exit 0.
+- `pnpm typecheck` (`tsc -b`): no errors; exit 0.
+- `pnpm test`: 241 test files and 2678 tests passed.
+- `FC_NUM_RUNS=500 pnpm test:pbt`: 36 test files and 138 tests passed.
+
+The push to `origin` and the CI run check of task 5.5 are recorded separately once done.
 
 Requirements: 14.13, 14.14.

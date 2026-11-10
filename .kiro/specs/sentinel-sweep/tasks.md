@@ -141,7 +141,7 @@ Conventions that apply to every task:
     - Record the confirmation result in the `BUILD_LOG.md` entry. Confirm `git status` shows no stray file. Ensure all tests pass, ask the user if questions arise.
     - _Requirements: 10.13, 10.16, 13.3, 12.17_
 
-- [ ] 5. Group 5: `body_edited` excerpts, Crew app link, README trim
+- [x] 5. Group 5: `body_edited` excerpts, Crew app link, README trim
   - [x] 5.1 Windowed excerpts in `excerpt.ts` and `bodyFinding`
     - Create `crew/sentinel/src/excerpt.ts` as in the design (D18): `LEAD = 30` and `excerptPair(before, after, max)`. Both strings at most `max`: returned whole. Otherwise `d` is the common prefix length in UTF-16 code units, `start = Math.max(0, d - LEAD)` moved back by one when the unit at `start` is a low surrogate after a high one, and each result is `ellipsize(text.slice(start), max)` from `@reveal-codes/export`, prefixed with "…" when `start > 0`. Two local one-line helpers `isHigh` and `isLow`. Named exports only, function under 40 lines.
     - In `crew/sentinel/src/findings.ts` make `bodyFinding` take `before` and `after` from `excerptPair(recordedLine, bodyLine, MAX)`; the line number, the absent-line rule (`""`) and every other Finding kind stay as they are. Add `excerpt.ts` to the public surface in `index.ts` only if `index.ts` exports `findings.ts` helpers today; otherwise leave `index.ts` alone.
@@ -166,7 +166,7 @@ Conventions that apply to every task:
     - In `crew/sentinel/test/static/package.test.ts` change "holds exactly three sentinel rows" to four, and keep the row lookups pointing at the original three (select the spec row by `startsWith("| Spec | sentinel-sweep |")`, which the new name does not match).
     - `BUILD_LOG.md`: append one dated entry (`## <YYYY-MM-DD> sentinel-sweep follow-up (body_edited excerpts)`, the day the task runs) with what changed (windows over one span, the report row that showed two identical cells, the README link and trim), what Kiro got wrong with the fix (or a sentence containing "Kiro got nothing wrong"), and a line saying the checkpoint result is added by task 5.5. Do not edit the `## 2026-11-08 sentinel-sweep` entry the static test reads.
     - _Requirements: 14.13, 14.14_
-  - [~] 5.5 Final checkpoint
+  - [x] 5.5 Final checkpoint
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm test` and `FC_NUM_RUNS=500 pnpm test:pbt`; fix failures.
     - Add the result to the `BUILD_LOG.md` entry of 5.4.
     - Push `main` to `origin`. Wait for the CI run on the new HEAD and confirm it is green (`gh run list --branch main --limit 1`, then `gh run watch <id>` or `gh run view <id>`). Report the CI run id and the new HEAD SHA (`git rev-parse HEAD`); the Crew app pins that commit. If CI fails, fix it and push again; report the final green run.
