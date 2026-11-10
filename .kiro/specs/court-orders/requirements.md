@@ -213,10 +213,10 @@ Product principles that bind this feature: principle 1 (provenance is captured, 
 6. THE Export_Package tests SHALL show that under `dcolo-wang-2025` with no AI the no-AI sentence and the signature line "(all contributors to the drafting)" are present.
 7. THE tests SHALL show that under `sdohio-newman` with one AI-origin span the Export_Dialog shows the line of Requirement 5, criterion 5 and `canExport` is `false`; that `canExport` stays `false` after the span is relabelled `AI>HUM` by an edit beyond the threshold; and that it becomes `true` only when the AI-origin text is deleted.
 8. THE tests SHALL show that under `cit-choe-groves-2025` the Confidentiality_Checkbox gates export and the confidentiality sentence appears only when the box is ticked, that the Print_View shows its own checkbox and the one-line stand-in until it is ticked, and that no tick is passed between the Export_Dialog and the Print_View.
-12. THE tests SHALL show that the Statement_Text, the prohibition line and the Export_Dialog use the word "paragraphs" and never "lines" for the Filing_Paragraph ranges, with the sentence `The text drafted with the program appears at paragraphs 12–14 of the filing.` as one example.
 9. THE Export_Package tests SHALL show that with `order === null` the rendered blocks equal the existing expected output of today's tests.
 10. THE tests SHALL show, for each of criteria 13 to 15 of Requirement 4 that applies to a chosen entry, that the existing verification sentences are present.
 11. THE tests SHALL contain no snapshot of the engine, no `try/catch` that hides an error, and no test that only imports a module.
+12. THE tests SHALL show that the Statement_Text, the prohibition line and the Export_Dialog use the word "paragraphs" and never "lines" for the Filing_Paragraph ranges, with the sentence `The text drafted with the program appears at paragraphs 12–14 of the filing.` as one example.
 13. THE Export_Package tests SHALL show that `STATEMENT_TITLES` holds `STATEMENT_TITLE` and the distinct `caption.text` of every Dataset entry, of any `status`, with `caption.placement` `statement_title` or `separate_declaration`, and no other caption text.
 
 ### Requirement 10: Properties

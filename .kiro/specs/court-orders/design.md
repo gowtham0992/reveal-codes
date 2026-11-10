@@ -17,7 +17,7 @@ Product principles that bind this design: principle 1 (the gate counts spans, it
 
 ### Decisions this design fixes
 
-Requirement 9 numbers its criteria out of order (a criterion 12 sits between 8 and 9, and a trailing 13). This design refers to those criteria by content: "the paragraphs-not-lines test" is the criterion about the word "paragraphs", and "the STATEMENT_TITLES test" is the trailing criterion about the constant.
+This design refers to two criteria of Requirement 9 by content: "the paragraphs-not-lines test" is criterion 12, about the word "paragraphs", and "the STATEMENT_TITLES test" is criterion 13, about the constant.
 
 | # | Decision | Reason |
 |---|---|---|

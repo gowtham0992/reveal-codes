@@ -18,7 +18,7 @@ The Sentinel reads four environment variables, `COURTLISTENER_TOKEN`, `REVEAL_CO
 - **Sentinel_CLI**: the module `crew/sentinel/src/cli.ts`, run as `pnpm sentinel <command>`.
 - **Export_File**: a `.docx` file produced by `buildDocx` of the Export_Package: the filing, the Statement_Text, and the Provenance_Appendix, in that order.
 - **Export_Package**: `packages/export`, `@reveal-codes/export`.
-- **Statement_Title**: the string `STATEMENT_TITLE` of the Export_Package, "AI-Use and Verification Statement".
+- **Statement_Title**: any member of the array `STATEMENT_TITLES` of the Export_Package: `STATEMENT_TITLE` ("AI-Use and Verification Statement") plus the distinct `caption.text` of every court-orders dataset entry, of any status, whose `caption.placement` is `statement_title` or `separate_declaration`.
 - **Appendix_Title**: the string `APPENDIX_TITLE` of the Export_Package, "Provenance Appendix".
 - **Paragraph_List**: the `readonly string[]` that `readDocx` returns, one entry per `w:p` element of `word/document.xml` in document order.
 - **Export_Parts**: the value `{ body, appendix }` that `splitExport` returns; `body` and `appendix` are each a `readonly string[]`.
@@ -70,7 +70,7 @@ The Sentinel reads four environment variables, `COURTLISTENER_TOKEN`, `REVEAL_CO
 12. THE Sentinel SHALL contain a `try/catch` only where the block converts a thrown error into a Sentinel_Error value, into a Finding, or into an exit code and a message, and SHALL contain no `try/catch` with an empty block or a block that neither returns, rethrows, nor records the error.
 13. THE Sentinel SHALL change no file under `packages/engine`, `packages/verifier`, `packages/courtlistener-mcp`, or `apps/web`, and SHALL change files under `packages/export` only as Requirement 3, criterion 1 states and, only when the fallback of Requirement 12, criterion 17 applies, by adding the two support files under `packages/export/src/testing/` and the `@reveal-codes/export/testing` subpath export.
 14. THE Sentinel SHALL contain no file named `app.json` and no other Crew app manifest under `crew/sentinel`.
-15. THE Sentinel SHALL declare `@reveal-codes/export` as a runtime dependency because the Sentinel reads at run time what the Export_Package writes (`STATEMENT_TITLE`, `APPENDIX_TITLE`, `buildAppendix`, `ellipsize`, and `localDateTime`), AND the Engine SHALL remain the only workspace package with zero dependencies.
+15. THE Sentinel SHALL declare `@reveal-codes/export` as a runtime dependency because the Sentinel reads at run time what the Export_Package writes (`STATEMENT_TITLES`, `APPENDIX_TITLE`, `buildAppendix`, `ellipsize`, and `localDateTime`), AND the Engine SHALL remain the only workspace package with zero dependencies.
 
 ### Requirement 2: Reading a .docx
 
@@ -99,9 +99,9 @@ The Sentinel reads four environment variables, `COURTLISTENER_TOKEN`, `REVEAL_CO
 
 #### Acceptance Criteria
 
-1. THE Export_Package SHALL add `STATEMENT_TITLE` and `APPENDIX_TITLE` to the named exports of `packages/export/src/index.ts`, re-exported from `wording.ts` with no change to their values, and SHALL change no other line of the Export_Package.
+1. THE Export_Package SHALL add `STATEMENT_TITLE`, `STATEMENT_TITLES` and `APPENDIX_TITLE` to the named exports of `packages/export/src/index.ts`, re-exported from `wording.ts` with no change to their values, and SHALL change no other line of the Export_Package.
 2. THE Sentinel SHALL export `splitExport(paragraphs: readonly string[]): Result<ExportParts, SentinelError>`, and `splitExport` SHALL return a `Result` value for every input, including an empty list, and SHALL NOT throw.
-3. WHEN `splitExport` is called, THE `splitExport` function SHALL locate the first paragraph equal to the Statement_Title (compared by exact string equality) and, after it, the first paragraph equal to the Appendix_Title (compared by exact string equality).
+3. WHEN `splitExport` is called, THE `splitExport` function SHALL locate the first paragraph equal to any Statement_Title (compared by exact string equality against each member of `STATEMENT_TITLES`) and, after it, the first paragraph equal to the Appendix_Title (compared by exact string equality).
 4. IF the Paragraph_List is empty, holds no paragraph equal to the Statement_Title, or holds no paragraph equal to the Appendix_Title after the first one equal to the Statement_Title, THEN THE `splitExport` function SHALL return `{ kind: "not_reveal_codes_export" }` as the `Err` value.
 5. WHEN `splitExport` returns an `Ok` value, THE `splitExport` function SHALL return as `body` every paragraph before the paragraph equal to the Statement_Title, in original order, with no paragraph removed, because the Export_Package emits the page break inside the title paragraph and emits no separate empty paragraph for it.
 6. WHEN `splitExport` returns an `Ok` value, THE `splitExport` function SHALL return as `appendix` every paragraph after the paragraph equal to the Appendix_Title, in original order, omitting the first *n* of them, where *n* is the length of the `intro` list of the Appendix that the Export_Package's `buildAppendix` returns, read from `buildAppendix` and not written as a literal.

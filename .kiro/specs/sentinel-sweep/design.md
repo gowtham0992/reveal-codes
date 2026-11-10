@@ -6,7 +6,7 @@ This design adds the sweep program of the Reveal Codes Sentinel to `crew/sentine
 
 The shape of the work follows `structure.md` and `tech.md`. The Engine and the Verifier do the thinking and are not changed. The Sentinel is plain data and functions: a reader for one XML part, a splitter, a re-verifier, a finding builder, two renderers, and a thin runner. Every function returns a `Result` or a value; the only `try/catch` blocks convert a thrown error into a value or into an exit code. `cli.ts` is the only module that touches `process`, the real clock, and the real `fetch`. Everything else receives them as arguments, so every test runs against recorded fixtures with zero network requests.
 
-Changes outside `crew/sentinel`: two added named exports in `packages/export/src/index.ts` (`STATEMENT_TITLE`, `APPENDIX_TITLE`), one root script, one hook file, edits to `structure.md`, `tech.md`, `README.md`, `docs/KIRO_USAGE.md` and `BUILD_LOG.md`, and, only on the fallback of Requirement 12 criterion 17, two moved test-support files. No `app.json` is created.
+Changes outside `crew/sentinel`: three added named exports in `packages/export/src/index.ts` (`STATEMENT_TITLE`, `STATEMENT_TITLES`, `APPENDIX_TITLE`), one root script, one hook file, edits to `structure.md`, `tech.md`, `README.md`, `docs/KIRO_USAGE.md` and `BUILD_LOG.md`, and, only on the fallback of Requirement 12 criterion 17, two moved test-support files. No `app.json` is created.
 
 ### Decisions this design fixes
 
@@ -44,7 +44,7 @@ Changes outside `crew/sentinel`: two added named exports in `packages/export/src
 - **Recorded fixtures.** `packages/verifier/fixtures/manifest.json` lists the lookup lines, cluster paths and opinion paths that `createFixtureFetch` serves. `fixtures/http/throttle-429.json` is the recorded 429 (`Retry-After: 30`, `wait_until: 2026-11-02T12:00:30Z`).
 - **Engine facts.** `issues(doc)` omits verified citations, matching quotes and linked short forms. `Override` is `{ key, reason, timestamp }`. `parse(text)` returns `Result<Document, EngineError>` and never throws; for `malformed_codes` the error holds `index` and `rule`. The full form of a citation reads `[CIT ✓{k=k0;cl=145875}]…[/CIT]`, so a test can rewrite it to `[CIT ✘{k=k0}]` with one string replacement.
 - **Export facts.** `buildAppendix(document)` returns `{ title, intro, lines }` with `intro` of two sentences and `lines` equal to `render(document, "full").text.split("\n")`. `ellipsize(text, 80)` returns the first 79 units and `…` when longer. `localDateTime(d)` is local `YYYY-MM-DD HH:MM`.
-- **Runtime import of the Export_Package.** `split.ts`, `findings.ts` and `report.ts` import `STATEMENT_TITLE`, `APPENDIX_TITLE`, `buildAppendix`, `ellipsize` and `localDateTime` from `@reveal-codes/export` at run time, and its `index.ts` also loads `docx`. `@reveal-codes/export` is therefore a runtime dependency of the Sentinel (Requirement 1, criteria 2 and 15), consistent with the use. The Engine remains the only workspace package with zero dependencies.
+- **Runtime import of the Export_Package.** `split.ts`, `findings.ts` and `report.ts` import `STATEMENT_TITLES`, `APPENDIX_TITLE`, `buildAppendix`, `ellipsize` and `localDateTime` from `@reveal-codes/export` at run time, and its `index.ts` also loads `docx`. `@reveal-codes/export` is therefore a runtime dependency of the Sentinel (Requirement 1, criteria 2 and 15), consistent with the use. The Engine remains the only workspace package with zero dependencies.
 
 ## Architecture
 
@@ -142,7 +142,7 @@ Trust boundary: the only outbound requests are the Verifier's own, made through 
 
 ## Components and Interfaces
 
-Shared imports: `Result`, `ok`, `err` and the Document types come from `@reveal-codes/engine`. `Deps`, `FetchLike` and the verifier functions come from `@reveal-codes/verifier`. `ellipsize`, `localDateTime`, `STATEMENT_TITLE`, `APPENDIX_TITLE` and `buildAppendix` come from `@reveal-codes/export`.
+Shared imports: `Result`, `ok`, `err` and the Document types come from `@reveal-codes/engine`. `Deps`, `FetchLike` and the verifier functions come from `@reveal-codes/verifier`. `ellipsize`, `localDateTime`, `STATEMENT_TITLES`, `APPENDIX_TITLE` and `buildAppendix` come from `@reveal-codes/export`.
 
 ### `xml-text.ts` and `docx-read.ts`
 
@@ -189,7 +189,7 @@ const EMPTY_DOCUMENT: Document = { text: "", spans: [], runs: [], citations: [],
 const INTRO_LENGTH = buildAppendix(EMPTY_DOCUMENT).intro.length;
 ```
 
-`splitExport` finds `s = paragraphs.indexOf(STATEMENT_TITLE)`, then `a` as the first index after `s` of `APPENDIX_TITLE` (`indexOf(APPENDIX_TITLE, s + 1)`). If either is `-1`, including for an empty list, it returns `err({ kind: "not_reveal_codes_export" })`. Otherwise `body = paragraphs.slice(0, s)` and `appendix = paragraphs.slice(a + 1 + INTRO_LENGTH)`; `slice` past the end yields `[]` (criterion 7). The input is never modified and the function reads nothing else, so equal inputs give equal results.
+`splitExport` finds `s = paragraphs.findIndex((p) => STATEMENT_TITLES.includes(p))`, then `a` as the first index after `s` of `APPENDIX_TITLE` (`indexOf(APPENDIX_TITLE, s + 1)`). If either is `-1`, including for an empty list, it returns `err({ kind: "not_reveal_codes_export" })`. Otherwise `body = paragraphs.slice(0, s)` and `appendix = paragraphs.slice(a + 1 + INTRO_LENGTH)`; `slice` past the end yields `[]` (criterion 7). The input is never modified and the function reads nothing else, so equal inputs give equal results.
 
 ### `recorded.ts`
 
@@ -586,10 +586,10 @@ The standing rule applies: a fault that affects only malformed input is a value 
 |---|---|---|
 | `bytes` empty, not a zip, no `word/document.xml`, or the entry will not inflate | `readDocx` returns `Err { kind: "not_docx" }`; no throw | 2.1 to 2.5 |
 | Numeric character reference to zero, a surrogate, or above U+10FFFF | Reference text left as written in the paragraph (L3) | 2.11 |
-| Paragraph list empty, or no `STATEMENT_TITLE`, or no `APPENDIX_TITLE` after it | `splitExport` returns `Err { kind: "not_reveal_codes_export" }` | 3.4 |
+| Paragraph list empty, or no member of `STATEMENT_TITLES`, or no `APPENDIX_TITLE` after it | `splitExport` returns `Err { kind: "not_reveal_codes_export" }` | 3.4 |
 | `APPENDIX_TITLE` is last or followed by `INTRO_LENGTH` paragraphs or fewer | `Ok` with `appendix: []`; `parse("")` then fails with `malformed_codes`, so the file is `appendix_unparseable` | 3.7, 4.2 |
 | `parse` returns `Err` | `Err { kind: "appendix_unparseable", detail }` naming the Engine error kind, and for `malformed_codes` its `index` and `rule`; no `lookup` call | 4.2, 8.2 |
-| A filing paragraph equals `STATEMENT_TITLE` | Body is cut there; the file reads as `body_edited`, `appendix_unparseable` or `not_reveal_codes_export` (L1) | 3.3 |
+| A filing paragraph equals a member of `STATEMENT_TITLES` | Body is cut there; the file reads as `body_edited`, `appendix_unparseable` or `not_reveal_codes_export` (L1) | 3.3 |
 | Body text differs from the Recorded_Document text | One `body_edited` Finding; the other checks still run; later line numbers count lines of the Appendix text (L13) | 6.2 |
 | Filing exported with an XML-illegal control character | `docx` dropped it, so the file reads as `body_edited` from the day of export (L2) | 6.2 |
 | `lookup` returns `unchecked` for a full citation | Recorded_Status kept; `recheck_unavailable` with the latest `waitUntil`, or `unavailable` | 5.3, 6.9 |
