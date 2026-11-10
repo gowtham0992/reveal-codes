@@ -226,3 +226,33 @@ The relative import of the export test support (`packages/export/test/support/de
 ### `pnpm sentinel check` confirmation (task 4.6)
 
 The root script `pnpm --filter @reveal-codes/sentinel run cli --` did not behave as design D11 assumed: pnpm passed the literal `--` through, so `cli.ts` saw `--` as `argv[2]` and `pnpm sentinel check <file>` exited 2 with `unknown command: --`. The brief assumed pnpm needed `--` to pass arguments through; pnpm 10 passes them without it and passed the literal `--` to the CLI. The fix drops the `--` (the script is now `pnpm --filter @reveal-codes/sentinel run cli`), and the static test in `crew/sentinel/test/static/package.test.ts` was updated to match. After the change, `pnpm sentinel check <demo export>` delivered `check` as the first argument, printed `No drift.` and exited 0, and `--json <file>` was passed through and written. The demo `.docx` came from a throwaway script that was deleted afterwards. The final run of lint, typecheck, test (2159 tests) and `FC_NUM_RUNS=500 pnpm test:pbt` (135 tests) passed.
+
+## 2026-11-09 court-orders
+
+### What was built
+
+Task numbers refer to `.kiro/specs/court-orders/tasks.md`.
+
+- `packages/export`: the dataset loader and validation for `data/standing-orders.json` (`src/orders.ts`), plus the order sentences in the Statement.
+- Export dialog and Print view: the Picker, the Order_Summary, the confidentiality checkbox and the prohibition block.
+- DOCX: the first-page header.
+- Sentinel: `STATEMENT_TITLES` in the splitter, so it recognises every title the Statement can now carry.
+- Demo motion: moved to N.D. Tex.
+
+### Where Kiro got something wrong, and what fixed it
+
+- The requirements pass found that the Sentinel matched only the Standard_Title. A Statement titled for a court's instrument would have been missed by the sweep. `STATEMENT_TITLES` in the splitter fixed it.
+- The change to a line of the demo motion shifted every later Offset by +8 (design D20). The character count in two export tests went from 2611 to 2619. The tests were updated to the new count; the Offsets were not hand-patched elsewhere.
+- Prettier pass on `data/standing-orders.json` (design D19): the dataset is formatted by Prettier, so the file was reformatted once to satisfy `pnpm lint`.
+- `tsconfig` change for the JSON import: `rootDir` was widened to `../..`. The `declarationDir` fallback was not needed.
+- A `catch` in `order-selection.ts` failed the limits scan. The function was restructured to return the error as a value.
+
+### Known wording gap
+
+The prohibition line reads "1 AI-origin span remain". This follows the spec's "span(s) remain" literally, and is grammatically off for one span. It is left as written and is not fixed here.
+
+### Tests that are weaker than they look
+
+The `edtex-love` and `dhaw` Sentinel proof tests assert a clean report. They do not assert the cut position.
+
+Requirements: 12.3, 12.13.

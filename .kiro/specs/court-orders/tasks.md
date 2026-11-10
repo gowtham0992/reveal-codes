@@ -160,7 +160,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Create `apps/web/test/print-view-orders.test.tsx`: Order_Summary in the controls block; first-page block present with the class that carries `break-after: avoid` (also read `print-view.module.css`) and absent otherwise; the print checkbox unticked on every load, the one-line stand-in until ticked, then the same blocks as `buildStatement` with the tick; after ticking in the dialog and opening print, the only storage keys are the autosave key and the order key
     - _Requirements: 3.12, 5.11, 6.8 to 6.11, 7.6, 7.7, 9.8_
 
-- [ ] 4. Group 4: demo motion court, `STATEMENT_TITLES`, Sentinel, documentation and steering
+- [x] 4. Group 4: demo motion court, `STATEMENT_TITLES`, Sentinel, documentation and steering
   - [x] 4.1 Add `STATEMENT_TITLES` and use it in the Sentinel splitter
     - In `packages/export/src/wording.ts` add `export const STATEMENT_TITLES = statementTitles(ORDERS, STATEMENT_TITLE);` and export it from `packages/export/src/index.ts`
     - In `crew/sentinel/src/split.ts` import `STATEMENT_TITLES` and find the first paragraph with `STATEMENT_TITLES.includes(p)`; change no other Sentinel source file and nothing in the Verifier
@@ -202,7 +202,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - This feature adds no hook, agent or MCP tool, so there are no other rows; make sure the web `inventory.test.ts` still passes
     - _Requirements: 12.2_
 
-  - [~] 4.7 Add the BUILD_LOG entry
+  - [x] 4.7 Add the BUILD_LOG entry
     - Append a dated entry to `BUILD_LOG.md`: what was built, what Kiro got wrong and what fixed it, that the requirements pass found the Sentinel matched only the Standard_Title, the Offsets shift of D20, the Prettier pass of D19, and the `tsconfig` change (and fallback if used)
     - Append to the file; do not rewrite earlier entries
     - _Requirements: 12.3, 12.13_
