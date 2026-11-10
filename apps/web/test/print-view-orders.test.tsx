@@ -175,6 +175,7 @@ describe("Print_View confidentiality checkbox _Requirements: 6.9, 6.10, 6.11, 9.
         orderStore={createOrderSelectionStore(storage, ORDERS)}
         now={() => EXPORT_NOW}
         notice={null}
+        clearNotice={() => undefined}
         busy={false}
         onGo={() => undefined}
         onDownload={() => undefined}

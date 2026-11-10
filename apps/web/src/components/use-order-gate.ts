@@ -10,6 +10,8 @@ import type { OrderContext, OrderEntry, ProhibitionNotice } from "@reveal-codes/
 import { useEffect, useState } from "react";
 import type { OrderSelection, OrderSelectionStore } from "../order-selection";
 
+const noop = (): void => undefined;
+
 export type OrderGate = Readonly<{
   selection: OrderSelection;
   entry: OrderEntry | null;
@@ -28,7 +30,11 @@ export type OrderGate = Readonly<{
  * store when the dialog opens; the tick starts false, is never stored, and is cleared when
  * the selection changes or the checkbox is no longer needed.
  */
-export function useOrderGate(document: Document, orderStore: OrderSelectionStore): OrderGate {
+export function useOrderGate(
+  document: Document,
+  orderStore: OrderSelectionStore,
+  clearNotice: () => void = noop,
+): OrderGate {
   const [selection, setSelection] = useState<OrderSelection>(() => orderStore.get());
   const [tick, setTick] = useState(false);
   const entry = selection === null ? null : orderById(ORDERS, selection.entryId);
@@ -41,6 +47,7 @@ export function useOrderGate(document: Document, orderStore: OrderSelectionStore
     orderStore.set(next);
     setSelection(next);
     setTick(false);
+    clearNotice();
   };
   return {
     selection,

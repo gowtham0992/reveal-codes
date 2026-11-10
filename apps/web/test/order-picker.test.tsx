@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 import { ORDERS, selectableOrders } from "@reveal-codes/export";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { OrderPicker, OrderSummary } from "../src/components/order-picker";
 import { useOrderGate } from "../src/components/use-order-gate";
@@ -149,5 +151,18 @@ describe("OrderPicker as a controlled component", () => {
     );
     choose("dhaw-go-23-1");
     expect(seen).toEqual([{ entryId: "dhaw-go-23-1" }]);
+  });
+});
+
+describe("OrderPicker width _Requirements: 3.2_", () => {
+  it("styles the select at the full width of the dialog", () => {
+    mount();
+    const css = readFileSync(
+      join(process.cwd(), "apps/web/src/components/order-picker.module.css"),
+      "utf8",
+    );
+    const rule = /\.select\s*\{([^}]*)\}/.exec(css)?.[1] ?? "";
+    expect(rule).toMatch(/width:\s*100%/);
+    expect(picker().className).toContain("select");
   });
 });

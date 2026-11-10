@@ -32,6 +32,7 @@ function props(document: Document, extra: Partial<ExportDialogProps> = {}): Expo
     orderStore: createOrderSelectionStore(createMemoryStorage(), ORDERS),
     now: () => new Date(ISO),
     notice: null,
+    clearNotice: () => undefined,
     busy: false,
     onGo: () => undefined,
     onDownload: () => undefined,

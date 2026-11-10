@@ -1,4 +1,4 @@
-import { judgeSurname } from "@reveal-codes/export";
+import { ellipsize, judgeSurname } from "@reveal-codes/export";
 import type { OrderEntry, OrderKind } from "@reveal-codes/export";
 
 export const NO_ORDER_LABEL = "No specific order \u2014 general statement";
@@ -24,11 +24,15 @@ export const appliesWords: Record<OrderEntry["applies_to"], string> = {
   pro_se: "self-represented parties",
 };
 
+/** Longest title or instrument shown in an option; the year stays visible after it. */
+export const OPTION_TEXT_MAX = 60;
+
 /** Option text of the Picker: court-wide entries by instrument, judge entries by surname. */
 export function optionText(entry: OrderEntry): string {
   const year = entry.date.slice(0, 4);
-  if (entry.judge === null) return `Court-wide \u2014 ${entry.instrument} (${year})`;
-  return `Judge ${judgeSurname(entry.judge)} \u2014 ${entry.title} (${year})`;
+  if (entry.judge === null)
+    return `Court-wide \u2014 ${ellipsize(entry.instrument, OPTION_TEXT_MAX)} (${year})`;
+  return `Judge ${judgeSurname(entry.judge)} \u2014 ${ellipsize(entry.title, OPTION_TEXT_MAX)} (${year})`;
 }
 
 export function summaryLine(entry: OrderEntry): string {

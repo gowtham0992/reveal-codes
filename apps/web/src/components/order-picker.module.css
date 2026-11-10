@@ -16,6 +16,7 @@
   background: var(--paper);
   border: 1px solid var(--rule);
   padding: 4px 6px;
+  width: 100%;
   max-width: 100%;
 }
 

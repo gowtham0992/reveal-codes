@@ -88,7 +88,12 @@ function mount(document: Document, storage = createMemoryStorage()): Rig {
   });
   function Harness() {
     const doc = useDoc(store);
-    const x = useExport({ svc, store, autosave, doc, notice: null, onGo: () => undefined });
+    const notice = useSyncExternalStore(
+      store.subscribe,
+      () => store.getState().notice,
+      () => store.getState().notice,
+    );
+    const x = useExport({ svc, store, autosave, doc, notice, onGo: () => undefined });
     return (
       <>
         <Toolbar notice={null} paneOpen={false} verifyDisabled={false} {...x.toolbar} />
@@ -133,6 +138,7 @@ describe("prohibition block _Requirements: 5.5, 5.6, 5.7, 5.8, 9.7, 9.12_", () =
       'Judge Newman\'s order prohibits AI-drafted text. 1 AI-origin passage remains: paragraph 2, beginning "The movant relies on the record.\u2026".',
     );
     expect(text).toContain(quoted(entry.key_language));
+    expect(text.split(entry.key_language)).toHaveLength(2);
     expect(button("Download .docx").disabled).toBe(true);
     expect(button("Open print view").disabled).toBe(true);
   });
@@ -306,5 +312,43 @@ describe("Confidentiality_Checkbox _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 
     fireEvent.click(button("Download .docx"));
     expect(downloads).toHaveLength(0);
     expect(button("Download .docx").disabled).toBe(true);
+  });
+});
+
+describe("export result notice _Requirements: 3.5, 5.11_", () => {
+  async function exportOnce(): Promise<Rig> {
+    const rig = mount(humanDocument());
+    openDialog();
+    await act(async () => {
+      fireEvent.click(button("Download .docx"));
+      await Promise.resolve();
+    });
+    await waitFor(() => {
+      expect(rig.downloads).toHaveLength(1);
+    });
+    return rig;
+  }
+
+  it("is gone when the dialog is closed and opened again", async () => {
+    const { store } = await exportOnce();
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "Export" })).toBeNull();
+    });
+    expect(store.getState().notice).toMatch(/^Exported .*\.docx\.$/);
+    openDialog();
+    expect(store.getState().notice).toBeNull();
+    expect(within(dialog()).getByRole("status").textContent).toBe("");
+  });
+
+  it("is cleared when the court is changed in the Picker", async () => {
+    const { store } = await exportOnce();
+    openDialog();
+    act(() => {
+      store.dispatch({ type: "notice", text: "Exported example.docx." });
+    });
+    expect(within(dialog()).getByRole("status").textContent).toBe("Exported example.docx.");
+    choose("sdohio-newman");
+    expect(store.getState().notice).toBeNull();
+    expect(within(dialog()).getByRole("status").textContent).toBe("");
   });
 });

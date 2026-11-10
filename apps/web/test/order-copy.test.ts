@@ -6,6 +6,7 @@ import {
   NO_ORDER_LABEL,
   appliesWords,
   kindWords,
+  OPTION_TEXT_MAX,
   optionText,
   quoted,
   summaryLine,
@@ -14,11 +15,15 @@ import {
 const SELECTABLE: readonly OrderEntry[] = selectableOrders(ORDERS).flatMap((g) => g.entries);
 
 /** The template, written out here rather than imported. */
+function short(text: string): string {
+  return text.length <= 60 ? text : `${text.slice(0, 59)}\u2026`;
+}
+
 function expectedOption(entry: OrderEntry): string {
   const year = entry.date.slice(0, 4);
-  if (entry.judge === null) return `Court-wide \u2014 ${entry.instrument} (${year})`;
+  if (entry.judge === null) return `Court-wide \u2014 ${short(entry.instrument)} (${year})`;
   const surname = entry.judge.name.trim().split(/\s+/).pop() ?? "";
-  return `Judge ${surname} \u2014 ${entry.title} (${year})`;
+  return `Judge ${surname} \u2014 ${short(entry.title)} (${year})`;
 }
 
 describe("optionText _Requirements: 2.2, 2.3, 2.4_", () => {
@@ -41,8 +46,31 @@ describe("optionText _Requirements: 2.2, 2.3, 2.4_", () => {
       "Court-wide \u2014 Local Civil Rule 7.2(f); Local Criminal Rule 47.2(e) (2024)",
     );
     expect(judge && optionText(judge)).toBe(
-      "Judge Love \u2014 Standing Order on Disclosure and Certification Requirements for Use of Generative Artificial Intelligence (2025)",
+      "Judge Love \u2014 Standing Order on Disclosure and Certification Requirements\u2026 (2025)",
     );
+  });
+});
+
+describe("optionText ellipsis _Requirements: 3.2_", () => {
+  const base = SELECTABLE.find((e) => e.judge !== null) as OrderEntry;
+  const wide = SELECTABLE.find((e) => e.judge === null) as OrderEntry;
+  const long = "A".repeat(80);
+
+  it("limits the title of a judge entry to 60 characters and keeps the year", () => {
+    const text = optionText({ ...base, title: long });
+    expect(text.endsWith(`${"A".repeat(59)}\u2026 (${base.date.slice(0, 4)})`)).toBe(true);
+    expect(OPTION_TEXT_MAX).toBe(60);
+  });
+
+  it("limits the instrument of a court-wide entry to 60 characters", () => {
+    const text = optionText({ ...wide, instrument: long });
+    expect(text).toBe(`Court-wide \u2014 ${"A".repeat(59)}\u2026 (${wide.date.slice(0, 4)})`);
+  });
+
+  it("leaves a title of exactly 60 characters and a short title unchanged", () => {
+    const sixty = "B".repeat(60);
+    expect(optionText({ ...base, title: sixty })).toContain(` \u2014 ${sixty} (`);
+    expect(optionText({ ...base, title: "Short" })).toContain(" \u2014 Short (");
   });
 });
 

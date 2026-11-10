@@ -4,7 +4,6 @@ import { blockingIssues } from "@reveal-codes/engine";
 import type { Document, Issue } from "@reveal-codes/engine";
 import type { OrderContext } from "@reveal-codes/export";
 import { useEffect, useRef, useState } from "react";
-import { quoted } from "../order-copy";
 import type { OrderSelectionStore } from "../order-selection";
 import type { Store } from "../store-runtime";
 import { ConfidentialityCheckbox } from "./confidentiality-checkbox";
@@ -22,6 +21,8 @@ export type ExportDialogProps = Readonly<{
   orderStore: OrderSelectionStore;
   now: () => Date;
   notice: string | null;
+  /** Clears the export result notice. */
+  clearNotice: () => void;
   /** A download is in progress. */
   busy: boolean;
   restoreFocus?: HTMLElement | null | undefined;
@@ -122,7 +123,6 @@ function ExportOrder({ gate }: OrderProps) {
       {gate.notice === null ? null : (
         <div className={styles["prohibition"]}>
           <p className={styles["text"]}>{gate.notice.line}</p>
-          <p className={styles["text"]}>{quoted(gate.notice.keyLanguage)}</p>
         </div>
       )}
     </div>
@@ -166,7 +166,7 @@ export function ExportDialog(props: ExportDialogProps) {
   const [target, setTarget] = useState<Target | null>(null);
   const root = useRef<HTMLDivElement | null>(null);
   useReclaimFocus(root, target);
-  const gate = useOrderGate(document, orderStore);
+  const gate = useOrderGate(document, orderStore, props.clearNotice);
   const blocking = blockingIssues(document);
   return (
     <>

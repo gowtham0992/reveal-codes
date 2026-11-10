@@ -235,7 +235,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Tests (`statement-orders.test.ts`, `statement.test.ts`, `render-statement.test.ts`): fixture run prints the words in both places; a real provider prints `provider: model` in the Tools clause and `provider model` in the order sentence; mixed tools print each as its own; a `null` model is unchanged
     - _Requirements: 4.9, 4.24, 13.6_
 
-  - [~] 6.3 Web: prohibition block, stale notice, picker width and ellipsis
+  - [x] 6.3 Web: prohibition block, stale notice, picker width and ellipsis
     - In `apps/web/src/components/export-dialog.tsx` render only `notice.line` in the prohibition block and remove the second `quoted(notice.keyLanguage)` copy; leave `ProhibitedView` in the Print_View unchanged
     - Clear the export result notice ("Exported ….docx.") when the Export_Dialog opens and when `select` changes the court (D26): add a `clearNotice` callback from `use-export.tsx` to the dialog and `useOrderGate`
     - In `order-picker.module.css` set the select to `width: 100%`; in `order-copy.ts` make `optionText` use `ellipsize` from `@reveal-codes/export` with limit 60 on the title (Judge_Entry) and the instrument (Court_Wide_Entry), keeping the `Judge <surname> — … (<year>)` and `Court-wide — … (<year>)` forms (D27)

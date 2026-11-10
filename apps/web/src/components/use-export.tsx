@@ -59,23 +59,39 @@ function useDeferredGo(open: boolean, onGo: (offset: number) => void) {
   return setGoTo;
 }
 
-/** Owns open, opener and busy for the Export_Dialog; the toolbar button is always enabled. */
-export function useExport({ svc, store, autosave, doc, notice, onGo }: UseExportArgs) {
+/** Open flag and the element that opened the dialog, for focus restore. */
+function useOpenState() {
   const [open, setOpen] = useState(false);
   const [opener, setOpener] = useState<HTMLElement | null>(null);
+  return {
+    open,
+    opener,
+    close: (): void => {
+      setOpen(false);
+    },
+    show: (): void => {
+      const active = document.activeElement;
+      setOpener(active instanceof HTMLElement ? active : null);
+      setOpen(true);
+    },
+  };
+}
+
+/** Owns open, opener and busy for the Export_Dialog; the toolbar button is always enabled. */
+export function useExport({ svc, store, autosave, doc, notice, onGo }: UseExportArgs) {
+  const { open, opener, close, show } = useOpenState();
   const [busy, setBusy] = useState(false);
   const orderStore = useMemo(() => createOrderSelectionStore(svc.storage, ORDERS), [svc.storage]);
   const setGoTo = useDeferredGo(open, onGo);
-  const close = (): void => {
-    setOpen(false);
+  const clearNotice = (): void => {
+    store.dispatch({ type: "notice", text: null });
   };
   return {
     toolbar: {
       blockingCount: blockingIssues(doc).length,
       onExport: (): void => {
-        const active = document.activeElement;
-        setOpener(active instanceof HTMLElement ? active : null);
-        setOpen(true);
+        clearNotice();
+        show();
       },
     },
     dialog: open ? (
@@ -85,6 +101,7 @@ export function useExport({ svc, store, autosave, doc, notice, onGo }: UseExport
         orderStore={orderStore}
         now={svc.now}
         notice={notice}
+        clearNotice={clearNotice}
         busy={busy}
         restoreFocus={opener}
         onGo={setGoTo}
