@@ -142,7 +142,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Replace the temporary `null` arguments from task 2.6; check and update any existing test that assumes the first focusable control is a button
     - _Requirements: 3.1, 3.13, 5.5, 5.6, 5.7, 5.8, 6.1 to 6.8, 8.2_
 
-  - [~] 3.5 Wire the Print_View
+  - [x] 3.5 Wire the Print_View
     - In `apps/web/src/print-model.ts` change to `printModel(raw, now, order)`: call `canExport(document, order)` once; add the `prohibited` kind (`blocking`, `notice`) and keep the `blocked` shape; `ready` gains `heading` and `certifiedBlocks` (non-null only when `needsConfidentiality`)
     - In `apps/web/src/print-view.tsx` read the selection on mount through `createOrderSelectionStore(svc.storage, ORDERS).get()` and `orderById`, keep a `ticked` state that is false on every load and never stored; split `ReadyView` into smaller components
     - Create `apps/web/src/components/print-order.tsx` with `PrintHeader` (controls block hidden in `@media print`, holding the Print button, `OrderSummary` and the checkbox), `FirstPageBlock` (two lines, heading bold and centred, outside the controls block) and `ProhibitedView` (notice line, quoted key language, blocked list; no Statement_Text); show `CONFIDENTIALITY_REQUIRED` as one line until the box is ticked

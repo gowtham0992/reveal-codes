@@ -17,6 +17,13 @@
   border-bottom: 1px solid var(--rule);
 }
 
+.firstPage {
+  break-after: avoid;
+}
+.firstPageHeading {
+  font-weight: 700;
+  text-align: center;
+}
 .message {
   margin: 0 0 8px;
 }

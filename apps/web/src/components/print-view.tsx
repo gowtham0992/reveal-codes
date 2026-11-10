@@ -1,12 +1,16 @@
 "use client";
 
-import type { Appendix, StatementBlock } from "@reveal-codes/export";
+import { ORDERS, orderById } from "@reveal-codes/export";
+import type { Appendix, OrderEntry, StatementBlock } from "@reveal-codes/export";
 import { useEffect, useState } from "react";
+import { CONFIDENTIALITY_REQUIRED } from "../order-copy";
+import { createOrderSelectionStore } from "../order-selection";
 import { AUTOSAVE_KEY } from "../persist";
 import { printModel } from "../print-model";
-import type { PrintModel, Thrown } from "../print-model";
+import type { BlockedItem, PrintModel, Thrown } from "../print-model";
 import { defaultServices } from "../services";
 import type { AppServices } from "../services";
+import { FirstPageBlock, PrintHeader, ProhibitedView } from "./print-order";
 import styles from "./print-view.module.css";
 
 export type PrintViewProps = Readonly<{
@@ -101,65 +105,121 @@ function AppendixSection({ appendix }: Readonly<{ appendix: Appendix }>) {
 
 type Ready = Extract<PrintModel, { kind: "ready" }>;
 
-function ReadyView({ model }: Readonly<{ model: Ready }>) {
-  const serif = `${styles["section"] ?? ""} ${styles["serif"] ?? ""}`;
+function FilingSection({ paragraphs }: Readonly<{ paragraphs: readonly string[] }>) {
+  return (
+    <section className={`${styles["section"] ?? ""} ${styles["serif"] ?? ""}`}>
+      {paragraphs.map((text, i) => (
+        <p key={i}>{text === "" ? "\u00a0" : text}</p>
+      ))}
+    </section>
+  );
+}
+
+function StatementSection({ model, ticked }: Readonly<{ model: Ready; ticked: boolean }>) {
+  const serif = `${styles["section"] ?? ""} ${styles["serif"] ?? ""} ${styles["statement"] ?? ""}`;
+  const waiting = model.certifiedBlocks !== null && !ticked;
+  const blocks = model.certifiedBlocks !== null && ticked ? model.certifiedBlocks : model.blocks;
+  return (
+    <section className={serif}>
+      {waiting ? <p>{CONFIDENTIALITY_REQUIRED}</p> : <StatementBlocks blocks={blocks} />}
+    </section>
+  );
+}
+
+type ReadyProps = Readonly<{
+  model: Ready;
+  order: OrderEntry | null;
+  ticked: boolean;
+  onTick: (ticked: boolean) => void;
+}>;
+
+function ReadyView({ model, order, ticked, onTick }: ReadyProps) {
   return (
     <>
-      <div className={styles["controls"]}>
-        <button
-          type="button"
-          onClick={() => {
-            window.print();
-          }}
-        >
-          Print
-        </button>
-      </div>
-      <section className={serif}>
-        {model.paragraphs.map((text, i) => (
-          <p key={i}>{text === "" ? "\u00a0" : text}</p>
-        ))}
-      </section>
-      <section className={`${serif} ${styles["statement"] ?? ""}`}>
-        <StatementBlocks blocks={model.blocks} />
-      </section>
+      <PrintHeader
+        order={order}
+        printable
+        needsTick={model.certifiedBlocks !== null}
+        ticked={ticked}
+        onTick={onTick}
+      />
+      <FirstPageBlock heading={model.heading} />
+      <FilingSection paragraphs={model.paragraphs} />
+      <StatementSection model={model} ticked={ticked} />
       <AppendixSection appendix={model.appendix} />
     </>
   );
 }
 
-function ModelView({ model }: Readonly<{ model: PrintModel }>) {
+function BlockedView({ blocking }: Readonly<{ blocking: readonly BlockedItem[] }>) {
+  return (
+    <>
+      <p className={styles["message"]}>{blockedText(blocking.length)}</p>
+      <ul className={styles["list"]}>
+        {blocking.map((item, i) => (
+          <li key={i} className={styles["item"]}>
+            <span className={styles["code"]}>{item.code}</span> {item.text}
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+type ModelViewProps = Readonly<{
+  model: PrintModel;
+  order: OrderEntry | null;
+  ticked: boolean;
+  onTick: (ticked: boolean) => void;
+}>;
+
+function ModelView({ model, order, ticked, onTick }: ModelViewProps) {
   switch (model.kind) {
     case "absent":
       return <p className={styles["message"]}>{ABSENT_TEXT}</p>;
     case "unreadable":
       return <p className={styles["message"]}>{UNREADABLE_TEXT}</p>;
     case "blocked":
+      return <BlockedView blocking={model.blocking} />;
+    case "prohibited":
       return (
         <>
-          <p className={styles["message"]}>{blockedText(model.blocking.length)}</p>
-          <ul className={styles["list"]}>
-            {model.blocking.map((item, i) => (
-              <li key={i} className={styles["item"]}>
-                <span className={styles["code"]}>{item.code}</span> {item.text}
-              </li>
-            ))}
-          </ul>
+          <PrintHeader
+            order={order}
+            printable={false}
+            needsTick={false}
+            ticked={false}
+            onTick={onTick}
+          />
+          <ProhibitedView model={model} />
         </>
       );
     case "ready":
-      return <ReadyView model={model} />;
+      return <ReadyView model={model} order={order} ticked={ticked} onTick={onTick} />;
   }
+}
+
+type Loaded = Readonly<{ model: PrintModel; order: OrderEntry | null }>;
+
+function load(svc: Pick<AppServices, "storage" | "now">): Loaded {
+  const selection = createOrderSelectionStore(svc.storage, ORDERS).get();
+  const order = selection === null ? null : orderById(ORDERS, selection.entryId);
+  return { model: printModel(readStored(svc.storage), svc.now(), order), order };
 }
 
 /** Reads storage after mount, never during server rendering (Req 8.1). */
 export function PrintView({ services }: PrintViewProps) {
-  const [model, setModel] = useState<PrintModel | null>(null);
+  const [loaded, setLoaded] = useState<Loaded | null>(null);
+  const [ticked, setTicked] = useState(false);
   useEffect(() => {
-    const svc = services ?? defaultServices();
-    setModel(printModel(readStored(svc.storage), svc.now()));
+    setLoaded(load(services ?? defaultServices()));
+    setTicked(false);
   }, [services]);
   return (
-    <main className={styles["page"]}>{model === null ? null : <ModelView model={model} />}</main>
+    <main className={styles["page"]}>
+      {loaded === null ? null : (
+        <ModelView model={loaded.model} order={loaded.order} ticked={ticked} onTick={setTicked} />
+      )}
+    </main>
   );
 }
