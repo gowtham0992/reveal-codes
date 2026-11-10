@@ -192,7 +192,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Locate lines by content; do not edit `.kiro/specs/sentinel-sweep/tasks.md`; call `validate_spec_format` on each edited spec file
     - _Requirements: 12.12_
 
-  - [-] 4.5 Add the README section
+  - [x] 4.5 Add the README section
     - Add "Court-specific certification" to `README.md`: what the Picker in the Export dialog does, three example courts (N.D. Tex. first-page heading, E.D. Tex. Judge Love's certificate title, S.D. Ohio Judge Newman's prohibition), a link to `data/README.md`, and one sentence that the dataset is released under CC0
     - Plain copy, no exclamation marks
     - _Requirements: 12.1_
