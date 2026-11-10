@@ -212,7 +212,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - In `.kiro/steering/product.md` add one unnumbered line under the principles: `The statement follows the selected court's instrument. The dataset behind it, data/standing-orders.json, is public and CC0.`
     - _Requirements: 12.4, 12.5_
 
-- [~] 5. Final checkpoint
+- [x] 5. Final checkpoint
   - Run `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm --filter @reveal-codes/web exec next build --webpack` (the build's `prebuild` refreshes `apps/web/public/demo-motion.txt`); fix every failure, and ask the user if questions arise
   - State in the final report that the browser check (Picker, prohibition block, confidentiality tick, print view, first-page header) is left to the user
   - _Requirements: 12.15_
