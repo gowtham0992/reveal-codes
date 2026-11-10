@@ -74,6 +74,16 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994031
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794274348345
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794274496910
       }
     ],
     "2.1 Add the Statement data fields and the paragraph-range computation": [
@@ -98,6 +108,16 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994076
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794274348884
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794274496844
       }
     ],
     "2.3 Add the court-orders wording to `wording.ts`": [
@@ -105,6 +125,11 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994100
+      },
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794274349385
       }
     ],
     "2.4 Implement the order rules and the render helpers": [
@@ -273,6 +298,13 @@
         "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
         "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
         "timestamp": 1794273994710
+      }
+    ],
+    "1. Group 1: dataset, validation, selection model and persistence": [
+      {
+        "executionId": "bb41bb2d-535b-4f3f-bfdc-c179a555bcf5",
+        "chatSessionId": "sess_0fbc7fae-32fe-4ef6-ae77-2bfcb7731a84",
+        "timestamp": 1794274496934
       }
     ]
   }

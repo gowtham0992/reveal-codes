@@ -1,5 +1,7 @@
-// The only module that holds the fixed wording of the Statement and the Appendix.
-// Every sentence is defined by Requirements 4 and 5; nothing else may be added.
+// The only module that holds the fixed wording of the Statement, the Appendix and the
+// court-orders additions (citing sentence, order sentences, first-page pointer, prohibition line).
+// Every sentence is defined by export-certification Requirements 4 and 5 and by court-orders
+// Requirements 4, 5 and 7; nothing else may be added. No sentence contains an exclamation mark.
 import type { StatementTool } from "./types.js";
 
 export const STATEMENT_TITLE = "AI-Use and Verification Statement";
@@ -79,5 +81,85 @@ export function quoteParagraph(matched: number, mismatched: number, unchecked: n
   return (
     "Quotations attributed to a cited decision were compared with the text of that decision. " +
     `${String(matched)} matched, ${String(mismatched)} did not, ${String(unchecked)} were not checked.`
+  );
+}
+
+// ---- court-orders wording (court-orders Requirements 4, 5.5, 7.3) ----
+
+export const NO_PROGRAM_SENTENCE = "No program was used.";
+export const CONFIDENTIALITY_SENTENCE =
+  "The author certifies that no confidential or business proprietary information was entered into the program.";
+export const ALL_DRAFTERS_SUFFIX = " (all contributors to the drafting)";
+
+export type CitingParts = Readonly<{
+  court: string;
+  title: string;
+  instrument: string;
+  /** Full judge name for a Judge_Entry, else null. */
+  judge: string | null;
+  date: string;
+  sourceUrl: string;
+  /** The caption text when the placement is separate_declaration, else null. */
+  declarationCaption: string | null;
+}>;
+
+/** Paragraph 1. The declaration clause replaces the full stop before "Source:" (design D10). */
+export function citingSentence(p: CitingParts): string {
+  const judge = p.judge === null ? "" : `, Judge ${p.judge}`;
+  const declaration =
+    p.declarationCaption === null
+      ? "."
+      : `, filed as a declaration captioned "${p.declarationCaption}".`;
+  return (
+    `This statement is made to comply with the following instrument of the ${p.court}: ` +
+    `${p.title} (${p.instrument}${judge}, ${p.date})${declaration} Source: ${p.sourceUrl}.`
+  );
+}
+
+export function toolsSentence(tools: readonly StatementTool[]): string {
+  if (tools.length === 0) {
+    return "The generative artificial intelligence program used is not recorded.";
+  }
+  const list = tools.map((t) => (t.model === null ? t.provider : `${t.provider} ${t.model}`));
+  return `The generative artificial intelligence program used was ${list.join("; ")}.`;
+}
+
+/** `ranges` is the text produced by formatRanges; the caller omits the sentence when it is empty. */
+export function portionsSentence(ranges: string): string {
+  return `The text drafted with the program appears at paragraphs ${ranges} of the filing.`;
+}
+
+export function howUsedSentence(runCount: number): string {
+  const noun = runCount === 1 ? "run" : "runs";
+  return (
+    `The program was used to draft text inserted at the author's request in ${String(runCount)} ${noun}; ` +
+    "each prompt is recorded in the run log."
+  );
+}
+
+export function promptRecordsSentence(runCount: number): string {
+  return `Prompt records are retained in the document's run log (${String(runCount)} prompts).`;
+}
+
+export function headerPointer(title: string): string {
+  return `This filing was prepared using generative artificial intelligence. See the ${title} following the filing.`;
+}
+
+export type ProhibitionParts = Readonly<{
+  /** Judge surname for a Judge_Entry, else null. */
+  judgeSurname: string | null;
+  instrument: string;
+  spans: number;
+  /** Text produced by formatRanges; "" when no paragraph holds AI text (design D18). */
+  ranges: string;
+}>;
+
+export function prohibitionLine(p: ProhibitionParts): string {
+  const subject = p.judgeSurname === null ? p.instrument : `Judge ${p.judgeSurname}'s order`;
+  const noun = p.spans === 1 ? "span" : "spans";
+  const where = p.ranges === "" ? "between paragraphs" : `at paragraphs ${p.ranges}`;
+  return (
+    `${subject} prohibits AI-drafted text. ` +
+    `${String(p.spans)} AI-origin ${noun} remain ${where}.`
   );
 }

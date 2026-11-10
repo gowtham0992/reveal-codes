@@ -15,7 +15,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
 
 ## Tasks
 
-- [ ] 1. Group 1: dataset, validation, selection model and persistence
+- [x] 1. Group 1: dataset, validation, selection model and persistence
   - [x] 1.1 Format the dataset and widen the export project settings
     - Parse `data/standing-orders.json`, run `pnpm exec prettier --write data/standing-orders.json`, parse again, and confirm the two values are deeply equal (whitespace only, no fact changes); `pnpm exec prettier --check data` must then pass
     - Change `packages/export/tsconfig.json` as the design specifies: `rootDir` `../..`, `include` `["src", "../../data/standing-orders.json"]`, `types: []`, reference to `../engine`
@@ -44,7 +44,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Leave `store.ts`, `history.ts`, `persist.ts` and the autosave Persisted_Value unchanged
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.9, 3.5, 3.9, 3.10, 6.1_
 
-  - [~] 1.5 Write the Selection_Store and copy tests
+  - [x] 1.5 Write the Selection_Store and copy tests
     - Create `apps/web/test/order-selection.test.ts`: write then read for `null` and every selectable entry with working storage and with write-failing storage; the table of stored values (missing, invalid JSON, other version, non-string id, unknown id, `ndtex-starr-2023` superseded, throwing `getItem`) all reading `null`; the autosave key is unchanged by a selection
     - Create `apps/web/test/order-copy.test.ts`: `optionText` for every selectable entry against a template written in the test; `kindWords` over `ORDER_KINDS`; `appliesWords` over `APPLIES_TO`; `summaryLine` and `quoted`
     - _Requirements: 2.2 to 2.6, 2.9, 3.5, 3.9, 3.10, 9.3_
@@ -56,12 +56,12 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - Create `packages/export/src/ai-paragraphs.ts` with `ParagraphRange`, `aiParagraphRanges` (reads only `document.spans` and `document.text`, overlap test excludes the terminating `\n`, D18) and `formatRanges` (`27`, `12–14` with an en dash, `, ` separator)
     - _Requirements: 4.2, 4.11, 4.21, 4.22, 8.1_
 
-  - [~] 2.2 Write the paragraph-range tests
+  - [x] 2.2 Write the paragraph-range tests
     - Create `packages/export/test/ai-paragraphs.test.ts`: a table of Documents with expected ranges (one paragraph, a span over three paragraphs, adjacent spans, a span on `\n` only, an empty paragraph inside a span, a span ending at the last character) and a `formatRanges` table (`27`, `12–14`, `12–13`, `3, 7–8, 20`, empty)
     - Assert no formatted range contains the word "lines"
     - _Requirements: 4.11, 4.22, 9.12_
 
-  - [~] 2.3 Add the court-orders wording to `wording.ts`
+  - [-] 2.3 Add the court-orders wording to `wording.ts`
     - Add constants `NO_PROGRAM_SENTENCE`, `CONFIDENTIALITY_SENTENCE`, `ALL_DRAFTERS_SUFFIX` and functions `citingSentence` (with the separate-declaration clause replacing the full stop, D10), `toolsSentence` (including the "not recorded" case), `portionsSentence`, `howUsedSentence`, `promptRecordsSentence`, `headerPointer`, `prohibitionLine` (including the `between paragraphs` form, D18)
     - Update the header comment of `wording.ts`; no exclamation marks; if the file would pass 300 lines or a function 40, move the block to `wording-orders.ts` and change the wording scan per D12
     - _Requirements: 4.7, 4.8, 4.9, 4.10, 4.11, 4.12, 4.14, 4.15, 4.16, 4.17, 4.20, 5.5, 7.3_

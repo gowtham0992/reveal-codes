@@ -21,6 +21,7 @@ export { buildDocx } from "./docx.js";
 export { canExport } from "./gate.js";
 export { APPENDIX_TITLE, STATEMENT_TITLE } from "./wording.js";
 export { ORDERS, loadOrders, selectableOrders, orderById, judgeSurname } from "./orders.js";
+export { APPLIES_TO, ORDER_KINDS } from "./orders-types.js";
 export type { OrderGroup } from "./orders.js";
 export type {
   OrderContext,
