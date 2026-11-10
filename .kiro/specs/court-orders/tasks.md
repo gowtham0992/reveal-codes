@@ -123,7 +123,7 @@ All commands run from the repository root. Property tests live in `<module>.prop
     - In `packages/export/src/docx.ts` add `headerOptions(heading)` so that a non-null `firstPageHeading(statement)` adds `titlePage: true` and `headers: { first: new Header(...) }`, and `null` keeps today's options; add nothing to the body paragraphs
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-  - [-] 3.2 Write the DOCX header tests
+  - [x] 3.2 Write the DOCX header tests
     - Create `packages/export/test/docx-orders.test.ts`: with `ndtex-lr-7-2-f` and AI used the unzipped file holds `word/header1.xml`, `w:titlePg` in `word/document.xml`, a first paragraph that is bold, centred and size 24, and the pointer sentence; the body paragraph list from the existing docx text reader equals the one without the heading
     - With AI not used, with another placement, and with `order === null`, there is no `header1.xml` and no `w:titlePg`
     - _Requirements: 7.1 to 7.5, 9.4_
