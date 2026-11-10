@@ -157,9 +157,23 @@ describe("README Sentinel section", () => {
     expect(section).toContain("pnpm sentinel sweep ~/Filings");
   });
 
-  it("has exactly one line with the crew app repo placeholder", () => {
-    expect(countMatches(readme, /<crew app repo>/)).toBe(1);
-    expect(countMatches(section, /<crew app repo>/)).toBe(1);
+  it("has no crew app repo placeholder and one line linking the crew app repository", () => {
+    expect(readme).not.toContain("<crew app repo>");
+    const linked = section
+      .split("\n")
+      .filter(
+        (line) =>
+          line.includes("https://github.com/gowtham0992/reveal-codes-sentinel") &&
+          line.includes("separate repository"),
+      );
+    expect(linked).toHaveLength(1);
+  });
+
+  it("does not contain the two trimmed Court-specific sentences", () => {
+    expect(readme).not.toContain("Long titles in the Picker are cut at 60 characters");
+    expect(readme).not.toContain(
+      'Counts use the right singular or plural ("1 prompt", "3 prompts").',
+    );
   });
 });
 

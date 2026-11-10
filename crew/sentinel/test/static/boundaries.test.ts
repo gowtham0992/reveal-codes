@@ -149,7 +149,7 @@ function weakTestViolations(file: Source): Violation[] {
   });
 }
 
-/** Requirement 12.14: each `// Property N` sits above exactly one fc.assert in its file. */
+/** Requirements 12.14 and 14.9 (three properties, 1, 2 and 3): each `// Property N` sits above exactly one fc.assert in its file. */
 function propertyViolations(file: Source): Violation[] {
   const lines = file.text.split("\n");
   const marks = lines.flatMap((text, i) => {
@@ -306,9 +306,9 @@ describe("sentinel boundaries _Requirements: 1.8, 1.9, 1.10, 1.11, 1.12_", () =>
     ]);
   });
 
-  it("exactly two Property comments, 1 and 2, each above one fc.assert", () => {
+  it("exactly three Property comments, 1, 2 and 3, each above one fc.assert", () => {
     const files = TESTS.filter((f) => f.path.endsWith(".properties.test.ts"));
     expect(format(files.flatMap(propertyViolations))).toEqual([]);
-    expect(allNumbers(files).sort()).toEqual([1, 2]);
+    expect(allNumbers(files).sort()).toEqual([1, 2, 3]);
   });
 });

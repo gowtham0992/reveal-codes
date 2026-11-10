@@ -53,3 +53,22 @@ export const arbSweepReport: fc.Arbitrary<SweepReport> = fc
       )
       .map((files) => ({ sweptAt, mode, files })),
   );
+
+/** One character of a body line: ASCII, the ellipsis mark, or an astral character (two code units). */
+const arbLineChar: fc.Arbitrary<string> = fc.oneof(
+  { weight: 6, arbitrary: fc.constantFrom("a", "b", "c", " ", ".", "e") },
+  { weight: 1, arbitrary: fc.constant("…") },
+  { weight: 2, arbitrary: fc.constantFrom("😀", "𝒳", "𠀀") },
+);
+const arbChars = (maxLength: number): fc.Arbitrary<string> =>
+  fc.array(arbLineChar, { maxLength }).map((cs) => cs.join(""));
+
+/**
+ * Two different single-line strings built from a shared prefix and two tails, so that the
+ * first difference falls both inside and beyond the first 80 code units. The prefix holds up
+ * to 70 characters (up to 140 code units); the tails up to 60 characters each.
+ */
+export const arbLinePair: fc.Arbitrary<{ readonly b: string; readonly a: string }> = fc
+  .tuple(arbChars(70), arbChars(60), arbChars(60))
+  .filter(([, tailB, tailA]) => tailB !== tailA)
+  .map(([prefix, tailB, tailA]) => ({ b: prefix + tailB, a: prefix + tailA }));

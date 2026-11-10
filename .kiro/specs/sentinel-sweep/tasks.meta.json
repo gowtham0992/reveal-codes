@@ -7,6 +7,10 @@
     "3.2 Property 2: sweep is a function of its inputs": {
       "status": "passed",
       "lastRunTimestamp": 1794200776966
+    },
+    "5.2 Property 3: excerpts differ and stay inside their lines": {
+      "status": "passed",
+      "lastRunTimestamp": 1794286482667
     }
   },
   "executionHistory": {
@@ -485,6 +489,16 @@
         "executionId": "5579eccb-5be6-490f-a608-6422fe71dc1e",
         "chatSessionId": "sess_4715634c-a885-41b1-9c00-0c015e3ad93f",
         "timestamp": 1794286286776
+      },
+      {
+        "executionId": "5579eccb-5be6-490f-a608-6422fe71dc1e",
+        "chatSessionId": "sess_4715634c-a885-41b1-9c00-0c015e3ad93f",
+        "timestamp": 1794286401067
+      },
+      {
+        "executionId": "5579eccb-5be6-490f-a608-6422fe71dc1e",
+        "chatSessionId": "sess_4715634c-a885-41b1-9c00-0c015e3ad93f",
+        "timestamp": 1794286490824
       }
     ],
     "5.3 README: Crew app link, Court-specific trim, Sentinel example": [
@@ -492,6 +506,11 @@
         "executionId": "5579eccb-5be6-490f-a608-6422fe71dc1e",
         "chatSessionId": "sess_4715634c-a885-41b1-9c00-0c015e3ad93f",
         "timestamp": 1794286286801
+      },
+      {
+        "executionId": "5579eccb-5be6-490f-a608-6422fe71dc1e",
+        "chatSessionId": "sess_4715634c-a885-41b1-9c00-0c015e3ad93f",
+        "timestamp": 1794286401601
       }
     ],
     "5.4 `docs/KIRO_USAGE.md` row and `BUILD_LOG.md` entry": [

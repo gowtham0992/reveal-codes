@@ -45,7 +45,7 @@ The appendix starts on its own page under the title "Provenance Appendix". It ho
 
 ## Court-specific certification
 
-Some federal courts and judges ask for their own AI statement. The Export dialog has a Picker labelled "Court or judge", above the Issues list. Long titles in the Picker are cut at 60 characters with an ellipsis. Choose a court or judge and the dialog shows a one-line summary of the instrument, its key language and a link to the source. The choice is saved in your browser, and the print view uses it too. The default is no selection, which gives the standard statement. Reveal Codes states what the order says; it does not tell you what the law requires, so read the source before you file.
+Some federal courts and judges ask for their own AI statement. The Export dialog has a Picker labelled "Court or judge", above the Issues list. Choose a court or judge and the dialog shows a one-line summary of the instrument, its key language and a link to the source. The choice is saved in your browser, and the print view uses it too. The default is no selection, which gives the standard statement. Reveal Codes states what the order says; it does not tell you what the law requires, so read the source before you file.
 
 Three examples:
 
@@ -53,7 +53,7 @@ Three examples:
 - E.D. Tex., Judge Love: every filing carries a "Certificate of Generative Artificial Intelligence Usage". The statement takes that title, and the Sentinel recognises it when it reads the file back.
 - S.D. Ohio, Judge Newman: the standing order bars the use of AI in preparing any filing. The dialog shows this as a notice with no override, because it is not a red code. It does not count toward the "Export (n blocking)" label. The notice states the prohibition once, in a single line that counts the AI-origin passages left in the filing and quotes the first, for example "1 AI-origin passage remains: paragraph 2, beginning "…"." The key language of the order appears once, in the summary.
 
-Where an order asks how AI was used, the statement says where. It lists the passages the program drafted: each is a paragraph number plus the first words of the passage, up to five, then a count of any more. Paragraphs are counted from the first line of the caption, skipping blank lines. Counts use the right singular or plural ("1 prompt", "3 prompts").
+Where an order asks how AI was used, the statement says where. It lists the passages the program drafted: each is a paragraph number plus the first words of the passage, up to five, then a count of any more. Paragraphs are counted from the first line of the caption, skipping blank lines.
 
 If the only AI text was drafted by the demo assistant with no provider configured, the statement does not name a model. It says the text came from a recorded demonstration response and that no model was called.
 
@@ -91,7 +91,7 @@ The report is Markdown on stdout. Its second line states the mode, `fixtures` or
 - `REVEAL_CODES_CACHE_DIR`: directory for the lookup cache; the default is `~/.reveal-codes/cache`, shared with the web app.
 - `COURTLISTENER_BASE_URL`: overrides the CourtListener API base URL.
 
-The Kiro Crew app that schedules the Sentinel lives in a separate repository: <crew app repo>.
+The Kiro Crew app that schedules the Sentinel lives in a separate repository: https://github.com/gowtham0992/reveal-codes-sentinel. The app was installed in Kiro Crew 0.12.0 and its nightly job run once over three sample filings on 2026-11-09; the run swept all three and reported the one edited after export.
 
 ## How Kiro built this
 
