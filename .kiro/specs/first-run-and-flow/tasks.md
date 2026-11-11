@@ -141,7 +141,7 @@ Conventions that apply to every task:
     - _Requirements: 10.1, 10.2, 10.3, 10.12, 10.13, 12.16_
 
 - [ ] 5. Page marks (optional)
-  - [~] 5.1 Smoke test for the three API assumptions
+  - [x] 5.1 Smoke test for the three API assumptions
     - Add `apps/web/test/smoke/api-assumptions.dom.test.ts` (or extend the existing smoke file) with three checks against real ProseMirror and TipTap: a meta-only transaction leaves `docText(editor.state.doc)` unchanged; it produces no Provenance_Plugin operation; `Decoration.inline` spanning a paragraph boundary renders.
     - **Stop condition.** If any of the three fails, stop group 5: record the reason in `BUILD_LOG.md` (under the entry written in task 6.2), build no marks, skip 5.2 and 5.3, and continue with group 6. Requirement 11.7 applies.
     - _Requirements: 11.3, 11.7_
