@@ -105,7 +105,7 @@ Conventions that apply to every task:
     - Add an example to the docs test: `product.md` contains each Pane colour of the table and none of `#0000AA`, `#AAAAAA`, `#AA0000`, `#FF55FF`, and principle 7 contains "pale text" and not "grey text".
     - _Requirements: 7.19_
 
-- [ ] 4. Dialogs, assistant and Small_Screen_Page
+- [x] 4. Dialogs, assistant and Small_Screen_Page
   - [x] 4.1 Dialog shell and Export dialog
     - Rewrite `apps/web/src/components/modal.module.css` as in the design (`--overlay`, `width: min(600px, 100vw - 32px)`, padding `24px 28px`, `gap: 16px`, `--control-h: 32px`, title in Libre Caslon 26px/32px with `border-bottom: 3px double var(--ink)`). Remove the `wide` prop from `Modal` and the `dialogWide` class, and remove `wide` at its one call in `export-dialog.tsx`.
     - In `order-copy.ts` add `curlyQuoted`. In `order-picker.tsx` `OrderSummary` call `curlyQuoted(entry.key_language)`; `quoted()` stays for `print-order.tsx`. Update `order-picker.module.css` (`.label` becomes a Small_Label in `var(--muted)`; `.keyLanguage` Libre Caslon 15px/24px with `margin-left: 24px`; the summary line and the `Source` link use the global link colour; remove the `--accent` rules).
@@ -120,7 +120,7 @@ Conventions that apply to every task:
     - Rewrite `assistant-column.module.css` (`--panel` background, `1px solid var(--rule)` right edge, the closed strip unchanged otherwise) and `assistant-panel.module.css` (`--panel`; `.heading` Libre Caslon 20px/26px weight 400 with the 1px bottom rule; `.label` as a Small_Label in `var(--muted)`; `.stream` Libre Caslon 13px/19px; the prompt keeps only layout). In `assistant-panel.tsx` add the `small-label` class to the "Prompt" label and the "Last reply" span.
     - Update `assistant-panel.test.tsx`: both labels keep their text and accessible names; the reply text is in the same element; no wording change. Add CSS assertions for the right rule, the panel background and the 13px/19px reply.
     - _Requirements: 9.1, 9.2, 9.3, 13.10_
-  - [~] 4.4 Small_Screen_Page
+  - [x] 4.4 Small_Screen_Page
     - Rewrite `small-screen-page.module.css` as in the design (`--paper`, `padding: 40px 28px`, the wordmark in the toolbar's style with `border-bottom: 3px double var(--ink)`, sentences in Libre Caslon 18px/29px). `small-screen-page.tsx` does not change: the three sentences, the title and the absence of any link, image, icon or button stay.
     - Update `small-screen.test.tsx`: the three sentences in order, no `a`, `img`, `svg` or `button` in the page, the window title "Reveal Codes"; CSS assertions for the padding, the 3px double rule and the 18px/29px sentences.
     - _Requirements: 9.4, 9.5, 9.6, 9.7, 13.10_

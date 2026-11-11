@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { SMALL_SCREEN_SENTENCES, SmallScreenPage } from "../src/components/small-screen-page";
 import { renderUi } from "./support/render";
 
-describe("SmallScreenPage _Requirements: 10.5, 10.6_", () => {
-  it("shows the wordmark and exactly the three sentences", () => {
+describe("SmallScreenPage _Requirements: 9.4, 9.5, 9.6, 9.7_", () => {
+  it("shows the wordmark and exactly the three sentences, in order", () => {
     const { container } = renderUi(<SmallScreenPage />);
     const paragraphs = [...container.querySelectorAll("p")].map((p) => p.textContent);
     expect(paragraphs).toEqual([
@@ -16,8 +16,14 @@ describe("SmallScreenPage _Requirements: 10.5, 10.6_", () => {
     expect(container.querySelector("main")?.textContent).toContain("Reveal Codes");
   });
 
-  it("has no button, link, image or icon", () => {
+  it("has no button, link, image, icon or input", () => {
     const { container } = renderUi(<SmallScreenPage />);
     expect(container.querySelectorAll("button, a, img, svg, input")).toHaveLength(0);
+  });
+
+  it("sets the window title to Reveal Codes", () => {
+    const { container } = renderUi(<SmallScreenPage />);
+    const title = container.querySelector("title") ?? document.querySelector("title");
+    expect(title?.textContent).toBe("Reveal Codes");
   });
 });
