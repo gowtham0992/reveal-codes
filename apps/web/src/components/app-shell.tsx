@@ -166,10 +166,10 @@ type IssuesSlotProps = Readonly<{
   binding: ReturnType<typeof useEditorBinding>;
   mode: ServerMode;
   verifiedAt: string | null;
-  note: string | null;
+  verify: ReturnType<typeof useVerify>;
 }>;
 
-function IssuesSlot({ doc, store, svc, binding, mode, verifiedAt, note }: IssuesSlotProps) {
+function IssuesSlot({ doc, store, svc, binding, mode, verifiedAt, verify }: IssuesSlotProps) {
   return (
     <IssuesRegion
       document={doc}
@@ -178,12 +178,13 @@ function IssuesSlot({ doc, store, svc, binding, mode, verifiedAt, note }: Issues
       onGo={binding.focusAt}
       demoMode={mode === "fixtures"}
       verifiedAt={verifiedAt}
-      note={note}
+      note={verify.note}
+      verify={verify}
     />
   );
 }
 
-export function AppShell({ services }: AppShellProps) {
+function useShellState(services: AppServices | undefined) {
   const { svc, store, autosave } = useShellParts(services);
   const { cursor, onCaret, getCaret } = useCaretRef();
   const binding = useEditorBinding({ store, now: svc.now, onCaret });
@@ -191,31 +192,43 @@ export function AppShell({ services }: AppShellProps) {
   const { notice, doc, verifiedAt } = useNoticeAndDocument(store);
   const { mode, assistant } = useModeResult(svc.api);
   const slot = useAssistantSlot({ svc, store, info: assistant, getCaret });
+  const onGo = binding.focusAt;
   const { exportGate, actions, verify } = useShellFlows({
     svc,
     store,
     autosave,
     doc,
     notice,
-    onGo: binding.focusAt,
+    onGo,
   });
-  const issues = { doc, store, svc, binding, mode, verifiedAt, note: verify.note };
-  const bottom = { paneControl, doc, cursor, mode, binding };
-  const toolbar = { notice, doc, verify, exportGate, pane: paneControl, actions };
+  return {
+    slot,
+    binding,
+    doc,
+    exportGate,
+    actions,
+    issues: { doc, store, svc, binding, mode, verifiedAt, verify },
+    bottom: { paneControl, doc, cursor, mode, binding },
+    toolbar: { notice, doc, verify, exportGate, pane: paneControl, actions },
+  };
+}
+
+export function AppShell({ services }: AppShellProps) {
+  const s = useShellState(services);
   return (
     <div
       className="app"
-      data-pane={paneControl.open ? "open" : undefined}
-      data-assistant={slot.attr}
+      data-pane={s.bottom.paneControl.open ? "open" : undefined}
+      data-assistant={s.slot.attr}
     >
-      <title>{windowTitle(doc.text)}</title>
-      <ShellToolbar {...toolbar} />
-      {slot.node}
-      <EditorSurface editor={binding.editor} empty={doc.text.length === 0} />
-      <IssuesSlot {...issues} />
-      {exportGate.dialog}
-      {actions.dialog}
-      <ShellBottom {...bottom} />
+      <title>{windowTitle(s.doc.text)}</title>
+      <ShellToolbar {...s.toolbar} />
+      {s.slot.node}
+      <EditorSurface editor={s.binding.editor} empty={s.doc.text.length === 0} />
+      <IssuesSlot {...s.issues} />
+      {s.exportGate.dialog}
+      {s.actions.dialog}
+      <ShellBottom {...s.bottom} />
     </div>
   );
 }

@@ -83,7 +83,8 @@ async function mount(
 
 async function click(name: string): Promise<void> {
   await act(async () => {
-    fireEvent.click(screen.getByRole("button", { name }));
+    const scope = name === "Verify" ? within(screen.getByRole("toolbar")) : screen;
+    fireEvent.click(scope.getByRole("button", { name }));
     await Promise.resolve();
   });
 }

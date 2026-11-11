@@ -48,7 +48,7 @@ async function loadAndVerify(): Promise<void> {
     await Promise.resolve();
   });
   await act(async () => {
-    fireEvent.click(button("Verify"));
+    fireEvent.click(within(screen.getByRole("toolbar")).getByRole("button", { name: "Verify" }));
     await Promise.resolve();
   });
   await waitFor(() => {

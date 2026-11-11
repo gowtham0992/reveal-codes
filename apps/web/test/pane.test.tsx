@@ -41,8 +41,8 @@ describe("Pane structure _Requirements: 12.1, 12.7, 12.8, 12.9_", () => {
     const body = container.querySelector("section > div:nth-child(2)");
     const status = container.querySelector("section > div:nth-child(3)");
     expect(region.firstElementChild?.textContent).toMatch(/^Reveal Codes/);
-    expect(body?.textContent?.toLowerCase()).not.toContain("reveal");
-    expect(status?.textContent?.toLowerCase()).not.toContain("reveal");
+    expect(body?.textContent.toLowerCase()).not.toContain("reveal");
+    expect(status?.textContent.toLowerCase()).not.toContain("reveal");
   });
 
   it("names Code_Items by meaning and hides Text_Items", () => {
@@ -244,7 +244,7 @@ describe("Pane failing class _Requirements: 3.1, 3.2, 3.3, 3.5, 12.14_", () => {
   function withCitation(result: VerificationResult): Document {
     const base = docOf("See Roe v. Wade, 410 U.S. 113 (1973).");
     const cit = base.citations.find((c) => c.kind === "full");
-    if (cit === undefined || cit.kind !== "full") throw new Error("fixture has no citation");
+    if (cit === undefined) throw new Error("fixture has no citation");
     const set = setVerification(base, cit.key, result);
     if (!set.ok) throw new Error("fixture verification rejected");
     return set.value;

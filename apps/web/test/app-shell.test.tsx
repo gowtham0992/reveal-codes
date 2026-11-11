@@ -179,7 +179,7 @@ describe("AppShell Pane wiring _Requirements: 6.7, 13.3, 13.5, 13.6, 14.1, 14.2,
     const app = document.querySelector(".app");
     const origins = [
       screen.getByRole("textbox", { name: "Document" }),
-      screen.getByRole("button", { name: "Verify" }),
+      within(screen.getByRole("toolbar")).getByRole("button", { name: "Verify" }),
       document.body,
     ];
     for (const origin of origins) {
@@ -374,7 +374,7 @@ function citingStorage(): MemoryStorage {
 }
 
 function verifyButton(): HTMLButtonElement {
-  return screen.getByRole("button", { name: /^Verify/ });
+  return within(screen.getByRole("toolbar")).getByRole("button", { name: /^Verify/ });
 }
 
 function result(): HTMLElement {

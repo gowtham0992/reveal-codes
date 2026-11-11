@@ -30,7 +30,9 @@ async function mountDemo(): Promise<ModeApi> {
 }
 
 function button(name: RegExp | string): HTMLButtonElement {
-  const b = screen.getByRole("button", { name });
+  const isVerify = typeof name === "string" ? name === "Verify" : name.source === "^Verify";
+  const scope = isVerify ? within(screen.getByRole("toolbar")) : screen;
+  const b = scope.getByRole("button", { name });
   if (!(b instanceof HTMLButtonElement)) throw new Error("not a button");
   return b;
 }

@@ -2,7 +2,7 @@
 import { createDocument, issues, recordOverride, setQuoteCheck } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
-import { IssuesList, shorten } from "../src/components/issues-list";
+import { IssuesList, issueText, shorten } from "../src/components/issues-list";
 import { IssuesRegion } from "../src/components/issues-region";
 import { createStore } from "../src/store-runtime";
 import { act, fireEvent, renderUi, screen, within } from "./support/render";
@@ -27,6 +27,7 @@ function withMismatch(doc: Document): Document {
 }
 
 const noop = (): void => undefined;
+const VERIFY = { start: noop, disabled: false };
 
 describe("IssuesList _Requirements: 10.17, 18.1, 18.3, 18.4, 18.10, 18.11_", () => {
   it("shows No issues. for a document without issues", () => {
@@ -127,6 +128,7 @@ describe("IssuesRegion _Requirements: 15.7_", () => {
         demoMode
         verifiedAt={null}
         note={null}
+        verify={VERIFY}
       />,
     );
     expect(screen.getByText(/^Demo mode checks only the recorded demo citations/)).not.toBeNull();
@@ -135,7 +137,14 @@ describe("IssuesRegion _Requirements: 15.7_", () => {
 
   it("reads Issues with no blocking issue and Issues — 4 blocking with four citations", () => {
     const store = createStore(() => new Date(ISO));
-    const props = { store, now: () => new Date(ISO), onGo: noop, verifiedAt: null, note: null };
+    const props = {
+      store,
+      now: () => new Date(ISO),
+      onGo: noop,
+      verifiedAt: null,
+      note: null,
+      verify: VERIFY,
+    };
     const view = renderUi(<IssuesRegion {...props} document={build("Plain text.")} />);
     expect(screen.getByRole("heading", { name: "Issues" })).not.toBeNull();
     const four = build(
@@ -144,5 +153,115 @@ describe("IssuesRegion _Requirements: 15.7_", () => {
     view.rerender(<IssuesRegion {...props} document={four} />);
     expect(screen.getByRole("heading", { name: "Issues \u2014 4 blocking" })).not.toBeNull();
     expect(screen.getByRole("complementary", { name: "Issues \u2014 4 blocking" })).not.toBeNull();
+  });
+});
+
+describe("Unchecked_Row _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 12.6_", () => {
+  const FOUR = "A 1 U.S. 1 (1900). B 2 U.S. 2 (1901). C 3 U.S. 3 (1902). D 4 U.S. 4 (1903).";
+
+  it("shows the plural row first with a plain Verify button", () => {
+    renderUi(
+      <IssuesList
+        document={build(FOUR)}
+        collapseUnchecked
+        verify={VERIFY}
+        onGo={noop}
+        onOverride={noop}
+      />,
+    );
+    const rows = screen.getAllByRole("listitem");
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.textContent).toContain("4 citations and quotations have not been checked.");
+    const button = within(rows[0] as HTMLElement).getByRole("button", { name: "Verify" });
+    expect(button.hasAttribute("data-primary")).toBe(false);
+  });
+
+  it("uses the singular text for one item", () => {
+    renderUi(
+      <IssuesList
+        document={build("A 1 U.S. 1 (1900).")}
+        collapseUnchecked
+        verify={VERIFY}
+        onGo={noop}
+        onOverride={noop}
+      />,
+    );
+    expect(screen.getByText("1 citation or quotation has not been checked.")).not.toBeNull();
+  });
+
+  it("puts the row before the individual rows of other issues", () => {
+    const doc = withMismatch(build(TEXT));
+    renderUi(
+      <IssuesList document={doc} collapseUnchecked verify={VERIFY} onGo={noop} onOverride={noop} />,
+    );
+    const rows = screen.getAllByRole("listitem");
+    expect(rows[0]?.textContent).toContain("have not been checked");
+    expect(rows.slice(1).some((r) => r.textContent.includes("QUO ✘"))).toBe(true);
+    expect(rows.some((r) => r.textContent.includes("CIT …"))).toBe(false);
+  });
+
+  it("lists every item individually when not collapsed", () => {
+    renderUi(
+      <IssuesList
+        document={build(FOUR)}
+        collapseUnchecked={false}
+        verify={VERIFY}
+        onGo={noop}
+        onOverride={noop}
+      />,
+    );
+    expect(screen.getAllByRole("listitem")).toHaveLength(4);
+    expect(screen.queryByText(/have not been checked/)).toBeNull();
+  });
+
+  it("calls verify.start once and honours verify.disabled", () => {
+    let calls = 0;
+    const start = (): void => {
+      calls += 1;
+    };
+    const view = renderUi(
+      <IssuesList
+        document={build(FOUR)}
+        collapseUnchecked
+        verify={{ start, disabled: false }}
+        onGo={noop}
+        onOverride={noop}
+      />,
+    );
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Verify" }));
+    });
+    expect(calls).toBe(1);
+    view.rerender(
+      <IssuesList
+        document={build(FOUR)}
+        collapseUnchecked
+        verify={{ start, disabled: true }}
+        onGo={noop}
+        onOverride={noop}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Verify" }).hasAttribute("disabled")).toBe(true);
+  });
+
+  it("shows No issues. and no row at zero unchecked", () => {
+    renderUi(
+      <IssuesList
+        document={build("Plain text.")}
+        collapseUnchecked
+        verify={VERIFY}
+        onGo={noop}
+        onOverride={noop}
+      />,
+    );
+    expect(screen.getByText("No issues.")).not.toBeNull();
+    expect(screen.queryByText(/have not been checked/)).toBeNull();
+  });
+
+  it("issueText shortens like the rows", () => {
+    const doc = build(FOUR);
+    const issue = issues(doc)[0];
+    if (issue === undefined) throw new Error("no issue");
+    expect(issueText(doc, issue)).toBe(shorten(doc.text.slice(issue.start, issue.end)));
   });
 });

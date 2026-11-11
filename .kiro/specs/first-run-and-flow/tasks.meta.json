@@ -159,6 +159,16 @@
         "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
         "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
         "timestamp": 1794358316393
+      },
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794359934689
+      },
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794360192050
       }
     ],
     "3.1 Assistant lines and Reply_Box": [
@@ -257,6 +267,13 @@
         "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
         "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
         "timestamp": 1794359022289
+      }
+    ],
+    "2. Primary button, Verify summary, and collapsed unchecked row": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794360192082
       }
     ]
   }

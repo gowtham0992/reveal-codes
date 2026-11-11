@@ -149,7 +149,7 @@ describe("failing flag in layoutPane _Requirements: 3.4, 3.6, 12.14_", () => {
     const base = docOf('See Roe v. Wade, 410 U.S. 113, 120 (1973) ("the quick brown fox").');
     const cit = base.citations.find((c) => c.kind === "full");
     const q = base.quotes[0];
-    if (cit === undefined || cit.kind !== "full" || q === undefined) throw new Error("fixture");
+    if (cit === undefined || q === undefined) throw new Error("fixture");
     const a = setVerification(base, cit.key, { status: "not_found" });
     if (!a.ok) throw new Error("fixture citation rejected");
     const b = setQuoteCheck(a.value, q.key, { status: "mismatch", prefixLength: 4 });

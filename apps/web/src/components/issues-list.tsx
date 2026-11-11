@@ -29,8 +29,18 @@ function divergenceFor(document: Document, issue: Issue): string | null {
   return divergenceWords(document.text.slice(issue.start, issue.end), rec.result.prefixLength);
 }
 
+/** Issue text shortened to at most 80 characters (Requirement 6, 8). */
+export function issueText(document: Document, issue: Issue): string {
+  return shorten(document.text.slice(issue.start, issue.end));
+}
+
+export type VerifyAction = Readonly<{ start: () => void; disabled: boolean }>;
+
 export type IssuesListProps = Readonly<{
   document: Document;
+  /** While true, unchecked items collapse into one row with a Verify button. */
+  collapseUnchecked?: boolean;
+  verify?: VerifyAction;
   onGo: (offset: number) => void;
   onOverride: (issue: Issue, opener: HTMLElement) => void;
 }>;
@@ -52,7 +62,7 @@ function IssueRow({ document, issue, blocking, reason, onGo, onOverride }: RowPr
         <span className={styles["code"]}>{issue.code}</span>
         <span>{`${blocking ? "blocking" : "overridden"}, ${SEVERITY[issue.code]}`}</span>
       </div>
-      <p className={styles["text"]}>{shorten(document.text.slice(issue.start, issue.end))}</p>
+      <p className={styles["text"]}>{issueText(document, issue)}</p>
       {words === null ? null : <p className={styles["text"]}>{`Diverges at: ${words}`}</p>}
       {reason === undefined ? null : <p className={styles["text"]}>{`Overridden: ${reason}`}</p>}
       <div className={styles["actions"]}>
@@ -79,14 +89,40 @@ function IssueRow({ document, issue, blocking, reason, onGo, onOverride }: RowPr
   );
 }
 
-/** One row per `issues(document)` in Engine order (Requirements 18.1 to 18.4, 18.10). */
-export function IssuesList({ document, onGo, onOverride }: IssuesListProps) {
+export function uncheckedText(n: number): string {
+  return n === 1
+    ? "1 citation or quotation has not been checked."
+    : `${String(n)} citations and quotations have not been checked.`;
+}
+
+function UncheckedRow({ count, verify }: Readonly<{ count: number; verify: VerifyAction }>) {
+  return (
+    <li className={styles["row"]}>
+      <p className={styles["text"]}>{uncheckedText(count)}</p>
+      <div className={styles["actions"]}>
+        <button type="button" onClick={verify.start} disabled={verify.disabled}>
+          Verify
+        </button>
+      </div>
+    </li>
+  );
+}
+
+const NO_VERIFY: VerifyAction = { start: () => undefined, disabled: true };
+
+/** One row per `issues(document)` in Engine order (Requirements 18.1 to 18.4, 18.10); Req 6 collapse. */
+export function IssuesList(props: IssuesListProps) {
+  const { document, onGo, onOverride, collapseUnchecked = false, verify = NO_VERIFY } = props;
   const all = issues(document);
   if (all.length === 0) return <p className={styles["empty"]}>{EMPTY_LINE}</p>;
   const blocking = new Set(blockingIssues(document).map((i) => i.key));
+  const isUnchecked = (i: Issue): boolean => i.code === "CIT …" || i.code === "QUO …";
+  const unchecked = collapseUnchecked ? all.filter(isUnchecked).length : 0;
+  const shown = unchecked > 0 ? all.filter((i) => !isUnchecked(i)) : all;
   return (
     <ul className={styles["list"]}>
-      {all.map((issue) => (
+      {unchecked > 0 ? <UncheckedRow count={unchecked} verify={verify} /> : null}
+      {shown.map((issue) => (
         <IssueRow
           key={issue.key}
           document={document}

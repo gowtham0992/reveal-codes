@@ -54,7 +54,7 @@ Conventions that apply to every task:
     - In `apps/web/test/pane-css.test.ts` compute the contrast ratio with the WCAG relative-luminance formula from colours read out of `pane.module.css`; assert 7.75 for the failing pair with a floor of 7:1, and 5.72 for the header pair, both to two decimals.
     - _Requirements: 3.7, 12.3, 12.11_
 
-- [ ] 2. Primary button, Verify summary, and collapsed unchecked row
+- [x] 2. Primary button, Verify summary, and collapsed unchecked row
   - [x] 2.1 `nextStep`, the Toolbar `step` prop, and the primary style
     - Create `apps/web/src/components/next-step.ts`: `NextStep`, `NextStepInput`, `nextStep` (rules in order: verifying gives `none`; empty gives `load-demo`; `verifiableUnchecked > 0` gives `verify`; otherwise `export`, whatever `blocking` is) and `PRIMARY_LABEL`. Pure, no React.
     - Add `countVerifiableUnchecked(document)` to `apps/web/src/client/verify-flow.ts`: unchecked full citations (`CIT …`) plus unchecked quotations (`QUO …`) whose attributed citation Verify can check or re-check (a full citation of any status, or a short form whose `targetStart` points at a full citation, found as `ownerCluster` does by `citationStart`). A quotation with no attached citation, or attached to a short form with no target, is not counted. The count is 0 when `hasFullRecord(document)` is false.
@@ -84,7 +84,7 @@ Conventions that apply to every task:
     - Update `app-shell.test.tsx`, `issues-shell.test.tsx` and `demo-path.test.tsx`: the summary appears after a run and not before; it disappears on New and Load demo; counts survive a reload while the further line does not; no result text in the Toolbar; the container has `role="status"`.
     - _Requirements: 5.2, 5.4, 5.5, 5.14, 5.15, 5.16, 12.5, 12.14_
 
-  - [~] 2.5 Unchecked_Row in the Issues list
+  - [x] 2.5 Unchecked_Row in the Issues list
     - In `apps/web/src/components/issues-list.tsx` add props `collapseUnchecked` and `verify` (`{ start, disabled }`), export `issueText(document, issue)` (the existing shortening function over `document.text.slice(start, end)`), and render, while `collapseUnchecked` and the unchecked count is above zero, the Unchecked_Row first, then a row for each issue that is not unchecked. The text is `<n> citations and quotations have not been checked.` or `1 citation or quotation has not been checked.`; its button is a plain "Verify" with `onClick={verify.start}` and `disabled={verify.disabled}`, with no `data-primary`. "No issues." still shows only when the full list is empty.
     - In `issues-region.tsx` pass `collapseUnchecked={verifiedAt === null}` and the `useVerify` values. Heading, Blocking_Count and Export label are unchanged; `ExportIssues` stays uncollapsed.
     - Update `issues-list.test.tsx` and `issues-shell.test.tsx` (scope Verify queries to `role="toolbar"` or the Issues region): the row first, plural and singular text, individual rows after a run, the row's Verify making one request through the same handler, the row's button disabled with the Toolbar's, no row at zero, the Export dialog listing every item.

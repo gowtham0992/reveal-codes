@@ -5,6 +5,7 @@ import type { Document, Issue } from "@reveal-codes/engine";
 import { useState } from "react";
 import type { Store } from "../store-runtime";
 import { IssuesList } from "./issues-list";
+import type { VerifyAction } from "./issues-list";
 import styles from "./issues-region.module.css";
 import { OverrideDialog } from "./override-dialog";
 import { VerifyResult } from "./verify-result";
@@ -22,6 +23,8 @@ export type IssuesRegionProps = Readonly<{
   verifiedAt: string | null;
   /** The further line of the last completed Verify run. */
   note: string | null;
+  /** The same start/disabled values the Toolbar uses. */
+  verify: VerifyAction;
 }>;
 
 type Target = Readonly<{ issue: Issue; opener: HTMLElement }>;
@@ -33,7 +36,7 @@ export function issuesHeading(blocking: number): string {
 
 /** The Issues region: Fixtures_Mode line (15.7), the list and the Override_Dialog (Req 18). */
 export function IssuesRegion(props: IssuesRegionProps) {
-  const { document, store, now, onGo, demoMode = false, verifiedAt, note } = props;
+  const { document, store, now, onGo, demoMode = false, verifiedAt, note, verify } = props;
   const [target, setTarget] = useState<Target | null>(null);
   return (
     <aside aria-labelledby="issues-heading" className={styles["issues"]}>
@@ -45,6 +48,8 @@ export function IssuesRegion(props: IssuesRegionProps) {
         {demoMode ? <p className={styles["note"]}>{DEMO_MODE_LINE}</p> : null}
         <IssuesList
           document={document}
+          collapseUnchecked={verifiedAt === null}
+          verify={verify}
           onGo={onGo}
           onOverride={(issue, opener) => {
             setTarget({ issue, opener });

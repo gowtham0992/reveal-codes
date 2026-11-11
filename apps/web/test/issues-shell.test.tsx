@@ -10,7 +10,7 @@ import type { AppServices } from "../src/services";
 import { createManualTimers } from "./support/clock";
 import { createMemoryStorage } from "./support/memory-storage";
 import { modeApi } from "./support/mode-fetch";
-import { act, fireEvent, renderUi, screen } from "./support/render";
+import { act, fireEvent, renderUi, screen, within } from "./support/render";
 
 const ISO = "2026-11-02T12:00:00.000Z";
 const TEXT = "Intro sentence. See Roe v. Wade, 410 U.S. 113 (1973).";
@@ -21,12 +21,14 @@ function stored(): Document {
   return created.value;
 }
 
-async function mount(): Promise<void> {
+type Mounted = Readonly<{ verifyRequests: () => number }>;
+async function mount(verifiedAt: string | null = ISO): Promise<Mounted> {
   const timers = createManualTimers();
   const storage = createMemoryStorage();
-  storage.setItem(AUTOSAVE_KEY, serialise(stored(), [], null));
+  storage.setItem(AUTOSAVE_KEY, serialise(stored(), [], verifiedAt));
+  const mode = modeApi("fixtures");
   const services: AppServices = {
-    api: modeApi("fixtures").api,
+    api: mode.api,
     now: timers.clock.now,
     setTimer: (fn, ms) => timers.setTimeout(fn, ms),
     clearTimer: (h) => {
@@ -40,6 +42,9 @@ async function mount(): Promise<void> {
     renderUi(<AppShell services={services} />);
     await Promise.resolve();
   });
+  return {
+    verifyRequests: () => mode.routes.requests.filter((r) => r.url === "/api/verify").length,
+  };
 }
 
 function editorOf(): Editor {
@@ -97,5 +102,39 @@ describe("Issues region in the shell _Requirements: 14.1, 18.2, 18.5, 18.7_", ()
     });
     expect(notCancelled).toBe(true);
     expect(screen.queryByRole("region", { name: "Reveal Codes" })).toBeNull();
+  });
+});
+
+describe("Unchecked_Row in the shell _Requirements: 6.1, 6.6, 6.7, 6.8, 6.9, 6.10, 12.6_", () => {
+  const issuesRegion = (): HTMLElement => screen.getByRole("complementary", { name: /^Issues/ });
+
+  it("shows the row before any run and hides it after a run", async () => {
+    const m = await mount(null);
+    expect(
+      within(issuesRegion()).getByText("1 citation or quotation has not been checked."),
+    ).not.toBeNull();
+    expect(within(issuesRegion()).queryByRole("button", { name: "Go" })).toBeNull();
+    const verify = within(issuesRegion()).getByRole("button", { name: "Verify" });
+    expect(verify.hasAttribute("data-primary")).toBe(false);
+    await act(async () => {
+      fireEvent.click(verify);
+      await new Promise((r) => setTimeout(r, 50));
+    });
+    expect(m.verifyRequests()).toBe(1);
+    expect(within(issuesRegion()).queryByText(/have not been checked/)).toBeNull();
+  });
+
+  it("disables the row's button together with the Toolbar's", async () => {
+    await mount(null);
+    const toolbar = screen.getByRole("toolbar");
+    const rowButton = within(issuesRegion()).getByRole("button", { name: "Verify" });
+    const barButton = within(toolbar).getByRole("button", { name: "Verify" });
+    expect(rowButton.hasAttribute("disabled")).toBe(barButton.hasAttribute("disabled"));
+  });
+
+  it("lists individual rows once a run has been recorded", async () => {
+    await mount(ISO);
+    expect(within(issuesRegion()).queryByText(/have not been checked/)).toBeNull();
+    expect(within(issuesRegion()).getByRole("button", { name: "Go" })).not.toBeNull();
   });
 });
