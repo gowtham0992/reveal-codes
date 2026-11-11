@@ -144,7 +144,8 @@ I listed the tarballs of the packages to confirm these file names exist (`latin-
 
 | Role | Family | Size / line | Weight | Where set |
 | ---- | ------ | ----------- | ------ | --------- |
-| Controls, labels (body default) | Public Sans | 13px / 16px | 500 | `body` and `button`, `select`, `textarea` in `globals.css` |
+| Controls and labels | Public Sans | 13px / 16px | 500 | `button`, `select`, `textarea` in `globals.css` |
+| Running UI text (body default) | Public Sans | 13px / 18px | 500 | `body` in `globals.css` |
 | Small_Label | Public Sans | 10.5px, uppercase, 0.1em | 700 | global class `.small-label` (font properties only) |
 | Primary button | Public Sans | 13px / 16px | 600 | `button[data-primary="true"]` in `globals.css` |
 | Wordmark | Libre Caslon Text | 15px, uppercase, 0.16em | 400 | `toolbar.module.css`, `small-screen-page.module.css` |
@@ -303,7 +304,7 @@ textarea:focus { padding: 3px; border: 2px solid var(--oxblood); }
 - `.chip { font-family: var(--font-pane); font-size: 12px; line-height: 20px; font-weight: 700; padding: 0 6px; border: 1px solid var(--ink); color: var(--ink); }`. `.chipFail` has `background: var(--fail); color: var(--white); border: 1px solid var(--fail)` (same box, so the two chips align). The chip also marks the failing state by its code text, so severity is never colour alone.
 - `.words { color: var(--oxblood); margin: 4px 0 0; }`; `.text { font-family: var(--font-editor); font-size: 13px; line-height: 19px; margin: 4px 0 0; overflow-wrap: anywhere; }`.
 - The Unchecked_Row is `UncheckedRow` with the Verify button in `.actions` aligned right on its first line (`.lineA` with an empty left side, `justify-content: flex-end`) and the sentence in `.text` below. No chip, no words.
-- Export dialog's own list (`export-issues.tsx`) is not part of Requirement 6. It gets the token restyle only (`--rule-light` dividers, Plex Mono bold code, `--control-h` from the dialog), with no markup change.
+- Export dialog's own list (`export-issues.tsx`) is not part of Requirement 6. It gets the token restyle only (`--rule-light` dividers, Plex Mono bold code), with no markup change, and its list sets `--control-h: 24px` so its row buttons are 24px.
 
 ### Pane
 
@@ -423,7 +424,7 @@ Changes inside the rules:
 - **Weights.** 400, 500, 600, 700, `normal`, `bold`, `inherit`.
 - **Variables.** `VARIABLE_VALUES` is replaced by the Token and geometry list above (so `--toolbar-h` must be `52px`, `--status-h` `26px`).
 - **Controls.** `FOCUS_OUTLINE` becomes `2px solid var(--oxblood)`; the button border check stays; the disabled check requires `--disabled-border`; the primary-rule check expects exactly one rest rule and one hover rule in `globals.css`, with `var(--oxblood)`, `var(--white)`, `var(--ink)` values and no other property than background, border-color, color and font-weight at rest, and background only at hover.
-- **Third-party fonts.** The test reads every `.css` under `app` and `src`, every `@fontsource` stylesheet imported by `layout.tsx` (resolved from `node_modules` by the same specifier), and, when `.next/static/css` exists, the built files. Any `fonts.googleapis.com`, `fonts.gstatic.com`, or `url(`/`@import` naming `http:`/`https:` fails with path and line. The `@fontsource` files are always available after `pnpm install`, so the test does not depend on a build; the built CSS is an extra check, not a skip condition.
+- **Third-party fonts.** The test reads every `.css` under `app` and `src`, every `@fontsource` stylesheet imported by `layout.tsx` (resolved from `node_modules` by the same specifier), and, when `.next/static/css` exists, the built files. Any `fonts.googleapis.com`, `fonts.gstatic.com`, or `url(`/`@import` naming `http:`/`https:` fails with path and line. The `@fontsource` files are always available after `pnpm install`, so the test does not depend on a build; the built CSS is an extra check, not a skip condition. The checkpoint runs the web build before `pnpm test` so the built CSS is present for that check.
 - **Document text.** Every declaration whose selector contains `.ProseMirror` and does not end in `::before` must not set `font-style`, `text-align`, `text-indent` or a `padding` and may set `margin` only to `0`.
 
 ## Correctness Properties
@@ -505,6 +506,10 @@ Non-text: the `#FF8A8A` ring on the pane `#0F2766` is 6.16:1 (3:1 is the non-tex
 | Contrast | `contrast.test.ts` |
 
 The browser walk at the checkpoint covers what jsdom cannot: fonts, pseudo-element line numbers, the block rings, the Sheet rules, and focus outlines.
+
+## Steering edit to product.md
+
+Besides the palette table, principle 7 of `product.md` changes "grey text" to "pale text" (the new Pane has no grey text). No other word of the principle changes.
 
 ## Alternatives considered
 

@@ -66,7 +66,7 @@ Where a value in this spec conflicts with `first-run-and-flow` or `shell-polish`
 **Other earlier specs**
 
 - editor-app Requirement 12, criteria 2, 4 and 6 and Requirement 13, criterion 1 (Pane colours, font size 14px, the CGA palette, the cursor block `#AAAAAA`): look. This spec wins (Requirement 7).
-- The sixteen-colour CGA palette in `product.md` "Pane palette" is replaced by the table of Requirement 7. Principle 7 of `product.md` is not edited.
+- The sixteen-colour CGA palette in `product.md` "Pane palette" is replaced by the table of Requirement 7. Principle 7 of `product.md` gets one stated word change, "grey text" to "pale text", because the new Pane has no grey text (Requirement 7, criterion 19); nothing else in it is edited.
 
 ## Glossary
 
@@ -125,14 +125,14 @@ Where a value in this spec conflicts with `first-run-and-flow` or `shell-polish`
 3. WHEN the Web_App runs, THE Web_App SHALL make no request to a third-party host for a font.
 4. THE Web_App SHALL load only these files: Public Sans weights 500, 600 and 700; Libre Caslon Text weight 400 in roman and in italic; IBM Plex Mono weights 400, 600 and 700; each in the Latin subset only.
 5. THE Web_App SHALL give each family a system fallback stack: Public Sans, then `-apple-system, "Segoe UI", Helvetica, Arial, sans-serif`; Libre Caslon Text, then `Georgia, "Times New Roman", serif`; IBM Plex Mono, then `ui-monospace, Menlo, Consolas, monospace`.
-6. THE Web_App SHALL set controls and labels in Public Sans at 13px, weight 500, line height 16px.
+6. THE Web_App SHALL set controls (buttons, selects, text areas) and labels in Public Sans at 13px, weight 500, line height 16px, and SHALL set all other running UI text that has no stated size in Public Sans at 13px, weight 500, line height 18px.
 7. THE Web_App SHALL set every Small_Label in Public Sans at 10.5px, weight 700, uppercase, with letter spacing 0.1em.
 8. THE Web_App SHALL set region headings (the Issues heading and the Assistant heading) in Libre Caslon Text at 20px with line height 26px and weight 400.
 9. THE Web_App SHALL set Dialog titles in Libre Caslon Text at 26px with line height 32px.
 10. THE Web_App SHALL set page text in Libre Caslon Text at 14px with line height 22px.
 11. THE Web_App SHALL set the Pane body in IBM Plex Mono at 13.5px with line height 20px, codes in weight 600 and Failing_Codes in weight 700, and the Status_Bar in IBM Plex Mono at 12px.
 12. THE print view SHALL keep the fonts, sizes and line height it used before this spec (the system stacks `Georgia, "Times New Roman", serif` and `ui-monospace, Menlo, Consolas, monospace`, 12pt, line height 1.5, 13px).
-13. THE Css_Scan SHALL fail when the built CSS, or any stylesheet of the Web_App, or any imported font stylesheet, contains the host `fonts.googleapis.com` or `fonts.gstatic.com`, or any `url(` or `@import` that names an `http:` or `https:` address.
+13. THE Css_Scan SHALL always scan the stylesheet sources and the imported font stylesheets, and SHALL also scan the built CSS under `.next/static/css` when it exists, and SHALL fail when any of them contains the host `fonts.googleapis.com` or `fonts.gstatic.com`, or any `url(` or `@import` that names an `http:` or `https:` address.
 
 ### Requirement 3: Controls (decision 3)
 
@@ -141,7 +141,7 @@ Where a value in this spec conflicts with `first-run-and-flow` or `shell-polish`
 #### Acceptance Criteria
 
 1. THE Web_App SHALL draw buttons square, with a 1px `--ink` border, a transparent fill and `--ink` text.
-2. THE Web_App SHALL give buttons a height of 30px in the Toolbar, 32px in Dialogs and 24px in Issue_Rows and in the Unchecked_Row.
+2. THE Web_App SHALL give buttons a height of 30px in the Toolbar, 32px in Dialogs, 24px in Issue_Rows, in the Unchecked_Row and in the rows of the Export dialog's issue list, and 30px for every button not listed here.
 3. THE Web_App SHALL draw the primary button (any button with `data-primary="true"`) with an `--oxblood` fill and border, `--white` text and weight 600.
 4. WHILE a button is disabled, THE Web_App SHALL draw it with a dashed 1px `--disabled-border` border, the `--disabled-fill` fill and `--muted` text, with `cursor: not-allowed`; a disabled primary button SHALL use this style and SHALL keep its `data-primary` attribute.
 5. WHILE the pointer is over an enabled button, THE Web_App SHALL change its fill to `--rule`, and the fill of the primary button to `--ink`, with no transition.
@@ -231,7 +231,7 @@ Where a value in this spec conflicts with `first-run-and-flow` or `shell-polish`
 16. THE Pane SHALL keep every code, offset, accessible name and text that `layoutPane` produces: FOR ALL Documents, the concatenated text of the rendered Pane items SHALL equal `render(document, "display").text`, with or without the Failing_Block grouping.
 17. WHEN the user clicks inside a Failing_Block, THE Pane SHALL set the Editor selection to the offset of the item clicked, as before.
 18. THE Pane SHALL draw only Pane_Colours and the `--white`, `--fail`, `--fail-ring` and `--ink` colours, and no colour of the earlier sixteen-colour palette.
-19. THE `product.md` "Pane palette" section SHALL be updated to the colours of this requirement and Requirement 1, criterion 4.
+19. THE `product.md` "Pane palette" section SHALL be updated to the colours of this requirement and Requirement 1, criterion 4, and principle 7 of `product.md` SHALL change the words "grey text" to "pale text" and nothing else in that principle.
 
 ### Requirement 8: Dialogs (decision 8)
 
@@ -245,7 +245,7 @@ Where a value in this spec conflicts with `first-run-and-flow` or `shell-polish`
 4. THE Dialog field labels (Reason, Court or judge) SHALL be Small_Labels in `--muted`.
 5. THE Export dialog SHALL show the quoted sentence of the order in Libre Caslon Text at 15px with line height 24px, indented 24px, between real quotation marks (U+201C and U+201D).
 6. THE real quotation marks of criterion 5 SHALL appear in the Export dialog only; the function `quoted` and the print view SHALL keep the straight marks they use now.
-7. WHILE the Blocking_Count is greater than zero, THE Export dialog SHALL show the blocking line as a Fail_Chip that holds the character ✘, followed by the words of the line in `--fail`, at 14px, weight 600; the words SHALL be the words of first-run-and-flow Requirement 9, criterion 4, and the ✘ SHALL be hidden from assistive technology because the words state the same thing.
+7. WHILE the Blocking_Count is greater than zero, THE Export dialog SHALL show the blocking line as a Fail_Chip that holds the character ✘, followed by the words of the line in `--fail`, at 14px, weight 600; the words SHALL be the words of first-run-and-flow Requirement 9, criterion 4, and the ✘ SHALL be hidden from assistive technology because the words state the same thing. WHILE there is nothing to export, THE Export dialog SHALL show that line as plain text with no chip and no ✘.
 8. THE Export dialog SHALL right-align its buttons with 8px between them.
 9. THE Override dialog SHALL show the text being overridden in Libre Caslon Text.
 10. THE Override dialog SHALL draw Save override as the primary button, and SHALL place it after Cancel, so that it is the last button.
@@ -304,7 +304,7 @@ Where a value in this spec conflicts with `first-run-and-flow` or `shell-polish`
 #### Acceptance Criteria
 
 1. THE Web_App SHALL move no layout region: the grid areas, the order of regions and the columns stay as they are, and only the heights and widths that Requirements 4, 5 and 7 state change.
-2. THE Web_App SHALL change no wording, except the changes that Requirements 7 and 8 state (the Legend without separators, the ✘ chip, the real quotation marks in the Export dialog).
+2. THE Web_App SHALL change no wording, except the changes that Requirements 7 and 8 state (the Legend without separators, the ✘ chip, the real quotation marks in the Export dialog), and the one-word change in principle 7 of `product.md` (Requirement 7, criterion 19).
 3. THE Web_App SHALL change no behaviour.
 4. THE Web_App SHALL not style the Document text with italics, centring or indents.
 5. THE change SHALL modify no file under `packages/engine`, `packages/verifier`, `packages/export`, `packages/courtlistener-mcp` or `crew/sentinel`.
@@ -320,7 +320,7 @@ Where a value in this spec conflicts with `first-run-and-flow` or `shell-polish`
 
 1. THE spec files SHALL be committed with a first line that matches `spec(legal-record-ui): <subject>`, where `<subject>` is non-empty and the whole first line is at most 72 characters, before any task runs.
 2. THE task list SHALL be arranged in five groups in this order: (1) fonts, Tokens, controls and `ui.md`; (2) the Toolbar, the Sheet with line numbers, and the Issues region; (3) the Pane, the Status_Bar and `product.md`; (4) the Dialogs, the assistant, and the Small_Screen_Page; (5) the static scans and Property 1, the README where it describes the look, the `docs/KIRO_USAGE.md` rows, the `BUILD_LOG.md` entry, and the final checkpoint.
-3. THE task list SHALL end with exactly one checkpoint task, positioned last, that runs `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, the clean-checkout web build (`pnpm --filter @reveal-codes/web build`), and `pnpm kiro:check`, and requires each to exit with code 0.
+3. THE task list SHALL end with exactly one checkpoint task, positioned last, that runs `pnpm lint`, `pnpm typecheck`, the clean-checkout web build (`pnpm --filter @reveal-codes/web build`), `pnpm test`, `pnpm test:pbt`, and `pnpm kiro:check`, in that order, so that the built CSS exists when the font scan runs, and requires each to exit with code 0.
 4. THE checkpoint task SHALL not push, because the user walks the app in a browser first.
 5. THE task list SHALL have no checkpoint task other than the last task.
 6. THE `README.md` SHALL be updated where it describes the look, and SHALL leave the screenshot placeholder byte-identical.
