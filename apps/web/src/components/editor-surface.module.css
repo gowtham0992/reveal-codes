@@ -2,7 +2,7 @@
   grid-column: main;
   overflow: auto;
   padding: 0;
-  background: var(--ui-bg);
+  background: var(--desk);
 }
 
 .page {
@@ -11,13 +11,38 @@
   max-width: var(--page-max);
   min-height: 11in;
   margin: 24px auto;
-  padding: 1in;
+  padding: 96px 96px 96px 104px;
   background: var(--paper);
   border: 1px solid var(--rule);
   color: var(--ink);
   font-family: var(--font-editor);
-  font-size: var(--size-editor);
-  line-height: var(--line-editor);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+/* Double margin rule: x = 74px and 77px from the inside of the border. */
+.page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 74px;
+  width: 4px;
+  border-left: 1px solid var(--margin-rule);
+  border-right: 1px solid var(--margin-rule);
+  pointer-events: none;
+}
+
+/* Single margin rule, 72px from the right edge. */
+.page::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 72px;
+  width: 0;
+  border-left: 1px solid var(--rule-light);
+  pointer-events: none;
 }
 
 .content {
@@ -25,25 +50,46 @@
 }
 
 .content :global(.ProseMirror) {
+  counter-reset: line;
   min-height: 24em;
   white-space: pre-wrap;
   word-wrap: break-word;
 }
 
 .content :global(.ProseMirror) p {
+  position: relative;
   margin: 0;
+  counter-increment: line;
+}
+
+.content :global(.ProseMirror) p::before {
+  content: counter(line);
+  content: counter(line) / "";
+  position: absolute;
+  top: 0;
+  left: -104px;
+  width: 62px;
+  text-align: right;
+  user-select: none;
+  pointer-events: none;
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  line-height: 22px;
+  font-weight: 500;
 }
 
 .content :global(.ProseMirror) [data-issue] {
-  text-decoration: underline dotted var(--ink);
+  text-decoration: underline dotted var(--fail);
   text-decoration-thickness: 1px;
 }
 
 .placeholder {
   position: absolute;
-  top: 1in;
-  left: 1in;
-  right: 1in;
-  color: var(--rule);
+  top: 96px;
+  left: 104px;
+  right: 96px;
+  color: var(--muted);
+  font-style: italic;
   pointer-events: none;
 }
