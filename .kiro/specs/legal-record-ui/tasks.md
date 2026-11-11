@@ -137,7 +137,7 @@ Conventions that apply to every task:
     - In `apps/web/test/static/inventory.test.ts` change the property inventory to eight (`["1","1","1","1","2","3","4","5"]`), name `css-tokens.properties.test.ts`, and change the test title to "eight properties". The "exactly one `fc.assert` per file with `{ numRuns: runs() }`" and "describe title ends with `_Requirements: ..._`" checks need no change.
     - Keep the planted-violation examples in `css-colours.test.ts` (stray hex, stray `rgba`, named colour, Pane colour outside the list, Token with the wrong value).
     - _Requirements: 10.13_
-  - [~] 5.3 Contrast record test
+  - [x] 5.3 Contrast record test
     - Create `apps/web/test/contrast.test.ts`: read the Token_Sheet and the Pane stylesheets through `parseCss`, compute the WCAG ratio for every pair of the design's contrast table, and assert each text and code pair is at least 4.5 and each Failing_Code pair (`--white` on `--fail`) at least 7. Assert the ring `#FF8A8A` on `#0F2766` is at least 3. Assert the pair list covers every text colour used (every class in `pane.module.css` with a `color` and every `color` declaration outside the Pane resolves to a Token in the table). Assert the measured values equal the design's table to two decimals so the record cannot drift.
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
   - [~] 5.4 README, KIRO_USAGE rows, BUILD_LOG entry
