@@ -56,6 +56,13 @@
   word-wrap: break-word;
 }
 
+/* The caret is the focus indicator of an editing surface; an outline round the column reads as two more margin rules. */
+.content :global(.ProseMirror):focus {
+  outline: none;
+}
+.content :global(.ProseMirror):focus-visible {
+  outline: none;
+}
 .content :global(.ProseMirror) p {
   position: relative;
   margin: 0;

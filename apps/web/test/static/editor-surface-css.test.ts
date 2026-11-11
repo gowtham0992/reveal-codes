@@ -30,6 +30,21 @@ function documentTextViolations(all: readonly CssDeclaration[]): string[] {
     });
 }
 
+describe("static: no outline on the Editor content element _Requirements: focus_", () => {
+  it("removes the outline from the content element when focused, and from no other element here", () => {
+    expect(valuesOf(`${SELECTOR_PM}:focus`, "outline")).toEqual(["none"]);
+    expect(valuesOf(`${SELECTOR_PM}:focus-visible`, "outline")).toEqual(["none"]);
+    const others = decls.filter((d) => d.prop === "outline" && !d.selector.includes(SELECTOR_PM));
+    expect(others).toEqual([]);
+  });
+  it("leaves the global focus outline for every control", () => {
+    const globals = readSources(["app"], /globals\.css$/)[0];
+    const rule = parseCss(globals?.text ?? "").declarations.filter(
+      (d) => norm(d.selector) === ":focus-visible" && d.prop === "outline",
+    );
+    expect(rule.map((d) => norm(d.value))).toEqual(["2px solid var(--oxblood)"]);
+  });
+});
 describe("static: Sheet stylesheet _Requirements: 5.2, 5.4, 5.5, 5.8, 5.10, 5.11, 13.10_", () => {
   it("finds the stylesheet", () => {
     expect(sheet).toBeDefined();

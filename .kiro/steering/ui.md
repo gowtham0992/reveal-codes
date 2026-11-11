@@ -68,6 +68,7 @@ Sizes and line heights:
 - Disabled: dashed 1px `--disabled-border`, `--disabled-fill` fill, `--muted` text, `cursor: not-allowed`. A disabled primary keeps its `data-primary`.
 - Hover is a fill change only: `--rule`, and `--ink` for the primary. No transition.
 - Focus is a 2px `--oxblood` outline with a 2px offset on every focusable control.
+- The Editor's content element is an editing surface, not a control: it draws no outline, and the caret is its focus indicator.
 - Links are `--oxblood`.
 - Selects are 34px high with a 1px `--ink` border and a `--white` fill.
 - Text areas have a 1px `--ink` border and a 2px `--oxblood` border while focused, with no layout shift.

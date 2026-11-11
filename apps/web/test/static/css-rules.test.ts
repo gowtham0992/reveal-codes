@@ -40,6 +40,8 @@ const VARIABLE_VALUES: Readonly<Record<string, string>> = {
   "--control-h": "30px",
 };
 const FOCUS_OUTLINE = /^2px solid var\(--oxblood\)$/;
+/** The one place a focus outline is removed: the Editor's content element, whose caret is the indicator. */
+const EDITOR_CONTENT_FOCUS = /^\.content :global\(\.ProseMirror\):focus(?:-visible)?$/;
 
 const norm = (v: string): string =>
   v
@@ -62,7 +64,8 @@ function bannedViolations(path: string, css: ReturnType<typeof parseCss>): Viola
       found.push(at(path, d, `${d.prop} is not allowed`));
     if (/gradient\s*\(|drop-shadow/i.test(d.value))
       found.push(at(path, d, "gradient or shadow value"));
-    if (/^outline(?:-style)?$/.test(d.prop) && /^(?:none|0)\b/.test(d.value.trim())) {
+    const outlineOff = /^outline(?:-style)?$/.test(d.prop) && /^(?:none|0)\b/.test(d.value.trim());
+    if (outlineOff && !EDITOR_CONTENT_FOCUS.test(d.selector.trim())) {
       found.push(at(path, d, "outline removed"));
     }
   }
@@ -124,8 +127,9 @@ function controlViolations(path: string, decls: CssDeclaration[]): Violation[] {
     if (sel.includes(":hover") && !hoverOk) {
       found.push(at(path, d, "hover may change only the background"));
     }
+    const editorContent = EDITOR_CONTENT_FOCUS.test(sel) && value === "none";
     if (sel.includes(":focus") && d.prop === "outline" && !FOCUS_OUTLINE.test(value)) {
-      found.push(at(path, d, "focus outline must be 2px solid oxblood"));
+      if (!editorContent) found.push(at(path, d, "focus outline must be 2px solid oxblood"));
     }
     if (
       sel === "button" &&
@@ -388,6 +392,23 @@ describe("static: stylesheet self-test (planted violations)", () => {
     expect(ui(".a:focus-visible {\n  outline: 2px solid var(--oxblood);\n}\n")).toEqual([]);
   });
 
+  it("allows no outline on the Editor content element and nowhere else", () => {
+    const editor = ".content :global(.ProseMirror):focus-visible {\n  outline: none;\n}\n";
+    expect(ui(editor)).toEqual([]);
+    const elsewhere = [
+      editor.replace(".content :global(.ProseMirror)", ".field"),
+      "button:focus-visible {\n  outline: none;\n}\n",
+    ];
+    for (const text of elsewhere) {
+      expect(ui(text)).toContain("src/components/x.module.css:2 outline removed");
+      expect(ui(text)).toContain(
+        "src/components/x.module.css:2 focus outline must be 2px solid oxblood",
+      );
+    }
+    expect(ui(editor.replace("none", "1px solid var(--ink)"))).toEqual([
+      "src/components/x.module.css:2 focus outline must be 2px solid oxblood",
+    ]);
+  });
   it("allows color on the primary hover selector only", () => {
     const primary =
       'button[data-primary="true"]:hover:not(:disabled) {\n  color: var(--white);\n}\n';
