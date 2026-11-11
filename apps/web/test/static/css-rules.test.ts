@@ -40,8 +40,11 @@ const VARIABLE_VALUES: Readonly<Record<string, string>> = {
   "--control-h": "30px",
 };
 const FOCUS_OUTLINE = /^2px solid var\(--oxblood\)$/;
-/** The one place a focus outline is removed: the Editor's content element, whose caret is the indicator. */
-const EDITOR_CONTENT_FOCUS = /^\.content :global\(\.ProseMirror\):focus(?:-visible)?$/;
+/**
+ * The two places a focus outline is removed: the Editor's content element, whose caret is the
+ * indicator, and a text area, whose 2px oxblood border is (one ring, not border and outline).
+ */
+const EDITOR_CONTENT_FOCUS = /^(?:\.content :global\(\.ProseMirror\)|textarea):focus(?:-visible)?$/;
 
 const norm = (v: string): string =>
   v
@@ -408,6 +411,15 @@ describe("static: stylesheet self-test (planted violations)", () => {
     expect(ui(editor.replace("none", "1px solid var(--ink)"))).toEqual([
       "src/components/x.module.css:2 focus outline must be 2px solid oxblood",
     ]);
+  });
+  it("allows no outline on a focused text area, which keeps its border", () => {
+    expect(
+      ui("textarea:focus {\n  border: 2px solid var(--oxblood);\n  outline: none;\n}\n"),
+    ).toEqual([]);
+    expect(ui("textarea:focus-visible {\n  outline: none;\n}\n")).toEqual([]);
+    expect(ui("input:focus {\n  outline: none;\n}\n")).toContain(
+      "src/components/x.module.css:2 outline removed",
+    );
   });
   it("allows color on the primary hover selector only", () => {
     const primary =

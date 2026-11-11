@@ -71,7 +71,7 @@ Sizes and line heights:
 - The Editor's content element is an editing surface, not a control: it draws no outline, and the caret is its focus indicator.
 - Links are `--oxblood`.
 - Selects are 34px high with a 1px `--ink` border and a `--white` fill.
-- Text areas have a 1px `--ink` border and a 2px `--oxblood` border while focused, with no layout shift.
+- Text areas have a 1px `--ink` border and a 2px `--oxblood` border while focused, with no layout shift and no outline: the border is the one focus ring.
 - Control rules live in `globals.css` and the shared Modal styles. Component stylesheets set only heights.
 
 ## Layout

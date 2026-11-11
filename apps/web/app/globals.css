@@ -124,6 +124,7 @@ textarea {
 textarea:focus {
   padding: 3px;
   border: 2px solid var(--oxblood);
+  outline: none;
 }
 
 .small-label {
