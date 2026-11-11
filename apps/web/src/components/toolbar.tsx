@@ -1,3 +1,4 @@
+import { Mark } from "./mark";
 import styles from "./toolbar.module.css";
 import type { NextStep } from "./next-step";
 
@@ -19,6 +20,15 @@ export type ToolbarProps = Readonly<{
   onTogglePane?: () => void;
   onExport?: () => void;
 }>;
+
+function Wordmark() {
+  return (
+    <span className={styles["wordmark"]}>
+      <Mark />
+      Reveal Codes
+    </span>
+  );
+}
 
 export function exportLabel(blocking: number): string {
   return blocking > 0 ? `Export (${String(blocking)} blocking)` : "Export";
@@ -43,7 +53,7 @@ function ExportButton(props: ToolbarProps) {
 export function Toolbar(props: ToolbarProps) {
   return (
     <div role="toolbar" aria-label="Document actions" className={styles["toolbar"]}>
-      <span className={styles["wordmark"]}>Reveal Codes</span>
+      <Wordmark />
       <div role="group" className={styles["group"]}>
         <button type="button" onClick={props.onNew}>
           New

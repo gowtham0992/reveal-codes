@@ -21,9 +21,12 @@ describe("SmallScreenPage _Requirements: 9.4, 9.5, 9.6, 9.7_", () => {
     expect(container.querySelector("main")?.textContent).toContain("Reveal Codes");
   });
 
-  it("has no button, link, image, icon or input", () => {
+  it("has no button, link, icon or input, and no picture but the hidden mark", () => {
     const { container } = renderUi(<SmallScreenPage />);
-    expect(container.querySelectorAll("button, a, img, svg, input")).toHaveLength(0);
+    expect(container.querySelectorAll("button, a, svg, input")).toHaveLength(0);
+    const pictures = [...container.querySelectorAll("img")];
+    expect(pictures.map((i) => i.getAttribute("src"))).toEqual(["/icon.svg"]);
+    expect(pictures[0]?.getAttribute("aria-hidden")).toBe("true");
   });
 
   it("sets the window title to Reveal Codes", () => {
@@ -59,7 +62,8 @@ describe("SmallScreenPage links", () => {
     expect(lastParagraph?.compareDocumentPosition(anchors[0] as Node)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     );
-    expect(main?.querySelectorAll("button, img, svg, input")).toHaveLength(0);
+    expect(main?.querySelectorAll("button, svg, input")).toHaveLength(0);
+    expect(main?.querySelectorAll("img")).toHaveLength(1);
   });
   it("shows only the link whose address is set", () => {
     const only = renderUi(<SmallScreenPage links={{ video: null, repo: REPO }} />);

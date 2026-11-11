@@ -511,11 +511,13 @@ function narrowFixture(width: number, storage: MemoryStorage = storageWithPane(f
 }
 
 describe("AppShell small screen _Requirements: 10.4, 10.5, 10.6, 10.8, 10.9, 10.10, 12.9_", () => {
-  it("shows the page with three sentences and no button, link or image at 799", async () => {
+  it("shows the page with three sentences and no button, link or icon, only the hidden mark, at 799", async () => {
     await mount(narrowFixture(799));
     expect(document.querySelector(".app")).toBeNull();
     expect(document.querySelectorAll("main p")).toHaveLength(3);
-    expect(document.querySelectorAll("button, a, img")).toHaveLength(0);
+    expect(document.querySelectorAll("button, a, svg")).toHaveLength(0);
+    const pictures = [...document.querySelectorAll("img")];
+    expect(pictures.map((i) => i.getAttribute("aria-hidden"))).toEqual(["true"]);
     expect(titleElement()).toBe("Reveal Codes");
   });
 

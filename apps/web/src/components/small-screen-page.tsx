@@ -1,5 +1,6 @@
 import { NO_LINKS } from "../public-links";
 import type { PublicLinks } from "../public-links";
+import { Mark } from "./mark";
 import styles from "./small-screen-page.module.css";
 
 export const VIDEO_LINK_TEXT = "Watch the two-minute demo";
@@ -24,7 +25,10 @@ export function SmallScreenPage({ links = NO_LINKS }: Readonly<{ links?: PublicL
   return (
     <main className={styles["page"]}>
       <title>Reveal Codes</title>
-      <div className={styles["wordmark"]}>Reveal Codes</div>
+      <div className={styles["wordmark"]}>
+        <Mark />
+        Reveal Codes
+      </div>
       {SMALL_SCREEN_SENTENCES.map((sentence) => (
         <p key={sentence}>{sentence}</p>
       ))}

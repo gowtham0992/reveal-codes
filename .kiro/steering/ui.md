@@ -15,7 +15,7 @@ The app should look like a page of a court record, not like a generated web app.
 - No animation and no transition.
 - No shadows, no gradients, no rounded corners.
 - Severity is never shown by colour alone. A word or a code always says the same thing.
-- The favicon (`apps/web/app/icon.svg`, the letters "RC") is the only place where letters serve as a mark. It is outside the Token rules and does not change.
+- The mark (`apps/web/app/icon.svg`, copied byte for byte from `docs/images/mark.svg`: the page above, the codes pane below, a failing code between brackets) is the only picture. It may appear in three places: the favicon, the lockup beside the wordmark in the Toolbar and on the small-screen page (24px, 10px before the wordmark, `aria-hidden`), and the README. It is outside the Token rules and does not change. The rule against icons stays: no control, label or message carries one.
 - Outside the Pane, a colour is written only as `var(--token)`. A colour literal appears in `globals.css` only on the declaration of the Token that has that value.
 
 ## Tokens
