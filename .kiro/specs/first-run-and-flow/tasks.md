@@ -101,7 +101,7 @@ Conventions that apply to every task:
     - Update `assistant-panel.test.tsx` and `use-assistant.test.tsx`: both lines; the position line updating with the caret and matching the Status_Line; no Reply_Box before the first run; the label "Last reply" as the accessible name; text kept after an inserting run; "Inserted at Ln `l` as run r1" with `l` the line of the first inserted character for the caret at a paragraph start, mid-paragraph and at the end of the text; stopped run with partial text keeps that text and shows "Stopped. Partial reply inserted at Ln `l` as run `id`" and no "Inserted at" line; stopped run with nothing inserted shows neither line and empty text, with no Reply_Box when it is the first run and an empty box (no earlier text) when it is a later run; no line after a failed, empty or rejected run; both lines removed when a new run starts.
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 7.10, 7.11, 7.12, 7.13, 7.14, 7.15, 12.7, 12.14_
 
-  - [-] 3.2 Override dialog shows the item being overridden
+  - [x] 3.2 Override dialog shows the item being overridden
     - In `apps/web/src/components/modal.tsx` add the prop `describedBy` and set `aria-describedby` on the dialog element.
     - In `apps/web/src/components/override-dialog.tsx` and `.module.css` add the prop `issueText`; render it directly under the title and above the printed-in-certification statement, both inside an element whose id is the `describedBy` target. Reason field, buttons, focus rules and error display do not change.
     - Pass `issueText(document, issue)` from `issues-region.tsx` and from the Export dialog's `OverrideTarget` in `export-dialog.tsx`.
