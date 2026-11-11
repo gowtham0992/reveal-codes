@@ -392,3 +392,5 @@ Seven small fixes in `apps/web` (plus CI, README and `.env.example`), made witho
 - `Toolbar` grew past the 40-line function limit when the Export button gained `disabled`; the button moved into its own component.
 - The first draft of the legend test edit left a stray call (`/failing/.test(...)(e.className)`), which the type check and a test run caught.
 - The inventory test counted exactly six properties and the docs test required `.env.example` to equal the variables `deps.ts` reads; both now account for the limiter property and the two AWS key names the SDK reads.
+## 2026-11-10 assistant plain prose
+- A live model began its reply with a Markdown heading ("# Request to Deny Motion to Dismiss") and the editor inserted it as literal text; the system prompt in `llm.ts` now asks for plain prose only, with no Markdown, headings, lists, emphasis marks or title line, beginning directly with the paragraph. The prompt is a request, not a guarantee; nothing strips Markdown from a reply.

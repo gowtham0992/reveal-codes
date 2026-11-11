@@ -143,6 +143,12 @@ describe("context limit and system prompt _Requirements: 22.6, 22.7_", () => {
     expect(SYSTEM_PROMPT).toMatch(/not invent citations/);
   });
 
+  it("asks for plain prose with no Markdown, headings, lists, emphasis marks or title line", () => {
+    expect(SYSTEM_PROMPT).toMatch(/plain prose only/);
+    expect(SYSTEM_PROMPT).toMatch(/no Markdown, no headings, no bullet or numbered lists/);
+    expect(SYSTEM_PROMPT).toMatch(/no asterisks or underscores for emphasis, and no title line/);
+    expect(SYSTEM_PROMPT).toMatch(/Begin directly with the paragraph/);
+  });
   it("sends an adapter only the system prompt, the prompt and the limited paragraph", async () => {
     const seen: AdapterInput[] = [];
     const streamText: StreamTextFn = () => ({ textStream: oneChunk("unused") });

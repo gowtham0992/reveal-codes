@@ -48,6 +48,8 @@ export const SYSTEM_PROMPT = [
   "Do not invent citations: never cite a case, statute or rule unless the user's text gives it.",
   "If authority is needed, write a bracketed note such as [citation needed] instead.",
   "Do not give legal advice and do not state what the law is.",
+  "Write plain prose only: no Markdown, no headings, no bullet or numbered lists, no asterisks or underscores for emphasis, and no title line.",
+  "Begin directly with the paragraph.",
 ].join(" ");
 
 const NO_PROVIDERS: AssistantConfig = { bedrock: null, anthropic: null };
