@@ -25,8 +25,10 @@ import { useDocumentActions } from "./use-document-actions";
 import { composeStatus, positionText, usePaneControl } from "./use-pane";
 import { lnPos } from "../pane/layout";
 import { Pane } from "../pane/pane";
+import { NO_LINKS } from "../public-links";
+import type { PublicLinks } from "../public-links";
 
-export type AppShellProps = Readonly<{ services?: AppServices }>;
+export type AppShellProps = Readonly<{ services?: AppServices; links?: PublicLinks }>;
 
 function useStoreSlice<T>(store: Store, select: (state: ReturnType<Store["getState"]>) => T): T {
   return useSyncExternalStore(
@@ -193,12 +195,12 @@ function Shell({ svc }: Readonly<{ svc: AppServices }>) {
 }
 
 /** The thin root: the Small_Screen_Page below NARROW_WIDTH, the Shell otherwise. */
-export function AppShell({ services }: AppShellProps) {
+export function AppShell({ services, links = NO_LINKS }: AppShellProps) {
   const [svc] = useState<AppServices>(() => services ?? defaultServices());
   const width = useSyncExternalStore(
     svc.viewport.subscribe,
     svc.viewport.width,
     () => SHELL_MIN_WIDTH,
   );
-  return width < NARROW_WIDTH ? <SmallScreenPage /> : <Shell svc={svc} />;
+  return width < NARROW_WIDTH ? <SmallScreenPage links={links} /> : <Shell svc={svc} />;
 }

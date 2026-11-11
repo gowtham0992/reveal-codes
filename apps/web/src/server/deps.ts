@@ -7,6 +7,8 @@ import {
   createMemoryCacheStore,
 } from "@reveal-codes/verifier";
 import type { Deps, FetchLike } from "@reveal-codes/verifier";
+import { parsePublicLinks } from "../public-links";
+import type { PublicLinks } from "../public-links";
 
 // This module is the only reader of process.env in apps/web (Req 15.1).
 export type ServerEnv = Readonly<Record<string, string | undefined>>;
@@ -134,4 +136,14 @@ export function getServerContext(): ServerContext {
   const context: ServerContext = { config, deps: buildServerDeps(config, io) };
   holder[CONTEXT_KEY] = context;
   return context;
+}
+
+/** Pure: `NEXT_PUBLIC_VIDEO_URL` and `NEXT_PUBLIC_REPO_URL`, each null unless set to an http(s) address. */
+export function readPublicLinks(env: ServerEnv): PublicLinks {
+  return parsePublicLinks(env["NEXT_PUBLIC_VIDEO_URL"], env["NEXT_PUBLIC_REPO_URL"]);
+}
+
+/** The small-screen page links, read where the page is built (a server component), never in the browser. */
+export function getPublicLinks(): PublicLinks {
+  return readPublicLinks(process.env);
 }
