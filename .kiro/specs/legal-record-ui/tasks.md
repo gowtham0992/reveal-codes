@@ -125,7 +125,7 @@ Conventions that apply to every task:
     - Update `small-screen.test.tsx`: the three sentences in order, no `a`, `img`, `svg` or `button` in the page, the window title "Reveal Codes"; CSS assertions for the padding, the 3px double rule and the 18px/29px sentences.
     - _Requirements: 9.4, 9.5, 9.6, 9.7, 13.10_
 
-- [ ] 5. Scan clean-up, Property 1, contrast, documents and checkpoint
+- [x] 5. Scan clean-up, Property 1, contrast, documents and checkpoint
   - [x] 5.1 Remove the temporary aliases and finish the control scan
     - Delete the temporary aliases from `globals.css` and the `LEGACY_ALIASES` allowance and the `var(--size-*)` allowance from the scan. Fix any stylesheet that still uses them (the scan names the file and line). Confirm the variable list in the scan is exactly the Token_Sheet of the design.
     - Add to `css-rules.test.ts` the Document-text rule if task 2.2 put it elsewhere (one place only), and assert the Shell width rules of first-run-and-flow Requirement 10 still hold (one width media query, the 799px hide rule).
@@ -145,7 +145,7 @@ Conventions that apply to every task:
     - `docs/KIRO_USAGE.md`: confirm the row for this spec (added with the spec commit) lists `.config.kiro`, `requirements.md`, `design.md`, `tasks.md` and `tasks.meta.json`; add one row for the `ui.md` edit and one for the `product.md` edit, each stating what changed in one sentence. Run `pnpm kiro:check`.
     - `BUILD_LOG.md`: append one dated entry (use `date +%F`) under the existing format: what the app looked like before and after in a few sentences, what Kiro got wrong and how it was fixed (from the task completion notes) or "No Kiro errors", any requirement found unbuildable, and that request limits, the size cap, the small-screen links and the Sentinel title fix were split into later specs. Do not edit existing entries.
     - _Requirements: 13.6, 13.7, 13.8_
-  - [~] 5.5 Checkpoint
+  - [x] 5.5 Checkpoint
     - Run, from the repository root, in this order: `pnpm lint`, `pnpm typecheck`, `pnpm --filter @reveal-codes/web build` (the clean-checkout build: `tsc -b` of engine, verifier and export, then `next build --webpack`; it runs before the tests so the font scan can read `.next/static/css`), `pnpm test`, `pnpm test:pbt`, and `pnpm kiro:check`. Each must exit with code 0. Report each exit code and the test counts. Fix failures in the task that caused them; do not weaken a scan or a test.
     - Run `git status` and confirm no file under `packages/`, `crew/sentinel`, `apps/web/app/api` or `apps/web/src/server` changed and that `.env.example` is unchanged.
     - Do not push. Tell the user the app is ready to walk in a browser, and list what only a browser can show: the three fonts loading from the app's own origin (no third-party request in the network panel), the line numbers in the margin (blank lines numbered, wrapped rows without a number), the double and single margin rules, the Failing_Block rings in the Pane and the Legend, the Issue_Row chips, the 52px Toolbar and 26px status bar, focus outlines, and the Export and Override dialogs.
