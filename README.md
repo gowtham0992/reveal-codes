@@ -17,6 +17,16 @@ The editor opens at http://localhost:3000. Copy `.env.example` to `.env` to set 
 
 The web app runs on webpack (`next dev --webpack`, `next build --webpack`), not Turbopack. The Engine imports its sibling files with `.js` specifiers that name `.ts` files. Webpack maps them with `resolve.extensionAlias`; Turbopack in Next 16.4.5 fails to resolve them with "Module not found". Cold starts and rebuilds are slower than the Next default.
 
+### Hosting
+
+The app directory is `apps/web`; build it with `pnpm --filter @reveal-codes/web build`. Variables by mode:
+
+- Demo: none.
+- Live citations: `COURTLISTENER_TOKEN`, and `REVEAL_CODES_CACHE_DIR` pointing at a writable temporary directory.
+- Live assistant on Bedrock: `AWS_REGION`, `BEDROCK_MODEL_ID`, and either `BEDROCK_ROLE_ARN` (a role assumed through the host's OIDC token) or the platform's own credentials.
+
+The role or user should be allowed only `bedrock:InvokeModel` and `bedrock:InvokeModelWithResponseStream` on the one model. Assistant replies are capped at 1,200 output tokens, and `/api/assistant` allows 10 requests per client address per 10 minutes (in memory, per server instance, a courtesy limit and not a guarantee). Set secrets in the host's settings; never commit them.
+
 ## Demo path
 
 No account and no token are needed.
