@@ -4,6 +4,7 @@ import type { Document } from "@reveal-codes/engine";
 import { itemIndexAtOffset, layoutPane, statusText } from "./layout";
 import type { PaneItem } from "./layout";
 import { cls, codeClass } from "./code-class";
+import { PaneHeader } from "./pane-header";
 
 export type PaneProps = Readonly<{
   document: Document;
@@ -116,6 +117,7 @@ export function Pane(props: PaneProps) {
   const lines = splitLines(layout.items);
   return (
     <section role="region" aria-label="Reveal Codes" className={cls("pane")}>
+      <PaneHeader />
       <div className={cls("body")} onClick={onClick}>
         {lines.map((line, n) => (
           <LineView

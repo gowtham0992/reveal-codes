@@ -35,10 +35,14 @@ describe("Pane structure _Requirements: 12.1, 12.7, 12.8, 12.9_", () => {
     expect(document.body.textContent).toBe("");
   });
 
-  it("is a region named Reveal Codes with no product name", () => {
-    renderUi(<Pane {...props(CITED)} />);
+  it("is a region named Reveal Codes whose name appears only in the header (Requirement 2.3)", () => {
+    const { container } = renderUi(<Pane {...props(CITED)} />);
     const region = screen.getByRole("region", { name: "Reveal Codes" });
-    expect(region.textContent.toLowerCase()).not.toContain("reveal");
+    const body = container.querySelector("section > div:nth-child(2)");
+    const status = container.querySelector("section > div:nth-child(3)");
+    expect(region.firstElementChild?.textContent).toMatch(/^Reveal Codes/);
+    expect(body?.textContent?.toLowerCase()).not.toContain("reveal");
+    expect(status?.textContent?.toLowerCase()).not.toContain("reveal");
   });
 
   it("names Code_Items by meaning and hides Text_Items", () => {
@@ -62,6 +66,91 @@ describe("Pane structure _Requirements: 12.1, 12.7, 12.8, 12.9_", () => {
     view.rerender(<Pane {...props(docOf("two words"))} />);
     expect(document.querySelector("[data-offset='2']")?.textContent).toBe("o");
     expect(document.querySelector("[data-offset='8']")?.textContent).toBe("s");
+  });
+});
+
+describe("Pane_Header and Legend _Requirements: 2.1, 2.3, 2.4, 2.5, 2.6, 2.8, 2.9, 2.10_", () => {
+  const WORDS = [
+    ["[HUM]", "typed"],
+    ["[PST]", "pasted"],
+    ["[AI]", "assistant"],
+    ["[AI>HUM]", "assistant, edited"],
+    ["[CIT ✓]", "found"],
+    ["[CIT ✘]", "not found"],
+    ["[QUO ✘]", "not in the opinion"],
+  ] as const;
+
+  function headerOf(container: HTMLElement): HTMLElement {
+    const header = container.querySelector("section > div");
+    if (!(header instanceof HTMLElement)) throw new Error("no header");
+    return header;
+  }
+
+  it("shows the name at the left and the seven entries joined in order", () => {
+    const { container } = renderUi(<Pane {...props(CITED)} />);
+    const header = headerOf(container);
+    const [name, legend] = Array.from(header.children);
+    expect(name?.textContent).toBe("Reveal Codes");
+    expect(legend?.textContent).toBe(WORDS.map(([c, w]) => `${c} ${w}`).join(" · "));
+    const codes = Array.from(legend?.children ?? []).map((e) => e.textContent);
+    expect(codes).toEqual(WORDS.map(([c]) => c));
+  });
+
+  it("draws the failing entries with the failing class and the others without", () => {
+    const { container } = renderUi(<Pane {...props(CITED)} />);
+    const legend = headerOf(container).children[1];
+    const codes = Array.from(legend?.children ?? []);
+    expect(codes.map((e) => /failing/.test(e.className))).toEqual([
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+    ]);
+  });
+
+  it("carries no aria-hidden, role or aria-label", () => {
+    const { container } = renderUi(<Pane {...props(CITED)} />);
+    const header = headerOf(container);
+    for (const el of [header, ...Array.from(header.querySelectorAll("*"))]) {
+      expect(el.hasAttribute("aria-hidden")).toBe(false);
+      expect(el.hasAttribute("role")).toBe(false);
+      expect(el.hasAttribute("aria-label")).toBe(false);
+    }
+  });
+
+  it("is a sibling above the scrolling body, not inside it", () => {
+    const { container } = renderUi(<Pane {...props(CITED)} />);
+    const section = container.querySelector("section");
+    const header = headerOf(container);
+    const body = section?.children[1];
+    expect(section?.children[0]).toBe(header);
+    expect(body?.contains(header)).toBe(false);
+    expect(body?.className).toMatch(/body/);
+  });
+
+  it("prevents the default of mousedown so the Editor selection stays", () => {
+    const { container } = renderUi(<Pane {...props(CITED)} />);
+    const outside = document.createElement("div");
+    outside.contentEditable = "true";
+    outside.textContent = "editor";
+    document.body.appendChild(outside);
+    outside.focus();
+    const selection = window.getSelection();
+    selection?.selectAllChildren(outside);
+    const before = selection?.toString();
+    const proceeded = fireEvent.mouseDown(headerOf(container));
+    expect(proceeded).toBe(false);
+    expect(window.getSelection()?.toString()).toBe(before);
+    outside.remove();
+  });
+
+  it("renders nothing of the header while the Pane is closed", () => {
+    renderUi(<Pane {...props(CITED)} open={false} />);
+    expect(screen.queryByText("Reveal Codes")).toBeNull();
+    expect(screen.queryByText(/\[HUM\]/)).toBeNull();
   });
 });
 
@@ -107,7 +196,7 @@ describe("Pane clicks and cursor _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5_", 
     const onItemClick = vi.fn();
     const onBackgroundClick = vi.fn();
     const { container } = renderUi(<Pane {...props(CITED, { onItemClick, onBackgroundClick })} />);
-    const body = container.querySelector("section > div") as Element;
+    const body = container.querySelector("section > div:nth-child(2)") as Element;
     fireEvent.click(body);
     expect(onBackgroundClick).toHaveBeenCalledTimes(1);
     expect(onItemClick).not.toHaveBeenCalled();

@@ -27,7 +27,7 @@ Conventions that apply to every task:
     - Add `apps/web/test/pane-preference.test.ts`: round trip for `true` and `false`; malformed values (`"x"`, `"{}"`, `{"version":2,"open":true}`, `{"version":1,"open":"yes"}`, `null`, `[]`) read as First_Visit; throwing `getItem` reads as First_Visit; throwing `setItem` returns an error value and does not throw; `initialPaneOpen` for stored true, stored false, no value without draft, no value with draft, and a draft that restores to empty text.
     - _Requirements: 1.1, 1.3, 1.4, 1.5, 1.7, 1.8, 1.11, 12.1_
 
-  - [~] 1.2 Pane control: open on first visit and remember the state
+  - [x] 1.2 Pane control: open on first visit and remember the state
     - In `apps/web/src/components/use-pane.ts` change `usePaneControl` to start closed, run one mount effect that sets the state from `initialPaneOpen(svc.storage)` and sets `ready`, and write the Pane_Preference from one effect keyed on `[ready, open, svc]` (ignore the result, set no Notice). Leave the Alt-F3 and F7 listener unchanged. "New" must not touch the key.
     - Update `apps/web/test/app-shell.test.tsx` and `apps/web/test/document-actions.test.tsx` where they assert the Pane hidden on first load. Add examples: first visit with no draft opens the Pane; stored `open: false` stays closed; stored `open: true` opens it (with and without a draft); first visit with a draft starts closed; the first-visit choice is written; an Alt-F3 toggle and the Toolbar button write the new state; a reload keeps the state; New leaves the key; throwing `setItem` keeps the in-memory state with no Notice.
     - _Requirements: 1.2, 1.3, 1.4, 1.5, 1.6, 1.8, 1.9, 1.10, 12.1, 12.14_
@@ -41,7 +41,7 @@ Conventions that apply to every task:
     - Add `apps/web/test/failing.test.ts` and update `layout.test.ts` and `pane.test.tsx`: opening and closing codes of a failing citation and a failing quotation carry the `failing` class; the closer of a verified citation and every other code do not; `CIT ?` is failing and `CIT …` is not; a quotation inside a failing citation does not consume the citation's closer; an unbalanced closer is not failing; item text and offsets still equal `render(document, "display")` (editor-app Property 4 stays green); `lineAt` examples (offset 0, after a newline, past the end clamped) and `statusText` output unchanged.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.8, 12.3, 12.14_
 
-  - [~] 1.4 Pane_Header with Legend
+  - [x] 1.4 Pane_Header with Legend
     - Create `apps/web/src/pane/pane-header.tsx` with the `LEGEND` constant (seven entries in the order of Requirement 2.4, each with `family` and `failing`) and `PaneHeader`: a `div` with the text "Reveal Codes" at the left and the Legend at the right; each code drawn with `codeClass(family, failing)`, entries joined by ` · `; `onMouseDown` calls `preventDefault`; no `aria-hidden`, no `role`, no `aria-label`.
     - In `apps/web/src/pane/pane.tsx` render `PaneHeader` as a sibling above the scrolling Pane_Body (flex column), only while the Pane is open.
     - In `apps/web/src/pane/pane.module.css` add `.header` (flex, wrap, space-between, `#0000aa` on `#aaaaaa`, Pane font family, 12px) and `.legend` (`white-space: pre-wrap`).

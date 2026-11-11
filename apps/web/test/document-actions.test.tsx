@@ -6,6 +6,7 @@ import type { Document } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import type { ApiClient } from "../src/client/api";
 import { AppShell } from "../src/components/app-shell";
+import { PANE_KEY, encodePreference } from "../src/pane-preference";
 import { AUTOSAVE_KEY, deserialise, serialise } from "../src/persist";
 import type { AppServices } from "../src/services";
 import { createManualTimers } from "./support/clock";
@@ -50,9 +51,15 @@ function apiWithDemo(base: ApiClient, reply: DemoReply): ApiClient {
   };
 }
 
-async function mount(stored: Document | null, reply: DemoReply = "fixture"): Promise<Mounted> {
+/** `pane` is the stored Pane_Preference; the default keeps the Pane closed as these examples expect. */
+async function mount(
+  stored: Document | null,
+  reply: DemoReply = "fixture",
+  pane: boolean | null = false,
+): Promise<Mounted> {
   const timers = createManualTimers();
   const storage = createMemoryStorage();
+  if (pane !== null) storage.setItem(PANE_KEY, encodePreference(pane));
   if (stored !== null) storage.setItem(AUTOSAVE_KEY, serialise(stored, [], null));
   const mode = modeApi("fixtures");
   const services: AppServices = {
@@ -128,6 +135,16 @@ describe("New _Requirements: 20.1, 20.2, 20.3_", () => {
   });
 });
 
+describe("New and the Pane_Preference _Requirements: 1.9, 12.1_", () => {
+  it.each([true, false])("leaves the stored preference %s untouched", async (open) => {
+    const m = await mount(typed("My draft."), "fixture", open);
+    await click("New");
+    await click("Discard and start new");
+    expect(m.storage.getItem(PANE_KEY)).toBe(encodePreference(open));
+    expect(screen.queryByRole("region", { name: "Reveal Codes" }) !== null).toBe(open);
+  });
+});
+
 describe("Load demo motion _Requirements: 20.1, 20.2, 20.4, 20.5_", () => {
   it("loads without a dialog when the draft is empty, as one PST span over the fixture text", async () => {
     const m = await mount(null);
@@ -153,7 +170,8 @@ describe("Load demo motion _Requirements: 20.1, 20.2, 20.4, 20.5_", () => {
     );
     expect(labels).toContain("Pasted or from outside the editor");
     expect(labels.some((l) => l?.toLowerCase().includes("assistant"))).toBe(false);
-    expect(pane.textContent).not.toContain("[AI");
+    // The Pane_Header Legend (task 1.4) names [AI], so pane.textContent can no longer be scanned.
+    expect(labels.every((l) => !(l ?? "").startsWith("AI"))).toBe(true);
   });
 
   it("confirms when the draft is non-empty; cancel keeps it, confirm replaces it", async () => {

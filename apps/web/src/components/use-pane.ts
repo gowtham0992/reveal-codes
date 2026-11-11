@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { divergenceWords, mismatchAt } from "../client/divergence";
 import { classifyKey } from "../editor/shortcuts";
 import { statusText } from "../pane/layout";
+import { initialPaneOpen, writePreference } from "../pane-preference";
 import type { AppServices } from "../services";
 
 export const SAVE_PROMPT = "Save document? Yes (No)";
@@ -40,7 +41,17 @@ export type PaneControl = Readonly<{
 /** Pane open state, the capturing Alt-F3 and F7 listener, and the F7 timer (Requirements 14.1 to 14.5). */
 export function usePaneControl(svc: AppServices): PaneControl {
   const [open, setOpen] = useState(false);
+  const [ready, setReady] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  useEffect(() => {
+    setOpen(initialPaneOpen(svc.storage));
+    setReady(true);
+    // Mount only: the preference is read once (Req 1.2 to 1.5).
+  }, []);
+  useEffect(() => {
+    if (!ready) return;
+    writePreference(svc.storage, open); // result ignored, no Notice (Req 1.8)
+  }, [ready, open, svc]);
   const openRef = useRef(open);
   openRef.current = open;
   const timer = useRef<unknown>(null);

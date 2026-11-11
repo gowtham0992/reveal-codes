@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { AppShell } from "../src/components/app-shell";
 import { EDITOR_PLACEHOLDER } from "../src/components/editor-surface";
 import { AUTOSAVE_KEY, serialise } from "../src/persist";
+import { PANE_KEY, encodePreference } from "../src/pane-preference";
 import type { AppServices } from "../src/services";
 import type { ApiClient } from "../src/client/api";
 import { modeApi } from "./support/mode-fetch";
@@ -34,8 +35,15 @@ function storedDocument(text: string): Document {
 
 type Fixture = { services: AppServices; storage: MemoryStorage; timers: ManualTimers };
 
+/** Storage holding a stored Pane_Preference, so tests that predate the first-visit rule see a closed Pane. */
+function storageWithPane(open: boolean): MemoryStorage {
+  const storage = createMemoryStorage();
+  storage.setItem(PANE_KEY, encodePreference(open));
+  return storage;
+}
+
 function fixture(
-  storage: MemoryStorage = createMemoryStorage(),
+  storage: MemoryStorage = storageWithPane(false),
   api: ApiClient = modeApi("fixtures").api,
 ): Fixture {
   const timers = createManualTimers();
@@ -67,7 +75,7 @@ describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () =
       ...base,
       mode: () => Promise.resolve({ ok: true, value: { mode: "fixtures" } }),
     };
-    await mount(fixture(createMemoryStorage(), noAssistant));
+    await mount(fixture(storageWithPane(false), noAssistant));
     const app = document.querySelector(".app");
     if (app === null) throw new Error("no .app root");
     const roles = [...app.children].map((c) => c.getAttribute("role") ?? c.tagName.toLowerCase());
@@ -273,6 +281,84 @@ describe("AppShell Pane wiring _Requirements: 6.7, 13.3, 13.5, 13.6, 14.1, 14.2,
     });
     const second = statusLine();
     expect(second).not.toBe(first);
+  });
+});
+
+const STORED = encodePreference;
+
+function draftStorage(pane: boolean | null): MemoryStorage {
+  const storage = pane === null ? createMemoryStorage() : storageWithPane(pane);
+  storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Stored draft."), [], null));
+  return storage;
+}
+
+describe("AppShell Pane_Preference _Requirements: 1.2, 1.3, 1.4, 1.5, 1.6, 1.8, 1.10, 12.1_", () => {
+  it("opens the Pane on a first visit with no draft", async () => {
+    await mount(fixture(createMemoryStorage()));
+    expect(paneRegion()).not.toBeNull();
+  });
+
+  it("starts closed on a first visit with a draft", async () => {
+    await mount(fixture(draftStorage(null)));
+    expect(paneRegion()).toBeNull();
+  });
+
+  it("writes the first-visit choice", async () => {
+    const f = fixture(createMemoryStorage());
+    await mount(f);
+    expect(f.storage.getItem(PANE_KEY)).toBe(STORED(true));
+    const g = fixture(draftStorage(null));
+    await mount(g);
+    expect(g.storage.getItem(PANE_KEY)).toBe(STORED(false));
+  });
+
+  it("keeps a stored closed preference with no draft", async () => {
+    await mount(fixture(storageWithPane(false)));
+    expect(paneRegion()).toBeNull();
+  });
+
+  it.each([null, "draft"] as const)("opens for a stored open preference (%s)", async (kind) => {
+    const storage = kind === null ? storageWithPane(true) : draftStorage(true);
+    await mount(fixture(storage));
+    expect(paneRegion()).not.toBeNull();
+  });
+
+  it("writes the new state on Alt-F3 and on the Toolbar button", async () => {
+    const f = fixture(storageWithPane(false));
+    await mount(f);
+    pressKey(document.body, "F3", { altKey: true });
+    expect(f.storage.getItem(PANE_KEY)).toBe(STORED(true));
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Hide codes (Alt-F3)" }));
+    });
+    expect(f.storage.getItem(PANE_KEY)).toBe(STORED(false));
+  });
+
+  it("keeps the state across a reload", async () => {
+    const f = fixture(storageWithPane(false));
+    let view: ReturnType<typeof renderUi> | null = null;
+    await act(async () => {
+      view = renderUi(<AppShell services={f.services} />);
+      await Promise.resolve();
+    });
+    pressKey(document.body, "F3", { altKey: true });
+    expect(paneRegion()).not.toBeNull();
+    act(() => {
+      view?.unmount();
+    });
+    await mount(f);
+    expect(paneRegion()).not.toBeNull();
+  });
+
+  it("keeps the in-memory state and sets no Notice when setItem throws", async () => {
+    const storage = storageWithPane(false);
+    storage.setItem = () => {
+      throw new Error("QuotaExceededError");
+    };
+    await mount(fixture(storage));
+    pressKey(document.body, "F3", { altKey: true });
+    expect(paneRegion()).not.toBeNull();
+    expect(screen.getByRole("status").textContent).toBe("");
   });
 });
 

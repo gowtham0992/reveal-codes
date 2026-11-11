@@ -10,6 +10,23 @@
   line-height: 1.3;
 }
 
+.header {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 16px;
+  padding: 2px 8px;
+  color: #0000aa;
+  background: #aaaaaa;
+  font-family: var(--font-pane);
+  font-size: 12px;
+}
+
+.legend {
+  white-space: pre-wrap;
+}
+
 .body {
   flex: 1;
   min-height: 0;
