@@ -29,6 +29,25 @@ const FONT_STACKS: Readonly<Record<string, string>> = {
   "--print-font-text": 'Georgia, "Times New Roman", serif',
   "--print-font-mono": "ui-monospace, Menlo, Consolas, monospace",
 };
+/** Requirements 2.6 to 2.11, 10.5 to 10.7. */
+const SIZES: ReadonlySet<string> = new Set([
+  "10.5px",
+  "11px",
+  "12px",
+  "12.5px",
+  "13px",
+  "13.5px",
+  "14px",
+  "15px",
+  "18px",
+  "20px",
+  "26px",
+  "12pt",
+  "inherit",
+]);
+/** TEMPORARY: the size aliases of globals.css; removed together with them in task 5.1. */
+const SIZE_ALIAS = /^var\(--size-(?:ui|editor|pane|wordmark|status)\)$/;
+const WEIGHTS = /^(?:400|500|600|700|normal|bold|inherit)$/;
 const VARIABLE_VALUES: Readonly<Record<string, string>> = {
   "--page-max": "8.5in",
   "--toolbar-h": "32px",
@@ -116,18 +135,6 @@ function bannedViolations(path: string, css: ReturnType<typeof parseCss>): Viola
 
 function typeViolations(path: string, decls: CssDeclaration[]): Violation[] {
   const found: Violation[] = [];
-  const sizes = [
-    "var(--size-ui)",
-    "10.5px",
-    "13px",
-    "inherit",
-    "15px",
-    "var(--size-wordmark)",
-    "12px",
-    "var(--size-status)",
-  ];
-  if (/(?:editor-surface|print-view)\.module\.css$/.test(path))
-    sizes.push("var(--size-editor)", "12pt");
   for (const d of decls) {
     const value = norm(d.value);
     const stack = FONT_STACKS[d.prop];
@@ -141,11 +148,11 @@ function typeViolations(path: string, decls: CssDeclaration[]): Violation[] {
       found.push(at(path, d, "font-family must be one of the three variables"));
     }
     if (d.prop === "font" && value !== "inherit") found.push(at(path, d, "font shorthand"));
-    if (d.prop === "font-weight" && !/^(?:400|500|600|700|normal|bold|inherit)$/.test(value)) {
+    if (d.prop === "font-weight" && !WEIGHTS.test(value)) {
       found.push(at(path, d, "font-weight must be 400, 500, 600 or 700"));
     }
-    if (d.prop === "font-size" && !sizes.includes(value))
-      found.push(at(path, d, "font-size must be 12px, 13px or 15px"));
+    if (d.prop === "font-size" && !SIZES.has(value) && !SIZE_ALIAS.test(value))
+      found.push(at(path, d, `font-size must be one of ${[...SIZES].join(", ")}`));
   }
   return found;
 }
@@ -430,6 +437,7 @@ describe("static: Export dialog width _Requirements: 9.1, 9.2, 9.8_", () => {
     expect(holders).toEqual(["src/components/modal.module.css"]);
   });
 });
+const SIZE_MESSAGE = `font-size must be one of ${[...SIZES].join(", ")}`;
 function ui(text: string, path = "src/components/x.module.css"): string[] {
   return formatViolations(checkUiSheet({ path, text }));
 }
@@ -465,29 +473,59 @@ describe("static: stylesheet self-test (planted violations)", () => {
 
   it("reports a fourth font family, a bad weight, a bad size and a removed outline", () => {
     const text =
-      ".a {\n  font-family: Comic Sans MS;\n  font-weight: 300;\n  font-size: 14px;\n  outline: none;\n}\n";
+      ".a {\n  font-family: Comic Sans MS;\n  font-weight: 300;\n  font-size: 17px;\n  outline: none;\n}\n";
     expect(ui(text)).toEqual([
       "src/components/x.module.css:2 font-family must be one of the three variables",
       "src/components/x.module.css:3 font-weight must be 400, 500, 600 or 700",
-      "src/components/x.module.css:4 font-size must be 12px, 13px or 15px",
+      `src/components/x.module.css:4 ${SIZE_MESSAGE}`,
       "src/components/x.module.css:5 outline removed",
     ]);
   });
 
-  it("accepts 12px and 15px and still reports 14px with its path and line", () => {
-    expect(ui(".a {\n  font-size: 12px;\n}\n.b {\n  font-size: 15px;\n}\n")).toEqual([]);
-    expect(ui(".a {\n  color: var(--ink);\n  font-size: 14px;\n}\n")).toEqual([
-      "src/components/x.module.css:3 font-size must be 12px, 13px or 15px",
+  it("accepts 13.5px and weight 600 and reports 17px with its path and line", () => {
+    expect(ui(".a {\n  font-size: 13.5px;\n  font-weight: 600;\n}\n")).toEqual([]);
+    expect(ui(".a {\n  color: var(--ink);\n  font-size: 17px;\n}\n")).toEqual([
+      `src/components/x.module.css:3 ${SIZE_MESSAGE}`,
     ]);
   });
 
-  it("reports button and focus rule violations in globals.css", () => {
+  it("accepts every listed size, the print pt size and the temporary size aliases", () => {
+    const sizes = [...SIZES, "var(--size-ui)", "var(--size-editor)", "var(--size-status)"];
+    expect(ui(sizes.map((s) => `.a {\n  font-size: ${s};\n}\n`).join(""))).toEqual([]);
+  });
+
+  it("accepts the five family variables and inherit, and reports a fourth font variable", () => {
+    const families = ["--font-ui", "--font-editor", "--font-pane", "--print-font-text"];
+    const ok = [...families.map((v) => `var(${v})`), "var(--print-font-mono)", "inherit"];
+    expect(ui(ok.map((f) => `.a {\n  font-family: ${f};\n}\n`).join(""))).toEqual([]);
+    expect(ui(":root {\n  --font-fourth: Papyrus, fantasy;\n}\n")).toEqual([
+      "src/components/x.module.css:2 fourth font family",
+    ]);
+  });
+
+  it("reports a font stack variable that differs from the specified stack", () => {
+    expect(
+      ui(':root {\n  --font-pane: "Fira Code", monospace;\n  --print-font-text: serif;\n}\n'),
+    ).toEqual([
+      "src/components/x.module.css:2 --font-pane is not the specified stack",
+      "src/components/x.module.css:3 --print-font-text is not the specified stack",
+    ]);
+  });
+
+  it("reports a changed size variable and a thick button border in globals.css", () => {
     const text =
-      ":root {\n  color-scheme: light;\n  --size-ui: 14px;\n}\nbutton {\n  border: 2px solid var(--ink);\n  color: red;\n}\n:focus-visible {\n  outline: 1px solid var(--oxblood);\n}\n";
+      ":root {\n  color-scheme: light;\n  --size-ui: 14px;\n}\nbutton {\n  border: 2px solid var(--ink);\n  color: red;\n}\n";
     expect(ui(text, "app/globals.css")).toEqual([
       "app/globals.css:3 --size-ui must be 13px",
       "app/globals.css:6 button border must be 1px solid ink",
-      "app/globals.css:10 focus outline must be 2px solid oxblood",
+    ]);
+  });
+
+  it("reports a focus outline that is not 2px solid oxblood", () => {
+    const text =
+      ":root {\n  color-scheme: light;\n}\n:focus-visible {\n  outline: 1px solid var(--oxblood);\n}\n";
+    expect(ui(text, "app/globals.css")).toEqual([
+      "app/globals.css:5 focus outline must be 2px solid oxblood",
     ]);
   });
 
