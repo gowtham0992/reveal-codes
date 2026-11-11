@@ -50,7 +50,7 @@ const SIZE_ALIAS = /^var\(--size-(?:ui|editor|pane|wordmark|status)\)$/;
 const WEIGHTS = /^(?:400|500|600|700|normal|bold|inherit)$/;
 const VARIABLE_VALUES: Readonly<Record<string, string>> = {
   "--page-max": "8.5in",
-  "--toolbar-h": "32px",
+  "--toolbar-h": "52px",
   "--status-h": "22px",
   "--strip-w": "32px",
   "--left-w": "260px",

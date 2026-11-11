@@ -4,8 +4,8 @@
   align-items: center;
   gap: 8px;
   padding: 0 8px;
-  background: var(--ui-bg);
-  border-bottom: 1px solid var(--rule);
+  background: var(--panel);
+  border-bottom: 3px double var(--ink);
 }
 
 .wordmark {
@@ -13,11 +13,14 @@
   display: flex;
   align-items: center;
   margin: 4px 0;
-  padding-right: 8px;
+  margin-right: 24px;
+  padding-right: 24px;
   border-right: 1px solid var(--rule);
   font-family: var(--font-editor);
-  font-size: var(--size-wordmark);
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
   color: var(--ink);
   white-space: nowrap;
 }
@@ -38,6 +41,8 @@
 .notice {
   flex: 1;
   min-width: 0;
+  color: var(--muted);
+  font-size: 12.5px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

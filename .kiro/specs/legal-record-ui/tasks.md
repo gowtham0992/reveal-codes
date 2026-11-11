@@ -57,7 +57,7 @@ Conventions that apply to every task:
     - _Requirements: 10.1, 10.2_
 
 - [ ] 2. Toolbar, Sheet with line numbers, and Issues region
-  - [~] 2.1 Toolbar
+  - [x] 2.1 Toolbar
     - In `apps/web/app/globals.css` set `--toolbar-h: 52px`. Update `VARIABLE_VALUES` in the scan.
     - Rewrite `apps/web/src/components/toolbar.module.css`: `background: var(--panel); border-bottom: 3px double var(--ink)`; `.wordmark` in Libre Caslon 15px, weight 400, `text-transform: uppercase; letter-spacing: 0.16em; margin-right: 24px; padding-right: 24px; border-right: 1px solid var(--rule)`; the `.group` rules and the 8px gaps unchanged with `var(--rule)`; `.notice` with `color: var(--muted)` and `font-size: 12.5px`. Use no `--ui-bg`, `--size-wordmark` or `--font-editor` alias that no longer exists; use `var(--font-editor)` and literal sizes. `toolbar.tsx` does not change; the text "Reveal Codes" stays in the DOM.
     - Update `toolbar.test.tsx` and `app-shell.test.tsx` where they assert the 32px row or the old wordmark weight. Add CSS assertions (read through `parseCss`) for the 52px row, the 3px double ink border, uppercase and letter spacing, 24px and 24px around the rule, and the 12.5px muted notice.
