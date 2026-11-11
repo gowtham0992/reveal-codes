@@ -23,6 +23,8 @@ export type IssuesRegionProps = Readonly<{
   verifiedAt: string | null;
   /** The further line of the last completed Verify run. */
   note: string | null;
+  /** The sentence for a failed run; the document and the list are not changed by it. */
+  failure?: string | null;
   /** The same start/disabled values the Toolbar uses. */
   verify: VerifyAction;
 }>;
@@ -34,9 +36,31 @@ export function issuesHeading(blocking: number): string {
   return blocking > 0 ? `Issues \u2014 ${String(blocking)} blocking` : "Issues";
 }
 
+type OverrideSlotProps = Readonly<{
+  target: Target | null;
+  document: Document;
+  store: Store;
+  now: () => Date;
+  close: () => void;
+}>;
+function OverrideSlot({ target, document, store, now, close }: OverrideSlotProps) {
+  if (target === null) return null;
+  return (
+    <OverrideDialog
+      issueKey={target.issue.key}
+      code={target.issue.code}
+      issueText={issueText(document, target.issue)}
+      store={store}
+      now={now}
+      restoreFocus={target.opener}
+      onClose={close}
+    />
+  );
+}
 /** The Issues region: Fixtures_Mode line (15.7), the list and the Override_Dialog (Req 18). */
 export function IssuesRegion(props: IssuesRegionProps) {
   const { document, store, now, onGo, demoMode = false, verifiedAt, note, verify } = props;
+  const { failure = null } = props;
   const [target, setTarget] = useState<Target | null>(null);
   return (
     <aside aria-labelledby="issues-heading" className={styles["issues"]}>
@@ -44,7 +68,12 @@ export function IssuesRegion(props: IssuesRegionProps) {
         {issuesHeading(blockingIssues(document).length)}
       </h2>
       <div className={styles["body"]}>
-        <VerifyResult document={document} verifiedAt={verifiedAt} further={note} />
+        <VerifyResult
+          document={document}
+          verifiedAt={verifiedAt}
+          further={note}
+          failure={failure}
+        />
         {demoMode ? <p className={styles["note"]}>{DEMO_MODE_LINE}</p> : null}
         <IssuesList
           document={document}
@@ -55,19 +84,15 @@ export function IssuesRegion(props: IssuesRegionProps) {
             setTarget({ issue, opener });
           }}
         />
-        {target === null ? null : (
-          <OverrideDialog
-            issueKey={target.issue.key}
-            code={target.issue.code}
-            issueText={issueText(document, target.issue)}
-            store={store}
-            now={now}
-            restoreFocus={target.opener}
-            onClose={() => {
-              setTarget(null);
-            }}
-          />
-        )}
+        <OverrideSlot
+          target={target}
+          document={document}
+          store={store}
+          now={now}
+          close={() => {
+            setTarget(null);
+          }}
+        />
       </div>
     </aside>
   );

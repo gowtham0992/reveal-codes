@@ -26,3 +26,6 @@ export function noticeForHistoryError(error: EngineError, direction: HistoryDire
 
 /** Shown in the assistant panel, and sent by /api/assistant with status 429, when its request limit is reached. */
 export const ASSISTANT_BUSY = "The assistant is busy. Try again in a few minutes.";
+
+/** Sent by /api/verify and /api/opinion with status 429 when an address is over its limit, and shown where a run fails. */
+export const CHECKS_BUSY = "Too many checks from this address. Try again in a moment.";

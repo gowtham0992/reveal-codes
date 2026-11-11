@@ -1,5 +1,6 @@
 import { getServerContext } from "../../../src/server/deps";
 import { notAllowed } from "../../../src/server/http";
+import { routeGuard, verifyLimiter } from "../../../src/server/rate-limit";
 import { handleVerify } from "../../../src/server/verify-route";
 
 export const runtime = "nodejs";
@@ -7,8 +8,10 @@ export const dynamic = "force-dynamic";
 /** The Verifier waits on the citation service's request bucket for up to about a minute. */
 export const maxDuration = 60;
 
-export const POST = (request: Request): Promise<Response> =>
-  handleVerify(request, getServerContext().deps);
+export const POST = (request: Request): Promise<Response> => {
+  const { config, deps } = getServerContext();
+  return handleVerify(request, deps, routeGuard(verifyLimiter, request, config.mode === "live"));
+};
 export const GET = notAllowed("POST");
 export const PUT = notAllowed("POST");
 export const PATCH = notAllowed("POST");

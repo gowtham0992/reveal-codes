@@ -1,7 +1,8 @@
 import { checkQuote } from "@reveal-codes/verifier/quote";
 import type { Document, IssueKey, QuoteCheckResult } from "@reveal-codes/engine";
+import { CHECKS_BUSY } from "../notices";
 import type { Store } from "../store-runtime";
-import type { ApiClient, FullRecord } from "./api";
+import type { ApiClient, ApiError, FullRecord } from "./api";
 import { FAILED_NOTICE, tallyDocument } from "./verify-summary";
 
 export type FlowStore = Pick<Store, "getState" | "dispatch">;
@@ -16,6 +17,10 @@ export type VerifyOutcome = Readonly<{
   quotes: Readonly<{ match: number; mismatch: number; unchecked: number }>;
   skipped: number;
   unavailable: number;
+  /** A failed run: the sentence the Issues region shows for it. */
+  failure?: string;
+  /** True when a lookup was refused by the server's request limit. */
+  limited?: boolean;
 }>;
 
 const NO_CITATIONS = { verified: 0, not_found: 0, ambiguous: 0, unchecked: 0 } as const;
@@ -93,6 +98,7 @@ function outcome(
   store: FlowStore,
   skipped: number,
   unavailable: number,
+  extra: Pick<VerifyOutcome, "failure" | "limited"> = {},
 ): VerifyOutcome {
   const counts = status === "completed" ? tallyDocument(store.getState().document) : null;
   return {
@@ -101,7 +107,12 @@ function outcome(
     quotes: counts?.quotes ?? NO_QUOTES,
     skipped,
     unavailable,
+    ...extra,
   };
+}
+
+function isLimit(error: ApiError): boolean {
+  return error.kind === "status" && error.status === 429;
 }
 
 /** Checks the still-present quotes of one cluster against its opinion; returns the skipped count. */
@@ -115,18 +126,28 @@ function applyQuoteChecks(store: FlowStore, keys: readonly IssueKey[], opinion: 
   return pairs.length === 0 ? 0 : store.dispatch({ type: "quoteCheck", pairs }).skipped;
 }
 
-type QuotePhase = Readonly<{ skipped: number; unavailable: number; discarded: boolean }>;
+type QuotePhase = Readonly<{
+  skipped: number;
+  unavailable: number;
+  discarded: boolean;
+  limited: boolean;
+}>;
 
 async function runQuotePhase(api: ApiClient, store: FlowStore, epoch: number): Promise<QuotePhase> {
   let skipped = 0;
   let unavailable = 0;
   for (const [clusterId, keys] of quotesByCluster(store.getState().document)) {
     const opinion = await api.opinion(clusterId);
-    if (store.getState().epoch !== epoch) return { skipped, unavailable, discarded: true };
+    if (store.getState().epoch !== epoch) {
+      return { skipped, unavailable, discarded: true, limited: false };
+    }
+    if (!opinion.ok && isLimit(opinion.error)) {
+      return { skipped, unavailable: unavailable + 1, discarded: false, limited: true };
+    }
     if (!opinion.ok || opinion.value === null) unavailable += 1;
     else skipped += applyQuoteChecks(store, keys, opinion.value);
   }
-  return { skipped, unavailable, discarded: false };
+  return { skipped, unavailable, discarded: false, limited: false };
 }
 
 /** Never rejects: failures are returned as an outcome and shown as a Notice. */
@@ -139,14 +160,23 @@ export async function runVerifyFlow(
   const verified = await api.verify(buildVerifyBody(store.getState().document).records);
   if (store.getState().epoch !== epoch) return outcome("discarded", store, 0, 0);
   if (!verified.ok) {
-    store.dispatch({ type: "notice", text: FAILED_NOTICE });
-    return outcome("failed", store, 0, 0);
+    const failure = isLimit(verified.error) ? CHECKS_BUSY : FAILED_NOTICE;
+    store.dispatch({ type: "notice", text: failure });
+    return outcome("failed", store, 0, 0, { failure });
   }
   const first = store.dispatch({ type: "verification", pairs: verified.value });
   const phase = await runQuotePhase(api, store, epoch);
   if (phase.discarded) return outcome("discarded", store, 0, 0);
   store.dispatch({ type: "verified", at: now().toISOString() });
-  const done = outcome("completed", store, first.skipped + phase.skipped, phase.unavailable);
-  if (store.getState().notice === FAILED_NOTICE) store.dispatch({ type: "notice", text: null });
+  const done = outcome(
+    "completed",
+    store,
+    first.skipped + phase.skipped,
+    phase.unavailable,
+    phase.limited ? { limited: true } : {},
+  );
+  const shown = store.getState().notice;
+  if (shown === FAILED_NOTICE || shown === CHECKS_BUSY)
+    store.dispatch({ type: "notice", text: null });
   return done;
 }

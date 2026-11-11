@@ -18,6 +18,8 @@ export type VerifyControl = Readonly<{
   disabled: boolean;
   /** The further line of the last completed run; null until then or when there is none. */
   note: string | null;
+  /** The sentence for a failed run, shown in the Issues region; null until one fails and after the next run starts. */
+  failure: string | null;
 }>;
 
 type Pending = { handle: unknown } | null;
@@ -52,16 +54,19 @@ function useWaiting(
 export function useVerify(svc: AppServices, store: Store): VerifyControl {
   const [running, setRunning] = useState(false);
   const [note, setNote] = useState<string | null>(null);
+  const [failure, setFailure] = useState<string | null>(null);
   const { waiting, arm, disarm } = useWaiting(svc);
   const start = (): void => {
     setRunning(true);
+    setFailure(null);
     arm();
     void runVerifyFlow(svc.api, store, svc.now).then((outcome) => {
+      setFailure(outcome.status === "failed" ? (outcome.failure ?? null) : null);
       if (outcome.status === "completed") setNote(furtherLine(outcome, store.getState().document));
       disarm();
       setRunning(false);
     });
   };
   const disabled = running || !hasFullRecord(store.getState().document);
-  return { running, waiting, start, disabled, note };
+  return { running, waiting, start, disabled, note, failure };
 }

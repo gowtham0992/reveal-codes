@@ -1,4 +1,5 @@
 import type { Document } from "@reveal-codes/engine";
+import { CHECKS_BUSY } from "../notices";
 import type { VerifyOutcome } from "./verify-flow";
 
 export const FAILED_NOTICE = "Verification could not be completed. Your citations are unchanged.";
@@ -77,6 +78,7 @@ function latestRetry(document: Document): number | null {
 /** The sentence about items a later Verify could still check; null when there is none. */
 export function furtherLine(outcome: VerifyOutcome, document: Document): string | null {
   if (outcome.status !== "completed") return null;
+  if (outcome.limited === true) return CHECKS_BUSY;
   const retry = latestRetry(document);
   const time = retry === null ? null : localTime(new Date(retry).toISOString());
   if (time !== null) return `Some items were not checked; try Verify again after ${time}.`;

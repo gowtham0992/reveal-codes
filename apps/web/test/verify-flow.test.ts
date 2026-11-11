@@ -11,6 +11,7 @@ import {
   runVerifyFlow,
 } from "../src/client/verify-flow";
 import { nextStep } from "../src/components/next-step";
+import { furtherLine } from "../src/client/verify-summary";
 import { createStore } from "../src/store-runtime";
 import { ISO, demoMotionText, verifiedDemoDocument } from "./support/persist-fixtures";
 import { routeFetch } from "./support/route-fetch";
@@ -39,6 +40,7 @@ function countingStore(store: ReturnType<typeof demoStore>) {
 }
 
 const FAILED = "Verification could not be completed. Your citations are unchanged.";
+const LIMIT_SENTENCE = "Too many checks from this address. Try again in a moment.";
 
 describe("Verify flow on the demo motion _Requirements: 17.2, 17.3, 17.4, 17.5, 17.6_", () => {
   it("finds 3 not_found citations, a Haines match and an Iqbal mismatch", async () => {
@@ -161,6 +163,44 @@ describe("Verify flow failures _Requirements: 17.7, 17.8, 17.10, 17.11_", () => 
     expect(store.getState().notice).toBe(FAILED);
   });
 
+  it("a 429 from verify leaves the Document unchanged and reports the limit sentence", async () => {
+    const store = demoStore();
+    const before = store.getState().document;
+    const busy = JSON.stringify({ error: LIMIT_SENTENCE });
+    const api = createApiClient(() => Promise.resolve(new Response(busy, { status: 429 })));
+    const counted = countingStore(store);
+    const outcome = await runVerifyFlow(api, counted.flow, CLOCK);
+    expect(outcome.status).toBe("failed");
+    expect(outcome.failure).toBe(LIMIT_SENTENCE);
+    expect(counted.count()).toBe(0);
+    expect(store.getState().verifiedAt).toBeNull();
+    expect(store.getState().document).toBe(before);
+    expect(store.getState().notice).toBe(LIMIT_SENTENCE);
+  });
+  it("another failure still reports the general failure sentence", async () => {
+    const api = createApiClient(() => Promise.resolve(new Response("down", { status: 503 })));
+    const outcome = await runVerifyFlow(api, demoStore(), CLOCK);
+    expect(outcome.failure).toBe(FAILED);
+  });
+  it("a 429 from opinion stops the quote checks, leaves them unchecked and says why", async () => {
+    const server = routeFetch();
+    const store = demoStore();
+    const fetchFn: FetchFn = (input, init) =>
+      input.startsWith("/api/opinion")
+        ? Promise.resolve(new Response("{}", { status: 429 }))
+        : server.fetch(input, init);
+    const outcome = await runVerifyFlow(createApiClient(fetchFn), store, CLOCK);
+    expect(outcome.status).toBe("completed");
+    expect(outcome.limited).toBe(true);
+    expect(outcome.quotes).toEqual({ match: 0, mismatch: 0, unchecked: 2 });
+    expect(furtherLine(outcome, store.getState().document)).toBe(LIMIT_SENTENCE);
+  });
+  it("a good run clears a stale limit Notice", async () => {
+    const store = demoStore();
+    store.dispatch({ type: "notice", text: LIMIT_SENTENCE });
+    await runVerifyFlow(createApiClient(routeFetch().fetch), store, CLOCK);
+    expect(store.getState().notice).toBeNull();
+  });
   it("a replace dispatched mid-flow discards later results", async () => {
     const server = routeFetch();
     const store = demoStore();

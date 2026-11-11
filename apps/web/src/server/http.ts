@@ -15,3 +15,15 @@ export function notAllowed(allow: string): () => Response {
       headers: { ...NO_STORE, Allow: allow, "Content-Type": "application/json" },
     });
 }
+
+/** A 429 carrying `Retry-After` (seconds), `Cache-Control: no-store` and a fixed `{ error }` body. */
+export function tooManyRequests(message: string, retryAfterSeconds: number): Response {
+  return new Response(JSON.stringify({ error: message }), {
+    status: 429,
+    headers: {
+      ...NO_STORE,
+      "Retry-After": String(retryAfterSeconds),
+      "Content-Type": "application/json",
+    },
+  });
+}

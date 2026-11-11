@@ -3,6 +3,9 @@ import type { Deps } from "@reveal-codes/verifier";
 import type { CitationRecord } from "@reveal-codes/engine";
 import { readBodyCapped } from "./body";
 import { jsonResponse } from "./http";
+import { CHECKS_BUSY } from "../notices";
+import { overRouteLimit } from "./rate-limit";
+import type { RouteGuard } from "./rate-limit";
 
 export const MAX_BODY_BYTES = 262_144;
 export const MAX_RECORDS = 500;
@@ -79,7 +82,14 @@ export function parseVerifyBody(text: string): ParsedBody {
   return { ok: true, value: valid };
 }
 
-export async function handleVerify(request: Request, deps: Deps): Promise<Response> {
+/** Over the limit: 429 before the body is read; `guard` is absent or off in demo mode. */
+export async function handleVerify(
+  request: Request,
+  deps: Deps,
+  guard?: RouteGuard,
+): Promise<Response> {
+  const limited = overRouteLimit(guard, CHECKS_BUSY);
+  if (limited !== null) return limited;
   const body = await readBodyCapped(request, MAX_BODY_BYTES);
   if (!body.ok) return jsonResponse(413, { error: TOO_LARGE.message });
   const parsed = parseVerifyBody(body.text);

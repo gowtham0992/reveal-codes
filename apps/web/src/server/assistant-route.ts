@@ -1,7 +1,7 @@
 import type { AssistantConfig } from "./deps";
 import { readBodyCapped } from "./body";
 import { ASSISTANT_BUSY } from "../notices";
-import { NO_STORE, jsonResponse } from "./http";
+import { NO_STORE, jsonResponse, tooManyRequests } from "./http";
 import { draft, selectProvider } from "./llm";
 import type { DraftOptions } from "./llm";
 import { clientAddress } from "./rate-limit";
@@ -134,14 +134,7 @@ function overLimit(
   if (limiter === undefined || selectProvider(assistant).name === "fixture") return null;
   const decision = limiter.check(clientAddress(request.headers));
   if (decision.allowed) return null;
-  return new Response(JSON.stringify({ error: ASSISTANT_BUSY }), {
-    status: 429,
-    headers: {
-      ...NO_STORE,
-      "Retry-After": String(decision.retryAfterSeconds),
-      "Content-Type": "application/json",
-    },
-  });
+  return tooManyRequests(ASSISTANT_BUSY, decision.retryAfterSeconds);
 }
 /**
  * Validates, pulls the first chunk (so a failure before it is a 502), then streams
