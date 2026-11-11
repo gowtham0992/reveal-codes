@@ -23,7 +23,7 @@ export function AssistantPanel({ info, run, position }: AssistantPanelProps) {
       </h2>
       <div className={styles["body"]}>
         <p className={styles["note"]}>{disclosure(info)}</p>
-        <label htmlFor="assistant-prompt" className={styles["label"]}>
+        <label htmlFor="assistant-prompt" className={`small-label ${styles["label"] ?? ""}`}>
           Prompt
         </label>
         <textarea
@@ -50,7 +50,7 @@ function ReplyBox({ run }: Readonly<{ run: AssistantRun }>) {
   const { inserted } = run;
   return (
     <>
-      <span id="assistant-reply-label" className={styles["label"]}>
+      <span id="assistant-reply-label" className={`small-label ${styles["label"] ?? ""}`}>
         Last reply
       </span>
       <div

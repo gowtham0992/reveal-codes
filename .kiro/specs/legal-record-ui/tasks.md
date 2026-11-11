@@ -116,7 +116,7 @@ Conventions that apply to every task:
     - In `override-dialog.tsx` order the buttons Cancel then Save override, and give Save override `data-primary="true"`; the label "Reason" gets the `small-label` class. In `override-dialog.module.css` set `.issueText` to Libre Caslon, the label to `var(--muted)`, remove repeated control rules; error text keeps weight and uses tokens only.
     - Update `override-dialog.test.tsx` and `modal.test.tsx`: Save override is the last button in DOM order and carries `data-primary`; Cancel is before it; focus still starts on the reason field; Escape, Tab trap, the hint and the error behave as before; the Toolbar still renders at most one `data-primary` while the dialog is open (the dialog's button is outside the Toolbar).
     - _Requirements: 8.4, 8.9, 8.10, 8.11, 13.10_
-  - [~] 4.3 Assistant strip and panel
+  - [x] 4.3 Assistant strip and panel
     - Rewrite `assistant-column.module.css` (`--panel` background, `1px solid var(--rule)` right edge, the closed strip unchanged otherwise) and `assistant-panel.module.css` (`--panel`; `.heading` Libre Caslon 20px/26px weight 400 with the 1px bottom rule; `.label` as a Small_Label in `var(--muted)`; `.stream` Libre Caslon 13px/19px; the prompt keeps only layout). In `assistant-panel.tsx` add the `small-label` class to the "Prompt" label and the "Last reply" span.
     - Update `assistant-panel.test.tsx`: both labels keep their text and accessible names; the reply text is in the same element; no wording change. Add CSS assertions for the right rule, the panel background and the 13px/19px reply.
     - _Requirements: 9.1, 9.2, 9.3, 13.10_

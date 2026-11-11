@@ -7,7 +7,7 @@
   height: 100%;
   overflow: auto;
   padding: 0;
-  background: var(--paper);
+  background: var(--panel);
 }
 
 .heading {
@@ -15,8 +15,10 @@
   margin: 0;
   padding: 8px;
   border-bottom: 1px solid var(--rule);
-  font-size: var(--size-ui);
-  font-weight: 700;
+  font-family: var(--font-editor);
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 400;
 }
 
 .body {
@@ -36,7 +38,7 @@
 }
 
 .label {
-  font-weight: 700;
+  color: var(--muted);
 }
 
 .prompt {
@@ -50,6 +52,10 @@
   overflow: auto;
   padding: 4px;
   border: 1px solid var(--rule);
+  font-family: var(--font-editor);
+  font-size: 13px;
+  line-height: 19px;
+  font-weight: 400;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }

@@ -166,6 +166,23 @@ describe("AssistantPanel _Requirements: 7.8, 10.8, 10.15, 23.1 to 23.9_", () => 
     ).not.toBeNull();
   });
 
+  it("marks the Prompt label and the Last reply label as small labels without changing their names", async () => {
+    await mount("Alpha");
+    openPanel();
+    const prompt = screen.getByLabelText("Prompt");
+    const promptLabel = document.querySelector('label[for="assistant-prompt"]');
+    expect(promptLabel?.textContent).toBe("Prompt");
+    expect(promptLabel?.classList.contains("small-label")).toBe(true);
+    expect(prompt.id).toBe("assistant-prompt");
+    startDraft("one");
+    await finished();
+    const reply = screen.getByRole("log", { name: "Last reply" });
+    const span = document.getElementById("assistant-reply-label");
+    expect(span?.textContent).toBe("Last reply");
+    expect(span?.classList.contains("small-label")).toBe(true);
+    expect(reply.textContent).toBe(FULL_REPLY.trim());
+  });
+
   it("streams into the panel, keeps it out of the Document until the end, then inserts one AI span at the cursor", async () => {
     const f = await mount("Alpha\nBeta");
     openPane();
