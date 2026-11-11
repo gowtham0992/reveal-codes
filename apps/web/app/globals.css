@@ -1,19 +1,32 @@
 :root {
   color-scheme: light;
-  --paper: #ffffff;
-  --ink: #111111;
-  --rule: #b0b0b0;
-  --ui-bg: #ececec;
-  --accent: #1f3a8a;
-  --font-ui: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
-  --font-editor: Georgia, "Times New Roman", serif;
-  --font-pane: ui-monospace, Menlo, Consolas, monospace;
-  --size-ui: 13px;
-  --size-editor: 12pt;
-  --size-pane: 14px;
-  --size-wordmark: 15px;
-  --size-status: 12px;
-  --line-editor: 1.5;
+  /* colour tokens */
+  --paper: #fffdf8;
+  --desk: #e9e3d6;
+  --panel: #fbf8f1;
+  --ink: #1b1915;
+  --muted: #5e574c;
+  --rule: #cfc6b4;
+  --rule-light: #ddd4c2;
+  --margin-rule: #b5a98f;
+  --oxblood: #6b1a24;
+  --fail: #a8001c;
+  --fail-ring: #ff8a8a;
+  --disabled-border: #8c8475;
+  --disabled-fill: #f1ece1;
+  --white: #ffffff;
+  --overlay: rgba(27, 25, 21, 0.55);
+  /* print tokens: the colours and fonts the print view used before the redesign */
+  --print-paper: #ffffff;
+  --print-ink: #111111;
+  --print-rule: #b0b0b0;
+  --print-font-text: Georgia, "Times New Roman", serif;
+  --print-font-mono: ui-monospace, Menlo, Consolas, monospace;
+  /* type families */
+  --font-ui: "Public Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-editor: "Libre Caslon Text", Georgia, "Times New Roman", serif;
+  --font-pane: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  /* geometry */
   --page-max: 8.5in;
   --toolbar-h: 32px;
   --status-h: 22px;
@@ -21,8 +34,19 @@
   --left-w: 260px;
   --right-w: 300px;
   --pane-h: 40vh;
-  --button-pad: 4px 10px;
   --shell-min: 1150px;
+  --control-h: 30px;
+  /* TEMPORARY: removed in task 1.3 */
+  --button-pad: 4px 10px;
+  /* TEMPORARY: removed in task 5.1 */
+  --ui-bg: var(--panel);
+  --accent: var(--oxblood);
+  --size-ui: 13px;
+  --size-editor: 12pt;
+  --size-pane: 14px;
+  --size-wordmark: 15px;
+  --size-status: 12px;
+  --line-editor: 1.5;
 }
 
 * {
@@ -36,15 +60,16 @@ body {
 }
 
 body {
-  background: var(--ui-bg);
+  background: var(--desk);
   color: var(--ink);
   font-family: var(--font-ui);
-  font-size: var(--size-ui);
-  font-weight: 400;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
 }
 
 a {
-  color: var(--accent);
+  color: var(--oxblood);
 }
 
 button {
@@ -81,7 +106,8 @@ button:disabled {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--oxblood);
+  outline-offset: 2px;
 }
 
 /* Fixed grid: toolbar, then main and Issues. The left column is added with the assistant. */

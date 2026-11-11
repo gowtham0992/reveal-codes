@@ -30,7 +30,7 @@ Conventions that apply to every task:
     - Add an example to `apps/web/test/static/package-json.test.ts` that the three packages are present at exactly `5.3.0`.
     - Run `pnpm tsc -b apps/web` to confirm a side-effect CSS import type-checks; if it does not, add the minimum ambient declaration to `apps/web/src/css-modules.d.ts` and say so in the completion note.
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.13, 12.8_
-  - [~] 1.2 Token_Sheet, temporary aliases, and the print view pin
+  - [x] 1.2 Token_Sheet, temporary aliases, and the print view pin
     - Rewrite `:root` in `apps/web/app/globals.css` to the Token_Sheet of the design: the fifteen colour Tokens, the Print_Tokens and print fonts, `--font-ui`, `--font-editor`, `--font-pane` with the three new stacks, and the geometry variables (`--page-max`, `--toolbar-h` 32px for now, `--status-h` 22px for now, `--strip-w`, `--left-w`, `--right-w`, `--pane-h`, `--shell-min`, `--control-h`). Keep `color-scheme: light`.
     - Add the **temporary aliases** after the Tokens, under a comment `TEMPORARY: removed in task 5.1`: `--ui-bg: var(--panel); --accent: var(--oxblood); --size-ui: 13px; --size-editor: 12pt; --size-pane: 14px; --size-wordmark: 15px; --size-status: 12px; --line-editor: 1.5;`.
     - In `globals.css` set the `body` rule to `background: var(--desk)`, `color: var(--ink)`, Public Sans 13px, weight 500, line height 18px (buttons, selects and text areas keep 16px); `a { color: var(--oxblood) }`; `:focus-visible { outline: 2px solid var(--oxblood); outline-offset: 2px; }`. Leave the button rules for task 1.3 and the grid rules unchanged.

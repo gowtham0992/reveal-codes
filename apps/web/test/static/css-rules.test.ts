@@ -1,11 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { parseCss, type CssDeclaration } from "../support/css";
 import { formatViolations, readSources, violation, type Violation } from "../support/scan";
+import { colourViolations, type Sheet } from "./css-colours";
 
 /** Requirements 10.9, 10.11 to 10.15 (UI stylesheets) and 12.2 to 12.5 (Pane stylesheet). */
-type Sheet = { readonly path: string; readonly text: string };
-
-const UI_PALETTE = new Set(["#FFFFFF", "#111111", "#B0B0B0", "#ECECEC", "#1F3A8A"]);
 const CGA = new Set([
   "#000000",
   "#0000AA",
@@ -25,31 +23,29 @@ const CGA = new Set([
   "#FFFFFF",
 ]);
 const FONT_STACKS: Readonly<Record<string, string>> = {
-  "--font-ui": '-apple-system, "Segoe UI", Helvetica, Arial, sans-serif',
-  "--font-editor": 'Georgia, "Times New Roman", serif',
-  "--font-pane": "ui-monospace, Menlo, Consolas, monospace",
+  "--font-ui": '"Public Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif',
+  "--font-editor": '"Libre Caslon Text", Georgia, "Times New Roman", serif',
+  "--font-pane": '"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace',
+  "--print-font-text": 'Georgia, "Times New Roman", serif',
+  "--print-font-mono": "ui-monospace, Menlo, Consolas, monospace",
 };
 const VARIABLE_VALUES: Readonly<Record<string, string>> = {
-  "--paper": "#FFFFFF",
-  "--ink": "#111111",
-  "--rule": "#B0B0B0",
-  "--ui-bg": "#ECECEC",
-  "--accent": "#1F3A8A",
+  "--page-max": "8.5in",
+  "--toolbar-h": "32px",
+  "--status-h": "22px",
+  "--strip-w": "32px",
+  "--left-w": "260px",
+  "--right-w": "300px",
+  "--pane-h": "40vh",
+  "--shell-min": "1150px",
+  "--control-h": "30px",
+  "--button-pad": "4px 10px",
   "--size-ui": "13px",
   "--size-editor": "12pt",
   "--size-pane": "14px",
-  "--line-editor": "1.5",
-  "--page-max": "8.5in",
-  "--toolbar-h": "32px",
-  "--left-w": "260px",
-  "--right-w": "300px",
   "--size-wordmark": "15px",
   "--size-status": "12px",
-  "--status-h": "22px",
-  "--strip-w": "32px",
-  "--pane-h": "40vh",
-  "--button-pad": "4px 10px",
-  "--shell-min": "1150px",
+  "--line-editor": "1.5",
 };
 /** Pane code families, keyed by class name lowercased with non-letters removed. */
 const FAMILY_COLOURS: Readonly<Record<string, readonly [string, string]>> = {
@@ -68,18 +64,8 @@ const FAMILY_COLOURS: Readonly<Record<string, readonly [string, string]>> = {
   status: ["#AAAAAA", "#0000AA"],
   statusline: ["#AAAAAA", "#0000AA"],
 };
-const NAMED_COLOURS = new Set(
-  (
-    "black white red green blue yellow orange purple pink gray grey silver navy teal maroon olive lime " +
-    "aqua fuchsia cyan magenta brown gold indigo violet coral crimson salmon tomato khaki beige ivory " +
-    "lavender plum orchid turquoise tan azure snow linen"
-  ).split(" "),
-);
-const COLOUR_PROPS =
-  /^(?:color|background(?:-color)?|border(?:-(?:top|right|bottom|left))?(?:-color)?|outline(?:-color)?|fill|stroke|caret-color|accent-color)$/;
 const COLOUR_FUNCTION = /\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix)\(/i;
-const LINK_SELECTOR = /(?:^|[\s>+~])a(?::[\w-]+(?:\([^)]*\))?)*$/;
-const FOCUS_OUTLINE = /^2px solid (?:var\(--accent\)|#1F3A8A)$/i;
+const FOCUS_OUTLINE = /^2px solid var\(--(?:oxblood|accent)\)$/;
 
 const norm = (v: string): string =>
   v
@@ -91,35 +77,16 @@ const byLine = (v: Violation[]): Violation[] => v.sort((a, b) => a.line - b.line
 const at = (path: string, d: CssDeclaration, message: string): Violation =>
   violation(path, d.line, message);
 
-function colourViolations(
-  path: string,
-  decls: CssDeclaration[],
-  allowed: ReadonlySet<string>,
-): Violation[] {
+function cgaViolations(path: string, decls: CssDeclaration[]): Violation[] {
   const found: Violation[] = [];
   for (const d of decls) {
     for (const hex of d.value.match(/#[0-9a-fA-F]{3,8}\b/g) ?? []) {
-      if (!allowed.has(hex.toUpperCase()))
+      if (!CGA.has(hex.toUpperCase()))
         found.push(at(path, d, `colour ${hex} is not in the palette`));
     }
     if (COLOUR_FUNCTION.test(d.value)) found.push(at(path, d, "colour function is not allowed"));
-    const named = d.value
-      .toLowerCase()
-      .split(/[\s,()/]+/)
-      .filter((t) => NAMED_COLOURS.has(t));
-    if (COLOUR_PROPS.test(d.prop) && named.length > 0) {
-      found.push(at(path, d, `named colour ${named.join(" ")} is not in the palette`));
-    }
   }
   return found;
-}
-
-function accentViolations(path: string, decls: CssDeclaration[]): Violation[] {
-  return decls
-    .filter((d) => /var\(--accent\)|#1F3A8A/i.test(d.value))
-    .filter((d) => !["outline", "outline-color", "--accent"].includes(d.prop))
-    .filter((d) => !d.selector.split(",").every((s) => LINK_SELECTOR.test(s.trim())))
-    .map((d) => at(path, d, "accent used outside the focus outline and links"));
 }
 
 const BANNED_PROP =
@@ -166,12 +133,14 @@ function typeViolations(path: string, decls: CssDeclaration[]): Violation[] {
       found.push(at(path, d, "fourth font family"));
     if (stack !== undefined && value !== stack)
       found.push(at(path, d, `${d.prop} is not the specified stack`));
-    if (d.prop === "font-family" && !/^(?:var\(--font-(?:ui|editor|pane)\)|inherit)$/.test(value)) {
+    const familyOk =
+      /^(?:var\(--(?:font-(?:ui|editor|pane)|print-font-(?:text|mono))\)|inherit)$/.test(value);
+    if (d.prop === "font-family" && !familyOk) {
       found.push(at(path, d, "font-family must be one of the three variables"));
     }
     if (d.prop === "font" && value !== "inherit") found.push(at(path, d, "font shorthand"));
-    if (d.prop === "font-weight" && !/^(?:400|700|normal|bold|inherit)$/.test(value)) {
-      found.push(at(path, d, "font-weight must be 400 or 700"));
+    if (d.prop === "font-weight" && !/^(?:400|500|600|700|normal|bold|inherit)$/.test(value)) {
+      found.push(at(path, d, "font-weight must be 400, 500, 600 or 700"));
     }
     if (d.prop === "font-size" && !sizes.includes(value))
       found.push(at(path, d, "font-size must be 12px, 13px or 15px"));
@@ -252,8 +221,6 @@ function checkUiSheet(sheet: Sheet): Violation[] {
       : [violation(sheet.path, 1, "UI stylesheet is neither app/globals.css nor a CSS module")];
   return byLine([
     ...shape,
-    ...colourViolations(sheet.path, css.declarations, UI_PALETTE),
-    ...accentViolations(sheet.path, css.declarations),
     ...bannedViolations(sheet.path, css),
     ...typeViolations(sheet.path, css.declarations),
     ...variableViolations(sheet.path, css.declarations),
@@ -293,7 +260,7 @@ function checkPaneSheet(sheet: Sheet): Violation[] {
     .filter((d) => /font-smooth|osx-font-smoothing|text-rendering/.test(d.prop))
     .map((d) => at(sheet.path, d, `${d.prop} is not allowed in the Pane stylesheet`));
   return byLine([
-    ...colourViolations(sheet.path, css.declarations, CGA),
+    ...cgaViolations(sheet.path, css.declarations),
     ...familyViolations(sheet.path, css.declarations),
     ...smoothing,
   ]);
@@ -303,9 +270,10 @@ const sheets = readSources(["app", "src"], /\.css$/);
 const isPane = (s: Sheet): boolean => /^src\/pane\//.test(s.path);
 
 describe("static: stylesheets _Requirements: 10.9, 10.11, 10.12, 10.13, 10.14, 10.15, 12.2, 12.3, 12.4, 12.5_", () => {
-  it("keeps every UI stylesheet inside the UI palette, type, control and focus rules", () => {
+  it("keeps every UI stylesheet inside the Tokens, type, control and focus rules", () => {
     const ui = sheets.filter((s) => !isPane(s));
     expect(formatViolations(ui.flatMap(checkUiSheet))).toEqual([]);
+    expect(formatViolations(colourViolations(ui))).toEqual([]);
   });
 
   it("keeps the Pane stylesheet on the CGA palette and the code-family table", () => {
@@ -469,30 +437,18 @@ function ui(text: string, path = "src/components/x.module.css"): string[] {
 }
 
 describe("static: stylesheet self-test (planted violations)", () => {
-  it("reports a colour outside the palette, a named colour and a colour function", () => {
-    const text = ".a {\n  color: #123456;\n  background: red;\n  border-color: rgb(1, 2, 3);\n}\n";
-    expect(ui(text)).toEqual([
-      "src/components/x.module.css:2 colour #123456 is not in the palette",
-      "src/components/x.module.css:3 named colour red is not in the palette",
-      "src/components/x.module.css:4 colour function is not allowed",
-    ]);
-  });
-
-  it("reports accent outside focus and links, but allows it in a link rule and an outline", () => {
-    expect(ui(".a {\n  color: var(--accent);\n}\n")).toEqual([
-      "src/components/x.module.css:2 accent used outside the focus outline and links",
-    ]);
-    expect(ui("a {\n  color: #1F3A8A;\n}\n")).toEqual([]);
-    expect(ui("a:hover {\n  color: #1F3A8A;\n}\n")).toEqual([
+  it("reports hover that changes more than the background, and allows a focus outline", () => {
+    expect(ui("a:hover {\n  color: var(--oxblood);\n}\n")).toEqual([
       "src/components/x.module.css:2 hover may change only the background",
     ]);
-    expect(ui(".a:focus-visible {\n  outline: 2px solid var(--accent);\n}\n")).toEqual([]);
+    expect(ui(".a:focus-visible {\n  outline: 2px solid var(--oxblood);\n}\n")).toEqual([]);
   });
 
   it("allows color on the primary hover selector only", () => {
-    const primary = 'button[data-primary="true"]:hover:not(:disabled) {\n  color: #111111;\n}\n';
+    const primary =
+      'button[data-primary="true"]:hover:not(:disabled) {\n  color: var(--white);\n}\n';
     expect(ui(primary)).toEqual([]);
-    expect(ui("a:hover {\n  color: #111111;\n}\n")).toEqual([
+    expect(ui("a:hover {\n  color: var(--ink);\n}\n")).toEqual([
       "src/components/x.module.css:2 hover may change only the background",
     ]);
   });
@@ -511,10 +467,10 @@ describe("static: stylesheet self-test (planted violations)", () => {
 
   it("reports a fourth font family, a bad weight, a bad size and a removed outline", () => {
     const text =
-      ".a {\n  font-family: Comic Sans MS;\n  font-weight: 600;\n  font-size: 14px;\n  outline: none;\n}\n";
+      ".a {\n  font-family: Comic Sans MS;\n  font-weight: 300;\n  font-size: 14px;\n  outline: none;\n}\n";
     expect(ui(text)).toEqual([
       "src/components/x.module.css:2 font-family must be one of the three variables",
-      "src/components/x.module.css:3 font-weight must be 400 or 700",
+      "src/components/x.module.css:3 font-weight must be 400, 500, 600 or 700",
       "src/components/x.module.css:4 font-size must be 12px, 13px or 15px",
       "src/components/x.module.css:5 outline removed",
     ]);
@@ -522,14 +478,14 @@ describe("static: stylesheet self-test (planted violations)", () => {
 
   it("accepts 12px and 15px and still reports 14px with its path and line", () => {
     expect(ui(".a {\n  font-size: 12px;\n}\n.b {\n  font-size: 15px;\n}\n")).toEqual([]);
-    expect(ui(".a {\n  color: #111111;\n  font-size: 14px;\n}\n")).toEqual([
+    expect(ui(".a {\n  color: var(--ink);\n  font-size: 14px;\n}\n")).toEqual([
       "src/components/x.module.css:3 font-size must be 12px, 13px or 15px",
     ]);
   });
 
   it("reports button and focus rule violations in globals.css", () => {
     const text =
-      ":root {\n  color-scheme: light;\n  --size-ui: 14px;\n}\nbutton {\n  border: 2px solid #111111;\n  padding: 8px;\n}\n:focus-visible {\n  outline: 1px solid var(--accent);\n}\n";
+      ":root {\n  color-scheme: light;\n  --size-ui: 14px;\n}\nbutton {\n  border: 2px solid var(--ink);\n  padding: 8px;\n}\n:focus-visible {\n  outline: 1px solid var(--accent);\n}\n";
     expect(ui(text, "app/globals.css")).toEqual([
       "app/globals.css:3 --size-ui must be 13px",
       "app/globals.css:6 button border must be 1px solid ink",
@@ -539,10 +495,10 @@ describe("static: stylesheet self-test (planted violations)", () => {
   });
 
   it("reports a stray global stylesheet and a missing color-scheme", () => {
-    expect(ui(".a {\n  color: #111111;\n}\n", "src/other.css")).toEqual([
+    expect(ui(".a {\n  color: var(--ink);\n}\n", "src/other.css")).toEqual([
       "src/other.css:1 UI stylesheet is neither app/globals.css nor a CSS module",
     ]);
-    expect(ui(":root {\n  --ink: #111111;\n}\n", "app/globals.css")).toEqual([
+    expect(ui(":root {\n  --ink: #1b1915;\n}\n", "app/globals.css")).toEqual([
       "app/globals.css:1 globals.css is missing :root color-scheme: light",
     ]);
   });
