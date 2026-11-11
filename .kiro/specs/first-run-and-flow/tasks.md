@@ -123,7 +123,7 @@ Conventions that apply to every task:
     - Add an example test for the fake and the default `Viewport` shape.
     - _Requirements: 10.11, 12.9_
 
-  - [~] 4.2 Autosave extraction with the narrow guard and unmount flush
+  - [x] 4.2 Autosave extraction with the narrow guard and unmount flush
     - Create `apps/web/src/components/use-autosave.ts`: move `useAutosave` and `loadAutosave` out of `app-shell.tsx`. Its mount effect returns before `loadAutosave` and before subscribing when `svc.viewport.width() < NARROW_WIDTH`. Its cleanup calls `autosave.flush()` once before it unsubscribes.
     - In `use-pane.ts` return early from the mount effect when `svc.viewport.width() < NARROW_WIDTH`, so the Pane_Key is not read or written.
     - Add tests: at width 799 the storage fake records no `getItem` or `setItem` of the Autosave_Key or the Pane_Key; at 800 the draft loads; unmount with a save pending flushes once and writes nothing afterwards.

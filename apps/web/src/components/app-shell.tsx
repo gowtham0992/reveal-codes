@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import type { Document } from "@reveal-codes/engine";
 import { createAutosave } from "../autosave";
 import type { Autosave } from "../autosave";
 import { useEditorBinding } from "../editor/use-editor-binding";
-import { AUTOSAVE_KEY, deserialise, readRaw } from "../persist";
 import { defaultServices } from "../services";
 import type { AppServices } from "../services";
 import { createStore } from "../store-runtime";
@@ -19,6 +18,7 @@ import { StatusLine } from "./status-line";
 import { IssuesRegion } from "./issues-region";
 import { ShellToolbar } from "./shell-toolbar";
 import { useVerify } from "./use-verify";
+import { useAutosave } from "./use-autosave";
 import { useExport } from "./use-export";
 import { useDocumentActions } from "./use-document-actions";
 import { composeStatus, positionText, usePaneControl } from "./use-pane";
@@ -26,51 +26,6 @@ import { lnPos } from "../pane/layout";
 import { Pane } from "../pane/pane";
 
 export type AppShellProps = Readonly<{ services?: AppServices }>;
-
-/** Mount-time load (Requirement 9.3): a missing or corrupt value leaves the empty Document. */
-function loadAutosave(services: AppServices, store: Store): void {
-  const stored = readRaw(services.storage, AUTOSAVE_KEY);
-  if (!("raw" in stored)) return;
-  const restored = deserialise(stored.raw);
-  if (restored.ok) {
-    store.dispatch({
-      type: "replace",
-      document: restored.value.document,
-      runLog: restored.value.runLog,
-      verifiedAt: restored.value.verifiedAt,
-    });
-  }
-}
-
-/** Schedules a save whenever the Document, Run_Log or verifiedAt changes; flushes when the page is hidden. */
-function useAutosave(store: Store, services: AppServices, autosave: Autosave): void {
-  useEffect(() => {
-    loadAutosave(services, store);
-    let last = store.getState();
-    const unsubscribe = store.subscribe(() => {
-      const next = store.getState();
-      const changed =
-        next.document !== last.document ||
-        next.runLog !== last.runLog ||
-        next.verifiedAt !== last.verifiedAt;
-      if (changed) autosave.schedule(next.document, next.runLog, next.verifiedAt);
-      last = next;
-    });
-    const onVisibility = (): void => {
-      if (document.visibilityState === "hidden") autosave.flush();
-    };
-    const onPageHide = (): void => {
-      autosave.flush();
-    };
-    document.addEventListener("visibilitychange", onVisibility);
-    window.addEventListener("pagehide", onPageHide);
-    return () => {
-      unsubscribe();
-      document.removeEventListener("visibilitychange", onVisibility);
-      window.removeEventListener("pagehide", onPageHide);
-    };
-  }, [store, services, autosave]);
-}
 
 function useStoreSlice<T>(store: Store, select: (state: ReturnType<Store["getState"]>) => T): T {
   return useSyncExternalStore(

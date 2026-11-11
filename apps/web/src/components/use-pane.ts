@@ -5,6 +5,7 @@ import { divergenceWords, mismatchAt } from "../client/divergence";
 import { classifyKey } from "../editor/shortcuts";
 import { statusText } from "../pane/layout";
 import { initialPaneOpen, writePreference } from "../pane-preference";
+import { NARROW_WIDTH } from "../services";
 import type { AppServices } from "../services";
 
 export const SAVE_PROMPT = "Save document? Yes (No)";
@@ -44,6 +45,7 @@ function usePanePreference(svc: AppServices): [boolean, Dispatch<SetStateAction<
   const [open, setOpen] = useState(false);
   const [ready, setReady] = useState(false);
   useEffect(() => {
+    if (svc.viewport.width() < NARROW_WIDTH) return; // Pane_Key untouched (Req 10.7)
     setOpen(initialPaneOpen(svc.storage));
     setReady(true);
     // Mount only: the preference is read once (Req 1.2 to 1.5).
