@@ -56,7 +56,7 @@ Conventions that apply to every task:
     - Add `apps/web/test/ui-md.test.ts` (or extend `docs.test.ts`): `ui.md` contains each Token name and value of Requirement 1, the three family names, no `#1F3A8A`, no `#ECECEC`, and the retained rule lines.
     - _Requirements: 10.1, 10.2_
 
-- [ ] 2. Toolbar, Sheet with line numbers, and Issues region
+- [x] 2. Toolbar, Sheet with line numbers, and Issues region
   - [x] 2.1 Toolbar
     - In `apps/web/app/globals.css` set `--toolbar-h: 52px`. Update `VARIABLE_VALUES` in the scan.
     - Rewrite `apps/web/src/components/toolbar.module.css`: `background: var(--panel); border-bottom: 3px double var(--ink)`; `.wordmark` in Libre Caslon 15px, weight 400, `text-transform: uppercase; letter-spacing: 0.16em; margin-right: 24px; padding-right: 24px; border-right: 1px solid var(--rule)`; the `.group` rules and the 8px gaps unchanged with `var(--rule)`; `.notice` with `color: var(--muted)` and `font-size: 12.5px`. Use no `--ui-bg`, `--size-wordmark` or `--font-editor` alias that no longer exists; use `var(--font-editor)` and literal sizes. `toolbar.tsx` does not change; the text "Reveal Codes" stays in the DOM.
@@ -69,7 +69,7 @@ Conventions that apply to every task:
     - Add a CSS test (in `css-rules.test.ts` or `editor-surface.test.tsx`): the counter is reset on `.ProseMirror`, incremented on `.ProseMirror p`, drawn by `p::before` with the alt-text form, with `user-select: none`; the margin rules sit at the stated offsets (`left: 74px` with a 4px box and `1px` borders on both sides; `right: 72px` with a `1px` left border); and every declaration whose selector contains `.ProseMirror` (other than `::before`) sets none of `font-style`, `text-align`, `text-indent`, `padding`, and sets `margin` only to `0`. Add a planted-violation example for that rule.
     - Add an example that the Line_Number of every line equals the `Ln` of `lnPos` for a caret on that line, for the same example texts (the counter is 1 plus the paragraph index, `lineAt` is 1 plus the newlines before it).
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 5.10, 5.11, 5.12, 5.13, 5.14, 5.15, 5.16, 12.4, 13.10_
-  - [~] 2.3 Issues region and Issue_Row layout
+  - [x] 2.3 Issues region and Issue_Row layout
     - In `apps/web/src/pane/failing.ts` export `isFailingOpener(code)` over the existing opener set (accepting the display form with or without brackets, as `nameOf` does).
     - Rewrite `issues-region.module.css` (`--panel` background, `1px solid var(--rule)` left, heading in Libre Caslon 20px/26px weight 400 with the existing 1px bottom rule, `.note` in `var(--muted)`), `verify-result.module.css` (`.line` 12.5px/18px `var(--muted)`), and `issues-list.module.css` (list with `border-top: 3px double var(--ink)` and `--control-h: 24px`; row padding 10px with a `1px solid var(--rule-light)` bottom; `.lineA`, `.actions`, `.chip`, `.chipFail`, `.words`, `.text` as in the design).
     - In `issues-list.tsx` restructure `IssueRow` into line (a) (chip and the Go and Override… buttons on the right), line (b) (the status words with the `small-label` class and `--oxblood`) and line (c) (the text), then the "Diverges at:" and "Overridden:" lines in the style of (c). The chip is `chipFail` when `isFailingOpener(issue.code)`, whether or not the item is overridden, otherwise `chip`. Restructure `UncheckedRow` so the Verify button is at the right end of its first line and the sentence follows in `.text`, with no chip and no status words. Words, text, order, handlers and `disabled` rules do not change.

@@ -1,6 +1,7 @@
 import { blockingIssues, issues } from "@reveal-codes/engine";
 import type { Document, Issue, IssueCode } from "@reveal-codes/engine";
 import { divergenceWords } from "../client/divergence";
+import { isFailingOpener } from "../pane/failing";
 import styles from "./issues-list.module.css";
 
 export const MAX_ISSUE_TEXT = 80;
@@ -58,33 +59,37 @@ function IssueRow({ document, issue, blocking, reason, onGo, onOverride }: RowPr
   const words = divergenceFor(document, issue);
   return (
     <li className={styles["row"]}>
-      <div className={styles["head"]}>
-        <span className={styles["code"]}>{issue.code}</span>
-        <span>{`${blocking ? "blocking" : "overridden"}, ${SEVERITY[issue.code]}`}</span>
+      <div className={styles["lineA"]}>
+        <span className={isFailingOpener(issue.code) ? styles["chipFail"] : styles["chip"]}>
+          {issue.code}
+        </span>
+        <div className={styles["actions"]}>
+          <button
+            type="button"
+            onClick={() => {
+              onGo(issue.start);
+            }}
+          >
+            Go
+          </button>
+          {blocking ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                onOverride(issue, e.currentTarget);
+              }}
+            >
+              Override…
+            </button>
+          ) : null}
+        </div>
       </div>
+      <p className={`small-label ${styles["words"] ?? ""}`}>
+        {`${blocking ? "blocking" : "overridden"}, ${SEVERITY[issue.code]}`}
+      </p>
       <p className={styles["text"]}>{issueText(document, issue)}</p>
       {words === null ? null : <p className={styles["text"]}>{`Diverges at: ${words}`}</p>}
       {reason === undefined ? null : <p className={styles["text"]}>{`Overridden: ${reason}`}</p>}
-      <div className={styles["actions"]}>
-        <button
-          type="button"
-          onClick={() => {
-            onGo(issue.start);
-          }}
-        >
-          Go
-        </button>
-        {blocking ? (
-          <button
-            type="button"
-            onClick={(e) => {
-              onOverride(issue, e.currentTarget);
-            }}
-          >
-            Override…
-          </button>
-        ) : null}
-      </div>
     </li>
   );
 }
@@ -98,12 +103,14 @@ export function uncheckedText(n: number): string {
 function UncheckedRow({ count, verify }: Readonly<{ count: number; verify: VerifyAction }>) {
   return (
     <li className={styles["row"]}>
-      <p className={styles["text"]}>{uncheckedText(count)}</p>
-      <div className={styles["actions"]}>
-        <button type="button" onClick={verify.start} disabled={verify.disabled}>
-          Verify
-        </button>
+      <div className={`${styles["lineA"] ?? ""} ${styles["lineEnd"] ?? ""}`}>
+        <div className={styles["actions"]}>
+          <button type="button" onClick={verify.start} disabled={verify.disabled}>
+            Verify
+          </button>
+        </div>
       </div>
+      <p className={styles["text"]}>{uncheckedText(count)}</p>
     </li>
   );
 }

@@ -1,5 +1,11 @@
 // @vitest-environment jsdom
-import { createDocument, issues, recordOverride, setQuoteCheck } from "@reveal-codes/engine";
+import {
+  createDocument,
+  issues,
+  recordOverride,
+  setQuoteCheck,
+  setVerification,
+} from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import { IssuesList, issueText, shorten } from "../src/components/issues-list";
@@ -26,6 +32,18 @@ function withMismatch(doc: Document): Document {
   return set.value;
 }
 
+function withCitationResults(doc: Document): Document {
+  const keys = issues(doc)
+    .filter((i) => i.code === "CIT …")
+    .map((i) => i.key);
+  const [first, second] = keys;
+  if (first === undefined || second === undefined) throw new Error("fixture needs two citations");
+  const a = setVerification(doc, first, { status: "not_found" });
+  if (!a.ok) throw new Error("verification rejected");
+  const b = setVerification(a.value, second, { status: "ambiguous", candidates: ["1", "2"] });
+  if (!b.ok) throw new Error("verification rejected");
+  return b.value;
+}
 const noop = (): void => undefined;
 const VERIFY = { start: noop, disabled: false };
 
@@ -53,6 +71,66 @@ describe("IssuesList _Requirements: 10.17, 18.1, 18.3, 18.4, 18.10, 18.11_", () 
     });
   });
 
+  it("lays each row out as three lines: chip with Go and Override…, status words, text", () => {
+    renderUi(<IssuesList document={withMismatch(build(TEXT))} onGo={noop} onOverride={noop} />);
+    const expected = issues(withMismatch(build(TEXT)));
+    screen.getAllByRole("listitem").forEach((row, i) => {
+      const [lineA, words, text] = Array.from(row.children);
+      expect(lineA?.className).toMatch(/lineA/);
+      expect(lineA?.firstElementChild?.textContent).toBe(expected[i]?.code);
+      const actions = lineA?.lastElementChild;
+      expect(actions?.className).toMatch(/actions/);
+      expect(Array.from(actions?.children ?? []).map((b) => b.textContent)).toEqual([
+        "Go",
+        "Override…",
+      ]);
+      expect(words?.className).toMatch(/small-label/);
+      expect(words?.className).toMatch(/words/);
+      expect(words?.textContent).toMatch(/^blocking, /);
+      expect(text?.className).toMatch(/text/);
+      expect(text?.textContent).toBe(
+        issueText(withMismatch(build(TEXT)), expected[i] as (typeof expected)[number]),
+      );
+    });
+  });
+  it("puts the Diverges at: line after the text, in the style of the text", () => {
+    renderUi(<IssuesList document={withMismatch(build(TEXT))} onGo={noop} onOverride={noop} />);
+    const row = screen.getByText(/^Diverges at: /).parentElement;
+    const kids = Array.from(row?.children ?? []);
+    expect(kids).toHaveLength(4);
+    expect(kids[3]?.className).toBe(kids[2]?.className);
+  });
+  it("uses the failing chip for CIT ✘, CIT ? and QUO ✘ and the outline chip for CIT … and QUO …", () => {
+    const failing = withMismatch(withCitationResults(build(TEXT)));
+    const view = renderUi(<IssuesList document={failing} onGo={noop} onOverride={noop} />);
+    const chipOf = (code: string): string => {
+      const chip = screen
+        .getAllByRole("listitem")
+        .map((r) => r.firstElementChild?.firstElementChild)
+        .find((e) => e?.textContent === code);
+      if (chip === undefined || chip === null) throw new Error(`no chip ${code}`);
+      return chip.className;
+    };
+    for (const code of ["CIT ✘", "CIT ?", "QUO ✘"]) expect(chipOf(code)).toMatch(/chipFail/);
+    view.unmount();
+    renderUi(<IssuesList document={build(TEXT)} onGo={noop} onOverride={noop} />);
+    for (const code of ["CIT …", "QUO …"]) {
+      expect(chipOf(code)).toMatch(/chip/);
+      expect(chipOf(code)).not.toMatch(/chipFail/);
+    }
+  });
+  it("keeps the failing chip on an overridden QUO ✘ and reads overridden in line (b)", () => {
+    const mismatch = withMismatch(build(TEXT));
+    const quo = issues(mismatch).find((i) => i.code === "QUO ✘");
+    if (quo === undefined) throw new Error("no QUO ✘");
+    const r = recordOverride(mismatch, quo.key, "Reviewed.", ISO);
+    if (!r.ok) throw new Error("override rejected");
+    renderUi(<IssuesList document={r.value} onGo={noop} onOverride={noop} />);
+    const row = screen.getByText("Overridden: Reviewed.").parentElement;
+    expect(row?.firstElementChild?.firstElementChild?.className).toMatch(/chipFail/);
+    expect(row?.children[1]?.textContent).toBe("overridden, quote not found in opinion");
+    expect(within(row as HTMLElement).queryByRole("button", { name: "Override…" })).toBeNull();
+  });
   it("uses words, not colour: no inline style or background on any row", () => {
     renderUi(<IssuesList document={build(TEXT)} onGo={noop} onOverride={noop} />);
     for (const el of document.querySelectorAll("li, li *")) {
@@ -174,6 +252,13 @@ describe("Unchecked_Row _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6
     expect(rows[0]?.textContent).toContain("4 citations and quotations have not been checked.");
     const button = within(rows[0] as HTMLElement).getByRole("button", { name: "Verify" });
     expect(button.hasAttribute("data-primary")).toBe(false);
+    const [first, second, ...rest] = Array.from(rows[0]?.children ?? []);
+    expect(rest).toEqual([]);
+    expect(first?.className).toMatch(/lineA/);
+    expect(first?.className).toMatch(/lineEnd/);
+    expect(first?.textContent).toBe("Verify");
+    expect(second?.className).toMatch(/text/);
+    expect(rows[0]?.querySelector("[class*='chip'], [class*='words']")).toBeNull();
   });
 
   it("uses the singular text for one item", () => {

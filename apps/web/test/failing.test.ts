@@ -1,6 +1,6 @@
 import type { CodePosition } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
-import { failingFlags } from "../src/pane/failing";
+import { failingFlags, isFailingOpener } from "../src/pane/failing";
 
 const at = (...codes: readonly string[]): CodePosition[] =>
   codes.map((code, offset) => ({ offset, code }));
@@ -47,5 +47,16 @@ describe("failingFlags _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_", () => {
 
   it("returns one flag per position, empty for none", () => {
     expect(failingFlags([])).toEqual([]);
+  });
+});
+
+describe("isFailingOpener _Requirements: 6.4, 6.5_", () => {
+  it("accepts the display form with or without brackets and rejects the rest", () => {
+    for (const code of ["CIT ✘", "[CIT ✘]", "CIT ?", "[CIT ?:2]", "QUO ✘", "[QUO ✘]"]) {
+      expect(isFailingOpener(code)).toBe(true);
+    }
+    for (const code of ["CIT ✓", "[CIT …]", "QUO ✓", "QUO …", "[/CIT]", "[HUM]", "[OVR:x]"]) {
+      expect(isFailingOpener(code)).toBe(false);
+    }
   });
 });

@@ -10,6 +10,11 @@ function nameOf(token: string): string {
   return end < 0 ? body : body.slice(0, end);
 }
 
+/** Whether a display code (with or without its brackets) opens a Failing_Block. */
+export function isFailingOpener(code: string): boolean {
+  return FAILING_OPENERS.has(nameOf(code));
+}
+
 /**
  * Whether each code is a Failing_Code, parallel to `positions`. A citation and a quotation
  * each have their own stack, so a quotation inside a citation never consumes its closer.

@@ -1,32 +1,63 @@
 .list {
+  --control-h: 24px;
   margin: 0;
   padding: 0;
+  border-top: 3px double var(--ink);
   list-style: none;
 }
 
 .row {
-  padding: 6px 0;
-  border-top: 1px solid var(--rule);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule-light);
 }
 
-.head {
+.lineA {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.code {
-  font-weight: 700;
-}
-
-.text {
-  margin: 4px 0 0;
-  overflow-wrap: anywhere;
+.lineEnd {
+  justify-content: flex-end;
 }
 
 .actions {
   display: flex;
   gap: 8px;
-  margin-top: 6px;
+}
+
+.chip {
+  padding: 0 6px;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  font-family: var(--font-pane);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.chipFail {
+  padding: 0 6px;
+  border: 1px solid var(--fail);
+  background: var(--fail);
+  color: var(--white);
+  font-family: var(--font-pane);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.words {
+  margin: 4px 0 0;
+  color: var(--oxblood);
+}
+
+.text {
+  margin: 4px 0 0;
+  font-family: var(--font-editor);
+  font-size: 13px;
+  line-height: 19px;
+  overflow-wrap: anywhere;
 }
 
 .empty {

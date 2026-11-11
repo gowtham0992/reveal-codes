@@ -162,6 +162,8 @@ function variableViolations(path: string, decls: CssDeclaration[]): Violation[] 
     .filter(
       (d) =>
         VARIABLE_VALUES[d.prop] !== undefined &&
+        // Component sheets set their own control height (24px list, 32px dialog); globals pins 30px.
+        !(d.prop === "--control-h" && path !== "app/globals.css") &&
         norm(d.value).toUpperCase() !== VARIABLE_VALUES[d.prop]?.toUpperCase(),
     )
     .map((d) => at(path, d, `${d.prop} must be ${VARIABLE_VALUES[d.prop] ?? ""}`));

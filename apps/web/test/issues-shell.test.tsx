@@ -88,6 +88,17 @@ describe("Issues region in the shell _Requirements: 14.1, 18.2, 18.5, 18.7_", ()
     expect(screen.queryByRole("button", { name: "Override…" })).toBeNull();
   });
 
+  it("shows the three-line row with Go and Override… in the first line", async () => {
+    await mount();
+    const row = within(screen.getByRole("complementary", { name: /^Issues/ })).getAllByRole(
+      "listitem",
+    )[0];
+    const [lineA, words, text] = Array.from(row?.children ?? []);
+    expect(within(lineA as HTMLElement).getByRole("button", { name: "Go" })).not.toBeNull();
+    expect(within(lineA as HTMLElement).getByRole("button", { name: "Override…" })).not.toBeNull();
+    expect(words?.textContent).toMatch(/^blocking, /);
+    expect(text?.textContent).toContain("410 U.S. 113");
+  });
   it("ignores Alt-F3 while the Override dialog is open", async () => {
     await mount();
     act(() => {
@@ -118,6 +129,9 @@ describe("Unchecked_Row in the shell _Requirements: 6.1, 6.6, 6.7, 6.8, 6.9, 6.1
     expect(within(issuesRegion()).queryByRole("button", { name: "Go" })).toBeNull();
     const verify = within(issuesRegion()).getByRole("button", { name: "Verify" });
     expect(verify.hasAttribute("data-primary")).toBe(false);
+    const row = verify.closest("li");
+    expect(row?.firstElementChild?.contains(verify)).toBe(true);
+    expect(row?.querySelector("[class*='chip'], [class*='words']")).toBeNull();
     await act(async () => {
       fireEvent.click(verify);
       await new Promise((r) => setTimeout(r, 50));
