@@ -40,24 +40,19 @@ function useOverrideForm(props: OverrideDialogProps) {
   return { reason, setReason, error, valid, save };
 }
 
-/** Override_Dialog (Requirements 18.5 to 18.9). */
-export function OverrideDialog(props: OverrideDialogProps) {
-  const { code, issueText, restoreFocus, onClose } = props;
+type FieldProps = Readonly<{
+  reason: string;
+  setReason: (value: string) => void;
+  valid: boolean;
+  error: string | null;
+}>;
+
+/** Reason label, field, hint and error display. */
+function ReasonField({ reason, setReason, valid, error }: FieldProps) {
   const fieldId = useId();
-  const describeId = useId();
   const hintId = useId();
-  const { reason, setReason, error, valid, save } = useOverrideForm(props);
   return (
-    <Modal
-      title={`Override ${code}`}
-      onClose={onClose}
-      restoreFocus={restoreFocus}
-      describedBy={describeId}
-    >
-      <div id={describeId}>
-        <p className={styles["issueText"]}>{issueText}</p>
-        <p className={styles["statement"]}>{PRINTED_STATEMENT}</p>
-      </div>
+    <>
       <label htmlFor={fieldId} className={styles["label"]}>
         Reason
       </label>
@@ -78,6 +73,27 @@ export function OverrideDialog(props: OverrideDialogProps) {
       {error === null ? null : (
         <p role="alert" className={styles["error"]}>{`Could not save the override: ${error}.`}</p>
       )}
+    </>
+  );
+}
+
+/** Override_Dialog (Requirements 18.5 to 18.9). */
+export function OverrideDialog(props: OverrideDialogProps) {
+  const { code, issueText, restoreFocus, onClose } = props;
+  const describeId = useId();
+  const { reason, setReason, error, valid, save } = useOverrideForm(props);
+  return (
+    <Modal
+      title={`Override ${code}`}
+      onClose={onClose}
+      restoreFocus={restoreFocus}
+      describedBy={describeId}
+    >
+      <div id={describeId}>
+        <p className={styles["issueText"]}>{issueText}</p>
+        <p className={styles["statement"]}>{PRINTED_STATEMENT}</p>
+      </div>
+      <ReasonField reason={reason} setReason={setReason} valid={valid} error={error} />
       <ModalActions>
         <button type="button" disabled={!valid} onClick={save}>
           Save override

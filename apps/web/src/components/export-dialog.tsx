@@ -35,12 +35,13 @@ export type ExportDialogProps = Readonly<{
 
 type Target = Readonly<{ issue: Issue; opener: HTMLElement }>;
 
-export function downloadLabel(blocking: number): string {
-  return blocking > 0 ? `Download .docx (${String(blocking)} blocking)` : "Download .docx";
-}
+export const DOWNLOAD_LABEL = "Download .docx";
+export const PRINT_LABEL = "Open print view";
 
-export function printLabel(blocking: number): string {
-  return blocking > 0 ? `Open print view (${String(blocking)} blocking)` : "Open print view";
+/** The line above the action buttons; null when nothing blocks. */
+export function blockingLine(n: number): string | null {
+  if (n === 0) return null;
+  return n === 1 ? "1 blocking item remains" : `${String(n)} blocking items remain`;
 }
 
 /**
@@ -142,24 +143,28 @@ type ActionsProps = Readonly<{
 }>;
 
 function ExportActions({ gate, blocking, busy, onDownload, onPrint, onClose }: ActionsProps) {
+  const line = blockingLine(blocking);
   return (
-    <ModalActions>
-      <button
-        type="button"
-        disabled={!gate.clear || busy}
-        onClick={() => {
-          onDownload(gate.context);
-        }}
-      >
-        {downloadLabel(blocking)}
-      </button>
-      <button type="button" disabled={!gate.clear} onClick={onPrint}>
-        {printLabel(blocking)}
-      </button>
-      <button type="button" onClick={onClose}>
-        Close
-      </button>
-    </ModalActions>
+    <>
+      {line === null ? null : <p className={styles["blockingLine"]}>{line}</p>}
+      <ModalActions>
+        <button
+          type="button"
+          disabled={!gate.clear || busy}
+          onClick={() => {
+            onDownload(gate.context);
+          }}
+        >
+          {DOWNLOAD_LABEL}
+        </button>
+        <button type="button" disabled={!gate.clear} onClick={onPrint}>
+          {PRINT_LABEL}
+        </button>
+        <button type="button" onClick={onClose}>
+          Close
+        </button>
+      </ModalActions>
+    </>
   );
 }
 
@@ -173,7 +178,7 @@ export function ExportDialog(props: ExportDialogProps) {
   const blocking = blockingIssues(document);
   return (
     <>
-      <Modal title="Export" onClose={onClose} restoreFocus={restoreFocus}>
+      <Modal title="Export" wide onClose={onClose} restoreFocus={restoreFocus}>
         <div ref={root} className={styles["body"]}>
           <ExportOrder gate={gate} />
           <ExportBody {...props} blocking={blocking} onOverride={setTarget} />

@@ -166,8 +166,8 @@ describe("prohibition block _Requirements: 5.5, 5.6, 5.7, 5.8, 9.7, 9.12_", () =
     expect(within(dialog()).getAllByRole("listitem")).toHaveLength(1);
     expect(dialog().textContent).toContain("prohibits AI-drafted text.");
     expect(screen.getAllByRole("button", { name: "Override\u2026" })).toHaveLength(1);
-    expect(button("Download .docx (1 blocking)").disabled).toBe(true);
-    expect(button("Open print view (1 blocking)").disabled).toBe(true);
+    expect(button("Download .docx").disabled).toBe(true);
+    expect(button("Open print view").disabled).toBe(true);
     expect(button(/^Export \(/).textContent).toBe("Export (1 blocking)");
   });
 

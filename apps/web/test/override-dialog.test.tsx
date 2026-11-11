@@ -75,6 +75,45 @@ function saveButton(): HTMLButtonElement {
   return screen.getByRole("button", { name: "Save override" });
 }
 
+function ListFixture({ doc, store }: { doc: Document; store: Store }) {
+  return (
+    <IssuesRegion
+      document={doc}
+      store={store}
+      now={now}
+      onGo={() => undefined}
+      verifiedAt={ISO}
+      note={null}
+      verify={{ start: () => undefined, disabled: false }}
+    />
+  );
+}
+
+function ExportFixture({ doc, store }: { doc: Document; store: Store }) {
+  return (
+    <ExportDialog
+      document={doc}
+      store={store}
+      orderStore={createOrderSelectionStore(createMemoryStorage(), ORDERS)}
+      now={now}
+      notice={null}
+      clearNotice={() => undefined}
+      busy={false}
+      onGo={() => undefined}
+      onDownload={() => undefined}
+      onPrint={() => undefined}
+      onClose={() => undefined}
+    />
+  );
+}
+
+function clickLastOverride(): void {
+  const buttons = screen.getAllByRole("button", { name: "Override…" });
+  act(() => {
+    fireEvent.click(buttons[buttons.length - 1] as HTMLElement);
+  });
+}
+
 describe("OverrideDialog _Requirements: 18.5, 18.6, 18.7, 18.8, 18.9_", () => {
   it("opens as a modal with a focused reason field and the certification statement", () => {
     const { store, key } = seededStore();
@@ -208,48 +247,16 @@ describe("OverrideDialog issue text _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 12.8
     const expected = issueText(doc, quoteIssue(doc));
     const store = createStore(now);
     store.dispatch({ type: "replace", document: doc });
-    const region = renderUi(
-      <IssuesRegion
-        document={doc}
-        store={store}
-        now={now}
-        onGo={() => undefined}
-        verifiedAt={ISO}
-        note={null}
-        verify={{ start: () => undefined, disabled: false }}
-      />,
-    );
-    const quoteRow = screen.getAllByRole("button", { name: "Override…" }).length - 1;
-    act(() => {
-      fireEvent.click(
-        screen.getAllByRole("button", { name: "Override…" })[quoteRow] as HTMLElement,
-      );
-    });
-    const fromList = screen.getByRole("dialog", { name: /^Override/ });
-    expect(fromList.getAttribute("aria-describedby")).not.toBeNull();
-    expect(fromList.textContent).toContain(expected);
+    const region = renderUi(<ListFixture doc={doc} store={store} />);
+    clickLastOverride();
+    expect(
+      screen.getByRole("dialog", { name: /^Override/ }).getAttribute("aria-describedby"),
+    ).not.toBeNull();
+    expect(screen.getByRole("dialog", { name: /^Override/ }).textContent).toContain(expected);
     region.unmount();
-    renderUi(
-      <ExportDialog
-        document={doc}
-        store={store}
-        orderStore={createOrderSelectionStore(createMemoryStorage(), ORDERS)}
-        now={now}
-        notice={null}
-        clearNotice={() => undefined}
-        busy={false}
-        onGo={() => undefined}
-        onDownload={() => undefined}
-        onPrint={() => undefined}
-        onClose={() => undefined}
-      />,
-    );
-    const buttons = screen.getAllByRole("button", { name: "Override…" });
-    act(() => {
-      fireEvent.click(buttons[buttons.length - 1] as HTMLElement);
-    });
-    const fromExport = screen.getByRole("dialog", { name: /^Override/ });
-    expect(fromExport.textContent).toContain(expected);
+    renderUi(<ExportFixture doc={doc} store={store} />);
+    clickLastOverride();
+    expect(screen.getByRole("dialog", { name: /^Override/ }).textContent).toContain(expected);
   });
 
   it("points aria-describedby at an element that contains the text", () => {

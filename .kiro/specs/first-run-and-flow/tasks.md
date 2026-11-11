@@ -90,7 +90,7 @@ Conventions that apply to every task:
     - Update `issues-list.test.tsx` and `issues-shell.test.tsx` (scope Verify queries to `role="toolbar"` or the Issues region): the row first, plural and singular text, individual rows after a run, the row's Verify making one request through the same handler, the row's button disabled with the Toolbar's, no row at zero, the Export dialog listing every item.
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10, 12.6, 12.14_
 
-- [ ] 3. Assistant lines, Override dialog text, and Export dialog width and copy
+- [x] 3. Assistant lines, Override dialog text, and Export dialog width and copy
   - [x] 3.1 Assistant lines and Reply_Box
     - In `apps/web/src/assistant-run.ts` add the pure helper `insertionLine(docText, op)` beside `buildInsertion`: `lineAt(docText, op.at)` (imported from `pane/layout.ts`) plus 1 when `op.text` starts with `"\n"` (the separator `asParagraph` adds; the reply's own leading newlines are stripped, so the lead is 0 or 1). It is the line of the first inserted character (Insertion_Line), computed from the text before the edit, never the caret line after it.
     - In `apps/web/src/components/use-assistant.ts` make `runDraft` return `{ message, inserted, insertedText }`. After `buildInsertion` it dispatches the edit and reads the result; `inserted = { line: insertionLine(textBefore, ops[0]), runId: insertion.run.runId, stopped }` only when `error === null` and text was inserted, for a completed run and for a stopped run with partial text alike (`stopped` true for the latter). `insertedText` is the reply text actually inserted, without the separating newlines. A failed, discarded, empty or rejected run, and a stopped run with no text, returns `inserted: null` and `insertedText: ""`.
@@ -108,7 +108,7 @@ Conventions that apply to every task:
     - Update `override-dialog.test.tsx`: short text under the title; 120 characters cut to 79 plus an ellipsis; an emoji at the cut is not split; the same text from the Issues list and from the Export dialog; `aria-describedby` resolves to an element that contains the text.
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 12.8, 12.14_
 
-  - [~] 3.3 Export dialog width, button labels, blocking line, Picker cut
+  - [x] 3.3 Export dialog width, button labels, blocking line, Picker cut
     - In `modal.tsx` add the prop `wide` and in `modal.module.css` add `.dialogWide { width: min(560px, 100vw - 32px); max-width: none; }` after `.dialog`; only the Export dialog passes `wide`. Override and confirm dialogs keep 420px.
     - In `apps/web/src/components/export-dialog.tsx` replace `downloadLabel` and `printLabel` with constants `DOWNLOAD_LABEL = "Download .docx"` and `PRINT_LABEL = "Open print view"`; add `blockingLine(n)` (null for 0, `1 blocking item remains`, `<n> blocking items remain`) rendered as a `<p>` directly above the action buttons; keep the disabled rules.
     - In `apps/web/src/order-copy.ts` set `OPTION_TEXT_MAX = 80`.

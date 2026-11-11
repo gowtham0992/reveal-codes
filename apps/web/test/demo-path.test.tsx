@@ -111,6 +111,21 @@ function expectRedAndGreenCodes(): void {
   expect(count(after, "[QUO ✓]")).toBe(1);
   expect(button(/^Export/).textContent).toBe("Export (4 blocking)");
   expect(button(/^Export/).disabled).toBe(false);
+  expectExportDialogLine();
+}
+function expectExportDialogLine(): void {
+  act(() => {
+    fireEvent.click(button(/^Export/));
+  });
+  const dialog = screen.getByRole("dialog", { name: "Export" });
+  expect(within(dialog).getByText("4 blocking items remain")).not.toBe(null);
+  expect(within(dialog).getByRole("button", { name: "Download .docx" })).toHaveProperty(
+    "disabled",
+    true,
+  );
+  act(() => {
+    fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
+  });
 }
 
 function expectIssuesAndGo(): void {

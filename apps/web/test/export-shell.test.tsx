@@ -129,7 +129,7 @@ describe("Export dialog in the shell _Requirements: 2.2, 2.4, 2.5, 2.8, 2.10, 2.
     const dialog = screen.getByRole("dialog", { name: "Export" });
     const n = blockingIssues(docOf(TWO)).length;
     expect(within(dialog).getAllByRole("listitem")).toHaveLength(n);
-    expect(within(dialog).getByRole("button", { name: /^Download .docx \(/ })).toHaveProperty(
+    expect(within(dialog).getByRole("button", { name: "Download .docx" })).toHaveProperty(
       "disabled",
       true,
     );
@@ -139,11 +139,10 @@ describe("Export dialog in the shell _Requirements: 2.2, 2.4, 2.5, 2.8, 2.10, 2.
     await mount(ONE);
     openExport();
     const dialog = (): HTMLElement => screen.getByRole("dialog", { name: "Export" });
-    expect(within(dialog()).getByRole("button", { name: "Download .docx (1 blocking)" })).not.toBe(
-      null,
-    );
+    expect(within(dialog()).getByText("1 blocking item remains")).not.toBe(null);
     saveOverride("Checked by hand", dialog());
     expect(within(dialog()).queryByRole("listitem")).toBeNull();
+    expect(within(dialog()).queryByText(/blocking item/)).toBeNull();
     expect(within(dialog()).getByRole("button", { name: "Download .docx" })).toHaveProperty(
       "disabled",
       false,

@@ -59,21 +59,40 @@ describe("ExportDialog states _Requirements: 2.1, 2.2, 2.3, 2.6, 2.7, 2.9_", () 
   it("lists each blocking issue and disables both buttons with the count", () => {
     const doc = docOf(TWO);
     const n = blockingIssues(doc).length;
-    expect(n).toBeGreaterThan(1);
+    expect(n).toBe(2);
     renderUi(<ExportDialog {...props(doc)} />);
     expect(screen.getAllByRole("listitem")).toHaveLength(n);
     expect(screen.getAllByRole("button", { name: "Go" })).toHaveLength(n);
     expect(screen.getAllByRole("button", { name: "Override…" })).toHaveLength(n);
-    expect(button(`Download .docx (${String(n)} blocking)`).disabled).toBe(true);
-    expect(button(`Open print view (${String(n)} blocking)`).disabled).toBe(true);
+    expect(button("Download .docx").disabled).toBe(true);
+    expect(button("Open print view").disabled).toBe(true);
+    expect(screen.getByText(`${String(n)} blocking items remain`)).toBeTruthy();
+  });
+  it.each([
+    [TWO, "2 blocking items remain"],
+    [ONE, "1 blocking item remains"],
+  ])("shows the blocking line directly above the buttons for %#", (text, line) => {
+    renderUi(<ExportDialog {...props(docOf(text))} />);
+    const el = screen.getByText(line);
+    expect(el.tagName).toBe("P");
+    expect(el.nextElementSibling?.contains(button("Download .docx"))).toBe(true);
+  });
+  it("shows no blocking line and plain labels when nothing blocks", () => {
+    renderUi(<ExportDialog {...props(docOf(NONE))} />);
+    expect(screen.queryByText(/blocking item/)).toBeNull();
+    expect(button("Download .docx")).toBeTruthy();
+  });
+  it("uses the wide dialog class only for Export", () => {
+    renderUi(<ExportDialog {...props(docOf(NONE))} />);
+    expect(screen.getByRole("dialog", { name: "Export" }).className).toContain("dialogWide");
   });
 
   it("does not call the handlers of disabled buttons", () => {
     const onDownload = vi.fn();
     const onPrint = vi.fn();
     renderUi(<ExportDialog {...props(docOf(ONE), { onDownload, onPrint })} />);
-    fireEvent.click(button("Download .docx (1 blocking)"));
-    fireEvent.click(button("Open print view (1 blocking)"));
+    fireEvent.click(button("Download .docx"));
+    fireEvent.click(button("Open print view"));
     expect(onDownload).not.toHaveBeenCalled();
     expect(onPrint).not.toHaveBeenCalled();
   });

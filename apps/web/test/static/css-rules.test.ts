@@ -404,6 +404,13 @@ describe("static: primary button rule _Requirements: 4.6, 4.7, 4.9, 4.12, 12.4_"
   });
 });
 
+const EXPORT_WIDTH = "width: min(560px, 100vw - 32px)";
+describe("static: Export dialog width _Requirements: 9.1, 9.2, 9.8_", () => {
+  it("defines the wide dialog width in modal.module.css and in no other sheet", () => {
+    const holders = sheets.filter((s) => s.text.includes(EXPORT_WIDTH)).map((s) => s.path);
+    expect(holders).toEqual(["src/components/modal.module.css"]);
+  });
+});
 function ui(text: string, path = "src/components/x.module.css"): string[] {
   return formatViolations(checkUiSheet({ path, text }));
 }

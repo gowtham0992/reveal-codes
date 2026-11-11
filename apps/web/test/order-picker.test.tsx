@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { ORDERS, selectableOrders } from "@reveal-codes/export";
+import type { OrderEntry } from "@reveal-codes/export";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -37,6 +38,17 @@ function choose(id: string): void {
   fireEvent.change(picker(), { target: { value: id } });
 }
 
+describe("OrderPicker option cut _Requirements: 9.7_", () => {
+  const base = selectableOrders(ORDERS)
+    .flatMap((g) => g.entries)
+    .find((e) => e.judge === null) as OrderEntry;
+  it("keeps 80 code points and cuts 81 with an ellipsis, for plain text", () => {
+    const eighty = "E".repeat(80);
+    expect(optionText({ ...base, judge: null, instrument: eighty })).toContain(` ${eighty} (`);
+    const cut = optionText({ ...base, judge: null, instrument: `${eighty}x` });
+    expect(cut).toContain(`${"E".repeat(79)}\u2026 (`);
+  });
+});
 describe("OrderPicker structure _Requirements: 3.1, 3.3, 3.4, 3.5_", () => {
   it("is a native select labelled Court or judge, above nothing but its label", () => {
     mount();

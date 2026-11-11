@@ -16,7 +16,7 @@ const SELECTABLE: readonly OrderEntry[] = selectableOrders(ORDERS).flatMap((g) =
 
 /** The template, written out here rather than imported. */
 function short(text: string): string {
-  return text.length <= 60 ? text : `${text.slice(0, 59)}\u2026`;
+  return text.length <= 80 ? text : `${text.slice(0, 79)}\u2026`;
 }
 
 function expectedOption(entry: OrderEntry): string {
@@ -46,7 +46,7 @@ describe("optionText _Requirements: 2.2, 2.3, 2.4_", () => {
       "Court-wide \u2014 Local Civil Rule 7.2(f); Local Criminal Rule 47.2(e) (2024)",
     );
     expect(judge && optionText(judge)).toBe(
-      "Judge Love \u2014 Standing Order on Disclosure and Certification Requirements\u2026 (2025)",
+      "Judge Love \u2014 Standing Order on Disclosure and Certification Requirements for Use of Generati\u2026 (2025)",
     );
   });
 });
@@ -54,22 +54,23 @@ describe("optionText _Requirements: 2.2, 2.3, 2.4_", () => {
 describe("optionText ellipsis _Requirements: 3.2_", () => {
   const base = SELECTABLE.find((e) => e.judge !== null) as OrderEntry;
   const wide = SELECTABLE.find((e) => e.judge === null) as OrderEntry;
-  const long = "A".repeat(80);
+  const long = "A".repeat(81);
 
-  it("limits the title of a judge entry to 60 characters and keeps the year", () => {
+  it("limits the title of a judge entry to 80 characters and keeps the year", () => {
     const text = optionText({ ...base, title: long });
-    expect(text.endsWith(`${"A".repeat(59)}\u2026 (${base.date.slice(0, 4)})`)).toBe(true);
-    expect(OPTION_TEXT_MAX).toBe(60);
+    expect(text.endsWith(`${"A".repeat(79)}\u2026 (${base.date.slice(0, 4)})`)).toBe(true);
+    expect(OPTION_TEXT_MAX).toBe(80);
   });
 
-  it("limits the instrument of a court-wide entry to 60 characters", () => {
+  it("limits the instrument of a court-wide entry to 80 characters", () => {
     const text = optionText({ ...wide, instrument: long });
-    expect(text).toBe(`Court-wide \u2014 ${"A".repeat(59)}\u2026 (${wide.date.slice(0, 4)})`);
+    expect(text).toBe(`Court-wide \u2014 ${"A".repeat(79)}\u2026 (${wide.date.slice(0, 4)})`);
   });
 
-  it("leaves a title of exactly 60 characters and a short title unchanged", () => {
-    const sixty = "B".repeat(60);
+  it("leaves a title of exactly 80 characters and a short title unchanged", () => {
+    const sixty = "B".repeat(80);
     expect(optionText({ ...base, title: sixty })).toContain(` \u2014 ${sixty} (`);
+    expect(optionText({ ...base, title: "B".repeat(81) })).toContain(`${"B".repeat(79)}\u2026 (`);
     expect(optionText({ ...base, title: "Short" })).toContain(" \u2014 Short (");
   });
 });

@@ -25,7 +25,7 @@ export const appliesWords: Record<OrderEntry["applies_to"], string> = {
 };
 
 /** Longest title or instrument shown in an option; the year stays visible after it. */
-export const OPTION_TEXT_MAX = 60;
+export const OPTION_TEXT_MAX = 80;
 
 /** Option text of the Picker: court-wide entries by instrument, judge entries by surname. */
 export function optionText(entry: OrderEntry): string {

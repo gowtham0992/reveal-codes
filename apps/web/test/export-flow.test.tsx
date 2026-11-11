@@ -77,10 +77,12 @@ function expectBlockedDialog(): void {
   });
   const dialog = screen.getByRole("dialog", { name: "Export" });
   expect(within(dialog).getAllByRole("listitem")).toHaveLength(4);
-  expect(
-    within(dialog).getByRole("button", { name: "Download .docx (4 blocking)" }),
-  ).toHaveProperty("disabled", true);
-  expect(within(dialog).getByRole("button", { name: /^Open print view/ })).toHaveProperty(
+  expect(within(dialog).getByRole("button", { name: "Download .docx" })).toHaveProperty(
+    "disabled",
+    true,
+  );
+  expect(within(dialog).getByText("4 blocking items remain")).not.toBe(null);
+  expect(within(dialog).getByRole("button", { name: "Open print view" })).toHaveProperty(
     "disabled",
     true,
   );
