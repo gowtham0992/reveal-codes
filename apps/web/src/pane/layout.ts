@@ -1,5 +1,6 @@
 import { render } from "@reveal-codes/engine";
 import type { CodePosition, Document } from "@reveal-codes/engine";
+import { openerFamilies } from "./closers";
 import { failingFlags } from "./failing";
 
 export type CodeFamily =
@@ -93,13 +94,13 @@ export function codeMeaning(token: string): string {
   }
 }
 
-function codeItem(position: CodePosition, failing: boolean): PaneItem {
+function codeItem(position: CodePosition, failing: boolean, opener: CodeFamily | null): PaneItem {
   return {
     failing,
     kind: "code",
     offset: position.offset,
     text: position.code,
-    family: codeFamily(position.code),
+    family: opener ?? codeFamily(position.code),
     meaning: codeMeaning(position.code),
   };
 }
@@ -115,6 +116,7 @@ export function layoutPane(document: Document): PaneLayout {
   const rendering = render(document, "display");
   const { positions } = rendering;
   const flags = failingFlags(positions);
+  const openers = openerFamilies(positions);
   const length = document.text.length;
   const items: PaneItem[] = [];
   let next = 0;
@@ -122,7 +124,7 @@ export function layoutPane(document: Document): PaneLayout {
   let offset = 0;
   for (;;) {
     for (let p = positions[next]; p !== undefined && p.offset === offset; p = positions[next]) {
-      items.push(codeItem(p, flags[next] ?? false));
+      items.push(codeItem(p, flags[next] ?? false, openers[next] ?? null));
       at += p.code.length;
       next += 1;
     }

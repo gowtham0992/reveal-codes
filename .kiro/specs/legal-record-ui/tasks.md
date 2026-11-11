@@ -78,7 +78,7 @@ Conventions that apply to every task:
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10, 6.11, 6.12, 13.10_
 
 - [ ] 3. Pane, Status_Bar and product.md
-  - [~] 3.1 Closer families
+  - [x] 3.1 Closer families
     - Create `apps/web/src/pane/closers.ts` with `openerFamilies(positions)` as the design lists it: one stack per kind (`CIT`, `QUO`, `REF`), an opener pushes `codeFamily(code)`, a closer pops, everything else and an unbalanced closer gives `null`. It reads only `positions`.
     - In `apps/web/src/pane/layout.ts` call `openerFamilies` once in `layoutPane` and give a paired closer the family of its opener (`family = opener ?? "close"`); `failing`, `text`, `offset` and `meaning` do not change. Add `pane/closers.ts` to the layout regex in `apps/web/test/static/boundaries.test.ts`.
     - Add `apps/web/test/closers.test.ts` and update `layout.test.ts` and `layout.properties.test.ts` if they assert the closer family: a closer of `CIT ✓` is `verified`; of `CIT …` is `pending`; of `REF` is `ref`; of `QUO ✓` inside `CIT …` pairs by kind; an unbalanced closer keeps `close`; item text and offsets still equal `render(document, "display")` (editor-app Property 4 stays green).

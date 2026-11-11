@@ -181,6 +181,47 @@ describe("failing flag in layoutPane _Requirements: 3.4, 3.6, 12.14_", () => {
   });
 });
 
+describe("closer family in layoutPane _Requirements: 7.7, 7.16_", () => {
+  const closerFamilies = (doc: Document): (string | undefined)[] =>
+    layoutPane(doc)
+      .items.filter((i) => i.kind === "code" && i.text === "[/CIT]")
+      .map((i) => (i.kind === "code" ? i.family : undefined));
+
+  it("gives the closer of a verified citation the family verified", () => {
+    const doc = docOf("See Roe v. Wade, 410 U.S. 113 (1973).");
+    const key = (doc.citations.find((c) => c.kind === "full") as { key: string }).key;
+    const verified = setVerification(doc, key, { status: "verified", clusterId: "1" });
+    if (!verified.ok) throw new Error("fixture rejected");
+    expect(closerFamilies(verified.value)).toEqual(["verified"]);
+  });
+
+  it("gives the closer of an unchecked citation the family pending", () => {
+    expect(closerFamilies(docOf("See Roe v. Wade, 410 U.S. 113 (1973)."))).toEqual(["pending"]);
+  });
+
+  it("gives the closer of a reference the family ref", () => {
+    const closers = layoutPane(docOf("See 42 U.S.C. § 1983.")).items.filter(
+      (i) => i.kind === "code" && i.text === "[/REF]",
+    );
+    expect(closers.map((i) => (i.kind === "code" ? i.family : null))).toEqual(["ref"]);
+  });
+
+  it("pairs a verified quote with an unchecked citation by kind", () => {
+    const base = docOf('See Roe v. Wade, 410 U.S. 113, 120 (1973) ("the quick brown fox").');
+    const q = base.quotes[0];
+    if (q === undefined) throw new Error("fixture");
+    const checked = setQuoteCheck(base, q.key, { status: "match" });
+    if (!checked.ok) throw new Error("fixture quote rejected");
+    const closers = layoutPane(checked.value).items.filter(
+      (i) => i.kind === "code" && i.text.startsWith("[/"),
+    );
+    expect(closers.map((i) => (i.kind === "code" ? [i.text, i.family] : null))).toEqual([
+      ["[/CIT]", "pending"],
+      ["[/QUO]", "verified"],
+    ]);
+  });
+});
+
 describe("lineAt and lnPos _Requirements: 3.8_", () => {
   it("numbers lines from 1 and clamps the offset", () => {
     expect(lineAt("ab\ncd", 0)).toBe(1);

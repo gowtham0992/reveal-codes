@@ -35,7 +35,7 @@ const DOM_DOCUMENT_MEMBERS = new Set([
 
 const STATE_MODULES =
   /^src\/(?:store|history|store-runtime|persist|autosave|notices|pane-preference)\.ts$/;
-const LAYOUT_MODULE = /^src\/pane\/(?:layout|failing)\.ts$/;
+const LAYOUT_MODULE = /^src\/pane\/(?:layout|failing|closers)\.ts$/;
 const EDITOR_PURE = /^src\/editor\/(?:offsets|slice-text|transaction-ops|schema|marks)\.ts$/;
 const ROUTE_FILE = /^app\/api\/.*route\.ts$/;
 
