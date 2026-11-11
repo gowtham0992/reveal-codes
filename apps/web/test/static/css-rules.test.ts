@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parseCss, type CssDeclaration } from "../support/css";
 import { formatViolations, readSources, violation, type Violation } from "../support/scan";
-import { colourViolations, type Sheet } from "./css-colours";
+import { colourViolations, paneLiteralViolations, type Sheet } from "./css-colours";
 
 /** Requirements 10.9, 10.11 to 10.15 (UI stylesheets) and 12.2 to 12.5 (Pane stylesheet). */
 const FONT_STACKS: Readonly<Record<string, string>> = {
@@ -39,7 +39,6 @@ const VARIABLE_VALUES: Readonly<Record<string, string>> = {
   "--shell-min": "1150px",
   "--control-h": "30px",
 };
-const COLOUR_FUNCTION = /\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix)\(/i;
 const FOCUS_OUTLINE = /^2px solid var\(--oxblood\)$/;
 
 const norm = (v: string): string =>
@@ -178,20 +177,6 @@ function checkUiSheet(sheet: Sheet): Violation[] {
   ]);
 }
 
-/** The ten Pane-only colour literals of the design, lowercase as Prettier writes them. */
-const PANE_ALLOWED: ReadonlySet<string> = new Set([
-  "#0f2766",
-  "#2e4a8f",
-  "#0a1c4f",
-  "#e8ecf6",
-  "#c9d2ec",
-  "#bac4e2",
-  "#f5d98b",
-  "#a6d4f7",
-  "#d7c6f5",
-  "#9adbb0",
-]);
-const PANE_VARS: ReadonlySet<string> = new Set(["--ink", "--white", "--fail", "--fail-ring"]);
 /** Pane code classes and the colours they set; `undefined` means the class sets none of that kind. */
 const PANE_CLASSES: Readonly<Record<string, Readonly<{ color?: string; background?: string }>>> = {
   hum: { color: "#e8ecf6" },
@@ -211,23 +196,6 @@ const lastClass = (selector: string): string | null => {
   const classes = [...selector.matchAll(/\.([\w-]+)/g)];
   return classes[classes.length - 1]?.[1] ?? null;
 };
-
-function paneLiteralViolations(path: string, decls: CssDeclaration[]): Violation[] {
-  const found: Violation[] = [];
-  for (const d of decls) {
-    for (const hex of d.value.match(/#[0-9a-fA-F]{3,8}\b/g) ?? []) {
-      if (!PANE_ALLOWED.has(hex.toLowerCase()))
-        found.push(at(path, d, `colour ${hex} is not in the Pane colours`));
-    }
-    for (const m of d.value.matchAll(/var\(\s*(--[\w-]+)/g)) {
-      const name = m[1] ?? "";
-      if (!PANE_VARS.has(name) && !/^--font-/.test(name))
-        found.push(at(path, d, `${name} is not usable in the Pane stylesheet`));
-    }
-    if (COLOUR_FUNCTION.test(d.value)) found.push(at(path, d, "colour function is not allowed"));
-  }
-  return found;
-}
 
 function paneClassViolations(path: string, decls: CssDeclaration[]): Violation[] {
   const found: Violation[] = [];

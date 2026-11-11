@@ -1,5 +1,6 @@
 import * as fc from "fast-check";
 import { apply, createDocument } from "@reveal-codes/engine";
+import { PANE_ALLOWED, PRINT_COLOUR_VALUES, TOKEN_VALUES } from "./static/css-colours";
 import type { CallerOperation, Document, VerificationResult } from "@reveal-codes/engine";
 import { arbCreatedDocument, arbDocument } from "../../../packages/engine/src/testing/arb-document";
 import { arbBoundary, arbOpSequence } from "../../../packages/engine/src/testing/arb-ops";
@@ -245,3 +246,49 @@ export const arbNextStepInput: fc.Arbitrary<NextStepCase> = fc
     blocking: arbCount,
   })
   .map((r) => ({ ...r, verifiableUnchecked: r.uncheckedCitations + r.uncheckedQuotations }));
+
+/** A non-empty subset of the given stylesheet paths. */
+// Feature: legal-record-ui, Property 1: tokens are total
+export const arbStylesheetSubset = (paths: readonly string[]): fc.Arbitrary<string[]> =>
+  fc.subarray([...paths], { minLength: 1 });
+
+const STRAY_NAMED = ["red", "blue", "green", "gold", "navy", "tomato", "teal", "coral"] as const;
+const KNOWN_HEX: ReadonlySet<string> = new Set([
+  ...Object.values(TOKEN_VALUES),
+  ...Object.values(PRINT_COLOUR_VALUES),
+  ...PANE_ALLOWED,
+]);
+
+/** A stray colour: a six-digit hex outside the Token and Pane lists, an `rgba(...)`, or a named colour. */
+// Feature: legal-record-ui, Property 1: tokens are total
+export const arbStrayColour = (): fc.Arbitrary<string> =>
+  fc.oneof(
+    fc
+      .array(
+        fc.constantFrom(
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+          "f",
+        ),
+        { minLength: 6, maxLength: 6 },
+      )
+      .map((h) => `#${h.join("")}`)
+      .filter((h) => !KNOWN_HEX.has(h)),
+    fc
+      .tuple(fc.nat(255), fc.nat(255), fc.nat(255), fc.constantFrom(0.1, 0.5, 1))
+      .map(([r, g, b, a]) => `rgba(${String(r)}, ${String(g)}, ${String(b)}, ${String(a)})`),
+    fc.constantFrom(...STRAY_NAMED),
+  );

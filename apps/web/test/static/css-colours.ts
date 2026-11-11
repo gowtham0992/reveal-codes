@@ -121,3 +121,51 @@ export function colourViolations(sheets: readonly Sheet[]): Violation[] {
     )
     .sort((a, b) => (a.file === b.file ? a.line - b.line : a.file.localeCompare(b.file)));
 }
+
+/** The ten Pane-only colour literals of the design, lowercase as Prettier writes them. */
+export const PANE_ALLOWED: ReadonlySet<string> = new Set([
+  "#0f2766",
+  "#2e4a8f",
+  "#0a1c4f",
+  "#e8ecf6",
+  "#c9d2ec",
+  "#bac4e2",
+  "#f5d98b",
+  "#a6d4f7",
+  "#d7c6f5",
+  "#9adbb0",
+]);
+const PANE_VARS: ReadonlySet<string> = new Set(["--ink", "--white", "--fail", "--fail-ring"]);
+
+/** Colour literals and variables in a Pane stylesheet that are outside the Pane lists. */
+export function paneLiteralViolations(path: string, decls: readonly CssDeclaration[]): Violation[] {
+  const found: Violation[] = [];
+  for (const d of decls) {
+    for (const hex of d.value.match(HEX) ?? []) {
+      if (!PANE_ALLOWED.has(hex.toLowerCase()))
+        found.push(violation(path, d.line, `colour ${hex} is not in the Pane colours`));
+    }
+    for (const m of d.value.matchAll(/var\(\s*(--[\w-]+)/g)) {
+      const name = m[1] ?? "";
+      if (!PANE_VARS.has(name) && !/^--font-/.test(name))
+        found.push(violation(path, d.line, `${name} is not usable in the Pane stylesheet`));
+    }
+    if (COLOUR_FUNCTION.test(d.value))
+      found.push(violation(path, d.line, "colour function is not allowed"));
+    found.push(...namedViolations(path, d));
+  }
+  return found;
+}
+
+/**
+ * The whole colour scan: `colourViolations` for sheets outside the Pane and `paneLiteralViolations`
+ * for Pane_Files, sorted by file and line.
+ */
+export function scanColours(sheets: readonly Sheet[]): Violation[] {
+  const pane = sheets
+    .filter((s) => isPaneFile(s.path))
+    .flatMap((s) => paneLiteralViolations(s.path, parseCss(s.text).declarations));
+  return [...colourViolations(sheets), ...pane].sort((a, b) =>
+    a.file === b.file ? a.line - b.line : a.file.localeCompare(b.file),
+  );
+}
