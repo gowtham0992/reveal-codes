@@ -44,6 +44,15 @@ importers:
       '@ai-sdk/anthropic':
         specifier: 4.0.99
         version: 4.0.99(zod@4.6.7)
+      '@fontsource/ibm-plex-mono':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource/libre-caslon-text':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource/public-sans':
+        specifier: 5.3.0
+        version: 5.3.0
       '@reveal-codes/engine':
         specifier: workspace:*
         version: link:../../packages/engine
@@ -388,6 +397,15 @@ packages:
 
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
+
+  '@fontsource/ibm-plex-mono@5.3.0':
+    resolution: {integrity: sha512-eTgnZjZEGk1QtD3ZstF+Vclo2HLAni8YMy34/DxllwZvyz1lR/1RF/xTiAquOBO7MvqBx8D2Ig2WCPMVfdZu7Q==}
+
+  '@fontsource/libre-caslon-text@5.3.0':
+    resolution: {integrity: sha512-zuGBMEtekNBbeH4YIbL2sUu8BZKFGr1o6b41v/QPnWaEAOgZHSf4ZFdr90YmRbE3uB5G1oAEIIACgwnFRk/F7w==}
+
+  '@fontsource/public-sans@5.3.0':
+    resolution: {integrity: sha512-kjODI0S3zdv0mBYCIQ8TbBayaiqszpc2UbhJiO3bjIqVVXzcWfHSt2o3WBCLOY3juaGaQoy4MoWCcgmfI5hCuA==}
 
   '@hono/node-server@2.1.6':
     resolution: {integrity: sha512-p/KH9MnfNcsm3sR6x4lNgm5j+QN4Et8srKredl9DZfXiyZ1UQ3aQ2YVpFLbqktYN5JI+DB+VZFKM2PqE5hLKjQ==}
@@ -2418,6 +2436,12 @@ snapshots:
 
   '@floating-ui/utils@0.2.12':
     optional: true
+
+  '@fontsource/ibm-plex-mono@5.3.0': {}
+
+  '@fontsource/libre-caslon-text@5.3.0': {}
+
+  '@fontsource/public-sans@5.3.0': {}
 
   '@hono/node-server@2.1.6(hono@4.13.17)':
     dependencies:

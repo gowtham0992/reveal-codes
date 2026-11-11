@@ -1,1 +1,169 @@
-{"pbtResults": {}, "executionHistory": {}}
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Self-hosted font packages and the third-party font scan": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413386
+      },
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371417879
+      },
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371504551
+      }
+    ],
+    "1.2 Token_Sheet, temporary aliases, and the print view pin": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413447
+      }
+    ],
+    "1.3 Controls in globals.css": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413472
+      }
+    ],
+    "1.4 Css_Scan lists: families, sizes, weights": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413498
+      }
+    ],
+    "1.5 Rewrite ui.md": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413524
+      }
+    ],
+    "2.1 Toolbar": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413551
+      }
+    ],
+    "2.2 Sheet, margin rules and line numbers": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413597
+      }
+    ],
+    "2.3 Issues region and Issue_Row layout": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413617
+      }
+    ],
+    "3.1 Closer families": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413638
+      }
+    ],
+    "3.2 Failing_Block grouping": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413659
+      }
+    ],
+    "3.3 Pane stylesheet, header and Legend; Pane scan": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413682
+      }
+    ],
+    "3.4 Status bar and grid row": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413704
+      }
+    ],
+    "3.5 Pane palette in product.md": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413727
+      }
+    ],
+    "4.1 Dialog shell and Export dialog": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413759
+      }
+    ],
+    "4.2 Override dialog": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413783
+      }
+    ],
+    "4.3 Assistant strip and panel": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413807
+      }
+    ],
+    "4.4 Small_Screen_Page": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413830
+      }
+    ],
+    "5.1 Remove the temporary aliases and finish the control scan": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413889
+      }
+    ],
+    "5.2 Property 1: tokens are total": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413913
+      }
+    ],
+    "5.3 Contrast record test": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413933
+      }
+    ],
+    "5.4 README, KIRO_USAGE rows, BUILD_LOG entry": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413955
+      }
+    ],
+    "5.5 Checkpoint": [
+      {
+        "executionId": "82234d97-7a47-498a-b45f-a5c9fea8e0b2",
+        "chatSessionId": "sess_612def12-70ff-403c-91db-c5f963b67fa6",
+        "timestamp": 1794371413977
+      }
+    ]
+  }
+}

@@ -51,6 +51,16 @@ describe("apps/web package.json _Requirements: 1.1, 1.2, 1.4, 1.5, 1.6, 1.7, 1.9
       expect(build, dir).toContain(`../../packages/${dir}`);
     }
   });
+  it("pins the three self-hosted font packages at exactly 5.3.0 _Requirements: 2.1, 12.8_", () => {
+    for (const name of [
+      "@fontsource/public-sans",
+      "@fontsource/libre-caslon-text",
+      "@fontsource/ibm-plex-mono",
+    ]) {
+      expect(web.dependencies?.[name], name).toBe("5.3.0");
+    }
+  });
+
   it("has no UI library, Tailwind, or CSS-in-JS dependency", () => {
     for (const name of Object.keys(deps)) expect(name, name).not.toMatch(BANNED);
   });
