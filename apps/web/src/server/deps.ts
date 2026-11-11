@@ -15,7 +15,7 @@ export type ServerMode = "fixtures" | "live";
 
 /** Tier 2. A provider is non-null only when both of its variables are non-empty. Model ids come only from env. */
 export type AssistantConfig = Readonly<{
-  bedrock: Readonly<{ region: string; modelId: string }> | null;
+  bedrock: Readonly<{ region: string; modelId: string; roleArn: string | null }> | null;
   anthropic: Readonly<{ apiKey: string; modelId: string }> | null;
 }>;
 
@@ -26,7 +26,7 @@ export type ServerConfig = Readonly<{
   baseUrl: string;
   /** `null` means `<home>/.reveal-codes/cache`. */
   cacheDir: string | null;
-  /** Tier 2. Holds the Anthropic key when set: never log it or send it to the browser. */
+  /** Tier 2. Holds the Anthropic key when set: never log it or send it to the browser. The Bedrock role ARN is not a secret but is never sent to the browser or printed in an error. */
   assistant: AssistantConfig;
 }>;
 
@@ -46,10 +46,12 @@ function nonEmpty(value: string | undefined): string | null {
 function readAssistant(env: ServerEnv): AssistantConfig {
   const region = nonEmpty(env["AWS_REGION"]);
   const bedrockModel = nonEmpty(env["BEDROCK_MODEL_ID"]);
+  const roleArn = nonEmpty(env["BEDROCK_ROLE_ARN"]);
   const apiKey = nonEmpty(env["ANTHROPIC_API_KEY"]);
   const anthropicModel = nonEmpty(env["ANTHROPIC_MODEL"]);
   return {
-    bedrock: region !== null && bedrockModel !== null ? { region, modelId: bedrockModel } : null,
+    bedrock:
+      region !== null && bedrockModel !== null ? { region, modelId: bedrockModel, roleArn } : null,
     anthropic:
       apiKey !== null && anthropicModel !== null ? { apiKey, modelId: anthropicModel } : null,
   };

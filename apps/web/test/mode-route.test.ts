@@ -34,6 +34,16 @@ describe("GET /api/mode _Requirements: 15.6, 16.6_", () => {
   });
 });
 
+describe("GET /api/mode with BEDROCK_ROLE_ARN", () => {
+  const pair = { AWS_REGION: "secret-region-1", BEDROCK_MODEL_ID: "model-b" };
+  const ARN = "arn:aws:iam::123456789012:role/SENTINEL-ROLE";
+  it("answers exactly as it does without the role and never contains the ARN", async () => {
+    const without = await handleMode(readServerConfig(pair)).text();
+    const withRole = await handleMode(readServerConfig({ ...pair, BEDROCK_ROLE_ARN: ARN })).text();
+    expect(withRole).toBe(without);
+    expect(withRole).not.toContain("SENTINEL-ROLE");
+  });
+});
 describe("GET /api/mode assistant field _Requirements: 15.6, 22.2_", () => {
   const cases: ReadonlyArray<readonly [string, Record<string, string>, unknown]> = [
     [

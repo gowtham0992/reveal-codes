@@ -10,7 +10,7 @@ import { draft, limitContext, selectProvider, SYSTEM_PROMPT } from "../src/serve
 import type { AdapterInput, StreamTextFn } from "../src/server/llm";
 import { chunkText, createFixtureReader, promptHash } from "../src/server/llm-fixture";
 
-const BEDROCK = { region: "r-1", modelId: "bedrock-model-x" };
+const BEDROCK = { region: "r-1", modelId: "bedrock-model-x", roleArn: null };
 const ANTHROPIC = { apiKey: "key-x", modelId: "anthropic-model-y" };
 
 const LONE_SURROGATE = /[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/;

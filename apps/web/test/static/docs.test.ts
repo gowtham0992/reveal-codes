@@ -90,10 +90,19 @@ describe("docs: .env.example _Requirements: 26.2, 26.3_", () => {
   const entries = envEntries(envExample);
   const names = entries.map((entry) => entry.name).sort();
 
-  it("lists every variable src/server/deps.ts reads and no other", () => {
+  // The AWS SDK reads these two itself when no role is used; deps.ts does not.
+  const PLATFORM_CREDENTIALS = ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"];
+
+  it("lists every variable src/server/deps.ts reads, the two AWS key names, and no other", () => {
     const read = variablesRead(depsSource);
     expect(read.length).toBeGreaterThan(0);
-    expect(names).toEqual(read);
+    expect(names).toEqual([...read, ...PLATFORM_CREDENTIALS].sort());
+  });
+
+  it("lists BEDROCK_ROLE_ARN and the two AWS key names", () => {
+    for (const name of ["BEDROCK_ROLE_ARN", ...PLATFORM_CREDENTIALS]) {
+      expect(names).toContain(name);
+    }
   });
 
   it("lists the variables the task names", () => {

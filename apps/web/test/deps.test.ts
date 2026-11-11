@@ -90,12 +90,26 @@ describe("readServerConfig", () => {
         ANTHROPIC_API_KEY: "",
         ANTHROPIC_MODEL: "anthropic-model",
       }).assistant,
-    ).toEqual({ bedrock: { region: "us-test-1", modelId: "bedrock-model" }, anthropic: null });
+    ).toEqual({
+      bedrock: { region: "us-test-1", modelId: "bedrock-model", roleArn: null },
+      anthropic: null,
+    });
     expect(
       readServerConfig({ ANTHROPIC_API_KEY: "k", ANTHROPIC_MODEL: "anthropic-model" }).assistant,
     ).toEqual({ bedrock: null, anthropic: { apiKey: "k", modelId: "anthropic-model" } });
   });
 
+  it("reads BEDROCK_ROLE_ARN only as part of a configured Bedrock pair", () => {
+    const arn = "arn:aws:iam::123456789012:role/reveal-codes-bedrock";
+    const pair = { AWS_REGION: "us-test-1", BEDROCK_MODEL_ID: "bedrock-model" };
+    expect(readServerConfig({ ...pair, BEDROCK_ROLE_ARN: arn }).assistant.bedrock?.roleArn).toBe(
+      arn,
+    );
+    expect(
+      readServerConfig({ ...pair, BEDROCK_ROLE_ARN: "" }).assistant.bedrock?.roleArn,
+    ).toBeNull();
+    expect(readServerConfig({ BEDROCK_ROLE_ARN: arn }).assistant.bedrock).toBeNull();
+  });
   it("does not echo the token in any field other than token", () => {
     const config = readServerConfig({ COURTLISTENER_TOKEN: SENTINEL });
     const { token, ...rest } = config;

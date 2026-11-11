@@ -8,11 +8,12 @@ import { MAX_OUTPUT_TOKENS, SYSTEM_PROMPT, draft } from "../src/server/llm";
 import type { AdapterInput, StreamTextFn } from "../src/server/llm";
 import { anthropicAdapter, createAnthropicAdapter } from "../src/server/llm-anthropic";
 import { bedrockAdapter, createBedrockAdapter } from "../src/server/llm-bedrock";
+import type { BedrockModelFactory } from "../src/server/llm-bedrock";
 import { defaultDraftOptions, sdkStreamText } from "../src/server/llm-default";
 
 const KEY = "sk-test-secret-key-123";
 const CONFIG: AssistantConfig = {
-  bedrock: { region: "test-region-1", modelId: "bedrock-id-from-env" },
+  bedrock: { region: "test-region-1", modelId: "bedrock-id-from-env", roleArn: null },
   anthropic: { apiKey: KEY, modelId: "anthropic-id-from-env" },
 };
 const BEDROCK_ONLY: AssistantConfig = { bedrock: CONFIG.bedrock, anthropic: null };
@@ -269,5 +270,73 @@ describe("reply cap", () => {
       (error: unknown) => error,
     );
     expect(seen).toEqual([7]);
+  });
+});
+describe("Bedrock role credentials", () => {
+  const ARN = "arn:aws:iam::123456789012:role/SENTINEL-ROLE";
+  const WITH_ROLE: AssistantConfig = {
+    bedrock: { region: "test-region-1", modelId: "bedrock-id-from-env", roleArn: ARN },
+    anthropic: null,
+  };
+  const credentials = { accessKeyId: "AKIAEXAMPLE", secretAccessKey: "secret", sessionToken: "t" };
+  function spyFactory() {
+    const seen: { region: string; credentialProvider?: unknown }[] = [];
+    const factory: BedrockModelFactory = (settings) => {
+      seen.push(settings);
+      return () => ({});
+    };
+    return { factory, seen };
+  }
+  it("passes a credential provider to the factory when a role ARN is set", async () => {
+    const { factory, seen } = spyFactory();
+    const asked: string[] = [];
+    const adapter = createBedrockAdapter(factory, (arn) => {
+      asked.push(arn);
+      return () => Promise.resolve(credentials);
+    });
+    await collect(adapter(inputOf(WITH_ROLE, recorder(["a"]).fn)));
+    expect(asked).toEqual([ARN]);
+    expect(seen).toHaveLength(1);
+    expect(seen[0]?.region).toBe("test-region-1");
+    const provider = seen[0]?.credentialProvider as () => Promise<unknown>;
+    expect(await provider()).toEqual(credentials);
+  });
+  it("passes no credential provider and never asks for one when no role ARN is set", async () => {
+    const { factory, seen } = spyFactory();
+    const asked: string[] = [];
+    const adapter = createBedrockAdapter(factory, (arn) => {
+      asked.push(arn);
+      return () => Promise.resolve(credentials);
+    });
+    await collect(adapter(inputOf(BEDROCK_ONLY, recorder(["a"]).fn)));
+    expect(asked).toEqual([]);
+    expect(seen).toEqual([{ region: "test-region-1" }]);
+    expect("credentialProvider" in (seen[0] ?? {})).toBe(false);
+  });
+  it("makes one provider per role, so its cached credentials are reused across requests", async () => {
+    const { factory, seen } = spyFactory();
+    let made = 0;
+    const adapter = createBedrockAdapter(factory, () => {
+      made += 1;
+      return () => Promise.resolve(credentials);
+    });
+    await collect(adapter(inputOf(WITH_ROLE, recorder(["a"]).fn)));
+    await collect(adapter(inputOf(WITH_ROLE, recorder(["b"]).fn)));
+    expect(made).toBe(1);
+    expect(seen[1]?.credentialProvider).toBe(seen[0]?.credentialProvider);
+  });
+  it("keeps the role ARN out of the error when building the credential provider fails", async () => {
+    const adapter = createBedrockAdapter(
+      () => () => ({}),
+      () => {
+        throw new Error(`cannot assume ${ARN}`);
+      },
+    );
+    const failure = await collect(adapter(inputOf(WITH_ROLE, recorder(["a"]).fn))).then(
+      () => null,
+      (error: unknown) => error,
+    );
+    expect((failure as Error).message).toBe("assistant provider failed");
+    expect(String(failure)).not.toContain("SENTINEL-ROLE");
   });
 });

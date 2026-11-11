@@ -176,7 +176,7 @@ describe("handleAssistant failures and secrets _Requirements: 22.10, 15.5_", () 
   it("a failure before the first chunk is 502 with a generic message", async () => {
     const res = await handleAssistant(
       post({ prompt: "p", context: "" }),
-      { bedrock: { region: REGION, modelId: "mb" }, anthropic: ANTHROPIC.anthropic },
+      { bedrock: { region: REGION, modelId: "mb", roleArn: null }, anthropic: ANTHROPIC.anthropic },
       { streamText: UNUSED_STREAM_TEXT, adapters: { bedrock: failsFirst } },
     );
     const text = await res.text();
