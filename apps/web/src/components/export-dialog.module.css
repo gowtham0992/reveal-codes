@@ -19,8 +19,27 @@
   border-top: 1px solid var(--rule-light);
 }
 
-.code {
+/* The same two chips as the Issues list: outline for an unchecked code, white on fail for a failing one. */
+.codeChip {
+  display: inline-block;
+  padding: 0 6px;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  font-family: var(--font-pane);
+  font-size: 12px;
   font-weight: 700;
+  line-height: 20px;
+}
+.codeChipFail {
+  display: inline-block;
+  padding: 0 6px;
+  border: 1px solid var(--fail);
+  background: var(--fail);
+  color: var(--white);
+  font-family: var(--font-pane);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 20px;
 }
 
 .text {

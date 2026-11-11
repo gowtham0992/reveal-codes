@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { blockingIssues, createDocument } from "@reveal-codes/engine";
+import { blockingIssues, createDocument, setVerification } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
 import { ORDERS } from "@reveal-codes/export";
 import { useSyncExternalStore } from "react";
@@ -173,6 +173,35 @@ describe("ExportIssues text _Requirements: 2.3_", () => {
     const shown = rowText(81);
     expect(shown).toBe(`${"x".repeat(79)}…`);
     expect(shown).toHaveLength(80);
+  });
+});
+
+describe("ExportIssues code chips", () => {
+  function chipClasses(document: Document): readonly (readonly [string, string])[] {
+    renderUi(
+      <ExportIssues
+        document={document}
+        issues={blockingIssues(document)}
+        onGo={() => undefined}
+        onOverride={() => undefined}
+      />,
+    );
+    return screen
+      .getAllByRole("listitem")
+      .map((li) => li.firstElementChild)
+      .map((chip) => [chip?.textContent.trim() ?? "", chip?.className ?? ""] as const);
+  }
+  it("draws an unchecked code as the outline chip", () => {
+    expect(chipClasses(docOf(ONE))).toEqual([["CIT …", expect.stringMatching(/codeChip(?!Fail)/)]]);
+  });
+  it("draws a failing code as the fail chip, the same two the Issues list uses", () => {
+    const base = docOf(ONE);
+    const first = base.citations[0];
+    if (first?.kind !== "full") throw new Error("fixture has no full citation");
+    const key = first.key;
+    const marked = setVerification(base, key, { status: "not_found" });
+    if (!marked.ok) throw new Error("fixture rejected");
+    expect(chipClasses(marked.value)).toEqual([["CIT ✘", expect.stringContaining("codeChipFail")]]);
   });
 });
 
