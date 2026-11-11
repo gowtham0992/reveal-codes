@@ -18,6 +18,7 @@ import { windowTitle } from "./use-document-title";
 import { StatusLine } from "./status-line";
 import { IssuesRegion } from "./issues-region";
 import { ShellToolbar } from "./shell-toolbar";
+import { useVerify } from "./use-verify";
 import { useExport } from "./use-export";
 import { useDocumentActions } from "./use-document-actions";
 import { composeStatus, positionText, usePaneControl } from "./use-pane";
@@ -81,7 +82,8 @@ function useStoreSlice<T>(store: Store, select: (state: ReturnType<Store["getSta
 function useNoticeAndDocument(store: Store) {
   const notice = useStoreSlice(store, (s) => s.notice);
   const doc = useStoreSlice(store, (s) => s.document);
-  return { notice, doc };
+  const verifiedAt = useStoreSlice(store, (s) => s.verifiedAt);
+  return { notice, doc, verifiedAt };
 }
 
 function useShellParts(services: AppServices | undefined) {
@@ -140,17 +142,66 @@ function ShellBottom({ paneControl, doc, cursor, mode, binding }: ShellBottomPro
   );
 }
 
+type FlowsArgs = Readonly<{
+  svc: AppServices;
+  store: Store;
+  autosave: Autosave;
+  doc: Document;
+  notice: string | null;
+  onGo: (offset: number) => void;
+}>;
+
+/** Export, New/Load and Verify wiring for the toolbar. */
+function useShellFlows({ svc, store, autosave, doc, notice, onGo }: FlowsArgs) {
+  const exportGate = useExport({ svc, store, autosave, doc, notice, onGo });
+  const actions = useDocumentActions({ store, svc, autosave, doc });
+  const verify = useVerify(svc, store);
+  return { exportGate, actions, verify };
+}
+
+type IssuesSlotProps = Readonly<{
+  doc: Document;
+  store: Store;
+  svc: AppServices;
+  binding: ReturnType<typeof useEditorBinding>;
+  mode: ServerMode;
+  verifiedAt: string | null;
+  note: string | null;
+}>;
+
+function IssuesSlot({ doc, store, svc, binding, mode, verifiedAt, note }: IssuesSlotProps) {
+  return (
+    <IssuesRegion
+      document={doc}
+      store={store}
+      now={svc.now}
+      onGo={binding.focusAt}
+      demoMode={mode === "fixtures"}
+      verifiedAt={verifiedAt}
+      note={note}
+    />
+  );
+}
+
 export function AppShell({ services }: AppShellProps) {
   const { svc, store, autosave } = useShellParts(services);
   const { cursor, onCaret, getCaret } = useCaretRef();
   const binding = useEditorBinding({ store, now: svc.now, onCaret });
   const paneControl = usePaneControl(svc);
-  const { notice, doc } = useNoticeAndDocument(store);
+  const { notice, doc, verifiedAt } = useNoticeAndDocument(store);
   const { mode, assistant } = useModeResult(svc.api);
   const slot = useAssistantSlot({ svc, store, info: assistant, getCaret });
-  const exportGate = useExport({ svc, store, autosave, doc, notice, onGo: binding.focusAt });
-  const actions = useDocumentActions({ store, svc, autosave, doc });
-  const toolbar = { notice, doc, svc, store, exportGate, pane: paneControl, actions };
+  const { exportGate, actions, verify } = useShellFlows({
+    svc,
+    store,
+    autosave,
+    doc,
+    notice,
+    onGo: binding.focusAt,
+  });
+  const issues = { doc, store, svc, binding, mode, verifiedAt, note: verify.note };
+  const bottom = { paneControl, doc, cursor, mode, binding };
+  const toolbar = { notice, doc, verify, exportGate, pane: paneControl, actions };
   return (
     <div
       className="app"
@@ -161,22 +212,10 @@ export function AppShell({ services }: AppShellProps) {
       <ShellToolbar {...toolbar} />
       {slot.node}
       <EditorSurface editor={binding.editor} empty={doc.text.length === 0} />
-      <IssuesRegion
-        document={doc}
-        store={store}
-        now={svc.now}
-        onGo={binding.focusAt}
-        demoMode={mode === "fixtures"}
-      />
+      <IssuesSlot {...issues} />
       {exportGate.dialog}
       {actions.dialog}
-      <ShellBottom
-        paneControl={paneControl}
-        doc={doc}
-        cursor={cursor}
-        mode={mode}
-        binding={binding}
-      />
+      <ShellBottom {...bottom} />
     </div>
   );
 }

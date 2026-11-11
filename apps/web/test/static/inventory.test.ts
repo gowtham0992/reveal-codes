@@ -104,9 +104,12 @@ describe("inventory: properties _Requirements: 25.1, 25.2, 25.3, 25.4, 25.5, 25.
   const files = walkFiles(join(WEB_ROOT, "test"), /\.properties\.test\.ts$/);
   const texts = files.map((file) => readFileSync(file, "utf8"));
 
-  it("has exactly five properties numbered 1 to 5, once each", () => {
+  // Property numbers are per spec: editor-app has 1 to 5, first-run-and-flow adds its own Property 1
+  // in next-step.properties.test.ts.
+  it("has exactly six properties: editor-app 1 to 5 and first-run-and-flow 1", () => {
     const numbers = texts.flatMap((t) => [...t.matchAll(/^\s*\/\/ Property (\d+)$/gm)]);
-    expect(numbers.map((m) => m[1]).sort()).toEqual(["1", "2", "3", "4", "5"]);
+    expect(numbers.map((m) => m[1]).sort()).toEqual(["1", "1", "2", "3", "4", "5"]);
+    expect(files.some((f) => f.endsWith("next-step.properties.test.ts"))).toBe(true);
   });
 
   it("has exactly one fc.assert per file, using runs()", () => {

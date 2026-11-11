@@ -7,6 +7,7 @@ import type { Store } from "../store-runtime";
 import { IssuesList } from "./issues-list";
 import styles from "./issues-region.module.css";
 import { OverrideDialog } from "./override-dialog";
+import { VerifyResult } from "./verify-result";
 
 export const DEMO_MODE_LINE =
   "Demo mode checks only the recorded demo citations. Any other citation shows as not found.";
@@ -18,6 +19,9 @@ export type IssuesRegionProps = Readonly<{
   /** Select the Pos of an Offset and focus the Editor (Requirement 18.2). */
   onGo: (offset: number) => void;
   demoMode?: boolean;
+  verifiedAt: string | null;
+  /** The further line of the last completed Verify run. */
+  note: string | null;
 }>;
 
 type Target = Readonly<{ issue: Issue; opener: HTMLElement }>;
@@ -29,7 +33,7 @@ export function issuesHeading(blocking: number): string {
 
 /** The Issues region: Fixtures_Mode line (15.7), the list and the Override_Dialog (Req 18). */
 export function IssuesRegion(props: IssuesRegionProps) {
-  const { document, store, now, onGo, demoMode = false } = props;
+  const { document, store, now, onGo, demoMode = false, verifiedAt, note } = props;
   const [target, setTarget] = useState<Target | null>(null);
   return (
     <aside aria-labelledby="issues-heading" className={styles["issues"]}>
@@ -37,6 +41,7 @@ export function IssuesRegion(props: IssuesRegionProps) {
         {issuesHeading(blockingIssues(document).length)}
       </h2>
       <div className={styles["body"]}>
+        <VerifyResult document={document} verifiedAt={verifiedAt} further={note} />
         {demoMode ? <p className={styles["note"]}>{DEMO_MODE_LINE}</p> : null}
         <IssuesList
           document={document}

@@ -107,7 +107,7 @@ describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () =
   it("exposes the Document textbox and an empty, polite status area", async () => {
     await mount(fixture());
     expect(screen.getByRole("textbox", { name: "Document" })).not.toBeNull();
-    const status = screen.getByRole("status");
+    const status = within(screen.getByRole("toolbar")).getByRole("status");
     expect(status.textContent).toBe("");
     expect(status.getAttribute("aria-live")).toBe("polite");
   });
@@ -361,7 +361,7 @@ describe("AppShell Pane_Preference _Requirements: 1.2, 1.3, 1.4, 1.5, 1.6, 1.8, 
     await mount(fixture(storage));
     pressKey(document.body, "F3", { altKey: true });
     expect(paneRegion()).not.toBeNull();
-    expect(screen.getByRole("status").textContent).toBe("");
+    expect(within(screen.getByRole("toolbar")).getByRole("status").textContent).toBe("");
   });
 });
 
@@ -377,6 +377,9 @@ function verifyButton(): HTMLButtonElement {
   return screen.getByRole("button", { name: /^Verify/ });
 }
 
+function result(): HTMLElement {
+  return screen.getByRole("status", { name: "Verify result" });
+}
 async function settle(): Promise<void> {
   await act(async () => {
     await new Promise((r) => setTimeout(r, 30));
@@ -467,7 +470,7 @@ describe("AppShell mode badge and Verify _Requirements: 15.7, 15.8, 17.1, 17.12,
     expect(marked.map((b) => b.textContent)).toEqual(["Verify"]);
   });
 
-  it("reads Verifying… and is disabled during a flow, then shows the summary Notice", async () => {
+  it("reads Verifying… and is disabled during a flow, then shows the summary in the Issues region", async () => {
     const mode = modeApi("fixtures");
     let release: () => void = () => undefined;
     mode.gate.current = new Promise<void>((resolve) => {
@@ -481,10 +484,13 @@ describe("AppShell mode badge and Verify _Requirements: 15.7, 15.8, 17.1, 17.12,
     expect(verifyButton().textContent).toBe("Verifying…");
     expect(verifyButton().disabled).toBe(true);
     expect(document.querySelector('[data-primary="true"]')).toBeNull();
+    expect(result().textContent).toBe("");
     release();
     await settle();
     expect(verifyButton().textContent).toBe("Verify");
-    expect(screen.queryByRole("status")?.textContent ?? "").not.toContain("Citations");
+    expect(result().textContent).toContain("Citations:");
+    expect(result().textContent).toContain("Checked ");
+    expect(within(screen.getByRole("toolbar")).queryByText(/Citations:/)).toBeNull();
   });
 });
 

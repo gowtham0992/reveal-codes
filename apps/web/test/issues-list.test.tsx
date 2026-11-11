@@ -125,6 +125,8 @@ describe("IssuesRegion _Requirements: 15.7_", () => {
         now={() => new Date(ISO)}
         onGo={noop}
         demoMode
+        verifiedAt={null}
+        note={null}
       />,
     );
     expect(screen.getByText(/^Demo mode checks only the recorded demo citations/)).not.toBeNull();
@@ -133,7 +135,7 @@ describe("IssuesRegion _Requirements: 15.7_", () => {
 
   it("reads Issues with no blocking issue and Issues — 4 blocking with four citations", () => {
     const store = createStore(() => new Date(ISO));
-    const props = { store, now: () => new Date(ISO), onGo: noop };
+    const props = { store, now: () => new Date(ISO), onGo: noop, verifiedAt: null, note: null };
     const view = renderUi(<IssuesRegion {...props} document={build("Plain text.")} />);
     expect(screen.getByRole("heading", { name: "Issues" })).not.toBeNull();
     const four = build(

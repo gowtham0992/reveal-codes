@@ -7,14 +7,16 @@ const at = (...codes: readonly string[]): CodePosition[] =>
 
 describe("failingFlags _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_", () => {
   it("flags failing openings and their closers", () => {
-    expect(failingFlags(at("[CIT ✘]", "[/CIT]", "[CIT ?:2]", "[/CIT]", "[QUO ✘]", "[/QUO]"))).toEqual(
-      [true, true, true, true, true, true],
-    );
+    expect(
+      failingFlags(at("[CIT ✘]", "[/CIT]", "[CIT ?:2]", "[/CIT]", "[QUO ✘]", "[/QUO]")),
+    ).toEqual([true, true, true, true, true, true]);
   });
 
   it("does not flag verified or unchecked openings and their closers", () => {
     expect(
-      failingFlags(at("[CIT ✓]", "[/CIT]", "[CIT …]", "[/CIT]", "[QUO ✓]", "[/QUO]", "[QUO …]", "[/QUO]")),
+      failingFlags(
+        at("[CIT ✓]", "[/CIT]", "[CIT …]", "[/CIT]", "[QUO ✓]", "[/QUO]", "[QUO …]", "[/QUO]"),
+      ),
     ).toEqual([false, false, false, false, false, false, false, false]);
   });
 

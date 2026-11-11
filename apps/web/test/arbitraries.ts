@@ -220,3 +220,28 @@ export const arbVerifyScript: fc.Arbitrary<VerifyScript> = fc.record({
   ),
   embedQuotes: fc.boolean(),
 });
+
+/** A count that is often zero and otherwise up to 50. */
+const arbCount: fc.Arbitrary<number> = fc.oneof(fc.constant(0), fc.nat({ max: 50 }));
+
+/** The parts of a NextStepInput, with the counts the sum is built from. */
+export type NextStepCase = Readonly<{
+  empty: boolean;
+  verifying: boolean;
+  uncheckedCitations: number;
+  uncheckedQuotations: number;
+  blocking: number;
+  /** The sum of the citation and quotation counts. */
+  verifiableUnchecked: number;
+}>;
+
+// Feature: first-run-and-flow, Property 1: one next step
+export const arbNextStepInput: fc.Arbitrary<NextStepCase> = fc
+  .record({
+    empty: fc.boolean(),
+    verifying: fc.boolean(),
+    uncheckedCitations: arbCount,
+    uncheckedQuotations: arbCount,
+    blocking: arbCount,
+  })
+  .map((r) => ({ ...r, verifiableUnchecked: r.uncheckedCitations + r.uncheckedQuotations }));

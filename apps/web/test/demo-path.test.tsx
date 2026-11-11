@@ -72,9 +72,12 @@ async function loadAndOpenPane(): Promise<void> {
   await waitFor(() => {
     expect(button(/^Export/).textContent).toBe("Export (7 blocking)");
   });
-  act(() => {
-    fireEvent.keyDown(document.body, { key: "F3", altKey: true, bubbles: true });
-  });
+  // The Pane opens on first visit; toggle it only when it is not already open.
+  if (screen.queryByRole("region", { name: "Reveal Codes" }) === null) {
+    act(() => {
+      fireEvent.keyDown(document.body, { key: "F3", altKey: true, bubbles: true });
+    });
+  }
   const before = codes();
   expect(count(before, "[PST]")).toBeGreaterThan(0);
   expect(before.some((c) => c.startsWith("[AI"))).toBe(false);
@@ -90,7 +93,10 @@ async function verifyAndWait(): Promise<void> {
   });
   await waitFor(() => {
     expect(button(/^Verify/).textContent).toBe("Verify");
-    expect(screen.queryByRole("status")?.textContent ?? "").not.toContain("Citations");
+    const result = screen.getByRole("status", { name: "Verify result" });
+    expect(result.textContent).toContain("Citations: 2 found · 3 not found");
+    expect(result.textContent).toContain("Quotations: 1 match · 1 not in the opinion");
+    expect(within(screen.getByRole("toolbar")).queryByText(/Citations:/)).toBeNull();
   });
   expect(Date.now() - started).toBeLessThan(10_000);
 }
@@ -148,6 +154,7 @@ describe("Demo path _Requirements: 21.1, 21.2, 21.3, 21.4, 21.5, 21.7, 20.7_", (
     const mode = await mountDemo();
     expect(button("Verify").disabled).toBe(true);
     await loadAndOpenPane();
+    expect(screen.getByRole("status", { name: "Verify result" }).textContent).toBe("");
     await verifyAndWait();
     expectRedAndGreenCodes();
     expectIssuesAndGo();

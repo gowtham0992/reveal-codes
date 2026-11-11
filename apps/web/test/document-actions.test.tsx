@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { apply, createDocument } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
+import { cleanup } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import type { ApiClient } from "../src/client/api";
 import { AppShell } from "../src/components/app-shell";
@@ -14,7 +15,7 @@ import type { ManualTimers } from "./support/clock";
 import { createMemoryStorage } from "./support/memory-storage";
 import type { MemoryStorage } from "./support/memory-storage";
 import { modeApi } from "./support/mode-fetch";
-import { act, fireEvent, renderUi, screen } from "./support/render";
+import { act, fireEvent, renderUi, screen, within } from "./support/render";
 
 const ISO = "2026-11-02T12:00:00.000Z";
 
@@ -100,6 +101,9 @@ function savedDocument(m: Mounted): Document {
   return restored.value.document;
 }
 
+function noticeText(): string {
+  return within(screen.getByRole("toolbar")).getByRole("status").textContent;
+}
 function editorText(): string {
   return screen.getByRole("textbox", { name: "Document" }).textContent;
 }
@@ -195,7 +199,7 @@ describe("Load demo motion _Requirements: 20.1, 20.2, 20.4, 20.5_", () => {
     await click("Load demo motion");
     await click("Replace draft");
     expect(editorText()).toBe("My draft.");
-    expect(screen.getByRole("status").textContent).toBe("Could not load the demo motion.");
+    expect(noticeText()).toBe("Could not load the demo motion.");
   });
 });
 
@@ -215,8 +219,69 @@ describe("Verify flow and New _Requirements: 20.6_", () => {
       await new Promise((r) => setTimeout(r, 50));
     });
     expect(editorText()).toBe("");
-    expect(screen.getByRole("status").textContent).toBe("");
+    expect(noticeText()).toBe("");
     await flush(m);
     expect(m.storage.getItem(AUTOSAVE_KEY)).toBeNull();
+  });
+});
+function verifyResult(): string {
+  return screen.getByRole("status", { name: "Verify result" }).textContent;
+}
+describe("Verify_Summary lifecycle _Requirements: 5.2, 5.4, 5.5, 5.14, 5.15, 5.16_", () => {
+  it("is empty before a run, filled after it, and cleared by New and by Load demo motion", async () => {
+    const m = await mount(null);
+    await click("Load demo motion");
+    expect(verifyResult()).toBe("");
+    await click("Verify");
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 30));
+    });
+    expect(verifyResult()).toContain("Citations:");
+    await click("Load demo motion");
+    await click("Replace draft");
+    expect(verifyResult()).toBe("");
+    await click("Verify");
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 30));
+    });
+    expect(verifyResult()).toContain("Citations:");
+    await click("New");
+    await click("Discard and start new");
+    expect(verifyResult()).toBe("");
+    await flush(m);
+  });
+  it("keeps the counts after a reload and drops the further line", async () => {
+    const m = await mount(null);
+    await click("Load demo motion");
+    await click("Verify");
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 30));
+    });
+    const before = verifyResult();
+    await flush(m);
+    cleanup();
+    const timers = createManualTimers();
+    const mode = modeApi("fixtures");
+    await act(async () => {
+      renderUi(
+        <AppShell
+          services={{
+            api: apiWithDemo(mode.api, "fixture"),
+            now: timers.clock.now,
+            setTimer: (fn, ms) => timers.setTimeout(fn, ms),
+            clearTimer: (h) => {
+              timers.clearTimeout(h as number);
+            },
+            storage: m.storage,
+            download: () => undefined,
+            openPrint: () => true,
+          }}
+        />,
+      );
+      await Promise.resolve();
+    });
+    const after = verifyResult();
+    expect(after).toContain("Citations:");
+    expect(after).toBe(before.replace(/Some items were.*$/, ""));
   });
 });

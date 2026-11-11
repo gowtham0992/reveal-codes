@@ -1,5 +1,6 @@
 import type { Document } from "@reveal-codes/engine";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { divergenceWords, mismatchAt } from "../client/divergence";
 import { classifyKey } from "../editor/shortcuts";
 import { statusText } from "../pane/layout";
@@ -38,11 +39,10 @@ export type PaneControl = Readonly<{
   saveMessage: string | null;
 }>;
 
-/** Pane open state, the capturing Alt-F3 and F7 listener, and the F7 timer (Requirements 14.1 to 14.5). */
-export function usePaneControl(svc: AppServices): PaneControl {
+/** Open state: read the Pane_Preference once on mount, then write every change (Req 1.2 to 1.8). */
+function usePanePreference(svc: AppServices): [boolean, Dispatch<SetStateAction<boolean>>] {
   const [open, setOpen] = useState(false);
   const [ready, setReady] = useState(false);
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   useEffect(() => {
     setOpen(initialPaneOpen(svc.storage));
     setReady(true);
@@ -52,6 +52,13 @@ export function usePaneControl(svc: AppServices): PaneControl {
     if (!ready) return;
     writePreference(svc.storage, open); // result ignored, no Notice (Req 1.8)
   }, [ready, open, svc]);
+  return [open, setOpen];
+}
+
+/** Pane open state, the capturing Alt-F3 and F7 listener, and the F7 timer (Requirements 14.1 to 14.5). */
+export function usePaneControl(svc: AppServices): PaneControl {
+  const [open, setOpen] = usePanePreference(svc);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const openRef = useRef(open);
   openRef.current = open;
   const timer = useRef<unknown>(null);
