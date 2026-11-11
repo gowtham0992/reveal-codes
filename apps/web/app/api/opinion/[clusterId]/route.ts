@@ -4,6 +4,8 @@ import { handleOpinion } from "../../../../src/server/opinion-route";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+/** The Verifier waits on the citation service's request bucket for up to about a minute. */
+export const maxDuration = 60;
 
 export async function GET(
   _request: Request,

@@ -7,12 +7,13 @@ import { Toolbar } from "./toolbar";
 import type { useExport } from "./use-export";
 import type { useDocumentActions } from "./use-document-actions";
 import type { usePaneControl } from "./use-pane";
+import { WAITING_TEXT } from "./use-verify";
 import type { VerifyControl } from "./use-verify";
 
 export type ShellToolbarProps = Readonly<{
   notice: string | null;
   doc: Document;
-  verify: Pick<VerifyControl, "running" | "start" | "disabled">;
+  verify: Pick<VerifyControl, "running" | "waiting" | "start" | "disabled">;
   exportGate: ReturnType<typeof useExport>;
   pane: ReturnType<typeof usePaneControl>;
   actions: ReturnType<typeof useDocumentActions>;
@@ -28,7 +29,7 @@ export function ShellToolbar(props: ShellToolbarProps) {
   });
   return (
     <Toolbar
-      notice={notice}
+      notice={verify.waiting ? WAITING_TEXT : notice}
       step={step}
       onNew={actions.onNew}
       onLoadDemo={actions.onLoadDemo}
