@@ -5,7 +5,7 @@ fileMatchPattern: ["apps/web/**", "**/*.css", ".kiro/specs/**/design.md"]
 
 # UI rules
 
-The app should look like a tool a lawyer's office would have used, not like a generated web app. Every spec that touches `apps/web` follows these rules. The Reveal Codes pane has its own fixed palette (product.md, editor-app spec) and is exempt from the palette below.
+The app should look like a tool a lawyer's office would have used, not like a generated web app. Every spec that touches `apps/web` follows these rules. The Reveal Codes pane has its own fixed palette (product.md, editor-app spec) and is exempt from the palette below. The Pane_Header and its Legend are part of the Pane and use the Pane palette.
 
 ## Build
 
@@ -34,6 +34,7 @@ The app should look like a tool a lawyer's office would have used, not like a ge
 - Disabled: grey text and grey border (`#B0B0B0`).
 - Hover is a background change only, with no transition or animation.
 - Focus is a 2px `#1F3A8A` outline.
+- One primary button on the Toolbar at most: ink background, paper text, the same border and size as other buttons. It names the next step, by the first rule that matches: nothing while a Verify run is in flight; Load demo motion when the text is empty; Verify when a full citation is unchecked; otherwise Export.
 
 ## Layout
 
@@ -45,9 +46,11 @@ The app should look like a tool a lawyer's office would have used, not like a ge
 - The page is a fixed 8.5in sheet with 1in padding.
 - The Issues region has a 1px left rule.
 - Separate regions with 1px `#B0B0B0` rules, not whitespace and shadows.
+- The Shell is at least 1150px wide. Between 800px and 1150px the page scrolls sideways. Below 800px a plain page replaces it.
 
 ## Copy
 
 - Short and plain. No exclamation marks, no "Oops", no "Let's", no sparkle characters, no marketing text.
 - No empty-state illustrations and no toasts. State is shown as text in the toolbar, the status line under the editor, or the pane status line.
+- The result of Verify is shown as text in the Issues region, in addition to the toolbar, the status line and the pane status line.
 - Severity is shown by the code colour in the pane and by words in the Issues list ("blocking", "not found"), not by coloured badges.

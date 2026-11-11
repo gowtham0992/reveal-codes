@@ -23,10 +23,10 @@ No account and no token are needed.
 
 1. Run `pnpm dev` and open the app.
 2. Select Load demo motion. The text enters as one `PST` span. The motion cites the Fifth Circuit and N.D. Tex.
-3. Press Alt-F3 to open the Reveal Codes pane.
-4. Select Verify. Citations and quotations get their codes; the planted errors show as red codes and in the Issues list as blocking.
-5. Select Export. The button reads "Export (n blocking)" while any blocking issue remains, and the dialog disables both export buttons.
-6. Write an override reason for one issue, and correct the others in the text. Verify again. The label drops to "Export" when none remain, and Download .docx produces the filing with its certification.
+3. The Reveal Codes pane is already open on a first visit; Alt-F3 hides and shows it, and the app remembers your choice.
+4. Select Verify. Citations and quotations get their codes; the planted errors show as red codes and in the Issues list as blocking. Read the result of Verify (counts and check time) as text in the Issues region.
+5. Select Export. The toolbar button reads "Export (n blocking)" while any blocking issue remains. In the dialog, Download .docx and Open print view carry no count and stay disabled while blocking items remain.
+6. Write an override reason for one issue, and correct the others in the text. Verify again. The toolbar label drops to "Export" when none remain, and Download .docx produces the filing with its certification.
 
 ## Export and certification
 

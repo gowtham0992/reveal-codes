@@ -88,6 +88,26 @@ Structural codes:
 
 `CIT ✓` and `QUO ✓` are the only codes that pass export (principle 4). The pane shows the display form: the codes above with no payload except the run id, the `[CIT ?]` candidate count, and the `[OVR]` reason. The full form, used for round-tripping, carries every payload.
 
+## Pane palette
+
+Colours of the codes in the Reveal Codes pane (text, background, outline). This table styles the Codes list above; it adds, renames and restyles no code in it.
+
+| Family | Text | Background | Outline |
+| ------ | ---- | ---------- | ------- |
+| `HUM` | `#FFFFFF` | `#0000AA` | 1px `#AAAAAA` |
+| `PST` | `#FFFF55` | `#0000AA` | 1px `#AAAAAA` |
+| `AI` | `#FF55FF` | `#0000AA` | 1px `#AAAAAA` |
+| `AI>HUM` | `#55FFFF` | `#0000AA` | 1px `#AAAAAA` |
+| `CIT ✓`, `QUO ✓` | `#55FF55` | `#0000AA` | 1px `#AAAAAA` |
+| `CIT …`, `QUO …` | `#AA5500` | `#FFFF55` | 1px `#AAAAAA` |
+| Failing: `CIT ✘`, `CIT ?`, `QUO ✘` and the closer of each | `#FFFFFF` | `#AA0000` | none (ratio 7.75:1) |
+| `OVR` | `#555555` | `#AAAAAA` | 1px `#AAAAAA` |
+| `REF` | `#AAAAAA` | `#0000AA` | 1px `#AAAAAA` |
+| Closers of non-failing codes (`/CIT`, `/QUO`, `/REF`) | `#FFFFFF` | `#0000AA` | 1px `#AAAAAA` |
+| Pane field and status line | `#AAAAAA` | `#0000AA` | none |
+| Cursor | `#0000AA` | `#AAAAAA` | none |
+| Pane_Header | `#0000AA` | `#AAAAAA` | none (ratio 5.72:1) |
+
 ## Success for the hackathon demo
 
 A judge pastes an AI-drafted motion with three fabricated citations and one fabricated quote, presses Alt-F3, sees the red codes within ten seconds, tries to export, is blocked, writes an override for one and fixes the others, and exports a DOCX whose certification lists the one override. Under ninety seconds, end to end, with no account required.
