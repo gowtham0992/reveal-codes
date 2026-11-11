@@ -28,6 +28,10 @@ function base(over: Partial<Statement> = {}): Statement {
   };
 }
 
+type TableBlock = Extract<StatementBlock, { kind: "table" }>;
+function tables(blocks: readonly StatementBlock[]): TableBlock[] {
+  return blocks.filter((b): b is TableBlock => b.kind === "table");
+}
 function paragraphs(blocks: readonly StatementBlock[]): string[] {
   return blocks.flatMap((b) => (b.kind === "paragraph" ? [`${String(b.number)}. ${b.text}`] : []));
 }
@@ -163,16 +167,13 @@ describe("renderStatement structure", () => {
   });
   it("omits the citation table and says so when there is no citation", () => {
     const blocks = renderStatement(base());
-    expect(blocks.filter((b) => b.kind === "table")).toEqual([]);
+    expect(tables(blocks)).toEqual([]);
     expect(paragraphs(blocks)[2]).toBe("3. This filing contains no legal citations.");
   });
   it("omits only the quotation table when there is a citation and no quotation", () => {
     const s = base({ citations: [{ text: "410 U.S. 113", status: "unchecked" }] });
     const blocks = renderStatement(s);
-    const tables = blocks.filter((b) => b.kind === "table");
-    expect(tables.map((t) => (t.kind === "table" ? t.columns : []))).toEqual([
-      ["Citation", "Status", "Cluster id"],
-    ]);
+    expect(tables(blocks).map((t) => t.columns)).toEqual([["Citation", "Status", "Cluster id"]]);
     expect(paragraphs(blocks)[3]).toBe(
       "4. This filing contains no quotations attributed to a cited decision.",
     );
@@ -180,10 +181,7 @@ describe("renderStatement structure", () => {
   it("omits only the citation table when there is a quotation and no citation", () => {
     const s = base({ quotes: [{ text: "a quotation", status: "unchecked" }] });
     const blocks = renderStatement(s);
-    const tables = blocks.filter((b) => b.kind === "table");
-    expect(tables.map((t) => (t.kind === "table" ? t.columns : []))).toEqual([
-      ["Quotation", "Status"],
-    ]);
+    expect(tables(blocks).map((t) => t.columns)).toEqual([["Quotation", "Status"]]);
     expect(paragraphs(blocks)[2]).toBe("3. This filing contains no legal citations.");
     expect(paragraphs(blocks)[3]).toBe(
       "4. Quotations attributed to a cited decision were compared with the text of that decision. 0 matched, 0 did not, 1 were not checked.",
