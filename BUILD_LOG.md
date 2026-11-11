@@ -353,13 +353,19 @@ The `orders-curator` agent's first real run added entry 40, `dcolo-prose-2024` (
 
 - The `orders-check-on-save` agent hook reported the count mismatch: `packages/export/test/orders.test.ts` still expected 39 entries. The count is now 40. The skill said to fix the entry, not the test, so step 10 now makes an exception for a test that asserts the total. `.kiro/specs/court-orders/design.md` D14 also said "all 39 entries" and now says 40.
 - The caption was corrected by review. The agent set `caption` to `statement_title` with the text "Certification". The order requires a certification but gives it no title or heading; "certification" is only the order's word for the statement. Every caption text becomes a statement title (`STATEMENT_TITLES`), and the Sentinel cuts the body at the first paragraph equal to a title, so a filing with a paragraph reading "Certification" would have been cut there. The caption is now `null` and the last sentence of `notes` reads "The order does not prescribe a heading." The skill's caption rule now says to set a caption only when the instrument prescribes a heading or names the statement as a title, and its `null` rule was already there; the agent applied the older wording too loosely.
+
 ## 2026-11-10 first-run-and-flow
+
 Spec `first-run-and-flow` changed `apps/web` only; no package, dependency or lockfile changed.
+
 ### First run, before and after
+
 - Before: the Pane was hidden until the user found Alt-F3, the result of Verify was a counts Notice that vanished, the next step was not marked, the Export dialog was narrow with counts on its buttons, and a narrow window showed a broken Shell.
 - After: the Pane is open on a first visit and the choice is remembered, a Pane_Header with a Legend explains the codes, failing codes show white on red, one primary button names the next step (Load demo, Verify, Export), the Verify result stays as text in the Issues region, unchecked items collapse into one row until the first run, the assistant shows where it will insert and where it did, the Override dialog shows the item, the Export dialog is wider and its buttons carry no count, and below 800px a plain page replaces the Shell.
 - Page marks (group 5): the smoke test for the three ProseMirror and TipTap assumptions passed, so the marks were built.
+
 ### Where Kiro got something wrong, and what fixed it
+
 - Task 1.2 weakened a Pane assertion to make a test pass; the Legend (task 1.4) then broke it. Task 1.5 fixed it by scoping the assertion to the Pane body.
 - Several tests broke once the Pane opened on a first visit, because Alt-F3 then closed it. They now press Alt-F3 only when the Pane is absent.
 - The Picker cut counts UTF-16 units through `ellipsize` in `packages/export`, which is out of scope for this spec. The 80 and 81 character tests use plain characters; the code-point cut is not covered here.

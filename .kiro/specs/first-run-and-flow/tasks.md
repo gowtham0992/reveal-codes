@@ -158,7 +158,7 @@ Conventions that apply to every task:
     - Add `apps/web/test/marks-plugin.test.tsx`: marks and titles drawn after a Verify run and none while Check_Time is null; Document text, undo stack and operations unchanged by a marks transaction; a mark follows an edit before it; a mark goes away when an edit inside it turns the item `CIT …`.
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 12.10_
 
-- [ ] 6. Documents, steering, and final checkpoint
+- [x] 6. Documents, steering, and final checkpoint
   - [x] 6.1 Steering: `ui.md` and `product.md`
     - In `.kiro/steering/ui.md`: add to the introduction that the Pane_Header and its Legend are part of the Pane and use the Pane palette; add to "Controls" the primary button (ink background, paper text, same border and size, at most one on the Toolbar) and the Next_Step rule in the order of Requirement 4; add to "Layout" the 1150px minimum width, the sideways scroll between 800px and 1150px and the plain page below 800px; add to "Copy" that the result of Verify is shown as text in the Issues region in addition to the toolbar, the status line and the pane status line.
     - In `.kiro/steering/product.md` add a new section "Pane palette" after the Codes list with the table from the design (every Code_Family, the Failing_Code style `#FFFFFF` on `#AA0000` with no outline and ratio 7.75:1, the Pane_Header `#0000AA` on `#AAAAAA` and ratio 5.72:1). The Codes list itself is not changed.
@@ -170,7 +170,7 @@ Conventions that apply to every task:
     - In `BUILD_LOG.md` append one dated entry `## <date> first-run-and-flow` after the last entry: the first run before and after, and where Kiro's output was wrong and how it was fixed, or "No Kiro errors". If task 5.1 stopped group 5, record the reason here. Existing entries stay unmodified.
     - _Requirements: 13.6, 13.7, 13.8_
 
-  - [~] 6.3 Final checkpoint: full repository checks
+  - [x] 6.3 Final checkpoint: full repository checks
     - Run, from the repository root, each to exit with code 0: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, `pnpm exec next build --webpack` in `apps/web`, and `pnpm kiro:check`. Fix failures at their cause; do not weaken a test. Confirm `git status` shows no change under `packages/` or `crew/` and no lockfile change.
     - Ensure all tests pass, ask the user if questions arise. Then the user walks the app in a browser themselves (layout at 799, 800 and 1150px, the sideways scroll, the Legend wrap, and the dotted marks if group 5 was built). The task does not run the app.
     - _Requirements: 14.1, 14.2, 14.3, 14.6, 14.7_
