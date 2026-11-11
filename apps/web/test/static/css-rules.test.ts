@@ -57,7 +57,8 @@ const FAMILY_COLOURS: Readonly<Record<string, readonly [string, string]>> = {
   ai: ["#FF55FF", "#0000AA"],
   aihum: ["#55FFFF", "#0000AA"],
   verified: ["#55FF55", "#0000AA"],
-  failed: ["#FF5555", "#0000AA"],
+  failing: ["#FFFFFF", "#AA0000"],
+  header: ["#0000AA", "#AAAAAA"],
   pending: ["#AA5500", "#FFFF55"],
   ovr: ["#555555", "#AAAAAA"],
   ref: ["#AAAAAA", "#0000AA"],
@@ -305,6 +306,40 @@ describe("static: stylesheets _Requirements: 10.9, 10.11, 10.12, 10.13, 10.14, 1
 
   it("keeps the Pane stylesheet on the CGA palette and the code-family table", () => {
     expect(formatViolations(sheets.filter(isPane).flatMap(checkPaneSheet))).toEqual([]);
+  });
+});
+
+const PANE_ONLY_COLOURS = /#(?:AAAAAA|AA0000)(?![0-9a-fA-F])/gi;
+
+/** Requirement 3.7: #AAAAAA and #AA0000 appear only under src/pane/, in any letter case. */
+function paneColourViolations(file: Sheet): Violation[] {
+  if (/^src\/pane\//.test(file.path)) return [];
+  return [...file.text.matchAll(PANE_ONLY_COLOURS)].map((m) =>
+    violation(
+      file.path,
+      file.text.slice(0, m.index).split("\n").length,
+      `${m[0]} is allowed only in src/pane/`,
+    ),
+  );
+}
+
+describe("static: Pane-only colours _Requirements: 3.7_", () => {
+  it("keeps #AAAAAA and #AA0000 out of app/** and src/** outside src/pane/", () => {
+    const files = readSources(["app", "src"], /\.(?:css|tsx?)$/);
+    expect(formatViolations(files.flatMap(paneColourViolations))).toEqual([]);
+  });
+
+  it("reports planted violations in any letter case and allows the same text in src/pane/", () => {
+    const text = ".a {\n  color: #aaaaaa;\n  background: #Aa0000;\n}\n";
+    const path = "src/components/x.module.css";
+    expect(formatViolations(paneColourViolations({ path, text }))).toEqual([
+      `${path}:2 #aaaaaa is allowed only in src/pane/`,
+      `${path}:3 #Aa0000 is allowed only in src/pane/`,
+    ]);
+    expect(paneColourViolations({ path: "app/x.ts", text: 'const c = "#AA0000";\n' })).toHaveLength(
+      1,
+    );
+    expect(paneColourViolations({ path: "src/pane/pane.module.css", text })).toEqual([]);
   });
 });
 

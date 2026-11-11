@@ -19,7 +19,7 @@ Conventions that apply to every task:
 
 ## Tasks
 
-- [ ] 1. Pane preference, Pane_Header with Legend, and Failing_Code style
+- [x] 1. Pane preference, Pane_Header with Legend, and Failing_Code style
   - [x] 1.1 Pane preference module and saved-draft check
     - Create `apps/web/src/pane-preference.ts`: `PANE_KEY = "reveal-codes:pane:v1"`, `encodePreference`, `decodePreference` (null is First_Visit; extra fields allowed; JSON parse catches only `SyntaxError`), `readPreference`, `writePreference` (returns `Result`, the caller ignores it), `initialPaneOpen`.
     - In `apps/web/src/persist.ts` add `readRaw(storage, key)` (moved from `app-shell.tsx`, same value-not-throw shape; update the import there) and `savedDraftExists(storage)` (true only when `deserialise` gives a Document whose text is not empty).
@@ -48,7 +48,7 @@ Conventions that apply to every task:
     - Update `apps/web/test/pane.test.tsx` and `pane-css.test.ts`: the seven Legend codes and words in order and the joined string; no `aria-hidden`, `role` or `aria-label` in the header; header colours and 12px; the header is a sibling of the scrolling body; `mousedown` on the header is default-prevented and the Editor selection stays; nothing of the header in a closed Pane.
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 12.2_
 
-  - [~] 1.5 Css_Scan: Pane colours and contrast
+  - [x] 1.5 Css_Scan: Pane colours and contrast
     - In `apps/web/test/static/css-rules.test.ts` change `FAMILY_COLOURS`: remove `failed`, add `failing: ["#FFFFFF", "#AA0000"]` and `header: ["#0000AA", "#AAAAAA"]`.
     - Add a source scan over `apps/web/app/**` and `apps/web/src/**` (`.css`, `.ts`, `.tsx`) outside `apps/web/src/pane/`: any `#AAAAAA` or `#AA0000` in any letter case is a violation. Add a planted-violation self-test.
     - In `apps/web/test/pane-css.test.ts` compute the contrast ratio with the WCAG relative-luminance formula from colours read out of `pane.module.css`; assert 7.75 for the failing pair with a floor of 7:1, and 5.72 for the header pair, both to two decimals.

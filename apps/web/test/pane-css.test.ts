@@ -4,6 +4,22 @@ import { describe, expect, it } from "vitest";
 import { parseCss } from "./support/css";
 import { WEB_ROOT } from "./support/scan";
 
+function luminance(hex: string | undefined): number {
+  if (hex === undefined || !/^#[0-9a-f]{6}$/i.test(hex))
+    throw new Error(`not a colour: ${String(hex)}`);
+  const [r = 0, g = 0, b = 0] = [1, 3, 5].map((i) => {
+    const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/** WCAG 2.x contrast ratio, lighter luminance first. */
+function contrast(a: string | undefined, b: string | undefined): number {
+  const [x, y] = [luminance(a), luminance(b)];
+  return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+}
+
 describe("Pane stylesheet _Requirements: 12.2, 12.3, 12.4_", () => {
   const css = parseCss(readFileSync(join(WEB_ROOT, "src/pane/pane.module.css"), "utf8"));
   // Prettier lowercases hex digits; compare case-insensitively.
@@ -38,6 +54,19 @@ describe("Pane stylesheet _Requirements: 12.2, 12.3, 12.4_", () => {
     expect(rule(".header", "justify-content")).toBe("space-between");
     expect(rule(".header", "flex")).toBe("none");
     expect(rule(".legend", "white-space")).toBe("pre-wrap");
+  });
+
+  it("measures the contrast of the failing and header pairs from the stylesheet _Requirements: 3.7_", () => {
+    const failing = contrast(rule(".failing", "color"), rule(".failing", "background"));
+    expect(failing).toBeGreaterThanOrEqual(7);
+    expect(failing.toFixed(2)).toBe("7.75");
+    const header = contrast(rule(".header", "color"), rule(".header", "background"));
+    expect(header.toFixed(2)).toBe("5.72");
+  });
+
+  it("computes the WCAG ratio: black on white is 21 and a colour on itself is 1", () => {
+    expect(contrast("#000000", "#FFFFFF")).toBeCloseTo(21, 5);
+    expect(contrast("#0000AA", "#0000AA")).toBeCloseTo(1, 5);
   });
 
   it("sets the field, the Code_Item outline and the monospace font", () => {

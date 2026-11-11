@@ -170,8 +170,12 @@ describe("Load demo motion _Requirements: 20.1, 20.2, 20.4, 20.5_", () => {
     );
     expect(labels).toContain("Pasted or from outside the editor");
     expect(labels.some((l) => l?.toLowerCase().includes("assistant"))).toBe(false);
-    // The Pane_Header Legend (task 1.4) names [AI], so pane.textContent can no longer be scanned.
-    expect(labels.every((l) => !(l ?? "").startsWith("AI"))).toBe(true);
+    // The Pane_Header Legend names [AI], so scan only the scrolling body (header, body, status).
+    const [header, body] = [pane.children[0], pane.children[1]];
+    expect(header?.textContent).toContain("Reveal Codes");
+    expect(header?.textContent).toContain("[AI");
+    expect(body?.textContent).toContain("[PST");
+    expect(body?.textContent).not.toContain("[AI");
   });
 
   it("confirms when the draft is non-empty; cancel keeps it, confirm replaces it", async () => {
