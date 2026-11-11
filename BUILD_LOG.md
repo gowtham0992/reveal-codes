@@ -396,3 +396,30 @@ Seven small fixes in `apps/web` (plus CI, README and `.env.example`), made witho
 ## 2026-11-10 assistant plain prose
 
 - A live model began its reply with a Markdown heading ("# Request to Deny Motion to Dismiss") and the editor inserted it as literal text; the system prompt in `llm.ts` now asks for plain prose only, with no Markdown, headings, lists, emphasis marks or title line, beginning directly with the paragraph. The prompt is a request, not a guarantee; nothing strips Markdown from a reply.
+
+## 2026-11-10 legal-record-ui
+
+- Before: a small, flat editor with a mixed set of greys and blues, system fonts, rounded controls, a plain editor surface, and a Reveal Codes pane drawn from the sixteen-colour CGA palette. After: one Token set, three self-hosted type families (Public Sans, Libre Caslon Text, IBM Plex Mono), square controls, a 52px Toolbar, a numbered pleading sheet with margin rules, redesigned Issue rows with chips, a navy Pane with Failing_Block rings, a 26px status bar, retitled Dialogs and a restyled small-screen page. Behavior is unchanged.
+- The README does not describe the look, so it is unchanged. The `ui.md` and `product.md` steering files and `docs/KIRO_USAGE.md` were updated.
+- Request limits, the size cap, the small-screen links and the Sentinel title fix were split into later specs.
+- No requirement was found unbuildable. Two design values conflicted with the scans (see below) and the scans were adjusted, not the values.
+
+### Where Kiro got something wrong, and what fixed it
+
+- 1.2: scans broken by the new values needed stopgaps, and `--button-pad` was kept temporarily until the controls task removed it.
+- 1.3: the design says `border-radius: 0` while the scan banned every radius; the scan now allows 0. A 10.5px size needed a stopgap.
+- 1.4: `FONT_STACKS` was already correct, so no change was made.
+- 2.1: CSS assertions placed in a jsdom test file failed because `import.meta.url` is not a file URL there; they moved to a node-environment file.
+- 2.2: eslint `no-unnecessary-condition` flagged a `textContent` check, and jsdom does not compute CSS counters, so the counter is asserted from the stylesheet.
+- 2.3: `css-rules` pinned `--control-h` to 30px in every sheet, which contradicted the design's 24px and 32px overrides; the scan now allows them.
+- 3.1: the layout test assumed the QUO closer came before the CIT closer, and the quote result status is `match`. A `closers.ts` and `layout.ts` import cycle was removed.
+- 3.2: back-to-back failing blocks merge into one segment; the test expectation was corrected.
+- 3.3: `paneColourViolations` was deleted as obsolete, and status-bar colours had to be allowed under `src/pane/`.
+- 3.4: prettier collapsed three-space JSX text, a `PaneStatus` component was extracted for the 40-line limit, and eslint rejected template-literal class joining.
+- 4.1: `OrderSummary` is reused by `PrintHeader`, so curly quotes leaked into the print view. It was fixed with an optional quote prop that is not in the design.
+- 4.2: `resize: vertical` was dropped by mistake and then restored.
+- 4.3: aliases and bold were replaced to match the requirement.
+- 4.4: a stale `--size-wordmark` Token and wrong requirement tags were removed and corrected.
+- 5.1: three tests that depended on the working directory switched from `process.cwd()` to `__dirname`.
+- 5.2: the Pane literal check was extracted into a shared helper, named colours were added to it, and `fc.hexaString` does not exist in fast-check 4.
+- 5.3: eslint `restrict-template-expressions` errors were fixed.
