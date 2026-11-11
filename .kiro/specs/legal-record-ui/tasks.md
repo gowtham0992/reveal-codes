@@ -22,7 +22,7 @@ Conventions that apply to every task:
 
 ## Tasks
 
-- [ ] 1. Fonts, Tokens, controls and ui.md
+- [x] 1. Fonts, Tokens, controls and ui.md
   - [x] 1.1 Self-hosted font packages and the third-party font scan
     - Run `pnpm --filter @reveal-codes/web add --save-exact @fontsource/public-sans@5.3.0 @fontsource/libre-caslon-text@5.3.0 @fontsource/ibm-plex-mono@5.3.0`. Check that `apps/web/package.json` holds the three at exactly `5.3.0` and that `pnpm-lock.yaml` changed only for them.
     - In `apps/web/app/layout.tsx` add the eight side-effect imports of the design, before `./globals.css`: Public Sans `latin-500.css`, `latin-600.css`, `latin-700.css`; Libre Caslon Text `latin-400.css`, `latin-400-italic.css`; IBM Plex Mono `latin-400.css`, `latin-600.css`, `latin-700.css`. Import no other weight and no other subset.
@@ -50,7 +50,7 @@ Conventions that apply to every task:
     - Sizes: `10.5px`, `11px`, `12px`, `12.5px`, `13px`, `13.5px`, `14px`, `15px`, `18px`, `20px`, `26px`, `12pt`, `inherit`, plus the temporary `var(--size-*)` aliases (removed in 5.1). The message reads `font-size must be one of 10.5px, 11px, ...` and still carries path and line. Weights: 400, 500, 600, 700, `normal`, `bold`, `inherit`.
     - Update the planted examples (`accepts 12px and 15px and still reports 14px` becomes a case for the new list: `17px` reported, `13.5px` accepted; weight `300` reported, `600` accepted; a fourth family reported).
     - _Requirements: 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 10.5, 10.6, 10.7, 13.10_
-  - [~] 1.5 Rewrite ui.md
+  - [x] 1.5 Rewrite ui.md
     - Rewrite `.kiro/steering/ui.md`, keeping its front matter (`inclusion: fileMatch`, same patterns). Sections: Build (no component library, no icon library, no Tailwind, no CSS-in-JS, text labels only, one global stylesheet defining Tokens plus one CSS module per component, favicon rule), Tokens (the table of Requirement 1 with uses), Type (three families, sizes, line heights, weights, fallback stacks, self-hosted, no third-party host), Controls (heights 30/32/24, primary, disabled, hover, focus, links, select, textarea), Layout (52px Toolbar, 26px Status_Bar, 32px strip, 260px assistant panel, 300px Issues_Region, 816px Sheet with 96px/104px padding, 1150px Shell minimum, 800px small-screen switch, Pane 40% height), Pane (exempt from Tokens; its colours live in `src/pane/`; Failing_Block rule; status bar shares the Pane stylesheet), Copy (the existing rules: short and plain, no exclamation marks, no toasts, Verify result also in the Issues region, severity never by colour alone), and the rule that the Document text is never styled.
     - Keep these lines from the old file: no component or icon library, text labels only, no animation, no shadows, no gradients, no rounded corners, severity never by colour alone.
     - Add `apps/web/test/ui-md.test.ts` (or extend `docs.test.ts`): `ui.md` contains each Token name and value of Requirement 1, the three family names, no `#1F3A8A`, no `#ECECEC`, and the retained rule lines.
