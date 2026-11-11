@@ -1,13 +1,16 @@
-import { createDocument } from "@reveal-codes/engine";
+import { createDocument, setVerification } from "@reveal-codes/engine";
+import type { Document } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import { createApiClient } from "../src/client/api";
 import type { FetchFn } from "../src/client/api";
 import {
   buildVerifyBody,
+  countVerifiableUnchecked,
   hasFullRecord,
   quotesByCluster,
   runVerifyFlow,
 } from "../src/client/verify-flow";
+import { nextStep } from "../src/components/next-step";
 import { createStore } from "../src/store-runtime";
 import { ISO, demoMotionText, verifiedDemoDocument } from "./support/persist-fixtures";
 import { routeFetch } from "./support/route-fetch";
@@ -53,7 +56,7 @@ describe("Verify flow on the demo motion _Requirements: 17.2, 17.3, 17.4, 17.5, 
     expect(byText("retaliation")?.result.status).toBe("mismatch");
     expect(outcome.status).toBe("completed");
     expect(outcome.quotes).toEqual({ match: 1, mismatch: 1, unchecked: 0 });
-    expect(store.getState().notice).toMatch(/^Citations: 2 verified, 3 not found, /);
+    expect(store.getState().notice).toBeNull();
   });
 
   it("sends one POST first, with only full records and no quote or document text", async () => {
@@ -132,7 +135,17 @@ describe("Verify flow failures _Requirements: 17.7, 17.8, 17.10, 17.11_", () => 
     const outcome = await runVerifyFlow(createApiClient(fetchFn), store, CLOCK);
     expect(outcome.status).toBe("completed");
     expect(outcome.unavailable).toBe(2);
-    expect(store.getState().notice).toContain("Opinions unavailable: 2.");
+    expect(store.getState().notice).toBeNull();
+  });
+
+  it("a good run clears a stale failure Notice but leaves another Notice alone", async () => {
+    const store = demoStore();
+    store.dispatch({ type: "notice", text: FAILED });
+    await runVerifyFlow(createApiClient(routeFetch().fetch), store, CLOCK);
+    expect(store.getState().notice).toBeNull();
+    store.dispatch({ type: "notice", text: "Something else." });
+    await runVerifyFlow(createApiClient(routeFetch().fetch), store, CLOCK);
+    expect(store.getState().notice).toBe("Something else.");
   });
 
   it("a failed POST leaves the Document unchanged and sets the failure Notice", async () => {
@@ -174,5 +187,68 @@ describe("Verify flow failures _Requirements: 17.7, 17.8, 17.10, 17.11_", () => 
     if (!empty.ok) throw new Error("rejected");
     expect(hasFullRecord(empty.value)).toBe(false);
     expect(hasFullRecord(demoStore().getState().document)).toBe(true);
+  });
+});
+
+function parsed(text: string): Document {
+  const created = createDocument(text, ISO);
+  if (!created.ok) throw new Error("rejected");
+  return created.value;
+}
+
+function verifyAllFull(start: Document): Document {
+  let doc = start;
+  for (const c of start.citations) {
+    if (c.kind !== "full") continue;
+    const next = setVerification(doc, c.key, { status: "verified", clusterId: "1" });
+    if (!next.ok) throw new Error("rejected");
+    doc = next.value;
+  }
+  return doc;
+}
+
+function stepFor(doc: Document): string {
+  return nextStep({
+    empty: doc.text.length === 0,
+    verifying: false,
+    verifiableUnchecked: countVerifiableUnchecked(doc),
+    blocking: 0,
+  });
+}
+
+const FULL = "Roe v. Wade, 410 U.S. 113, 153 (1973)";
+
+describe("countVerifiableUnchecked _Requirements: 4.2, 4.4, 4.5_", () => {
+  it("counts an unchecked quotation on a verified full citation and names verify", () => {
+    const doc = verifyAllFull(parsed(`See ${FULL} ("the right of privacy is broad").`));
+    expect(doc.quotes.map((q) => q.result.status)).toEqual(["unchecked"]);
+    expect(countVerifiableUnchecked(doc)).toBe(1);
+    expect(stepFor(doc)).toBe("verify");
+  });
+
+  it("counts an unchecked quotation attached to a short form with no target as zero", () => {
+    const doc = parsed('Id. at 5 ("the right of privacy is broad").');
+    expect(doc.quotes).toHaveLength(1);
+    expect(countVerifiableUnchecked(doc)).toBe(0);
+  });
+
+  it("gives zero and export for a short form only", () => {
+    const doc = parsed("Id. at 5.");
+    expect(doc.citations.some((c) => c.kind === "short")).toBe(true);
+    expect(countVerifiableUnchecked(doc)).toBe(0);
+    expect(stepFor(doc)).toBe("export");
+  });
+
+  it("gives export when unchecked items exist but there is no full citation", () => {
+    const doc = parsed('Id. at 5 ("the right of privacy is broad"). Id. at 6.');
+    expect(hasFullRecord(doc)).toBe(false);
+    expect(countVerifiableUnchecked(doc)).toBe(0);
+    expect(stepFor(doc)).toBe("export");
+  });
+
+  it("counts unchecked full citations", () => {
+    const doc = parsed(`See ${FULL}.`);
+    expect(countVerifiableUnchecked(doc)).toBe(1);
+    expect(stepFor(doc)).toBe("verify");
   });
 });

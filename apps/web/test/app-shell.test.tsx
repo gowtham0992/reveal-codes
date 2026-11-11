@@ -99,6 +99,9 @@ describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () =
     expect(
       buttons.filter((b) => (b as HTMLButtonElement).disabled).map((b) => b.textContent),
     ).toEqual(["Verify"]);
+    expect(
+      buttons.filter((b) => b.getAttribute("data-primary") === "true").map((b) => b.textContent),
+    ).toEqual(["Load demo motion"]);
   });
 
   it("exposes the Document textbox and an empty, polite status area", async () => {
@@ -363,9 +366,6 @@ describe("AppShell Pane_Preference _Requirements: 1.2, 1.3, 1.4, 1.5, 1.6, 1.8, 
 });
 
 const CITING = "See Roe v. Wade, 410 U.S. 113 (1973).";
-const SUMMARY =
-  "Citations: 0 verified, 1 not found, 0 ambiguous, 0 unchecked. " +
-  "Quotes: 0 match, 0 mismatch, 0 unchecked. Skipped: 0. Opinions unavailable: 0.";
 
 function citingStorage(): MemoryStorage {
   const storage = createMemoryStorage();
@@ -463,6 +463,8 @@ describe("AppShell mode badge and Verify _Requirements: 15.7, 15.8, 17.1, 17.12,
       await Promise.resolve();
     });
     expect(verifyButton().disabled).toBe(false);
+    const marked = [...document.querySelectorAll('[data-primary="true"]')];
+    expect(marked.map((b) => b.textContent)).toEqual(["Verify"]);
   });
 
   it("reads Verifying… and is disabled during a flow, then shows the summary Notice", async () => {
@@ -478,10 +480,11 @@ describe("AppShell mode badge and Verify _Requirements: 15.7, 15.8, 17.1, 17.12,
     });
     expect(verifyButton().textContent).toBe("Verifying…");
     expect(verifyButton().disabled).toBe(true);
+    expect(document.querySelector('[data-primary="true"]')).toBeNull();
     release();
     await settle();
     expect(verifyButton().textContent).toBe("Verify");
-    expect(screen.getByRole("status").textContent).toBe(SUMMARY);
+    expect(screen.queryByRole("status")?.textContent ?? "").not.toContain("Citations");
   });
 });
 

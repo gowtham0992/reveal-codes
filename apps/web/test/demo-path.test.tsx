@@ -8,10 +8,6 @@ import { modeApi } from "./support/mode-fetch";
 import type { ModeApi } from "./support/mode-fetch";
 import { act, fireEvent, renderUi, screen, waitFor, within } from "./support/render";
 
-const SUMMARY =
-  "Citations: 2 verified, 3 not found, 0 ambiguous, 0 unchecked. " +
-  "Quotes: 1 match, 1 mismatch, 0 unchecked. Skipped: 0. Opinions unavailable: 0.";
-
 async function mountDemo(): Promise<ModeApi> {
   const timers = createManualTimers();
   const mode = modeApi("fixtures");
@@ -94,7 +90,7 @@ async function verifyAndWait(): Promise<void> {
   });
   await waitFor(() => {
     expect(button(/^Verify/).textContent).toBe("Verify");
-    expect(screen.getByRole("status").textContent).toBe(SUMMARY);
+    expect(screen.queryByRole("status")?.textContent ?? "").not.toContain("Citations");
   });
   expect(Date.now() - started).toBeLessThan(10_000);
 }

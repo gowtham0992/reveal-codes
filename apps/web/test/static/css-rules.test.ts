@@ -193,7 +193,10 @@ function controlViolations(path: string, decls: CssDeclaration[]): Violation[] {
   for (const d of decls) {
     const value = norm(d.value);
     const sel = d.selector.trim();
-    if (sel.includes(":hover") && !/^background(?:-color)?$/.test(d.prop)) {
+    const hoverOk =
+      /^background(?:-color)?$/.test(d.prop) ||
+      (d.prop === "color" && sel.includes('[data-primary="true"]'));
+    if (sel.includes(":hover") && !hoverOk) {
       found.push(at(path, d, "hover may change only the background"));
     }
     if (sel.includes(":focus") && d.prop === "outline" && !FOCUS_OUTLINE.test(value)) {
@@ -343,6 +346,64 @@ describe("static: Pane-only colours _Requirements: 3.7_", () => {
   });
 });
 
+const PRIMARY_SEL = /\[data-primary/;
+const PRIMARY_VALUE = /^var\(--(?:ink|paper)\)$/;
+const PRIMARY_FORBIDDEN = /^(?:border.*|padding.*|transition.*|font-size|height)$/;
+
+function primaryViolations(all: readonly Sheet[]): string[] {
+  const found: string[] = [];
+  const mentions = all.filter((s) => s.text.includes("data-primary")).map((s) => s.path);
+  if (mentions.length !== 1 || mentions[0] !== "app/globals.css")
+    found.push(`data-primary must appear only in app/globals.css, found in ${mentions.join(", ")}`);
+  const global = all.find((s) => s.path === "app/globals.css");
+  const decls = parseCss(global?.text ?? "").declarations;
+  const rules = new Map<string, CssDeclaration[]>();
+  for (const d of decls.filter((x) => PRIMARY_SEL.test(x.selector))) {
+    rules.set(d.selector.trim(), [...(rules.get(d.selector.trim()) ?? []), d]);
+  }
+  const selectors = [...rules.keys()];
+  const hover = selectors.filter((s) => s.includes(":hover"));
+  if (selectors.length !== 2 || hover.length !== 1)
+    found.push("expected exactly one rest and one hover rule with data-primary");
+  for (const d of [...rules.values()].flat()) {
+    if (!PRIMARY_VALUE.test(norm(d.value)))
+      found.push(`${d.prop} must be var(--ink) or var(--paper)`);
+    if (PRIMARY_FORBIDDEN.test(d.prop)) found.push(`${d.prop} is not allowed in a primary rule`);
+    if (d.selector.includes(":hover") && !/^(?:background|color)$/.test(d.prop))
+      found.push(`hover sets ${d.prop}`);
+  }
+  return [...found, ...buttonBaseViolations(decls)];
+}
+
+function buttonBaseViolations(decls: CssDeclaration[]): string[] {
+  const base = decls.filter((d) => d.selector.trim() === "button");
+  const value = (p: string): string => norm(base.find((d) => d.prop === p)?.value ?? "");
+  return [
+    ...(value("border") === "1px solid var(--ink)" ? [] : ["button border changed"]),
+    ...(value("padding") === "var(--button-pad)" ? [] : ["button padding changed"]),
+  ];
+}
+
+describe("static: primary button rule _Requirements: 4.6, 4.7, 4.9, 4.12, 12.4_", () => {
+  it("defines the primary style once, in globals.css, with ink and paper only", () => {
+    expect(primaryViolations(sheets)).toEqual([]);
+  });
+
+  it("reports a planted primary rule with a border, a transition and a stray colour", () => {
+    const text =
+      'button {\n  border: 1px solid var(--ink);\n  padding: var(--button-pad);\n}\nbutton[data-primary="true"]:not(:disabled) {\n  background: #111111;\n  border: 1px solid var(--ink);\n  transition: none;\n}\n';
+    const found = primaryViolations([{ path: "app/globals.css", text }]);
+    expect(found).toEqual([
+      "expected exactly one rest and one hover rule with data-primary",
+      "background must be var(--ink) or var(--paper)",
+      "border must be var(--ink) or var(--paper)",
+      "border is not allowed in a primary rule",
+      "transition must be var(--ink) or var(--paper)",
+      "transition is not allowed in a primary rule",
+    ]);
+  });
+});
+
 function ui(text: string, path = "src/components/x.module.css"): string[] {
   return formatViolations(checkUiSheet({ path, text }));
 }
@@ -366,6 +427,14 @@ describe("static: stylesheet self-test (planted violations)", () => {
       "src/components/x.module.css:2 hover may change only the background",
     ]);
     expect(ui(".a:focus-visible {\n  outline: 2px solid var(--accent);\n}\n")).toEqual([]);
+  });
+
+  it("allows color on the primary hover selector only", () => {
+    const primary = 'button[data-primary="true"]:hover:not(:disabled) {\n  color: #111111;\n}\n';
+    expect(ui(primary)).toEqual([]);
+    expect(ui("a:hover {\n  color: #111111;\n}\n")).toEqual([
+      "src/components/x.module.css:2 hover may change only the background",
+    ]);
   });
 
   it("reports banned properties, gradients and keyframes", () => {

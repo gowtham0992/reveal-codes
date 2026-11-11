@@ -55,7 +55,7 @@ Conventions that apply to every task:
     - _Requirements: 3.7, 12.3, 12.11_
 
 - [ ] 2. Primary button, Verify summary, and collapsed unchecked row
-  - [~] 2.1 `nextStep`, the Toolbar `step` prop, and the primary style
+  - [x] 2.1 `nextStep`, the Toolbar `step` prop, and the primary style
     - Create `apps/web/src/components/next-step.ts`: `NextStep`, `NextStepInput`, `nextStep` (rules in order: verifying gives `none`; empty gives `load-demo`; `verifiableUnchecked > 0` gives `verify`; otherwise `export`, whatever `blocking` is) and `PRIMARY_LABEL`. Pure, no React.
     - Add `countVerifiableUnchecked(document)` to `apps/web/src/client/verify-flow.ts`: unchecked full citations (`CIT …`) plus unchecked quotations (`QUO …`) whose attributed citation Verify can check or re-check (a full citation of any status, or a short form whose `targetStart` points at a full citation, found as `ownerCluster` does by `citationStart`). A quotation with no attached citation, or attached to a short form with no target, is not counted. The count is 0 when `hasFullRecord(document)` is false.
     - In `apps/web/src/components/toolbar.tsx` add the prop `step: NextStep`; set `data-primary="true"` on the one button the step names and on no other. Move `ShellToolbar` out of `app-shell.tsx` into `apps/web/src/components/shell-toolbar.tsx`; it calls `nextStep` and passes `step`.
@@ -71,7 +71,7 @@ Conventions that apply to every task:
     - **Inventory five to six.** In `apps/web/test/static/inventory.test.ts` change the property inventory from five to six properties (`["1","1","2","3","4","5"]` by comment, property numbers being per spec) and name the new file. The "exactly one `fc.assert` per file with `{ numRuns: runs() }`" and "describe title ends with `_Requirements: ..._`" checks need no change.
     - _Requirements: 4.12, 12.13_
 
-  - [~] 2.3 Verify summary logic; no counts Notice
+  - [x] 2.3 Verify summary logic; no counts Notice
     - In `apps/web/src/client/verify-summary.ts` remove `summaryNotice`; add `tallyDocument` (the private `tally` moved from `verify-flow.ts`), `summaryLines` (line 1 `Citations: ` with `<n> found`, `<n> not found`, `<n> ambiguous`, `<n> not checked`; line 2 `Quotations: ` with `<n> match`, `<n> not in the opinion`, `<n> not checked`; zero terms dropped, a line with no terms dropped whole; line 3 `Checked HH:MM`, left out when the date does not parse; then the further line), `furtherLine` (latest `waitUntil` among unchecked full citations gives `Some items were not checked; try Verify again after <HH:MM>.`; else skipped or unavailable gives `Some items were skipped; try Verify again.`; else null; null unless the outcome is `completed`) and `localTime` (two-digit local hours and minutes from `new Date(iso)`). Keep `FAILED_NOTICE`.
     - In `apps/web/src/client/verify-flow.ts` stop dispatching the counts Notice, import `tallyDocument`, keep the `FAILED_NOTICE` on failure, and on a `completed` outcome clear the Notice only when it equals `FAILED_NOTICE`.
     - Update `apps/web/test/verify-flow.test.ts` and `verify-summary.test.ts`: all terms; a zero term dropped; a whole line dropped; the Checked line (expected value built from local getters so it holds in any zone); the further line with the latest of two retry times; the skipped sentence; no further line on a clean run; unparseable `verifiedAt`; no counts Notice; failure Notice kept; stale failure Notice cleared by a good run.

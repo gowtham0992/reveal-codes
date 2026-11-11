@@ -8,7 +8,43 @@ const BASE: ToolbarProps = {
   notice: null,
   paneOpen: false,
   verifyDisabled: false,
+  step: "none",
 };
+
+function primaries(): string[] {
+  return screen
+    .getAllByRole("button")
+    .filter((b) => b.getAttribute("data-primary") === "true")
+    .map((b) => b.textContent);
+}
+
+describe("Toolbar primary button _Requirements: 4.6, 4.8, 4.10, 4.11_", () => {
+  it("marks exactly the button the step names", () => {
+    const { rerender } = renderUi(<Toolbar {...BASE} step="load-demo" />);
+    expect(primaries()).toEqual(["Load demo motion"]);
+    rerender(<Toolbar {...BASE} step="verify" />);
+    expect(primaries()).toEqual(["Verify"]);
+    rerender(<Toolbar {...BASE} step="export" blockingCount={2} />);
+    expect(primaries()).toEqual(["Export (2 blocking)"]);
+    rerender(<Toolbar {...BASE} step="none" />);
+    expect(primaries()).toEqual([]);
+  });
+
+  it("marks no button while Verify runs and keeps Verify in the ordinary disabled style", () => {
+    renderUi(<Toolbar {...BASE} step="none" verifyDisabled={true} verifyRunning={true} />);
+    expect(primaries()).toEqual([]);
+    const running = screen.getByRole("button", { name: "Verifying…" });
+    expect(running).toHaveProperty("disabled", true);
+    expect(running.hasAttribute("data-primary")).toBe(false);
+  });
+
+  it("keeps data-primary on a disabled primary button", () => {
+    renderUi(<Toolbar {...BASE} step="verify" verifyDisabled={true} />);
+    const verify = screen.getByRole("button", { name: "Verify" });
+    expect(verify.getAttribute("data-primary")).toBe("true");
+    expect(verify).toHaveProperty("disabled", true);
+  });
+});
 
 describe("Toolbar _Requirements: 10.1, 10.2, 10.6, 10.7_", () => {
   it("is a toolbar whose buttons appear in the specified order", () => {

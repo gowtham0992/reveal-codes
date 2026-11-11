@@ -96,7 +96,7 @@ function mount(document: Document, storage = createMemoryStorage()): Rig {
     const x = useExport({ svc, store, autosave, doc, notice, onGo: () => undefined });
     return (
       <>
-        <Toolbar notice={null} paneOpen={false} verifyDisabled={false} {...x.toolbar} />
+        <Toolbar notice={null} step="none" paneOpen={false} verifyDisabled={false} {...x.toolbar} />
         {x.dialog}
       </>
     );

@@ -63,6 +63,16 @@ button:hover:not(:disabled) {
   background: var(--ui-bg);
 }
 
+button[data-primary="true"]:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+button[data-primary="true"]:hover:not(:disabled) {
+  background: var(--paper);
+  color: var(--ink);
+}
+
 button:disabled {
   border-color: var(--rule);
   color: var(--rule);

@@ -2,7 +2,7 @@ import { checkQuote } from "@reveal-codes/verifier/quote";
 import type { Document, IssueKey, QuoteCheckResult } from "@reveal-codes/engine";
 import type { Store } from "../store-runtime";
 import type { ApiClient, FullRecord } from "./api";
-import { FAILED_NOTICE, summaryNotice } from "./verify-summary";
+import { FAILED_NOTICE, tallyDocument } from "./verify-summary";
 
 export type FlowStore = Pick<Store, "getState" | "dispatch">;
 export type VerifyOutcome = Readonly<{
@@ -65,12 +65,27 @@ export function quotesByCluster(document: Document): ReadonlyMap<string, readonl
   return groups;
 }
 
-function tally(document: Document): Pick<VerifyOutcome, "citations" | "quotes"> {
-  const citations = { ...NO_CITATIONS };
-  for (const r of fullRecords(document)) citations[r.result.status] += 1;
-  const quotes = { ...NO_QUOTES };
-  for (const q of document.quotes) quotes[q.result.status] += 1;
-  return { citations, quotes };
+/** True when the quote's attached citation is a full citation, or a short form linked to one. */
+function hasCheckableOwner(document: Document, citationStart: number): boolean {
+  const attached = document.citations.find((c) => c.citation.start === citationStart);
+  if (attached === undefined) return false;
+  const value = attached.citation.value;
+  if (attached.kind === "short" && value.kind === "short") {
+    if (value.targetStart === null) return false;
+    const target = value.targetStart;
+    return document.citations.some((c) => c.kind === "full" && c.citation.start === target);
+  }
+  return attached.kind === "full";
+}
+
+/** Requirement 4.2: unchecked citations plus unchecked quotations that Verify can act on. */
+export function countVerifiableUnchecked(document: Document): number {
+  if (!hasFullRecord(document)) return 0;
+  const citations = fullRecords(document).filter((r) => r.result.status === "unchecked").length;
+  const quotes = document.quotes.filter(
+    (q) => q.result.status === "unchecked" && hasCheckableOwner(document, q.quote.citationStart),
+  ).length;
+  return citations + quotes;
 }
 
 function outcome(
@@ -79,7 +94,7 @@ function outcome(
   skipped: number,
   unavailable: number,
 ): VerifyOutcome {
-  const counts = status === "completed" ? tally(store.getState().document) : null;
+  const counts = status === "completed" ? tallyDocument(store.getState().document) : null;
   return {
     status,
     citations: counts?.citations ?? NO_CITATIONS,
@@ -132,6 +147,6 @@ export async function runVerifyFlow(
   if (phase.discarded) return outcome("discarded", store, 0, 0);
   store.dispatch({ type: "verified", at: now().toISOString() });
   const done = outcome("completed", store, first.skipped + phase.skipped, phase.unavailable);
-  store.dispatch({ type: "notice", text: summaryNotice(done) });
+  if (store.getState().notice === FAILED_NOTICE) store.dispatch({ type: "notice", text: null });
   return done;
 }

@@ -10,7 +10,6 @@ import { defaultServices } from "../services";
 import type { AppServices } from "../services";
 import { createStore } from "../store-runtime";
 import type { Store } from "../store-runtime";
-import { hasFullRecord, runVerifyFlow } from "../client/verify-flow";
 import { EditorSurface } from "./editor-surface";
 import { useAssistantSlot } from "./assistant-column";
 import { modeText, useModeResult } from "./use-server-mode";
@@ -18,7 +17,7 @@ import type { ServerMode } from "./use-server-mode";
 import { windowTitle } from "./use-document-title";
 import { StatusLine } from "./status-line";
 import { IssuesRegion } from "./issues-region";
-import { Toolbar } from "./toolbar";
+import { ShellToolbar } from "./shell-toolbar";
 import { useExport } from "./use-export";
 import { useDocumentActions } from "./use-document-actions";
 import { composeStatus, positionText, usePaneControl } from "./use-pane";
@@ -100,46 +99,6 @@ function useShellParts(services: AppServices | undefined) {
   );
   useAutosave(store, svc, autosave);
   return { svc, store, autosave };
-}
-
-/** Verify wiring (Requirement 17.1): one flow at a time; the flow reports through the Store. */
-function useVerify(svc: AppServices, store: Store) {
-  const [running, setRunning] = useState(false);
-  const start = (): void => {
-    setRunning(true);
-    void runVerifyFlow(svc.api, store, svc.now).then(() => {
-      setRunning(false);
-    });
-  };
-  return { running, start };
-}
-
-type ShellToolbarProps = Readonly<{
-  notice: string | null;
-  doc: Document;
-  svc: AppServices;
-  store: Store;
-  exportGate: ReturnType<typeof useExport>;
-  pane: ReturnType<typeof usePaneControl>;
-  actions: ReturnType<typeof useDocumentActions>;
-}>;
-
-function ShellToolbar(props: ShellToolbarProps) {
-  const { notice, doc, exportGate, pane, actions } = props;
-  const verify = useVerify(props.svc, props.store);
-  return (
-    <Toolbar
-      notice={notice}
-      onNew={actions.onNew}
-      onLoadDemo={actions.onLoadDemo}
-      paneOpen={pane.open}
-      verifyDisabled={verify.running || !hasFullRecord(doc)}
-      verifyRunning={verify.running}
-      {...exportGate.toolbar}
-      onVerify={verify.start}
-      onTogglePane={pane.toggle}
-    />
-  );
 }
 
 /** The caret Offset as a ref, so a draft that ends later inserts where the caret is then. */
