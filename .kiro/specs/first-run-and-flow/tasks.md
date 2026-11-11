@@ -129,7 +129,7 @@ Conventions that apply to every task:
     - Add tests: at width 799 the storage fake records no `getItem` or `setItem` of the Autosave_Key or the Pane_Key; at 800 the draft loads; unmount with a save pending flushes once and writes nothing afterwards.
     - _Requirements: 10.7, 10.8, 12.9_
 
-  - [~] 4.3 Root switch and Small_Screen_Page
+  - [x] 4.3 Root switch and Small_Screen_Page
     - Create `apps/web/src/components/small-screen-page.tsx` and `.module.css`: `<title>Reveal Codes</title>` and a `<main>` with the wordmark in the editor family at 15px bold and three `<p>` elements with exactly the sentences of Requirement 10.5; paper background, ink text, no image, icon, button or link.
     - In `apps/web/src/components/app-shell.tsx` make `AppShell` the thin root: `useSyncExternalStore(svc.viewport.subscribe, svc.viewport.width, () => SHELL_MIN_WIDTH)`, rendering `SmallScreenPage` below 800 and `Shell` otherwise; the present body becomes `Shell`. The Shell is mounted fresh at 800 and unmounted below it.
     - Add `apps/web/test/small-screen.test.tsx` and update `app-shell.test.tsx`: width 799 gives the page with its three sentences and no `button`, `a` or `img`; width 800 gives the Shell; the Shell is replaced when the width falls below 800; the Shell mounts and loads the draft when the width reaches 800; the title at 799.

@@ -5,7 +5,8 @@ import type { Document } from "@reveal-codes/engine";
 import { createAutosave } from "../autosave";
 import type { Autosave } from "../autosave";
 import { useEditorBinding } from "../editor/use-editor-binding";
-import { defaultServices } from "../services";
+import { NARROW_WIDTH, SHELL_MIN_WIDTH, defaultServices } from "../services";
+import { SmallScreenPage } from "./small-screen-page";
 import type { AppServices } from "../services";
 import { createStore } from "../store-runtime";
 import type { Store } from "../store-runtime";
@@ -42,8 +43,7 @@ function useNoticeAndDocument(store: Store) {
   return { notice, doc, verifiedAt };
 }
 
-function useShellParts(services: AppServices | undefined) {
-  const [svc] = useState<AppServices>(() => services ?? defaultServices());
+function useShellParts(svc: AppServices) {
   const [store] = useState(() => createStore(svc.now));
   const [autosave] = useState(() =>
     createAutosave({
@@ -140,8 +140,8 @@ function IssuesSlot({ doc, store, svc, binding, mode, verifiedAt, verify }: Issu
   );
 }
 
-function useShellState(services: AppServices | undefined) {
-  const { svc, store, autosave } = useShellParts(services);
+function useShellState(svc: AppServices) {
+  const { store, autosave } = useShellParts(svc);
   const { cursor, onCaret, getCaret } = useCaretRef();
   const binding = useEditorBinding({ store, now: svc.now, onCaret });
   const paneControl = usePaneControl(svc);
@@ -170,8 +170,9 @@ function useShellState(services: AppServices | undefined) {
   };
 }
 
-export function AppShell({ services }: AppShellProps) {
-  const s = useShellState(services);
+/** Mounted fresh when the width reaches NARROW_WIDTH; unmounted (and flushed) below it. */
+function Shell({ svc }: Readonly<{ svc: AppServices }>) {
+  const s = useShellState(svc);
   return (
     <div
       className="app"
@@ -188,4 +189,15 @@ export function AppShell({ services }: AppShellProps) {
       <ShellBottom {...s.bottom} />
     </div>
   );
+}
+
+/** The thin root: the Small_Screen_Page below NARROW_WIDTH, the Shell otherwise. */
+export function AppShell({ services }: AppShellProps) {
+  const [svc] = useState<AppServices>(() => services ?? defaultServices());
+  const width = useSyncExternalStore(
+    svc.viewport.subscribe,
+    svc.viewport.width,
+    () => SHELL_MIN_WIDTH,
+  );
+  return width < NARROW_WIDTH ? <SmallScreenPage /> : <Shell svc={svc} />;
 }

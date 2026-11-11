@@ -501,6 +501,53 @@ function titleElement(): string | undefined {
   return document.head.querySelector("title")?.textContent ?? undefined;
 }
 
+function narrowFixture(width: number, storage: MemoryStorage = storageWithPane(false)) {
+  const f = fixture(storage);
+  const viewport = createFakeViewport(width);
+  return { ...f, viewport, services: { ...f.services, viewport } };
+}
+
+describe("AppShell small screen _Requirements: 10.4, 10.5, 10.6, 10.8, 10.9, 10.10, 12.9_", () => {
+  it("shows the page with three sentences and no button, link or image at 799", async () => {
+    await mount(narrowFixture(799));
+    expect(document.querySelector(".app")).toBeNull();
+    expect(document.querySelectorAll("main p")).toHaveLength(3);
+    expect(document.querySelectorAll("button, a, img")).toHaveLength(0);
+    expect(titleElement()).toBe("Reveal Codes");
+  });
+
+  it("shows the Shell at 800", async () => {
+    await mount(narrowFixture(800));
+    expect(document.querySelector(".app")).not.toBeNull();
+    expect(screen.queryByText("It is a desktop editor.")).toBeNull();
+  });
+
+  it("replaces the Shell when the width falls below 800", async () => {
+    const f = narrowFixture(1280);
+    await mount(f);
+    expect(document.querySelector(".app")).not.toBeNull();
+    act(() => {
+      f.viewport.setWidth(799);
+    });
+    expect(document.querySelector(".app")).toBeNull();
+    expect(screen.getByText("It is a desktop editor.")).not.toBeNull();
+  });
+
+  it("mounts the Shell and loads the saved draft when the width reaches 800", async () => {
+    const storage = storageWithPane(false);
+    storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Saved Motion\nBody."), [], null));
+    const f = narrowFixture(799, storage);
+    await mount(f);
+    expect(titleElement()).toBe("Reveal Codes");
+    await act(async () => {
+      f.viewport.setWidth(800);
+      await Promise.resolve();
+    });
+    expect(document.querySelector(".app")).not.toBeNull();
+    expect(titleElement()).toBe("Saved Motion \u2014 Reveal Codes");
+  });
+});
+
 describe("AppShell Window_Title _Requirements: 10.1, 10.2, 10.3, 10.4, 14.4_", () => {
   const LONG = "A".repeat(70);
   it.each([
