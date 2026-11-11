@@ -146,7 +146,7 @@ Conventions that apply to every task:
     - **Stop condition.** If any of the three fails, stop group 5: record the reason in `BUILD_LOG.md` (under the entry written in task 6.2), build no marks, skip 5.2 and 5.3, and continue with group 6. Requirement 11.7 applies.
     - _Requirements: 11.3, 11.7_
 
-  - [~] 5.2 `markRanges`
+  - [x] 5.2 `markRanges`
     - Create `apps/web/src/editor/marks.ts` with `MarkRange` and the pure `markRanges(document)`: filter `issues(document)` to `CIT ✘`, `CIT ?` and `QUO ✘` and map to the titles `Citation not found`, `Citation ambiguous` and `Quotation not in the opinion`.
     - Add `apps/web/test/marks.test.ts`: ranges and titles for the three codes; no range for `CIT ✓`, `CIT …`, `QUO ✓`, `QUO …`.
     - _Requirements: 11.1, 11.2, 11.5, 12.10_
