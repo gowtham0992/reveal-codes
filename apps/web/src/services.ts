@@ -15,6 +15,29 @@ function lazyApi(): ApiClient {
   };
 }
 
+/** Below this width the Small_Screen_Page replaces the shell. */
+export const NARROW_WIDTH = 800;
+/** Minimum width of the shell itself. */
+export const SHELL_MIN_WIDTH = 1150;
+
+/** Window width and a change subscription; `subscribe` returns the unsubscribe function. */
+export type Viewport = Readonly<{
+  width: () => number;
+  subscribe: (onChange: () => void) => () => void;
+}>;
+
+function browserViewport(): Viewport {
+  return {
+    width: () => window.innerWidth,
+    subscribe: (onChange) => {
+      window.addEventListener("resize", onChange);
+      return () => {
+        window.removeEventListener("resize", onChange);
+      };
+    },
+  };
+}
+
 /**
  * Browser services the shell depends on. Tests supply fakes.
  */
@@ -27,6 +50,7 @@ export type AppServices = Readonly<{
   download: (bytes: Uint8Array, fileName: string) => void;
   /** True when the print tab opened. */
   openPrint: () => boolean;
+  viewport: Viewport;
 }>;
 
 /** No `noopener` feature: it makes `window.open` return null even on success. */
@@ -62,5 +86,6 @@ export function defaultServices(): AppServices {
       browserDownload(bytes, fileName);
     },
     openPrint: openPrintTab,
+    viewport: browserViewport(),
   };
 }

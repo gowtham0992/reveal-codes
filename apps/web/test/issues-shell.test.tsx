@@ -9,6 +9,7 @@ import { AUTOSAVE_KEY, serialise } from "../src/persist";
 import type { AppServices } from "../src/services";
 import { createManualTimers } from "./support/clock";
 import { createMemoryStorage } from "./support/memory-storage";
+import { createFakeViewport } from "./support/viewport";
 import { modeApi } from "./support/mode-fetch";
 import { act, fireEvent, renderUi, screen, within } from "./support/render";
 
@@ -37,6 +38,7 @@ async function mount(verifiedAt: string | null = ISO): Promise<Mounted> {
     storage,
     download: () => undefined,
     openPrint: () => true,
+    viewport: createFakeViewport(),
   };
   await act(async () => {
     renderUi(<AppShell services={services} />);

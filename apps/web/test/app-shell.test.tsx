@@ -14,6 +14,7 @@ import type { ModeSetting } from "./support/mode-fetch";
 import { createManualTimers } from "./support/clock";
 import type { ManualTimers } from "./support/clock";
 import { createMemoryStorage } from "./support/memory-storage";
+import { createFakeViewport } from "./support/viewport";
 import type { MemoryStorage } from "./support/memory-storage";
 import { offsetToPos } from "../src/editor/offsets";
 import { act, fireEvent, renderUi, screen, within } from "./support/render";
@@ -57,6 +58,7 @@ function fixture(
     storage,
     download: () => undefined,
     openPrint: () => true,
+    viewport: createFakeViewport(),
   };
   return { services, storage, timers };
 }

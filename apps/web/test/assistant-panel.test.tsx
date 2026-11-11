@@ -14,6 +14,7 @@ import type { AssistantFetch } from "./support/assistant-fetch";
 import { createManualTimers } from "./support/clock";
 import type { ManualTimers } from "./support/clock";
 import { createMemoryStorage } from "./support/memory-storage";
+import { createFakeViewport } from "./support/viewport";
 import type { MemoryStorage } from "./support/memory-storage";
 import { act, fireEvent, renderUi, screen, waitFor } from "./support/render";
 
@@ -57,6 +58,7 @@ async function mount(text = ""): Promise<Fixture> {
     storage,
     download: () => undefined,
     openPrint: () => true,
+    viewport: createFakeViewport(),
   };
   await act(async () => {
     renderUi(<AppShell services={services} />);

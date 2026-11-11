@@ -117,7 +117,7 @@ Conventions that apply to every task:
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8, 12.8, 12.14_
 
 - [ ] 4. Small-screen rules
-  - [~] 4.1 Viewport service and shared test helper
+  - [x] 4.1 Viewport service and shared test helper
     - In `apps/web/src/services.ts` add the `Viewport` type (`width()`, `subscribe(onChange)`), `NARROW_WIDTH = 800`, `SHELL_MIN_WIDTH = 1150`, and `AppServices.viewport`. `defaultServices` reads `window.innerWidth` inside `width()` and registers a `resize` listener inside `subscribe`, so server rendering touches no `window`.
     - Add one shared helper under `apps/web/test/support/` that builds a fake `Viewport` with a settable width, and add `viewport` to the eight test files that build an `AppServices` literal, using the helper (default width 1280).
     - Add an example test for the fake and the default `Viewport` shape.

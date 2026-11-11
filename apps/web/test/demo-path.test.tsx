@@ -4,6 +4,7 @@ import { AppShell } from "../src/components/app-shell";
 import type { AppServices } from "../src/services";
 import { createManualTimers } from "./support/clock";
 import { createMemoryStorage } from "./support/memory-storage";
+import { createFakeViewport } from "./support/viewport";
 import { modeApi } from "./support/mode-fetch";
 import type { ModeApi } from "./support/mode-fetch";
 import { act, fireEvent, renderUi, screen, waitFor, within } from "./support/render";
@@ -21,6 +22,7 @@ async function mountDemo(): Promise<ModeApi> {
     storage: createMemoryStorage(),
     download: () => undefined,
     openPrint: () => true,
+    viewport: createFakeViewport(),
   };
   await act(async () => {
     renderUi(<AppShell services={services} />);

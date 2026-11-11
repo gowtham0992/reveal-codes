@@ -15,6 +15,7 @@ import { createManualTimers } from "./support/clock";
 import { readDocxParagraphs } from "./support/docx-text";
 import { EXPORT_NOW, storeWith } from "./support/export-fixtures";
 import { createMemoryStorage } from "./support/memory-storage";
+import { createFakeViewport } from "./support/viewport";
 import type { MemoryStorage } from "./support/memory-storage";
 import { modeApi } from "./support/mode-fetch";
 import {
@@ -73,6 +74,7 @@ function services(storage: MemoryStorage, downloads: Downloaded[]): AppServices 
       downloads.push({ bytes, fileName });
     },
     openPrint: () => true,
+    viewport: createFakeViewport(),
   };
 }
 
