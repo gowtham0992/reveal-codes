@@ -3,6 +3,8 @@ import type { MouseEvent, RefObject } from "react";
 import type { Document } from "@reveal-codes/engine";
 import { itemIndexAtOffset, layoutPane, statusText } from "./layout";
 import type { PaneItem } from "./layout";
+import { blockSegments } from "./blocks";
+import type { Segment } from "./blocks";
 import { cls, codeClass } from "./code-class";
 import { PaneHeader } from "./pane-header";
 
@@ -73,22 +75,35 @@ function nearestOffset(target: EventTarget): number | null {
 
 type LineProps = Readonly<{
   line: Line;
+  segments: readonly Segment[];
   head: number;
   endBlock: number | null;
   cursorRef: RefObject<HTMLSpanElement | null>;
 }>;
 
-function LineView({ line, head, endBlock, cursorRef }: LineProps) {
+function LineView({ line, segments, head, endBlock, cursorRef }: LineProps) {
+  let index = line.start;
   return (
     <div className={cls("line")}>
-      {line.items.map((item, i) => (
-        <ItemView
-          key={line.start + i}
-          item={item}
-          highlighted={line.start + i === head}
-          cursorRef={cursorRef}
-        />
-      ))}
+      {segments.map((segment) => {
+        const first = index;
+        const views = segment.items.map((item, i) => (
+          <ItemView
+            key={first + i}
+            item={item}
+            highlighted={first + i === head}
+            cursorRef={cursorRef}
+          />
+        ));
+        index += segment.items.length;
+        return segment.block ? (
+          <span key={first} className={cls("block")}>
+            {views}
+          </span>
+        ) : (
+          views
+        );
+      })}
       {endBlock === null ? null : (
         <span aria-hidden="true" data-offset={endBlock} ref={cursorRef} className={cls("cursor")}>
           {"\u00A0"}
@@ -115,6 +130,7 @@ export function Pane(props: PaneProps) {
     else onItemClick(offset);
   };
   const lines = splitLines(layout.items);
+  const segments = blockSegments(lines.map((line) => line.items));
   return (
     <section role="region" aria-label="Reveal Codes" className={cls("pane")}>
       <PaneHeader />
@@ -123,6 +139,7 @@ export function Pane(props: PaneProps) {
           <LineView
             key={line.start}
             line={line}
+            segments={segments[n] ?? []}
             head={head}
             endBlock={atEnd && n === lines.length - 1 ? layout.textLength : null}
             cursorRef={cursorRef}

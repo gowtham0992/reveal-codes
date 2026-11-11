@@ -291,6 +291,52 @@ describe("Pane failing class _Requirements: 3.1, 3.2, 3.3, 3.5, 12.14_", () => {
   });
 });
 
+describe("Pane Failing_Block wrapper _Requirements: 7.8, 7.16, 7.17_", () => {
+  function failedCitation(): Document {
+    const base = docOf("See Roe v. Wade, 410 U.S. 113 (1973).");
+    const cit = base.citations.find((c) => c.kind === "full");
+    if (cit === undefined) throw new Error("fixture has no citation");
+    const set = setVerification(base, cit.key, { status: "not_found" });
+    if (!set.ok) throw new Error("fixture verification rejected");
+    return set.value;
+  }
+  const blocks = (root: ParentNode): Element[] =>
+    [...root.querySelectorAll("span")].filter((e) => /block/.test(e.className));
+
+  it("wraps the failing citation in one block span with no role or data-offset", () => {
+    const { container } = renderUi(<Pane {...props(failedCitation())} />);
+    const found = blocks(container);
+    expect(found).toHaveLength(1);
+    const block = found[0] as Element;
+    expect(block.hasAttribute("role")).toBe(false);
+    expect(block.hasAttribute("data-offset")).toBe(false);
+    expect(block.firstElementChild?.getAttribute("aria-label")).toBe("Citation not found");
+    expect(block.lastElementChild?.getAttribute("aria-label")).toBe("End of citation");
+  });
+
+  it("draws no block for a document without failing codes", () => {
+    const { container } = renderUi(<Pane {...props(CITED)} />);
+    expect(blocks(container)).toHaveLength(0);
+  });
+
+  it("sets the selection to the offset of a text item clicked inside a block", () => {
+    const onItemClick = vi.fn();
+    const doc = failedCitation();
+    const { container } = renderUi(<Pane {...props(doc, { onItemClick })} />);
+    const offset = doc.text.indexOf("410") + 1;
+    const inside = blocks(container)[0]?.querySelector(`[data-offset='${String(offset)}']`);
+    expect(inside).toBeTruthy();
+    fireEvent.click(inside as Element);
+    expect(onItemClick).toHaveBeenLastCalledWith(offset);
+  });
+
+  it("keeps the item count and data-offsets the same as without grouping", () => {
+    const doc = failedCitation();
+    const { container } = renderUi(<Pane {...props(doc)} />);
+    expect(container.querySelectorAll("[data-offset]").length).toBeGreaterThan(doc.text.length);
+  });
+});
+
 describe("Pane classes _Requirements: 12.4_", () => {
   it("gives each rendered Code_Item the class of its family", () => {
     renderUi(<Pane {...props(CITED)} />);

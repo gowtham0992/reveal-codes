@@ -47,6 +47,10 @@
   contain-intrinsic-size: auto 1.3em;
 }
 
+.block {
+  display: inline;
+}
+
 .code {
   margin: 0 1px;
   outline: 1px solid #aaaaaa;
