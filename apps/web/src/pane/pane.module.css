@@ -31,6 +31,12 @@
   outline-offset: -1px;
 }
 
+.failing {
+  color: #ffffff;
+  background: #aa0000;
+  outline: none;
+}
+
 .hum {
   color: #ffffff;
   background: #0000aa;
@@ -53,11 +59,6 @@
 
 .verified {
   color: #55ff55;
-  background: #0000aa;
-}
-
-.failed {
-  color: #ff5555;
   background: #0000aa;
 }
 

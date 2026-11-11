@@ -18,7 +18,7 @@ describe("Pane stylesheet _Requirements: 12.2, 12.3, 12.4_", () => {
     ["ai", "#FF55FF", "#0000AA"],
     ["aihum", "#55FFFF", "#0000AA"],
     ["verified", "#55FF55", "#0000AA"],
-    ["failed", "#FF5555", "#0000AA"],
+    ["failing", "#FFFFFF", "#AA0000"],
     ["pending", "#AA5500", "#FFFF55"],
     ["ovr", "#555555", "#AAAAAA"],
     ["ref", "#AAAAAA", "#0000AA"],

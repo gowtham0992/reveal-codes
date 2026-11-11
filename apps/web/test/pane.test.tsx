@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { createDocument, setQuoteCheck } from "@reveal-codes/engine";
-import type { Document } from "@reveal-codes/engine";
+import { createDocument, setQuoteCheck, setVerification } from "@reveal-codes/engine";
+import type { Document, VerificationResult } from "@reveal-codes/engine";
 import { describe, expect, it, vi } from "vitest";
 import { Pane } from "../src/pane/pane";
 import type { PaneProps } from "../src/pane/pane";
@@ -148,6 +148,55 @@ describe("Pane clicks and cursor _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5_", 
     if (!set.ok) throw new Error("fixture quote check rejected");
     renderUi(<Pane {...props(set.value)} />);
     expect(screen.getAllByRole("img", { name: "Quote not found in the opinion" })).toHaveLength(1);
+  });
+});
+
+describe("Pane failing class _Requirements: 3.1, 3.2, 3.3, 3.5, 12.14_", () => {
+  function withCitation(result: VerificationResult): Document {
+    const base = docOf("See Roe v. Wade, 410 U.S. 113 (1973).");
+    const cit = base.citations.find((c) => c.kind === "full");
+    if (cit === undefined || cit.kind !== "full") throw new Error("fixture has no citation");
+    const set = setVerification(base, cit.key, result);
+    if (!set.ok) throw new Error("fixture verification rejected");
+    return set.value;
+  }
+  const classOf = (name: string): string[] =>
+    screen.getAllByRole("img", { name }).map((e) => e.className);
+
+  it("gives a not-found citation's opening and closing codes the failing class", () => {
+    renderUi(<Pane {...props(withCitation({ status: "not_found" }))} />);
+    expect(classOf("Citation not found")[0]).toMatch(/failing/);
+    expect(classOf("End of citation")[0]).toMatch(/failing/);
+  });
+
+  it("gives an ambiguous citation the failing class", () => {
+    renderUi(<Pane {...props(withCitation({ status: "ambiguous", candidates: ["1", "2"] }))} />);
+    expect(classOf("Citation ambiguous, 2 candidates")[0]).toMatch(/failing/);
+  });
+
+  it("does not give a verified citation's closer or an unchecked citation the failing class", () => {
+    renderUi(<Pane {...props(withCitation({ status: "verified", clusterId: "1" }))} />);
+    expect(classOf("End of citation")[0]).not.toMatch(/failing/);
+    expect(classOf("Citation verified")[0]).not.toMatch(/failing/);
+    expect(classOf("Pasted or from outside the editor")[0]).not.toMatch(/failing/);
+  });
+
+  it("does not give an unchecked citation the failing class", () => {
+    renderUi(<Pane {...props(CITED)} />);
+    expect(classOf("Citation unchecked")[0]).not.toMatch(/failing/);
+    expect(classOf("End of citation")[0]).not.toMatch(/failing/);
+  });
+
+  it("gives a mismatched quotation the failing class on both codes", () => {
+    const base = docOf('See Roe v. Wade, 410 U.S. 113, 120 (1973) ("the quick brown fox").');
+    const q = base.quotes[0];
+    if (q === undefined) throw new Error("fixture has no quote");
+    const set = setQuoteCheck(base, q.key, { status: "mismatch", prefixLength: 4 });
+    if (!set.ok) throw new Error("fixture quote check rejected");
+    renderUi(<Pane {...props(set.value)} />);
+    expect(classOf("Quote not found in the opinion")[0]).toMatch(/failing/);
+    expect(classOf("End of quote")[0]).toMatch(/failing/);
+    expect(classOf("End of citation")[0]).not.toMatch(/failing/);
   });
 });
 

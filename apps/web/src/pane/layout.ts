@@ -1,5 +1,6 @@
 import { render } from "@reveal-codes/engine";
 import type { CodePosition, Document } from "@reveal-codes/engine";
+import { failingFlags } from "./failing";
 
 export type CodeFamily =
   "HUM" | "PST" | "AI" | "AI>HUM" | "verified" | "failed" | "pending" | "ovr" | "ref" | "close";
@@ -12,6 +13,7 @@ export type PaneItem =
       text: string;
       family: CodeFamily;
       meaning: string;
+      failing: boolean;
     }>;
 
 export type PaneLayout = Readonly<{ items: readonly PaneItem[]; textLength: number }>;
@@ -91,8 +93,9 @@ export function codeMeaning(token: string): string {
   }
 }
 
-function codeItem(position: CodePosition): PaneItem {
+function codeItem(position: CodePosition, failing: boolean): PaneItem {
   return {
+    failing,
     kind: "code",
     offset: position.offset,
     text: position.code,
@@ -111,6 +114,7 @@ function textUnit(rendered: string, at: number): Readonly<{ text: string; width:
 export function layoutPane(document: Document): PaneLayout {
   const rendering = render(document, "display");
   const { positions } = rendering;
+  const flags = failingFlags(positions);
   const length = document.text.length;
   const items: PaneItem[] = [];
   let next = 0;
@@ -118,7 +122,7 @@ export function layoutPane(document: Document): PaneLayout {
   let offset = 0;
   for (;;) {
     for (let p = positions[next]; p !== undefined && p.offset === offset; p = positions[next]) {
-      items.push(codeItem(p));
+      items.push(codeItem(p, flags[next] ?? false));
       at += p.code.length;
       next += 1;
     }
@@ -154,11 +158,23 @@ export function offsetOfItem(layout: PaneLayout, index: number): number {
   return item === undefined ? layout.textLength : item.offset;
 }
 
+function headOf(text: string, offset: number): string {
+  return text.slice(0, Math.max(0, Math.min(offset, text.length)));
+}
+
+/** Line number of `offset`: 1 plus the newlines before it; the offset is clamped to the text. */
+export function lineAt(text: string, offset: number): number {
+  return headOf(text, offset).split("\n").length;
+}
+
+/** `Ln <line> Pos <col>`; offsets outside the text are clamped. */
+export function lnPos(text: string, offset: number): string {
+  const head = headOf(text, offset);
+  const col = head.length - (head.lastIndexOf("\n") + 1) + 1;
+  return `Ln ${String(lineAt(text, offset))} Pos ${String(col)}`;
+}
+
 /** `Doc 1 Pg 1 Ln <line> Pos <col>`; offsets outside the text are clamped. */
 export function statusText(text: string, offset: number): string {
-  const head = text.slice(0, Math.max(0, Math.min(offset, text.length)));
-  const lastNewline = head.lastIndexOf("\n");
-  const line = head.split("\n").length;
-  const col = head.length - (lastNewline + 1) + 1;
-  return `Doc 1 Pg 1 Ln ${String(line)} Pos ${String(col)}`;
+  return `Doc 1 Pg 1 ${lnPos(text, offset)}`;
 }

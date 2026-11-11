@@ -1,4 +1,4 @@
-import { createDocument, render } from "@reveal-codes/engine";
+import { createDocument, render, setQuoteCheck, setVerification } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import {
@@ -6,6 +6,8 @@ import {
   codeMeaning,
   itemIndexAtOffset,
   layoutPane,
+  lineAt,
+  lnPos,
   offsetOfItem,
   statusText,
 } from "../src/pane/layout";
@@ -139,6 +141,57 @@ describe("itemIndexAtOffset and offsetOfItem _Requirements: 11.6_", () => {
     for (const o of [0, 1, 3]) {
       expect(offsetOfItem(layout, itemIndexAtOffset(layout, o))).toBe(o);
     }
+  });
+});
+
+describe("failing flag in layoutPane _Requirements: 3.4, 3.6, 12.14_", () => {
+  function failedDoc(): Document {
+    const base = docOf('See Roe v. Wade, 410 U.S. 113, 120 (1973) ("the quick brown fox").');
+    const cit = base.citations.find((c) => c.kind === "full");
+    const q = base.quotes[0];
+    if (cit === undefined || cit.kind !== "full" || q === undefined) throw new Error("fixture");
+    const a = setVerification(base, cit.key, { status: "not_found" });
+    if (!a.ok) throw new Error("fixture citation rejected");
+    const b = setQuoteCheck(a.value, q.key, { status: "mismatch", prefixLength: 4 });
+    if (!b.ok) throw new Error("fixture quote rejected");
+    return b.value;
+  }
+
+  it("flags failing openings and closers, keeping text and offsets of the display rendering", () => {
+    const doc = failedDoc();
+    const rendering = render(doc, "display");
+    const codes = layoutPane(doc).items.filter((i) => i.kind === "code");
+    expect(codes.map((c) => [c.text, c.failing])).toEqual(
+      rendering.positions.map((p) => [p.code, p.code !== "[PST]"]),
+    );
+    expect(codes.map((c) => c.offset)).toEqual(rendering.positions.map((p) => p.offset));
+  });
+
+  it("does not flag the closer of a verified citation or other codes", () => {
+    const doc = docOf("See Roe v. Wade, 410 U.S. 113 (1973).");
+    const verified = setVerification(
+      doc,
+      (doc.citations.find((c) => c.kind === "full") as { key: string }).key,
+      { status: "verified", clusterId: "1" },
+    );
+    if (!verified.ok) throw new Error("fixture rejected");
+    const codes = layoutPane(verified.value).items.filter((i) => i.kind === "code");
+    expect(codes.some((c) => c.text === "[/CIT]")).toBe(true);
+    expect(codes.every((c) => !c.failing)).toBe(true);
+  });
+});
+
+describe("lineAt and lnPos _Requirements: 3.8_", () => {
+  it("numbers lines from 1 and clamps the offset", () => {
+    expect(lineAt("ab\ncd", 0)).toBe(1);
+    expect(lineAt("ab\ncd", 3)).toBe(2);
+    expect(lineAt("ab\ncd", 99)).toBe(2);
+    expect(lineAt("ab\ncd", -4)).toBe(1);
+  });
+
+  it("builds the position part of the status text", () => {
+    expect(lnPos("ab\ncd", 4)).toBe("Ln 2 Pos 2");
+    expect(statusText("ab\ncd", 4)).toBe(`Doc 1 Pg 1 ${lnPos("ab\ncd", 4)}`);
   });
 });
 

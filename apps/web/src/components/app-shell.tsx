@@ -5,7 +5,7 @@ import type { Document } from "@reveal-codes/engine";
 import { createAutosave } from "../autosave";
 import type { Autosave } from "../autosave";
 import { useEditorBinding } from "../editor/use-editor-binding";
-import { AUTOSAVE_KEY, deserialise } from "../persist";
+import { AUTOSAVE_KEY, deserialise, readRaw } from "../persist";
 import { defaultServices } from "../services";
 import type { AppServices } from "../services";
 import { createStore } from "../store-runtime";
@@ -26,20 +26,9 @@ import { Pane } from "../pane/pane";
 
 export type AppShellProps = Readonly<{ services?: AppServices }>;
 
-type Stored = Readonly<{ raw: string | null } | { thrown: unknown }>;
-
-/** `localStorage` access can throw (disabled storage); the throw becomes a value. */
-function readStored(services: AppServices): Stored {
-  try {
-    return { raw: services.storage.getItem(AUTOSAVE_KEY) };
-  } catch (e) {
-    return { thrown: e };
-  }
-}
-
 /** Mount-time load (Requirement 9.3): a missing or corrupt value leaves the empty Document. */
 function loadAutosave(services: AppServices, store: Store): void {
-  const stored = readStored(services);
+  const stored = readRaw(services.storage, AUTOSAVE_KEY);
   if (!("raw" in stored)) return;
   const restored = deserialise(stored.raw);
   if (restored.ok) {

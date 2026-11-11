@@ -67,6 +67,17 @@ function parseJson(raw: string): Result<unknown, PersistError> {
   }
 }
 
+export type Stored = Readonly<{ raw: string | null } | { thrown: unknown }>;
+
+/** `localStorage` access can throw (disabled storage); the throw becomes a value. */
+export function readRaw(storage: Pick<Storage, "getItem">, key: string): Stored {
+  try {
+    return { raw: storage.getItem(key) };
+  } catch (e) {
+    return { thrown: e };
+  }
+}
+
 /** Validates the JSON shape, then the Engine's `parse`; any fault is an `Err` (Req 9.4). */
 export function deserialise(raw: string | null): Result<Restored, PersistError> {
   if (raw === null) return err({ kind: "absent" });
@@ -84,4 +95,12 @@ export function deserialise(raw: string | null): Result<Restored, PersistError> 
   const parsed = parse(codes);
   if (!parsed.ok) return err({ kind: "bad_codes" });
   return ok({ document: parsed.value, runLog, verifiedAt: stamp ?? null });
+}
+
+/** True only when the stored draft restores to a Document whose text is not empty. */
+export function savedDraftExists(storage: Pick<Storage, "getItem">): boolean {
+  const stored = readRaw(storage, AUTOSAVE_KEY);
+  if (!("raw" in stored)) return false;
+  const restored = deserialise(stored.raw);
+  return restored.ok && restored.value.document.text.length > 0;
 }

@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef } from "react";
 import type { MouseEvent, RefObject } from "react";
 import type { Document } from "@reveal-codes/engine";
 import { itemIndexAtOffset, layoutPane, statusText } from "./layout";
-import type { CodeFamily, PaneItem } from "./layout";
-import styles from "./pane.module.css";
+import type { PaneItem } from "./layout";
+import { cls, codeClass } from "./code-class";
 
 export type PaneProps = Readonly<{
   document: Document;
@@ -20,15 +20,6 @@ export type PaneProps = Readonly<{
   modeText?: string | null;
 }>;
 
-/** Class name of a family: lowercased with non-letters removed (`AI>HUM` is `aihum`). */
-function familyClass(family: CodeFamily): string {
-  return family.toLowerCase().replace(/[^a-z]/g, "");
-}
-
-function cls(...names: readonly string[]): string {
-  return names.map((n) => styles[n] ?? n).join(" ");
-}
-
 type ItemProps = Readonly<{
   item: PaneItem;
   highlighted: boolean;
@@ -42,7 +33,7 @@ function ItemView({ item, highlighted, cursorRef }: ItemProps) {
         role="img"
         aria-label={item.meaning}
         data-offset={item.offset}
-        className={cls("code", familyClass(item.family))}
+        className={codeClass(item.family, item.failing)}
       >
         {item.text}
       </span>

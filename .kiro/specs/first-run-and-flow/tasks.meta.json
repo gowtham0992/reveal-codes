@@ -1,0 +1,181 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Pane preference module and saved-draft check": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316104
+      },
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358320850
+      },
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358626938
+      }
+    ],
+    "1.2 Pane control: open on first visit and remember the state": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316152
+      }
+    ],
+    "1.3 Failing flags in the Pane layout and the Failing_Code style": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316187
+      },
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358321301
+      }
+    ],
+    "1.4 Pane_Header with Legend": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316225
+      }
+    ],
+    "1.5 Css_Scan: Pane colours and contrast": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316253
+      }
+    ],
+    "2.1 `nextStep`, the Toolbar `step` prop, and the primary style": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316284
+      }
+    ],
+    "2.2 Property 1: one next step, and the inventory five-to-six change": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316309
+      }
+    ],
+    "2.3 Verify summary logic; no counts Notice": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316335
+      }
+    ],
+    "2.4 `useVerify` and the Verify_Summary in the Issues region": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316368
+      }
+    ],
+    "2.5 Unchecked_Row in the Issues list": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316393
+      }
+    ],
+    "3.1 Assistant lines and Reply_Box": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316416
+      }
+    ],
+    "3.2 Override dialog shows the item being overridden": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316436
+      }
+    ],
+    "3.3 Export dialog width, button labels, blocking line, Picker cut": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316459
+      }
+    ],
+    "4.1 Viewport service and shared test helper": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316485
+      }
+    ],
+    "4.2 Autosave extraction with the narrow guard and unmount flush": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316510
+      }
+    ],
+    "4.3 Root switch and Small_Screen_Page": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316543
+      }
+    ],
+    "4.4 Shell minimum width and the max-width 799px hide rule": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316576
+      }
+    ],
+    "5.1 Smoke test for the three API assumptions": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316602
+      }
+    ],
+    "5.2 `markRanges`": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316635
+      }
+    ],
+    "5.3 Marks plugin, binding, and style": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316668
+      }
+    ],
+    "6.1 Steering: `ui.md` and `product.md`": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316735
+      }
+    ],
+    "6.2 README, `docs/KIRO_USAGE.md`, and `BUILD_LOG.md`": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316760
+      }
+    ],
+    "6.3 Final checkpoint: full repository checks": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794358316792
+      }
+    ]
+  }
+}
