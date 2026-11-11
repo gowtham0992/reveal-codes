@@ -116,7 +116,7 @@ Conventions that apply to every task:
     - Update `export-dialog.test.tsx`, `export-dialog-orders.test.tsx`, `export-flow.test.tsx`, `export-shell.test.tsx`, `demo-path.test.tsx`, `order-copy.test.ts` and `order-picker.test.tsx`: labels with zero and with four blocking items; the line for 4, 1 and 0; the width rule; options of 80 and 81 code points.
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8, 12.8, 12.14_
 
-- [ ] 4. Small-screen rules
+- [x] 4. Small-screen rules
   - [x] 4.1 Viewport service and shared test helper
     - In `apps/web/src/services.ts` add the `Viewport` type (`width()`, `subscribe(onChange)`), `NARROW_WIDTH = 800`, `SHELL_MIN_WIDTH = 1150`, and `AppServices.viewport`. `defaultServices` reads `window.innerWidth` inside `width()` and registers a `resize` listener inside `subscribe`, so server rendering touches no `window`.
     - Add one shared helper under `apps/web/test/support/` that builds a fake `Viewport` with a settable width, and add `viewport` to the eight test files that build an `AppServices` literal, using the helper (default width 1280).
@@ -135,7 +135,7 @@ Conventions that apply to every task:
     - Add `apps/web/test/small-screen.test.tsx` and update `app-shell.test.tsx`: width 799 gives the page with its three sentences and no `button`, `a` or `img`; width 800 gives the Shell; the Shell is replaced when the width falls below 800; the Shell mounts and loads the draft when the width reaches 800; the title at 799.
     - _Requirements: 10.4, 10.5, 10.6, 10.8, 10.9, 10.10, 12.9_
 
-  - [~] 4.4 Shell minimum width and the max-width 799px hide rule
+  - [x] 4.4 Shell minimum width and the max-width 799px hide rule
     - In `apps/web/app/globals.css` add `--shell-min: 1150px` in `:root`, `min-width: var(--shell-min)` on `.app`, and the one rule `@media (max-width: 799px) { .app { display: none; } }`. It is the only width media query for the Shell; the Small_Screen_Page is not `.app` and stays visible.
     - In `apps/web/test/static/css-rules.test.ts`: add `--shell-min` as `1150px` to `VARIABLE_VALUES`; check that `globals.css` has exactly one `@media (max-width: 799px)` at-rule containing `display: none` on `.app`, and that across all stylesheets under `apps/web/app` and `apps/web/src` there is exactly one at-rule whose prelude has `min-width` or `max-width` (`@media print` is not a width query); check that `status-line.module.css` has `grid-column: main` and `issues-region.module.css` has `grid-row: 2 / 4`.
     - _Requirements: 10.1, 10.2, 10.3, 10.12, 10.13, 12.16_

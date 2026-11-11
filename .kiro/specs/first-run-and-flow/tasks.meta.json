@@ -278,6 +278,16 @@
         "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
         "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
         "timestamp": 1794358316576
+      },
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794361350858
+      },
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794361455829
       }
     ],
     "5.1 Smoke test for the three API assumptions": [
@@ -341,6 +351,13 @@
         "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
         "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
         "timestamp": 1794360928101
+      }
+    ],
+    "4. Small-screen rules": [
+      {
+        "executionId": "b48feaf9-d9b5-4c54-9097-e3b09fdb75ef",
+        "chatSessionId": "sess_ca46cb25-17c1-4290-9179-24bc838fc1ab",
+        "timestamp": 1794361455871
       }
     ]
   }

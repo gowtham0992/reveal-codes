@@ -22,6 +22,7 @@
   --right-w: 300px;
   --pane-h: 40vh;
   --button-pad: 4px 10px;
+  --shell-min: 1150px;
 }
 
 * {
@@ -89,7 +90,15 @@ button:disabled {
   grid-template-rows: var(--toolbar-h) minmax(0, 1fr) var(--status-h);
   grid-template-columns: [main] minmax(0, 1fr) [issues] var(--right-w);
   height: 100vh;
+  min-width: var(--shell-min);
   overflow: hidden;
+}
+
+/* Below 800px the Shell is hidden and the Small_Screen_Page (not .app) shows instead. */
+@media (max-width: 799px) {
+  .app {
+    display: none;
+  }
 }
 
 /* The Pane row takes its height while the Pane is open. */

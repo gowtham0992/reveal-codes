@@ -49,6 +49,7 @@ const VARIABLE_VALUES: Readonly<Record<string, string>> = {
   "--strip-w": "32px",
   "--pane-h": "40vh",
   "--button-pad": "4px 10px",
+  "--shell-min": "1150px",
 };
 /** Pane code families, keyed by class name lowercased with non-letters removed. */
 const FAMILY_COLOURS: Readonly<Record<string, readonly [string, string]>> = {
@@ -401,6 +402,58 @@ describe("static: primary button rule _Requirements: 4.6, 4.7, 4.9, 4.12, 12.4_"
       "transition must be var(--ink) or var(--paper)",
       "transition is not allowed in a primary rule",
     ]);
+  });
+});
+
+const WIDTH_QUERY = /\b(?:min|max)-width\b/;
+
+function shellWidthViolations(all: readonly Sheet[]): string[] {
+  const found: string[] = [];
+  const widthRules = all.flatMap((s) =>
+    parseCss(s.text)
+      .atRules.filter((r) => WIDTH_QUERY.test(r.prelude))
+      .map((r) => `${s.path}:${String(r.line)} ${r.prelude}`),
+  );
+  if (widthRules.length !== 1)
+    found.push(`expected exactly one width at-rule, found ${String(widthRules.length)}`);
+  const global = all.find((s) => s.path === "app/globals.css");
+  const css = parseCss(global?.text ?? "");
+  const hide = css.atRules.filter((r) => r.prelude === "@media (max-width: 799px)");
+  if (hide.length !== 1) found.push("globals.css needs exactly one @media (max-width: 799px)");
+  const hidden = css.declarations.filter(
+    (d) =>
+      d.atRules.includes("@media (max-width: 799px)") &&
+      d.selector.trim() === ".app" &&
+      d.prop === "display" &&
+      norm(d.value) === "none",
+  );
+  if (hidden.length !== 1) found.push("the 799px rule must set display: none on .app");
+  return found;
+}
+
+const normText = (t: string): string => t.replace(/\s+/g, " ");
+
+describe("static: Shell width _Requirements: 10.1, 10.2, 10.3, 10.12, 10.13_", () => {
+  it("has one width media query, the 799px hide rule on .app", () => {
+    expect(shellWidthViolations(sheets)).toEqual([]);
+  });
+
+  it("reports a planted second width query and a missing hide rule", () => {
+    const text = "@media (min-width: 900px) {\n  .app {\n    color: #111111;\n  }\n}\n";
+    expect(shellWidthViolations([{ path: "app/globals.css", text }])).toEqual([
+      "globals.css needs exactly one @media (max-width: 799px)",
+      "the 799px rule must set display: none on .app",
+    ]);
+    const two = `${text}@media (max-width: 799px) {\n  .app {\n    display: none;\n  }\n}\n`;
+    expect(shellWidthViolations([{ path: "app/globals.css", text: two }])).toEqual([
+      "expected exactly one width at-rule, found 2",
+    ]);
+  });
+
+  it("keeps the Status_Line in the editor column and the Issues_Region on rows 2 to 4", () => {
+    const text = (p: string): string => normText(sheets.find((s) => s.path === p)?.text ?? "");
+    expect(text("src/components/status-line.module.css")).toContain("grid-column: main;");
+    expect(text("src/components/issues-region.module.css")).toContain("grid-row: 2 / 4;");
   });
 });
 
