@@ -83,6 +83,8 @@ export function useEditorBinding(args: EditorBindingArgs): EditorBinding {
         "aria-multiline": "true",
         "aria-label": "Document",
         "aria-placeholder": PLACEHOLDER,
+        // Party names and reporters are not words to a spell checker; the only red mark is ours.
+        spellcheck: "false",
       },
       handleKeyDown: (view, event) => historyKey(view, store, event),
     },

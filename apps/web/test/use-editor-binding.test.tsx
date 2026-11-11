@@ -82,6 +82,12 @@ describe("useEditorBinding", () => {
     expect(dom.getAttribute("aria-label")).toBe("Document");
     expect(dom.getAttribute("aria-placeholder")).not.toBeNull();
   });
+  it("turns the browser's spell check off on the content element", async () => {
+    const h = await mount();
+    const dom = view(h).dom;
+    expect(dom.getAttribute("spellcheck")).toBe("false");
+    expect(dom.getAttribute("contenteditable")).toBe("true");
+  });
 
   it("reconciles a Store change from outside the Editor", async () => {
     const h = await mount();

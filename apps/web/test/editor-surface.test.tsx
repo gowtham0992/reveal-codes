@@ -59,6 +59,7 @@ describe("EditorSurface _Requirements: 6.5, 6.6, 10.3_", () => {
     await mount();
     const box = screen.getByRole("textbox", { name: "Document" });
     expect(box.getAttribute("aria-multiline")).toBe("true");
+    expect(box.getAttribute("spellcheck")).toBe("false");
     expect(screen.getByRole("main").contains(box)).toBe(true);
   });
 
