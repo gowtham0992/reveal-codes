@@ -423,3 +423,21 @@ Seven small fixes in `apps/web` (plus CI, README and `.env.example`), made witho
 - 5.1: three tests that depended on the working directory switched from `process.cwd()` to `__dirname`.
 - 5.2: the Pane literal check was extracted into a shared helper, named colours were added to it, and `fc.hexaString` does not exist in fast-check 4.
 - 5.3: eslint `restrict-template-expressions` errors were fixed.
+
+## 2026-11-10 request limits, size cap, small-screen links, sentinel title, redesign fixes, the mark
+
+- Request limits: `/api/verify` allows 6 requests and `/api/opinion/[clusterId]` 30 per client address per minute, and the live assistant gets 200 an hour across all addresses on top of its 10 per 10 minutes. One module (`rate-limit.ts`) holds them. Over a limit the route answers 429 with `Retry-After` and a fixed sentence; the Issues region shows the sentence where it shows a failed run, and nothing is marked unchecked or changed. Demo mode (fixtures) is never limited on verify or opinion, and the fixture assistant is neither limited nor counted. They are courtesy limits: in memory, per server instance, the address comes from a header a caller can set. The README run section says so.
+- Size cap: the `/api/verify` body holds citation records and no draft text, so the 200 000 character cap is a cap on the request the route reads, checked before any lookup (413, "This document is too long to check in one request."). Smaller caps already exist and stay: 500 records (about 112 000 characters for typical records) and 262 144 bytes. The new cap only matters between those, for bodies with unusually long records.
+- Small-screen links: `NEXT_PUBLIC_VIDEO_URL` and `NEXT_PUBLIC_REPO_URL` are read in `deps.ts` (the only reader of `process.env`) by the server page, so they are fixed when the app is built. Only http and https addresses are used. Both are in `.env.example`.
+- Sentinel: `splitExport` now cuts at the last statement title before the Appendix title, which is the last paragraph equal to it. A filing whose own text holds a line equal to a title now sweeps as "No drift." The new tests fail on the old code.
+- Fixes from walking the redesign: no outline on the editor content element, `spellcheck="false"` there, Export dialog codes drawn as the Issues chips, one ring on a focused text area, and for a filing with no citation or quotation the Statement says so and omits the empty tables (wording in `wording.ts`; a Sentinel example proves such an export sweeps clean).
+- The mark: `docs/images/mark.svg` is now `app/icon.svg` byte for byte, shown at 24px with 10px before the wordmark in the Toolbar and on the small-screen page, as the favicon file itself (`/icon.svg`).
+
+### Where Kiro got something wrong, and what fixed it
+
+- The first limiter composition spent the per-address count before the hourly total refused, so a refused request still used an address's allowance. `Limiter` gained `peek`, and `allOf` spends neither bound unless both have room; a unit example and the property cover it.
+- The property with fast-check's default array size almost never reached a bound, so it proved little. It now uses `size: "max"` and bursts of small steps, and a second example fails if the generator stops reaching both the address bound and the hourly bound. A mutation check with the old composition ran so long on shrinking that it timed out, which is a cost of long arrays.
+- The task asked for a cap on the document text; the verify request never carries it. The cap is on the request body instead, and the finding is recorded above.
+- Reading `NEXT_PUBLIC_*` in the component broke the scan that allows `process.env` only in `deps.ts`; the read moved there and the page passes the links down.
+- I read only the last lines of `pnpm lint`, which hid two eslint errors in the export tests. They were found later and fixed in their own commit.
+- A helper inserted by a script landed inside a doc comment in `toolbar.tsx` and broke 16 test files until it was moved by hand.
