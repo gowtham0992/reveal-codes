@@ -15,6 +15,7 @@ export type StreamTextFn = (
     model: unknown;
     system: string;
     prompt: string;
+    maxOutputTokens?: number;
     abortSignal?: AbortSignal;
   }>,
 ) => Readonly<{ textStream: AsyncIterable<string> }>;
@@ -38,6 +39,8 @@ export type DraftOptions = Readonly<{
 }>;
 
 export const CONTEXT_LIMIT = 4000;
+/** Reply cap passed to both live providers; the fixture provider is not capped. */
+export const MAX_OUTPUT_TOKENS = 1200;
 
 export const SYSTEM_PROMPT = [
   "You are helping draft a court filing for a self-represented person who has no lawyer.",

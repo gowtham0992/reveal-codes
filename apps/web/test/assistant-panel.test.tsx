@@ -6,6 +6,7 @@ import type { Editor } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 import { AppShell } from "../src/components/app-shell";
 import { DRAFT_EMPTY, DRAFT_FAILED } from "../src/components/use-assistant";
+import { ASSISTANT_BUSY } from "../src/notices";
 import { offsetToPos } from "../src/editor/offsets";
 import { AUTOSAVE_KEY, serialise } from "../src/persist";
 import type { AppServices } from "../src/services";
@@ -253,6 +254,21 @@ describe("AssistantPanel _Requirements: 7.8, 10.8, 10.15, 23.1 to 23.9_", () => 
     expect(runLogOf(f)).toEqual([]);
   });
 
+  it("shows the busy message, not the failure line, when the route answers 429", async () => {
+    const f = await mount("Alpha");
+    openPanel();
+    f.server.override.current = () =>
+      new Response(JSON.stringify({ error: ASSISTANT_BUSY }), {
+        status: 429,
+        headers: { "Retry-After": "300" },
+      });
+    startDraft("one");
+    await waitFor(() => {
+      expect(screen.getAllByText(ASSISTANT_BUSY).length).toBeGreaterThan(0);
+    });
+    expect(screen.queryByText(DRAFT_FAILED)).toBeNull();
+    expect(editorOf().getText()).toBe("Alpha");
+  });
   it("inserts nothing and sets a Notice on a failed or empty reply", async () => {
     const f = await mount("Alpha");
     openPanel();

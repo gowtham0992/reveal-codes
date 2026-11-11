@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { buildInsertion, insertionLine, paragraphAt } from "../assistant-run";
 import type { AssistantInfo } from "../client/api";
+import { ASSISTANT_BUSY } from "../notices";
 import type { AppServices } from "../services";
 import type { Store } from "../store-runtime";
 
@@ -78,7 +79,10 @@ export async function runDraft(a: RunArgs): Promise<DraftOutcome> {
   if (a.signal.aborted) {
     return reply.trim() === "" ? NOTHING : insertReply({ a, reply, stopped: true });
   }
-  if (!done.ok) return { ...NOTHING, message: DRAFT_FAILED };
+  if (!done.ok) {
+    const busy = done.error.kind === "status" && done.error.status === 429;
+    return { ...NOTHING, message: busy ? ASSISTANT_BUSY : DRAFT_FAILED };
+  }
   if (reply.trim() === "") return { ...NOTHING, message: DRAFT_EMPTY };
   return insertReply({ a, reply, stopped: false });
 }

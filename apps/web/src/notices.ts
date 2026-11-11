@@ -23,3 +23,6 @@ export function noticeForHistoryError(error: EngineError, direction: HistoryDire
   }
   return `${label} not applied: ${error.kind}.`;
 }
+
+/** Shown in the assistant panel, and sent by /api/assistant with status 429, when its request limit is reached. */
+export const ASSISTANT_BUSY = "The assistant is busy. Try again in a few minutes.";

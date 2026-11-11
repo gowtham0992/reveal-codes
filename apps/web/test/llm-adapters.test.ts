@@ -4,7 +4,7 @@ import { MockLanguageModelV4 } from "ai/test";
 import { describe, expect, it, vi } from "vitest";
 import { handleAssistant } from "../src/server/assistant-route";
 import type { AssistantConfig } from "../src/server/deps";
-import { SYSTEM_PROMPT, draft } from "../src/server/llm";
+import { MAX_OUTPUT_TOKENS, SYSTEM_PROMPT, draft } from "../src/server/llm";
 import type { AdapterInput, StreamTextFn } from "../src/server/llm";
 import { anthropicAdapter, createAnthropicAdapter } from "../src/server/llm-anthropic";
 import { bedrockAdapter, createBedrockAdapter } from "../src/server/llm-bedrock";
@@ -234,4 +234,40 @@ describe("provider modules hold no model id _Requirements: 22.6, 24.2_", () => {
       expect(literals.filter((l) => MODEL_ID.test(l))).toEqual([]);
     });
   }
+});
+describe("reply cap", () => {
+  it("is 1,200 output tokens", () => {
+    expect(MAX_OUTPUT_TOKENS).toBe(1200);
+  });
+  it("reaches the streamText call of the Bedrock adapter", async () => {
+    const { fn, calls } = recorder(["a"]);
+    await collect(createBedrockAdapter(() => () => ({}))(inputOf(BEDROCK_ONLY, fn)));
+    expect(calls.map((c) => c.maxOutputTokens)).toEqual([1200]);
+  });
+  it("reaches the streamText call of the Anthropic adapter", async () => {
+    const { fn, calls } = recorder(["a"]);
+    await collect(createAnthropicAdapter(() => () => ({}))(inputOf(ANTHROPIC_ONLY, fn)));
+    expect(calls.map((c) => c.maxOutputTokens)).toEqual([1200]);
+  });
+  it("is not passed on the fixture path, which never calls streamText", async () => {
+    const { fn, calls } = recorder(["a"]);
+    await collect(draft("p", "", { config: { bedrock: null, anthropic: null }, streamText: fn }));
+    expect(calls).toEqual([]);
+  });
+  it("sdkStreamText forwards the cap to the SDK call", async () => {
+    const seen: (number | undefined)[] = [];
+    const model = new MockLanguageModelV4({
+      doStream: (options) => {
+        seen.push(options.maxOutputTokens);
+        return Promise.reject(new Error("stop"));
+      },
+    });
+    await collect(
+      sdkStreamText({ model, system: "s", prompt: "p", maxOutputTokens: 7 }).textStream,
+    ).then(
+      () => null,
+      (error: unknown) => error,
+    );
+    expect(seen).toEqual([7]);
+  });
 });

@@ -1,8 +1,11 @@
 import type { AssistantConfig } from "./deps";
 import { readBodyCapped } from "./body";
+import { ASSISTANT_BUSY } from "../notices";
 import { NO_STORE, jsonResponse } from "./http";
-import { draft } from "./llm";
+import { draft, selectProvider } from "./llm";
 import type { DraftOptions } from "./llm";
+import { clientAddress } from "./rate-limit";
+import type { Limiter } from "./rate-limit";
 
 /** Tier 2. Prompt and context are small; anything past this is rejected before parsing. */
 export const MAX_ASSISTANT_BODY_BYTES = 65_536;
@@ -122,6 +125,24 @@ function linkAbort(request: Request, abort: AbortController): void {
   }
 }
 
+/** 429 with Retry-After when a live provider is configured and the address is over its limit. */
+function overLimit(
+  request: Request,
+  assistant: AssistantConfig,
+  limiter: Limiter | undefined,
+): Response | null {
+  if (limiter === undefined || selectProvider(assistant).name === "fixture") return null;
+  const decision = limiter.check(clientAddress(request.headers));
+  if (decision.allowed) return null;
+  return new Response(JSON.stringify({ error: ASSISTANT_BUSY }), {
+    status: 429,
+    headers: {
+      ...NO_STORE,
+      "Retry-After": String(decision.retryAfterSeconds),
+      "Content-Type": "application/json",
+    },
+  });
+}
 /**
  * Validates, pulls the first chunk (so a failure before it is a 502), then streams
  * `text/plain` with `no-store`. Client disconnect aborts the provider call.
@@ -130,7 +151,10 @@ export async function handleAssistant(
   request: Request,
   assistant: AssistantConfig,
   options: DraftOptions = {},
+  limiter?: Limiter,
 ): Promise<Response> {
+  const limited = overLimit(request, assistant, limiter);
+  if (limited !== null) return limited;
   const body = await readBodyCapped(request, MAX_ASSISTANT_BODY_BYTES);
   if (!body.ok) return jsonResponse(TOO_LARGE.status, { error: TOO_LARGE.message });
   const parsed = parseAssistantBody(body.text);

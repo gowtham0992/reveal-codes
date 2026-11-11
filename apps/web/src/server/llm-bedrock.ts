@@ -1,4 +1,5 @@
 import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock";
+import { MAX_OUTPUT_TOKENS } from "./llm";
 import type { AdapterInput, ProviderAdapter } from "./llm";
 
 /** Tier 2. The model id and region come only from configuration; no id is written here. */
@@ -22,6 +23,7 @@ export function createBedrockAdapter(factory: BedrockModelFactory): ProviderAdap
         model,
         system: input.system,
         prompt: input.prompt,
+        maxOutputTokens: MAX_OUTPUT_TOKENS,
         ...(input.signal === undefined ? {} : { abortSignal: input.signal }),
       });
       yield* result.textStream;

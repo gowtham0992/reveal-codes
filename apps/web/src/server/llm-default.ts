@@ -17,6 +17,7 @@ export const sdkStreamText: StreamTextFn = (options) => {
     model: options.model as LanguageModel,
     instructions: options.system,
     prompt: options.prompt,
+    ...(options.maxOutputTokens === undefined ? {} : { maxOutputTokens: options.maxOutputTokens }),
     ...(options.abortSignal === undefined ? {} : { abortSignal: options.abortSignal }),
     onError: () => {
       failed = true;
