@@ -126,7 +126,7 @@ Conventions that apply to every task:
     - _Requirements: 9.4, 9.5, 9.6, 9.7, 13.10_
 
 - [ ] 5. Scan clean-up, Property 1, contrast, documents and checkpoint
-  - [~] 5.1 Remove the temporary aliases and finish the control scan
+  - [x] 5.1 Remove the temporary aliases and finish the control scan
     - Delete the temporary aliases from `globals.css` and the `LEGACY_ALIASES` allowance and the `var(--size-*)` allowance from the scan. Fix any stylesheet that still uses them (the scan names the file and line). Confirm the variable list in the scan is exactly the Token_Sheet of the design.
     - Add to `css-rules.test.ts` the Document-text rule if task 2.2 put it elsewhere (one place only), and assert the Shell width rules of first-run-and-flow Requirement 10 still hold (one width media query, the 799px hide rule).
     - Confirm by scan that `--ui-bg`, `--accent`, `--size-ui`, `--size-editor`, `--size-pane`, `--size-wordmark`, `--size-status`, `--line-editor` and `--button-pad` appear nowhere under `apps/web/app` or `apps/web/src`.

@@ -76,7 +76,7 @@ describe("Print_View Order_Summary _Requirements: 3.12_", () => {
 
 describe("Print_View first-page block _Requirements: 7.6, 7.7_", () => {
   const cssText = readFileSync(
-    join(process.cwd(), "apps/web/src/components/print-view.module.css"),
+    join(__dirname, "..", "src/components/print-view.module.css"),
     "utf8",
   );
 

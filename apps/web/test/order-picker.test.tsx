@@ -171,7 +171,7 @@ describe("OrderPicker width _Requirements: 3.2_", () => {
   it("styles the select at the full width of the dialog", () => {
     mount();
     const css = readFileSync(
-      join(process.cwd(), "apps/web/src/components/order-picker.module.css"),
+      join(__dirname, "..", "src/components/order-picker.module.css"),
       "utf8",
     );
     const rule = /\.select\s*\{([^}]*)\}/.exec(css)?.[1] ?? "";

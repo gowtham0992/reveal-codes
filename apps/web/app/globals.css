@@ -36,15 +36,6 @@
   --pane-h: 40vh;
   --shell-min: 1150px;
   --control-h: 30px;
-  /* TEMPORARY: removed in task 5.1 */
-  --ui-bg: var(--panel);
-  --accent: var(--oxblood);
-  --size-ui: 13px;
-  --size-editor: 12pt;
-  --size-pane: 14px;
-  --size-wordmark: 15px;
-  --size-status: 12px;
-  --line-editor: 1.5;
 }
 
 * {

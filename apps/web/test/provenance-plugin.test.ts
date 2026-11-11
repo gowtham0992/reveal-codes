@@ -164,7 +164,7 @@ describe("static", () => {
   it("no editor module constructs the AI-then-human origin", () => {
     const needle = ["AI", "HUM"].join(">");
     for (const f of ["provenance-plugin", "clipboard", "meta"]) {
-      const source = readFileSync(join(process.cwd(), "apps/web/src/editor", `${f}.ts`), "utf8");
+      const source = readFileSync(join(__dirname, "..", "src/editor", `${f}.ts`), "utf8");
       expect(source.includes(needle)).toBe(false);
     }
   });

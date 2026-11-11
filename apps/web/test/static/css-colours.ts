@@ -30,18 +30,6 @@ export const PRINT_COLOUR_VALUES: Readonly<Record<string, string>> = {
   "--print-rule": "#b0b0b0",
 };
 
-/** Names the stylesheets may still read until task 5.1 removes them and this allowance together. */
-export const LEGACY_ALIASES: readonly string[] = [
-  "--ui-bg",
-  "--accent",
-  "--size-ui",
-  "--size-editor",
-  "--size-pane",
-  "--size-wordmark",
-  "--size-status",
-  "--line-editor",
-];
-
 const ROOT_COLOURS: Readonly<Record<string, string>> = { ...TOKEN_VALUES, ...PRINT_COLOUR_VALUES };
 
 const NAMED_COLOURS = new Set(
@@ -90,10 +78,9 @@ function literalViolations(path: string, d: CssDeclaration): Violation[] {
 
 function varViolations(path: string, d: CssDeclaration): Violation[] {
   if (!COLOUR_PROPS.test(d.prop)) return [];
-  const known = (n: string): boolean => ROOT_COLOURS[n] !== undefined || LEGACY_ALIASES.includes(n);
   return [...d.value.matchAll(/var\(\s*(--[\w-]+)/g)]
     .map((m) => m[1] ?? "")
-    .filter((n) => !known(n))
+    .filter((n) => ROOT_COLOURS[n] === undefined)
     .map((n) => violation(path, d.line, `${n} is not a Token`));
 }
 
@@ -119,8 +106,8 @@ function tokenValueViolations(path: string, d: CssDeclaration): Violation[] {
 
 /**
  * Colour scan for every sheet outside the Pane. A colour literal is allowed only on the `:root`
- * declaration of the Token that has that value; `var(--x)` in a colour property must name a Token
- * or a temporary alias. Pane_Files are left to the Pane checks.
+ * declaration of the Token that has that value; `var(--x)` in a colour property must name a Token.
+ * Pane_Files are left to the Pane checks.
  */
 export function colourViolations(sheets: readonly Sheet[]): Violation[] {
   return sheets

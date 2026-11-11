@@ -1,9 +1,6 @@
 import styles from "./status-line.module.css";
 import statusBar from "../pane/status-bar.module.css";
 
-/** Three spaces between the two entries. */
-export const KEY_LEGEND = "Alt-F3 Codes   F7 Exit";
-
 export type StatusLineProps = Readonly<{
   /** Position_Text from `positionText()`. */
   position: string;

@@ -27,8 +27,6 @@ const SIZES: ReadonlySet<string> = new Set([
   "12pt",
   "inherit",
 ]);
-/** TEMPORARY: the size aliases of globals.css; removed together with them in task 5.1. */
-const SIZE_ALIAS = /^var\(--size-(?:ui|editor|pane|wordmark|status)\)$/;
 const WEIGHTS = /^(?:400|500|600|700|normal|bold|inherit)$/;
 const VARIABLE_VALUES: Readonly<Record<string, string>> = {
   "--page-max": "8.5in",
@@ -40,12 +38,6 @@ const VARIABLE_VALUES: Readonly<Record<string, string>> = {
   "--pane-h": "40vh",
   "--shell-min": "1150px",
   "--control-h": "30px",
-  "--size-ui": "13px",
-  "--size-editor": "12pt",
-  "--size-pane": "14px",
-  "--size-wordmark": "15px",
-  "--size-status": "12px",
-  "--line-editor": "1.5",
 };
 const COLOUR_FUNCTION = /\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix)\(/i;
 const FOCUS_OUTLINE = /^2px solid var\(--oxblood\)$/;
@@ -104,7 +96,7 @@ function typeViolations(path: string, decls: CssDeclaration[]): Violation[] {
     if (d.prop === "font-weight" && !WEIGHTS.test(value)) {
       found.push(at(path, d, "font-weight must be 400, 500, 600 or 700"));
     }
-    if (d.prop === "font-size" && !SIZES.has(value) && !SIZE_ALIAS.test(value))
+    if (d.prop === "font-size" && !SIZES.has(value))
       found.push(at(path, d, `font-size must be one of ${[...SIZES].join(", ")}`));
   }
   return found;
@@ -229,7 +221,7 @@ function paneLiteralViolations(path: string, decls: CssDeclaration[]): Violation
     }
     for (const m of d.value.matchAll(/var\(\s*(--[\w-]+)/g)) {
       const name = m[1] ?? "";
-      if (!PANE_VARS.has(name) && !/^--(?:font|size|line)-/.test(name))
+      if (!PANE_VARS.has(name) && !/^--font-/.test(name))
         found.push(at(path, d, `${name} is not usable in the Pane stylesheet`));
     }
     if (COLOUR_FUNCTION.test(d.value)) found.push(at(path, d, "colour function is not allowed"));
@@ -393,6 +385,21 @@ describe("static: Shell width _Requirements: 10.1, 10.2, 10.3, 10.12, 10.13_", (
   });
 });
 
+const REMOVED_NAMES =
+  /--(?:ui-bg|accent|size-ui|size-editor|size-pane|size-wordmark|size-status|line-editor|button-pad)\b/;
+describe("static: removed aliases _Requirements: 1.5, 1.6, 13.10_", () => {
+  it("names none of the removed variables in any stylesheet or source file", () => {
+    const files = [...sheets, ...readSources(["app", "src"], /\.(?:tsx?|css)$/)];
+    const hits = files.flatMap((s) =>
+      s.text.split("\n").flatMap((line, i) => {
+        const m = REMOVED_NAMES.exec(line);
+        return m ? [violation(s.path, i + 1, `${m[0]} was removed`)] : [];
+      }),
+    );
+    expect(formatViolations(hits)).toEqual([]);
+  });
+});
+
 const DIALOG_WIDTH = "width: min(600px, 100vw - 32px)";
 describe("static: Dialog width _Requirements: 8.2, 13.10_", () => {
   it("defines the Dialog width in modal.module.css and in no other sheet", () => {
@@ -452,9 +459,11 @@ describe("static: stylesheet self-test (planted violations)", () => {
     ]);
   });
 
-  it("accepts every listed size, the print pt size and the temporary size aliases", () => {
-    const sizes = [...SIZES, "var(--size-ui)", "var(--size-editor)", "var(--size-status)"];
-    expect(ui(sizes.map((s) => `.a {\n  font-size: ${s};\n}\n`).join(""))).toEqual([]);
+  it("accepts every listed size and the print pt size, and reports a removed size alias", () => {
+    expect(ui([...SIZES].map((s) => `.a {\n  font-size: ${s};\n}\n`).join(""))).toEqual([]);
+    expect(ui(".a {\n  font-size: var(--size-ui);\n}\n")).toEqual([
+      `src/components/x.module.css:2 ${SIZE_MESSAGE}`,
+    ]);
   });
 
   it("accepts the five family variables and inherit, and reports a fourth font variable", () => {
@@ -475,11 +484,11 @@ describe("static: stylesheet self-test (planted violations)", () => {
     ]);
   });
 
-  it("reports a changed size variable and a thick button border in globals.css", () => {
+  it("reports a changed geometry variable and a thick button border in globals.css", () => {
     const text =
-      ":root {\n  color-scheme: light;\n  --size-ui: 14px;\n}\nbutton {\n  border: 2px solid var(--ink);\n  color: red;\n}\n";
+      ":root {\n  color-scheme: light;\n  --toolbar-h: 60px;\n}\nbutton {\n  border: 2px solid var(--ink);\n  color: red;\n}\n";
     expect(ui(text, "app/globals.css")).toEqual([
-      "app/globals.css:3 --size-ui must be 13px",
+      "app/globals.css:3 --toolbar-h must be 52px",
       "app/globals.css:6 button border must be 1px solid ink",
     ]);
   });

@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 import { formatViolations, WEB_ROOT } from "../support/scan";
 import {
   colourViolations,
-  LEGACY_ALIASES,
   parseTokenSheet,
   PRINT_COLOUR_VALUES,
   TOKEN_VALUES,
@@ -40,11 +39,27 @@ describe("static: Token_Sheet _Requirements: 1.1, 1.2, 1.3, 1.5, 1.6, 1.7_", () 
     );
   });
 
-  it("declares the temporary aliases, each one of the removable names", () => {
-    for (const name of LEGACY_ALIASES) expect(tokens[name], name).toBeDefined();
-    expect(globalsText).toContain("TEMPORARY: removed in task 5.1");
-    expect(tokens["--ui-bg"]).toBe("var(--panel)");
-    expect(tokens["--accent"]).toBe("var(--oxblood)");
+  it("declares exactly the Token_Sheet names and no temporary alias", () => {
+    const expected = [
+      ...Object.keys(TOKEN_VALUES),
+      ...Object.keys(PRINT_COLOUR_VALUES),
+      "--print-font-text",
+      "--print-font-mono",
+      "--font-ui",
+      "--font-editor",
+      "--font-pane",
+      "--page-max",
+      "--toolbar-h",
+      "--status-h",
+      "--strip-w",
+      "--left-w",
+      "--right-w",
+      "--pane-h",
+      "--shell-min",
+      "--control-h",
+    ].sort();
+    expect(Object.keys(tokens).sort()).toEqual(expected);
+    expect(globalsText).not.toContain("TEMPORARY");
   });
 
   it("keeps every stylesheet outside the Pane on Tokens", () => {
@@ -96,13 +111,13 @@ describe("static: colour scan self-test (planted violations) _Requirements: 1.5,
     ]);
   });
 
-  it("accepts Tokens, the temporary aliases and var() outside colour properties", () => {
+  it("accepts Tokens and var() outside colour properties, and reports a removed alias", () => {
     expect(scan(".a {\n  color: var(--ink);\n  border: 1px solid var(--rule-light);\n}\n")).toEqual(
       [],
     );
-    expect(
-      scan(".a {\n  background: var(--ui-bg);\n  outline: 2px solid var(--accent);\n}\n"),
-    ).toEqual([]);
+    expect(scan(".a {\n  background: var(--ui-bg);\n}\n")).toEqual([
+      `${MODULE}:2 --ui-bg is not a Token`,
+    ]);
     expect(scan(".a {\n  height: var(--control-h);\n}\n")).toEqual([]);
   });
 
