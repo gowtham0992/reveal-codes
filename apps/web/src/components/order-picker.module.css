@@ -9,19 +9,7 @@
 }
 
 .select {
-  font: inherit;
-  font-family: var(--font-ui);
-  font-size: 13px;
-  color: var(--ink);
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  padding: 4px 6px;
   width: 100%;
-  max-width: 100%;
-}
-
-.select:focus-visible {
-  outline: 2px solid var(--accent);
 }
 
 .summary {
@@ -37,12 +25,4 @@
 .keyLanguage {
   margin: 0 0 4px;
   overflow-wrap: anywhere;
-}
-
-.summary a {
-  color: var(--accent);
-}
-
-.summary a:focus-visible {
-  outline: 2px solid var(--accent);
 }

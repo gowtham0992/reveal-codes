@@ -39,7 +39,6 @@ const VARIABLE_VALUES: Readonly<Record<string, string>> = {
   "--pane-h": "40vh",
   "--shell-min": "1150px",
   "--control-h": "30px",
-  "--button-pad": "4px 10px",
   "--size-ui": "13px",
   "--size-editor": "12pt",
   "--size-pane": "14px",
@@ -65,7 +64,7 @@ const FAMILY_COLOURS: Readonly<Record<string, readonly [string, string]>> = {
   statusline: ["#AAAAAA", "#0000AA"],
 };
 const COLOUR_FUNCTION = /\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix)\(/i;
-const FOCUS_OUTLINE = /^2px solid var\(--(?:oxblood|accent)\)$/;
+const FOCUS_OUTLINE = /^2px solid var\(--oxblood\)$/;
 
 const norm = (v: string): string =>
   v
@@ -95,7 +94,9 @@ const BANNED_PROP =
 function bannedViolations(path: string, css: ReturnType<typeof parseCss>): Violation[] {
   const found: Violation[] = [];
   for (const d of css.declarations) {
-    if (BANNED_PROP.test(d.prop)) found.push(at(path, d, `${d.prop} is not allowed`));
+    const squareRadius = /^border(?:-[a-z]+)*-radius$/.test(d.prop) && d.value.trim() === "0";
+    if (BANNED_PROP.test(d.prop) && !squareRadius)
+      found.push(at(path, d, `${d.prop} is not allowed`));
     if (/gradient\s*\(|drop-shadow/i.test(d.value))
       found.push(at(path, d, "gradient or shadow value"));
     if (/^outline(?:-style)?$/.test(d.prop) && /^(?:none|0)\b/.test(d.value.trim())) {
@@ -117,6 +118,7 @@ function typeViolations(path: string, decls: CssDeclaration[]): Violation[] {
   const found: Violation[] = [];
   const sizes = [
     "var(--size-ui)",
+    "10.5px",
     "13px",
     "inherit",
     "15px",
@@ -170,7 +172,7 @@ function controlViolations(path: string, decls: CssDeclaration[]): Violation[] {
       found.push(at(path, d, "hover may change only the background"));
     }
     if (sel.includes(":focus") && d.prop === "outline" && !FOCUS_OUTLINE.test(value)) {
-      found.push(at(path, d, "focus outline must be 2px solid accent"));
+      found.push(at(path, d, "focus outline must be 2px solid oxblood"));
     }
     if (
       sel === "button" &&
@@ -180,18 +182,11 @@ function controlViolations(path: string, decls: CssDeclaration[]): Violation[] {
       found.push(at(path, d, "button border must be 1px solid ink"));
     }
     if (
-      sel === "button" &&
-      d.prop === "padding" &&
-      !/^(?:var\(--button-pad\)|4px 10px)$/.test(value)
-    ) {
-      found.push(at(path, d, "button padding must be 4px 10px"));
-    }
-    if (
       sel === "button:disabled" &&
       /^(?:color|border|border-color)$/.test(d.prop) &&
-      !/(?:var\(--rule\)|#B0B0B0)/i.test(value)
+      !/var\(--(?:disabled-border|disabled-fill|muted)\)/.test(value)
     ) {
-      found.push(at(path, d, "disabled button must use rule grey"));
+      found.push(at(path, d, "disabled button must use the disabled tokens or muted"));
     }
   }
   return found;
@@ -316,8 +311,13 @@ describe("static: Pane-only colours _Requirements: 3.7_", () => {
 });
 
 const PRIMARY_SEL = /\[data-primary/;
-const PRIMARY_VALUE = /^var\(--(?:ink|paper)\)$/;
-const PRIMARY_FORBIDDEN = /^(?:border.*|padding.*|transition.*|font-size|height)$/;
+const PRIMARY_REST: Readonly<Record<string, string>> = {
+  background: "var(--oxblood)",
+  "border-color": "var(--oxblood)",
+  color: "var(--white)",
+  "font-weight": "600",
+};
+const PRIMARY_HOVER: Readonly<Record<string, string>> = { background: "var(--ink)" };
 
 function primaryViolations(all: readonly Sheet[]): string[] {
   const found: string[] = [];
@@ -335,11 +335,11 @@ function primaryViolations(all: readonly Sheet[]): string[] {
   if (selectors.length !== 2 || hover.length !== 1)
     found.push("expected exactly one rest and one hover rule with data-primary");
   for (const d of [...rules.values()].flat()) {
-    if (!PRIMARY_VALUE.test(norm(d.value)))
-      found.push(`${d.prop} must be var(--ink) or var(--paper)`);
-    if (PRIMARY_FORBIDDEN.test(d.prop)) found.push(`${d.prop} is not allowed in a primary rule`);
-    if (d.selector.includes(":hover") && !/^(?:background|color)$/.test(d.prop))
-      found.push(`hover sets ${d.prop}`);
+    const allowed = d.selector.includes(":hover") ? PRIMARY_HOVER : PRIMARY_REST;
+    const prop = d.prop.toLowerCase();
+    if (allowed[prop] === undefined) found.push(`${d.prop} is not allowed in a primary rule`);
+    else if (norm(d.value) !== allowed[prop])
+      found.push(`${d.prop} must be ${allowed[prop] ?? ""}`);
   }
   return [...found, ...buttonBaseViolations(decls)];
 }
@@ -349,25 +349,23 @@ function buttonBaseViolations(decls: CssDeclaration[]): string[] {
   const value = (p: string): string => norm(base.find((d) => d.prop === p)?.value ?? "");
   return [
     ...(value("border") === "1px solid var(--ink)" ? [] : ["button border changed"]),
-    ...(value("padding") === "var(--button-pad)" ? [] : ["button padding changed"]),
+    ...(value("height") === "var(--control-h)" ? [] : ["button height changed"]),
   ];
 }
 
 describe("static: primary button rule _Requirements: 4.6, 4.7, 4.9, 4.12, 12.4_", () => {
-  it("defines the primary style once, in globals.css, with ink and paper only", () => {
+  it("defines the primary style once, in globals.css, with oxblood, white and ink only", () => {
     expect(primaryViolations(sheets)).toEqual([]);
   });
 
   it("reports a planted primary rule with a border, a transition and a stray colour", () => {
     const text =
-      'button {\n  border: 1px solid var(--ink);\n  padding: var(--button-pad);\n}\nbutton[data-primary="true"]:not(:disabled) {\n  background: #111111;\n  border: 1px solid var(--ink);\n  transition: none;\n}\n';
+      'button {\n  border: 1px solid var(--ink);\n  height: var(--control-h);\n}\nbutton[data-primary="true"]:not(:disabled) {\n  background: #111111;\n  border: 1px solid var(--ink);\n  transition: none;\n}\n';
     const found = primaryViolations([{ path: "app/globals.css", text }]);
     expect(found).toEqual([
       "expected exactly one rest and one hover rule with data-primary",
-      "background must be var(--ink) or var(--paper)",
-      "border must be var(--ink) or var(--paper)",
+      "background must be var(--oxblood)",
       "border is not allowed in a primary rule",
-      "transition must be var(--ink) or var(--paper)",
       "transition is not allowed in a primary rule",
     ]);
   });
@@ -485,12 +483,11 @@ describe("static: stylesheet self-test (planted violations)", () => {
 
   it("reports button and focus rule violations in globals.css", () => {
     const text =
-      ":root {\n  color-scheme: light;\n  --size-ui: 14px;\n}\nbutton {\n  border: 2px solid var(--ink);\n  padding: 8px;\n}\n:focus-visible {\n  outline: 1px solid var(--accent);\n}\n";
+      ":root {\n  color-scheme: light;\n  --size-ui: 14px;\n}\nbutton {\n  border: 2px solid var(--ink);\n  color: red;\n}\n:focus-visible {\n  outline: 1px solid var(--oxblood);\n}\n";
     expect(ui(text, "app/globals.css")).toEqual([
       "app/globals.css:3 --size-ui must be 13px",
       "app/globals.css:6 button border must be 1px solid ink",
-      "app/globals.css:7 button padding must be 4px 10px",
-      "app/globals.css:10 focus outline must be 2px solid accent",
+      "app/globals.css:10 focus outline must be 2px solid oxblood",
     ]);
   });
 

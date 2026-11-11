@@ -36,8 +36,6 @@
   --pane-h: 40vh;
   --shell-min: 1150px;
   --control-h: 30px;
-  /* TEMPORARY: removed in task 1.3 */
-  --button-pad: 4px 10px;
   /* TEMPORARY: removed in task 5.1 */
   --ui-bg: var(--panel);
   --accent: var(--oxblood);
@@ -74,35 +72,76 @@ a {
 
 button {
   appearance: none;
-  background: var(--paper);
+  height: var(--control-h);
+  padding: 0 10px;
+  margin: 0;
+  background: transparent;
   border: 1px solid var(--ink);
   color: var(--ink);
   cursor: pointer;
-  font-family: inherit;
-  font-size: inherit;
-  font-weight: 400;
-  margin: 0;
-  padding: var(--button-pad);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
 }
 
 button:hover:not(:disabled) {
-  background: var(--ui-bg);
+  background: var(--rule);
 }
 
 button[data-primary="true"]:not(:disabled) {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--oxblood);
+  border-color: var(--oxblood);
+  color: var(--white);
+  font-weight: 600;
 }
 
 button[data-primary="true"]:hover:not(:disabled) {
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--ink);
 }
 
 button:disabled {
-  border-color: var(--rule);
-  color: var(--rule);
-  cursor: default;
+  background: var(--disabled-fill);
+  border: 1px dashed var(--disabled-border);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+select {
+  height: 34px;
+  padding: 0 8px;
+  background: var(--white);
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+textarea {
+  padding: 4px;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 16px;
+}
+
+textarea:focus {
+  padding: 3px;
+  border: 2px solid var(--oxblood);
+}
+
+.small-label {
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 14px;
+  text-transform: uppercase;
 }
 
 :focus-visible {

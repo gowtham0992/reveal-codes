@@ -41,12 +41,6 @@
 
 .prompt {
   width: 100%;
-  padding: 4px;
-  border: 1px solid var(--ink);
-  background: var(--paper);
-  color: var(--ink);
-  font-family: inherit;
-  font-size: inherit;
 }
 
 .stream {
