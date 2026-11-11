@@ -40,10 +40,17 @@ describe("apps/web package.json _Requirements: 1.1, 1.2, 1.4, 1.5, 1.6, 1.7, 1.9
 
   it("uses webpack for dev and build", () => {
     expect(web.scripts?.["dev"]).toBe("next dev --port 3000 --webpack");
-    expect(web.scripts?.["build"]).toBe("next build --webpack");
+    expect(web.scripts?.["build"]).toMatch(/ && next build --webpack$/);
     expect(web.scripts?.["start"]).toContain("next start");
   });
 
+  it("builds the three referenced packages before the Next build, so a clean checkout type-checks", () => {
+    const build = web.scripts?.["build"] ?? "";
+    expect(build.startsWith("tsc -b ")).toBe(true);
+    for (const dir of ["engine", "verifier", "export"]) {
+      expect(build, dir).toContain(`../../packages/${dir}`);
+    }
+  });
   it("has no UI library, Tailwind, or CSS-in-JS dependency", () => {
     for (const name of Object.keys(deps)) expect(name, name).not.toMatch(BANNED);
   });

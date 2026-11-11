@@ -23,3 +23,16 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm test:pbt
+  # Clean checkout: install and the web build only, so an earlier `pnpm typecheck`
+  # (which leaves the packages' declaration output behind) cannot satisfy it.
+  clean-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @reveal-codes/web build

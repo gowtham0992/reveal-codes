@@ -26,6 +26,7 @@ pnpm test:pbt      # property tests only, numRuns=500
 pnpm dev           # apps/web on :3000
 pnpm mcp           # starts courtlistener-mcp on stdio
 pnpm sentinel   # sweep a folder of exported .docx files for drift
+pnpm --filter @reveal-codes/web build   # tsc -b of engine, verifier and export, then next build; works on a clean clone after install
 ```
 
 ## Property-based testing

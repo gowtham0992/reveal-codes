@@ -9,7 +9,7 @@
     "predev": "node --import jiti/register scripts/copy-demo.ts",
     "dev": "next dev --port 3000 --webpack",
     "prebuild": "node --import jiti/register scripts/copy-demo.ts",
-    "build": "next build --webpack",
+    "build": "tsc -b ../../packages/engine ../../packages/verifier ../../packages/export && next build --webpack",
     "start": "next start --port 3000"
   },
   "dependencies": {
