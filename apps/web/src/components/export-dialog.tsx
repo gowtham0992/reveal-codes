@@ -9,6 +9,7 @@ import type { Store } from "../store-runtime";
 import { ConfidentialityCheckbox } from "./confidentiality-checkbox";
 import styles from "./export-dialog.module.css";
 import { ExportIssues } from "./export-issues";
+import { issueText } from "./issues-list";
 import { Modal, ModalActions } from "./modal";
 import { OrderPicker, OrderSummary } from "./order-picker";
 import { OverrideDialog } from "./override-dialog";
@@ -88,6 +89,7 @@ function ExportBody({ document, blocking, onGo, onClose, onOverride }: BodyProps
 }
 
 type OverrideTargetProps = Readonly<{
+  document: Document;
   target: Target | null;
   store: Store;
   now: () => Date;
@@ -95,12 +97,13 @@ type OverrideTargetProps = Readonly<{
 }>;
 
 /** The Override_Dialog is a sibling of the Export modal so Tab trapping does not clash. */
-function OverrideTarget({ target, store, now, onClose }: OverrideTargetProps) {
+function OverrideTarget({ document, target, store, now, onClose }: OverrideTargetProps) {
   if (target === null) return null;
   return (
     <OverrideDialog
       issueKey={target.issue.key}
       code={target.issue.code}
+      issueText={issueText(document, target.issue)}
       store={store}
       now={now}
       restoreFocus={target.opener}
@@ -188,6 +191,7 @@ export function ExportDialog(props: ExportDialogProps) {
         />
       </Modal>
       <OverrideTarget
+        document={document}
         target={target}
         store={store}
         now={now}

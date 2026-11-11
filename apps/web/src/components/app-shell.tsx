@@ -22,6 +22,7 @@ import { useVerify } from "./use-verify";
 import { useExport } from "./use-export";
 import { useDocumentActions } from "./use-document-actions";
 import { composeStatus, positionText, usePaneControl } from "./use-pane";
+import { lnPos } from "../pane/layout";
 import { Pane } from "../pane/pane";
 
 export type AppShellProps = Readonly<{ services?: AppServices }>;
@@ -191,7 +192,8 @@ function useShellState(services: AppServices | undefined) {
   const paneControl = usePaneControl(svc);
   const { notice, doc, verifiedAt } = useNoticeAndDocument(store);
   const { mode, assistant } = useModeResult(svc.api);
-  const slot = useAssistantSlot({ svc, store, info: assistant, getCaret });
+  const position = lnPos(doc.text, cursor);
+  const slot = useAssistantSlot({ svc, store, info: assistant, getCaret, position });
   const onGo = binding.focusAt;
   const { exportGate, actions, verify } = useShellFlows({
     svc,

@@ -13,6 +13,8 @@ export const PRINTED_STATEMENT = "The reason is printed in the certification.";
 export type OverrideDialogProps = Readonly<{
   issueKey: IssueKey;
   code: string;
+  /** The shortened text of the item being overridden (Requirement 8). */
+  issueText: string;
   store: Store;
   now: () => Date;
   restoreFocus: HTMLElement | null;
@@ -40,13 +42,22 @@ function useOverrideForm(props: OverrideDialogProps) {
 
 /** Override_Dialog (Requirements 18.5 to 18.9). */
 export function OverrideDialog(props: OverrideDialogProps) {
-  const { code, restoreFocus, onClose } = props;
+  const { code, issueText, restoreFocus, onClose } = props;
   const fieldId = useId();
+  const describeId = useId();
   const hintId = useId();
   const { reason, setReason, error, valid, save } = useOverrideForm(props);
   return (
-    <Modal title={`Override ${code}`} onClose={onClose} restoreFocus={restoreFocus}>
-      <p className={styles["statement"]}>{PRINTED_STATEMENT}</p>
+    <Modal
+      title={`Override ${code}`}
+      onClose={onClose}
+      restoreFocus={restoreFocus}
+      describedBy={describeId}
+    >
+      <div id={describeId}>
+        <p className={styles["issueText"]}>{issueText}</p>
+        <p className={styles["statement"]}>{PRINTED_STATEMENT}</p>
+      </div>
       <label htmlFor={fieldId} className={styles["label"]}>
         Reason
       </label>

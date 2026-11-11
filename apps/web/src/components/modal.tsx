@@ -13,6 +13,8 @@ export type ModalProps = Readonly<{
   onClose: () => void;
   /** Control that opened the dialog; focus returns to it. Defaults to the focused element at open. */
   restoreFocus?: HTMLElement | null | undefined;
+  /** Id of the element inside the dialog that describes it; sets `aria-describedby`. */
+  describedBy?: string | undefined;
   children: ReactNode;
 }>;
 
@@ -72,7 +74,7 @@ export function ModalActions({ children }: Readonly<{ children: ReactNode }>) {
 }
 
 /** Hand-built modal dialog: focus trap, Escape closes, focus returns to the opener (Req 18.9). */
-export function Modal({ title, onClose, restoreFocus, children }: ModalProps) {
+export function Modal({ title, onClose, restoreFocus, describedBy, children }: ModalProps) {
   const titleId = useId();
   const dialog = useRef<HTMLDivElement | null>(null);
   useFocusLifecycle(dialog, restoreFocus);
@@ -92,6 +94,7 @@ export function Modal({ title, onClose, restoreFocus, children }: ModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        aria-describedby={describedBy}
         tabIndex={-1}
         className={styles["dialog"]}
         onKeyDown={onKeyDown}

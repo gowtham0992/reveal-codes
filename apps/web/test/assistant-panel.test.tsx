@@ -114,10 +114,28 @@ function paneText(): string {
   return screen.getByRole("region", { name: "Reveal Codes" }).textContent;
 }
 
+/** The Pane opens on first visit; press Alt-F3 only when it is not already showing. */
 function openPane(): void {
+  if (screen.queryByRole("region", { name: "Reveal Codes" }) !== null) return;
   act(() => {
     fireEvent.keyDown(document.body, { key: "F3", altKey: true, bubbles: true, cancelable: true });
   });
+}
+
+/** A reply that sends no bytes until `fail` errors the stream (what a real abort does). */
+function silentReply(): { response: Response; fail: () => void } {
+  const held: { ctrl?: ReadableStreamDefaultController<Uint8Array> } = {};
+  const body = new ReadableStream<Uint8Array>({
+    start(c) {
+      held.ctrl = c;
+    },
+  });
+  return {
+    response: new Response(body, { status: 200 }),
+    fail: () => {
+      held.ctrl?.error(new Error("aborted"));
+    },
+  };
 }
 
 function deferred(): { promise: Promise<void>; resolve: () => void } {
@@ -195,7 +213,7 @@ describe("AssistantPanel _Requirements: 7.8, 10.8, 10.15, 23.1 to 23.9_", () => 
     expect(runLogOf(f).map((r) => r.runId)).toEqual(["r1", "r2"]);
   });
 
-  it("inserts nothing when Stop is pressed", async () => {
+  it("inserts the partial reply when Stop is pressed after some text arrived", async () => {
     const f = await mount("Alpha");
     openPanel();
     f.server.gate.current = deferred().promise;
@@ -203,10 +221,16 @@ describe("AssistantPanel _Requirements: 7.8, 10.8, 10.15, 23.1 to 23.9_", () => 
     await waitFor(() => {
       expect(screen.getByRole("log").textContent).not.toBe("");
     });
+    const partial = screen.getByRole("log").textContent;
     fireEvent.click(screen.getByRole("button", { name: "Stop" }));
     await finished();
-    expect(editorOf().getText()).toBe("Alpha");
-    expect(runLogOf(f)).toEqual([]);
+    expect(editorOf().getText()).toContain(partial);
+    expect(runLogOf(f).map((r) => r.runId)).toEqual(["r1"]);
+    expect(screen.getByRole("log").textContent).toBe(partial);
+    expect(
+      screen.getByText(/^Stopped\. Partial reply inserted at Ln \d+ as run r1$/),
+    ).not.toBeNull();
+    expect(screen.queryByText(/^Inserted at/)).toBeNull();
     expect(screen.getByRole("button", { name: "Draft" })).not.toBeNull();
   });
 
@@ -274,5 +298,120 @@ describe("AssistantPanel _Requirements: 7.8, 10.8, 10.15, 23.1 to 23.9_", () => 
       await Promise.resolve();
     });
     expect(paneText()).toContain("[AI>HUM:r1]");
+  });
+});
+
+async function draftAt(text: string, caret: number): Promise<Fixture> {
+  const f = await mount(text);
+  setCaret(caret);
+  openPanel();
+  startDraft("one");
+  await finished();
+  return f;
+}
+
+describe("AssistantPanel lines and Reply_Box _Requirements: 7.1 to 7.15_", () => {
+  it("shows where the reply will go, following the caret and the pane status line", async () => {
+    await mount("Alpha\nBeta");
+    openPane();
+    openPanel();
+    setCaret(8);
+    expect(screen.getByText("Inserts at the cursor: Ln 2 Pos 3")).not.toBeNull();
+    expect(paneText()).toContain("Ln 2 Pos 3");
+    setCaret(2);
+    expect(screen.getByText("Inserts at the cursor: Ln 1 Pos 3")).not.toBeNull();
+    expect(paneText()).toContain("Ln 1 Pos 3");
+  });
+
+  it("has no Reply_Box before the first run, then labels it Last reply", async () => {
+    await mount("Alpha");
+    openPanel();
+    expect(screen.queryByRole("log")).toBeNull();
+    expect(screen.queryByText("Last reply")).toBeNull();
+    startDraft("one");
+    await finished();
+    expect(screen.getByRole("log", { name: "Last reply" })).not.toBeNull();
+    expect(screen.queryByLabelText("Streamed reply")).toBeNull();
+  });
+
+  it("keeps the reply text and reports the line of the first inserted character", async () => {
+    await draftAt("Alpha\nBeta", 6);
+    expect(screen.getByRole("log").textContent).toBe(FULL_REPLY.trim());
+    expect(screen.getByText("Inserted at Ln 2 as run r1")).not.toBeNull();
+    expect(screen.queryByText(/^Stopped/)).toBeNull();
+  });
+
+  it("counts the separating newline mid-paragraph", async () => {
+    await draftAt("Alpha\nBeta", 2);
+    expect(screen.getByText("Inserted at Ln 2 as run r1")).not.toBeNull();
+  });
+
+  it("reports the line after the last one at the end of the text", async () => {
+    await draftAt("Alpha\nBeta", 10);
+    expect(screen.getByText("Inserted at Ln 3 as run r1")).not.toBeNull();
+  });
+
+  it("removes the line when a new run starts", async () => {
+    const f = await draftAt("Alpha", 0);
+    expect(screen.getByText(/^Inserted at Ln 1 as run r1$/)).not.toBeNull();
+    f.server.gate.current = deferred().promise;
+    startDraft("two");
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Stop" })).not.toBeNull();
+    });
+    expect(screen.queryByText(/^Inserted at/)).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Stop" }));
+    await finished();
+  });
+
+  it("shows no line after a failed or empty run", async () => {
+    const f = await mount("Alpha");
+    openPanel();
+    f.server.override.current = () => new Response("down", { status: 502 });
+    startDraft("one");
+    await waitFor(() => {
+      expect(screen.getAllByText(DRAFT_FAILED).length).toBeGreaterThan(0);
+    });
+    expect(screen.queryByText(/Inserted at/)).toBeNull();
+    f.server.override.current = () => new Response("  \n ", { status: 200 });
+    startDraft("two");
+    await waitFor(() => {
+      expect(screen.getAllByText(DRAFT_EMPTY).length).toBeGreaterThan(0);
+    });
+    expect(screen.queryByText(/Inserted at/)).toBeNull();
+    expect(screen.getByRole("log").textContent).toBe("");
+  });
+
+  it("shows neither line and no box when the first run is stopped with nothing inserted", async () => {
+    const f = await mount("Alpha");
+    openPanel();
+    const silent = silentReply();
+    f.server.override.current = () => silent.response;
+    startDraft("one");
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Stop" })).not.toBeNull();
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Stop" }));
+    silent.fail();
+    await finished();
+    expect(screen.queryByRole("log")).toBeNull();
+    expect(screen.queryByText(/Inserted at/)).toBeNull();
+    expect(editorOf().getText()).toBe("Alpha");
+  });
+
+  it("keeps an empty box, without the earlier text, when a later run is stopped with nothing", async () => {
+    const f = await draftAt("Alpha", 0);
+    expect(screen.getByRole("log").textContent).toBe(FULL_REPLY.trim());
+    const silent = silentReply();
+    f.server.override.current = () => silent.response;
+    startDraft("two");
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Stop" })).not.toBeNull();
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Stop" }));
+    silent.fail();
+    await finished();
+    expect(screen.getByRole("log", { name: "Last reply" }).textContent).toBe("");
+    expect(screen.queryByText(/Inserted at|Stopped/)).toBeNull();
   });
 });

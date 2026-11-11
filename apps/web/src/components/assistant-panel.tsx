@@ -6,10 +6,15 @@ import type { AssistantInfo } from "../client/api";
 import styles from "./assistant-panel.module.css";
 import type { AssistantRun } from "./use-assistant";
 
-export type AssistantPanelProps = Readonly<{ info: AssistantInfo; run: AssistantRun }>;
+export type AssistantPanelProps = Readonly<{
+  info: AssistantInfo;
+  run: AssistantRun;
+  /** The cursor as `Ln <l> Pos <c>`. */
+  position: string;
+}>;
 
-/** Prompt box, Draft or Stop, streaming text area and the disclosure line (Requirement 23.1). */
-export function AssistantPanel({ info, run }: AssistantPanelProps) {
+/** Prompt box, Draft or Stop, the Reply_Box and the disclosure line (Requirement 23.1). */
+export function AssistantPanel({ info, run, position }: AssistantPanelProps) {
   const [prompt, setPrompt] = useState("");
   return (
     <aside aria-labelledby="assistant-heading" className={styles["panel"]}>
@@ -32,13 +37,37 @@ export function AssistantPanel({ info, run }: AssistantPanelProps) {
             setPrompt(e.target.value);
           }}
         />
+        <p className={styles["note"]}>Inserts at the cursor: {position}</p>
         <DraftButton run={run} prompt={prompt} />
-        <div role="log" aria-live="off" aria-label="Streamed reply" className={styles["stream"]}>
-          {run.text}
-        </div>
+        {run.started ? <ReplyBox run={run} /> : null}
         {run.message === null ? null : <p className={styles["error"]}>{run.message}</p>}
       </div>
     </aside>
+  );
+}
+
+function ReplyBox({ run }: Readonly<{ run: AssistantRun }>) {
+  const { inserted } = run;
+  return (
+    <>
+      <span id="assistant-reply-label" className={styles["label"]}>
+        Last reply
+      </span>
+      <div
+        role="log"
+        aria-live="off"
+        aria-labelledby="assistant-reply-label"
+        className={styles["stream"]}
+      >
+        {run.text}
+      </div>
+      {inserted === null ? null : (
+        <p className={styles["note"]}>
+          {inserted.stopped ? "Stopped. Partial reply inserted" : "Inserted"} at Ln {inserted.line}{" "}
+          as run {inserted.runId}
+        </p>
+      )}
+    </>
   );
 }
 

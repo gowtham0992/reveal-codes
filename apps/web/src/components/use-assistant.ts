@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { buildInsertion, paragraphAt } from "../assistant-run";
+import { buildInsertion, insertionLine, paragraphAt } from "../assistant-run";
 import type { AssistantInfo } from "../client/api";
 import type { AppServices } from "../services";
 import type { Store } from "../store-runtime";
@@ -19,12 +19,48 @@ export type RunArgs = Readonly<{
   onText: (text: string) => void;
 }>;
 
+/** Where a run put its text: the line of the first inserted character, the run id, and whether Stop cut it short. */
+export type Inserted = Readonly<{ line: number; runId: string; stopped: boolean }>;
+
+export type DraftOutcome = Readonly<{
+  message: string | null;
+  inserted: Inserted | null;
+  /** The reply text now in the Document, without the separating newlines. */
+  insertedText: string;
+}>;
+
+const NOTHING: DraftOutcome = { message: null, inserted: null, insertedText: "" };
+
+type InsertArgs = Readonly<{ a: RunArgs; reply: string; stopped: boolean }>;
+
+/** One `AI` edit at the caret; `inserted` is set only when the Store accepted it. */
+function insertReply({ a, reply, stopped }: InsertArgs): DraftOutcome {
+  const now = a.store.getState();
+  const insertion = buildInsertion({
+    document: now.document,
+    runLog: now.runLog,
+    caret: a.getCaret(),
+    text: reply,
+    prompt: a.prompt,
+    info: a.info,
+    timestamp: a.svc.now().toISOString(),
+  });
+  const op = insertion.ops[0];
+  if (op === undefined || op.kind !== "insert") return NOTHING;
+  const line = insertionLine(now.document.text, op);
+  // A rejected edit sets its own Notice in the Store.
+  const result = a.store.dispatch({ type: "edit", ops: insertion.ops, run: insertion.run });
+  if (result.error !== null) return NOTHING;
+  const inserted = { line, runId: insertion.run.runId, stopped };
+  return { message: null, inserted, insertedText: op.text.replace(/^\n|\n$/g, "") };
+}
+
 /**
  * One draft: stream into `onText` (never the Document), then on a clean end insert the whole
- * reply as one `AI` edit. Returns a message for a failure, else null. Stop and an epoch change
- * (New or Load while streaming) discard the reply.
+ * reply as one `AI` edit. Stop inserts the partial reply, if any. An epoch change (New or Load
+ * while streaming) discards the reply.
  */
-export async function runDraft(a: RunArgs): Promise<string | null> {
+export async function runDraft(a: RunArgs): Promise<DraftOutcome> {
   const begin = a.store.getState();
   const context = paragraphAt(begin.document.text, a.getCaret());
   let reply = "";
@@ -38,27 +74,21 @@ export async function runDraft(a: RunArgs): Promise<string | null> {
     },
     a.signal,
   );
-  const now = a.store.getState();
-  if (a.signal.aborted || now.epoch !== begin.epoch) return null;
-  if (!done.ok) return DRAFT_FAILED;
-  if (reply.trim() === "") return DRAFT_EMPTY;
-  const insertion = buildInsertion({
-    document: now.document,
-    runLog: now.runLog,
-    caret: a.getCaret(),
-    text: reply,
-    prompt: a.prompt,
-    info: a.info,
-    timestamp: a.svc.now().toISOString(),
-  });
-  // A rejected edit sets its own Notice in the Store.
-  a.store.dispatch({ type: "edit", ops: insertion.ops, run: insertion.run });
-  return null;
+  if (a.store.getState().epoch !== begin.epoch) return NOTHING;
+  if (a.signal.aborted) {
+    return reply.trim() === "" ? NOTHING : insertReply({ a, reply, stopped: true });
+  }
+  if (!done.ok) return { ...NOTHING, message: DRAFT_FAILED };
+  if (reply.trim() === "") return { ...NOTHING, message: DRAFT_EMPTY };
+  return insertReply({ a, reply, stopped: false });
 }
 
 export type AssistantRun = Readonly<{
   text: string;
   streaming: boolean;
+  /** True once a run has started, unless the first run was stopped with nothing inserted. */
+  started: boolean;
+  inserted: Inserted | null;
   message: string | null;
   start: (prompt: string) => void;
   stop: () => void;
@@ -71,11 +101,15 @@ type Deps = Readonly<{
   getCaret: () => number;
 }>;
 
+type View = Readonly<{ text: string; inserted: Inserted | null; message: string | null }>;
+const EMPTY_VIEW: View = { text: "", inserted: null, message: null };
+
 export function useAssistantRun(deps: Deps): AssistantRun {
-  const [text, setText] = useState("");
+  const [view, setView] = useState<View>(EMPTY_VIEW);
   const [streaming, setStreaming] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [started, setStarted] = useState(false);
   const controller = useRef<AbortController | null>(null);
+  const shownBefore = useRef(false);
   useEffect(
     () => () => {
       controller.current?.abort();
@@ -87,19 +121,24 @@ export function useAssistantRun(deps: Deps): AssistantRun {
     if (trimmed === "" || controller.current !== null) return;
     const ctl = new AbortController();
     controller.current = ctl;
-    setText("");
-    setMessage(null);
+    setView(EMPTY_VIEW);
+    setStarted(true);
     setStreaming(true);
-    void runDraft({ ...deps, prompt: trimmed, signal: ctl.signal, onText: setText }).then((m) => {
+    const onText = (t: string): void => {
+      setView({ ...EMPTY_VIEW, text: t });
+    };
+    void runDraft({ ...deps, prompt: trimmed, signal: ctl.signal, onText }).then((o) => {
       if (controller.current === ctl) controller.current = null;
+      const firstEmptyStop = !shownBefore.current && ctl.signal.aborted && o.inserted === null;
+      if (firstEmptyStop) setStarted(false);
+      else shownBefore.current = true;
       setStreaming(false);
-      setText("");
-      setMessage(m);
-      if (m !== null) deps.store.dispatch({ type: "notice", text: m });
+      setView({ text: o.insertedText, inserted: o.inserted, message: o.message });
+      if (o.message !== null) deps.store.dispatch({ type: "notice", text: o.message });
     });
   };
   const stop = (): void => {
     controller.current?.abort();
   };
-  return { text, streaming, message, start, stop };
+  return { ...view, streaming, started, start, stop };
 }

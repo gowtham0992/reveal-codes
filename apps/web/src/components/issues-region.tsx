@@ -4,7 +4,7 @@ import { blockingIssues } from "@reveal-codes/engine";
 import type { Document, Issue } from "@reveal-codes/engine";
 import { useState } from "react";
 import type { Store } from "../store-runtime";
-import { IssuesList } from "./issues-list";
+import { IssuesList, issueText } from "./issues-list";
 import type { VerifyAction } from "./issues-list";
 import styles from "./issues-region.module.css";
 import { OverrideDialog } from "./override-dialog";
@@ -59,6 +59,7 @@ export function IssuesRegion(props: IssuesRegionProps) {
           <OverrideDialog
             issueKey={target.issue.key}
             code={target.issue.code}
+            issueText={issueText(document, target.issue)}
             store={store}
             now={now}
             restoreFocus={target.opener}

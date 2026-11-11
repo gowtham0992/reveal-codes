@@ -1,5 +1,6 @@
 import type { CallerOperation, Document } from "@reveal-codes/engine";
 import type { AssistantInfo } from "./client/api";
+import { lineAt } from "./pane/layout";
 import type { RunLogEntry } from "./store";
 
 /** The route accepts at most this many code units of context (Requirement 22.8). */
@@ -58,6 +59,14 @@ function asParagraph(reply: string, text: string, at: number): string {
   const atStart = at === 0 || text[at - 1] === "\n";
   const atEnd = at === text.length || text[at] === "\n";
   return (atStart ? "" : "\n") + body + (atEnd ? "" : "\n");
+}
+
+/**
+ * Line of the first inserted character: the line of `op.at` in the text before the edit, plus one
+ * when the insert starts with the separating newline `asParagraph` adds.
+ */
+export function insertionLine(docText: string, op: Readonly<{ at: number; text: string }>): number {
+  return lineAt(docText, op.at) + (op.text.startsWith("\n") ? 1 : 0);
 }
 
 /** One `AI` insert at the caret and its Run_Log entry; the app never builds `AI>HUM`. */

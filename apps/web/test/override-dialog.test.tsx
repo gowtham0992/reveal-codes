@@ -1,10 +1,17 @@
 // @vitest-environment jsdom
 import { createDocument, issues } from "@reveal-codes/engine";
+import type { Document, Issue } from "@reveal-codes/engine";
+import { ORDERS } from "@reveal-codes/export";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
-import { OverrideDialog, REASON_HINT } from "../src/components/override-dialog";
+import { ExportDialog } from "../src/components/export-dialog";
+import { IssuesRegion } from "../src/components/issues-region";
+import { issueText } from "../src/components/issues-list";
+import { OverrideDialog, PRINTED_STATEMENT, REASON_HINT } from "../src/components/override-dialog";
+import { createOrderSelectionStore } from "../src/order-selection";
 import { createStore } from "../src/store-runtime";
 import type { Store } from "../src/store-runtime";
+import { createMemoryStorage } from "./support/memory-storage";
 import { act, fireEvent, renderUi, screen } from "./support/render";
 
 const ISO = "2026-11-02T12:00:00.000Z";
@@ -20,7 +27,7 @@ function seededStore(): { store: Store; key: string } {
   return { store, key: first.key };
 }
 
-function Harness(props: { store: Store; issueKey: string }) {
+function Harness(props: { store: Store; issueKey: string; issueText?: string }) {
   const [open, setOpen] = useState(false);
   return (
     <div>
@@ -36,6 +43,7 @@ function Harness(props: { store: Store; issueKey: string }) {
         <OverrideDialog
           issueKey={props.issueKey}
           code="CIT …"
+          issueText={props.issueText ?? "410 U.S. 113"}
           store={props.store}
           now={now}
           restoreFocus={null}
@@ -134,5 +142,124 @@ describe("OverrideDialog _Requirements: 18.5, 18.6, 18.7, 18.8, 18.9_", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(document.activeElement).toBe(opener);
     expect(store.getState().document.overrides).toEqual([]);
+  });
+});
+
+function docOf(text: string): Document {
+  const created = createDocument(text, ISO);
+  if (!created.ok) throw new Error("fixture rejected");
+  return created.value;
+}
+
+function quoteIssue(doc: Document): Issue {
+  const found = issues(doc).find((i) => i.code === "QUO …");
+  if (found === undefined) throw new Error("fixture has no quote issue");
+  return found;
+}
+
+function longQuoteDoc(filler: string): Document {
+  return docOf(`See Roe v. Wade, 410 U.S. 113 (1973) ("${filler}").`);
+}
+
+describe("OverrideDialog issue text _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 12.8, 12.14_", () => {
+  it("shows short issue text directly under the title and above the statement", () => {
+    const { store, key } = seededStore();
+    renderUi(<Harness store={store} issueKey={key} issueText="410 U.S. 113" />);
+    openDialog();
+    const text = screen.getByText("410 U.S. 113");
+    const statement = screen.getByText(PRINTED_STATEMENT);
+    const title = screen.getByRole("heading", { name: "Override CIT …" });
+    expect(title.compareDocumentPosition(text) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(text.compareDocumentPosition(statement) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("cuts 120 characters to 79 plus an ellipsis", () => {
+    const doc = longQuoteDoc("x".repeat(120));
+    const issue = quoteIssue(doc);
+    expect(issue.end - issue.start).toBe(120);
+    const shown = issueText(doc, issue);
+    const { store } = seededStore();
+    renderUi(<Harness store={store} issueKey={issue.key} issueText={shown} />);
+    openDialog();
+    const points = Array.from(screen.getByText(shown).textContent);
+    expect(points).toHaveLength(80);
+    expect(points[79]).toBe("…");
+    expect(points.slice(0, 79).join("")).toBe(
+      Array.from(doc.text.slice(issue.start, issue.end)).slice(0, 79).join(""),
+    );
+  });
+
+  it("does not split an emoji at the cut", () => {
+    const slice = (d: Document, i: Issue): string[] => Array.from(d.text.slice(i.start, i.end));
+    const probe = longQuoteDoc("y".repeat(120));
+    const offset = slice(probe, quoteIssue(probe)).indexOf("y");
+    const filler = `${"y".repeat(78 - offset)}😀${"z".repeat(60)}`;
+    const doc = longQuoteDoc(filler);
+    const shown = issueText(doc, quoteIssue(doc));
+    const points = Array.from(shown);
+    expect(points[78]).toBe("😀");
+    expect(points).toHaveLength(80);
+    expect(shown).not.toMatch(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/);
+    expect(shown).not.toMatch(/(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/);
+  });
+
+  it("shows the same text from the Issues list and from the Export dialog", () => {
+    const doc = longQuoteDoc("w".repeat(120));
+    const expected = issueText(doc, quoteIssue(doc));
+    const store = createStore(now);
+    store.dispatch({ type: "replace", document: doc });
+    const region = renderUi(
+      <IssuesRegion
+        document={doc}
+        store={store}
+        now={now}
+        onGo={() => undefined}
+        verifiedAt={ISO}
+        note={null}
+        verify={{ start: () => undefined, disabled: false }}
+      />,
+    );
+    const quoteRow = screen.getAllByRole("button", { name: "Override…" }).length - 1;
+    act(() => {
+      fireEvent.click(
+        screen.getAllByRole("button", { name: "Override…" })[quoteRow] as HTMLElement,
+      );
+    });
+    const fromList = screen.getByRole("dialog", { name: /^Override/ });
+    expect(fromList.getAttribute("aria-describedby")).not.toBeNull();
+    expect(fromList.textContent).toContain(expected);
+    region.unmount();
+    renderUi(
+      <ExportDialog
+        document={doc}
+        store={store}
+        orderStore={createOrderSelectionStore(createMemoryStorage(), ORDERS)}
+        now={now}
+        notice={null}
+        clearNotice={() => undefined}
+        busy={false}
+        onGo={() => undefined}
+        onDownload={() => undefined}
+        onPrint={() => undefined}
+        onClose={() => undefined}
+      />,
+    );
+    const buttons = screen.getAllByRole("button", { name: "Override…" });
+    act(() => {
+      fireEvent.click(buttons[buttons.length - 1] as HTMLElement);
+    });
+    const fromExport = screen.getByRole("dialog", { name: /^Override/ });
+    expect(fromExport.textContent).toContain(expected);
+  });
+
+  it("points aria-describedby at an element that contains the text", () => {
+    const { store, key } = seededStore();
+    renderUi(<Harness store={store} issueKey={key} issueText="410 U.S. 113" />);
+    openDialog();
+    const id = screen.getByRole("dialog").getAttribute("aria-describedby");
+    expect(id).not.toBeNull();
+    const target = document.getElementById(id ?? "");
+    expect(target?.textContent).toContain("410 U.S. 113");
+    expect(target?.textContent).toContain(PRINTED_STATEMENT);
   });
 });

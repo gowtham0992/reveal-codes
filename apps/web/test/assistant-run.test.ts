@@ -5,10 +5,12 @@ import {
   CONTEXT_LIMIT,
   buildInsertion,
   disclosure,
+  insertionLine,
   normaliseNewlines,
   nextRunId,
   paragraphAt,
 } from "../src/assistant-run";
+import { lineAt } from "../src/pane/layout";
 
 describe("assistant-run _Requirements: 22.7, 23.1, 23.4, 23.5_", () => {
   it("takes only the paragraph holding the offset", () => {
@@ -137,5 +139,41 @@ describe("buildInsertion paragraph boundaries _Requirements: 7.8, 24_", () => {
     if (!parsed.ok) throw new Error("parse rejected");
     expect(parsed.value.text).toBe(r.applied.document.text);
     expect(render(parsed.value, "full").text).toBe(render(r.applied.document, "full").text);
+  });
+});
+
+describe("insertionLine _Requirements: 7.5, 7.6, 7.7, 7.8, 7.9_", () => {
+  function lineFor(text: string, caret: number): number {
+    const r = insertAt(text, caret);
+    return insertionLine(r.document.text, r.op as { at: number; text: string });
+  }
+
+  it("is the caret line at a paragraph start", () => {
+    expect(lineFor("Alpha\nBeta", 6)).toBe(2);
+  });
+
+  it("is one line below the caret line mid-paragraph", () => {
+    expect(lineFor("Alpha beta", 5)).toBe(2);
+  });
+
+  it("is the next line at the end of the text", () => {
+    expect(lineFor("Alpha", 5)).toBe(2);
+    expect(lineFor("Alpha\nBeta", 10)).toBe(3);
+  });
+
+  it("is line 1 at offset 0", () => {
+    expect(lineFor("Alpha", 0)).toBe(1);
+    expect(lineFor("", 0)).toBe(1);
+  });
+
+  it("counts earlier lines in multi-line text", () => {
+    expect(lineFor("a\nb\nc d\ne", 5)).toBe(4);
+  });
+
+  it("differs from the caret line after the insertion", () => {
+    const r = insertAt("Alpha beta", 5);
+    const caretLineAfter = lineAt(r.applied.document.text, 5);
+    expect(insertionLine(r.document.text, r.op as { at: number; text: string })).toBe(2);
+    expect(caretLineAfter).toBe(1);
   });
 });

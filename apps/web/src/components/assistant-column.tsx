@@ -13,6 +13,7 @@ export type AssistantColumnProps = Readonly<{
   store: Store;
   info: AssistantInfo;
   getCaret: () => number;
+  position: string;
   open: boolean;
   onToggle: () => void;
 }>;
@@ -23,6 +24,7 @@ export function AssistantColumn({
   store,
   info,
   getCaret,
+  position,
   open,
   onToggle,
 }: AssistantColumnProps) {
@@ -34,7 +36,7 @@ export function AssistantColumn({
       <button type="button" aria-expanded={open} onClick={onToggle}>
         Assistant
       </button>
-      {open ? <AssistantPanel info={info} run={run} /> : null}
+      {open ? <AssistantPanel info={info} run={run} position={position} /> : null}
     </div>
   );
 }
@@ -44,10 +46,11 @@ type SlotArgs = Readonly<{
   store: Store;
   info: AssistantInfo | null;
   getCaret: () => number;
+  position: string;
 }>;
 
 /** The column element and the `data-assistant` value for the grid; both absent without an assistant. */
-export function useAssistantSlot({ svc, store, info, getCaret }: SlotArgs) {
+export function useAssistantSlot({ svc, store, info, getCaret, position }: SlotArgs) {
   const [open, setOpen] = useState(false); // collapsed on first load (Requirement 10.8)
   const toggle = (): void => {
     setOpen((v) => !v);
@@ -59,6 +62,7 @@ export function useAssistantSlot({ svc, store, info, getCaret }: SlotArgs) {
       store={store}
       info={info}
       getCaret={getCaret}
+      position={position}
       open={open}
       onToggle={toggle}
     />
