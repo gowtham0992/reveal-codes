@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
-import { Modal } from "../src/components/modal";
-import { act, fireEvent, renderUi, screen } from "./support/render";
+import { Modal, ModalActions } from "../src/components/modal";
+import { Toolbar } from "../src/components/toolbar";
+import { act, fireEvent, renderUi, screen, within } from "./support/render";
 
 function Harness() {
   const [open, setOpen] = useState(false);
@@ -56,6 +57,33 @@ describe("Modal dialog class _Requirements: 8.2_", () => {
     const dialog = screen.getByRole("dialog", { name: "Sample" });
     expect(dialog.className.trim().split(/\s+/)).toHaveLength(1);
     expect(dialog.className).not.toContain("Wide");
+  });
+});
+
+describe("Modal primary button _Requirements: 8.10, 8.11, 13.10_", () => {
+  it("renders a dialog primary button last in DOM order, outside the Toolbar's single primary", () => {
+    renderUi(
+      <div>
+        <Toolbar notice={null} paneOpen={false} verifyDisabled={false} step="export" />
+        <Modal title="Sample" onClose={() => undefined}>
+          <ModalActions>
+            <button type="button">Cancel</button>
+            <button type="button" data-primary="true">
+              Save
+            </button>
+          </ModalActions>
+        </Modal>
+      </div>,
+    );
+    const dialogButtons = within(screen.getByRole("dialog")).getAllByRole("button");
+    expect(dialogButtons.map((b) => b.textContent)).toEqual(["Cancel", "Save"]);
+    expect(dialogButtons[1]?.getAttribute("data-primary")).toBe("true");
+    const toolbar = screen.getByRole("toolbar", { name: "Document actions" });
+    const inToolbar = within(toolbar)
+      .getAllByRole("button")
+      .filter((b) => b.getAttribute("data-primary") === "true");
+    expect(inToolbar).toHaveLength(1);
+    expect(toolbar.contains(dialogButtons[1] as HTMLElement)).toBe(false);
   });
 });
 

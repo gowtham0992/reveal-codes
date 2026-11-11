@@ -6,13 +6,14 @@ import { useState } from "react";
 import { describe, expect, it } from "vitest";
 import { ExportDialog } from "../src/components/export-dialog";
 import { IssuesRegion } from "../src/components/issues-region";
+import { Toolbar } from "../src/components/toolbar";
 import { issueText } from "../src/components/issues-list";
 import { OverrideDialog, PRINTED_STATEMENT, REASON_HINT } from "../src/components/override-dialog";
 import { createOrderSelectionStore } from "../src/order-selection";
 import { createStore } from "../src/store-runtime";
 import type { Store } from "../src/store-runtime";
 import { createMemoryStorage } from "./support/memory-storage";
-import { act, fireEvent, renderUi, screen } from "./support/render";
+import { act, fireEvent, renderUi, screen, within } from "./support/render";
 
 const ISO = "2026-11-02T12:00:00.000Z";
 const now = (): Date => new Date(ISO);
@@ -73,6 +74,12 @@ function typeReason(value: string): void {
 
 function saveButton(): HTMLButtonElement {
   return screen.getByRole("button", { name: "Save override" });
+}
+
+function tab(shiftKey = false): void {
+  act(() => {
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Tab", shiftKey });
+  });
 }
 
 function ListFixture({ doc, store }: { doc: Document; store: Store }) {
@@ -181,6 +188,72 @@ describe("OverrideDialog _Requirements: 18.5, 18.6, 18.7, 18.8, 18.9_", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(document.activeElement).toBe(opener);
     expect(store.getState().document.overrides).toEqual([]);
+  });
+});
+
+describe("OverrideDialog buttons _Requirements: 8.4, 8.10, 8.11_", () => {
+  it("puts Cancel before Save override, which is last and carries data-primary", () => {
+    const { store, key } = seededStore();
+    renderUi(<Harness store={store} issueKey={key} />);
+    openDialog();
+    const buttons = within(screen.getByRole("dialog")).getAllByRole("button");
+    const names = buttons.map((b) => b.textContent);
+    expect(names).toEqual(["Cancel", "Save override"]);
+    const save = saveButton();
+    expect(buttons[buttons.length - 1]).toBe(save);
+    expect(save.getAttribute("data-primary")).toBe("true");
+    expect(screen.getByRole("button", { name: "Cancel" }).hasAttribute("data-primary")).toBe(false);
+  });
+
+  it("keeps data-primary on a disabled Save override", () => {
+    const { store, key } = seededStore();
+    renderUi(<Harness store={store} issueKey={key} />);
+    openDialog();
+    expect(saveButton().disabled).toBe(true);
+    expect(saveButton().getAttribute("data-primary")).toBe("true");
+  });
+
+  it("gives the Reason label the small-label class", () => {
+    const { store, key } = seededStore();
+    renderUi(<Harness store={store} issueKey={key} />);
+    openDialog();
+    const label = document.querySelector("label");
+    expect(label?.textContent).toBe("Reason");
+    expect(label?.classList.contains("small-label")).toBe(true);
+  });
+
+  it("traps Tab between the field, Cancel and Save override", () => {
+    const { store, key } = seededStore();
+    renderUi(<Harness store={store} issueKey={key} />);
+    openDialog();
+    typeReason("a long enough reason");
+    expect(document.activeElement).toBe(screen.getByLabelText("Reason"));
+    tab();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Cancel" }));
+    tab();
+    expect(document.activeElement).toBe(saveButton());
+    tab();
+    expect(document.activeElement).toBe(screen.getByLabelText("Reason"));
+    tab(true);
+    expect(document.activeElement).toBe(saveButton());
+  });
+
+  it("leaves the Toolbar with at most one data-primary while the dialog is open", () => {
+    const { store, key } = seededStore();
+    renderUi(
+      <div>
+        <Toolbar notice={null} paneOpen={false} verifyDisabled={false} step="verify" />
+        <Harness store={store} issueKey={key} />
+      </div>,
+    );
+    openDialog();
+    const marked = (root: HTMLElement): HTMLElement[] =>
+      within(root)
+        .getAllByRole("button")
+        .filter((b) => b.getAttribute("data-primary") === "true");
+    const toolbar = screen.getByRole("toolbar", { name: "Document actions" });
+    expect(marked(toolbar).map((b) => b.textContent)).toEqual(["Verify"]);
+    expect(marked(screen.getByRole("dialog")).map((b) => b.textContent)).toEqual(["Save override"]);
   });
 });
 

@@ -53,7 +53,7 @@ function ReasonField({ reason, setReason, valid, error }: FieldProps) {
   const hintId = useId();
   return (
     <>
-      <label htmlFor={fieldId} className={styles["label"]}>
+      <label htmlFor={fieldId} className={`small-label ${styles["label"] ?? ""}`}>
         Reason
       </label>
       <textarea
@@ -95,11 +95,11 @@ export function OverrideDialog(props: OverrideDialogProps) {
       </div>
       <ReasonField reason={reason} setReason={setReason} valid={valid} error={error} />
       <ModalActions>
-        <button type="button" disabled={!valid} onClick={save}>
-          Save override
-        </button>
         <button type="button" onClick={onClose}>
           Cancel
+        </button>
+        <button type="button" data-primary="true" disabled={!valid} onClick={save}>
+          Save override
         </button>
       </ModalActions>
     </Modal>
