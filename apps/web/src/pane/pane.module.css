@@ -124,19 +124,3 @@
   background: #e8ecf6;
   color: #0f2766;
 }
-
-/* TEMPORARY: the status line moves to status-bar.module.css in task 3.4. */
-.status {
-  flex: none;
-  padding: 2px 48px;
-  background: #0a1c4f;
-  color: #c9d2ec;
-  white-space: pre;
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.modeText {
-  white-space: nowrap;
-}

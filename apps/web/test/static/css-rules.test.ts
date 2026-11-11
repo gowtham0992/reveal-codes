@@ -33,7 +33,7 @@ const WEIGHTS = /^(?:400|500|600|700|normal|bold|inherit)$/;
 const VARIABLE_VALUES: Readonly<Record<string, string>> = {
   "--page-max": "8.5in",
   "--toolbar-h": "52px",
-  "--status-h": "22px",
+  "--status-h": "26px",
   "--strip-w": "32px",
   "--left-w": "260px",
   "--right-w": "300px",

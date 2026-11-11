@@ -1,4 +1,5 @@
 import styles from "./status-line.module.css";
+import statusBar from "../pane/status-bar.module.css";
 
 /** Three spaces between the two entries. */
 export const KEY_LEGEND = "Alt-F3 Codes   F7 Exit";
@@ -13,10 +14,19 @@ export type StatusLineProps = Readonly<{
 /** The strip under the editor while the Pane is closed. No live region: keystrokes are not announced. */
 export function StatusLine({ position, mode }: StatusLineProps) {
   return (
-    <section role="region" aria-label="Status line" className={styles["statusLine"]}>
+    <section
+      role="region"
+      aria-label="Status line"
+      className={[styles["statusLine"], statusBar["bar"]].join(" ")}
+    >
       <span className={styles["position"]}>{position}</span>
-      <span className={styles["mode"]}>{mode}</span>
-      <span className={styles["legend"]}>{KEY_LEGEND}</span>
+      <span className={statusBar["mode"]}>{mode}</span>
+      <span className={styles["legend"]}>
+        <strong className={statusBar["key"]}>Alt-F3</strong>
+        {" Codes   "}
+        <strong className={statusBar["key"]}>F7</strong>
+        {" Exit"}
+      </span>
     </section>
   );
 }

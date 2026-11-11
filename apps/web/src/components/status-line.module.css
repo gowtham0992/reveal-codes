@@ -1,32 +1,15 @@
 .statusLine {
   grid-column: main;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 0 8px;
-  border-top: 1px solid var(--rule);
-  background: var(--ui-bg);
-  font-family: var(--font-pane);
-  font-size: var(--size-status);
-  white-space: pre;
-  overflow: hidden;
 }
-
 .position,
 .legend {
   flex: 1 1 0;
   min-width: 0;
 }
-
 .position {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .legend {
   text-align: right;
-}
-
-.mode {
-  white-space: nowrap;
 }

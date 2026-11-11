@@ -7,6 +7,7 @@ import { blockSegments } from "./blocks";
 import type { Segment } from "./blocks";
 import { cls, codeClass } from "./code-class";
 import { PaneHeader } from "./pane-header";
+import statusBar from "./status-bar.module.css";
 
 export type PaneProps = Readonly<{
   document: Document;
@@ -113,6 +114,15 @@ function LineView({ line, segments, head, endBlock, cursorRef }: LineProps) {
   );
 }
 
+/** The Status_Bar at the foot of the Pane: position or F7 message, then Mode_Text. */
+function PaneStatus(props: { text: string; mode: string | null | undefined }) {
+  return (
+    <div className={statusBar["bar"]}>
+      <span>{props.text}</span>
+      {props.mode == null ? null : <span className={statusBar["mode"]}>{props.mode}</span>}
+    </div>
+  );
+}
 export function Pane(props: PaneProps) {
   const { document, cursorOffset, statusOverride, onItemClick, onBackgroundClick } = props;
   const open = props.open ?? true;
@@ -146,10 +156,10 @@ export function Pane(props: PaneProps) {
           />
         ))}
       </div>
-      <div className={cls("status")}>
-        <span>{statusOverride ?? statusText(document.text, cursorOffset)}</span>
-        {props.modeText == null ? null : <span className={cls("modeText")}>{props.modeText}</span>}
-      </div>
+      <PaneStatus
+        text={statusOverride ?? statusText(document.text, cursorOffset)}
+        mode={props.modeText}
+      />
     </section>
   );
 }

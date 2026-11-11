@@ -428,6 +428,9 @@ describe("AppShell mode badge and Verify _Requirements: 15.7, 15.8, 17.1, 17.12,
     expect(line.hasAttribute("aria-live")).toBe(false);
     expect(within(line).getByText("Doc 1 Pg 1 Ln 1 Pos 1")).not.toBeNull();
     expect(line.textContent).toContain("Alt-F3 Codes   F7 Exit");
+    for (const key of ["Alt-F3", "F7"]) {
+      expect(within(line).getByText(key).tagName).toBe("STRONG");
+    }
     pressKey(document.body, "F3", { altKey: true });
     expect(screen.queryByRole("region", { name: "Status line" })).toBeNull();
     expect(paneRegion()).not.toBeNull();

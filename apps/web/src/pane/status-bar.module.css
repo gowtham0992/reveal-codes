@@ -1,0 +1,23 @@
+.bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 26px;
+  padding: 0 48px;
+  background: #0a1c4f;
+  color: #c9d2ec;
+  font-family: var(--font-pane);
+  font-size: 12px;
+  line-height: 18px;
+  white-space: pre;
+  overflow: hidden;
+}
+.key {
+  color: var(--white);
+  font-weight: 700;
+}
+.mode {
+  white-space: nowrap;
+}
