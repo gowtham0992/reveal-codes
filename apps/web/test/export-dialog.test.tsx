@@ -222,3 +222,20 @@ function useStoreDoc(store: Store): Document {
     () => store.getState().document,
   );
 }
+describe("ExportDialog with nothing to export", () => {
+  it.each([
+    ["an empty document", ""],
+    ["a whitespace-only document", "  \n\t \u00a0\n"],
+  ])("disables both actions and says so for %s", (_label, text) => {
+    renderUi(<ExportDialog {...props(docOf(text))} />);
+    expect(button("Download .docx").disabled).toBe(true);
+    expect(button("Open print view").disabled).toBe(true);
+    expect(button("Close").disabled).toBe(false);
+    expect(screen.getAllByText("There is nothing to export yet.")).toHaveLength(1);
+  });
+  it("shows no such line for a document with text", () => {
+    renderUi(<ExportDialog {...props(docOf(NONE))} />);
+    expect(screen.queryByText("There is nothing to export yet.")).toBeNull();
+    expect(button("Download .docx").disabled).toBe(false);
+  });
+});

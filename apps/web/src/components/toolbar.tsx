@@ -11,6 +11,8 @@ export type ToolbarProps = Readonly<{
   verifyRunning?: boolean;
   /** Blocking issue count; the Export label reads "Export (<n> blocking)" when above zero. */
   blockingCount?: number;
+  /** True when the Document has no character other than whitespace. */
+  exportDisabled?: boolean;
   onNew?: () => void;
   onLoadDemo?: () => void;
   onVerify?: () => void;
@@ -26,6 +28,18 @@ function primary(step: NextStep, own: NextStep): "true" | undefined {
   return step === own ? "true" : undefined;
 }
 
+function ExportButton(props: ToolbarProps) {
+  return (
+    <button
+      type="button"
+      data-primary={primary(props.step, "export")}
+      disabled={props.exportDisabled === true}
+      onClick={props.onExport}
+    >
+      {exportLabel(props.blockingCount ?? 0)}
+    </button>
+  );
+}
 export function Toolbar(props: ToolbarProps) {
   return (
     <div role="toolbar" aria-label="Document actions" className={styles["toolbar"]}>
@@ -56,9 +70,7 @@ export function Toolbar(props: ToolbarProps) {
         <button type="button" aria-pressed={props.paneOpen} onClick={props.onTogglePane}>
           {props.paneOpen ? "Hide codes (Alt-F3)" : "Show codes (Alt-F3)"}
         </button>
-        <button type="button" data-primary={primary(props.step, "export")} onClick={props.onExport}>
-          {exportLabel(props.blockingCount ?? 0)}
-        </button>
+        <ExportButton {...props} />
       </div>
       <div role="status" aria-live="polite" className={styles["notice"]}>
         {props.notice}

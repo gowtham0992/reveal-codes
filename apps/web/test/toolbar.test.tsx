@@ -123,3 +123,19 @@ describe("Toolbar _Requirements: 10.1, 10.2, 10.6, 10.7_", () => {
     expect(onTogglePane).not.toHaveBeenCalled();
   });
 });
+describe("Toolbar Export button on a Document with nothing to export", () => {
+  it("is enabled by default and disabled when exportDisabled is true", () => {
+    const { rerender } = renderUi(<Toolbar {...BASE} step="export" />);
+    expect(screen.getByRole("button", { name: "Export" })).toHaveProperty("disabled", false);
+    rerender(<Toolbar {...BASE} step="export" exportDisabled={true} />);
+    const exportButton = screen.getByRole("button", { name: "Export" });
+    expect(exportButton).toHaveProperty("disabled", true);
+    expect(exportButton.getAttribute("data-primary")).toBe("true");
+  });
+  it("does not call onExport when disabled", () => {
+    const onExport = vi.fn();
+    renderUi(<Toolbar {...BASE} step="export" exportDisabled={true} onExport={onExport} />);
+    fireEvent.click(screen.getByRole("button", { name: "Export" }));
+    expect(onExport).not.toHaveBeenCalled();
+  });
+});

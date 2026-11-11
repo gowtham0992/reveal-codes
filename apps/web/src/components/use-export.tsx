@@ -11,7 +11,7 @@ import { PRINT_FAILED } from "../notices";
 import { createOrderSelectionStore } from "../order-selection";
 import type { AppServices } from "../services";
 import type { Store } from "../store-runtime";
-import { ExportDialog } from "./export-dialog";
+import { ExportDialog, hasExportableText } from "./export-dialog";
 
 export type UseExportArgs = Readonly<{
   svc: AppServices;
@@ -77,7 +77,7 @@ function useOpenState() {
   };
 }
 
-/** Owns open, opener and busy for the Export_Dialog; the toolbar button is always enabled. */
+/** Owns open, opener and busy for the Export_Dialog; the toolbar button is disabled while the Document is only whitespace. */
 export function useExport({ svc, store, autosave, doc, notice, onGo }: UseExportArgs) {
   const { open, opener, close, show } = useOpenState();
   const [busy, setBusy] = useState(false);
@@ -89,6 +89,7 @@ export function useExport({ svc, store, autosave, doc, notice, onGo }: UseExport
   return {
     toolbar: {
       blockingCount: blockingIssues(doc).length,
+      exportDisabled: !hasExportableText(doc),
       onExport: (): void => {
         clearNotice();
         show();

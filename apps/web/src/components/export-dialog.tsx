@@ -37,6 +37,11 @@ type Target = Readonly<{ issue: Issue; opener: HTMLElement }>;
 
 export const DOWNLOAD_LABEL = "Download .docx";
 export const PRINT_LABEL = "Open print view";
+export const NOTHING_TO_EXPORT = "There is nothing to export yet.";
+/** True when the Document holds at least one character that is not whitespace. */
+export function hasExportableText(document: Document): boolean {
+  return /\S/u.test(document.text);
+}
 
 /** The line above the action buttons; null when nothing blocks. */
 export function blockingLine(n: number): string | null {
@@ -135,6 +140,8 @@ function ExportOrder({ gate }: OrderProps) {
 
 type ActionsProps = Readonly<{
   gate: OrderGate;
+  /** The Document has no character other than whitespace. */
+  nothing: boolean;
   blocking: number;
   busy: boolean;
   onDownload: (context: OrderContext | null) => void;
@@ -142,22 +149,23 @@ type ActionsProps = Readonly<{
   onClose: () => void;
 }>;
 
-function ExportActions({ gate, blocking, busy, onDownload, onPrint, onClose }: ActionsProps) {
-  const line = blockingLine(blocking);
+function ExportActions(props: ActionsProps) {
+  const { gate, nothing, blocking, busy, onDownload, onPrint, onClose } = props;
+  const line = nothing ? NOTHING_TO_EXPORT : blockingLine(blocking);
   return (
     <>
       {line === null ? null : <p className={styles["blockingLine"]}>{line}</p>}
       <ModalActions>
         <button
           type="button"
-          disabled={!gate.clear || busy}
+          disabled={!gate.clear || busy || nothing}
           onClick={() => {
             onDownload(gate.context);
           }}
         >
           {DOWNLOAD_LABEL}
         </button>
-        <button type="button" disabled={!gate.clear} onClick={onPrint}>
+        <button type="button" disabled={!gate.clear || nothing} onClick={onPrint}>
           {PRINT_LABEL}
         </button>
         <button type="button" onClick={onClose}>
@@ -188,6 +196,7 @@ export function ExportDialog(props: ExportDialogProps) {
         </p>
         <ExportActions
           gate={gate}
+          nothing={!hasExportableText(document)}
           blocking={blocking.length}
           busy={busy}
           onDownload={props.onDownload}
