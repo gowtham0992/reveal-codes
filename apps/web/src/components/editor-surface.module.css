@@ -34,6 +34,11 @@
   margin: 0;
 }
 
+.content :global(.ProseMirror) [data-issue] {
+  text-decoration: underline dotted var(--ink);
+  text-decoration-thickness: 1px;
+}
+
 .placeholder {
   position: absolute;
   top: 1in;

@@ -5,6 +5,8 @@ import type { EditorView } from "@tiptap/pm/view";
 import { useEditor } from "@tiptap/react";
 import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 import type { Store } from "../store-runtime";
+import { markRanges } from "./marks";
+import { createMarksPlugin, MARKS_META } from "./marks-plugin";
 import { docText, offsetToPos, posToOffset } from "./offsets";
 import { createProvenancePlugin } from "./provenance-plugin";
 import { reconcile } from "./reconcile";
@@ -87,6 +89,7 @@ export function useEditorBinding(args: EditorBindingArgs): EditorBinding {
   });
   useRegisteredPlugin(editor, store, nowRef);
   useReconcileEffect(editor, store);
+  useMarks(editor, store);
   useSelectionReport(editor, onCaretRef);
   const focusAt = useCallback(
     (offset: number) => {
@@ -122,6 +125,37 @@ function useRegisteredPlugin(
       if (!editor.isDestroyed) editor.unregisterPlugin(plugin.spec.key ?? "");
     };
   }, [editor, store, nowRef]);
+}
+
+/** Page marks: derive ranges from the Store and apply them when Editor and Store text agree (Req 11). */
+function useMarks(editor: Editor | null, store: Store): void {
+  useEffect(() => {
+    if (editor === null || editor.isDestroyed) return undefined;
+    const plugin = createMarksPlugin();
+    editor.registerPlugin(plugin);
+    let applied = "[]";
+    const sync = (): void => {
+      if (editor.isDestroyed) return;
+      const { document, verifiedAt } = store.getState();
+      if (docText(editor.state.doc) !== document.text || editor.view.composing) return;
+      const ranges = verifiedAt === null ? [] : markRanges(document);
+      const signature = JSON.stringify(ranges);
+      if (signature === applied) return;
+      applied = signature;
+      editor.view.dispatch(editor.state.tr.setMeta(MARKS_META, ranges));
+    };
+    const onTransaction = (): void => {
+      queueMicrotask(sync);
+    };
+    const unsubscribe = store.subscribe(sync);
+    editor.on("transaction", onTransaction);
+    sync();
+    return () => {
+      unsubscribe();
+      editor.off("transaction", onTransaction);
+      if (!editor.isDestroyed) editor.unregisterPlugin(plugin.spec.key ?? "");
+    };
+  }, [editor, store]);
 }
 
 function useReconcileEffect(editor: Editor | null, store: Store): void {

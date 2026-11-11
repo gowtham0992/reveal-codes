@@ -140,7 +140,7 @@ Conventions that apply to every task:
     - In `apps/web/test/static/css-rules.test.ts`: add `--shell-min` as `1150px` to `VARIABLE_VALUES`; check that `globals.css` has exactly one `@media (max-width: 799px)` at-rule containing `display: none` on `.app`, and that across all stylesheets under `apps/web/app` and `apps/web/src` there is exactly one at-rule whose prelude has `min-width` or `max-width` (`@media print` is not a width query); check that `status-line.module.css` has `grid-column: main` and `issues-region.module.css` has `grid-row: 2 / 4`.
     - _Requirements: 10.1, 10.2, 10.3, 10.12, 10.13, 12.16_
 
-- [ ] 5. Page marks (optional)
+- [x] 5. Page marks (optional)
   - [x] 5.1 Smoke test for the three API assumptions
     - Add `apps/web/test/smoke/api-assumptions.dom.test.ts` (or extend the existing smoke file) with three checks against real ProseMirror and TipTap: a meta-only transaction leaves `docText(editor.state.doc)` unchanged; it produces no Provenance_Plugin operation; `Decoration.inline` spanning a paragraph boundary renders.
     - **Stop condition.** If any of the three fails, stop group 5: record the reason in `BUILD_LOG.md` (under the entry written in task 6.2), build no marks, skip 5.2 and 5.3, and continue with group 6. Requirement 11.7 applies.
@@ -151,7 +151,7 @@ Conventions that apply to every task:
     - Add `apps/web/test/marks.test.ts`: ranges and titles for the three codes; no range for `CIT ✓`, `CIT …`, `QUO ✓`, `QUO …`.
     - _Requirements: 11.1, 11.2, 11.5, 12.10_
 
-  - [~] 5.3 Marks plugin, binding, and style
+  - [x] 5.3 Marks plugin, binding, and style
     - Create `apps/web/src/editor/marks-plugin.ts`: a plugin whose state is a `DecorationSet`; `apply` builds a new set from a `MARKS_META` range list with `Decoration.inline(offsetToPos(start), offsetToPos(end), { "data-issue": code, title })`, skipping ranges that map to null, and otherwise maps the set through `tr.mapping`.
     - In `apps/web/src/editor/use-editor-binding.ts` register the plugin and add `useMarks(editor, store)` with one `sync` function, called from a Store subscription and from the Editor `transaction` event through `queueMicrotask`: ranges are empty while `verifiedAt` is null; return when `docText(editor.state.doc) !== document.text` or `view.composing`; return when the signature equals the last applied one; otherwise dispatch a meta-only transaction.
     - In `apps/web/src/components/editor-surface.module.css` add one rule for `[data-issue]`: `text-decoration: underline dotted var(--ink)` at 1px thickness. No other colour, no transition.
