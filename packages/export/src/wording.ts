@@ -95,6 +95,11 @@ export function citationParagraph(c: CitationCounts): string {
   );
 }
 
+/** Paragraph 3 for a filing with no citation; the citation table is omitted. */
+export const NO_CITATIONS_SENTENCE = "This filing contains no legal citations.";
+/** Paragraph 4 for a filing with no quotation attributed to a cited decision; the table is omitted. */
+export const NO_QUOTATIONS_SENTENCE =
+  "This filing contains no quotations attributed to a cited decision.";
 export function quoteParagraph(matched: number, mismatched: number, unchecked: number): string {
   return (
     "Quotations attributed to a cited decision were compared with the text of that decision. " +

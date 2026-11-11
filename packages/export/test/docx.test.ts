@@ -35,9 +35,12 @@ function titleParagraphs(x: string): string[] {
     .map((s) => s.slice(0, s.indexOf("</w:p>")));
 }
 
+/** A filing with one full citation, so the Statement carries a citation table. */
+const CITING = "Hello\n\nSee Roe v. Wade, 410 U.S. 113 (1973).";
+
 describe("buildDocx", () => {
   it("writes the two titles after page markers, bold, and no other title", async () => {
-    const bytes = await build(doc("Hello\n\nWorld"));
+    const bytes = await build(doc(CITING));
     const paras = readDocxParagraphs(bytes);
     const marks = paras.flatMap((p, i) => (p === "\f" ? [i] : []));
     expect(marks).toHaveLength(2);
@@ -67,11 +70,22 @@ describe("buildDocx", () => {
   });
 
   it("draws single borders on all six table edges", async () => {
-    const x = xml(await build(doc("x")));
+    const x = xml(await build(doc(CITING)));
     const borders = x.match(/<w:tblBorders>[\s\S]*?<\/w:tblBorders>/)?.[0] ?? "";
     for (const edge of ["top", "bottom", "left", "right", "insideH", "insideV"]) {
       expect(borders).toMatch(new RegExp(`<w:${edge} w:val="single"`));
     }
+  });
+
+  it("writes no table, and the two plain sentences, for a filing with no citation or quotation", async () => {
+    const bytes = await build(doc("Notice of appearance."));
+    expect(xml(bytes)).not.toContain("<w:tbl>");
+    const paras = readDocxParagraphs(bytes);
+    expect(paras).toContain("3. This filing contains no legal citations.");
+    expect(paras).toContain(
+      "4. This filing contains no quotations attributed to a cited decision.",
+    );
+    expect(paras.some((p) => p.includes("Every legal citation"))).toBe(false);
   });
 
   it("sets creator and the caption as title in core properties", async () => {

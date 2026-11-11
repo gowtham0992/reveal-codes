@@ -93,6 +93,18 @@ describe("PrintView ready state _Requirements: 8.2, 8.3, 8.4, 8.5, 8.9_", () => 
     expect(sections[2]?.querySelector("pre")).not.toBeNull();
   });
 
+  it("prints the plain sentences and no table for a filing with no citation or quotation", () => {
+    const created = createDocument("Notice of appearance.", ISO);
+    if (!created.ok) throw new Error("fixture rejected");
+    const { container } = view(serialise(created.value, [], EXPORT_VERIFIED_AT));
+    const statement = container.querySelectorAll("section")[1];
+    expect(statement?.textContent).toContain("3. This filing contains no legal citations.");
+    expect(statement?.textContent).toContain(
+      "4. This filing contains no quotations attributed to a cited decision.",
+    );
+    expect(statement?.textContent).not.toContain("Every legal citation");
+    expect(statement?.querySelector("table")).toBeNull();
+  });
   it("calls window.print once per click", () => {
     const print = vi.spyOn(window, "print").mockImplementation(() => undefined);
     ready();

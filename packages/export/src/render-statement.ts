@@ -5,6 +5,8 @@ import type { Statement, StatementBlock } from "./types.js";
 import {
   CITATION_CODES,
   CITATION_COLUMNS,
+  NO_CITATIONS_SENTENCE,
+  NO_QUOTATIONS_SENTENCE,
   OVERRIDES_INTRO,
   OVERRIDE_COLUMNS,
   PARAGRAPH_1,
@@ -54,6 +56,7 @@ function countOf(items: readonly { status: string }[], status: string): number {
 }
 
 function citationBlocks(s: Statement, number: number): StatementBlock[] {
+  if (s.citations.length === 0) return [paragraph(number, NO_CITATIONS_SENTENCE)];
   const text = citationParagraph({
     date: s.verifiedAt === null ? null : s.verifiedDate,
     verified: countOf(s.citations, "verified"),
@@ -66,6 +69,7 @@ function citationBlocks(s: Statement, number: number): StatementBlock[] {
 }
 
 function quoteBlocks(s: Statement, number: number): StatementBlock[] {
+  if (s.quotes.length === 0) return [paragraph(number, NO_QUOTATIONS_SENTENCE)];
   const text = quoteParagraph(
     countOf(s.quotes, "match"),
     countOf(s.quotes, "mismatch"),

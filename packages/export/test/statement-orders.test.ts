@@ -442,12 +442,8 @@ describe("verification-only elements _Requirements: 4.13, 9.10_", () => {
       const blocks = renderStatement(stmt(doc, log, ctx(withElements("edtex-love-2025", [el]))));
       expect(blocks).toEqual(bare);
       const texts = paragraphs(blocks).map((p) => p.text);
-      expect(
-        texts.some((t) => t.startsWith("Every legal citation in this filing was checked")),
-      ).toBe(true);
-      expect(texts.some((t) => t.startsWith("Quotations attributed to a cited decision"))).toBe(
-        true,
-      );
+      expect(texts).toContain("This filing contains no legal citations.");
+      expect(texts).toContain("This filing contains no quotations attributed to a cited decision.");
       expect(texts).toContain(RESPONSIBILITY);
     },
   );
@@ -455,15 +451,30 @@ describe("verification-only elements _Requirements: 4.13, 9.10_", () => {
   it("keeps the verification sentences under every shipped entry", () => {
     for (const e of ALL_ENTRIES) {
       const texts = paragraphs(renderStatement(stmt(aiDoc(), logOf(1), ctx(e)))).map((p) => p.text);
-      expect(
-        texts.some((t) => t.startsWith("Every legal citation")),
-        e.id,
-      ).toBe(true);
-      expect(
-        texts.some((t) => t.startsWith("Quotations attributed")),
-        e.id,
-      ).toBe(true);
+      expect(texts, e.id).toContain("This filing contains no legal citations.");
+      expect(texts, e.id).toContain(
+        "This filing contains no quotations attributed to a cited decision.",
+      );
       expect(texts, e.id).toContain(RESPONSIBILITY);
+    }
+  });
+  it("keeps the checking sentences under every shipped entry when there is something to check", () => {
+    for (const e of ALL_ENTRIES) {
+      const base = stmt(aiDoc(), logOf(1), ctx(e));
+      const checked: Statement = {
+        ...base,
+        citations: [{ text: "410 U.S. 113", status: "unchecked" }],
+        quotes: [{ text: "a quotation", status: "unchecked" }],
+      };
+      const texts = paragraphs(renderStatement(checked)).map((p) => p.text);
+      expect(
+        texts.some((t) => t.startsWith("Every legal citation in this filing was checked")),
+        e.id,
+      ).toBe(true);
+      expect(
+        texts.some((t) => t.startsWith("Quotations attributed to a cited decision")),
+        e.id,
+      ).toBe(true);
     }
   });
 });
