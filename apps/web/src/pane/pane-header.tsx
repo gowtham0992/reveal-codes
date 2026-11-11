@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import type { MouseEvent } from "react";
 import type { CodeFamily } from "./layout";
 import { cls, codeClass } from "./code-class";
@@ -29,16 +28,19 @@ function keepEditorFocus(event: MouseEvent<HTMLDivElement>): void {
 export function PaneHeader() {
   return (
     <div className={cls("header")} onMouseDown={keepEditorFocus}>
-      <span>Reveal Codes</span>
+      <span className={cls("title")}>Reveal Codes</span>
       <span className={cls("legend")}>
-        {LEGEND.map((entry, i) => (
-          <Fragment key={entry.code}>
-            {i === 0 ? null : " · "}
-            <span className={cls("legendItem")}>
-              <span className={codeClass(entry.family, entry.failing)}>{entry.code}</span>
-              {` ${entry.words}`}
+        {LEGEND.map((entry) => (
+          <span key={entry.code} className={cls("legendItem")}>
+            <span className={codeClass(entry.family, entry.failing)}>
+              {entry.failing ? (
+                <span className={cls("legendBlock")}>{entry.code}</span>
+              ) : (
+                entry.code
+              )}
             </span>
-          </Fragment>
+            {` ${entry.words}`}
+          </span>
         ))}
       </span>
     </div>

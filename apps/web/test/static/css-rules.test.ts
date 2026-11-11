@@ -4,24 +4,6 @@ import { formatViolations, readSources, violation, type Violation } from "../sup
 import { colourViolations, type Sheet } from "./css-colours";
 
 /** Requirements 10.9, 10.11 to 10.15 (UI stylesheets) and 12.2 to 12.5 (Pane stylesheet). */
-const CGA = new Set([
-  "#000000",
-  "#0000AA",
-  "#00AA00",
-  "#00AAAA",
-  "#AA0000",
-  "#AA00AA",
-  "#AA5500",
-  "#AAAAAA",
-  "#555555",
-  "#5555FF",
-  "#55FF55",
-  "#55FFFF",
-  "#FF5555",
-  "#FF55FF",
-  "#FFFF55",
-  "#FFFFFF",
-]);
 const FONT_STACKS: Readonly<Record<string, string>> = {
   "--font-ui": '"Public Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif',
   "--font-editor": '"Libre Caslon Text", Georgia, "Times New Roman", serif',
@@ -65,23 +47,6 @@ const VARIABLE_VALUES: Readonly<Record<string, string>> = {
   "--size-status": "12px",
   "--line-editor": "1.5",
 };
-/** Pane code families, keyed by class name lowercased with non-letters removed. */
-const FAMILY_COLOURS: Readonly<Record<string, readonly [string, string]>> = {
-  hum: ["#FFFFFF", "#0000AA"],
-  pst: ["#FFFF55", "#0000AA"],
-  ai: ["#FF55FF", "#0000AA"],
-  aihum: ["#55FFFF", "#0000AA"],
-  verified: ["#55FF55", "#0000AA"],
-  failing: ["#FFFFFF", "#AA0000"],
-  header: ["#0000AA", "#AAAAAA"],
-  pending: ["#AA5500", "#FFFF55"],
-  ovr: ["#555555", "#AAAAAA"],
-  ref: ["#AAAAAA", "#0000AA"],
-  close: ["#FFFFFF", "#0000AA"],
-  cursor: ["#0000AA", "#AAAAAA"],
-  status: ["#AAAAAA", "#0000AA"],
-  statusline: ["#AAAAAA", "#0000AA"],
-};
 const COLOUR_FUNCTION = /\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix)\(/i;
 const FOCUS_OUTLINE = /^2px solid var\(--oxblood\)$/;
 
@@ -94,18 +59,6 @@ const norm = (v: string): string =>
 const byLine = (v: Violation[]): Violation[] => v.sort((a, b) => a.line - b.line);
 const at = (path: string, d: CssDeclaration, message: string): Violation =>
   violation(path, d.line, message);
-
-function cgaViolations(path: string, decls: CssDeclaration[]): Violation[] {
-  const found: Violation[] = [];
-  for (const d of decls) {
-    for (const hex of d.value.match(/#[0-9a-fA-F]{3,8}\b/g) ?? []) {
-      if (!CGA.has(hex.toUpperCase()))
-        found.push(at(path, d, `colour ${hex} is not in the palette`));
-    }
-    if (COLOUR_FUNCTION.test(d.value)) found.push(at(path, d, "colour function is not allowed"));
-  }
-  return found;
-}
 
 const BANNED_PROP =
   /^(?:box-shadow|text-shadow|backdrop-filter|transition(?:-.+)?|animation(?:-.+)?|border(?:-[a-z]+)*-radius)$/;
@@ -233,27 +186,70 @@ function checkUiSheet(sheet: Sheet): Violation[] {
   ]);
 }
 
-function familyOf(selector: string): readonly [string, string] | null {
-  const classes = [...selector.matchAll(/\.([\w-]+)/g)].map((m) =>
-    (m[1] ?? "").toLowerCase().replace(/[^a-z]/g, ""),
-  );
-  const last = classes[classes.length - 1];
-  return last === undefined ? null : (FAMILY_COLOURS[last] ?? null);
+/** The ten Pane-only colour literals of the design, lowercase as Prettier writes them. */
+const PANE_ALLOWED: ReadonlySet<string> = new Set([
+  "#0f2766",
+  "#2e4a8f",
+  "#0a1c4f",
+  "#e8ecf6",
+  "#c9d2ec",
+  "#bac4e2",
+  "#f5d98b",
+  "#a6d4f7",
+  "#d7c6f5",
+  "#9adbb0",
+]);
+const PANE_VARS: ReadonlySet<string> = new Set(["--ink", "--white", "--fail", "--fail-ring"]);
+/** Pane code classes and the colours they set; `undefined` means the class sets none of that kind. */
+const PANE_CLASSES: Readonly<Record<string, Readonly<{ color?: string; background?: string }>>> = {
+  hum: { color: "#e8ecf6" },
+  pst: { color: "#f5d98b" },
+  ai: { color: "#a6d4f7" },
+  aihum: { color: "#d7c6f5" },
+  verified: { color: "#9adbb0" },
+  pending: { color: "#bac4e2" },
+  ref: { color: "#bac4e2" },
+  ovr: { color: "#f5d98b" },
+  close: { color: "#bac4e2" },
+  cursor: { color: "#0f2766", background: "#e8ecf6" },
+  block: { background: "var(--fail)" },
+};
+
+const lastClass = (selector: string): string | null => {
+  const classes = [...selector.matchAll(/\.([\w-]+)/g)];
+  return classes[classes.length - 1]?.[1] ?? null;
+};
+
+function paneLiteralViolations(path: string, decls: CssDeclaration[]): Violation[] {
+  const found: Violation[] = [];
+  for (const d of decls) {
+    for (const hex of d.value.match(/#[0-9a-fA-F]{3,8}\b/g) ?? []) {
+      if (!PANE_ALLOWED.has(hex.toLowerCase()))
+        found.push(at(path, d, `colour ${hex} is not in the Pane colours`));
+    }
+    for (const m of d.value.matchAll(/var\(\s*(--[\w-]+)/g)) {
+      const name = m[1] ?? "";
+      if (!PANE_VARS.has(name) && !/^--(?:font|size|line)-/.test(name))
+        found.push(at(path, d, `${name} is not usable in the Pane stylesheet`));
+    }
+    if (COLOUR_FUNCTION.test(d.value)) found.push(at(path, d, "colour function is not allowed"));
+  }
+  return found;
 }
 
-function familyViolations(path: string, decls: CssDeclaration[]): Violation[] {
+function paneClassViolations(path: string, decls: CssDeclaration[]): Violation[] {
   const found: Violation[] = [];
-  const bySelector = new Map<string, CssDeclaration[]>();
-  for (const d of decls) bySelector.set(d.selector, [...(bySelector.get(d.selector) ?? []), d]);
-  for (const [selector, rules] of bySelector) {
-    const pair = familyOf(selector);
-    const fg = rules.find((d) => d.prop === "color");
-    const bg = rules.find((d) => /^background(?:-color)?$/.test(d.prop));
-    if (pair === null || fg === undefined || bg === undefined) continue;
-    if (fg.value.toUpperCase() !== pair[0])
-      found.push(at(path, fg, `${selector} text must be ${pair[0]}`));
-    if (bg.value.toUpperCase() !== pair[1])
-      found.push(at(path, bg, `${selector} background must be ${pair[1]}`));
+  for (const d of decls) {
+    const want = PANE_CLASSES[lastClass(d.selector) ?? ""];
+    if (want === undefined || d.selector.trim().split(/\s+/).length > 1) continue;
+    const expected =
+      d.prop === "color"
+        ? want.color
+        : /^background(?:-color)?$/.test(d.prop)
+          ? want.background
+          : undefined;
+    if (expected !== undefined && d.value.trim().toLowerCase() !== expected)
+      found.push(at(path, d, `${d.selector} ${d.prop} must be ${expected}`));
   }
   return found;
 }
@@ -264,12 +260,11 @@ function checkPaneSheet(sheet: Sheet): Violation[] {
     .filter((d) => /font-smooth|osx-font-smoothing|text-rendering/.test(d.prop))
     .map((d) => at(sheet.path, d, `${d.prop} is not allowed in the Pane stylesheet`));
   return byLine([
-    ...cgaViolations(sheet.path, css.declarations),
-    ...familyViolations(sheet.path, css.declarations),
+    ...paneLiteralViolations(sheet.path, css.declarations),
+    ...paneClassViolations(sheet.path, css.declarations),
     ...smoothing,
   ]);
 }
-
 const sheets = readSources(["app", "src"], /\.css$/);
 const isPane = (s: Sheet): boolean => /^src\/pane\//.test(s.path);
 
@@ -280,42 +275,8 @@ describe("static: stylesheets _Requirements: 10.9, 10.11, 10.12, 10.13, 10.14, 1
     expect(formatViolations(colourViolations(ui))).toEqual([]);
   });
 
-  it("keeps the Pane stylesheet on the CGA palette and the code-family table", () => {
+  it("keeps the Pane stylesheet on the Pane colours and the class table", () => {
     expect(formatViolations(sheets.filter(isPane).flatMap(checkPaneSheet))).toEqual([]);
-  });
-});
-
-const PANE_ONLY_COLOURS = /#(?:AAAAAA|AA0000)(?![0-9a-fA-F])/gi;
-
-/** Requirement 3.7: #AAAAAA and #AA0000 appear only under src/pane/, in any letter case. */
-function paneColourViolations(file: Sheet): Violation[] {
-  if (/^src\/pane\//.test(file.path)) return [];
-  return [...file.text.matchAll(PANE_ONLY_COLOURS)].map((m) =>
-    violation(
-      file.path,
-      file.text.slice(0, m.index).split("\n").length,
-      `${m[0]} is allowed only in src/pane/`,
-    ),
-  );
-}
-
-describe("static: Pane-only colours _Requirements: 3.7_", () => {
-  it("keeps #AAAAAA and #AA0000 out of app/** and src/** outside src/pane/", () => {
-    const files = readSources(["app", "src"], /\.(?:css|tsx?)$/);
-    expect(formatViolations(files.flatMap(paneColourViolations))).toEqual([]);
-  });
-
-  it("reports planted violations in any letter case and allows the same text in src/pane/", () => {
-    const text = ".a {\n  color: #aaaaaa;\n  background: #Aa0000;\n}\n";
-    const path = "src/components/x.module.css";
-    expect(formatViolations(paneColourViolations({ path, text }))).toEqual([
-      `${path}:2 #aaaaaa is allowed only in src/pane/`,
-      `${path}:3 #Aa0000 is allowed only in src/pane/`,
-    ]);
-    expect(paneColourViolations({ path: "app/x.ts", text: 'const c = "#AA0000";\n' })).toHaveLength(
-      1,
-    );
-    expect(paneColourViolations({ path: "src/pane/pane.module.css", text })).toEqual([]);
   });
 });
 
@@ -540,13 +501,23 @@ describe("static: stylesheet self-test (planted violations)", () => {
     ]);
   });
 
-  it("reports a non-CGA colour, a wrong family pair and font smoothing in the Pane stylesheet", () => {
+  it("reports an old CGA colour, a non-listed hex, a non-Pane variable, a wrong class colour and font smoothing in the Pane stylesheet", () => {
     const text =
-      ".pane {\n  color: #123456;\n  -webkit-font-smoothing: antialiased;\n}\n.verified {\n  color: #FF5555;\n  background: #0000AA;\n}\n";
+      ".pane {\n  color: #123456;\n  background: #0000aa;\n  border-color: var(--rule);\n  -webkit-font-smoothing: antialiased;\n}\n.verified {\n  color: #55ff55;\n}\n.block {\n  background: var(--ink);\n}\n";
     expect(formatViolations(checkPaneSheet({ path: "src/pane/pane.module.css", text }))).toEqual([
-      "src/pane/pane.module.css:2 colour #123456 is not in the palette",
-      "src/pane/pane.module.css:3 -webkit-font-smoothing is not allowed in the Pane stylesheet",
-      "src/pane/pane.module.css:6 .verified text must be #55FF55",
+      "src/pane/pane.module.css:2 colour #123456 is not in the Pane colours",
+      "src/pane/pane.module.css:3 colour #0000aa is not in the Pane colours",
+      "src/pane/pane.module.css:4 --rule is not usable in the Pane stylesheet",
+      "src/pane/pane.module.css:5 -webkit-font-smoothing is not allowed in the Pane stylesheet",
+      "src/pane/pane.module.css:8 colour #55ff55 is not in the Pane colours",
+      "src/pane/pane.module.css:8 .verified color must be #9adbb0",
+      "src/pane/pane.module.css:11 .block background must be var(--fail)",
     ]);
+  });
+
+  it("accepts the listed Pane colours and variables", () => {
+    const text =
+      ".cursor {\n  color: #0f2766;\n  background: #E8ECF6;\n}\n.block {\n  background: var(--fail);\n  outline: 2px solid var(--fail-ring);\n}\n";
+    expect(checkPaneSheet({ path: "src/pane/pane.module.css", text })).toEqual([]);
   });
 });

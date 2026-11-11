@@ -91,7 +91,9 @@ describe("Pane_Header and Legend _Requirements: 2.1, 2.3, 2.4, 2.5, 2.6, 2.8, 2.
     const header = headerOf(container);
     const [name, legend] = Array.from(header.children);
     expect(name?.textContent).toBe("Reveal Codes");
-    expect(legend?.textContent).toBe(WORDS.map(([c, w]) => `${c} ${w}`).join(" · "));
+    expect(name?.className).toMatch(/title/);
+    expect(legend?.children).toHaveLength(7);
+    expect(legend?.textContent).not.toContain("·");
     const items = Array.from(legend?.children ?? []);
     expect(items.map((e) => e.textContent)).toEqual(WORDS.map(([c, w]) => `${c} ${w}`));
     const codes = items.map((e) => e.firstElementChild?.textContent);
@@ -111,6 +113,18 @@ describe("Pane_Header and Legend _Requirements: 2.1, 2.3, 2.4, 2.5, 2.6, 2.8, 2.
       true,
       true,
     ]);
+  });
+
+  it("wraps the code of the two failing entries in the ring class and no other", () => {
+    const { container } = renderUi(<Pane {...props(CITED)} />);
+    const legend = headerOf(container).children[1];
+    const rings = Array.from(legend?.children ?? []).map(
+      (e) => e.firstElementChild?.firstElementChild,
+    );
+    expect(
+      rings.map((e) => e !== null && e !== undefined && /legendBlock/.test(e.className)),
+    ).toEqual([false, false, false, false, false, true, true]);
+    expect(rings.slice(5).map((e) => e?.textContent)).toEqual(["[CIT ✘]", "[QUO ✘]"]);
   });
 
   it("carries no aria-hidden, role or aria-label", () => {
