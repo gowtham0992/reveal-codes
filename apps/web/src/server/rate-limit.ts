@@ -14,6 +14,9 @@ export const VERIFY_LIMIT = 6;
 /** /api/opinion/[clusterId]: 30 requests per address per minute. */
 export const OPINION_LIMIT = 30;
 export const ROUTE_WINDOW_MS = 60 * 1000;
+/** /api/assistant with a live provider, in addition to the per-address limit: 200 an hour in total. */
+export const ASSISTANT_HOURLY_LIMIT = 200;
+export const ASSISTANT_HOURLY_WINDOW_MS = 60 * 60 * 1000;
 /** Address used when the request carries no x-forwarded-for entry. */
 export const LOCAL_ADDRESS = "local";
 const SWEEP_AT = 1000;
@@ -89,12 +92,49 @@ export function clientAddress(headers: Headers): string {
   return first === "" ? LOCAL_ADDRESS : first;
 }
 const wallClock = (): number => Date.now();
-/** The limiter /api/assistant uses: 10 requests per address per 10 minutes. */
-export const assistantLimiter: Limiter = createFixedWindowLimiter({
-  limit: ASSISTANT_LIMIT,
-  windowMs: ASSISTANT_WINDOW_MS,
-  now: wallClock,
-});
+const ALL_ADDRESSES = "all";
+/** One window shared by every address: the same fixed window, counted under a single key. */
+export function createTotalLimiter(options: LimiterOptions): Limiter {
+  const inner = createFixedWindowLimiter(options);
+  const total = (d: Decision): Decision => (d.allowed ? d : { ...d, scope: "all" });
+  return {
+    check: () => total(inner.check(ALL_ADDRESSES)),
+    peek: () => total(inner.peek(ALL_ADDRESSES)),
+  };
+}
+/**
+ * Both limits must have room. Neither is spent unless both have, so a request refused by
+ * one bound never uses up the other. The per-address bound is reported first.
+ */
+export function allOf(perAddress: Limiter, total: Limiter): Limiter {
+  const peek = (address: string): Decision => {
+    const own = perAddress.peek(address);
+    return own.allowed ? total.peek(address) : own;
+  };
+  return {
+    peek,
+    check(address) {
+      const room = peek(address);
+      if (!room.allowed) return room;
+      const own = perAddress.check(address);
+      total.check(address);
+      return own;
+    },
+  };
+}
+/** The limiter /api/assistant uses: 10 per address per 10 minutes and 200 an hour across all. */
+export const assistantLimiter: Limiter = allOf(
+  createFixedWindowLimiter({
+    limit: ASSISTANT_LIMIT,
+    windowMs: ASSISTANT_WINDOW_MS,
+    now: wallClock,
+  }),
+  createTotalLimiter({
+    limit: ASSISTANT_HOURLY_LIMIT,
+    windowMs: ASSISTANT_HOURLY_WINDOW_MS,
+    now: wallClock,
+  }),
+);
 export const verifyLimiter: Limiter = createFixedWindowLimiter({
   limit: VERIFY_LIMIT,
   windowMs: ROUTE_WINDOW_MS,

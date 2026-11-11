@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { buildInsertion, insertionLine, paragraphAt } from "../assistant-run";
-import type { AssistantInfo } from "../client/api";
-import { ASSISTANT_BUSY } from "../notices";
+import type { ApiError, AssistantInfo } from "../client/api";
+import { ASSISTANT_BUSY, ASSISTANT_HOURLY } from "../notices";
 import type { AppServices } from "../services";
 import type { Store } from "../store-runtime";
 
@@ -56,6 +56,11 @@ function insertReply({ a, reply, stopped }: InsertArgs): DraftOutcome {
   return { message: null, inserted, insertedText: op.text.replace(/^\n|\n$/g, "") };
 }
 
+/** Only the two fixed sentences of the route are ever shown; anything else on a 429 is the busy line. */
+function failureMessage(error: ApiError): string {
+  if (error.kind !== "status" || error.status !== 429) return DRAFT_FAILED;
+  return error.message === ASSISTANT_HOURLY ? ASSISTANT_HOURLY : ASSISTANT_BUSY;
+}
 /**
  * One draft: stream into `onText` (never the Document), then on a clean end insert the whole
  * reply as one `AI` edit. Stop inserts the partial reply, if any. An epoch change (New or Load
@@ -80,8 +85,7 @@ export async function runDraft(a: RunArgs): Promise<DraftOutcome> {
     return reply.trim() === "" ? NOTHING : insertReply({ a, reply, stopped: true });
   }
   if (!done.ok) {
-    const busy = done.error.kind === "status" && done.error.status === 429;
-    return { ...NOTHING, message: busy ? ASSISTANT_BUSY : DRAFT_FAILED };
+    return { ...NOTHING, message: failureMessage(done.error) };
   }
   if (reply.trim() === "") return { ...NOTHING, message: DRAFT_EMPTY };
   return insertReply({ a, reply, stopped: false });

@@ -6,7 +6,7 @@ import type { Editor } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 import { AppShell } from "../src/components/app-shell";
 import { DRAFT_EMPTY, DRAFT_FAILED } from "../src/components/use-assistant";
-import { ASSISTANT_BUSY } from "../src/notices";
+import { ASSISTANT_BUSY, ASSISTANT_HOURLY } from "../src/notices";
 import { offsetToPos } from "../src/editor/offsets";
 import { AUTOSAVE_KEY, serialise } from "../src/persist";
 import type { AppServices } from "../src/services";
@@ -285,6 +285,33 @@ describe("AssistantPanel _Requirements: 7.8, 10.8, 10.15, 23.1 to 23.9_", () => 
     });
     expect(screen.queryByText(DRAFT_FAILED)).toBeNull();
     expect(editorOf().getText()).toBe("Alpha");
+  });
+  it("shows the hourly sentence when the route says the hourly limit is reached", async () => {
+    const f = await mount("Alpha");
+    openPanel();
+    f.server.override.current = () =>
+      new Response(JSON.stringify({ error: ASSISTANT_HOURLY }), {
+        status: 429,
+        headers: { "Retry-After": "1800" },
+      });
+    startDraft("one");
+    await waitFor(() => {
+      expect(screen.getAllByText(ASSISTANT_HOURLY).length).toBeGreaterThan(0);
+    });
+    expect(screen.queryByText(ASSISTANT_BUSY)).toBeNull();
+    expect(screen.queryByText(DRAFT_FAILED)).toBeNull();
+    expect(editorOf().getText()).toBe("Alpha");
+  });
+  it("shows only the busy sentence for a 429 with any other text", async () => {
+    const f = await mount("Alpha");
+    openPanel();
+    f.server.override.current = () =>
+      new Response(JSON.stringify({ error: "something else" }), { status: 429 });
+    startDraft("one");
+    await waitFor(() => {
+      expect(screen.getAllByText(ASSISTANT_BUSY).length).toBeGreaterThan(0);
+    });
+    expect(screen.queryByText("something else")).toBeNull();
   });
   it("inserts nothing and sets a Notice on a failed or empty reply", async () => {
     const f = await mount("Alpha");

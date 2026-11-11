@@ -30,6 +30,22 @@ async function readChunks(
   return { ok: true, value: undefined };
 }
 
+/** The route's fixed `{ error }` sentence of a 429, so the panel can tell a busy address from the hourly limit. */
+async function refusal(response: Response): Promise<Result<void, ApiError>> {
+  const status = response.status;
+  if (status !== 429) return { ok: false, error: { kind: "status", status } };
+  const body = await attempt(() => response.json() as Promise<unknown>);
+  const message = body instanceof Error ? undefined : errorOf(body);
+  return {
+    ok: false,
+    error: { kind: "status", status, ...(message === undefined ? {} : { message }) },
+  };
+}
+function errorOf(body: unknown): string | undefined {
+  if (typeof body !== "object" || body === null) return undefined;
+  const error = (body as Record<string, unknown>)["error"];
+  return typeof error === "string" ? error : undefined;
+}
 /**
  * `POST /api/assistant`, reading the reply as it arrives and passing each decoded
  * piece to `onChunk`. A multi-byte character split across reads is held until whole.
@@ -50,7 +66,7 @@ export async function streamDraft(
   };
   const response = await attempt(() => fetchFn("/api/assistant", init));
   if (response instanceof Error) return NETWORK;
-  if (!response.ok) return { ok: false, error: { kind: "status", status: response.status } };
+  if (!response.ok) return refusal(response);
   if (response.body === null) return { ok: false, error: { kind: "shape" } };
   return readChunks(response.body, onChunk);
 }

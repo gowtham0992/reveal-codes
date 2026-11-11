@@ -3,7 +3,7 @@ import { streamDraft } from "./assistant-client";
 
 export type ApiError =
   | Readonly<{ kind: "network" }>
-  | Readonly<{ kind: "status"; status: number }>
+  | Readonly<{ kind: "status"; status: number; message?: string }>
   | Readonly<{ kind: "shape" }>;
 export type FullRecord = Extract<CitationRecord, { kind: "full" }>;
 export type VerifyPairs = readonly (readonly [IssueKey, VerificationResult])[];

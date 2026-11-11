@@ -1,6 +1,6 @@
 import type { AssistantConfig } from "./deps";
 import { readBodyCapped } from "./body";
-import { ASSISTANT_BUSY } from "../notices";
+import { ASSISTANT_BUSY, ASSISTANT_HOURLY } from "../notices";
 import { NO_STORE, jsonResponse, tooManyRequests } from "./http";
 import { draft, selectProvider } from "./llm";
 import type { DraftOptions } from "./llm";
@@ -125,7 +125,7 @@ function linkAbort(request: Request, abort: AbortController): void {
   }
 }
 
-/** 429 with Retry-After when a live provider is configured and the address is over its limit. */
+/** 429 with Retry-After when a live provider is configured and a limit is reached. */
 function overLimit(
   request: Request,
   assistant: AssistantConfig,
@@ -134,7 +134,8 @@ function overLimit(
   if (limiter === undefined || selectProvider(assistant).name === "fixture") return null;
   const decision = limiter.check(clientAddress(request.headers));
   if (decision.allowed) return null;
-  return tooManyRequests(ASSISTANT_BUSY, decision.retryAfterSeconds);
+  const message = decision.scope === "all" ? ASSISTANT_HOURLY : ASSISTANT_BUSY;
+  return tooManyRequests(message, decision.retryAfterSeconds);
 }
 /**
  * Validates, pulls the first chunk (so a failure before it is a 502), then streams

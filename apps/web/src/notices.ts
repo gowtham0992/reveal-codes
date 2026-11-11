@@ -29,3 +29,6 @@ export const ASSISTANT_BUSY = "The assistant is busy. Try again in a few minutes
 
 /** Sent by /api/verify and /api/opinion with status 429 when an address is over its limit, and shown where a run fails. */
 export const CHECKS_BUSY = "Too many checks from this address. Try again in a moment.";
+
+/** Sent by /api/assistant with status 429 when the hourly limit across all addresses is reached. */
+export const ASSISTANT_HOURLY = "The assistant has reached its hourly limit. Try again later.";
