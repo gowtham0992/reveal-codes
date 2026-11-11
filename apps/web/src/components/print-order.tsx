@@ -30,7 +30,7 @@ export function PrintHeader(props: PrintHeaderProps) {
           Print
         </button>
       ) : null}
-      <OrderSummary entry={props.order} />
+      <OrderSummary entry={props.order} quote={quoted} />
       {props.needsTick ? (
         <ConfidentialityCheckbox checked={props.ticked} onChange={props.onTick} />
       ) : null}

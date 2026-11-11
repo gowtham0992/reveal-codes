@@ -24,6 +24,8 @@ function docOf(text: string): Document {
   return created.value;
 }
 
+const dialogText = (): string => screen.getByRole("dialog", { name: "Export" }).textContent;
+
 function props(document: Document, extra: Partial<ExportDialogProps> = {}): ExportDialogProps {
   const store = createStore(() => new Date(ISO));
   return {
@@ -76,15 +78,28 @@ describe("ExportDialog states _Requirements: 2.1, 2.2, 2.3, 2.6, 2.7, 2.9_", () 
     const el = screen.getByText(line);
     expect(el.tagName).toBe("P");
     expect(el.nextElementSibling?.contains(button("Download .docx"))).toBe(true);
+    const chip = el.firstElementChild;
+    expect(chip?.textContent).toBe("\u2718");
+    expect(chip?.getAttribute("aria-hidden")).toBe("true");
+    expect(el.textContent).toBe(`\u2718${line}`);
   });
   it("shows no blocking line and plain labels when nothing blocks", () => {
     renderUi(<ExportDialog {...props(docOf(NONE))} />);
     expect(screen.queryByText(/blocking item/)).toBeNull();
+    expect(dialogText()).not.toContain("\u2718");
     expect(button("Download .docx")).toBeTruthy();
   });
-  it("uses the wide dialog class only for Export", () => {
+  it("shows Nothing to export as plain text with no chip", () => {
+    renderUi(<ExportDialog {...props(docOf(""))} />);
+    const el = screen.getByText("There is nothing to export yet.");
+    expect(el.tagName).toBe("P");
+    expect(el.children).toHaveLength(0);
+    expect(dialogText()).not.toContain("\u2718");
+  });
+  it("gives the Export dialog the single shared dialog class", () => {
     renderUi(<ExportDialog {...props(docOf(NONE))} />);
-    expect(screen.getByRole("dialog", { name: "Export" }).className).toContain("dialogWide");
+    const cls = screen.getByRole("dialog", { name: "Export" }).className;
+    expect(cls).not.toContain("Wide");
   });
 
   it("does not call the handlers of disabled buttons", () => {

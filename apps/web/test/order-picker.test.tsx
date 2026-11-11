@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { OrderPicker, OrderSummary } from "../src/components/order-picker";
 import { useOrderGate } from "../src/components/use-order-gate";
-import { NO_ORDER_LABEL, optionText, quoted, summaryLine } from "../src/order-copy";
+import { NO_ORDER_LABEL, curlyQuoted, optionText, quoted, summaryLine } from "../src/order-copy";
 import { ORDER_KEY, createOrderSelectionStore } from "../src/order-selection";
 import type { OrderSelection } from "../src/order-selection";
 import { createMemoryStorage } from "./support/memory-storage";
@@ -132,7 +132,8 @@ describe("OrderSummary _Requirements: 3.8, 3.11_", () => {
     expect(summaryLine(entry)).toBe(
       "AI drafting prohibited \u00B7 attorneys and self-represented parties \u00B7 2025-08-27",
     );
-    expect(screen.getByText(quoted(entry.key_language))).toBeTruthy();
+    expect(screen.getByText(curlyQuoted(entry.key_language))).toBeTruthy();
+    expect(screen.queryByText(quoted(entry.key_language))).toBeNull();
     const link = screen.getByRole("link", { name: "Source" });
     expect(link.getAttribute("href")).toBe(entry.source_url);
     expect(link.getAttribute("target")).toBe("_blank");

@@ -106,7 +106,7 @@ Conventions that apply to every task:
     - _Requirements: 7.19_
 
 - [ ] 4. Dialogs, assistant and Small_Screen_Page
-  - [~] 4.1 Dialog shell and Export dialog
+  - [x] 4.1 Dialog shell and Export dialog
     - Rewrite `apps/web/src/components/modal.module.css` as in the design (`--overlay`, `width: min(600px, 100vw - 32px)`, padding `24px 28px`, `gap: 16px`, `--control-h: 32px`, title in Libre Caslon 26px/32px with `border-bottom: 3px double var(--ink)`). Remove the `wide` prop from `Modal` and the `dialogWide` class, and remove `wide` at its one call in `export-dialog.tsx`.
     - In `order-copy.ts` add `curlyQuoted`. In `order-picker.tsx` `OrderSummary` call `curlyQuoted(entry.key_language)`; `quoted()` stays for `print-order.tsx`. Update `order-picker.module.css` (`.label` becomes a Small_Label in `var(--muted)`; `.keyLanguage` Libre Caslon 15px/24px with `margin-left: 24px`; the summary line and the `Source` link use the global link colour; remove the `--accent` rules).
     - In `export-dialog.tsx` render the blocking line as `<p className={styles["blockingLine"]}><span aria-hidden="true" className={styles["chip"]}>✘</span>{line}</p>` when `!nothing && blocking > 0`, and the plain `p` otherwise. Update `export-dialog.module.css` (`.blockingLine` `var(--fail)` 14px weight 600 flex with 8px gap; `.chip` white on `var(--fail)`; row dividers `var(--rule-light)`; remove `--accent` and `--ui-bg`) and `confidentiality-checkbox.module.css` and `export-issues` styling to tokens only, with `--control-h: 24px` on its list so its row buttons are 24px. The "Nothing to export" line stays plain text with no chip and no ✘. `ModalActions` keeps right alignment and the 8px gap.

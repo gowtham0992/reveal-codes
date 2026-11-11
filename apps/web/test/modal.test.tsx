@@ -46,6 +46,19 @@ function tab(shiftKey = false): void {
   });
 }
 
+describe("Modal dialog class _Requirements: 8.2_", () => {
+  it("has one dialog class and no wide variant", () => {
+    renderUi(
+      <Modal title="Sample" onClose={() => undefined}>
+        <button type="button">First</button>
+      </Modal>,
+    );
+    const dialog = screen.getByRole("dialog", { name: "Sample" });
+    expect(dialog.className.trim().split(/\s+/)).toHaveLength(1);
+    expect(dialog.className).not.toContain("Wide");
+  });
+});
+
 describe("Modal _Requirements: 18.5, 18.9_", () => {
   it("is a labelled modal dialog and moves focus to its first control", () => {
     renderUi(<Harness />);

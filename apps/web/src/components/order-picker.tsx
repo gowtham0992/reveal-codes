@@ -3,7 +3,7 @@
 import { ORDERS, selectableOrders } from "@reveal-codes/export";
 import type { OrderEntry } from "@reveal-codes/export";
 import { useId } from "react";
-import { NO_ORDER_LABEL, optionText, quoted, summaryLine } from "../order-copy";
+import { NO_ORDER_LABEL, curlyQuoted, optionText, summaryLine } from "../order-copy";
 import type { OrderSelection } from "../order-selection";
 import styles from "./order-picker.module.css";
 
@@ -19,7 +19,7 @@ export function OrderPicker({ selection, onSelect }: OrderPickerProps) {
   const id = useId();
   return (
     <div className={styles["field"]}>
-      <label htmlFor={id} className={styles["label"]}>
+      <label htmlFor={id} className={`small-label ${styles["label"] ?? ""}`}>
         Court or judge
       </label>
       <select
@@ -46,15 +46,19 @@ export function OrderPicker({ selection, onSelect }: OrderPickerProps) {
   );
 }
 
-export type OrderSummaryProps = Readonly<{ entry: OrderEntry | null }>;
+export type OrderSummaryProps = Readonly<{
+  entry: OrderEntry | null;
+  /** Wraps the key language; real quotation marks by default, the print view passes `quoted`. */
+  quote?: ((text: string) => string) | undefined;
+}>;
 
 /** The Order_Summary: nothing without an entry. */
-export function OrderSummary({ entry }: OrderSummaryProps) {
+export function OrderSummary({ entry, quote = curlyQuoted }: OrderSummaryProps) {
   if (entry === null) return null;
   return (
     <div className={styles["summary"]}>
       <p className={styles["summaryLine"]}>{summaryLine(entry)}</p>
-      <p className={styles["keyLanguage"]}>{quoted(entry.key_language)}</p>
+      <p className={styles["keyLanguage"]}>{quote(entry.key_language)}</p>
       <a href={entry.source_url} target="_blank" rel="noreferrer">
         Source
       </a>

@@ -7,6 +7,7 @@ import {
   appliesWords,
   kindWords,
   OPTION_TEXT_MAX,
+  curlyQuoted,
   optionText,
   quoted,
   summaryLine,
@@ -111,6 +112,12 @@ describe("summaryLine and quoted _Requirements: 3.5, 3.10_", () => {
     expect(quoted("a b")).toBe('"a b"');
     expect(quoted("")).toBe('""');
     expect(quoted('say "x"')).toBe('"say "x""');
+  });
+
+  it("curlyQuoted wraps in U+201C and U+201D and changes nothing inside _Requirements: 8.5, 8.6_", () => {
+    expect(curlyQuoted("a b")).toBe("\u201Ca b\u201D");
+    expect(curlyQuoted("")).toBe("\u201C\u201D");
+    expect(curlyQuoted('say "x"')).toBe('\u201Csay "x"\u201D');
   });
 });
 

@@ -15,8 +15,6 @@ export type ModalProps = Readonly<{
   restoreFocus?: HTMLElement | null | undefined;
   /** Id of the element inside the dialog that describes it; sets `aria-describedby`. */
   describedBy?: string | undefined;
-  /** Uses the wide dialog width (Export dialog only). */
-  wide?: boolean | undefined;
   children: ReactNode;
 }>;
 
@@ -70,18 +68,13 @@ function useFocusLifecycle(
   }, [dialog]);
 }
 
-function dialogClass(wide: boolean | undefined): string {
-  const base = styles["dialog"] ?? "";
-  return wide === true ? [base, styles["dialogWide"] ?? ""].join(" ") : base;
-}
-
 /** Right-aligned button row at the foot of a dialog. */
 export function ModalActions({ children }: Readonly<{ children: ReactNode }>) {
   return <div className={styles["actions"]}>{children}</div>;
 }
 
 /** Hand-built modal dialog: focus trap, Escape closes, focus returns to the opener (Req 18.9). */
-export function Modal({ title, onClose, restoreFocus, describedBy, wide, children }: ModalProps) {
+export function Modal({ title, onClose, restoreFocus, describedBy, children }: ModalProps) {
   const titleId = useId();
   const dialog = useRef<HTMLDivElement | null>(null);
   useFocusLifecycle(dialog, restoreFocus);
@@ -103,7 +96,7 @@ export function Modal({ title, onClose, restoreFocus, describedBy, wide, childre
         aria-labelledby={titleId}
         aria-describedby={describedBy}
         tabIndex={-1}
-        className={dialogClass(wide)}
+        className={styles["dialog"]}
         onKeyDown={onKeyDown}
       >
         <h2 id={titleId} className={styles["title"]}>

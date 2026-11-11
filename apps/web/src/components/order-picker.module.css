@@ -6,6 +6,7 @@
 .label {
   display: block;
   margin: 0 0 4px;
+  color: var(--muted);
 }
 
 .select {
@@ -14,8 +15,6 @@
 
 .summary {
   margin: 0 0 8px;
-  font-family: var(--font-ui);
-  font-size: 13px;
 }
 
 .summaryLine {
@@ -23,6 +22,9 @@
 }
 
 .keyLanguage {
-  margin: 0 0 4px;
+  margin: 0 0 4px 24px;
+  font-family: var(--font-editor);
+  font-size: 15px;
+  line-height: 24px;
   overflow-wrap: anywhere;
 }

@@ -393,10 +393,10 @@ describe("static: Shell width _Requirements: 10.1, 10.2, 10.3, 10.12, 10.13_", (
   });
 });
 
-const EXPORT_WIDTH = "width: min(560px, 100vw - 32px)";
-describe("static: Export dialog width _Requirements: 9.1, 9.2, 9.8_", () => {
-  it("defines the wide dialog width in modal.module.css and in no other sheet", () => {
-    const holders = sheets.filter((s) => s.text.includes(EXPORT_WIDTH)).map((s) => s.path);
+const DIALOG_WIDTH = "width: min(600px, 100vw - 32px)";
+describe("static: Dialog width _Requirements: 8.2, 13.10_", () => {
+  it("defines the Dialog width in modal.module.css and in no other sheet", () => {
+    const holders = sheets.filter((s) => s.text.includes(DIALOG_WIDTH)).map((s) => s.path);
     expect(holders).toEqual(["src/components/modal.module.css"]);
   });
 });

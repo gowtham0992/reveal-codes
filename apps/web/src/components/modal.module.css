@@ -4,37 +4,40 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--overlay);
 }
 
 .dialog {
-  width: 420px;
-  max-width: 90vw;
-  padding: 0;
+  --control-h: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: min(600px, 100vw - 32px);
+  max-width: none;
+  padding: 24px 28px;
   background: var(--paper);
   color: var(--ink);
   border: 1px solid var(--ink);
 }
 
-.dialogWide {
-  width: min(560px, 100vw - 32px);
-  max-width: none;
-}
-
 .title {
   margin: 0;
-  padding: 12px;
-  border-bottom: 1px solid var(--rule);
-  font-size: var(--size-ui);
-  font-weight: 700;
+  padding-bottom: 12px;
+  border-bottom: 3px double var(--ink);
+  font-family: var(--font-editor);
+  font-size: 26px;
+  line-height: 32px;
+  font-weight: 400;
 }
 
 .body {
-  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .actions {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
-  margin-top: 12px;
 }

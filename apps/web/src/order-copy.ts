@@ -39,6 +39,11 @@ export function summaryLine(entry: OrderEntry): string {
   return `${kindWords[entry.kind]} \u00B7 ${appliesWords[entry.applies_to]} \u00B7 ${entry.date}`;
 }
 
+/** Real quotation marks (U+201C, U+201D); the Export dialog only. */
+export function curlyQuoted(text: string): string {
+  return `\u201C${text}\u201D`;
+}
+
 export function quoted(text: string): string {
   return `"${text}"`;
 }

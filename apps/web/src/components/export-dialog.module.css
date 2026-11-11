@@ -8,6 +8,7 @@
 }
 
 .list {
+  --control-h: 24px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -15,7 +16,7 @@
 
 .row {
   padding: 6px 0;
-  border-top: 1px solid var(--rule);
+  border-top: 1px solid var(--rule-light);
 }
 
 .code {
@@ -35,8 +36,8 @@
 
 .status {
   min-height: 1.5em;
-  margin: 8px 0 0;
-  border-top: 1px solid var(--rule);
+  margin: 0;
+  border-top: 1px solid var(--rule-light);
   padding-top: 6px;
 }
 
@@ -46,10 +47,28 @@
 
 .prohibition {
   margin: 8px 0 0;
-  border-top: 1px solid var(--rule);
+  border-top: 1px solid var(--rule-light);
   padding-top: 6px;
   font-weight: 700;
 }
+
+.plainLine {
+  margin: 0;
+}
+
 .blockingLine {
-  margin: 8px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--fail);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.chip {
+  padding: 0 6px;
+  background: var(--fail);
+  color: var(--white);
+  line-height: 20px;
 }

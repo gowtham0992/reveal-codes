@@ -149,12 +149,25 @@ type ActionsProps = Readonly<{
   onClose: () => void;
 }>;
 
+/** The blocking line: a fail chip (hidden from assistive technology) before the words. */
+function BlockingLine({ line, chip }: Readonly<{ line: string; chip: boolean }>) {
+  if (!chip) return <p className={styles["plainLine"]}>{line}</p>;
+  return (
+    <p className={styles["blockingLine"]}>
+      <span aria-hidden="true" className={styles["chip"]}>
+        ✘
+      </span>
+      {line}
+    </p>
+  );
+}
+
 function ExportActions(props: ActionsProps) {
   const { gate, nothing, blocking, busy, onDownload, onPrint, onClose } = props;
   const line = nothing ? NOTHING_TO_EXPORT : blockingLine(blocking);
   return (
     <>
-      {line === null ? null : <p className={styles["blockingLine"]}>{line}</p>}
+      {line === null ? null : <BlockingLine line={line} chip={!nothing && blocking > 0} />}
       <ModalActions>
         <button
           type="button"
@@ -186,7 +199,7 @@ export function ExportDialog(props: ExportDialogProps) {
   const blocking = blockingIssues(document);
   return (
     <>
-      <Modal title="Export" wide onClose={onClose} restoreFocus={restoreFocus}>
+      <Modal title="Export" onClose={onClose} restoreFocus={restoreFocus}>
         <div ref={root} className={styles["body"]}>
           <ExportOrder gate={gate} />
           <ExportBody {...props} blocking={blocking} onOverride={setTarget} />

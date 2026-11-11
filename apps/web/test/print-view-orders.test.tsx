@@ -6,7 +6,12 @@ import { ORDERS, buildStatement, firstPageHeading, renderStatement } from "@reve
 import { describe, expect, it } from "vitest";
 import { ExportDialog } from "../src/components/export-dialog";
 import { PrintView, StatementBlocks } from "../src/components/print-view";
-import { CONFIDENTIALITY_LABEL, CONFIDENTIALITY_REQUIRED, summaryLine } from "../src/order-copy";
+import {
+  CONFIDENTIALITY_LABEL,
+  CONFIDENTIALITY_REQUIRED,
+  quoted,
+  summaryLine,
+} from "../src/order-copy";
 import { ORDER_KEY, createOrderSelectionStore } from "../src/order-selection";
 import { AUTOSAVE_KEY, serialise } from "../src/persist";
 import { createStore } from "../src/store-runtime";
@@ -55,7 +60,8 @@ describe("Print_View Order_Summary _Requirements: 3.12_", () => {
     const controls = printButton().parentElement;
     expect(controls).not.toBeNull();
     expect(controls?.textContent).toContain(summaryLine(entry));
-    expect(controls?.textContent).toContain(entry.key_language);
+    expect(controls?.textContent).toContain(quoted(entry.key_language));
+    expect(controls?.textContent).not.toMatch(/[\u201C\u201D]/u);
     const link = controls?.querySelector("a");
     expect(link?.getAttribute("href")).toBe(entry.source_url);
     expect(link?.getAttribute("target")).toBe("_blank");

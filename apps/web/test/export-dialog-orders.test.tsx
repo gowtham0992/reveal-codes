@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createAutosave } from "../src/autosave";
 import { Toolbar } from "../src/components/toolbar";
 import { useExport } from "../src/components/use-export";
-import { CONFIDENTIALITY_LABEL, quoted } from "../src/order-copy";
+import { CONFIDENTIALITY_LABEL, curlyQuoted, quoted } from "../src/order-copy";
 import { ORDER_KEY } from "../src/order-selection";
 import type { AppServices } from "../src/services";
 import type { Store } from "../src/store-runtime";
@@ -139,7 +139,8 @@ describe("prohibition block _Requirements: 5.5, 5.6, 5.7, 5.8, 9.7, 9.12_", () =
     expect(text).toContain(
       'Judge Newman\'s order prohibits AI-drafted text. 1 AI-origin passage remains: paragraph 2, beginning "The movant relies on the record.\u2026".',
     );
-    expect(text).toContain(quoted(entry.key_language));
+    expect(text).toContain(curlyQuoted(entry.key_language));
+    expect(text).not.toContain(quoted(entry.key_language));
     expect(text.split(entry.key_language)).toHaveLength(2);
     expect(button("Download .docx").disabled).toBe(true);
     expect(button("Open print view").disabled).toBe(true);
