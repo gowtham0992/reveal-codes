@@ -28,15 +28,14 @@ These are choices the requirements leave open. Each is binding on the tasks that
 - **D4. `useVerify` moves up to `Shell`.** The Toolbar and the Issues region (Unchecked_Row, Verify_Summary) share one running flag, one start handler and one further-line note.
 - **D5. The Toolbar receives `step: NextStep`; it does not compute it.** `ShellToolbar` calls `nextStep`. Property 1 renders the real Toolbar from the output of the real `nextStep`.
 - **D6. The Failing_Code flag is computed in `pane/layout.ts`**, not in the component, so Requirement 3.4 (read only `positions`) is testable without React.
-- **D7. The Reply_Box keeps its text only for a run that inserted.** For a stopped, failed, empty or discarded run the box is emptied and the message shows as it does today. This is how I read "finished text" in Requirement 7.5. If you want the partial text of a stopped run to stay, it is a one-line change in `useAssistantRun`.
-- **D8. "Inserted at Ln" is true only if the Store accepted the edit.** `runDraft` reads the result of `dispatch` and reports an insertion only when `error` is null. The requirement says the line shows "when the text has been inserted"; a rejected edit sets its own Notice and shows no line.
+- **D7. The Reply_Box shows what is in the Document.** The box text is the text of the run that was inserted, whole or partial (Requirements 7.5, 7.10 to 7.14). A completed run that inserted keeps its text; a stopped run that inserted partial text keeps that partial text; a run that inserted nothing (failed, empty, discarded, or stopped before any text) leaves the box empty. This replaces the earlier decision that the box kept text only for a run that inserted. The first run of the page session that inserts nothing leaves `started` false, so no box is rendered; a later run that inserts nothing leaves the box rendered and empty, and never shows an earlier run's text.
+- **D8. "Inserted at Ln" and "Stopped. Partial reply inserted at Ln" are true only if the Store accepted the edit.** `runDraft` reads the result of `dispatch` and reports an insertion only when `error` is null. A rejected edit sets its own Notice and shows no line.
 - **D9. `verifiedAt` that does not parse as a date leaves out the "Checked" line** and changes nothing else. `deserialise` accepts any string there, so this input exists.
 - **D10. Property 1 lives in `apps/web/test/next-step.properties.test.ts`**, not under `src/components/`. Requirement 12.13 allows "the matching `test/` path", and every other property file of the app is under `test/`.
 
 ### Observations for the owner (no spec change made)
 
-- **O1.** Requirement 7.6 says `<l>` is the line of the insertion Offset. When the caret is inside a paragraph, `asParagraph` puts the reply on its own paragraph, so the text starts on line `<l> + 1`. The design follows the requirement as written. If the line should name the first line of the reply, the fix is to add 1 when the caret is not at a paragraph start.
-- **O2.** Requirement 4.2(c) uses the Verifiable_Unchecked_Count of full citations only. A document whose citations are all verified but whose quote is `QUO …` (opinion unavailable on the last run) gets `export` as its next step, although pressing Verify would retry the quote. This follows the glossary. It is not a defect of the design.
+- **O1.** Resolved by the Insertion_Line definition (Requirements 7.6, 7.11). `<l>` names the line where the reply text begins, not the line of the caret (see "Assistant panel").
 - **O3.** The old failing style, `#FF5555` on `#0000AA`, measures 4.23:1, below the 4.5:1 of WCAG AA for normal text. The new style fixes that (see "Measured contrast").
 
 ## Architecture
@@ -273,7 +272,7 @@ export type NextStep = "load-demo" | "verify" | "export" | "none";
 export type NextStepInput = Readonly<{
   empty: boolean;            // Document text has zero characters
   verifying: boolean;        // Verify_In_Flight
-  verifiableUnchecked: number; // full citations whose code is CIT …
+  verifiableUnchecked: number; // unchecked citations plus unchecked quotations Verify can act on
   blocking: number;          // length of blockingIssues(document)
 }>;
 
@@ -289,7 +288,12 @@ export const PRIMARY_LABEL = { "load-demo": "Load demo motion", verify: "Verify"
 
 `blocking` is an input because Requirement 4.1 lists it, and the function ignores it by rule (d). Property 1 holds that it is ignored.
 
-`countVerifiableUnchecked(document)` in `client/verify-flow.ts` counts `document.citations` entries with `kind === "full"` and `result.status === "unchecked"`. Verify is enabled exactly when `hasFullRecord(document)`, so `verifiableUnchecked > 0` implies Verify is enabled and not running; the primary Verify button is never disabled in the shell (see Requirement 4.9 below).
+`countVerifiableUnchecked(document)` in `client/verify-flow.ts` is the sum of two counts (Requirements 4.2, 4.4, 4.5):
+
+- citations: `document.citations` entries with `kind === "full"` and `result.status === "unchecked"` (code `CIT …`);
+- quotations: `document.quotes` entries with `result.status === "unchecked"` (code `QUO …`) whose owner is checkable. The owner is found by `quote.quote.citationStart`, as `ownerCluster` does: the attached citation is a full citation (whatever its status, since a verified one is re-checked and an unchecked or failed one is re-verified), or a short form whose `targetStart` points at a full citation. A quote with no attached citation, or a short form with `targetStart === null` or a target that is not a full citation, is not counted.
+
+It is 0 when `hasFullRecord(document)` is false, which is also when the Verify button is disabled, so the two stay in step. Every counted quotation has a full citation, so `hasFullRecord` holds whenever the count is above zero: `verifiableUnchecked > 0` implies Verify is enabled and not running, and the primary Verify button is never disabled in the shell (see Requirement 4.9 below). A document whose citations are all verified but whose quote is `QUO …` gives `verify`, so pressing it retries the quote. A Short_Form with no preceding citation (`CIT …`, no target) and its quote are not counted, and give `export`.
 
 Toolbar:
 
@@ -360,28 +364,46 @@ Order in the panel body: disclosure, Prompt label and box, then `<p>Inserts at t
 export type AssistantRun = Readonly<{
   text: string; streaming: boolean; message: string | null;
   started: boolean;                          // a run has started in this page session
-  inserted: Readonly<{ line: number; runId: string }> | null;
+  inserted: Readonly<{ line: number; runId: string; stopped: boolean }> | null;
   start: (prompt: string) => void; stop: () => void;
 }>;
 ```
 
-`runDraft` returns `{ message: string | null; inserted: { line; runId } | null }`. After `buildInsertion` it dispatches the edit and reads the result. `inserted` is set only when `error === null`; its `line` is the line number of `ops[0].at` in the Document text at that moment (the lines before the Offset do not change by the insertion), and `runId` is `insertion.run.runId`. A discarded, stopped, failed or empty run returns `inserted: null`.
+`runDraft` returns `{ message: string | null; inserted: { line; runId; stopped } | null; insertedText: string }`. After `buildInsertion` it dispatches the edit and reads the result. `inserted` is set only when `error === null` and text was inserted, for a completed run and for a stopped run with partial text alike; `stopped` is true for the latter. A failed, discarded, empty or rejected run, and a stopped run with no text, returns `inserted: null` and `insertedText: ""`. `runId` is `insertion.run.runId`; `insertedText` is the reply text actually inserted (the body, without the separating newlines `asParagraph` adds).
+
+**Insertion_Line.** It is the line of the first inserted character of the reply, not the caret line after the insertion. It is computed from the Document text before the edit, with the same line numbering as `lnPos`, and the offset `ops[0].at`:
+
+```ts
+const op = insertion.ops[0];                              // kind "insert"
+const lead = op.text.startsWith("\n") ? 1 : 0;            // asParagraph's separator, not reply text
+const line = lineAt(docTextBefore, op.at) + lead;         // lines before `at` do not change by the insertion
+```
+
+`asParagraph` adds one leading `\n` when the caret is not at a paragraph start, so the reply then begins on the next line; the `lead` term accounts for that, and `asParagraph` strips the reply's own leading newlines, so `lead` is 0 or 1. When the caret starts a paragraph the reply begins at `at` and `lead` is 0. The value does not depend on where the caret ends up (Requirements 7.6, 7.11). `lineAt(text, offset)` is the line number inside `lnPos` (1 plus the newlines before the clamped offset), exported from `pane/layout.ts` so `statusText`, `lnPos` and the insertion line share one numbering. The pure helper `insertionLine(docText, op)` sits beside `buildInsertion` in `assistant-run.ts` and is tested without React.
 
 `useAssistantRun`:
 
-- `start` sets `started`, clears `inserted` and `message`, empties `text`, and sets `streaming`. This removes the old "Inserted at" line when a new run starts (Requirement 7.8).
-- On the end of a run it sets `message` and `inserted`. It keeps `text` only when `inserted` is not null (D7). Otherwise it sets `text` to empty.
+- `start` sets `started`, clears `inserted`, `message` and `text`, and sets `streaming`. This removes the "Inserted at" and "Stopped. Partial reply inserted" lines of the previous run (Requirements 7.8, 7.15).
+- On the end of a run it sets `message` and `inserted`, and sets `text` to `insertedText` (D7): the whole reply, the partial reply of a stopped run, or empty. It never keeps an earlier run's text.
+- `start` sets `started` to true, so the box appears with the first run (Requirement 7.4). When the first run of the page session ends stopped with nothing inserted, the hook sets `started` back to false, so no Reply_Box is rendered (Requirement 7.13). A ref `shownBefore`, set once any run has inserted text or has ended without being the first, tells the hook this is not the first run; for a later run `started` stays true and the box stays rendered and empty (Requirement 7.14).
 
-The Reply_Box renders only when `run.started`:
+The Reply_Box renders only when `run.started`. While streaming the box shows the streamed text; when the run ends it is replaced by the inserted text, so a stop never leaves text that is not in the Document (Requirement 7.10):
 
 ```tsx
 <p id={labelId} className={styles.label}>Last reply</p>
 <div role="log" aria-live="off" aria-labelledby={labelId} className={styles.stream}>
   {run.text}
-  {run.inserted === null ? null :
-    <p className={styles.inserted}>{`Inserted at Ln ${run.inserted.line} as run ${run.inserted.runId}`}</p>}
+  {run.inserted === null ? null : (
+    <p className={styles.inserted}>
+      {run.inserted.stopped
+        ? `Stopped. Partial reply inserted at Ln ${run.inserted.line} as run ${run.inserted.runId}`
+        : `Inserted at Ln ${run.inserted.line} as run ${run.inserted.runId}`}
+    </p>
+  )}
 </div>
 ```
+
+A stopped run shows only the "Stopped. Partial reply inserted" line, never "Inserted at". A stopped run with nothing inserted shows neither line (Requirement 7.12).
 
 The accessible name comes from the visible label (Requirement 7.4). The old `aria-label="Streamed reply"` goes away. Insertion itself (origin `AI`, Run_Id, one Undo_Group, offset at the caret when the stream ends) is not changed.
 
@@ -491,7 +513,7 @@ type QuoteTally = Readonly<{ match: number; mismatch: number; unchecked: number 
 
 // Page-session state in the Shell, never stored.
 type VerifyNote = string | null;                          // the further line
-type RunResult = Readonly<{ message: string | null; inserted: Readonly<{ line: number; runId: string }> | null }>;
+type RunResult = Readonly<{ message: string | null; inserted: Readonly<{ line: number; runId: string; stopped: boolean }> | null; insertedText: string }>;
 
 // Injected through AppServices.
 type Viewport = Readonly<{ width: () => number; subscribe: (onChange: () => void) => () => void }>;
@@ -510,7 +532,7 @@ The prework found one criterion group that is a property of this spec's own logi
 
 ### Property 1: One next step
 
-*For any* combination of "Document text is empty" (true or false), Verify_In_Flight (true or false), Verifiable_Unchecked_Count (zero or more) and Blocking_Count (zero or more), the Toolbar rendered with `step = nextStep(input)` shall carry `data-primary="true"` on at most one button; on none while Verify_In_Flight is true; and otherwise on exactly the button the ordered rule names: "Load demo motion" when the text is empty, else "Verify" when the Verifiable_Unchecked_Count is above zero, else the Export button, whatever the Blocking_Count is. Changing only the Blocking_Count never changes `nextStep`.
+*For any* combination of "Document text is empty" (true or false), Verify_In_Flight (true or false), unchecked citations Verify can act on (zero or more), unchecked quotations Verify can act on (zero or more) and Blocking_Count (zero or more), with Verifiable_Unchecked_Count the sum of the two unchecked counts, the Toolbar rendered with `step = nextStep(input)` shall carry `data-primary="true"` on at most one button; on none while Verify_In_Flight is true; and otherwise on exactly the button the ordered rule names: "Load demo motion" when the text is empty, else "Verify" when the Verifiable_Unchecked_Count is above zero (including when only quotations are unchecked), else the Export button, whatever the Blocking_Count is. Changing only the Blocking_Count never changes `nextStep`.
 
 **Validates: Requirements 4.1, 4.2, 4.3, 4.4, 4.5, 4.7, 4.10, 4.12**
 
@@ -542,7 +564,7 @@ PBT applies to one part of this feature: the Next_Step rule, a pure function wit
 - File: `apps/web/test/next-step.properties.test.ts`, one `fc.assert(fc.property(...))`, a `// Property 1` comment above it.
 - `describe` title: `"Property 1: one next step _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.7, 4.10, 4.12_"`.
 - `{ numRuns: runs() }`, which gives 200 locally and 500 when `CI` is set, as `test/support/fc.ts` and the inventory test require.
-- Arbitrary `arbNextStepInput` in `apps/web/test/arbitraries.ts`: `fc.record` of two `fc.boolean()` and two counts drawn from `fc.oneof(fc.constant(0), fc.nat({ max: 50 }))`, so the zero case is hit often. Tag comment: **Feature: first-run-and-flow, Property 1: one next step**.
+- Arbitrary `arbNextStepInput` in `apps/web/test/arbitraries.ts`: `fc.record` of two `fc.boolean()` and three counts (unchecked citations, unchecked quotations, blocking) each drawn from `fc.oneof(fc.constant(0), fc.nat({ max: 50 }))`, so the zero case is hit often. `verifiableUnchecked` is the sum of the citation and quotation counts, so the generator reaches the case of zero unchecked citations with unchecked quotations (which must give `verify`) and the case of both zero (which must give `export`). Tag comment: **Feature: first-run-and-flow, Property 1: one next step**.
 - Every assertion relates input to output; none checks only that the render does not throw.
 
 ### Example tests
@@ -552,10 +574,10 @@ PBT applies to one part of this feature: the Next_Step rule, a pure function wit
 | 1 (12.1) | `test/pane-preference.test.ts`, `test/app-shell.test.tsx` | First visit with no draft opens; stored `open: false` stays closed; stored `open: true` opens; malformed values (`"x"`, `"{}"`, `{"version":2,"open":true}`, `{"version":1,"open":"yes"}`, `null`, `[]`) read as First_Visit; first visit with a draft starts closed; a draft that restores to empty text counts as no draft; a toggle writes; the first-visit choice is written; encode and decode for `true` and `false`; throwing `getItem` and `setItem`; New leaves the key. |
 | 2 (12.2) | `test/pane.test.tsx`, `test/pane-css.test.ts` | The seven Legend entries and the joined string; no `aria-hidden`, `role` or `aria-label` in the header; header colours and 12px; the header is a sibling of the scrolling body; `mousedown` on the header is default-prevented. |
 | 3 (12.3) | `test/failing.test.ts`, `test/layout.test.ts`, `test/pane.test.tsx`, `test/pane-css.test.ts` | Failing flags for failing and verified citation and quotation; a quote inside a failing citation; an unbalanced closer; `CIT ?` is failing, `CIT …` is not; the `failing` class on opening and closing codes; the contrast figures 7.75 and 5.72 and the 7:1 floor. |
-| 4 (12.4) | `test/next-step.test.ts`, `test/toolbar.test.tsx`, `test/app-shell.test.tsx` | One example for each of the four results; a Document with a Short_Form only gives `export`; no `data-primary` while a run is in flight; the attribute on exactly the named button otherwise; a disabled primary keeps `data-primary` and `disabled`. |
+| 4 (12.4) | `test/next-step.test.ts`, `test/verify-flow.test.ts`, `test/toolbar.test.tsx`, `test/app-shell.test.tsx` | One example for each of the four results; `countVerifiableUnchecked` on a Document with all citations verified and one `QUO …` attributed to a full citation (1, so `verify`), a `QUO …` attributed to a Short_Form with no target (0), and a Short_Form only (0, so `export`); no `data-primary` while a run is in flight; the attribute on exactly the named button otherwise; a disabled primary keeps `data-primary` and `disabled`. |
 | 5 (12.5) | `test/verify-summary.test.ts`, `test/verify-result.test.tsx`, `test/verify-flow.test.ts` | Lines with all terms, with a zero term dropped, with a whole line dropped, the Checked line (expected value built from local getters, so it holds in any zone), the further line with the latest of two retry times, the skipped sentence, a clean run clearing the line, no Toolbar result text, no counts Notice, the failure Notice kept, a stale failure Notice cleared by a good run, the summary gone after a replace. |
 | 6 (12.6) | `test/issues-list.test.tsx`, `test/issues-shell.test.tsx` | The Unchecked_Row first, plural and singular text, individual rows after a run, the row's Verify making one request, the row's button disabled with the Toolbar's, no row at zero, the Export dialog listing every item. |
-| 7 (12.7) | `test/assistant-panel.test.tsx`, `test/use-assistant.test.tsx` | The "Inserts at the cursor" line above the button and its update with the caret; no Reply_Box before a run; the label "Last reply" as the accessible name; text kept after an inserting run; "Inserted at Ln `l` as run r1" for the caret on three lines; no line after a failed, stopped or empty run; the line removed when a new run starts; a rejected edit shows no line. |
+| 7 (12.7) | `test/assistant-panel.test.tsx`, `test/use-assistant.test.tsx` | The "Inserts at the cursor" line above the button and its update with the caret; no Reply_Box before a run; the label "Last reply" as the accessible name; text kept after an inserting run; "Inserted at Ln `l` as run r1" with `l` the line of the first inserted character, for a caret at a paragraph start, mid-paragraph (the leading newline moves it down one line) and at the end of the text, and not the caret line after the insertion; "Stopped. Partial reply inserted at Ln `l` as run `id`" with the partial text kept and no "Inserted at" line; a stopped run with nothing inserted shows neither line and empty text, with no box for the first run and an empty box (no earlier text) for a later run; no line after a failed or empty run; both lines removed when a new run starts; a rejected edit shows no line. `insertionLine` is also tested directly in `test/assistant-run.test.ts`. |
 | 8 (12.8) | `test/override-dialog.test.tsx` | Short text under the title; 120 characters cut to 79 plus an ellipsis; an emoji at the cut is not split; the same text from the list and from the Export dialog; `aria-describedby` resolves to the text. |
 | 9 (12.8) | `test/export-dialog.test.tsx`, `test/order-copy.test.ts`, `test/order-picker.test.tsx` | Labels "Download .docx" and "Open print view" with zero and with four blocking items; the line for 4, 1 and 0 items; the width string in `modal.module.css`; options of 80 and 81 code points. |
 | 10 (12.9) | `test/app-shell.test.tsx`, `test/small-screen.test.tsx` | Width 799 gives the small page with its three sentences and no `button`, `a` or `img`; width 800 gives the Shell; the storage fake records no `getItem` or `setItem` of either key at 799; the Shell mounts and loads the draft when the width reaches 800; the Shell is replaced when it falls below, with one flush and no later write; the title at 799. |
