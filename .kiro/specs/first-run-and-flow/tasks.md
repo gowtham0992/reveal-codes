@@ -164,7 +164,7 @@ Conventions that apply to every task:
     - In `.kiro/steering/product.md` add a new section "Pane palette" after the Codes list with the table from the design (every Code_Family, the Failing_Code style `#FFFFFF` on `#AA0000` with no outline and ratio 7.75:1, the Pane_Header `#0000AA` on `#AAAAAA` and ratio 5.72:1). The Codes list itself is not changed.
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5_
 
-  - [-] 6.2 README, `docs/KIRO_USAGE.md`, and `BUILD_LOG.md`
+  - [x] 6.2 README, `docs/KIRO_USAGE.md`, and `BUILD_LOG.md`
     - In `README.md` update the demo path: the Pane is already open on a first visit (Alt-F3 hides and shows it), the result of Verify is read in the Issues region, the Export dialog buttons carry no count. Keep the sections that `docs.test.ts` requires.
     - In `docs/KIRO_USAGE.md` add one row for this spec with `.kiro/specs/first-run-and-flow/requirements.md`, `design.md`, `tasks.md` and the spec's other files that exist, and one row each for the `ui.md` and `product.md` edits.
     - In `BUILD_LOG.md` append one dated entry `## <date> first-run-and-flow` after the last entry: the first run before and after, and where Kiro's output was wrong and how it was fixed, or "No Kiro errors". If task 5.1 stopped group 5, record the reason here. Existing entries stay unmodified.
