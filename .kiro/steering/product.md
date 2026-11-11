@@ -35,7 +35,7 @@ Courts have sanctioned lawyers in several hundred decisions for filings that cit
 4. **Red codes block export.** Only `CIT ✓` and `QUO ✓` pass. A filing with any `CIT ✘`, `CIT ?`, `CIT …`, `QUO ✘`, or `QUO …` code cannot export unless the author writes an override reason for each one. Overrides are printed in the certification. The product never hides a problem to be convenient.
 5. **One keystroke to the truth.** Alt-F3 always toggles the Reveal Codes pane. The pane is a faithful serialization of the document's provenance; it is not a summary.
 6. **Quotes are checked, not just citations.** A real case with an invented quotation is the failure mode that existence checkers miss. `QUO ✘` is a headline result, shown with where the quote diverges from the opinion.
-7. **Respect the period.** The pane looks like 1989 (blue field, grey text, bracketed codes, monospace). The editor above it looks like 2026. The contrast is the point. Spooky theming is not; this is not a Costume entry.
+7. **Respect the period.** The pane looks like 1989 (blue field, pale text, bracketed codes, monospace). The editor above it looks like 2026. The contrast is the point. Spooky theming is not; this is not a Costume entry.
 
 The statement follows the selected court's instrument. The dataset behind it, data/standing-orders.json, is public and CC0.
 
@@ -94,19 +94,19 @@ Colours of the codes in the Reveal Codes pane (text, background, outline). This 
 
 | Family | Text | Background | Outline |
 | ------ | ---- | ---------- | ------- |
-| `HUM` | `#FFFFFF` | `#0000AA` | 1px `#AAAAAA` |
-| `PST` | `#FFFF55` | `#0000AA` | 1px `#AAAAAA` |
-| `AI` | `#FF55FF` | `#0000AA` | 1px `#AAAAAA` |
-| `AI>HUM` | `#55FFFF` | `#0000AA` | 1px `#AAAAAA` |
-| `CIT ✓`, `QUO ✓` | `#55FF55` | `#0000AA` | 1px `#AAAAAA` |
-| `CIT …`, `QUO …` | `#AA5500` | `#FFFF55` | 1px `#AAAAAA` |
-| Failing: `CIT ✘`, `CIT ?`, `QUO ✘` and the closer of each | `#FFFFFF` | `#AA0000` | none (ratio 7.75:1) |
-| `OVR` | `#555555` | `#AAAAAA` | 1px `#AAAAAA` |
-| `REF` | `#AAAAAA` | `#0000AA` | 1px `#AAAAAA` |
-| Closers of non-failing codes (`/CIT`, `/QUO`, `/REF`) | `#FFFFFF` | `#0000AA` | 1px `#AAAAAA` |
-| Pane field and status line | `#AAAAAA` | `#0000AA` | none |
-| Cursor | `#0000AA` | `#AAAAAA` | none |
-| Pane_Header | `#0000AA` | `#AAAAAA` | none (ratio 5.72:1) |
+| `HUM` (typed) | `#E8ECF6` | none | none |
+| `PST` (pasted) | `#F5D98B` | none | none |
+| `AI` (assistant) | `#A6D4F7` | none | none |
+| `AI>HUM` (assistant-edited) | `#D7C6F5` | none | none |
+| `CIT ✓`, `QUO ✓` (found) | `#9ADBB0` | none | none |
+| `CIT …`, `QUO …` (unchecked) and `REF` | `#BAC4E2` | none | none |
+| `OVR` | `#F5D98B` | none | none |
+| Closers (`/CIT`, `/QUO`, `/REF`) | the colour of their opener | the background of their opener | the outline of their opener |
+| Failing_Block: `CIT ✘`, `CIT ?`, `QUO ✘`, their text and their closers | `#FFFFFF` | `#A8001C` | 2px `#FF8A8A` ring (1px in the Legend) |
+| Cursor | `#0F2766` | `#E8ECF6` | none |
+| Pane body | `#E8ECF6` | `#0F2766` | none |
+| Pane_Header | title `#FFFFFF`, Legend `#BAC4E2` | `#0F2766` | 1px `#2E4A8F` rule |
+| Status_Bar | `#C9D2EC`, key names `#FFFFFF` bold | `#0A1C4F` | none |
 
 ## Success for the hackathon demo
 

@@ -77,7 +77,7 @@ Conventions that apply to every task:
     - Update the scan if it names `issues-region.module.css` (`grid-row: 2 / 4` stays).
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10, 6.11, 6.12, 13.10_
 
-- [ ] 3. Pane, Status_Bar and product.md
+- [x] 3. Pane, Status_Bar and product.md
   - [x] 3.1 Closer families
     - Create `apps/web/src/pane/closers.ts` with `openerFamilies(positions)` as the design lists it: one stack per kind (`CIT`, `QUO`, `REF`), an opener pushes `codeFamily(code)`, a closer pops, everything else and an unbalanced closer gives `null`. It reads only `positions`.
     - In `apps/web/src/pane/layout.ts` call `openerFamilies` once in `layoutPane` and give a paired closer the family of its opener (`family = opener ?? "close"`); `failing`, `text`, `offset` and `meaning` do not change. Add `pane/closers.ts` to the layout regex in `apps/web/test/static/boundaries.test.ts`.
@@ -100,7 +100,7 @@ Conventions that apply to every task:
     - In `globals.css` set `--status-h: 26px`; update `VARIABLE_VALUES` in the scan. Confirm the `.app[data-pane="open"]` row still uses `var(--pane-h)`.
     - Update `app-shell.test.tsx` and the scan test that reads `status-line.module.css` (it must still contain `grid-column: main;`). Add CSS assertions for `status-bar.module.css`: 26px, `#0A1C4F`, `#C9D2EC`, 12px Plex Mono, key names white and 700; and a DOM assertion that the Status_Line `textContent` contains `Alt-F3 Codes   F7 Exit` and that both key names are `strong` elements.
     - _Requirements: 7.13, 7.14, 7.15, 13.10_
-  - [~] 3.5 Pane palette in product.md
+  - [x] 3.5 Pane palette in product.md
     - Rewrite the "Pane palette" section of `.kiro/steering/product.md` to the new colours: a table of Family, Text, Background and Outline covering typed, pasted, assistant, assistant-edited, found, unchecked and `REF`, `OVR`, closers (the colour of their opener), the Failing_Block (`#FFFFFF` on `#A8001C`, 2px `#FF8A8A` ring; 1px in the Legend), the cursor, the Pane body, the Pane_Header (title white, Legend `#BAC4E2`, 1px `#2E4A8F` rule), and the Status_Bar (`#C9D2EC` on `#0A1C4F`, key names white bold). Keep the sentence that the table styles the Codes list and adds, renames and restyles no code. In principle 7 change the words "grey text" to "pale text" and nothing else; edit nothing else in `product.md`.
     - Add an example to the docs test: `product.md` contains each Pane colour of the table and none of `#0000AA`, `#AAAAAA`, `#AA0000`, `#FF55FF`, and principle 7 contains "pale text" and not "grey text".
     - _Requirements: 7.19_

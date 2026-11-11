@@ -167,6 +167,43 @@ describe("docs: no provider switch and no model id literal _Requirements: 26.3_"
   });
 });
 
+describe("docs: product.md Pane palette _Requirements: 7.19_", () => {
+  const product = repoFile(".kiro", "steering", "product.md");
+  const palette = section(product, "Pane palette");
+
+  it("contains each Pane colour of the table", () => {
+    for (const hex of [
+      "#E8ECF6",
+      "#F5D98B",
+      "#A6D4F7",
+      "#D7C6F5",
+      "#9ADBB0",
+      "#BAC4E2",
+      "#FFFFFF",
+      "#A8001C",
+      "#FF8A8A",
+      "#0F2766",
+      "#2E4A8F",
+      "#C9D2EC",
+      "#0A1C4F",
+    ]) {
+      expect(palette, hex).toContain(hex);
+    }
+  });
+
+  it("contains none of the earlier sixteen-colour palette", () => {
+    for (const hex of ["#0000AA", "#AAAAAA", "#AA0000", "#FF55FF"]) {
+      expect(product.toUpperCase(), hex).not.toContain(hex);
+    }
+  });
+
+  it("says pale text and not grey text in principle 7", () => {
+    const principle = product.split("\n").find((line) => line.startsWith("7. ")) ?? "";
+    expect(principle).toContain("pale text");
+    expect(principle).not.toContain("grey text");
+  });
+});
+
 describe("docs: hook and test project exist _Requirements: 1.5, 2.1_", () => {
   it("has the web-tests-on-save hook", () => {
     expect(existsSync(join(REPO_ROOT, ".kiro", "hooks", "web-tests-on-save.json"))).toBe(true);
