@@ -56,6 +56,9 @@ describe("Pane stylesheet _Requirements: 12.2, 12.3, 12.4_", () => {
     expect(rule(".legend", "white-space")).toBe("pre-wrap");
   });
 
+  it("keeps each Legend item (code and label) on one line so it wraps as a unit", () => {
+    expect(rule(".legendItem", "white-space")).toBe("nowrap");
+  });
   it("measures the contrast of the failing and header pairs from the stylesheet _Requirements: 3.7_", () => {
     const failing = contrast(rule(".failing", "color"), rule(".failing", "background"));
     expect(failing).toBeGreaterThanOrEqual(7);

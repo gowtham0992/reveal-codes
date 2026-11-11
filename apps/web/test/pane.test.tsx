@@ -92,15 +92,17 @@ describe("Pane_Header and Legend _Requirements: 2.1, 2.3, 2.4, 2.5, 2.6, 2.8, 2.
     const [name, legend] = Array.from(header.children);
     expect(name?.textContent).toBe("Reveal Codes");
     expect(legend?.textContent).toBe(WORDS.map(([c, w]) => `${c} ${w}`).join(" · "));
-    const codes = Array.from(legend?.children ?? []).map((e) => e.textContent);
+    const items = Array.from(legend?.children ?? []);
+    expect(items.map((e) => e.textContent)).toEqual(WORDS.map(([c, w]) => `${c} ${w}`));
+    const codes = items.map((e) => e.firstElementChild?.textContent);
     expect(codes).toEqual(WORDS.map(([c]) => c));
   });
 
   it("draws the failing entries with the failing class and the others without", () => {
     const { container } = renderUi(<Pane {...props(CITED)} />);
     const legend = headerOf(container).children[1];
-    const codes = Array.from(legend?.children ?? []);
-    expect(codes.map((e) => /failing/.test(e.className))).toEqual([
+    const codes = Array.from(legend?.children ?? []).map((e) => e.firstElementChild);
+    expect(codes.map((e) => /failing/.test(e?.className ?? ""))).toEqual([
       false,
       false,
       false,

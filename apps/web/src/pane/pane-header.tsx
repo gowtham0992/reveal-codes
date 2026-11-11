@@ -34,8 +34,10 @@ export function PaneHeader() {
         {LEGEND.map((entry, i) => (
           <Fragment key={entry.code}>
             {i === 0 ? null : " · "}
-            <span className={codeClass(entry.family, entry.failing)}>{entry.code}</span>
-            {` ${entry.words}`}
+            <span className={cls("legendItem")}>
+              <span className={codeClass(entry.family, entry.failing)}>{entry.code}</span>
+              {` ${entry.words}`}
+            </span>
           </Fragment>
         ))}
       </span>

@@ -27,6 +27,11 @@
   white-space: pre-wrap;
 }
 
+/* A code and its label wrap as one unit; the line may still break between items. */
+.legendItem {
+  white-space: nowrap;
+}
+
 .body {
   flex: 1;
   min-height: 0;
