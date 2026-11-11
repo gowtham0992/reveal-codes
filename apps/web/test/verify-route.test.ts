@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { MAX_BODY_BYTES, MAX_RECORDS, handleVerify } from "../src/server/verify-route";
+import {
+  MAX_BODY_BYTES,
+  MAX_RECORDS,
+  MAX_TEXT_CHARS,
+  handleVerify,
+} from "../src/server/verify-route";
 import {
   fixturesDeps,
   demoRecords,
@@ -68,6 +73,31 @@ describe("POST /api/verify size limits _Requirements: 16.3_", () => {
     await rejected(JSON.stringify({ records: [], padding }), 413);
   });
 
+  it("a request over 200000 characters gives 413 and the fixed sentence, before any lookup", async () => {
+    const { deps, calls } = recordingLiveDeps();
+    const body = '{"records":[]}' + " ".repeat(MAX_TEXT_CHARS - 13);
+    expect(body.length).toBe(MAX_TEXT_CHARS + 1);
+    const res = await handleVerify(postJson(body), deps);
+    expect(res.status).toBe(413);
+    expect(res.headers.get("Cache-Control")).toBe("no-store");
+    expect(await res.json()).toEqual({
+      error: "This document is too long to check in one request.",
+    });
+    expect(calls).toHaveLength(0);
+  });
+  it("a request of exactly 200000 characters is read", async () => {
+    const body = '{"records":[]}' + " ".repeat(MAX_TEXT_CHARS - 14);
+    expect(body.length).toBe(MAX_TEXT_CHARS);
+    const res = await handleVerify(postJson(body), fixturesDeps());
+    expect(res.status).toBe(200);
+  });
+  it("keeps the smaller caps: 500 records and 262144 bytes both sit under or beside it", () => {
+    expect(MAX_TEXT_CHARS).toBe(200_000);
+    expect(MAX_RECORDS).toBe(500);
+    expect(MAX_BODY_BYTES).toBe(262_144);
+    const typical = JSON.stringify({ records: Array.from({ length: MAX_RECORDS }, () => FULL) });
+    expect(typical.length).toBeLessThan(MAX_TEXT_CHARS);
+  });
   it("exactly 500 valid records are accepted", async () => {
     const records = Array.from({ length: MAX_RECORDS }, (_, i) => ({
       ...FULL,

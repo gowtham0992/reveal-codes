@@ -32,3 +32,6 @@ export const CHECKS_BUSY = "Too many checks from this address. Try again in a mo
 
 /** Sent by /api/assistant with status 429 when the hourly limit across all addresses is reached. */
 export const ASSISTANT_HOURLY = "The assistant has reached its hourly limit. Try again later.";
+
+/** Sent by /api/verify with status 413 when the request carries more than 200 000 characters. */
+export const DOCUMENT_TOO_LONG = "This document is too long to check in one request.";
