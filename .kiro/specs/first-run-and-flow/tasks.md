@@ -32,7 +32,7 @@ Conventions that apply to every task:
     - Update `apps/web/test/app-shell.test.tsx` and `apps/web/test/document-actions.test.tsx` where they assert the Pane hidden on first load. Add examples: first visit with no draft opens the Pane; stored `open: false` stays closed; stored `open: true` opens it (with and without a draft); first visit with a draft starts closed; the first-visit choice is written; an Alt-F3 toggle and the Toolbar button write the new state; a reload keeps the state; New leaves the key; throwing `setItem` keeps the in-memory state with no Notice.
     - _Requirements: 1.2, 1.3, 1.4, 1.5, 1.6, 1.8, 1.9, 1.10, 12.1, 12.14_
 
-  - [-] 1.3 Failing flags in the Pane layout and the Failing_Code style
+  - [x] 1.3 Failing flags in the Pane layout and the Failing_Code style
     - Create `apps/web/src/pane/failing.ts` with `failingFlags(positions)`: two stacks, one per kind (CIT, QUO); opening `CIT ✘`, `CIT ?` and `QUO ✘` push true and are failing; other openings push false; `/CIT` and `/QUO` pop their own stack and are failing when the popped value is true (empty stack gives false); every other code is not failing. Read only `positions`.
     - In `apps/web/src/pane/layout.ts` add `failing: boolean` to the code item, call `failingFlags` once in `layoutPane`, and export `lineAt(text, offset)` (1 plus the newlines before the clamped offset, the line number inside the Status_Position) and `lnPos(text, offset)` built on it; `statusText` calls `lnPos` with identical output.
     - Create `apps/web/src/pane/code-class.ts` with `cls(...names)` and `codeClass(family, failing)`. Use `codeClass` in `ItemView` in `apps/web/src/pane/pane.tsx`.
