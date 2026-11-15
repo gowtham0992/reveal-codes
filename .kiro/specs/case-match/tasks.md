@@ -68,7 +68,7 @@ Conventions for every task:
     - **Property 6: A malformed `wrong_case` result is rejected and named**
     - **Validates: Requirements 2.3, 2.4, 2.5**
 
-  - [-]* 1.9 Write property test for Override survival
+  - [x]* 1.9 Write property test for Override survival
     - **Property 7: An Override survives only an unchanged status**
     - **Validates: Requirements 2.9**
 
