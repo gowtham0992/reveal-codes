@@ -475,7 +475,7 @@ describe("case-match a Short_Form follows a wrong_case target _Requirements: 2.1
     fc.assert(
       fc.property(fc.array(arbGroup, { minLength: 1, maxLength: 2 }), (groups) => {
         const text = groups
-          .map((g, i) => `See ${GROUP_CITATIONS[i]}. ${g.shorts.join(" ")}.`)
+          .map((g, i) => `See ${GROUP_CITATIONS[i] ?? GROUP_CITATIONS[0]}. ${g.shorts.join(" ")}.`)
           .join("\n\n");
         const created = createDocument(text, TIMESTAMP);
         expect(created.ok).toBe(true);

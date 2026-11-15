@@ -91,7 +91,7 @@ Conventions for every task:
     - `Dep't of Homeland Sec. v. Regents of the Univ. of Cal.` after a line break reads as that exact string.
     - _Requirements: 1.4, 1.11, 1.13, 1.14, 1.15, 3.1, 3.6, 3.7, 13.5_
 
-- [~] 2. Checkpoint - Engine complete
+- [x] 2. Checkpoint - Engine complete
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 3. Verifier and MCP: name rule, lookup rule, cache, verify route and `lookup_citations` (Requirements 4 and 5)
@@ -173,7 +173,7 @@ Conventions for every task:
     - Leave the existing tests of the package unedited; they must still pass.
     - _Requirements: 5.12, 5.13, 13.5_
 
-- [~] 4. Checkpoint - Verifier and MCP complete
+- [x] 4. Checkpoint - Verifier and MCP complete
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 5. Web: Pane, page underline, Issues region and Resolved list (Requirements 6 and 7)

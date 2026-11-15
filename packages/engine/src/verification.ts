@@ -63,19 +63,16 @@ function badWrongCase(v: Fields): string | null {
     : "foundYear";
 }
 
-const FIELD_CHECKS: Readonly<Record<VerificationResult["status"], (v: Fields) => string | null>> =
-  {
-    verified: (v) => (isNonEmptyString(v["clusterId"]) ? null : "clusterId"),
-    wrong_case: badWrongCase,
-    ambiguous: (v) => {
-      const c = v["candidates"];
-      return Array.isArray(c) && c.length >= 2 && isDistinctIds(c) ? null : "candidates";
-    },
-    not_found: (v) =>
-      !hasOwn(v, "reason") || isNonEmptyString(v["reason"]) ? null : "reason",
-    unchecked: (v) =>
-      !hasOwn(v, "waitUntil") || isTimestamp(v["waitUntil"]) ? null : "waitUntil",
-  };
+const FIELD_CHECKS: Readonly<Record<VerificationResult["status"], (v: Fields) => string | null>> = {
+  verified: (v) => (isNonEmptyString(v["clusterId"]) ? null : "clusterId"),
+  wrong_case: badWrongCase,
+  ambiguous: (v) => {
+    const c = v["candidates"];
+    return Array.isArray(c) && c.length >= 2 && isDistinctIds(c) ? null : "candidates";
+  },
+  not_found: (v) => (!hasOwn(v, "reason") || isNonEmptyString(v["reason"]) ? null : "reason"),
+  unchecked: (v) => (!hasOwn(v, "waitUntil") || isTimestamp(v["waitUntil"]) ? null : "waitUntil"),
+};
 
 function badVerificationField(r: VerificationResult): string | null {
   const v: Fields = r;
@@ -96,7 +93,10 @@ export function setVerification(
 ): Result<Document, EngineError> {
   const rec = findKeyed(doc, key);
   if (rec === null) return err({ kind: "unknown_citation", key });
-  if (rec.kind === "short" || ((result.status === "verified" || result.status === "wrong_case") && isUnlistedLexis(rec))) {
+  if (
+    rec.kind === "short" ||
+    ((result.status === "verified" || result.status === "wrong_case") && isUnlistedLexis(rec))
+  ) {
     return err({ kind: "not_verifiable", key });
   }
   const field = badVerificationField(result);

@@ -40,7 +40,12 @@ function fullPayloadOk(s: DraftStatus): boolean {
 }
 
 const hasPayload = (s: DraftStatus): boolean =>
-  "clusterId" in s || "foundName" in s || "foundYear" in s || "candidates" in s || "reason" in s || "waitUntil" in s;
+  "clusterId" in s ||
+  "foundName" in s ||
+  "foundYear" in s ||
+  "candidates" in s ||
+  "reason" in s ||
+  "waitUntil" in s;
 
 const valueOf = (i: CheckInput, c: DraftCitation): CitationValue | undefined =>
   i.byRange.get(rangeKey(c.start, c.end))?.value;
