@@ -453,7 +453,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - _Requirements: 20.2, 20.3, 20.6, 20.7_
 
 - [ ] 20. Sentinel examples, inventory and documentation (Requirements 9, 21)
-  - [-] 20.1 Add the two Sentinel examples for Requirement 9, criterion 8
+  - [x] 20.1 Add the two Sentinel examples for Requirement 9, criterion 8
     - In a new `crew/sentinel/test/pre-spec-filing.test.ts` (tests only; no Sentinel source changes) sweep a filing exported before this spec: one whose recorded `verified` citations still match the re-check data gives no finding and no error, and one whose recorded `verified` citation has a written name that now resolves to a different case gives one `citation_changed` finding with Before `verified <clusterId>` and After `wrong_case <clusterId> <foundName>`. Build both from the existing Sentinel test support and the recorded fixtures.
     - _Requirements: 9.8, 13.5_
 
