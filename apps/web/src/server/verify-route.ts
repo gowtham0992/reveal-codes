@@ -1,4 +1,4 @@
-import { lookup } from "@reveal-codes/verifier";
+import { lookupWithInfo } from "@reveal-codes/verifier";
 import type { Deps } from "@reveal-codes/verifier";
 import type { CitationRecord } from "@reveal-codes/engine";
 import { readBodyCapped } from "./body";
@@ -9,6 +9,8 @@ import type { RouteGuard } from "./rate-limit";
 
 export const MAX_BODY_BYTES = 262_144;
 export const MAX_RECORDS = 500;
+/** The most code units a record's `caseName` may hold. */
+export const MAX_CASE_NAME = 200;
 /**
  * The most text, in characters, one request may carry. The body holds the citation records
  * and no draft text, so this bounds the request the route reads, ahead of any lookup. The
@@ -60,7 +62,9 @@ function isFullRecord(value: unknown): value is FullRecord {
   if (!isObject(value) || value["kind"] !== "full") return false;
   if (typeof value["key"] !== "string") return false;
   const citation = value["citation"];
-  return isObject(citation) && isCitationValue(citation["value"]);
+  if (!isObject(citation) || !isCitationValue(citation["value"])) return false;
+  const name = citation["caseName"];
+  return name === undefined || (typeof name === "string" && name.length <= MAX_CASE_NAME);
 }
 
 function parseJson(text: string): unknown {
@@ -102,6 +106,6 @@ export async function handleVerify(
   if (body.text.length > MAX_TEXT_CHARS) return jsonResponse(413, { error: DOCUMENT_TOO_LONG });
   const parsed = parseVerifyBody(body.text);
   if (!parsed.ok) return jsonResponse(parsed.error.status, { error: parsed.error.message });
-  const results = await lookup(parsed.value, deps);
-  return jsonResponse(200, [...results]);
+  const { results, info } = await lookupWithInfo(parsed.value, deps);
+  return jsonResponse(200, { results: [...results], info: [...info] });
 }

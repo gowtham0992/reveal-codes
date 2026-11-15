@@ -65,10 +65,16 @@ const noClientSide: Check = (ref, file) =>
     ? null
     : "client-side modules";
 
-/** `client/*` takes only `checkQuote` from the `/quote` subpath and types from the root. */
+/** `client/*` takes the browser-safe `/quote` and `/link` subpaths and types from the root. */
 const verifierSubpathOnly: Check = (ref) => {
   if (ref.spec === VERIFIER) return ref.typeOnly ? null : `${VERIFIER} at its root for a value`;
-  if (ref.spec.startsWith(`${VERIFIER}/`) && ref.spec !== `${VERIFIER}/quote`) return ref.spec;
+  if (
+    ref.spec.startsWith(`${VERIFIER}/`) &&
+    ref.spec !== `${VERIFIER}/quote` &&
+    ref.spec !== `${VERIFIER}/link`
+  ) {
+    return ref.spec;
+  }
   return null;
 };
 

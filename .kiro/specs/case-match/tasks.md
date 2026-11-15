@@ -108,7 +108,7 @@ Conventions for every task:
     - Update existing verifier tests that assert exact cache entries, if any, and note them for BUILD_LOG.
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 5.14, 7.4, 15.7_
 
-  - [~] 3.3 Carry `caseName` and Display_Info through the verify route and client
+  - [x] 3.3 Carry `caseName` and Display_Info through the verify route and client
     - In `apps/web/src/server/verify-route.ts` accept an optional `caseName` string of at most 200 code units (400 with the existing fixed message otherwise), call `lookupWithInfo`, and answer `{ results, info }` (design D4).
     - In `apps/web/src/client/api.ts` update the response guard to accept `wrong_case` with its field checks, reject other unknown statuses, and validate `info` items with `isDisplayInfo`.
     - Update the verify flow in `apps/web/src/client/verify-flow.ts` to send `caseName` from each record and return `info` beside the results.
@@ -159,7 +159,7 @@ Conventions for every task:
     - `lookup` called directly (not `lookupWithInfo`) returns `wrong_case` for the Henderson record.
     - _Requirements: 4.11, 5.4, 5.6, 5.7, 5.10, 5.14, 12.7, 13.5, 13.6_
 
-  - [~] 3.12 Report the wrong case and the cited name from the MCP tool
+  - [x] 3.12 Report the wrong case and the cited name from the MCP tool
     - In `packages/courtlistener-mcp/src/tools/lookup-citations.ts`, change `describeDoc` only: add `caseName` to each citation it describes with a conditional spread (`...(r.citation.caseName === undefined ? {} : { caseName: r.citation.caseName })`), so the key is absent when no name was read and is never present on a Short_Form or Other_Reference. Do not change `buildDocs`, `prefixed`, `applyResults` or the call to `lookup`: the records already carry `caseName`, and `lookup` applies the rule (task 3.2).
     - In `packages/courtlistener-mcp/src/server.ts`, extend the `lookup_citations` description with `and the case name read before each full citation`. Check that `server.test.ts` and `stdio.test.ts` do not assert the old description text, and note any edit for BUILD_LOG.
     - The package has no output schema and no `switch` over verification statuses, so no exhaustive-case edit is needed; confirm with `pnpm typecheck`.
@@ -272,7 +272,7 @@ Conventions for every task:
     - _Requirements: 10.5, 10.6, 10.7, 10.8, 10.9, 10.10, 10.11, 10.12, 10.15, 13.5_
 
 - [ ] 10. Recording script and its tests (Requirement 11)
-  - [~] 10.1 Write the recording script
+  - [-] 10.1 Write the recording script
     - Create `packages/verifier/scripts/record-lookups.ts` with `trimEntry`, `recordLookups`, `checkExpected` and `main`; add `scripts` to `packages/verifier/tsconfig.json` `include`.
     - `main` is the only reader of `COURTLISTENER_TOKEN`; it prints one line and exits 1 before any request when it is unset. The token is never printed, logged or written.
     - Request the seven lines in one chunk using `buildLookupRequest`. Dry run by default; with differences exit 2 and write nothing; with `--write` and no differences write `fixtures/lookup/<slug>.json` for the six new lines only. Never record `360 N.J. Super. 360` or `821 F.2d 1147`.
@@ -280,7 +280,7 @@ Conventions for every task:
     - `fetch` is injected; no network in tests.
     - _Requirements: 11.1, 11.2, 11.4, 11.5, 11.6, 11.8, 11.9, 11.10, 11.11_
 
-  - [~] 10.2 Add the fixture credential scan
+  - [-] 10.2 Add the fixture credential scan
     - Add a test under `packages/verifier/test/` that reads every file under `packages/verifier/fixtures/` and fails when any contains a `Token ` or `Bearer ` credential value or the word `authorization` in any case.
     - _Requirements: 11.3_
 

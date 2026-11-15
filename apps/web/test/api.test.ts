@@ -15,24 +15,53 @@ describe("Api client _Requirements: 17.1, 17.2_", () => {
     expect(server.requests).toHaveLength(1);
     expect(server.requests[0]?.method).toBe("POST");
     expect(JSON.parse(server.requests[0]?.body ?? "")).toEqual({ records });
-    expect(result.ok && result.value.length).toBe(records.length);
+    expect(result.ok && result.value.pairs.length).toBe(records.length);
   });
 
   it("drops malformed pairs and keeps the good ones", async () => {
     const fetchFn: FetchFn = () =>
-      json([
-        ["k0", { status: "not_found" }],
-        ["k1"],
-        [5, { status: "verified" }],
-        ["k2", { status: "verified" }],
-        "x",
-      ]);
+      json({
+        results: [
+          ["k0", { status: "not_found" }],
+          ["k1"],
+          [5, { status: "verified" }],
+          ["k2", { status: "verified" }],
+          "x",
+        ],
+      });
     const result = await createApiClient(fetchFn).verify([]);
-    expect(result).toEqual({ ok: true, value: [["k0", { status: "not_found" }]] });
+    expect(result).toEqual({
+      ok: true,
+      value: { pairs: [["k0", { status: "not_found" }]], info: [] },
+    });
+  });
+  it("accepts wrong_case, rejects a malformed one, and keeps only valid Display_Info", async () => {
+    const wrong = { status: "wrong_case", clusterId: "1", foundName: "A v. B", foundYear: 2009 };
+    const fetchFn: FetchFn = () =>
+      json({
+        results: [
+          ["k0", wrong],
+          ["k1", { status: "wrong_case", clusterId: "1", foundName: "" }],
+          ["k2", { ...wrong, foundYear: 999 }],
+          ["k3", { status: "bogus" }],
+        ],
+        info: [
+          ["k0", { clusterId: "1", foundName: "A v. B", absoluteUrl: "/opinion/1/a/" }],
+          ["k1", { clusterId: "1", foundName: "A v. B", absoluteUrl: "//evil" }],
+        ],
+      });
+    const result = await createApiClient(fetchFn).verify([]);
+    expect(result).toEqual({
+      ok: true,
+      value: {
+        pairs: [["k0", wrong]],
+        info: [["k0", { clusterId: "1", foundName: "A v. B", absoluteUrl: "/opinion/1/a/" }]],
+      },
+    });
   });
 
   it("a non-array verify body is a shape error", async () => {
-    const result = await createApiClient(() => json({ a: 1 })).verify([]);
+    const result = await createApiClient(() => json([["k", { status: "unchecked" }]])).verify([]);
     expect(result).toEqual({ ok: false, error: { kind: "shape" } });
   });
 

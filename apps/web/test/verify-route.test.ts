@@ -119,7 +119,11 @@ describe("POST /api/verify against the recorded fixtures _Requirements: 16.1, 16
     expect(res.status).toBe(200);
     expect(res.headers.get("Cache-Control")).toBe("no-store");
     expect(text).not.toContain(SENTINEL);
-    const pairs = JSON.parse(text) as Array<[string, { status: string; clusterId?: string }]>;
+    const reply = JSON.parse(text) as {
+      results: Array<[string, { status: string; clusterId?: string }]>;
+      info: Array<[string, { clusterId: string; foundName: string }]>;
+    };
+    const pairs = reply.results;
     expect(pairs.map(([key]) => key)).toEqual(records.map((r) => r.key));
     expect(pairs.map(([, r]) => r.status)).toEqual([
       "verified",
@@ -137,13 +141,29 @@ describe("POST /api/verify against the recorded fixtures _Requirements: 16.1, 16
     const records = [withValue({ kind: "reporter", volume: 576, reporter: "U.S.", page: 644 })];
     const res = await handleVerify(postJson(JSON.stringify({ records })), fixturesDeps());
     expect(res.status).toBe(200);
-    const pairs = (await res.json()) as Array<[string, { status: string }]>;
-    expect(pairs[0]?.[1].status).toBe("unchecked");
+    const reply = (await res.json()) as { results: Array<[string, { status: string }]> };
+    expect(reply.results[0]?.[1].status).toBe("unchecked");
   });
 
+  it("accepts an absent caseName and 200 code units, and answers 400 for 201 units or a number", async () => {
+    const named = (caseName: unknown): typeof FULL =>
+      ({
+        ...FULL,
+        citation: { ...FULL.citation, caseName },
+      }) as typeof FULL;
+    const post = (r: typeof FULL) =>
+      handleVerify(postJson(JSON.stringify({ records: [r] })), fixturesDeps());
+    expect((await post(FULL)).status).toBe(200);
+    expect((await post(named("a".repeat(200)))).status).toBe(200);
+    for (const bad of ["a".repeat(201), 5]) {
+      const res = await post(named(bad));
+      expect(res.status).toBe(400);
+      expect(await res.json()).toEqual({ error: "Request body is not valid." });
+    }
+  });
   it("an empty records array gives 200 and []", async () => {
     const res = await handleVerify(postJson('{"records":[]}'), fixturesDeps());
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual([]);
+    expect(await res.json()).toEqual({ results: [], info: [] });
   });
 });

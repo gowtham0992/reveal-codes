@@ -30,7 +30,7 @@ function recordingFetch(script: VerifyScript, doc: Document) {
       const sent = JSON.parse(init?.body ?? "{}") as { records?: FullRecord[] };
       const results = script.results;
       const pairs = (sent.records ?? []).map((r, i) => [r.key, results[i % results.length]]);
-      return Promise.resolve(json(pairs));
+      return Promise.resolve(json({ results: pairs, info: [] }));
     }
     const id = /^\/api\/opinion\/(\d+)$/.exec(url)?.[1] ?? "";
     return Promise.resolve(json({ clusterId: id, text: opinionText(script, doc, id) }));
@@ -62,7 +62,7 @@ function expectedClusters(doc: Document): readonly string[] {
   return ids;
 }
 
-/** Windows of `doc.text` lying wholly outside every Full_Record range and not inside a record's text. */
+/** Windows of `doc.text` lying wholly outside every Full_Record range and not inside a record's text or `caseName` (case-match D12: the name is sent to the app's own server). */
 function outsideWindows(doc: Document): readonly string[] {
   const fulls = fullsOf(doc);
   const out: string[] = [];
@@ -70,7 +70,9 @@ function outsideWindows(doc: Document): readonly string[] {
     const clear = fulls.every((f) => i + WINDOW <= f.citation.start || i >= f.citation.end);
     const w = doc.text.slice(i, i + WINDOW);
     const own = (f: FullRecord): boolean =>
-      f.citation.text.includes(w) || (f.citation.normalised ?? "").includes(w);
+      f.citation.text.includes(w) ||
+      (f.citation.normalised ?? "").includes(w) ||
+      (f.citation.caseName ?? "").includes(w);
     if (clear && !fulls.some(own)) out.push(w);
   }
   return out;

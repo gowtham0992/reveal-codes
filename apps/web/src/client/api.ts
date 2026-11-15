@@ -1,4 +1,6 @@
 import type { CitationRecord, IssueKey, Result, VerificationResult } from "@reveal-codes/engine";
+import { isDisplayInfo } from "@reveal-codes/verifier/link";
+import type { DisplayInfo } from "@reveal-codes/verifier/link";
 import { streamDraft } from "./assistant-client";
 
 export type ApiError =
@@ -7,6 +9,9 @@ export type ApiError =
   | Readonly<{ kind: "shape" }>;
 export type FullRecord = Extract<CitationRecord, { kind: "full" }>;
 export type VerifyPairs = readonly (readonly [IssueKey, VerificationResult])[];
+export type InfoPairs = readonly (readonly [IssueKey, DisplayInfo])[];
+/** The verify route's answer: results, and Display_Info beside them (never part of a result). */
+export type VerifyReply = Readonly<{ pairs: VerifyPairs; info: InfoPairs }>;
 export type AssistantInfo = Readonly<{
   provider: "bedrock" | "anthropic" | "fixture";
   modelId: string | null;
@@ -26,7 +31,7 @@ export type ApiClient = Readonly<{
   verify(
     records: readonly FullRecord[],
     signal?: AbortSignal,
-  ): Promise<Result<VerifyPairs, ApiError>>;
+  ): Promise<Result<VerifyReply, ApiError>>;
   opinion(clusterId: string, signal?: AbortSignal): Promise<Result<string | null, ApiError>>;
   mode(): Promise<Result<ModeInfo, ApiError>>;
   demoMotion(): Promise<Result<string, ApiError>>;
@@ -49,11 +54,26 @@ function isStrings(value: unknown): boolean {
   return Array.isArray(value) && value.every((v) => typeof v === "string");
 }
 
+function isWrongCase(value: Record<string, unknown>): boolean {
+  const { clusterId, foundName, foundYear } = value;
+  if (typeof clusterId !== "string" || clusterId === "") return false;
+  if (typeof foundName !== "string" || foundName === "") return false;
+  return (
+    foundYear === undefined ||
+    (typeof foundYear === "number" &&
+      Number.isInteger(foundYear) &&
+      foundYear >= 1000 &&
+      foundYear <= 9999)
+  );
+}
+
 function isVerificationResult(value: unknown): value is VerificationResult {
   if (!isObject(value)) return false;
   switch (value["status"]) {
     case "verified":
       return typeof value["clusterId"] === "string";
+    case "wrong_case":
+      return isWrongCase(value);
     case "ambiguous":
       return isStrings(value["candidates"]);
     case "not_found":
@@ -70,14 +90,30 @@ function toPair(value: unknown): readonly [IssueKey, VerificationResult] | null 
   return typeof key === "string" && isVerificationResult(result) ? [key, result] : null;
 }
 
-function toPairs(body: unknown): Result<VerifyPairs, ApiError> {
-  if (!Array.isArray(body)) return { ok: false, error: { kind: "shape" } };
-  const pairs: (readonly [IssueKey, VerificationResult])[] = [];
-  for (const item of body as unknown[]) {
-    const pair = toPair(item);
-    if (pair !== null) pairs.push(pair);
+function toInfo(value: unknown): readonly [IssueKey, DisplayInfo] | null {
+  if (!Array.isArray(value) || value.length !== 2) return null;
+  const [key, info] = value as [unknown, unknown];
+  return typeof key === "string" && isDisplayInfo(info) ? [key, info] : null;
+}
+
+function collect<T>(items: unknown, read: (item: unknown) => T | null): readonly T[] {
+  const out: T[] = [];
+  for (const item of Array.isArray(items) ? (items as unknown[]) : []) {
+    const read1 = read(item);
+    if (read1 !== null) out.push(read1);
   }
-  return { ok: true, value: pairs };
+  return out;
+}
+
+/** Malformed pairs and malformed Display_Info items are dropped; a body that is not `{ results }` is a shape error. */
+function toReply(body: unknown): Result<VerifyReply, ApiError> {
+  if (!isObject(body) || !Array.isArray(body["results"])) {
+    return { ok: false, error: { kind: "shape" } };
+  }
+  return {
+    ok: true,
+    value: { pairs: collect(body["results"], toPair), info: collect(body["info"], toInfo) },
+  };
 }
 
 function toOpinion(body: unknown): Result<string | null, ApiError> {
@@ -159,7 +195,7 @@ export function createApiClient(fetchFn: FetchFn): ApiClient {
           },
           signal,
         ),
-        jsonReader(toPairs),
+        jsonReader(toReply),
       ),
     opinion: (clusterId, signal) =>
       request(

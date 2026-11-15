@@ -97,7 +97,7 @@ describe("Verify flow on the demo motion _Requirements: 17.2, 17.3, 17.4, 17.5, 
     const server = routeFetch();
     const fetchFn: FetchFn = (url, init) =>
       url === "/api/verify"
-        ? Promise.resolve(new Response(JSON.stringify([]), { status: 200 }))
+        ? Promise.resolve(new Response(JSON.stringify({ results: [], info: [] }), { status: 200 }))
         : server.fetch(url, init);
     const store = demoStore();
     const outcome = await runVerifyFlow(createApiClient(fetchFn), store, CLOCK);

@@ -73,7 +73,7 @@ The Kiro Crew app that schedules the Sentinel lives in a separate repository: ht
 
 ## What leaves your machine
 
-- Verify sends only citation records to this app's own server, and from there only citation strings go to CourtListener. Your draft text is not sent.
+- Verify sends only citation records to this app's own server, and each record includes the case name written before the citation; from there only citation strings go to CourtListener. The rest of your draft text is not sent.
 - Quotation text is checked in the browser against the opinion and is never sent anywhere.
 - Draft, the assistant, sends the prompt and the paragraph at the cursor to the configured LLM provider. Nothing is sent to a provider unless you use Draft. The provider is Amazon Bedrock when `AWS_REGION` and `BEDROCK_MODEL_ID` are set, otherwise Anthropic when `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL` are set.
 - Exporting to DOCX and printing send nothing anywhere; both happen in your browser.

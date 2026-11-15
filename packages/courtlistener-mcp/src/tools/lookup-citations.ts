@@ -53,6 +53,7 @@ function describeDoc(doc: Document, index: number): unknown {
     start: r.citation.start,
     end: r.citation.end,
     kind: r.kind,
+    ...(r.citation.caseName === undefined ? {} : { caseName: r.citation.caseName }),
     result: r.kind === "other" ? null : verificationOf(doc, r.key),
   }));
   return { index, citations };

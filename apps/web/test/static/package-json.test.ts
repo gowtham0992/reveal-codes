@@ -67,7 +67,11 @@ describe("apps/web package.json _Requirements: 1.1, 1.2, 1.4, 1.5, 1.6, 1.7, 1.9
 });
 
 describe("verifier package.json _Requirements: 1.8_", () => {
-  it("exports the root and the quote subpath", () => {
-    expect(verifier.exports).toEqual({ ".": "./src/index.ts", "./quote": "./src/quote.ts" });
+  it("exports the root, the link subpath and the quote subpath", () => {
+    expect(verifier.exports).toEqual({
+      ".": "./src/index.ts",
+      "./link": "./src/link.ts",
+      "./quote": "./src/quote.ts",
+    });
   });
 });

@@ -34,7 +34,7 @@ export function createServer(ctx: ToolContext): McpServer {
     "lookup_citations",
     {
       description:
-        "Extract citations from 1 to 50 strings and verify each against CourtListener. Returns text, offsets, source index and result.",
+        "Extract citations from 1 to 50 strings and verify each against CourtListener. Returns text, offsets, source index and result, and the case name read before each full citation.",
       inputSchema: lookupCitationsShape,
     },
     (args) => guarded("lookup_citations", ctx, () => handleLookupCitations(args, ctx)),

@@ -2,7 +2,7 @@ import { checkQuote } from "@reveal-codes/verifier/quote";
 import type { Document, IssueKey, QuoteCheckResult } from "@reveal-codes/engine";
 import { CHECKS_BUSY } from "../notices";
 import type { Store } from "../store-runtime";
-import type { ApiClient, ApiError, FullRecord } from "./api";
+import type { ApiClient, ApiError, FullRecord, InfoPairs } from "./api";
 import { FAILED_NOTICE, tallyDocument } from "./verify-summary";
 
 export type FlowStore = Pick<Store, "getState" | "dispatch">;
@@ -17,6 +17,8 @@ export type VerifyOutcome = Readonly<{
   quotes: Readonly<{ match: number; mismatch: number; unchecked: number }>;
   skipped: number;
   unavailable: number;
+  /** Display_Info of the run's Resolved_Citations, by issue key. Memory only; never stored in the Document. */
+  info?: InfoPairs;
   /** A failed run: the sentence the Issues region shows for it. */
   failure?: string;
   /** True when a lookup was refused by the server's request limit. */
@@ -98,7 +100,7 @@ function outcome(
   store: FlowStore,
   skipped: number,
   unavailable: number,
-  extra: Pick<VerifyOutcome, "failure" | "limited"> = {},
+  extra: Pick<VerifyOutcome, "failure" | "limited" | "info"> = {},
 ): VerifyOutcome {
   const counts = status === "completed" ? tallyDocument(store.getState().document) : null;
   return {
@@ -164,17 +166,14 @@ export async function runVerifyFlow(
     store.dispatch({ type: "notice", text: failure });
     return outcome("failed", store, 0, 0, { failure });
   }
-  const first = store.dispatch({ type: "verification", pairs: verified.value });
+  const first = store.dispatch({ type: "verification", pairs: verified.value.pairs });
   const phase = await runQuotePhase(api, store, epoch);
   if (phase.discarded) return outcome("discarded", store, 0, 0);
   store.dispatch({ type: "verified", at: now().toISOString() });
-  const done = outcome(
-    "completed",
-    store,
-    first.skipped + phase.skipped,
-    phase.unavailable,
-    phase.limited ? { limited: true } : {},
-  );
+  const done = outcome("completed", store, first.skipped + phase.skipped, phase.unavailable, {
+    info: verified.value.info,
+    ...(phase.limited ? { limited: true } : {}),
+  });
   const shown = store.getState().notice;
   if (shown === FAILED_NOTICE || shown === CHECKS_BUSY)
     store.dispatch({ type: "notice", text: null });
