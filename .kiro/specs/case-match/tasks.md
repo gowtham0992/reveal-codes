@@ -214,7 +214,7 @@ Conventions for every task:
     - Resolved list hidden before a Verify_Run, rows after, absent when no `verified` citation, no effect on blocking count, Export button, Next_Step or `No issues.`.
     - _Requirements: 6.3, 6.4, 6.5, 7.1, 7.2, 7.4, 7.7, 7.8, 7.10, 7.12, 7.13, 7.16, 7.17, 13.5_
 
-- [-] 6. Checkpoint - Web display complete
+- [x] 6. Checkpoint - Web display complete
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 7. Statement and Appendix (Requirement 8)

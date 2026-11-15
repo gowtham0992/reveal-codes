@@ -52,7 +52,16 @@ describe("failingFlags _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_", () => {
 
 describe("isFailingOpener _Requirements: 6.4, 6.5_", () => {
   it("accepts the display form with or without brackets and rejects the rest", () => {
-    for (const code of ["CIT ✘", "[CIT ✘]", "CIT ≠", "[CIT ≠]", "CIT ?", "[CIT ?:2]", "QUO ✘", "[QUO ✘]"]) {
+    for (const code of [
+      "CIT ✘",
+      "[CIT ✘]",
+      "CIT ≠",
+      "[CIT ≠]",
+      "CIT ?",
+      "[CIT ?:2]",
+      "QUO ✘",
+      "[QUO ✘]",
+    ]) {
       expect(isFailingOpener(code)).toBe(true);
     }
     for (const code of ["CIT ✓", "[CIT …]", "QUO ✓", "QUO …", "[/CIT]", "[HUM]", "[OVR:x]"]) {
