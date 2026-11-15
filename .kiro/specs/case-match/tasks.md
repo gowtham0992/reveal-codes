@@ -230,7 +230,7 @@ Conventions for every task:
     - **Property 14: Statement counts and status cell**
     - **Validates: Requirements 8.1, 8.2, 8.3, 8.4**
 
-  - [-]* 7.3 Write Statement example tests
+  - [x]* 7.3 Write Statement example tests
     - Statement paragraph, Status cell with and without year, Overrides table row with `CIT ≠`, DOCX builder and `/print` view show the new blocks.
     - _Requirements: 8.1, 8.4, 8.5, 8.7, 13.5_
 
@@ -246,7 +246,7 @@ Conventions for every task:
     - **Property 15: Sentinel finding rule**
     - **Validates: Requirements 9.2, 9.3, 9.4, 9.5**
 
-  - [-]* 8.3 Write Sentinel example tests
+  - [x]* 8.3 Write Sentinel example tests
     - `verified` to `wrong_case`, `wrong_case` to `verified`, an appendix containing `CIT ≠` parses, and a pre-spec filing yields no finding and no error.
     - _Requirements: 9.2, 9.3, 9.7, 9.8, 13.5_
 
