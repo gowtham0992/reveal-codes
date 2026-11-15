@@ -272,7 +272,7 @@ Conventions for every task:
     - _Requirements: 10.5, 10.6, 10.7, 10.8, 10.9, 10.10, 10.11, 10.12, 10.15, 13.5_
 
 - [ ] 10. Recording script and its tests (Requirement 11)
-  - [-] 10.1 Write the recording script
+  - [x] 10.1 Write the recording script
     - Create `packages/verifier/scripts/record-lookups.ts` with `trimEntry`, `recordLookups`, `checkExpected` and `main`; add `scripts` to `packages/verifier/tsconfig.json` `include`.
     - `main` is the only reader of `COURTLISTENER_TOKEN`; it prints one line and exits 1 before any request when it is unset. The token is never printed, logged or written.
     - Request the seven lines in one chunk using `buildLookupRequest`. Dry run by default; with differences exit 2 and write nothing; with `--write` and no differences write `fixtures/lookup/<slug>.json` for the six new lines only. Never record `360 N.J. Super. 360` or `821 F.2d 1147`.
