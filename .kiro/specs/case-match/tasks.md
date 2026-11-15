@@ -360,7 +360,7 @@ Conventions for every task:
 Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. They are written from the design section "Follow-up: walkthrough findings". No task commits or pushes. Each existing test that changes is edited in the task that changes it and listed in the BUILD_LOG entry of task 20.3.
 
 - [ ] 15. Empty-page links take a pointer click (Requirement 17)
-  - [-] 15.1 Make the links the hit target and keep focus in the editor
+  - [x] 15.1 Make the links the hit target and keep focus in the editor
     - In `apps/web/src/components/editor-surface.tsx` render the `samples` list after `<EditorContent>` inside `.page`, still only while `empty` and `onLoadSample` is given.
     - Add `onMouseDown` on each link that calls `e.preventDefault()`. Keep `onClick`'s `preventDefault` and the load call.
     - In `editor-surface.module.css` add `pointer-events: none` to `.samples` and a rule `.samples a { pointer-events: auto; display: inline-block; }`. Add no `z-index` anywhere (design D15: the Modal overlay has none, and a `z-index` on the list would lift it above the overlay). Add no colour literal, Token, outline or transition.
