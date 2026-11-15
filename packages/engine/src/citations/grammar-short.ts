@@ -13,23 +13,23 @@
  * `matchShortAt` puts both in one class; the longer wins at the same `p`, so
  * `Id. Smith, 5 U.S. at 9` is one party Short_Form (D16).
  *
+ * Pincites. `Id. at` and the party tail read a Pincite_Expression
+ * (`pincite.ts`, Req 18): up to five items `page[-short]` joined by `, `, at
+ * most 24 code units. The value keeps the first page; the match end is the
+ * end of the expression.
+ *
  * Read bound. Behind `p`: `matchIdAt` reads `text[p − 1]`; the party form
  * reads `text[p − 2 .. p)` for its fast reject and `partyStartFor` reads
  * indices `≥ c − PARTY_SCAN ≥ p − 160`, inside `LOOKBEHIND` (162). Ahead:
- * the last comma is at most `p + MAX_PARTY`, and the tail reads under 70 code
- * units past it, inside `LOOKAHEAD`. Nothing here throws.
+ * the last comma is at most `p + MAX_PARTY`, and the tail reads under 130 code
+ * units past it (a 24-unit pincite and the `startsMember` look-ahead of a
+ * later item), inside `LOOKAHEAD`. Nothing here throws.
  */
 
 import type { IdValue, PartyValue } from "../types.js";
-import {
-  PAGE_RANGE,
-  PINCITE_RANGE,
-  VOLUME_RANGE,
-  isWordCharAt,
-  readInt,
-  readLiteral,
-} from "./lex.js";
-import { resolveReporterAt } from "./grammar.js";
+import { VOLUME_RANGE, readInt, readLiteral } from "./lex.js";
+import { resolveReporterAt, startsMember } from "./grammar.js";
+import { readPinciteExpression, type PinciteRead } from "./pincite.js";
 import { MAX_PARTY, partyStartFor } from "./party.js";
 import { isPartyWordUnitAt } from "./party-lex.js";
 import { LEGAL_ABBREVIATION_INDEX } from "./reporters.js";
@@ -52,14 +52,9 @@ function idLeftContextOk(text: string, p: number): boolean {
   return WHITESPACE.test(before) || ID_OPENERS.has(before);
 }
 
-/** Reads a number that is not followed by a letter or digit (Req 9.8). */
-function readBoundedInt(
-  text: string,
-  at: number,
-  range: typeof PAGE_RANGE,
-): ReturnType<typeof readInt> {
-  const n = readInt(text, at, range);
-  return n === null || isWordCharAt(text, n.end) ? null : n;
+/** Reads a Pincite_Expression (Req 18); `first` is the stored pincite. */
+function readPinciteAt(text: string, at: number): PinciteRead | null {
+  return readPinciteExpression(text, at, { list: true, startsMember });
 }
 
 /**
@@ -72,11 +67,11 @@ export function matchIdAt(text: string, p: number): IdMatch | null {
   const idEnd = readLiteral(text, p, "Id.");
   if (idEnd === null) return null;
   const atEnd = readLiteral(text, idEnd, " at ");
-  const page = atEnd === null ? null : readBoundedInt(text, atEnd, PINCITE_RANGE);
+  const page = atEnd === null ? null : readPinciteAt(text, atEnd);
   if (page === null) {
     return { start: p, end: idEnd, value: { kind: "short", form: "id", targetStart: null } };
   }
-  const value: IdValue = { kind: "short", form: "id", pincite: page.value, targetStart: null };
+  const value: IdValue = { kind: "short", form: "id", pincite: page.first, targetStart: null };
   return { start: p, end: page.end, value };
 }
 
@@ -103,9 +98,9 @@ function matchPartyTailAt(text: string, c: number): Tail | null {
   if (vol === null || text[vol.end] !== " ") return null;
   return resolveReporterAt(text, vol.end + 1, (reporter, e) => {
     const pageStart = readLiteral(text, e, " at ");
-    const page = pageStart === null ? null : readBoundedInt(text, pageStart, PAGE_RANGE);
+    const page = pageStart === null ? null : readPinciteAt(text, pageStart);
     if (page === null) return null;
-    return { volume: vol.value, reporter, page: page.value, end: page.end };
+    return { volume: vol.value, reporter, page: page.first, end: page.end };
   });
 }
 

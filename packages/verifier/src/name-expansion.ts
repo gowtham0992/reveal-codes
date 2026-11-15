@@ -57,6 +57,22 @@ export const DROPPED_WORDS: ReadonlySet<string> = new Set([
   "llp",
   "plc",
   "na",
+  // Role_Words (Requirement 20)
+  "plaintiff",
+  "plaintiffs",
+  "defendant",
+  "defendants",
+  "appellant",
+  "appellants",
+  "appellee",
+  "appellees",
+  "petitioner",
+  "petitioners",
+  "respondent",
+  "respondents",
+  "individually",
+  "deceased",
+  "no",
 ]);
 
 export const INITIALS_SKIP_WORDS: ReadonlySet<string> = new Set(["of", "and", "the", "for"]);

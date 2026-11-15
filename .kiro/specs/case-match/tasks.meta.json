@@ -1114,6 +1114,178 @@
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794781502415
       }
+    ],
+    "15.1 Make the links the hit target and keep focus in the editor": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786651939
+      },
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786660117
+      }
+    ],
+    "15.2 Add the static stylesheet test": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786651972
+      }
+    ],
+    "15.3 Add the structure and event tests": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786651997
+      }
+    ],
+    "16.1 Read the Pincite_Expression and keep the value": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652035
+      },
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786661160
+      }
+    ],
+    "16.2 Extend the citation arbitraries": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652058
+      }
+    ],
+    "16.4 Write the pincite example tests": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652082
+      }
+    ],
+    "16.5 Re-check the Avianca sample and the worked outcomes": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652105
+      }
+    ],
+    "17. Checkpoint - Links and pincite complete": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652129
+      }
+    ],
+    "18.1 Add the shared lines and use them in the Issues row": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652156
+      }
+    ],
+    "18.2 Show the lines and the link in the Export dialog row": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652220
+      }
+    ],
+    "18.3 Show the lines in the Override dialog": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652305
+      }
+    ],
+    "18.4 Write the mismatch tests": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652339
+      }
+    ],
+    "19.1 Add the Role_Words to the Dropped_Words": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652362
+      },
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786662110
+      },
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786884459
+      }
+    ],
+    "19.2 Mirror the words in the engine arbitraries": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652389
+      }
+    ],
+    "19.3 Add the list-drift test": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652412
+      }
+    ],
+    "19.4 Write the role-word examples and re-run the worked outcomes": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652436
+      }
+    ],
+    "20.1 Add the two Sentinel examples for Requirement 9, criterion 8": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652462
+      },
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786662559
+      }
+    ],
+    "20.2 Update the aggregate inventory test": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652487
+      }
+    ],
+    "20.3 Write the BUILD_LOG entry and update the steering file and usage doc": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652512
+      }
+    ],
+    "21. Final checkpoint": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786652536
+      }
+    ],
+    "16.3 Write property test for the pincite expression": [
+      {
+        "executionId": "4b3d941a-021d-403c-a674-b558d29d4796",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794786656322
+      }
     ]
   }
 }

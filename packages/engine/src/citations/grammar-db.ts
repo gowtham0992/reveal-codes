@@ -4,7 +4,9 @@
  *   <yyyy> WL <n>
  *   <yyyy> <court tokens> LEXIS <n>
  *
- * each optionally followed by `, at *<pincite>`, then optionally by a
+ * each optionally followed by `, at *<pincite>` (one item of a
+ * Pincite_Expression, `page` or `page-short`, no list: Req 18; the value keeps
+ * the first page and the match end moves), then optionally by a
  * ` (<court> <year>|<year>|<court>)` parenthetical. The parenthetical is kept
  * in the match range (Req 9.2) but not in the value; format() never prints it,
  * so a citation written with one gets a Normalised_Form (Req 11.2).
@@ -26,13 +28,13 @@
  * (`isUnlistedLexisCourt`) records the court as written with
  * `lexisCourtListed: false`; any other court is no citation.
  *
- * Reads stay within `[p − 2, p + 140)`, well inside `LOOKAHEAD`.
+ * Reads stay within `[p − 2, p + 150)` (the pincite adds at most 11 code
+ * units for `371-72345`), well inside `LOOKAHEAD`.
  */
 
 import type { DatabaseValue } from "../types.js";
 import {
   DOC_NUMBER_RANGE,
-  PINCITE_RANGE,
   YEAR_RANGE,
   type IntRange,
   isWordCharAt,
@@ -43,6 +45,7 @@ import {
 } from "./lex.js";
 import { isCourtText, MAX_COURT_LENGTH } from "./grammar.js";
 import { isUnlistedLexisCourt, lookupLexisCourt } from "./lexis-courts.js";
+import { readPinciteExpression } from "./pincite.js";
 
 /** A Database_Citation match: `[start, end)` and its value. */
 export type DatabaseMatch = Readonly<{ start: number; end: number; value: DatabaseValue }>;
@@ -169,7 +172,9 @@ function readBoundedInt(text: string, at: number, range: IntRange): NumberField 
 /** Reads `, at *<pincite>` at `at`, or returns `null` if it does not parse. */
 function readPincite(text: string, at: number): NumberField | null {
   const lead = readLiteral(text, at, PINCITE_LEAD);
-  return lead === null ? null : readBoundedInt(text, lead, PINCITE_RANGE);
+  if (lead === null) return null;
+  const read = readPinciteExpression(text, lead, { list: false, startsMember: () => false });
+  return read === null ? null : { value: read.first, end: read.end };
 }
 
 /**

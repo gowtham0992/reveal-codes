@@ -27,12 +27,16 @@ export function EditorSurface({ editor, empty, onLoadSample }: EditorSurfaceProp
             {EDITOR_PLACEHOLDER}
           </div>
         ) : null}
+        <EditorContent editor={editor} className={styles["content"]} />
         {empty && onLoadSample !== undefined ? (
           <ul className={styles["samples"]}>
             {SAMPLE_LINKS.map((l) => (
               <li key={l.key}>
                 <a
                   href={l.href}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                  }}
                   onClick={(e) => {
                     e.preventDefault();
                     onLoadSample(l.key);
@@ -44,7 +48,6 @@ export function EditorSurface({ editor, empty, onLoadSample }: EditorSurfaceProp
             ))}
           </ul>
         ) : null}
-        <EditorContent editor={editor} className={styles["content"]} />
       </div>
     </main>
   );

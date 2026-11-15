@@ -109,4 +109,10 @@
   padding: 0;
   list-style: none;
   color: var(--oxblood);
+  pointer-events: none;
+}
+
+.samples a {
+  pointer-events: auto;
+  display: inline-block;
 }

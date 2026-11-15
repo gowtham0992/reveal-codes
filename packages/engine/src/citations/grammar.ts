@@ -12,9 +12,15 @@
  * (`lookupReporter`, first `reporters.json` entry wins), and the first token
  * whose member parse succeeds wins.
  *
- * Read bound. A member reads at most 6 + 1 + 41 + 6 + 2 code units, and a
- * pincite check adds 2 + 6 + 1 + 41 + 2 more past the page. Four members and
- * a parenthetical (2 + 46) therefore read under 450 code units past `p`,
+ * A pincite is a Pincite_Expression (`pincite.ts`, Req 18): `, ` then up to
+ * five items `page[-short]` joined by `, `, at most 24 code units. The value
+ * keeps the first page; only the match end moves.
+ *
+ * Read bound. A member reads at most 6 + 1 + 41 + 6 + 2 = 56 code units and a
+ * pincite adds `, ` and at most 24, so 82 (the design counts 78 at the
+ * 52-unit member maximum). The `startsMember` look-ahead for a later item
+ * starts at most 24 code units in and reads under 56 more. Four members and
+ * a parenthetical (2 + 46) therefore read under 500 code units past `p`,
  * inside `LOOKAHEAD` (1,024). The only read behind `p` is `text[p − 2 .. p)`
  * for the Req 9.8 left boundary. Nothing here throws.
  */
@@ -22,7 +28,6 @@
 import type { ParallelValue, ReporterMember, ReporterValue } from "../types.js";
 import {
   PAGE_RANGE,
-  PINCITE_RANGE,
   VOLUME_RANGE,
   YEAR_RANGE,
   isAsciiDigitAt,
@@ -33,6 +38,7 @@ import {
   readSpaces,
   type IntRead,
 } from "./lex.js";
+import { readPinciteExpression } from "./pincite.js";
 import { lookupReporter } from "./reporters.js";
 
 /** Longest reporter token the resolver tries (the generator drops longer entries). */
@@ -111,7 +117,7 @@ function readMemberCore(text: string, at: number): MemberRead | null {
  * True when `at` starts `<number> <reporter> <digit>`: a number in that
  * position is a parallel volume, never a pincite (design A9 step 3).
  */
-function startsMember(text: string, at: number): boolean {
+export function startsMember(text: string, at: number): boolean {
   const vol = readInt(text, at, VOLUME_RANGE);
   const tokenStart = vol === null ? null : readSpaces(text, vol.end);
   if (tokenStart === null) return false;
@@ -121,11 +127,15 @@ function startsMember(text: string, at: number): boolean {
   return hit === true;
 }
 
-/** Reads `, <pincite>` after a page, unless the number starts a member. */
+/**
+ * Reads `, <Pincite_Expression>` after a page, unless the first number starts
+ * a member. `value` is the First_Page; `end` is the end of the expression.
+ */
 function readPincite(text: string, at: number): IntRead | null {
   const n = readCommaSpace(text, at);
   if (n === null || startsMember(text, n)) return null;
-  return readBoundedInt(text, n, PINCITE_RANGE);
+  const read = readPinciteExpression(text, n, { list: true, startsMember });
+  return read === null ? null : { value: read.first, end: read.end };
 }
 
 /** Reads one member, `<vol> <reporter> <page>[, <pincite>]`, at `at`. */
