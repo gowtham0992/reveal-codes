@@ -1,5 +1,23 @@
 {
-  "pbtResults": {},
+  "pbtResults": {
+    "8.2 Write property test for the Sentinel finding rule": {
+      "status": "passed",
+      "lastRunTimestamp": 1794776058785
+    },
+    "3.5 Write property test for name matching": {
+      "status": "passed",
+      "lastRunTimestamp": 1794776086024
+    },
+    "7.2 Write property test for Statement counts and the Status cell": {
+      "status": "passed",
+      "lastRunTimestamp": 1794776109149
+    },
+    "1.5 Write property test for the cited name": {
+      "status": "failed",
+      "failingExample": "Counterexample: [{\"s\":{\"name\":\"Aaaa. Aaaa v. Dep't\",\"leadIn\":\"\",\"boundary\":\"\",\"gap\":\" \",\"citation\":\"410 U.S. 113, 116 (1973)\",\"stringCite\":false}}] — expected caseName \"Aaaa. Aaaa v. Dep't\", got \"Aaaa v. Dep't\". Also (with names starting with a dotted word excluded): name \"Nnnn de Dep't v. Nnnn\" gives \"Dep't v. Nnnn\". seed -374445900",
+      "lastRunTimestamp": 1794776131178
+    }
+  },
   "executionHistory": {
     "1.1 Record the cited name in the Extractor and in carry-over": [
       {
@@ -440,6 +458,11 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772480226
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794776019110
       }
     ],
     "1.6 Write property test for carry-over of `caseName`": [
@@ -496,6 +519,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772483885
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794776019178
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794776186902
       }
     ],
     "3.6 Write property test for the verifier rule": [
@@ -545,6 +578,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772488190
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794776019226
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794776186980
       }
     ],
     "5.5 Write property test for the Citations line": [
@@ -566,6 +609,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772490038
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794776019504
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794776187010
       }
     ],
     "7.3 Write Statement example tests": [
@@ -580,6 +633,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772491430
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794776019984
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794776187064
       }
     ],
     "8.3 Write Sentinel example tests": [

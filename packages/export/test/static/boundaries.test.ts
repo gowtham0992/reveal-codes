@@ -299,7 +299,10 @@ describe("property files _Requirements: 10.5_", () => {
 
   it("each existing property file holds its own numbered comment above a single fc.assert", () => {
     const present = PROPERTY_FILES.filter((p) => existsSync(join(TEST_DIR, p.file)));
-    const sources = readDir(TEST_DIR, ".properties.test.ts");
+    // case-match numbers its properties within its own spec (design D9); task 13.6 checks them.
+    const sources = readDir(TEST_DIR, ".properties.test.ts").filter(
+      (s) => basename(s.path) !== "case-match.properties.test.ts",
+    );
     const violations = sources.flatMap((s) => {
       const entry = PROPERTY_FILES.find((p) => p.file === basename(s.path));
       if (entry === undefined) return [at(s, 1, "property file is not one of the known files")];

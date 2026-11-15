@@ -50,7 +50,7 @@ Conventions for every task:
     - Confirm the existing extraction, strip, render-order and incremental-equals-full properties pass unedited.
     - _Requirements: 13.3, 13.9, 1.10, 3.3, 3.4_
 
-  - [~]* 1.5 Write property test for the cited name
+  - [-]* 1.5 Write property test for the cited name
     - Create `packages/engine/test/case-match.properties.test.ts`.
     - **Property 3: The cited name is read back**
     - Generate names with `arbTolerantCaseName` (unlisted dotted abbreviations and apostrophe contractions as well as listed forms), `arbInReName`, `arbLeadIn` and `arbNameBoundary`, and assert the `caseName` equals the name as written, without lead-in and closing comma, and is at most 164 code units.
@@ -121,7 +121,7 @@ Conventions for every task:
     - The check of this spec's markers is the one aggregate inventory test of task 13.6, which requires all eighteen.
     - _Requirements: 13.1, 13.9_
 
-  - [~]* 3.5 Write property test for name matching
+  - [x]* 3.5 Write property test for name matching
     - Create `packages/verifier/test/case-match.properties.test.ts`.
     - **Property 1: Name matching**
     - **Validates: Requirements 4.2, 4.5, 4.6, 4.7, 4.8, 4.10, 4.12, 4.13**
@@ -199,7 +199,7 @@ Conventions for every task:
     - Use only existing Tokens and the existing link colour; no exclamation mark, icon or emoji.
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.7, 7.8, 7.10, 7.11, 7.13, 7.14, 7.16, 7.17, 7.18_
 
-  - [~]* 5.4 Write property test for Resolved list selection
+  - [x]* 5.4 Write property test for Resolved list selection
     - Create `apps/web/test/case-match.properties.test.ts`.
     - **Property 16: Resolved list selection**
     - **Validates: Requirements 7.5, 7.12, 7.13, 7.14, 7.15, 7.17**
@@ -225,7 +225,7 @@ Conventions for every task:
     - Edit `packages/export/test/render-statement.test.ts`, `packages/export/test/null-order.test.ts` and `apps/web/test/export-flow.test.tsx` for the new paragraph, and note them for BUILD_LOG.
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.8, 3.9, 13.9_
 
-  - [~]* 7.2 Write property test for Statement counts and the Status cell
+  - [x]* 7.2 Write property test for Statement counts and the Status cell
     - Create `packages/export/test/case-match.properties.test.ts`.
     - **Property 14: Statement counts and status cell**
     - **Validates: Requirements 8.1, 8.2, 8.3, 8.4**
@@ -241,7 +241,7 @@ Conventions for every task:
     - Leave `reverify.ts`, `recorded.ts`, `split.ts` and `analyse.ts` unchanged.
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 2.12_
 
-  - [~]* 8.2 Write property test for the Sentinel finding rule
+  - [x]* 8.2 Write property test for the Sentinel finding rule
     - Create `crew/sentinel/test/case-match.properties.test.ts`.
     - **Property 15: Sentinel finding rule**
     - **Validates: Requirements 9.2, 9.3, 9.4, 9.5**
