@@ -31,6 +31,14 @@
     "1.7 Write property test for `wrong_case` blocking export": {
       "status": "passed",
       "lastRunTimestamp": 1794780217743
+    },
+    "3.8 Write property test for the lookup request body": {
+      "status": "passed",
+      "lastRunTimestamp": 1794780326274
+    },
+    "1.8 Write property test for malformed `wrong_case` results": {
+      "status": "passed",
+      "lastRunTimestamp": 1794780338928
     }
   },
   "executionHistory": {
@@ -524,6 +532,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772480714
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780290729
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780429192
       }
     ],
     "1.9 Write property test for Override survival": [
@@ -610,6 +628,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772487255
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780291722
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780429259
       }
     ],
     "3.9 Write property test for Display_Info derivation": [
@@ -757,6 +785,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772492460
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780292223
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780429305
       }
     ],
     "10.3 Write property test for credential-free recordings": [
@@ -788,6 +826,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772494200
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780292902
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780429344
       }
     ],
     "1. Engine: cited name, `wrong_case` status and Reveal Codes form (Requirements 1 to 3)": [

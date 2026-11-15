@@ -340,3 +340,51 @@ describe("Property 10: A cache hit gives the live result _Requirements: 5.7_", (
     );
   });
 });
+
+// ---- Property 11 harness: the requests of a run over records with and without case names. ----
+
+/** Every request of a run with a token configured, over fresh deps and the scenario's answers. */
+async function requestsOf(
+  s: Scenario,
+  records: CitationRecord[],
+): Promise<ReturnType<typeof makeDeps>["fetch"]["calls"]> {
+  const steps = planLookup(records)
+    .chunks.filter((chunk) => !chunk.oversize)
+    .map((chunk) => ({
+      status: 200,
+      body: chunk.lines.map((line) => entryOf(s, Number.parseInt(line, 10) - 100)),
+    }));
+  const run = makeDeps(steps, { token: "tok-secret" });
+  await lookupWithInfo(records, run.deps);
+  return run.fetch.calls;
+}
+
+// Feature: case-match, Property 11: the lookup request carries no case name
+// Property 11
+describe("Property 11: The lookup request carries no case name _Requirements: 5.6, 15.7_", () => {
+  it("sends the same requests with or without case names, and no case name appears outside a Citation_Line", async () => {
+    await fc.assert(
+      fc.asyncProperty(arbScenario, async (s) => {
+        const named = recordsOf(s, true);
+        const withNames = await requestsOf(s, named);
+        const without = await requestsOf(s, recordsOf(s, false));
+
+        expect(withNames.map((c) => c.body)).toEqual(without.map((c) => c.body));
+        expect(withNames.map((c) => c.url)).toEqual(without.map((c) => c.url));
+        expect(withNames.map((c) => c.headers)).toEqual(without.map((c) => c.headers));
+
+        const lines = planLookup(named).lines.join("\n");
+        const names = new Set(s.records.flatMap((r) => (r.cited === undefined ? [] : [r.cited])));
+        for (const call of withNames) {
+          const haystack = [call.url, call.body ?? "", call.text, ...Object.values(call.headers)];
+          for (const name of names) {
+            if (lines.includes(name)) continue;
+            for (const part of haystack) expect(part).not.toContain(name);
+            for (const part of haystack) expect(part).not.toContain(encodeURIComponent(name));
+          }
+        }
+      }),
+      { numRuns: runs() },
+    );
+  });
+});

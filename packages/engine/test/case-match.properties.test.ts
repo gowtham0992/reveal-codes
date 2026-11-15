@@ -255,3 +255,125 @@ describe("case-match wrong_case blocks export _Requirements: 2.6, 2.7, 2.8, 2.11
     expect(wrongSeen).toBeGreaterThan(0);
   });
 });
+
+type Payload = Readonly<Record<string, unknown>>;
+
+const arbBadText: fc.Arbitrary<unknown> = fc.oneof(
+  fc.constant(""),
+  fc.constant(undefined),
+  fc.constant(null),
+  fc.integer(),
+  fc.boolean(),
+  fc.array(fc.string(), { maxLength: 2 }),
+);
+
+const arbGoodText: fc.Arbitrary<unknown> = fc.string({ minLength: 1, maxLength: 8 });
+
+const arbBadYear: fc.Arbitrary<unknown> = fc.oneof(
+  fc.integer({ min: -100000, max: 999 }),
+  fc.integer({ min: 10000, max: 1000000 }),
+  fc.double({ noInteger: true, min: 1000, max: 9999 }),
+  fc.constantFrom(Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY),
+  fc.string({ maxLength: 6 }),
+  fc.constant(null),
+  fc.constant("2009"),
+);
+
+const arbGoodYear: fc.Arbitrary<number> = fc.integer({ min: 1000, max: 9999 });
+
+/** A wrong_case payload whose three fields are each good or bad, with `foundYear` possibly absent. */
+const arbPayload: fc.Arbitrary<Payload> = fc
+  .tuple(
+    fc.oneof(arbGoodText, arbBadText),
+    fc.oneof(arbGoodText, arbBadText),
+    fc.oneof(
+      fc.constant({ absent: true } as const),
+      arbGoodYear.map((v) => ({ absent: false, v }) as const),
+      arbBadYear.map((v) => ({ absent: false, v }) as const),
+    ),
+  )
+  .map(([clusterId, foundName, year]) => ({
+    status: "wrong_case",
+    clusterId,
+    foundName,
+    ...(year.absent ? {} : { foundYear: year.v }),
+  }));
+
+/** The first failing field among clusterId, foundName, foundYear, computed independently of the Engine. */
+function firstBadField(p: Payload): string | null {
+  const text = (v: unknown): boolean => typeof v === "string" && v.length > 0;
+  if (!text(p["clusterId"])) return "clusterId";
+  if (!text(p["foundName"])) return "foundName";
+  if (!("foundYear" in p)) return null;
+  const y = p["foundYear"];
+  return typeof y === "number" && Number.isInteger(y) && y >= 1000 && y <= 9999
+    ? null
+    : "foundYear";
+}
+
+const SHORT_FORM_TEXT = "The rule is in 410 U.S. 113, 116 (1973). Id. at 118.";
+
+// Property 6
+describe("case-match malformed wrong_case is rejected and named _Requirements: 2.3, 2.4, 2.5_", () => {
+  it("stores a well-formed payload, otherwise names the first failing field and leaves the Document unchanged", () => {
+    let rejected = 0;
+    let stored = 0;
+    fc.assert(
+      fc.property(arbNamedDocument, arbPayload, (doc, payload) => {
+        const before = structuredClone(doc);
+        const expectedField = firstBadField(payload);
+        for (const rec of fullRecords(doc)) {
+          const set = setVerification(doc, rec.key, payload as unknown as WrongCaseResult);
+          const v = rec.citation.value;
+          if (!set.ok && set.error.kind === "not_verifiable") {
+            // Only an unlisted Database_Citation is not verifiable among Full_Citations.
+            expect(v.kind === "database" && v.lexisCourtListed === false).toBe(true);
+            expect(doc).toEqual(before);
+            continue;
+          }
+          if (expectedField === null) {
+            expect(set.ok).toBe(true);
+            if (!set.ok) continue;
+            stored += 1;
+            const written = fullRecords(set.value).find((r) => r.key === rec.key);
+            expect(written?.result).toEqual(payload);
+          } else {
+            rejected += 1;
+            expect(set.ok).toBe(false);
+            if (set.ok) continue;
+            expect(set.error).toEqual({
+              kind: "invalid_verification_result",
+              field: expectedField,
+            });
+          }
+          expect(doc).toEqual(before);
+        }
+      }),
+      runs(),
+    );
+    expect(stored).toBeGreaterThan(0);
+    expect(rejected).toBeGreaterThan(0);
+  });
+
+  it("returns not_verifiable for a Short_Form key whatever the payload", () => {
+    const created = createDocument(SHORT_FORM_TEXT, TIMESTAMP);
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+    const doc = created.value;
+    const shorts = doc.citations.filter((r) => r.kind === "short");
+    expect(shorts.length).toBeGreaterThan(0);
+    fc.assert(
+      fc.property(arbPayload, (payload) => {
+        const before = structuredClone(doc);
+        for (const s of shorts) {
+          const set = setVerification(doc, s.key, payload as unknown as WrongCaseResult);
+          expect(set.ok).toBe(false);
+          if (set.ok) continue;
+          expect(set.error).toEqual({ kind: "not_verifiable", key: s.key });
+        }
+        expect(doc).toEqual(before);
+      }),
+      runs(),
+    );
+  });
+});

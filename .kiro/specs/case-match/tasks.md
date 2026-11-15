@@ -64,7 +64,7 @@ Conventions for every task:
     - **Property 5: `wrong_case` blocks export until overridden**
     - **Validates: Requirements 2.6, 2.7, 2.8, 2.11**
 
-  - [~]* 1.8 Write property test for malformed `wrong_case` results
+  - [x]* 1.8 Write property test for malformed `wrong_case` results
     - **Property 6: A malformed `wrong_case` result is rejected and named**
     - **Validates: Requirements 2.3, 2.4, 2.5**
 
@@ -135,7 +135,7 @@ Conventions for every task:
     - **Property 10: A cache hit gives the live result**
     - **Validates: Requirements 5.7**
 
-  - [~]* 3.8 Write property test for the lookup request body
+  - [x]* 3.8 Write property test for the lookup request body
     - **Property 11: The lookup request carries no case name**
     - **Validates: Requirements 5.6, 15.7**
 
@@ -265,7 +265,7 @@ Conventions for every task:
     - Leave the Toolbar unchanged.
     - _Requirements: 10.7, 10.8, 10.9, 10.10, 10.11, 10.12, 10.13_
 
-  - [~]* 9.3 Write Avianca example tests
+  - [x]* 9.3 Write Avianca example tests
     - The Extractor returns exactly six Full_Citations from the sample, each with its own `caseName` (`Varghese v. China Southern Airlines Co., Ltd.`, `Petersen v. Iran Air`, `Miller v. United Airlines, Inc.`, `Zicherman v. Korean Air Lines Co., Ltd.`, `Zicherman v. Korean Air Lines Co.`, `Chambers v. NASCO, Inc.`), and none from the first paragraph: `Mata v. Avianca, Inc., No. 22-cv-1461 (S.D.N.Y. 2023)` and `ECF 54 at 7` yield no citation, and no `caseName` begins in or reaches back across a blank line into the explanatory sentences. If any line reads differently, stop and report which line and why before changing the text (Requirement 10, criterion 15).
     - `copy-demo.ts` copies the sample byte for byte.
     - Empty-page links: order, keyboard focus, not `aria-hidden`, absent when text exists, load behaviour, failure notice.
@@ -311,7 +311,7 @@ Conventions for every task:
     - Re-check every count asserted by `packages/verifier/test/fixtures.test.ts` and `demo-corpus.test.ts` and edit them for the six added entries; note the edit for BUILD_LOG. Confirm the credential scan of 10.2 still passes.
     - _Requirements: 11.5, 11.7, 10.14, 13.9_
 
-  - [~]* 12.3 Write worked-outcome example tests
+  - [x]* 12.3 Write worked-outcome example tests
     - One example per row of the design's worked-outcome tables, run against `createFixtureFetch` and the routed fixtures: the five Introduction rows, every Full_Citation and Short_Form of the Demo_Motion, the six Avianca citations, and every existing fixture line.
     - Henderson gives `wrong_case` and Ashcroft gives `verified` on `556 U.S. 662`; `1 Hill 150`, `576 U.S. 644` and the 404 lines keep their results with no name comparison.
     - The Demo_Motion's Alvarez and Okafor rows assert that each carries a `caseName` (`Alvarez v. Cascade Residential Mgmt., LLC` and `Okafor v. Lindqvist Props.`) and still gives `not_found`.
