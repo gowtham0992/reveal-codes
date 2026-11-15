@@ -321,8 +321,23 @@ describe("case-match malformed wrong_case is rejected and named _Requirements: 2
   it("stores a well-formed payload, otherwise names the first failing field and leaves the Document unchanged", () => {
     let rejected = 0;
     let stored = 0;
+    const created = createDocument(SHORT_FORM_TEXT, TIMESTAMP);
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+    const shortDoc = created.value;
+    const shorts = shortDoc.citations.filter((r) => r.kind === "short");
+    expect(shorts.length).toBeGreaterThan(0);
     fc.assert(
       fc.property(arbNamedDocument, arbPayload, (doc, payload) => {
+        // A Short_Form key is not verifiable whatever the payload.
+        const shortBefore = structuredClone(shortDoc);
+        for (const s of shorts) {
+          const set = setVerification(shortDoc, s.key, payload as unknown as WrongCaseResult);
+          expect(set.ok).toBe(false);
+          if (set.ok) continue;
+          expect(set.error).toEqual({ kind: "not_verifiable", key: s.key });
+        }
+        expect(shortDoc).toEqual(shortBefore);
         const before = structuredClone(doc);
         const expectedField = firstBadField(payload);
         for (const rec of fullRecords(doc)) {
@@ -356,28 +371,6 @@ describe("case-match malformed wrong_case is rejected and named _Requirements: 2
     );
     expect(stored).toBeGreaterThan(0);
     expect(rejected).toBeGreaterThan(0);
-  });
-
-  it("returns not_verifiable for a Short_Form key whatever the payload", () => {
-    const created = createDocument(SHORT_FORM_TEXT, TIMESTAMP);
-    expect(created.ok).toBe(true);
-    if (!created.ok) return;
-    const doc = created.value;
-    const shorts = doc.citations.filter((r) => r.kind === "short");
-    expect(shorts.length).toBeGreaterThan(0);
-    fc.assert(
-      fc.property(arbPayload, (payload) => {
-        const before = structuredClone(doc);
-        for (const s of shorts) {
-          const set = setVerification(doc, s.key, payload as unknown as WrongCaseResult);
-          expect(set.ok).toBe(false);
-          if (set.ok) continue;
-          expect(set.error).toEqual({ kind: "not_verifiable", key: s.key });
-        }
-        expect(doc).toEqual(before);
-      }),
-      runs(),
-    );
   });
 });
 

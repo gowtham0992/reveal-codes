@@ -307,7 +307,11 @@ describe("sentinel boundaries _Requirements: 1.8, 1.9, 1.10, 1.11, 1.12_", () =>
   });
 
   it("exactly three Property comments, 1, 2 and 3, each above one fc.assert", () => {
-    const files = TESTS.filter((f) => f.path.endsWith(".properties.test.ts"));
+    // case-match.properties.test.ts is checked by the aggregate case-match-inventory.test.ts (task 13.6).
+    const files = TESTS.filter(
+      (f) =>
+        f.path.endsWith(".properties.test.ts") && !f.path.endsWith("case-match.properties.test.ts"),
+    );
     expect(format(files.flatMap(propertyViolations))).toEqual([]);
     expect(allNumbers(files).sort()).toEqual([1, 2, 3]);
   });

@@ -343,7 +343,7 @@ Conventions for every task:
     - `.kiro/steering/structure.md`: add `scripts/` under `packages/verifier/` naming `record-lookups.ts`.
     - _Requirements: 6.7, 6.8, 14.5_
 
-  - [~] 13.6 Add the aggregate property inventory test
+  - [x] 13.6 Add the aggregate property inventory test
     - Create `apps/web/test/static/case-match-inventory.test.ts`. It reads `.kiro/specs/case-match/design.md` and the five files `packages/engine/test/case-match.properties.test.ts`, `packages/verifier/test/case-match.properties.test.ts`, `packages/export/test/case-match.properties.test.ts`, `crew/sentinel/test/case-match.properties.test.ts` and `apps/web/test/case-match.properties.test.ts`.
     - It requires that the design holds exactly eighteen `### Property N` headings numbered 1 to 18 once each; that all eighteen `// Property N` markers are present across the five files, each exactly once, in the package the design's table assigns it to (engine 2 to 8, verifier 1, 9 to 13 and 18, export 14, Sentinel 15, web 16 and 17); that each marker is followed by exactly one `fc.assert(fc.property(...))`; and that each describe title ends in `_Requirements: x.y_`.
     - The test fails when any marker is missing, so skipping an optional property sub-task is caught here and at the final checkpoint, never silently.
