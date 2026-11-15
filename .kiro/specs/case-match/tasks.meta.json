@@ -13,9 +13,8 @@
       "lastRunTimestamp": 1794776109149
     },
     "1.5 Write property test for the cited name": {
-      "status": "failed",
-      "failingExample": "Counterexample: [{\"s\":{\"name\":\"Aaaa. Aaaa v. Dep't\",\"leadIn\":\"\",\"boundary\":\"\",\"gap\":\" \",\"citation\":\"410 U.S. 113, 116 (1973)\",\"stringCite\":false}}] — expected caseName \"Aaaa. Aaaa v. Dep't\", got \"Aaaa v. Dep't\". Also (with names starting with a dotted word excluded): name \"Nnnn de Dep't v. Nnnn\" gives \"Dep't v. Nnnn\". seed -374445900",
-      "lastRunTimestamp": 1794776131178
+      "status": "passed",
+      "lastRunTimestamp": 1794779826269
     }
   },
   "executionHistory": {
@@ -463,6 +462,11 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794776019110
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794779842962
       }
     ],
     "1.6 Write property test for carry-over of `caseName`": [

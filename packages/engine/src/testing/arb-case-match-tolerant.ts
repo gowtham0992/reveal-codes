@@ -6,6 +6,8 @@
  */
 import fc from "fast-check";
 import { LEGAL_ABBREVIATION_INDEX } from "../citations/reporters.js";
+import { isCaseName } from "../citations/case-name.js";
+import { partyStartFor } from "../citations/party.js";
 import { arbPartyWords } from "./arb-case-match.js";
 
 const UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -85,7 +87,24 @@ export function arbTolerantCaseName(pool: string): fc.Arbitrary<string> {
   return fc
     .tuple(arbTolerantParty(pool), arbTolerantParty(pool))
     .map(([a, b]) => `${a} v. ${b}`)
-    .filter((n) => n.length <= 164);
+    .filter((n) => n.length <= 164)
+    .filter(hasNoDottedLeftExtension);
+}
+
+/**
+ * Rule A (Req 1.15): the Strict_Read keeps its shorter name when the words
+ * the Tolerant_Read adds to its left include one ending in a period. Such a
+ * name cannot be read back whole, so it is not generated: no unlisted dotted
+ * word sits immediately left of a name the Strict_Read accepts.
+ */
+function hasNoDottedLeftExtension(name: string): boolean {
+  const text = `${name},`;
+  const s = partyStartFor(text, name.length);
+  if (s === null || !isCaseName(text, s, name.length + 1)) return true;
+  return !text
+    .slice(0, s)
+    .split(/\s+/)
+    .some((w) => w.endsWith("."));
 }
 
 const NOT_CONNECTORS: ReadonlySet<string> = new Set([

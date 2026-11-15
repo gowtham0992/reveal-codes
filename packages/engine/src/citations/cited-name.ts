@@ -3,10 +3,13 @@
  * design, "Engine: the cited name"; Req 1.2 to 1.7, 1.13 to 1.15).
  *
  * `citedNameFor(text, start)` runs the Strict_Read (`partyStartFor` and
- * `isCaseName` from the existing rules, plus the In_Re_Name rule) and only
- * when that finds nothing, the Tolerant_Read, a second reader over a larger
- * token set. `party.ts` and `case-name.ts` are not changed. Every function
- * is total and never throws.
+ * `isCaseName` from the existing rules, plus the In_Re_Name rule) and the
+ * Tolerant_Read, a second reader over a larger token set. The strict result
+ * stands, unless it is empty (then the tolerant result is used) or the
+ * tolerant result is longer, ends with it, and the words it adds on the left
+ * contain no token ending in a period (rule A; Req 1.15, D13).
+ * `party.ts` and `case-name.ts` are not changed. Every function is total
+ * and never throws.
  */
 
 import { isCaseName, isPartyName, MAX_CASE_NAME } from "./case-name.js";
@@ -143,5 +146,23 @@ function tolerantName(text: string, c: number): string | undefined {
 export function citedNameFor(text: string, start: number): string | undefined {
   const c = tailComma(text, start);
   if (c === null) return undefined;
-  return strictName(text, c) ?? tolerantName(text, c);
+  const strict = strictName(text, c);
+  const tolerant = tolerantName(text, c);
+  if (strict === undefined) return tolerant;
+  return extendsStrictSafely(strict, tolerant) ? tolerant : strict;
+}
+
+/**
+ * Rule A (Req 1.15, D13): the tolerant result replaces the strict one only
+ * when it is longer, ends with it, and the words it adds on the left contain
+ * no token ending in a period. A period-ending word cannot be told from the
+ * end of a sentence, so such an extension would make the name change when an
+ * earlier sentence is edited.
+ */
+function extendsStrictSafely(strict: string, tolerant: string | undefined): boolean {
+  if (tolerant === undefined || tolerant.length <= strict.length || !tolerant.endsWith(strict)) {
+    return false;
+  }
+  const added = tolerant.slice(0, tolerant.length - strict.length).split(/\s+/);
+  return !added.some((w) => w.endsWith("."));
 }

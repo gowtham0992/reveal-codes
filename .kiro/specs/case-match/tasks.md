@@ -50,7 +50,7 @@ Conventions for every task:
     - Confirm the existing extraction, strip, render-order and incremental-equals-full properties pass unedited.
     - _Requirements: 13.3, 13.9, 1.10, 3.3, 3.4_
 
-  - [-]* 1.5 Write property test for the cited name
+  - [x]* 1.5 Write property test for the cited name
     - Create `packages/engine/test/case-match.properties.test.ts`.
     - **Property 3: The cited name is read back**
     - Generate names with `arbTolerantCaseName` (unlisted dotted abbreviations and apostrophe contractions as well as listed forms), `arbInReName`, `arbLeadIn` and `arbNameBoundary`, and assert the `caseName` equals the name as written, without lead-in and closing comma, and is at most 164 code units.
@@ -87,7 +87,7 @@ Conventions for every task:
     - `parse` of an appendix containing `[CIT ≠…]` succeeds.
     - The Tolerant_Read on the Demo_Motion text: Alvarez gives `Alvarez v. Cascade Residential Mgmt., LLC` and Okafor gives `Okafor v. Lindqvist Props.`; Ashcroft, Haines and Brennan still give their Strict_Read names unchanged.
     - The Tolerant_Read on a name after a sentence that ends just before it (`The Court said so in Twombly. Alvarez v. Cascade Residential Mgmt., LLC, 556 U.S. 662, 678 (2009)`): the `caseName` is `Twombly. Alvarez v. Cascade Residential Mgmt., LLC`, so the extra word sits in the first party and the second party's words are those of the name as written.
-    - The Tolerant_Read gives no `caseName` for: text with no `v.`, text with nothing left of `v.`, a name cut by a line break so that no `v.` remains, and a run longer than 164 code units. A second `v.` ends the scan (`Smith v. Jones v. Brown Mgmt.` gives `Jones v. Brown Mgmt.`). A name the Strict_Read reads is returned unchanged, whatever the tolerant scan would read.
+    - The Tolerant_Read gives no `caseName` for: text with no `v.`, text with nothing left of `v.`, a name cut by a line break so that no `v.` remains, and a run longer than 164 code units. A second `v.` ends the scan (`Smith v. Jones v. Brown Mgmt.` gives `Jones v. Brown Mgmt.`). A name the Strict_Read reads is returned unchanged, unless the tolerant result is longer, ends with it, and the words it adds on the left contain no token ending in a period (rule A: `Aaaa. Aaaa v. Dep't` gives `Aaaa v. Dep't`, `Nnnn de Bbbb v. Nnnn` gives the full name, and a prior sentence inserted before `Intro. Roe v. Wade, …` leaves `Roe v. Wade`); a tolerant result that is not such an extension never replaces it.
     - `Dep't of Homeland Sec. v. Regents of the Univ. of Cal.` after a line break reads as that exact string.
     - _Requirements: 1.4, 1.11, 1.13, 1.14, 1.15, 3.1, 3.6, 3.7, 13.5_
 
