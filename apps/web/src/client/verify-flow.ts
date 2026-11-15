@@ -4,16 +4,12 @@ import { CHECKS_BUSY } from "../notices";
 import type { Store } from "../store-runtime";
 import type { ApiClient, ApiError, FullRecord, InfoPairs } from "./api";
 import { FAILED_NOTICE, tallyDocument } from "./verify-summary";
+import type { CitationTally } from "./verify-summary";
 
 export type FlowStore = Pick<Store, "getState" | "dispatch">;
 export type VerifyOutcome = Readonly<{
   status: "completed" | "failed" | "discarded";
-  citations: Readonly<{
-    verified: number;
-    not_found: number;
-    ambiguous: number;
-    unchecked: number;
-  }>;
+  citations: CitationTally;
   quotes: Readonly<{ match: number; mismatch: number; unchecked: number }>;
   skipped: number;
   unavailable: number;
@@ -25,7 +21,13 @@ export type VerifyOutcome = Readonly<{
   limited?: boolean;
 }>;
 
-const NO_CITATIONS = { verified: 0, not_found: 0, ambiguous: 0, unchecked: 0 } as const;
+const NO_CITATIONS = {
+  verified: 0,
+  wrong_case: 0,
+  not_found: 0,
+  ambiguous: 0,
+  unchecked: 0,
+} as const;
 const NO_QUOTES = { match: 0, mismatch: 0, unchecked: 0 } as const;
 
 function fullRecords(document: Document): readonly FullRecord[] {

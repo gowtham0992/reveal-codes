@@ -100,3 +100,13 @@
   font-style: italic;
   pointer-events: none;
 }
+
+.samples {
+  position: absolute;
+  top: 172px;
+  left: 104px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--oxblood);
+}

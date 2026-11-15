@@ -70,6 +70,42 @@ describe("lookup_citations _Requirements: 13.2, 13.3_", () => {
   });
 });
 
+describe("lookup_citations case match _Requirements: 5.12, 5.13_", () => {
+  type Cite = { kind: string; result: Record<string, unknown> | null } & Record<string, unknown>;
+  async function citesOf(text: string): Promise<Cite[]> {
+    const res = await call("lookup_citations", { citations: [text] });
+    const body = JSON.parse(textOf(res)) as { results: { citations: Cite[] }[] };
+    return body.results[0]?.citations ?? [];
+  }
+
+  it("reports wrong_case with the found name and the cited name for a different case", async () => {
+    const [c] = await citesOf("Henderson v. Pacific Housing Authority, 556 U.S. 662, 678 (2009)");
+    expect(c?.["result"]).toEqual({
+      status: "wrong_case",
+      clusterId: "145875",
+      foundName: "Ashcroft v. Iqbal",
+      foundYear: 2009,
+    });
+    expect(c?.["caseName"]).toBe("Henderson v. Pacific Housing Authority");
+  });
+
+  it("reports verified with no caseName key for a bare citation", async () => {
+    const [c] = await citesOf("556 U.S. 662");
+    expect(c?.["result"]).toEqual({ status: "verified", clusterId: "145875" });
+    expect(c).not.toHaveProperty("caseName");
+  });
+
+  it("gives caseName on the full citation and none on its short form", async () => {
+    const cites = await citesOf("Ashcroft v. Iqbal, 556 U.S. 662, 678 (2009). Id. at 680.");
+    const full = cites.find((c) => c.kind === "full");
+    const short = cites.find((c) => c.kind === "short");
+    expect(full?.result).toMatchObject({ status: "verified" });
+    expect(full?.["caseName"]).toBe("Ashcroft v. Iqbal");
+    expect(short?.result).toMatchObject({ status: "verified" });
+    expect(short).not.toHaveProperty("caseName");
+  });
+});
+
 describe("argument bounds _Requirements: 13.12_", () => {
   const cases: [string, Record<string, unknown>, string][] = [
     ["lookup_citations", { citations: [] }, "citations"],

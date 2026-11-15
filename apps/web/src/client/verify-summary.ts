@@ -6,6 +6,7 @@ export const FAILED_NOTICE = "Verification could not be completed. Your citation
 
 export type CitationTally = Readonly<{
   verified: number;
+  wrong_case: number;
   not_found: number;
   ambiguous: number;
   unchecked: number;
@@ -16,7 +17,7 @@ export type QuoteTally = Readonly<{ match: number; mismatch: number; unchecked: 
 export function tallyDocument(
   document: Document,
 ): Readonly<{ citations: CitationTally; quotes: QuoteTally }> {
-  const citations = { verified: 0, not_found: 0, ambiguous: 0, unchecked: 0 };
+  const citations = { verified: 0, wrong_case: 0, not_found: 0, ambiguous: 0, unchecked: 0 };
   for (const c of document.citations) if (c.kind === "full") citations[c.result.status] += 1;
   const quotes = { match: 0, mismatch: 0, unchecked: 0 };
   for (const q of document.quotes) quotes[q.result.status] += 1;
@@ -48,6 +49,7 @@ export function summaryLines(
   const lines = [
     line("Citations", [
       [c.verified, "found"],
+      [c.wrong_case, "wrong case"],
       [c.not_found, "not found"],
       [c.ambiguous, "ambiguous"],
       [c.unchecked, "not checked"],

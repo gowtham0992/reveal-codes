@@ -185,7 +185,11 @@ function Shell({ svc }: Readonly<{ svc: AppServices }>) {
       <title>{windowTitle(s.doc.text)}</title>
       <ShellToolbar {...s.toolbar} />
       {s.slot.node}
-      <EditorSurface editor={s.binding.editor} empty={s.doc.text.length === 0} />
+      <EditorSurface
+        editor={s.binding.editor}
+        empty={s.doc.text.length === 0}
+        onLoadSample={s.actions.onLoadSample}
+      />
       <IssuesSlot {...s.issues} />
       {s.exportGate.dialog}
       {s.actions.dialog}

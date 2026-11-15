@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { AppServices } from "../services";
 import type { Store } from "../store-runtime";
 import { hasFullRecord, runVerifyFlow } from "../client/verify-flow";
+import type { ResolvedSession } from "../client/resolved";
 import { furtherLine } from "../client/verify-summary";
 
 /** A run in flight this long is probably held by the citation service's request bucket. */
@@ -20,6 +21,8 @@ export type VerifyControl = Readonly<{
   note: string | null;
   /** The sentence for a failed run, shown in the Issues region; null until one fails and after the next run starts. */
   failure: string | null;
+  /** Display_Info of the last completed run, memory only; null until a run completes this session. */
+  resolved: ResolvedSession;
 }>;
 
 type Pending = { handle: unknown } | null;
@@ -56,17 +59,22 @@ export function useVerify(svc: AppServices, store: Store): VerifyControl {
   const [note, setNote] = useState<string | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const { waiting, arm, disarm } = useWaiting(svc);
+  const [resolved, setResolved] = useState<ResolvedSession>(null);
   const start = (): void => {
+    const epoch = store.getState().epoch;
     setRunning(true);
     setFailure(null);
     arm();
     void runVerifyFlow(svc.api, store, svc.now).then((outcome) => {
       setFailure(outcome.status === "failed" ? (outcome.failure ?? null) : null);
-      if (outcome.status === "completed") setNote(furtherLine(outcome, store.getState().document));
+      if (outcome.status === "completed") {
+        setNote(furtherLine(outcome, store.getState().document));
+        setResolved({ epoch, info: new Map(outcome.info ?? []) });
+      }
       disarm();
       setRunning(false);
     });
   };
   const disabled = running || !hasFullRecord(store.getState().document);
-  return { running, waiting, start, disabled, note, failure };
+  return { running, waiting, start, disabled, note, failure, resolved };
 }

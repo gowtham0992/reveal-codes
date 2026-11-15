@@ -166,6 +166,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772475390
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794775268936
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794775535751
       }
     ],
     "4. Checkpoint - Verifier and MCP complete": [
@@ -197,6 +207,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772475436
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794775269006
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794775535662
       }
     ],
     "5.3 Show the `wrong_case` row, the link, the Export dialog words and the Resolved list": [
@@ -269,6 +289,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772475544
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794775269255
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794775535852
       }
     ],
     "10.1 Write the recording script": [
@@ -583,6 +613,20 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794775265586
+      }
+    ],
+    "3. Verifier and MCP: name rule, lookup rule, cache, verify route and `lookup_citations` (Requirements 4 and 5)": [
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794775535813
+      }
+    ],
+    "9. Avianca sample and empty-page links (Requirement 10)": [
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794775535887
       }
     ]
   }

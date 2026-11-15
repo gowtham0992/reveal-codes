@@ -94,7 +94,7 @@ Conventions for every task:
 - [~] 2. Checkpoint - Engine complete
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 3. Verifier and MCP: name rule, lookup rule, cache, verify route and `lookup_citations` (Requirements 4 and 5)
+- [x] 3. Verifier and MCP: name rule, lookup rule, cache, verify route and `lookup_citations` (Requirements 4 and 5)
   - [x] 3.1 Implement name matching
     - Create `packages/verifier/src/name-expansion.ts` (the thirty table entries of Requirement 4, criterion 4, that is the seventeen first listed and `mgmt`, `assn`, `intl`, `natl`, `bros`, `univ`, `hosp`, `auth`, `cnty`, `commn`, `props`, `cos` and `assocs`; Dropped_Words; Initials_Skip_Words), `name-normalise.ts` (`prepareName`, `splitParties`), `name-initials.ts` (`initialisms`, `initialismMatch`) and `name-match.ts` (`namesMatch(cited, found: readonly string[])`).
     - No I/O, no clock, no `node:` import. Each module under 300 lines.
@@ -165,7 +165,7 @@ Conventions for every task:
     - The package has no output schema and no `switch` over verification statuses, so no exhaustive-case edit is needed; confirm with `pnpm typecheck`.
     - _Requirements: 5.12, 5.13, 5.14_
 
-  - [~] 3.13 Write MCP server tests for the wrong case and the cited name
+  - [x] 3.13 Write MCP server tests for the wrong case and the cited name
     - In `packages/courtlistener-mcp/test/tools.test.ts`, add a describe titled `lookup_citations case match _Requirements: 5.12, 5.13_` that calls the tool through the existing harness with the recorded fixtures.
     - `Henderson v. Pacific Housing Authority, 556 U.S. 662, 678 (2009)` returns a Full_Citation whose `result` is `{ status: "wrong_case", clusterId: "145875", foundName: "Ashcroft v. Iqbal", foundYear: 2009 }` and whose `caseName` is `Henderson v. Pacific Housing Authority`.
     - `556 U.S. 662` alone returns `{ status: "verified", clusterId: "145875" }` and has no `caseName` key.
@@ -185,7 +185,7 @@ Conventions for every task:
     - No colour literal, Token, icon or new style. Edit existing tests that enumerate the Legend or the failing opener set and note them for BUILD_LOG.
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 13.9_
 
-  - [~] 5.2 Add the Citations tally term, session state and Resolved list selection
+  - [x] 5.2 Add the Citations tally term, session state and Resolved list selection
     - `client/verify-summary.ts`: add `wrong_case` to `CitationTally`, `tallyDocument`, `NO_CITATIONS`, and the `Citations:` line order found, wrong case, not found, ambiguous, not checked, omitting zero terms.
     - `use-verify.ts`: keep `ResolvedSession` (`null` on mount, set on a `completed` run, unchanged otherwise) and expose `resolved` on `VerifyControl`.
     - Create `client/resolved.ts` with `resolvedRows(doc, session, currentEpoch)` as specified, using `courtListenerLink` from `@reveal-codes/verifier/link`.
@@ -250,7 +250,7 @@ Conventions for every task:
     - `verified` to `wrong_case`, `wrong_case` to `verified`, an appendix containing `CIT ≠` parses, and a pre-spec filing yields no finding and no error.
     - _Requirements: 9.2, 9.3, 9.7, 9.8, 13.5_
 
-- [ ] 9. Avianca sample and empty-page links (Requirement 10)
+- [x] 9. Avianca sample and empty-page links (Requirement 10)
   - [x] 9.1 Add the Avianca sample and copy it to `public`
     - Create `packages/engine/fixtures/avianca-citations.txt` with exactly the text in the design: the first paragraph (one line, exactly as Requirement 10, criterion 1) and one blank line, the four citation lines, the paragraph `The citation above and the one below share a name. The one above is invented. The one below is the real decision of the Supreme Court.`, the Zicherman 516 U.S. 217 line, the line `A second real decision, for comparison:`, and the Chambers line, with the blank lines the design shows.
     - If the extraction example test of task 9.3 shows that any line reads differently from the six expected Full_Citations and their `caseName` values, report which line and why BEFORE changing the sample text, and do not change the Extractor, the Tolerant_Read or the text to make it pass without that report.
@@ -258,7 +258,7 @@ Conventions for every task:
     - Add a line for the new fixture in the engine fixtures README, with source and date.
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.6, 10.15_
 
-  - [~] 9.2 Add the sample action and the empty-page links
+  - [x] 9.2 Add the sample action and the empty-page links
     - `client/api.ts`: add `aviancaCitations` next to `demoMotion`.
     - `use-document-actions.tsx`: generalise the demo action to a `sample` action keyed `"demo" | "avianca"`, same one-`PST`-span path, and the failure notice `The Avianca citations could not be loaded. Your document is unchanged.`
     - `components/editor-surface.tsx` (and its CSS module): while the text is empty show the two links `Load demo motion` and `Load the Avianca citations` as focusable `a` elements outside the `aria-hidden` placeholder, with the link colour and no icon; render neither when text exists.

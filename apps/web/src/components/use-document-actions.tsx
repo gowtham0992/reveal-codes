@@ -11,7 +11,11 @@ import { ConfirmDialog } from "./confirm-dialog";
 
 export const DEMO_FAILED = "Could not load the demo motion.";
 
-type Pending = "new" | "demo";
+export const AVIANCA_FAILED =
+  "The Avianca citations could not be loaded. Your document is unchanged.";
+
+export type SampleKey = "demo" | "avianca";
+type Pending = "new" | SampleKey;
 
 /** One PST insert over an empty Document; the whole text is a single span (Requirement 20). */
 function pastedDocument(text: string, iso: string): Document | string {
@@ -32,10 +36,11 @@ function installDocument(store: Store, svc: AppServices, text: string): void {
   else store.dispatch({ type: "replace", document: doc });
 }
 
-async function loadDemo(store: Store, svc: AppServices): Promise<void> {
-  const fetched = await svc.api.demoMotion();
-  if (!fetched.ok) store.dispatch({ type: "notice", text: DEMO_FAILED });
-  else installDocument(store, svc, fetched.value);
+async function loadSample(store: Store, svc: AppServices, key: SampleKey): Promise<void> {
+  const fetched = await (key === "demo" ? svc.api.demoMotion() : svc.api.aviancaCitations());
+  if (!fetched.ok) {
+    store.dispatch({ type: "notice", text: key === "demo" ? DEMO_FAILED : AVIANCA_FAILED });
+  } else installDocument(store, svc, fetched.value);
 }
 
 function startNew(store: Store, svc: AppServices, autosave: Autosave): void {
@@ -56,6 +61,11 @@ const COPY = {
     message: "Replace the current draft with the demo motion?",
     confirmLabel: "Replace draft",
   },
+  avianca: {
+    title: "Load the Avianca citations",
+    message: "Replace the current draft with the Avianca citations?",
+    confirmLabel: "Replace draft",
+  },
 } as const;
 
 /** New and Load demo motion: both confirm first (Load demo only when the draft is non-empty). */
@@ -69,7 +79,7 @@ export function useDocumentActions({ store, svc, autosave, doc }: Deps) {
   };
   const run = (kind: Pending): void => {
     if (kind === "new") startNew(store, svc, autosave);
-    else void loadDemo(store, svc);
+    else void loadSample(store, svc, kind);
   };
   const confirm = (): void => {
     const kind = pending;
@@ -83,6 +93,10 @@ export function useDocumentActions({ store, svc, autosave, doc }: Deps) {
     onLoadDemo: (): void => {
       if (doc.text.length === 0) run("demo");
       else ask("demo");
+    },
+    onLoadSample: (key: SampleKey): void => {
+      if (doc.text.length === 0) run(key);
+      else ask(key);
     },
     dialog:
       pending === null ? null : (

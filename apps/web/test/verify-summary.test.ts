@@ -42,7 +42,7 @@ function build(
 
 const OUTCOME: VerifyOutcome = {
   status: "completed",
-  citations: { verified: 0, not_found: 0, ambiguous: 0, unchecked: 0 },
+  citations: { verified: 0, wrong_case: 0, not_found: 0, ambiguous: 0, unchecked: 0 },
   quotes: { match: 0, mismatch: 0, unchecked: 0 },
   skipped: 0,
   unavailable: 0,
@@ -65,6 +65,7 @@ describe("summaryLines _Requirements: 5.6, 5.7, 5.8, 5.9, 5.10_", () => {
     const doc = build(ALL, [{ status: "match" }, { status: "mismatch", prefixLength: 1 }]);
     expect(tallyDocument(doc).citations).toEqual({
       verified: 1,
+      wrong_case: 0,
       not_found: 1,
       ambiguous: 1,
       unchecked: 1,
