@@ -337,7 +337,7 @@ Conventions for every task:
     - Edit the `MCP | courtlistener` row: `lookup_citations` now reports `wrong_case` and returns the `caseName` it read, because `structure.md` asks for a line when an MCP tool changes.
     - _Requirements: 14.4_
 
-  - [-] 13.5 Update the steering files
+  - [x] 13.5 Update the steering files
     - `.kiro/steering/product.md`: add the `[CIT ≠]` code line to the Citation codes, `wrong_case` to the verification status vocabulary, `CIT ≠` to the codes named in principle 4, and `CIT ≠` to the Failing_Block row of the Pane palette.
     - `.kiro/steering/citations.md`: add the comparison rule and the `wrong_case` mapping to the verification contract, and say that `lookup` applies the rule, so the MCP `lookup_citations` tool reports `wrong_case` too.
     - `.kiro/steering/structure.md`: add `scripts/` under `packages/verifier/` naming `record-lookups.ts`.
