@@ -349,7 +349,7 @@ Conventions for every task:
     - The test fails when any marker is missing, so skipping an optional property sub-task is caught here and at the final checkpoint, never silently.
     - _Requirements: 13.1, 13.2, 13.4_
 
-- [~] 14. Final checkpoint
+- [x] 14. Final checkpoint
   - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, `pnpm --filter @reveal-codes/web build` (the clean-checkout web build) and `pnpm kiro:check`, and fix any failure in the code, never in a test's meaning.
   - State in the report that the browser check and the push are left to the author. Do not push.
   - Ensure all tests pass, ask the user if questions arise.

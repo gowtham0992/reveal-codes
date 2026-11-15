@@ -61,6 +61,18 @@ function spanCode(span: Span, mode: RenderMode): string {
 
 type Opening = Readonly<{ name: CodeName; retained: string | null; fields: readonly CodeField[] }>;
 
+function wrongCaseFields(
+  k: CodeField,
+  result: Extract<VerificationResult, { status: "wrong_case" }>,
+): readonly CodeField[] {
+  return [
+    k,
+    field("cl", result.clusterId),
+    field("nm", result.foundName),
+    ...(result.foundYear === undefined ? [] : [field("yr", String(result.foundYear))]),
+  ];
+}
+
 function citationOpening(rec: CitationRecord, result: VerificationResult): Opening {
   const full = rec.kind === "full";
   const key = rec.kind === "other" ? "" : rec.key;
@@ -82,14 +94,7 @@ function citationOpening(rec: CitationRecord, result: VerificationResult): Openi
       return {
         name: CODE_NAMES.citWrongCase,
         retained: null,
-        fields: full
-          ? [
-              k,
-              field("cl", result.clusterId),
-              field("nm", result.foundName),
-              ...(result.foundYear === undefined ? [] : [field("yr", String(result.foundYear))]),
-            ]
-          : [k],
+        fields: full ? wrongCaseFields(k, result) : [k],
       };
     case "not_found":
       return {
