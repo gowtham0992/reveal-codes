@@ -379,7 +379,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - _Requirements: 17.3, 17.4, 17.5, 17.7_
 
 - [ ] 16. Page ranges and lists in a pincite (Requirement 18)
-  - [-] 16.1 Read the Pincite_Expression and keep the value
+  - [x] 16.1 Read the Pincite_Expression and keep the value
     - Create `packages/engine/src/citations/pincite.ts` with `readPinciteExpression(text, at, { list, startsMember })` as designed: items `page [dash short]` with `-` or `–`, a shortened second number of one to five ASCII digits, at most five items and 24 code units, items after the first refused when `startsMember` is true or when they are a four-digit number from 1600 to 2999 followed by a space and an uppercase letter, an item accepted only when its last digit is not followed by a letter or number, and a failed `dash short` leaving the item as the page alone. No import from the other grammar modules.
     - Export `startsMember` from `grammar.ts` and use the new reader in `grammar.ts#readPincite` (`list: true`), in `grammar-short.ts` for `Id. at` and for the party tail (`list: true`; `first` becomes `pincite`, `end` the tail end), and in `grammar-db.ts#readPincite` (`list: false`, `startsMember: () => false`). Keep the existing `startsMember` check for the first item.
     - The value's `pincite` stays the First_Page. Do not change `types.ts`, `format.ts`, `codes/*` or `packages/verifier/src/lines.ts`. If an edit to any of them looks necessary, stop and report why before making it.
