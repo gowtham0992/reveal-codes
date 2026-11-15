@@ -324,7 +324,7 @@ Conventions for every task:
     - Check `apps/web/test/static/docs.test.ts` first: it matches `Verify sends only citation records to this app's own server` and `from there only citation strings go to CourtListener`, and both must still match. Add one assertion there that the section matches `each record includes the case name written before the citation`. Do not edit any other README test, and confirm the export-certification README test (one line saying exporting and printing send nothing) still passes.
     - _Requirements: 14.1, 14.6, 14.7_
 
-  - [-] 13.2 Update `docs/CERTIFICATION.md`
+  - [x] 13.2 Update `docs/CERTIFICATION.md`
     - Update the statement paragraph to the new five-term sentence and name the count of citations that resolved to a different case than the one named.
     - _Requirements: 8.9, 14.2, 14.6_
 
