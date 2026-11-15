@@ -80,7 +80,7 @@ Conventions for every task:
     - **Property 2: Reveal Codes round trip with `wrong_case`**
     - **Validates: Requirements 3.1, 3.5, 3.8**
 
-  - [~]* 1.12 Write engine example tests
+  - [x]* 1.12 Write engine example tests
     - An In_Re_Name with commas (`In re Air Crash Disaster Near New Orleans, LA`) read from text written for the test.
     - Exact full and display strings of `[CIT ≠]` for the Ashcroft payload, and the tamper cases `bad_field` and `short_form_code`.
     - A `caseName` change resets the result to `unchecked` and drops the Override.
@@ -147,7 +147,7 @@ Conventions for every task:
     - **Property 13: CourtListener link construction**
     - **Validates: Requirements 7.4**
 
-  - [~]* 3.11 Write verifier and route example tests
+  - [x]* 3.11 Write verifier and route example tests
     - The three name pairs of Requirement 4 (NLRB, SEC, `U.S.`) and the spaced `U. S.` form.
     - A name that matches only through `case_name_full` or `case_name_short`.
     - Henderson and Ashcroft in one Document on one lookup line get separate results.
