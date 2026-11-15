@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 import { extract } from "../src/citations/extract";
 import { apply, createDocument } from "../src/document";
 import { blockingIssues, issues, recordOverride } from "../src/issues";
-import { setVerification } from "../src/verification";
+import { render } from "../src/codes/render";
+import { setVerification, verificationOf } from "../src/verification";
 import type { CitationRecord, Document, VerificationResult } from "../src/types";
 import {
   arbWrongCaseResult,
@@ -449,5 +450,94 @@ describe("case-match an Override survives only an unchanged status _Requirements
     expect(kept).toBeGreaterThan(0);
     expect(dropped).toBeGreaterThan(0);
     expect(wrongToWrong).toBeGreaterThan(0);
+  });
+});
+
+const SHORT_TAILS = ["Id.", "Id. at 118", "Id. at 120-21"] as const;
+
+type Group = Readonly<{ shorts: readonly (typeof SHORT_TAILS)[number][]; result: WrongCaseResult }>;
+
+const arbGroup: fc.Arbitrary<Group> = fc.record({
+  shorts: fc.array(fc.constantFrom(...SHORT_TAILS), { minLength: 1, maxLength: 3 }),
+  result: arbWrongCaseResult,
+});
+
+const GROUP_CITATIONS = ["410 U.S. 113, 116 (1973)", "598 F.3d 1, 7 (2d Cir. 2010)"] as const;
+
+type ShortRecord = Extract<CitationRecord, { kind: "short" }>;
+
+// Property 8
+describe("case-match a Short_Form follows a wrong_case target _Requirements: 2.10, 3.2_", () => {
+  it("reports the target's wrong_case result, lists no Issue, and renders [CIT ≠{k=<key>}] in full form and [CIT ≠] in display form", () => {
+    let shortsSeen = 0;
+    fc.assert(
+      fc.property(fc.array(arbGroup, { minLength: 1, maxLength: 2 }), (groups) => {
+        const text = groups
+          .map((g, i) => `See ${GROUP_CITATIONS[i]}. ${g.shorts.join(" ")}.`)
+          .join("\n\n");
+        const created = createDocument(text, TIMESTAMP);
+        expect(created.ok).toBe(true);
+        if (!created.ok) return;
+        let doc = created.value;
+        const fulls = fullRecords(doc);
+        expect(fulls.length).toBe(groups.length);
+        groups.forEach((g, i) => {
+          const full = fulls[i];
+          if (full === undefined) return;
+          const set = setVerification(doc, full.key, g.result);
+          expect(set.ok).toBe(true);
+          if (set.ok) doc = set.value;
+        });
+
+        const shortIssueKeys = new Set(issues(doc).map((x) => x.key));
+        const fullMode = render(doc, "full");
+        const displayMode = render(doc, "display");
+        const codeAt = (r: typeof fullMode, offset: number): string[] =>
+          r.positions
+            .filter((p) => p.offset === offset && p.code.startsWith("[CIT"))
+            .map((p) => p.code);
+
+        const shorts = doc.citations.filter((c): c is ShortRecord => c.kind === "short");
+        expect(shorts.length).toBeGreaterThanOrEqual(groups.length);
+        for (const s of shorts) {
+          const value = s.citation.value;
+          if (value.kind !== "short" || value.targetStart === null) continue;
+          const target = fulls.find((f) => f.citation.start === value.targetStart);
+          const targetNow = fullRecords(doc).find((f) => f.citation.start === value.targetStart);
+          expect(target).toBeDefined();
+          expect(targetNow?.result.status).toBe("wrong_case");
+          shortsSeen += 1;
+
+          expect(verificationOf(doc, s.key)).toEqual(targetNow?.result);
+          expect(shortIssueKeys.has(s.key)).toBe(false);
+
+          // Offsets in `positions` are into the rendered text, so find this Short_Form's
+          // opener by its unique key in the full form, and by order in the display form.
+          const fullOpeners = fullMode.positions.filter((p) => p.code === `[CIT ≠{k=${s.key}}]`);
+          expect(fullOpeners).toHaveLength(1);
+          const at = fullOpeners[0]?.offset ?? -1;
+          expect(codeAt(fullMode, at)).toContain(`[CIT ≠{k=${s.key}}]`);
+        }
+
+        const shortCount = shorts.filter(
+          (s) => s.citation.value.kind === "short" && s.citation.value.targetStart !== null,
+        ).length;
+        const wrongOpeners = (r: typeof fullMode): number =>
+          r.positions.filter((p) => p.code.startsWith("[CIT ≠")).length;
+        // One opener per Full_Citation plus one per linked Short_Form, in each mode.
+        expect(wrongOpeners(fullMode)).toBe(groups.length + shortCount);
+        expect(wrongOpeners(displayMode)).toBe(groups.length + shortCount);
+        expect(displayMode.positions.filter((p) => p.code === "[CIT ≠]")).toHaveLength(
+          groups.length + shortCount,
+        );
+        expect(
+          fullMode.positions.filter(
+            (p) => p.code.startsWith("[CIT ≠") && p.code.includes("{k=") && /;/.test(p.code),
+          ),
+        ).toHaveLength(groups.length);
+      }),
+      runs(),
+    );
+    expect(shortsSeen).toBeGreaterThan(0);
   });
 });

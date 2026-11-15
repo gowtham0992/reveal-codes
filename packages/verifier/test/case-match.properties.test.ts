@@ -15,6 +15,7 @@ import { chunkLines } from "../src/chunk";
 import { createDeps } from "../src/create-deps";
 import { lookup, lookupWithInfo, planLookup } from "../src/lookup";
 import type { LookupInfo } from "../src/lookup";
+import { courtListenerLink } from "../src/link";
 import { namesMatch } from "../src/name-match";
 import { runs } from "./support/fc";
 import { TEST_BASE_URL, makeDeps } from "./support/make-deps";
@@ -494,6 +495,72 @@ describe("Property 12: Display_Info derivation _Requirements: 5.8, 5.9_", () => 
         } else {
           expect(result?.status).toBe("verified");
         }
+      }),
+      { numRuns: runs() },
+    );
+  });
+});
+
+// ---- Property 13 harness: cluster ids of digits and near-digits, and absolute URLs of every shape. ----
+
+const ORIGIN = "https://www.courtlistener.com";
+const arbDigitId = fc.stringMatching(/^[0-9]{1,12}$/);
+/** Strings that look like ids but are not ASCII digits only: empty, signs, spaces, newlines, non-ASCII digits. */
+const arbNonDigitId: fc.Arbitrary<string> = fc.oneof(
+  fc.constantFrom(
+    "",
+    " ",
+    "-1",
+    "+1",
+    "1.5",
+    "1e3",
+    "١٢٣",
+    "１２３",
+    "12\n",
+    "\n12",
+    "1 2",
+    "0x1f",
+  ),
+  fc.tuple(arbDigitId, fc.constantFrom("a", " ", "\n", "/", "-", "١")).map(([d, x]) => d + x),
+  fc.tuple(fc.constantFrom("a", " ", "\n", "/", "-", "١"), arbDigitId).map(([x, d]) => x + d),
+  fc.string({ maxLength: 10 }).filter((s) => !/^[0-9]+$/.test(s)),
+);
+const arbLinkId: fc.Arbitrary<string> = fc.oneof(arbDigitId, arbNonDigitId);
+/** Site-relative paths (one leading slash), protocol-relative and absolute URLs, other strings, and undefined. */
+const arbLinkUrl: fc.Arbitrary<string | undefined> = fc.oneof(
+  fc.constantFrom<string | undefined>(
+    undefined,
+    "",
+    "/",
+    "//",
+    "//evil.example/x",
+    "http://evil.example/x",
+    "https://evil.example/",
+    "opinion/1/x/",
+    "\\\\evil.example",
+  ),
+  fc.string({ maxLength: 16 }).map((s) => `/${s}`),
+  fc.string({ maxLength: 16 }).map((s) => `//${s}`),
+  fc.string({ maxLength: 16 }),
+);
+
+// Feature: case-match, Property 13: CourtListener link construction
+// Property 13
+describe("Property 13: CourtListener link construction _Requirements: 7.4_", () => {
+  it("is null iff the cluster id is not ASCII digits, else the fixed origin plus a single-slash path or the opinion path", () => {
+    fc.assert(
+      fc.property(arbLinkId, arbLinkUrl, (clusterId, absoluteUrl) => {
+        const link = courtListenerLink(clusterId, absoluteUrl);
+        if (!/^[0-9]+$/.test(clusterId)) {
+          expect(link).toBeNull();
+          return;
+        }
+        const usable =
+          absoluteUrl !== undefined && absoluteUrl.startsWith("/") && !absoluteUrl.startsWith("//");
+        expect(link).toBe(usable ? `${ORIGIN}${absoluteUrl}` : `${ORIGIN}/opinion/${clusterId}/x/`);
+        expect(link?.startsWith(`${ORIGIN}/`)).toBe(true);
+        // The host is the constant origin whatever the response held.
+        expect(new URL(link ?? "").origin).toBe(ORIGIN);
       }),
       { numRuns: runs() },
     );
