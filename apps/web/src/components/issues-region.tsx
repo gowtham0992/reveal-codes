@@ -3,11 +3,14 @@
 import { blockingIssues } from "@reveal-codes/engine";
 import type { Document, Issue } from "@reveal-codes/engine";
 import { useState } from "react";
+import { resolvedRows, usableInfo } from "../client/resolved";
+import type { ResolvedSession } from "../client/resolved";
 import type { Store } from "../store-runtime";
 import { IssuesList, issueText } from "./issues-list";
 import type { VerifyAction } from "./issues-list";
 import styles from "./issues-region.module.css";
 import { OverrideDialog } from "./override-dialog";
+import { ResolvedList } from "./resolved-list";
 import { VerifyResult } from "./verify-result";
 
 export const DEMO_MODE_LINE =
@@ -27,6 +30,8 @@ export type IssuesRegionProps = Readonly<{
   failure?: string | null;
   /** The same start/disabled values the Toolbar uses. */
   verify: VerifyAction;
+  /** Display_Info of the latest Verify_Run this session; null until one completes. */
+  resolved?: ResolvedSession;
 }>;
 
 type Target = Readonly<{ issue: Issue; opener: HTMLElement }>;
@@ -57,16 +62,22 @@ function OverrideSlot({ target, document, store, now, close }: OverrideSlotProps
     />
   );
 }
+function IssuesHeading({ document }: Readonly<{ document: Document }>) {
+  return (
+    <h2 id="issues-heading" className={styles["heading"]}>
+      {issuesHeading(blockingIssues(document).length)}
+    </h2>
+  );
+}
 /** The Issues region: Fixtures_Mode line (15.7), the list and the Override_Dialog (Req 18). */
 export function IssuesRegion(props: IssuesRegionProps) {
   const { document, store, now, onGo, demoMode = false, verifiedAt, note, verify } = props;
-  const { failure = null } = props;
+  const { failure = null, resolved = null } = props;
+  const epoch = store.getState().epoch;
   const [target, setTarget] = useState<Target | null>(null);
   return (
     <aside aria-labelledby="issues-heading" className={styles["issues"]}>
-      <h2 id="issues-heading" className={styles["heading"]}>
-        {issuesHeading(blockingIssues(document).length)}
-      </h2>
+      <IssuesHeading document={document} />
       <div className={styles["body"]}>
         <VerifyResult
           document={document}
@@ -79,11 +90,13 @@ export function IssuesRegion(props: IssuesRegionProps) {
           document={document}
           collapseUnchecked={verifiedAt === null}
           verify={verify}
+          info={usableInfo(resolved, epoch)}
           onGo={onGo}
           onOverride={(issue, opener) => {
             setTarget({ issue, opener });
           }}
         />
+        <ResolvedList rows={resolvedRows(document, resolved, epoch)} />
         <OverrideSlot
           target={target}
           document={document}

@@ -176,7 +176,7 @@ Conventions for every task:
 - [~] 4. Checkpoint - Verifier and MCP complete
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 5. Web: Pane, page underline, Issues region and Resolved list (Requirements 6 and 7)
+- [x] 5. Web: Pane, page underline, Issues region and Resolved list (Requirements 6 and 7)
   - [x] 5.1 Add `CIT ≠` to the Pane, the Legend and the page marks
     - `pane/failing.ts`: add `"CIT ≠"` to `FAILING_OPENERS`.
     - `pane/layout.ts`: family `failed` and the plain-words text `Citation is a different case`.
@@ -192,7 +192,7 @@ Conventions for every task:
     - Edit existing verify-summary tests and tests that enumerate the five statuses, and note them for BUILD_LOG.
     - _Requirements: 7.5, 7.6, 7.9, 7.12, 7.13, 7.14, 7.15, 7.17, 2.12, 13.9_
 
-  - [~] 5.3 Show the `wrong_case` row, the link, the Export dialog words and the Resolved list
+  - [x] 5.3 Show the `wrong_case` row, the link, the Export dialog words and the Resolved list
     - `components/issues-list.tsx`: `SEVERITY["CIT ≠"] = "wrong case"`, the `This citation is …` line, the CourtListener_Link (`target="_blank"`, `rel="noreferrer"`), exported `issueWords(code, blocking)`.
     - `components/export-issues.tsx`: use `issueWords` and show the chip `CIT ≠`.
     - Create `components/resolved-list.tsx` and its CSS module; render it below the Issues list in `issues-region.tsx` with heading `Resolved citations`, no `Override…`, no `Go`, no effect on the blocking count, Export button, Next_Step or `No issues.` line.

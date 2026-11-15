@@ -139,6 +139,7 @@ function IssuesSlot({ doc, store, svc, binding, mode, verifiedAt, verify }: Issu
       note={verify.note}
       failure={verify.failure}
       verify={verify}
+      resolved={verify.resolved}
     />
   );
 }

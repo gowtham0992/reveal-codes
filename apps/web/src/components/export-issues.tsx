@@ -4,6 +4,7 @@ import type { Document, Issue } from "@reveal-codes/engine";
 import { ellipsize } from "@reveal-codes/export";
 import { isFailingOpener } from "../pane/failing";
 import styles from "./export-dialog.module.css";
+import { issueWords } from "./issues-list";
 
 export const MAX_EXPORT_ISSUE_TEXT = 80;
 
@@ -28,6 +29,7 @@ export function ExportIssues({ document, issues, onGo, onOverride }: ExportIssue
           <p className={styles["text"]}>
             {ellipsize(document.text.slice(issue.start, issue.end), MAX_EXPORT_ISSUE_TEXT)}
           </p>
+          <p className={styles["text"]}>{issueWords(issue.code, true)}</p>
           <div className={styles["rowActions"]}>
             <button
               type="button"

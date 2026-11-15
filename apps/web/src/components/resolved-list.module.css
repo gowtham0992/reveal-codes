@@ -1,0 +1,25 @@
+.heading {
+  margin: 16px 0 0;
+  padding-bottom: 4px;
+  color: var(--oxblood);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  border-top: 3px double var(--ink);
+  list-style: none;
+}
+
+.row {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule-light);
+}
+
+.text {
+  margin: 4px 0 0;
+  font-family: var(--font-editor);
+  font-size: 13px;
+  line-height: 19px;
+  overflow-wrap: anywhere;
+}

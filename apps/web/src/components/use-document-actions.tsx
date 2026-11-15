@@ -68,8 +68,7 @@ const COPY = {
   },
 } as const;
 
-/** New and Load demo motion: both confirm first (Load demo only when the draft is non-empty). */
-export function useDocumentActions({ store, svc, autosave, doc }: Deps) {
+function useDialogOpener() {
   const [pending, setPending] = useState<Pending | null>(null);
   const [opener, setOpener] = useState<HTMLElement | null>(null);
   const ask = (kind: Pending): void => {
@@ -77,6 +76,12 @@ export function useDocumentActions({ store, svc, autosave, doc }: Deps) {
     setOpener(active instanceof HTMLElement ? active : null);
     setPending(kind);
   };
+  return { pending, setPending, opener, ask };
+}
+
+/** New and Load demo motion: both confirm first (Load demo only when the draft is non-empty). */
+export function useDocumentActions({ store, svc, autosave, doc }: Deps) {
+  const { pending, setPending, opener, ask } = useDialogOpener();
   const run = (kind: Pending): void => {
     if (kind === "new") startNew(store, svc, autosave);
     else void loadSample(store, svc, kind);

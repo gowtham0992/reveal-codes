@@ -18,7 +18,9 @@ export type ResolvedRow = Readonly<{
 }>;
 
 function foundText(info: DisplayInfo): string {
-  return info.foundYear === undefined ? info.foundName : `${info.foundName} (${info.foundYear})`;
+  return info.foundYear === undefined
+    ? info.foundName
+    : `${info.foundName} (${String(info.foundYear)})`;
 }
 
 /**
@@ -47,4 +49,12 @@ export function resolvedRows(
     });
   }
   return rows;
+}
+
+/** The session's Display_Info while it belongs to the current Document epoch, otherwise undefined. */
+export function usableInfo(
+  session: ResolvedSession,
+  currentEpoch: number,
+): ReadonlyMap<IssueKey, DisplayInfo> | undefined {
+  return session !== null && session.epoch === currentEpoch ? session.info : undefined;
 }

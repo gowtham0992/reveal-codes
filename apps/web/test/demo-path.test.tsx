@@ -53,8 +53,9 @@ function count(all: readonly string[], code: string): number {
 }
 
 function rows(): HTMLElement[] {
+  // The Resolved citations list (a section) is not an Issues row.
   return [...document.querySelectorAll("aside li")].filter(
-    (e): e is HTMLElement => e instanceof HTMLElement,
+    (e): e is HTMLElement => e instanceof HTMLElement && e.closest("section") === null,
   );
 }
 

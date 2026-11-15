@@ -24,7 +24,7 @@ function titleFor(document: Document, key: IssueKey, code: IssueCode): string | 
   if (code !== "CIT ≠") return TITLES[code];
   const result = verificationOf(document, key);
   if (result === null || result.status !== "wrong_case") return TITLES[code];
-  const year = result.foundYear === undefined ? "" : ` (${result.foundYear})`;
+  const year = result.foundYear === undefined ? "" : ` (${String(result.foundYear)})`;
   return `This citation is ${result.foundName}${year}`;
 }
 
