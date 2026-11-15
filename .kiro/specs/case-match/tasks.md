@@ -143,7 +143,7 @@ Conventions for every task:
     - **Property 12: Display_Info derivation**
     - **Validates: Requirements 5.8, 5.9**
 
-  - [-]* 3.10 Write property test for link construction
+  - [x]* 3.10 Write property test for link construction
     - **Property 13: CourtListener link construction**
     - **Validates: Requirements 7.4**
 
