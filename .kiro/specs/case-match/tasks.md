@@ -217,8 +217,8 @@ Conventions for every task:
 - [~] 6. Checkpoint - Web display complete
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 7. Statement and Appendix (Requirement 8)
-  - [-] 7.1 Add `wrong_case` to the Statement
+- [x] 7. Statement and Appendix (Requirement 8)
+  - [x] 7.1 Add `wrong_case` to the Statement
     - `packages/export/src/types.ts`: add `foundName?` and `foundYear?` to `StatementCitation`.
     - `wording.ts`: `CITATION_CODES` const object, `CitationCounts` with `wrongCase`, the new five-term sentence, `citationStatusCell`.
     - `statement-parts.ts` and `render-statement.ts`: fill the new fields from the Document, count `wrong_case` in its own term, use `citationStatusCell` and the cluster id cell. No new column, no network call.
