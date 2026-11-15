@@ -55,6 +55,14 @@
     "1.10 Write property test for Short_Forms of a `wrong_case` target": {
       "status": "passed",
       "lastRunTimestamp": 1794780583001
+    },
+    "1.11 Write property test for the Reveal Codes round trip": {
+      "status": "passed",
+      "lastRunTimestamp": 1794780655930
+    },
+    "10.3 Write property test for credential-free recordings": {
+      "status": "passed",
+      "lastRunTimestamp": 1794780666140
     }
   },
   "executionHistory": {
@@ -639,6 +647,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772482622
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780598935
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780674774
       }
     ],
     "1.12 Write engine example tests": [
@@ -898,6 +916,11 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772493290
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780599117
       }
     ],
     "10.4 Write recording script example tests": [

@@ -3,10 +3,12 @@ import { describe, expect, it } from "vitest";
 import { extract } from "../src/citations/extract";
 import { apply, createDocument } from "../src/document";
 import { blockingIssues, issues, recordOverride } from "../src/issues";
-import { render } from "../src/codes/render";
+import { parse, render } from "../src/codes";
+import { structuralEqual } from "../src/equal";
 import { setVerification, verificationOf } from "../src/verification";
 import type { CitationRecord, Document, VerificationResult } from "../src/types";
 import {
+  arbDocument,
   arbWrongCaseResult,
   type WrongCaseResult,
   arbCitationTargetedOp,
@@ -539,5 +541,37 @@ describe("case-match a Short_Form follows a wrong_case target _Requirements: 2.1
       runs(),
     );
     expect(shortsSeen).toBeGreaterThan(0);
+  });
+});
+
+/** A named-citation Document with a wrong_case result written to some Full_Citations. */
+const arbWrongCaseDocument: fc.Arbitrary<Document> = fc
+  .tuple(arbNamedDocument, fc.array(arbWrongCaseResult, { minLength: 3, maxLength: 3 }))
+  .map(([start, results]) =>
+    fullRecords(start).reduce((doc, rec, i) => {
+      const result = results[i];
+      if (result === undefined) return doc;
+      const set = setVerification(doc, rec.key, result);
+      return set.ok ? set.value : doc;
+    }, start),
+  );
+
+// Property 2
+describe("case-match Reveal Codes round trip with wrong_case _Requirements: 3.1, 3.5, 3.8_", () => {
+  it("parse(render(d, full).text) is ok and structurally equals d, and re-renders to the same text", () => {
+    let wrongSeen = 0;
+    fc.assert(
+      fc.property(fc.oneof(arbDocument, arbWrongCaseDocument), (d) => {
+        wrongSeen += fullRecords(d).filter((r) => r.result.status === "wrong_case").length;
+        const text = render(d, "full").text;
+        const parsed = parse(text);
+        expect(parsed.ok).toBe(true);
+        if (!parsed.ok) return;
+        expect(structuralEqual(parsed.value, d)).toBe(true);
+        expect(render(parsed.value, "full").text).toBe(text);
+      }),
+      runs(),
+    );
+    expect(wrongSeen).toBeGreaterThan(0);
   });
 });

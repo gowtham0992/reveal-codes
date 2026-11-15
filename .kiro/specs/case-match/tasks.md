@@ -76,7 +76,7 @@ Conventions for every task:
     - **Property 8: A Short_Form follows a `wrong_case` target**
     - **Validates: Requirements 2.10, 3.2**
 
-  - [~]* 1.11 Write property test for the Reveal Codes round trip
+  - [x]* 1.11 Write property test for the Reveal Codes round trip
     - **Property 2: Reveal Codes round trip with `wrong_case`**
     - **Validates: Requirements 3.1, 3.5, 3.8**
 
@@ -284,7 +284,7 @@ Conventions for every task:
     - Add a test under `packages/verifier/test/` that reads every file under `packages/verifier/fixtures/` and fails when any contains a `Token ` or `Bearer ` credential value or the word `authorization` in any case.
     - _Requirements: 11.3_
 
-  - [~]* 10.3 Write property test for credential-free recordings
+  - [-]* 10.3 Write property test for credential-free recordings
     - **Property 18: Recorded fixtures carry no credentials**
     - **Validates: Requirements 11.2, 11.5, 11.11**
 
