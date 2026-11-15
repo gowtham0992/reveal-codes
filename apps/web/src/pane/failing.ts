@@ -1,6 +1,6 @@
 import type { CodePosition } from "@reveal-codes/engine";
 
-const FAILING_OPENERS: ReadonlySet<string> = new Set(["CIT ✘", "CIT ?", "QUO ✘"]);
+const FAILING_OPENERS: ReadonlySet<string> = new Set(["CIT ✘", "CIT ≠", "CIT ?", "QUO ✘"]);
 const OTHER_OPENERS: ReadonlySet<string> = new Set(["CIT ✓", "CIT …", "QUO ✓", "QUO …"]);
 
 /** Name of a display token: the text between `[` and the first `:`, `{` or `]`. */

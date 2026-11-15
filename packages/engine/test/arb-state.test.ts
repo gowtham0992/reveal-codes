@@ -27,7 +27,7 @@ describe("state arbitraries", () => {
     );
   });
 
-  it("arbDocument reaches every verification status", () => {
+  it("arbDocument reaches every verification status, wrong_case included", () => {
     const seen = new Set<string>();
     fc.assert(
       fc.property(arbDocument, (d) => {
@@ -35,7 +35,13 @@ describe("state arbitraries", () => {
       }),
       { numRuns: 400 },
     );
-    expect([...seen].sort()).toEqual(["ambiguous", "not_found", "unchecked", "verified"]);
+    expect([...seen].sort()).toEqual([
+      "ambiguous",
+      "not_found",
+      "unchecked",
+      "verified",
+      "wrong_case",
+    ]);
   });
 
   it("bad verification writes return the recorded error and change nothing", () => {

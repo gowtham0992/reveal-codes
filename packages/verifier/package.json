@@ -7,7 +7,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./quote": "./src/quote.ts"
+    "./quote": "./src/quote.ts",
+    "./link": "./src/link.ts"
   },
   "dependencies": {
     "@reveal-codes/engine": "workspace:*"

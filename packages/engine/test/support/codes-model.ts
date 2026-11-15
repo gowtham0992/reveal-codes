@@ -28,6 +28,7 @@ export const VOCABULARY = [
   "AI>HUM",
   "CIT ✓",
   "CIT ✘",
+  "CIT ≠",
   "CIT ?",
   "CIT …",
   "QUO ✓",
@@ -83,6 +84,20 @@ function citationToken(
         "CIT ?",
         String(r.candidates.length),
         full ? [k, ["cs", r.candidates]] : [k],
+        mode,
+      );
+    case "wrong_case":
+      return token(
+        "CIT ≠",
+        null,
+        full
+          ? [
+              k,
+              ["cl", [r.clusterId]],
+              ["nm", [r.foundName]],
+              ...(r.foundYear === undefined ? [] : [["yr", [String(r.foundYear)]] as Field]),
+            ]
+          : [k],
         mode,
       );
     case "not_found":

@@ -77,6 +77,7 @@ describe("Pane_Header and Legend _Requirements: 2.1, 2.3, 2.4, 2.5, 2.6, 2.8, 2.
     ["[AI>HUM]", "assistant, edited"],
     ["[CIT ✓]", "found"],
     ["[CIT ✘]", "not found"],
+    ["[CIT ≠]", "wrong case"],
     ["[QUO ✘]", "not in the opinion"],
   ] as const;
 
@@ -86,13 +87,13 @@ describe("Pane_Header and Legend _Requirements: 2.1, 2.3, 2.4, 2.5, 2.6, 2.8, 2.
     return header;
   }
 
-  it("shows the name at the left and the seven entries joined in order", () => {
+  it("shows the name at the left and the eight entries joined in order", () => {
     const { container } = renderUi(<Pane {...props(CITED)} />);
     const header = headerOf(container);
     const [name, legend] = Array.from(header.children);
     expect(name?.textContent).toBe("Reveal Codes");
     expect(name?.className).toMatch(/title/);
-    expect(legend?.children).toHaveLength(7);
+    expect(legend?.children).toHaveLength(8);
     expect(legend?.textContent).not.toContain("·");
     const items = Array.from(legend?.children ?? []);
     expect(items.map((e) => e.textContent)).toEqual(WORDS.map(([c, w]) => `${c} ${w}`));
@@ -112,10 +113,11 @@ describe("Pane_Header and Legend _Requirements: 2.1, 2.3, 2.4, 2.5, 2.6, 2.8, 2.
       false,
       true,
       true,
+      true,
     ]);
   });
 
-  it("wraps the code of the two failing entries in the ring class and no other", () => {
+  it("wraps the code of the three failing entries in the ring class and no other", () => {
     const { container } = renderUi(<Pane {...props(CITED)} />);
     const legend = headerOf(container).children[1];
     const rings = Array.from(legend?.children ?? []).map(
@@ -123,8 +125,8 @@ describe("Pane_Header and Legend _Requirements: 2.1, 2.3, 2.4, 2.5, 2.6, 2.8, 2.
     );
     expect(
       rings.map((e) => e !== null && e !== undefined && /legendBlock/.test(e.className)),
-    ).toEqual([false, false, false, false, false, true, true]);
-    expect(rings.slice(5).map((e) => e?.textContent)).toEqual(["[CIT ✘]", "[QUO ✘]"]);
+    ).toEqual([false, false, false, false, false, true, true, true]);
+    expect(rings.slice(5).map((e) => e?.textContent)).toEqual(["[CIT ✘]", "[CIT ≠]", "[QUO ✘]"]);
   });
 
   it("carries no aria-hidden, role or aria-label", () => {

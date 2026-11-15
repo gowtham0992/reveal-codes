@@ -9,7 +9,7 @@ type LegendEntry = Readonly<{
   failing: boolean;
 }>;
 
-/** The seven Legend entries, in the order of Requirement 2.4. */
+/** The eight Legend entries, in the order of Requirement 2.4. */
 export const LEGEND: readonly LegendEntry[] = [
   { code: "[HUM]", words: "typed", family: "HUM", failing: false },
   { code: "[PST]", words: "pasted", family: "PST", failing: false },
@@ -17,6 +17,7 @@ export const LEGEND: readonly LegendEntry[] = [
   { code: "[AI>HUM]", words: "assistant, edited", family: "AI>HUM", failing: false },
   { code: "[CIT ✓]", words: "found", family: "verified", failing: false },
   { code: "[CIT ✘]", words: "not found", family: "failed", failing: true },
+  { code: "[CIT ≠]", words: "wrong case", family: "failed", failing: true },
   { code: "[QUO ✘]", words: "not in the opinion", family: "failed", failing: true },
 ];
 

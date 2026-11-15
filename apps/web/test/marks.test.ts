@@ -39,6 +39,23 @@ function quoted(doc: Document, result: QuoteCheckResult): Document {
 }
 
 describe("markRanges _Requirements: 11.1, 11.2, 11.5, 12.10_", () => {
+  it("marks a wrong case citation with the found name and year, or the name alone", () => {
+    const withYear = verified(build(), {
+      status: "wrong_case",
+      clusterId: "145875",
+      foundName: "Ashcroft v. Iqbal",
+      foundYear: 2009,
+    });
+    expect(markRanges(withYear).map((m) => [m.code, m.title])).toEqual([
+      ["CIT ≠", "This citation is Ashcroft v. Iqbal (2009)"],
+    ]);
+    const noYear = verified(build(), {
+      status: "wrong_case",
+      clusterId: "145875",
+      foundName: "Ashcroft v. Iqbal",
+    });
+    expect(markRanges(noYear).map((m) => m.title)).toEqual(["This citation is Ashcroft v. Iqbal"]);
+  });
   it("marks a not found citation with its Issue range and title", () => {
     const doc = verified(build(), { status: "not_found" });
     const issue = issues(doc).find((i) => i.code === "CIT ✘");

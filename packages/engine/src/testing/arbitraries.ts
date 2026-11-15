@@ -8,6 +8,8 @@ export * from "./arb-citation.js";
 export * from "./arb-citation-corrupt.js";
 export * from "./arb-lexis-near-miss.js";
 export * from "./arb-case-name.js";
+export * from "./arb-case-match.js";
+export * from "./arb-case-match-tolerant.js";
 export * from "./arb-short-form-party.js";
 export * from "./arb-initial-prose.js";
 export * from "./arb-boundary-text.js";

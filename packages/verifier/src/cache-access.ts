@@ -1,4 +1,5 @@
 import type { VerificationResult } from "@reveal-codes/engine";
+import type { ClusterData } from "./clusters";
 import type { Deps } from "./deps";
 import { isRecord } from "./json";
 import { bumpCounter } from "./status";
@@ -25,6 +26,27 @@ export function isTerminalResult(v: unknown): v is TerminalResult {
     default:
       return false;
   }
+}
+
+/** A resolved line as cached: the result plus the display data of its cluster (case-match D8). */
+export type CachedVerified = Readonly<{
+  status: "verified";
+  clusterId: string;
+  cluster: ClusterData;
+}>;
+
+export type CachedLine = CachedVerified | Exclude<TerminalResult, { status: "verified" }>;
+
+function isClusterData(v: unknown): v is ClusterData {
+  if (!isRecord(v)) return false;
+  return Object.values(v).every((x) => typeof x === "string");
+}
+
+/** Guard for a cached line: a `verified` entry with no cluster record is a miss. */
+export function isCachedLine(v: unknown): v is CachedLine {
+  if (!isTerminalResult(v)) return false;
+  if (v.status !== "verified") return true;
+  return isClusterData((v as Readonly<Record<string, unknown>>)["cluster"]);
 }
 
 /** Shape guard for a cached opinion text: a non-empty string. */

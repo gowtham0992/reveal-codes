@@ -97,10 +97,20 @@ function decodeStatus(code: CodeToken): Result<DraftStatus, typeof BAD> {
       const r = opt("reason", readText(code, "why"));
       return r.ok ? ok({ status: "not_found", ...r.value }) : err(BAD);
     }
-    default: {
+    case CODE_NAMES.citWrongCase: {
+      const cl = opt("clusterId", readText(code, "cl"));
+      const nm = opt("foundName", readText(code, "nm"));
+      const yr = opt("foundYear", readInt(code, "yr"));
+      return cl.ok && nm.ok && yr.ok
+        ? ok({ status: "wrong_case", ...cl.value, ...nm.value, ...yr.value })
+        : err(BAD);
+    }
+    case CODE_NAMES.citUnchecked: {
       const r = opt("waitUntil", readTimestamp(code, "wu"));
       return r.ok ? ok({ status: "unchecked", ...r.value }) : err(BAD);
     }
+    default:
+      return err(BAD);
   }
 }
 

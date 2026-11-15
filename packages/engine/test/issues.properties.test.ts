@@ -16,6 +16,7 @@ import { runs } from "./support/fc";
 /** Test-local rendered opening codes (Glossary), typed independently of src. */
 const CITATION_CODE = {
   not_found: "CIT ✘",
+  wrong_case: "CIT ≠",
   ambiguous: "CIT ?",
   unchecked: "CIT …",
 } as const;

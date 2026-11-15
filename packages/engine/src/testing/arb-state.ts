@@ -19,6 +19,7 @@ import type {
   VerificationResult,
 } from "../types.js";
 import { setQuoteCheck, setVerification } from "../verification.js";
+import { arbWrongCaseResult } from "./arb-case-match.js";
 import { arbTimestamp } from "./arb-text.js";
 
 /** A Full_Citation record of a Document. */
@@ -60,9 +61,10 @@ export const arbVerifiedResult: fc.Arbitrary<VerificationResult> = arbId.map((cl
   clusterId,
 }));
 
-/** Well-formed results of all four statuses, equally weighted (Req 16.2). */
+/** Well-formed results of all five statuses, equally weighted (Req 16.2; case-match Req 13.3). */
 export const arbVerificationResult: fc.Arbitrary<VerificationResult> = fc.oneof(
   arbVerifiedResult,
+  arbWrongCaseResult,
   fc
     .uniqueArray(arbId, { minLength: 2, maxLength: 5 })
     .map((candidates): VerificationResult => ({ status: "ambiguous", candidates })),

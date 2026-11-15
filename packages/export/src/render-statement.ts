@@ -3,7 +3,6 @@ import { statementTitle } from "./statement-order.js";
 import { ellipsize } from "./text.js";
 import type { Statement, StatementBlock } from "./types.js";
 import {
-  CITATION_CODES,
   CITATION_COLUMNS,
   NO_CITATIONS_SENTENCE,
   NO_QUOTATIONS_SENTENCE,
@@ -16,6 +15,7 @@ import {
   RESPONSIBILITY,
   aiParagraph,
   citationParagraph,
+  citationStatusCell,
   quoteParagraph,
 } from "./wording.js";
 
@@ -60,11 +60,12 @@ function citationBlocks(s: Statement, number: number): StatementBlock[] {
   const text = citationParagraph({
     date: s.verifiedAt === null ? null : s.verifiedDate,
     verified: countOf(s.citations, "verified"),
+    wrongCase: countOf(s.citations, "wrong_case"),
     notFound: countOf(s.citations, "not_found"),
     ambiguous: countOf(s.citations, "ambiguous"),
     unchecked: countOf(s.citations, "unchecked"),
   });
-  const rows = s.citations.map((c) => [c.text, CITATION_CODES[c.status], c.clusterId ?? ""]);
+  const rows = s.citations.map((c) => [c.text, citationStatusCell(c), c.clusterId ?? ""]);
   return [paragraph(number, text), { kind: "table", columns: CITATION_COLUMNS, rows }];
 }
 

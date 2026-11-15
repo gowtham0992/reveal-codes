@@ -30,6 +30,13 @@ function resultOf(s: DraftStatus): VerificationResult {
   switch (s.status) {
     case "verified":
       return { status: "verified", clusterId: s.clusterId ?? "" };
+    case "wrong_case":
+      return {
+        status: "wrong_case",
+        clusterId: s.clusterId ?? "",
+        foundName: s.foundName ?? "",
+        ...(s.foundYear === undefined ? {} : { foundYear: s.foundYear }),
+      };
     case "ambiguous":
       return { status: "ambiguous", candidates: s.candidates ?? [] };
     case "not_found":

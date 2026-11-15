@@ -9,6 +9,7 @@ export const EMPTY_LINE = "No issues.";
 
 const SEVERITY: Readonly<Record<IssueCode, string>> = {
   "CIT ✘": "not found",
+  "CIT ≠": "wrong case",
   "CIT ?": "ambiguous",
   "CIT …": "unchecked",
   "QUO ✘": "quote not found in opinion",

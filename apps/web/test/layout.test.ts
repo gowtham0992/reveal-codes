@@ -29,6 +29,7 @@ describe("codeFamily _Requirements: 11.5_", () => {
     ["[CIT ✓]", "verified"],
     ["[QUO ✓]", "verified"],
     ["[CIT ✘]", "failed"],
+    ["[CIT ≠]", "failed"],
     ["[QUO ✘]", "failed"],
     ["[CIT ?:2]", "pending"],
     ["[CIT …]", "pending"],
@@ -50,6 +51,7 @@ describe("codeFamily _Requirements: 11.5_", () => {
 describe("codeMeaning _Requirements: 11.5_", () => {
   it("names the outcome", () => {
     expect(codeMeaning("[CIT ✘]")).toBe("Citation not found");
+    expect(codeMeaning("[CIT ≠]")).toBe("Citation is a different case");
     expect(codeMeaning("[/QUO]")).toBe("End of quote");
     expect(codeMeaning("[CIT ?:2]")).toBe("Citation ambiguous, 2 candidates");
   });

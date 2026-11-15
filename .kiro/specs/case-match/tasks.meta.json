@@ -40,6 +40,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772475229
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794774701314
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794775052692
       }
     ],
     "1.4 Extend the shared arbitraries and the engine inventory test": [
@@ -47,6 +57,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772475249
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794774701357
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794775052771
       }
     ],
     "2. Checkpoint - Engine complete": [
@@ -78,6 +98,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772475314
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794774701641
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794775052845
       }
     ],
     "3.3 Carry `caseName` and Display_Info through the verify route and client": [
@@ -130,6 +160,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772475421
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794774702093
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794775052878
       }
     ],
     "5.2 Add the Citations tally term, session state and Resolved list selection": [
@@ -158,6 +198,11 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772475484
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794774702634
       }
     ],
     "8.1 Report `wrong_case` drift in the Sentinel": [
@@ -455,6 +500,13 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772494200
+      }
+    ],
+    "1. Engine: cited name, `wrong_case` status and Reveal Codes form (Requirements 1 to 3)": [
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794775052812
       }
     ]
   }

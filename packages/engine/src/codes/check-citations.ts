@@ -16,6 +16,12 @@ function fullPayloadOk(s: DraftStatus): boolean {
   switch (s.status) {
     case "verified":
       return isNonEmpty(s.clusterId);
+    case "wrong_case":
+      return (
+        isNonEmpty(s.clusterId) &&
+        isNonEmpty(s.foundName) &&
+        (s.foundYear === undefined || (s.foundYear >= 1000 && s.foundYear <= 9999))
+      );
     case "ambiguous": {
       const c = s.candidates;
       return (
@@ -34,7 +40,7 @@ function fullPayloadOk(s: DraftStatus): boolean {
 }
 
 const hasPayload = (s: DraftStatus): boolean =>
-  "clusterId" in s || "candidates" in s || "reason" in s || "waitUntil" in s;
+  "clusterId" in s || "foundName" in s || "foundYear" in s || "candidates" in s || "reason" in s || "waitUntil" in s;
 
 const valueOf = (i: CheckInput, c: DraftCitation): CitationValue | undefined =>
   i.byRange.get(rangeKey(c.start, c.end))?.value;
@@ -90,7 +96,8 @@ export function checkShortForms(i: CheckInput): CheckFault | undefined {
 export function checkUnverifiable(i: CheckInput): CheckFault | undefined {
   for (const c of i.draft.citations) {
     const v = valueOf(i, c);
-    if (c.status.status === "verified" && v?.kind === "database" && v.lexisCourtListed === false) {
+    const passing = c.status.status === "verified" || c.status.status === "wrong_case";
+    if (passing && v?.kind === "database" && v.lexisCourtListed === false) {
       return fault(c.index, "unverifiable_status");
     }
   }

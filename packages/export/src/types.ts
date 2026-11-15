@@ -13,8 +13,12 @@ export type StatementTool = Readonly<{ provider: string; model: string | null }>
 export type StatementCitation = Readonly<{
   text: string;
   status: VerificationResult["status"];
-  /** Present only when status is "verified". */
+  /** Present only when status is "verified" or "wrong_case". */
   clusterId?: string;
+  /** Present only when status is "wrong_case". */
+  foundName?: string;
+  /** Present only when status is "wrong_case" and the result carries a year. */
+  foundYear?: number;
 }>;
 export type StatementQuote = Readonly<{
   text: string;

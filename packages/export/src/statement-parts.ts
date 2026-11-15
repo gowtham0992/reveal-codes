@@ -1,5 +1,5 @@
 import { issues } from "@reveal-codes/engine";
-import type { Document, Origin, Sentence } from "@reveal-codes/engine";
+import type { Document, Origin, Sentence, VerificationResult } from "@reveal-codes/engine";
 import { localDateTime } from "./time.js";
 import type {
   OriginCounts,
@@ -51,13 +51,25 @@ export function citationsOf(document: Document): readonly StatementCitation[] {
   for (const r of document.citations) {
     if (r.kind !== "full") continue;
     const text = r.citation.text;
-    out.push(
-      r.result.status === "verified"
-        ? { text, status: r.result.status, clusterId: r.result.clusterId }
-        : { text, status: r.result.status },
-    );
+    out.push(citationEntry(text, r.result));
   }
   return out;
+}
+
+function citationEntry(text: string, result: VerificationResult): StatementCitation {
+  if (result.status === "verified") {
+    return { text, status: result.status, clusterId: result.clusterId };
+  }
+  if (result.status === "wrong_case") {
+    return {
+      text,
+      status: result.status,
+      clusterId: result.clusterId,
+      foundName: result.foundName,
+      ...(result.foundYear === undefined ? {} : { foundYear: result.foundYear }),
+    };
+  }
+  return { text, status: result.status };
 }
 
 /** One entry per quote record, in document order. */

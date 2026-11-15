@@ -123,7 +123,7 @@ function expectStatementWording(statement: readonly string[]): void {
     /^3\. Every legal citation in this filing was checked against the CourtListener database on \d{4}-\d{2}-\d{2}\. /,
   );
   expect(three).toContain(
-    "2 resolved to a single reported decision, 3 could not be found, 0 matched more than one decision, and 0 were not checked.",
+    "2 resolved to a single reported decision, 0 resolved to a different case than the one named, 3 could not be found, 0 matched more than one decision, and 0 were not checked.",
   );
   expect(statement).toContain(
     "4. Quotations attributed to a cited decision were compared with the text of that decision. 1 matched, 1 did not, 0 were not checked.",

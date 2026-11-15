@@ -1,6 +1,10 @@
 import type { CitationRecord, IssueKey, VerificationResult } from "@reveal-codes/engine";
 import { acquire } from "./bucket";
-import { cacheGet, cacheSet } from "./cache-access";
+import { cacheGet, cacheSet, isCachedLine } from "./cache-access";
+import { clusterDataByIndex } from "./clusters";
+import type { ClusterData } from "./clusters";
+import { judgeRecords } from "./judge";
+import type { DisplayInfo } from "./judge";
 import { chunkLines } from "./chunk";
 import type { Chunk } from "./chunk";
 import { combineParallel } from "./combine";
@@ -60,14 +64,27 @@ export function resultsForRecords(
 }
 
 type LineResults = Map<string, VerificationResult>;
+type ClusterMap = Map<string, ClusterData>;
+type Fetched = Readonly<{ results: LineResults; clusters: ClusterMap }>;
 
-function uncheckedLines(lines: readonly string[], waitUntil: string | null): LineResults {
+function uncheckedLines(lines: readonly string[], waitUntil: string | null): Fetched {
   const r: VerificationResult = waitUntil === null ? UNCHECKED : { status: "unchecked", waitUntil };
-  return new Map(lines.map((line) => [line, r]));
+  return { results: new Map(lines.map((line) => [line, r])), clusters: new Map() };
+}
+
+function fetchedFrom(lines: readonly string[], json: unknown, nowMillis: number): Fetched {
+  const results: LineResults = new Map(mapChunk(lines, parseLookupBody(json), null, nowMillis));
+  const data = clusterDataByIndex(json);
+  const clusters: ClusterMap = new Map();
+  lines.forEach((line, i) => {
+    const d = data.get(i);
+    if (d !== undefined && results.get(line)?.status === "verified") clusters.set(line, d);
+  });
+  return { results, clusters };
 }
 
 /** One chunk through the bucket, the retry loop and the status mapping (A3). */
-async function dispatchChunk(deps: Deps, chunk: Chunk): Promise<LineResults> {
+async function dispatchChunk(deps: Deps, chunk: Chunk): Promise<Fetched> {
   const { lines } = chunk;
   if (chunk.oversize) return uncheckedLines(lines, null);
   const req = buildLookupRequest(deps, lines);
@@ -76,26 +93,32 @@ async function dispatchChunk(deps: Deps, chunk: Chunk): Promise<LineResults> {
     () => acquire(deps, lines.length),
     () => requestOnce(deps, req.url, req.spec),
   );
-  if (outcome.kind === "json") {
-    return new Map(mapChunk(lines, parseLookupBody(outcome.json), null, nowMs(deps)));
-  }
+  if (outcome.kind === "json") return fetchedFrom(lines, outcome.json, nowMs(deps));
   return uncheckedLines(lines, waitUntilOf(outcome, nowMs(deps)));
 }
 
 /** A chunk that fails for any reason leaves only its own lines `unchecked` (Req 1.9, 1.10). */
-function dispatchIsolated(deps: Deps, chunk: Chunk): Promise<LineResults> {
+function dispatchIsolated(deps: Deps, chunk: Chunk): Promise<Fetched> {
   return dispatchChunk(deps, chunk).then(
     (r) => r,
     () => uncheckedLines(chunk.lines, null),
   );
 }
 
-async function dispatchAll(deps: Deps, chunks: readonly Chunk[], into: LineResults): Promise<void> {
+async function dispatchAll(
+  deps: Deps,
+  chunks: readonly Chunk[],
+  into: LineResults,
+  clusters: ClusterMap,
+): Promise<void> {
   for (const chunk of chunks) {
     const got = await dispatchIsolated(deps, chunk);
-    for (const [line, result] of got) {
+    for (const [line, result] of got.results) {
       into.set(line, result);
-      await cacheSet(deps, line, result);
+      const cluster = got.clusters.get(line);
+      if (cluster !== undefined) clusters.set(line, cluster);
+      const cached = result.status === "verified" ? { ...result, cluster: cluster ?? {} } : result;
+      await cacheSet(deps, line, cached);
     }
   }
 }
@@ -105,31 +128,54 @@ async function readCache(
   deps: Deps,
   lines: readonly string[],
   into: LineResults,
+  clusters: ClusterMap,
 ): Promise<string[]> {
   const missing: string[] = [];
   for (const line of lines) {
-    const hit = await cacheGet(deps, line);
-    if (hit === undefined) missing.push(line);
-    else into.set(line, hit);
+    const hit = await cacheGet(deps, line, isCachedLine);
+    if (hit === undefined) {
+      missing.push(line);
+    } else if (hit.status === "verified") {
+      into.set(line, { status: "verified", clusterId: hit.clusterId });
+      clusters.set(line, hit.cluster);
+    } else {
+      into.set(line, hit);
+    }
   }
   return missing;
 }
 
+export type LookupInfo = Readonly<{
+  results: ReadonlyMap<IssueKey, VerificationResult>;
+  info: ReadonlyMap<IssueKey, DisplayInfo>;
+}>;
+
 /**
- * One result per Full_Record, keyed by the record's key (Req 1.1, 1.5). Never throws
- * or rejects: every failure becomes `unchecked` for the affected records.
+ * One result per Full_Record, keyed by the record's key (Req 1.1, 1.5), with the case-name
+ * comparison applied, plus the Display_Info of every resolved citation. Never throws or
+ * rejects: every failure becomes `unchecked` for the affected records.
  */
-export async function lookup(
+export async function lookupWithInfo(
+  records: readonly CitationRecord[],
+  deps: Deps,
+): Promise<LookupInfo> {
+  if (!records.some((r) => r.kind === "full")) return { results: new Map(), info: new Map() };
+  const plan = planLookup(records);
+  const lineResults: LineResults = new Map();
+  const clusters: ClusterMap = new Map();
+  const missing = await readCache(deps, plan.lines, lineResults, clusters);
+  if (missing.length > 0) {
+    const chunks = chunkLines(missing);
+    await withGate(deps.state, () => dispatchAll(deps, chunks, lineResults, clusters));
+  }
+  const combined = resultsForRecords(plan.index, lineResults, combineParallel);
+  return judgeRecords(records, plan.index, combined, lineResults, clusters);
+}
+
+/** `lookupWithInfo` without the Display_Info; the comparison still applies. */
+export function lookup(
   records: readonly CitationRecord[],
   deps: Deps,
 ): Promise<ReadonlyMap<IssueKey, VerificationResult>> {
-  if (!records.some((r) => r.kind === "full")) return new Map();
-  const plan = planLookup(records);
-  const results: LineResults = new Map();
-  const missing = await readCache(deps, plan.lines, results);
-  if (missing.length > 0) {
-    const chunks = chunkLines(missing);
-    await withGate(deps.state, () => dispatchAll(deps, chunks, results));
-  }
-  return resultsForRecords(plan.index, results, combineParallel);
+  return lookupWithInfo(records, deps).then((o) => o.results);
 }

@@ -7,6 +7,7 @@ export type DecodeFault = LexFault;
 /** Payload of a citation Code. Payload fields are absent for a Short_Form. */
 export type DraftStatus =
   | Readonly<{ status: "verified"; clusterId?: string }>
+  | Readonly<{ status: "wrong_case"; clusterId?: string; foundName?: string; foundYear?: number }>
   | Readonly<{ status: "ambiguous"; count: number; candidates?: readonly string[] }>
   | Readonly<{ status: "not_found"; reason?: string }>
   | Readonly<{ status: "unchecked"; waitUntil?: string }>;

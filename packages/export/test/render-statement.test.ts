@@ -65,7 +65,7 @@ describe("renderStatement on the Demo_Document", () => {
       {
         kind: "paragraph",
         number: 3,
-        text: "Every legal citation in this filing was checked against the CourtListener database on 2026-11-20. 2 resolved to a single reported decision, 3 could not be found, 0 matched more than one decision, and 0 were not checked.",
+        text: "Every legal citation in this filing was checked against the CourtListener database on 2026-11-20. 2 resolved to a single reported decision, 0 resolved to a different case than the one named, 3 could not be found, 0 matched more than one decision, and 0 were not checked.",
       },
       {
         kind: "table",
@@ -162,7 +162,7 @@ describe("renderStatement structure", () => {
       citations: [{ text: "410 U.S. 113", status: "unchecked" }],
     });
     expect(paragraphs(renderStatement(s))[2]).toBe(
-      "3. Every legal citation in this filing was checked against the CourtListener database on a date that was not recorded. 0 resolved to a single reported decision, 0 could not be found, 0 matched more than one decision, and 1 were not checked.",
+      "3. Every legal citation in this filing was checked against the CourtListener database on a date that was not recorded. 0 resolved to a single reported decision, 0 resolved to a different case than the one named, 0 could not be found, 0 matched more than one decision, and 1 were not checked.",
     );
   });
   it("omits the citation table and says so when there is no citation", () => {

@@ -25,7 +25,7 @@ const EXPECTED: readonly StatementBlock[] = [
   {
     kind: "paragraph",
     number: 3,
-    text: "Every legal citation in this filing was checked against the CourtListener database on 2026-11-20. 2 resolved to a single reported decision, 3 could not be found, 0 matched more than one decision, and 0 were not checked.",
+    text: "Every legal citation in this filing was checked against the CourtListener database on 2026-11-20. 2 resolved to a single reported decision, 0 resolved to a different case than the one named, 3 could not be found, 0 matched more than one decision, and 0 were not checked.",
   },
   {
     kind: "table",

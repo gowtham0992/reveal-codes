@@ -16,7 +16,7 @@ Conventions for every task:
 
 ## Tasks
 
-- [ ] 1. Engine: cited name, `wrong_case` status and Reveal Codes form (Requirements 1 to 3)
+- [x] 1. Engine: cited name, `wrong_case` status and Reveal Codes form (Requirements 1 to 3)
   - [x] 1.1 Record the cited name in the Extractor and in carry-over
     - Add `caseName?: string` to `ExtractedCitation` in `packages/engine/src/types.ts`.
     - Create `packages/engine/src/citations/cited-name.ts` with `citedNameFor(text, start)`, built from `tailComma`, `strictName` and `tolerantName`. `strictName` uses `partyStartFor` and `isCaseName` plus the new In_Re_Name rule from the design. `tolerantName` is the Tolerant_Read of the design and runs only when `strictName` finds nothing: it scans left from the tail comma over Name_Tokens (with one trailing comma after a period-ending token), digits, the Connectors `of`, `the`, `and`, `for`, `&`, `de`, `la`, exactly one `v.` and the `In re` pair, stops at a line break, a second `v.` or any other token, trims leading `PARTY_STOP_LIST` entries and `CONNECTORS` (read from `party.ts`, which is not edited), and accepts only a result with `v.` and a token on each side or one that begins `In re` or `In Re`. Every `caseName` is at most 164 code units.
@@ -33,7 +33,7 @@ Conventions for every task:
     - Fix every other `switch` or table over the status or code union in the Engine so `pnpm typecheck` passes.
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.12_
 
-  - [~] 1.3 Add `CIT ≠` to the Reveal Codes form
+  - [x] 1.3 Add `CIT ≠` to the Reveal Codes form
     - `codes/syntax.ts`: `CODE_NAMES.citWrongCase = "CIT ≠"`.
     - `codes/lex.ts`: schema with required `k` and optional `cl`, `nm`, `yr`, and `OPENS` entry `cit`.
     - `codes/decode-types.ts`, `decode.ts`, `build.ts`: decode and build the `wrong_case` result, replacing the `default` branch of `decodeStatus` with explicit cases.
@@ -42,7 +42,7 @@ Conventions for every task:
     - Update the existing engine tests that enumerate the code names or statuses, if any, and note them for BUILD_LOG.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.9, 3.10_
 
-  - [~] 1.4 Extend the shared arbitraries and the engine inventory test
+  - [x] 1.4 Extend the shared arbitraries and the engine inventory test
     - In `packages/engine/src/testing/arbitraries.ts` add `arbPartyWords(pool)`, `arbCaseName(pool)`, `arbInReName`, `arbLeadIn`, `arbNameVariant(name)` (excluding initialisms equal to a Dropped_Word or one of the thirty table keys, design D10), `arbDisjointNames`, `arbFoundName` and `arbWrongCaseResult`.
     - For Property 3 also add `arbUnlistedAbbreviation` (a capital, three to six lower-case letters and a period, filtered against the Engine's Legal_Abbreviation index, optionally followed by a comma when not the last word), `arbContraction` (`Dep't`, `Ass'n`, `Comm'r`, `Int'l`, `Nat'l`, `Gov't`, or a generated capital-apostrophe form), `arbTolerantCaseName(pool)` (party words from the three sources and the Tolerant_Read Connectors, at most 164 code units) and `arbNameBoundary` (empty, a line break, or a lowercase non-Connector word and a space, so the left edge of the scan is the left edge of the name).
     - Extend the existing document and verification-result arbitraries so some Full_Citations carry `wrong_case` results.
@@ -100,7 +100,7 @@ Conventions for every task:
     - No I/O, no clock, no `node:` import. Each module under 300 lines.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 4.10, 4.13_
 
-  - [~] 3.2 Implement the verifier rule, Display_Info, link and cache change
+  - [x] 3.2 Implement the verifier rule, Display_Info, link and cache change
     - Create `clusters.ts` (`ClusterData`, `clusterDataByIndex`, `foundNames`, `foundYear` per design D5), `judge.ts` (`judgeRecords`, `DisplayInfo`) and `link.ts` (`COURTLISTENER_ORIGIN`, `isSafeAbsoluteUrl`, `isDisplayInfo`, `courtListenerLink`).
     - In `lookup.ts` add `lookupWithInfo` and keep `lookup` as a wrapper returning `lookupWithInfo(records, deps).then((o) => o.results)`, so `lookup` applies the comparison and every caller of it (the MCP tool, the Sentinel) receives `wrong_case`. Add `isCachedLine` so a cached `verified` entry without `cluster` is a miss; leave `isTerminalResult`, `map-status.ts`, `combineParallel`, `chunk.ts`, `bucket.ts`, `transport.ts` and `request.ts` unchanged.
     - Export the new items from `index.ts` and add the browser-safe `@reveal-codes/verifier/link` subpath in `package.json` exports.
@@ -177,7 +177,7 @@ Conventions for every task:
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 5. Web: Pane, page underline, Issues region and Resolved list (Requirements 6 and 7)
-  - [~] 5.1 Add `CIT ≠` to the Pane, the Legend and the page marks
+  - [x] 5.1 Add `CIT ≠` to the Pane, the Legend and the page marks
     - `pane/failing.ts`: add `"CIT ≠"` to `FAILING_OPENERS`.
     - `pane/layout.ts`: family `failed` and the plain-words text `Citation is a different case`.
     - `pane/pane-header.tsx`: Legend entry `[CIT ≠]` `wrong case`, failing, directly after `[CIT ✘] not found`.
@@ -218,7 +218,7 @@ Conventions for every task:
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 7. Statement and Appendix (Requirement 8)
-  - [~] 7.1 Add `wrong_case` to the Statement
+  - [-] 7.1 Add `wrong_case` to the Statement
     - `packages/export/src/types.ts`: add `foundName?` and `foundYear?` to `StatementCitation`.
     - `wording.ts`: `CITATION_CODES` const object, `CitationCounts` with `wrongCase`, the new five-term sentence, `citationStatusCell`.
     - `statement-parts.ts` and `render-statement.ts`: fill the new fields from the Document, count `wrong_case` in its own term, use `citationStatusCell` and the cluster id cell. No new column, no network call.

@@ -90,7 +90,12 @@ function markersIn(file: string): readonly Marker[] {
 }
 
 const allFiles = listTestFiles(testDir);
-const propertyFiles = allFiles.filter((f) => f.endsWith(".properties.test.ts"));
+// The case-match spec's markers are checked by the aggregate inventory test of
+// its own task 13.6, which requires all eighteen; this file covers the
+// provenance-engine design only.
+const propertyFiles = allFiles.filter(
+  (f) => f.endsWith(".properties.test.ts") && !f.endsWith("case-match.properties.test.ts"),
+);
 const markers = propertyFiles.flatMap(markersIn);
 const designNumbers = designPropertyNumbers();
 

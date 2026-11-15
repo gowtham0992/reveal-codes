@@ -32,6 +32,7 @@ export const OVERRIDE_COLUMNS = ["Code", "Text", "Reason", "Timestamp"] as const
 /** Product codes shown in the status columns (design D3). */
 export const CITATION_CODES = {
   verified: "CIT ✓",
+  wrong_case: "CIT ≠",
   not_found: "CIT ✘",
   ambiguous: "CIT ?",
   unchecked: "CIT …",
@@ -81,6 +82,7 @@ export function aiParagraph(f: AiFigures): string {
 export type CitationCounts = Readonly<{
   date: string | null;
   verified: number;
+  wrongCase: number;
   notFound: number;
   ambiguous: number;
   unchecked: number;
@@ -90,9 +92,23 @@ export function citationParagraph(c: CitationCounts): string {
   const when = c.date === null ? "a date that was not recorded" : c.date;
   return (
     `Every legal citation in this filing was checked against the CourtListener database on ${when}. ` +
-    `${String(c.verified)} resolved to a single reported decision, ${String(c.notFound)} could not be found, ` +
+    `${String(c.verified)} resolved to a single reported decision, ` +
+    `${String(c.wrongCase)} resolved to a different case than the one named, ` +
+    `${String(c.notFound)} could not be found, ` +
     `${String(c.ambiguous)} matched more than one decision, and ${String(c.unchecked)} were not checked.`
   );
+}
+
+/** The Status cell of the citation table: the code, plus the found case for `wrong_case`. */
+export function citationStatusCell(c: {
+  status: keyof typeof CITATION_CODES;
+  foundName?: string;
+  foundYear?: number;
+}): string {
+  const code = CITATION_CODES[c.status];
+  if (c.status !== "wrong_case" || c.foundName === undefined) return code;
+  const year = c.foundYear === undefined ? "" : `, ${String(c.foundYear)}`;
+  return `${code} (${c.foundName}${year})`;
 }
 
 /** Paragraph 3 for a filing with no citation; the citation table is omitted. */

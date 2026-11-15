@@ -26,7 +26,7 @@ type Case = Readonly<{ doc: Document; target: FullRecord; result: VerificationRe
  */
 const arbResultFor = (target: FullRecord): fc.Arbitrary<VerificationResult> =>
   isUnlistedLexisRecord(target)
-    ? arbVerificationResult.filter((r) => r.status !== "verified")
+    ? arbVerificationResult.filter((r) => r.status !== "verified" && r.status !== "wrong_case")
     : arbVerificationResult;
 
 const arbCase: fc.Arbitrary<Case> = arbDocument
