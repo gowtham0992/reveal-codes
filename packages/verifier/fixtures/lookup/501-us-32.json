@@ -1,0 +1,21 @@
+{
+  "line": "501 U.S. 32",
+  "entry": {
+    "citation": "501 U.S. 32",
+    "normalized_citations": ["501 U.S. 32"],
+    "start_index": 0,
+    "end_index": 11,
+    "status": 200,
+    "error_message": "",
+    "clusters": [
+      {
+        "id": 112616,
+        "absolute_url": "/opinion/112616/chambers-v-nasco-inc/",
+        "case_name": "Chambers v. Nasco, Inc.",
+        "case_name_full": "Chambers v. Nasco, Inc.",
+        "case_name_short": "Chambers",
+        "date_filed": "1991-08-02"
+      }
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { clusterDataByIndex, foundNames, foundYear } from "../src/clusters";
@@ -248,7 +248,9 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const LOOKUP_DIR = resolve(HERE, "../fixtures/lookup");
 
 function readExistingFixture(line: string): unknown {
-  const parsed = parseJson(readFileSync(resolve(LOOKUP_DIR, `${slugOf(line)}.json`), "utf8"));
+  const path = resolve(LOOKUP_DIR, `${slugOf(line)}.json`);
+  if (!existsSync(path)) return undefined;
+  const parsed = parseJson(readFileSync(path, "utf8"));
   return parsed.ok && isRecord(parsed.value) ? parsed.value["entry"] : undefined;
 }
 

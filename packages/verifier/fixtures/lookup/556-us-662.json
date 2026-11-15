@@ -9,16 +9,11 @@
     "error_message": "",
     "clusters": [
       {
-        "resource_uri": "https://www.courtlistener.com/api/rest/v4/clusters/145875/",
         "id": 145875,
         "absolute_url": "/opinion/145875/ashcroft-v-iqbal/",
-        "docket_id": 191796,
-        "sub_opinions": [
-          "https://www.courtlistener.com/api/rest/v4/opinions/9435340/",
-          "https://www.courtlistener.com/api/rest/v4/opinions/145875/",
-          "https://www.courtlistener.com/api/rest/v4/opinions/9435339/"
-        ],
         "case_name": "Ashcroft v. Iqbal",
+        "case_name_full": "ASHCROFT, FORMER ATTORNEY GENERAL, Et Al. v. IQBAL Et Al.",
+        "case_name_short": "Iqbal",
         "date_filed": "2009-05-18"
       }
     ]

@@ -9,6 +9,12 @@ import lookup404 from "../fixtures/lookup/404-us-519.json" with { type: "json" }
 import lookup556 from "../fixtures/lookup/556-us-662.json" with { type: "json" };
 import lookup576 from "../fixtures/lookup/576-us-644.json" with { type: "json" };
 import lookup912 from "../fixtures/lookup/912-f4th-33.json" with { type: "json" };
+import lookup925_f3d_1339 from "../fixtures/lookup/925-f3d-1339.json" with { type: "json" };
+import lookup905_f_supp_2d_121 from "../fixtures/lookup/905-f-supp-2d-121.json" with { type: "json" };
+import lookup174_f3d_366 from "../fixtures/lookup/174-f3d-366.json" with { type: "json" };
+import lookup516_f3d_1237 from "../fixtures/lookup/516-f3d-1237.json" with { type: "json" };
+import lookup516_us_217 from "../fixtures/lookup/516-us-217.json" with { type: "json" };
+import lookup501_us_32 from "../fixtures/lookup/501-us-32.json" with { type: "json" };
 import manifestJson from "../fixtures/manifest.json" with { type: "json" };
 import opinion108432 from "../fixtures/opinions/108432.json" with { type: "json" };
 import opinion9435339 from "../fixtures/opinions/9435339.json" with { type: "json" };
@@ -22,6 +28,12 @@ const BODIES: Readonly<Record<string, unknown>> = {
   "lookup/912-f4th-33.json": lookup912,
   "lookup/1-hill-150.json": lookup1Hill150,
   "lookup/576-us-644.json": lookup576,
+  "lookup/925-f3d-1339.json": lookup925_f3d_1339,
+  "lookup/905-f-supp-2d-121.json": lookup905_f_supp_2d_121,
+  "lookup/174-f3d-366.json": lookup174_f3d_366,
+  "lookup/516-f3d-1237.json": lookup516_f3d_1237,
+  "lookup/516-us-217.json": lookup516_us_217,
+  "lookup/501-us-32.json": lookup501_us_32,
   "clusters/145875.json": cluster145875,
   "clusters/108432.json": cluster108432,
   "opinions/9435339.json": opinion9435339,

@@ -298,14 +298,14 @@ Conventions for every task:
 - [~] 11. Checkpoint - Everything before the recording passes
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 12. Recording gate (Requirement 11, Requirement 12)
+- [x] 12. Recording gate (Requirement 11, Requirement 12)
   - [x] 12.1 Run the recording dry run and stop or report
     - This task is a stop-and-report gate. Do not edit code, the sample, the rule, the Expected_Outcomes or any fixture in it.
     - Check whether `COURTLISTENER_TOKEN` is set in the shell. If it is absent, stop and tell the user to run `pnpm --filter @reveal-codes/verifier exec tsx scripts/record-lookups.ts` (dry run first, then `--write`) in their own terminal, with the token in their environment. Do not ask for the token and do not read `.env`.
     - If the token is present, run the script as a dry run and report, for each of the seven lines, the status, cluster id and found name. If any result differs from the Requirement 12 table (a status, a cluster, or a name that makes the rule give a different outcome, including a Petersen or Miller name that would give `verified`), report the difference and stop. Do not change the sample, the rule, the Expected_Outcomes or the fixtures to make a result fit.
     - _Requirements: 11.4, 11.9, 11.10, 11.11, 12.2, 12.5_
 
-  - [~] 12.2 Write and wire the six recorded fixtures
+  - [x] 12.2 Write and wire the six recorded fixtures
     - Only after 12.1 reports no difference: run the script with `--write` (or commit the fixtures the user recorded).
     - Add one manifest entry per fixture (`source` `courtlistener-live`, recording date, note), one line each in `packages/verifier/fixtures/README.md`, and route each in `fixtures.ts`.
     - Re-check every count asserted by `packages/verifier/test/fixtures.test.ts` and `demo-corpus.test.ts` and edit them for the six added entries; note the edit for BUILD_LOG. Confirm the credential scan of 10.2 still passes.

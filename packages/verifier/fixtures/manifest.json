@@ -5,7 +5,7 @@
     "line": "556 U.S. 662",
     "source": "courtlistener-live",
     "recorded": "2026-11-07",
-    "note": "citation-lookup entry for Ashcroft v. Iqbal, status 200, one cluster 145875; embedded cluster trimmed to identifying fields"
+    "note": "citation-lookup entry for Ashcroft v. Iqbal, status 200, one cluster 145875; re-fetched with case_name_full and case_name_short; embedded cluster trimmed to identifying fields"
   },
   {
     "file": "lookup/404-us-519.json",
@@ -95,6 +95,54 @@
     "source": "supremecourt.gov",
     "hand_authored": true,
     "note": "Haines excerpt, 404 U.S. at 519-521, from fixtures/source/404-us-519-excerpt.txt; checked 2026-11-07 against live text: the two quoted passages match; elsewhere live differs in quote marks, Rule 12 (b) (6) spacing, and citation text (427 F.2d 71, Conley parallel cites)"
+  },
+  {
+    "file": "lookup/925-f3d-1339.json",
+    "kind": "lookup",
+    "line": "925 F.3d 1339",
+    "source": "courtlistener-live",
+    "recorded": "2026-11-07",
+    "note": "status 404 as returned live; Varghese citation in the Avianca sample, no such reporter page"
+  },
+  {
+    "file": "lookup/905-f-supp-2d-121.json",
+    "kind": "lookup",
+    "line": "905 F. Supp. 2d 121",
+    "source": "courtlistener-live",
+    "recorded": "2026-11-07",
+    "note": "status 200, one cluster 2661490 (United States v. ISS Marine Services, Inc.); the Avianca sample cites it as Petersen v. Iran Air, so the name rule gives wrong_case; embedded cluster trimmed to identifying fields"
+  },
+  {
+    "file": "lookup/174-f3d-366.json",
+    "kind": "lookup",
+    "line": "174 F.3d 366",
+    "source": "courtlistener-live",
+    "recorded": "2026-11-07",
+    "note": "status 200, one cluster 3011108 (Greenleaf v. Garlock, Inc.); the Avianca sample cites it as Miller v. United Airlines, so the name rule gives wrong_case; embedded cluster trimmed to identifying fields"
+  },
+  {
+    "file": "lookup/516-f3d-1237.json",
+    "kind": "lookup",
+    "line": "516 F.3d 1237",
+    "source": "courtlistener-live",
+    "recorded": "2026-11-07",
+    "note": "status 404 as returned live; Zicherman-labelled citation in the Avianca sample"
+  },
+  {
+    "file": "lookup/516-us-217.json",
+    "kind": "lookup",
+    "line": "516 U.S. 217",
+    "source": "courtlistener-live",
+    "recorded": "2026-11-07",
+    "note": "status 200, one cluster 117990 (Zicherman v. Korean Air Lines Co.); embedded cluster trimmed to identifying fields"
+  },
+  {
+    "file": "lookup/501-us-32.json",
+    "kind": "lookup",
+    "line": "501 U.S. 32",
+    "source": "courtlistener-live",
+    "recorded": "2026-11-07",
+    "note": "status 200, one cluster 112616 (Chambers v. Nasco, Inc.); embedded cluster trimmed to identifying fields"
   },
   {
     "file": "quotes.json",
