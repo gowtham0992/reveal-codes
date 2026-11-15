@@ -2,8 +2,12 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { extract } from "../src/citations/extract";
 import { apply, createDocument } from "../src/document";
+import { blockingIssues, issues, recordOverride } from "../src/issues";
+import { setVerification } from "../src/verification";
 import type { CitationRecord, Document } from "../src/types";
 import {
+  arbWrongCaseResult,
+  type WrongCaseResult,
   arbCitationTargetedOp,
   arbInReName,
   arbLeadIn,
@@ -175,5 +179,79 @@ describe("case-match carry-over of caseName _Requirements: 1.9, 1.11_", () => {
       runs(),
     );
     expect(keptSeen).toBeGreaterThan(0);
+  });
+});
+
+type Plan = Readonly<{
+  wrong: boolean;
+  overridden: boolean;
+  result: WrongCaseResult;
+  reason: string;
+}>;
+
+const arbPlan: fc.Arbitrary<Plan> = fc.record({
+  wrong: fc.boolean(),
+  overridden: fc.boolean(),
+  result: arbWrongCaseResult,
+  reason: fc.string({ minLength: 1, maxLength: 20 }).filter((r) => r.trim() !== ""),
+});
+
+// Property 5
+describe("case-match wrong_case blocks export _Requirements: 2.6, 2.7, 2.8, 2.11_", () => {
+  it("lists each wrong_case citation once as CIT ≠, blocks exactly the ones without an Override, and blocking is empty iff all are overridden", () => {
+    let wrongSeen = 0;
+    fc.assert(
+      fc.property(
+        arbNamedDocument,
+        fc.array(arbPlan, { minLength: 6, maxLength: 6 }),
+        (start, plans) => {
+          let doc = start;
+          const chosen = new Set<string>();
+          fullRecords(start).forEach((rec, i) => {
+            const plan = plans[i];
+            if (plan === undefined) return;
+            const status = plan.wrong
+              ? plan.result
+              : { status: "verified" as const, clusterId: "1" };
+            const set = setVerification(doc, rec.key, status);
+            if (!set.ok) return; // a Database_Citation with an unlisted court is not verifiable
+            doc = set.value;
+            if (plan.wrong) chosen.add(rec.key);
+          });
+          const overridden = new Set<string>();
+          fullRecords(start).forEach((rec, i) => {
+            const plan = plans[i];
+            if (plan === undefined || !chosen.has(rec.key) || !plan.overridden) return;
+            const done = recordOverride(doc, rec.key, plan.reason, TIMESTAMP);
+            expect(done.ok).toBe(true);
+            if (!done.ok) return;
+            doc = done.value;
+            overridden.add(rec.key);
+          });
+          wrongSeen += chosen.size;
+
+          const wrongIssues = issues(doc).filter((x) => x.code === "CIT ≠");
+          expect(wrongIssues.map((x) => x.key).sort()).toEqual([...chosen].sort());
+          for (const x of wrongIssues) expect(x.kind).toBe("citation");
+
+          const blocking = blockingIssues(doc);
+          const blockingWrong = blocking.filter((x) => x.code === "CIT ≠").map((x) => x.key);
+          const expected = [...chosen].filter((k) => !overridden.has(k));
+          expect(blockingWrong.sort()).toEqual(expected.sort());
+
+          // Every other Issue here is a citation left unchecked; none is a wrong_case one.
+          const overrideKeys = new Set(doc.overrides.map((o) => o.key));
+          expect(blocking.map((x) => x.key)).toEqual(
+            issues(doc)
+              .filter((x) => !overrideKeys.has(x.key))
+              .map((x) => x.key),
+          );
+          const others = blocking.filter((x) => x.code !== "CIT ≠");
+          expect(blocking.length === 0).toBe(expected.length === 0 && others.length === 0);
+        },
+      ),
+      runs(),
+    );
+    expect(wrongSeen).toBeGreaterThan(0);
   });
 });

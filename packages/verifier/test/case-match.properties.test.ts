@@ -10,10 +10,17 @@ import {
   arbPooledCaseName,
 } from "../../engine/src/testing/arb-case-match";
 import type { CitationRecord, IssueKey, VerificationResult } from "@reveal-codes/engine";
+import { cacheSet } from "../src/cache-access";
+import { chunkLines } from "../src/chunk";
+import { createDeps } from "../src/create-deps";
 import { lookup, lookupWithInfo, planLookup } from "../src/lookup";
+import type { LookupInfo } from "../src/lookup";
 import { namesMatch } from "../src/name-match";
 import { runs } from "./support/fc";
-import { makeDeps } from "./support/make-deps";
+import { TEST_BASE_URL, makeDeps } from "./support/make-deps";
+import type { TestDeps } from "./support/make-deps";
+import { scriptedFetch } from "./support/scripted-fetch";
+import type { ScriptStep } from "./support/scripted-fetch";
 
 type NamePair = Readonly<{ cited: string; found: string; expected: boolean }>;
 
@@ -255,6 +262,79 @@ describe("Property 9: The verifier rule _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 
             expect(unnamed?.status).toBe("verified");
           }
         });
+      }),
+      { numRuns: runs() },
+    );
+  });
+});
+
+// ---- Property 10 harness: a second run on the same cache. ----
+
+/** Only line kinds that are cached (200, 300, 400, 404); `unchecked` outcomes are never cached. */
+const arbCachedScenario: fc.Arbitrary<Scenario> = arbScenario.map((s) => ({
+  ...s,
+  kinds: s.kinds.map((k): LineKind => (k === "429" || k === "junk" ? "200" : k)),
+}));
+
+/** Scripted answers for the chunks of `lines`, in the order `lookupWithInfo` requests them. */
+function stepsFor(s: Scenario, lines: readonly string[]): ScriptStep[] {
+  return chunkLines(lines).map((chunk) => ({
+    status: 200,
+    body: chunk.lines.map((line) => entryOf(s, Number.parseInt(line, 10) - 100)),
+  }));
+}
+
+/** Fresh fetch and deps over the cache and clock of an earlier run. */
+function sharedCacheDeps(first: TestDeps, steps: readonly ScriptStep[]): TestDeps {
+  const fetch = scriptedFetch(steps);
+  const deps = createDeps({
+    fetch: fetch.fetch,
+    now: first.clock.now,
+    sleep: first.clock.sleep,
+    cache: first.cache,
+    baseUrl: TEST_BASE_URL,
+  });
+  return { deps, fetch, clock: first.clock, cache: first.cache };
+}
+
+async function firstRun(s: Scenario, records: CitationRecord[]): Promise<[TestDeps, LookupInfo]> {
+  const lines = planLookup(records).lines;
+  const first = makeDeps(stepsFor(s, lines));
+  return [first, await lookupWithInfo(records, first.deps)];
+}
+
+// Feature: case-match, Property 10: a cache hit gives the live result
+// Property 10
+describe("Property 10: A cache hit gives the live result _Requirements: 5.7_", () => {
+  it("returns the same results and info from the cache with no request, and refetches a verified entry without cluster data", async () => {
+    await fc.assert(
+      fc.asyncProperty(arbCachedScenario, fc.boolean(), async (s, withNames) => {
+        const records = recordsOf(s, withNames);
+        const [first, live] = await firstRun(s, records);
+        const lines = planLookup(records).lines;
+
+        // Second run on the same cache: identical output and no request.
+        const hit = sharedCacheDeps(first, []);
+        const cached = await lookupWithInfo(records, hit.deps);
+        expect(cached.results).toEqual(live.results);
+        expect(cached.info).toEqual(live.info);
+        expect(hit.fetch.calls).toHaveLength(0);
+
+        // Strip the cluster record from every cached `verified` entry: each is now a miss.
+        const stripped = lines.filter((line) => {
+          const r = lineOutcome(s, Number.parseInt(line, 10) - 100);
+          return r.status === "verified";
+        });
+        for (const line of stripped) {
+          const clusterId = String(s.clusterOf[Number.parseInt(line, 10) - 100] ?? 1);
+          await cacheSet(first.deps, line, { status: "verified", clusterId });
+        }
+        const miss = sharedCacheDeps(first, stepsFor(s, stripped));
+        const again = await lookupWithInfo(records, miss.deps);
+        const requested = miss.fetch.calls.flatMap((c) => c.text.split("\n"));
+        expect([...requested].sort()).toEqual([...stripped].sort());
+        expect(again.results).toEqual(live.results);
+        expect(again.info).toEqual(live.info);
       }),
       { numRuns: runs() },
     );

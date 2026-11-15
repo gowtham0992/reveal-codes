@@ -60,7 +60,7 @@ Conventions for every task:
     - **Property 4: A kept citation keeps its name**
     - **Validates: Requirements 1.9, 1.11**
 
-  - [~]* 1.7 Write property test for `wrong_case` blocking export
+  - [x]* 1.7 Write property test for `wrong_case` blocking export
     - **Property 5: `wrong_case` blocks export until overridden**
     - **Validates: Requirements 2.6, 2.7, 2.8, 2.11**
 
@@ -131,7 +131,7 @@ Conventions for every task:
     - Include the clause that `lookup` returns a map equal to the `results` of `lookupWithInfo` for the same records and fixture `fetch`.
     - **Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.5, 5.14**
 
-  - [~]* 3.7 Write property test for cache hits
+  - [x]* 3.7 Write property test for cache hits
     - **Property 10: A cache hit gives the live result**
     - **Validates: Requirements 5.7**
 
@@ -208,7 +208,7 @@ Conventions for every task:
     - **Property 17: The `wrong case` term of the Citations line**
     - **Validates: Requirements 7.9**
 
-  - [~]* 5.6 Write web example tests
+  - [x]* 5.6 Write web example tests
     - Legend entry and order, page mark title with and without year, plain-words description.
     - Issues row text, link `href`/`target`/`rel`, link built from `clusterId` with no `absoluteUrl`, the row after a reload, the Export dialog row.
     - Resolved list hidden before a Verify_Run, rows after, absent when no `verified` citation, no effect on blocking count, Export button, Next_Step or `No issues.`.
@@ -288,7 +288,7 @@ Conventions for every task:
     - **Property 18: Recorded fixtures carry no credentials**
     - **Validates: Requirements 11.2, 11.5, 11.11**
 
-  - [~]* 10.4 Write recording script example tests
+  - [x]* 10.4 Write recording script example tests
     - A missing token exits with code 1 and makes no request.
     - `checkExpected` reports a changed status, cluster id or rule outcome.
     - The `556 U.S. 662` comparison reports `matches` and `differs`.
