@@ -271,7 +271,7 @@ Conventions for every task:
     - Empty-page links: order, keyboard focus, not `aria-hidden`, absent when text exists, load behaviour, failure notice.
     - _Requirements: 10.5, 10.6, 10.7, 10.8, 10.9, 10.10, 10.11, 10.12, 10.15, 13.5_
 
-- [ ] 10. Recording script and its tests (Requirement 11)
+- [x] 10. Recording script and its tests (Requirement 11)
   - [x] 10.1 Write the recording script
     - Create `packages/verifier/scripts/record-lookups.ts` with `trimEntry`, `recordLookups`, `checkExpected` and `main`; add `scripts` to `packages/verifier/tsconfig.json` `include`.
     - `main` is the only reader of `COURTLISTENER_TOKEN`; it prints one line and exits 1 before any request when it is unset. The token is never printed, logged or written.
@@ -280,7 +280,7 @@ Conventions for every task:
     - `fetch` is injected; no network in tests.
     - _Requirements: 11.1, 11.2, 11.4, 11.5, 11.6, 11.8, 11.9, 11.10, 11.11_
 
-  - [-] 10.2 Add the fixture credential scan
+  - [x] 10.2 Add the fixture credential scan
     - Add a test under `packages/verifier/test/` that reads every file under `packages/verifier/fixtures/` and fails when any contains a `Token ` or `Bearer ` credential value or the word `authorization` in any case.
     - _Requirements: 11.3_
 

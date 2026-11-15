@@ -298,6 +298,11 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794775100579
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794775265546
       }
     ],
     "11. Checkpoint - Everything before the recording passes": [
@@ -571,6 +576,13 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794775095282
+      }
+    ],
+    "10. Recording script and its tests (Requirement 11)": [
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794775265586
       }
     ]
   }
