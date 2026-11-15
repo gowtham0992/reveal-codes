@@ -34,9 +34,16 @@ function bodyFinding(input: FindingInput): readonly Finding[] {
   return [{ kind: "body_edited", file, line, before, after }];
 }
 
-/** D16: the status differs, or both are verified with different cluster ids. */
-function citationDiffers(old: VerificationResult, now: VerificationResult): boolean {
-  if (old.status === "verified" && now.status === "verified") {
+/**
+ * D16: the status differs, or both are verified (or both wrong_case) with
+ * different cluster ids. Two wrong_case results with the same cluster id are
+ * not a finding, whatever their found names are.
+ */
+export function citationDiffers(old: VerificationResult, now: VerificationResult): boolean {
+  if (
+    (old.status === "verified" && now.status === "verified") ||
+    (old.status === "wrong_case" && now.status === "wrong_case")
+  ) {
     return old.clusterId !== now.clusterId;
   }
   return old.status !== now.status;

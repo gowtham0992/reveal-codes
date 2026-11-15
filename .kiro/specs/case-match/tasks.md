@@ -234,8 +234,8 @@ Conventions for every task:
     - Statement paragraph, Status cell with and without year, Overrides table row with `CIT ≠`, DOCX builder and `/print` view show the new blocks.
     - _Requirements: 8.1, 8.4, 8.5, 8.7, 13.5_
 
-- [ ] 8. Sentinel (Requirement 9)
-  - [~] 8.1 Report `wrong_case` drift in the Sentinel
+- [x] 8. Sentinel (Requirement 9)
+  - [x] 8.1 Report `wrong_case` drift in the Sentinel
     - `crew/sentinel/src/status-text.ts`: `wrong_case <clusterId> <foundName>`.
     - `findings.ts`: export `citationDiffers` with the rule that a status change is a finding, and two `verified` or two `wrong_case` results differ only by cluster id.
     - Leave `reverify.ts`, `recorded.ts`, `split.ts` and `analyse.ts` unchanged.
