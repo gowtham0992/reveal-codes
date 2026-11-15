@@ -18,6 +18,7 @@ describe("codes/syntax (_Requirements: 19.2, 19.3, 19.11_)", () => {
       "AI>HUM",
       "CIT ✓",
       "CIT ✘",
+      "CIT ≠",
       "CIT ?",
       "CIT …",
       "QUO ✓",

@@ -26,7 +26,7 @@ Conventions for every task:
     - Keep `extract` total and keep every other extracted field identical.
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10, 1.11, 1.12, 1.13, 1.14, 1.15_
 
-  - [~] 1.2 Add the `wrong_case` status and `CIT ≠` Issue code
+  - [x] 1.2 Add the `wrong_case` status and `CIT ≠` Issue code
     - Add the `wrong_case` variant to `VerificationResult` and `"CIT ≠"` to `IssueCode` in `types.ts`.
     - In `verification.ts`, turn `badVerificationField` into a table keyed by status with no `default` branch, validate `clusterId`, `foundName` and `foundYear` (1000 to 9999), treat `wrong_case` like `verified` for `not_verifiable`, and keep `statusChanged` Override behaviour.
     - In `issues.ts`, retype `FULL_CODES` over the non-`verified` statuses and add `wrong_case: "CIT ≠"`.
@@ -116,7 +116,7 @@ Conventions for every task:
     - Edit the existing verify-flow and api tests that build a verify response, and note them for BUILD_LOG.
     - _Requirements: 5.10, 5.11, 2.12, 13.9_
 
-  - [~] 3.4 Update the verifier inventory test
+  - [x] 3.4 Update the verifier inventory test
     - Make `packages/verifier/test/inventory.test.ts` skip files named `case-match.properties.test.ts`.
     - The check of this spec's markers is the one aggregate inventory test of task 13.6, which requires all eighteen.
     - _Requirements: 13.1, 13.9_

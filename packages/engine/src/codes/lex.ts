@@ -49,6 +49,11 @@ const SCHEMAS: Readonly<Record<CodeName, Schema>> = {
   [CODE_NAMES.aiHum]: RUN_T,
   [CODE_NAMES.citVerified]: { retained: false, required: ["k"], optional: ["cl"] },
   [CODE_NAMES.citNotFound]: { retained: false, required: ["k"], optional: ["why"] },
+  [CODE_NAMES.citWrongCase]: {
+    retained: false,
+    required: ["k"],
+    optional: ["cl", "nm", "yr"],
+  },
   [CODE_NAMES.citAmbiguous]: { retained: true, required: ["k"], optional: ["cs"] },
   [CODE_NAMES.citUnchecked]: { retained: false, required: ["k"], optional: ["wu"] },
   [CODE_NAMES.quoVerified]: K,
@@ -205,6 +210,7 @@ type Family = "cit" | "quo" | "ref";
 const OPENS: Readonly<Partial<Record<CodeName, Family>>> = {
   [CODE_NAMES.citVerified]: "cit",
   [CODE_NAMES.citNotFound]: "cit",
+  [CODE_NAMES.citWrongCase]: "cit",
   [CODE_NAMES.citAmbiguous]: "cit",
   [CODE_NAMES.citUnchecked]: "cit",
   [CODE_NAMES.quoVerified]: "quo",

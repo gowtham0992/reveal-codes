@@ -131,6 +131,7 @@ export type Extraction = Readonly<{
 
 export type VerificationResult =
   | Readonly<{ status: "verified"; clusterId: string }>
+  | Readonly<{ status: "wrong_case"; clusterId: string; foundName: string; foundYear?: number }>
   | Readonly<{ status: "ambiguous"; candidates: readonly string[] }>
   | Readonly<{ status: "not_found"; reason?: string }>
   | Readonly<{ status: "unchecked"; waitUntil?: string }>;
@@ -221,7 +222,7 @@ export type Sentence = Readonly<{
 
 // Issues
 
-export type IssueCode = "CIT ✘" | "CIT ?" | "CIT …" | "QUO ✘" | "QUO …";
+export type IssueCode = "CIT ✘" | "CIT ≠" | "CIT ?" | "CIT …" | "QUO ✘" | "QUO …";
 
 export type Issue = Readonly<{
   key: IssueKey;

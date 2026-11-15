@@ -78,6 +78,19 @@ function citationOpening(rec: CitationRecord, result: VerificationResult): Openi
         retained: String(result.candidates.length),
         fields: full ? [k, field("cs", ...result.candidates)] : [k],
       };
+    case "wrong_case":
+      return {
+        name: CODE_NAMES.citWrongCase,
+        retained: null,
+        fields: full
+          ? [
+              k,
+              field("cl", result.clusterId),
+              field("nm", result.foundName),
+              ...(result.foundYear === undefined ? [] : [field("yr", String(result.foundYear))]),
+            ]
+          : [k],
+      };
     case "not_found":
       return {
         name: CODE_NAMES.citNotFound,

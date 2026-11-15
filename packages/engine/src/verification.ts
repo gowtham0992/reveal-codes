@@ -51,22 +51,37 @@ function isDistinctIds(ids: readonly unknown[]): boolean {
  * Payload form of Req 16.2. Returns the name of the first failing field, or
  * null. Reads the value as `unknown` because callers may pass malformed data.
  */
-function badVerificationField(r: VerificationResult): string | null {
-  const v: { readonly [k: string]: unknown } = r;
-  switch (v["status"]) {
-    case "verified":
-      return isNonEmptyString(v["clusterId"]) ? null : "clusterId";
-    case "ambiguous": {
+type Fields = { readonly [k: string]: unknown };
+
+function badWrongCase(v: Fields): string | null {
+  if (!isNonEmptyString(v["clusterId"])) return "clusterId";
+  if (!isNonEmptyString(v["foundName"])) return "foundName";
+  if (!hasOwn(v, "foundYear")) return null;
+  const y = v["foundYear"];
+  return typeof y === "number" && Number.isInteger(y) && y >= 1000 && y <= 9999
+    ? null
+    : "foundYear";
+}
+
+const FIELD_CHECKS: Readonly<Record<VerificationResult["status"], (v: Fields) => string | null>> =
+  {
+    verified: (v) => (isNonEmptyString(v["clusterId"]) ? null : "clusterId"),
+    wrong_case: badWrongCase,
+    ambiguous: (v) => {
       const c = v["candidates"];
       return Array.isArray(c) && c.length >= 2 && isDistinctIds(c) ? null : "candidates";
-    }
-    case "not_found":
-      return !hasOwn(v, "reason") || isNonEmptyString(v["reason"]) ? null : "reason";
-    case "unchecked":
-      return !hasOwn(v, "waitUntil") || isTimestamp(v["waitUntil"]) ? null : "waitUntil";
-    default:
-      return "status";
-  }
+    },
+    not_found: (v) =>
+      !hasOwn(v, "reason") || isNonEmptyString(v["reason"]) ? null : "reason",
+    unchecked: (v) =>
+      !hasOwn(v, "waitUntil") || isTimestamp(v["waitUntil"]) ? null : "waitUntil",
+  };
+
+function badVerificationField(r: VerificationResult): string | null {
+  const v: Fields = r;
+  const status = v["status"];
+  if (typeof status !== "string" || !hasOwn(FIELD_CHECKS, status)) return "status";
+  return FIELD_CHECKS[status as VerificationResult["status"]](v);
 }
 
 /**
@@ -81,7 +96,7 @@ export function setVerification(
 ): Result<Document, EngineError> {
   const rec = findKeyed(doc, key);
   if (rec === null) return err({ kind: "unknown_citation", key });
-  if (rec.kind === "short" || (result.status === "verified" && isUnlistedLexis(rec))) {
+  if (rec.kind === "short" || ((result.status === "verified" || result.status === "wrong_case") && isUnlistedLexis(rec))) {
     return err({ kind: "not_verifiable", key });
   }
   const field = badVerificationField(result);

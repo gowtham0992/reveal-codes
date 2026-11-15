@@ -17,6 +17,7 @@ export const CODE_NAMES = {
   aiHum: "AI>HUM",
   citVerified: "CIT ✓",
   citNotFound: "CIT ✘",
+  citWrongCase: "CIT ≠",
   citAmbiguous: "CIT ?",
   citUnchecked: "CIT …",
   quoVerified: "QUO ✓",

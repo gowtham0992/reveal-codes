@@ -14,14 +14,16 @@ import type {
   IssueKey,
   Override,
   QuoteRecord,
+  VerificationResult,
 } from "./types.js";
 import { isTimestamp } from "./validate.js";
 
-const FULL_CODES = {
+const FULL_CODES: Readonly<Record<Exclude<VerificationResult["status"], "verified">, IssueCode>> = {
   not_found: "CIT ✘",
+  wrong_case: "CIT ≠",
   ambiguous: "CIT ?",
   unchecked: "CIT …",
-} as const satisfies Record<string, IssueCode>;
+};
 
 /** The Issue a citation record is, or null (verified, linked, Other_Reference). */
 function citationIssue(r: CitationRecord): Issue | null {

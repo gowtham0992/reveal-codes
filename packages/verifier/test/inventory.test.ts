@@ -11,7 +11,11 @@ const DESCRIBE = /^describe\((["'`])([^\n]*?)\1,/gm;
 type Found = Readonly<{ file: string; n: number; block: string }>;
 
 function propertyFiles(): readonly string[] {
-  return readdirSync(DIR).filter((f) => f.endsWith(".properties.test.ts"));
+  // case-match.properties.test.ts is checked by the aggregate inventory test of
+  // the case-match spec (task 13.6), not by this per-package inventory.
+  return readdirSync(DIR).filter(
+    (f) => f.endsWith(".properties.test.ts") && f !== "case-match.properties.test.ts",
+  );
 }
 
 function blocksOf(file: string): readonly Found[] {
