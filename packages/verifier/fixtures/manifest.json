@@ -5,7 +5,7 @@
     "line": "556 U.S. 662",
     "source": "courtlistener-live",
     "recorded": "2026-11-07",
-    "note": "citation-lookup entry for Ashcroft v. Iqbal, status 200, one cluster 145875; re-fetched with case_name_full and case_name_short; embedded cluster trimmed to identifying fields"
+    "note": "citation-lookup entry for Ashcroft v. Iqbal, status 200, one cluster 145875; re-fetched on 2026-11-15 with case_name_full and case_name_short; embedded cluster trimmed to identifying fields"
   },
   {
     "file": "lookup/404-us-519.json",
@@ -101,7 +101,7 @@
     "kind": "lookup",
     "line": "925 F.3d 1339",
     "source": "courtlistener-live",
-    "recorded": "2026-11-07",
+    "recorded": "2026-11-15",
     "note": "status 404 as returned live; Varghese citation in the Avianca sample, no such reporter page"
   },
   {
@@ -109,7 +109,7 @@
     "kind": "lookup",
     "line": "905 F. Supp. 2d 121",
     "source": "courtlistener-live",
-    "recorded": "2026-11-07",
+    "recorded": "2026-11-15",
     "note": "status 200, one cluster 2661490 (United States v. ISS Marine Services, Inc.); the Avianca sample cites it as Petersen v. Iran Air, so the name rule gives wrong_case; embedded cluster trimmed to identifying fields"
   },
   {
@@ -117,7 +117,7 @@
     "kind": "lookup",
     "line": "174 F.3d 366",
     "source": "courtlistener-live",
-    "recorded": "2026-11-07",
+    "recorded": "2026-11-15",
     "note": "status 200, one cluster 3011108 (Greenleaf v. Garlock, Inc.); the Avianca sample cites it as Miller v. United Airlines, so the name rule gives wrong_case; embedded cluster trimmed to identifying fields"
   },
   {
@@ -125,7 +125,7 @@
     "kind": "lookup",
     "line": "516 F.3d 1237",
     "source": "courtlistener-live",
-    "recorded": "2026-11-07",
+    "recorded": "2026-11-15",
     "note": "status 404 as returned live; Zicherman-labelled citation in the Avianca sample"
   },
   {
@@ -133,7 +133,7 @@
     "kind": "lookup",
     "line": "516 U.S. 217",
     "source": "courtlistener-live",
-    "recorded": "2026-11-07",
+    "recorded": "2026-11-15",
     "note": "status 200, one cluster 117990 (Zicherman v. Korean Air Lines Co.); embedded cluster trimmed to identifying fields"
   },
   {
@@ -141,7 +141,7 @@
     "kind": "lookup",
     "line": "501 U.S. 32",
     "source": "courtlistener-live",
-    "recorded": "2026-11-07",
+    "recorded": "2026-11-15",
     "note": "status 200, one cluster 112616 (Chambers v. Nasco, Inc.); embedded cluster trimmed to identifying fields"
   },
   {

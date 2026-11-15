@@ -317,7 +317,7 @@ Conventions for every task:
     - The Demo_Motion's Alvarez and Okafor rows assert that each carries a `caseName` (`Alvarez v. Cascade Residential Mgmt., LLC` and `Okafor v. Lindqvist Props.`) and still gives `not_found`.
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.6, 13.5_
 
-- [ ] 13. Documentation and steering (Requirements 6, 8, 14)
+- [x] 13. Documentation and steering (Requirements 6, 8, 14)
   - [x] 13.1 Update the README
     - Add one line under "It checks citations and quotations" saying a citation must also name the case it points to, and one line in the demo path naming the Avianca sample. No exclamation mark or marketing text.
     - Edit the first bullet under "What leaves your machine" (the heading stays verbatim) to read: `Verify sends only citation records to this app's own server, and each record includes the case name written before the citation; from there only citation strings go to CourtListener. The rest of your draft text is not sent.` Keep the other bullets of the section as they are.
@@ -328,7 +328,7 @@ Conventions for every task:
     - Update the statement paragraph to the new five-term sentence and name the count of citations that resolved to a different case than the one named.
     - _Requirements: 8.9, 14.2, 14.6_
 
-  - [-] 13.3 Add the BUILD_LOG entry
+  - [x] 13.3 Add the BUILD_LOG entry
     - Add a dated entry that begins with the five-row table of the Introduction as the reason for the spec, then lists every existing test changed under Requirement 13, criterion 9 (collected from tasks 1.3, 3.2, 3.3, 3.12, 5.1, 5.2, 7.1, 12.2 and 13.1), and any finding of the recording task.
     - _Requirements: 14.3, 13.9_
 

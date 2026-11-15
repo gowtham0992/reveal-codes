@@ -2,7 +2,7 @@ See `manifest.json`: it lists every fixture here with its source, whether it was
 
 Quote fixtures were chosen from regions that match both the supplied LII excerpts and CourtListener's own text, because CourtListener's text has OCR errors and typographic differences (see the manifest notes), so the quotes stay valid whichever source is checked.
 
-Recorded citation-lookup fixtures added by case-match (all `courtlistener-live`, recorded 2026-11-07 with `scripts/record-lookups.ts`; clusters trimmed to identifying fields; no request headers kept):
+Recorded citation-lookup fixtures added by case-match (all `courtlistener-live`, recorded 2026-11-15 with `scripts/record-lookups.ts`; clusters trimmed to identifying fields; no request headers kept):
 
 - `lookup/925-f3d-1339.json`: `925 F.3d 1339`, status 404.
 - `lookup/905-f-supp-2d-121.json`: `905 F. Supp. 2d 121`, status 200, cluster 2661490 (United States v. ISS Marine Services, Inc.).
@@ -10,4 +10,4 @@ Recorded citation-lookup fixtures added by case-match (all `courtlistener-live`,
 - `lookup/516-f3d-1237.json`: `516 F.3d 1237`, status 404.
 - `lookup/516-us-217.json`: `516 U.S. 217`, status 200, cluster 117990 (Zicherman v. Korean Air Lines Co.).
 - `lookup/501-us-32.json`: `501 U.S. 32`, status 200, cluster 112616 (Chambers v. Nasco, Inc.).
-- `lookup/556-us-662.json`: re-fetched 2026-11-07 to keep `case_name_full` and `case_name_short`.
+- `lookup/556-us-662.json`: re-fetched 2026-11-15 to keep `case_name_full` and `case_name_short`.

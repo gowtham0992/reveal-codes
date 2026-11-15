@@ -442,19 +442,101 @@ Seven small fixes in `apps/web` (plus CI, README and `.env.example`), made witho
 - I read only the last lines of `pnpm lint`, which hid two eslint errors in the export tests. They were found later and fixed in their own commit.
 - A helper inserted by a script landed inside a doc comment in `toolbar.tsx` and broke 16 test files until it was moved by hand.
 
-## 2026-11-15 case-match task 1.1: the cited name in the Extractor and in carry-over
+## 2026-11-15 case-match
 
-- `ExtractedCitation` gains an optional `caseName`. The new module `packages/engine/src/citations/cited-name.ts` reads it (`citedNameFor`: tail comma, Strict_Read through `partyStartFor`, `isCaseName` and the new In_Re_Name rule, then the Tolerant_Read only when the Strict_Read finds nothing). `extract.ts` sets it with a conditional spread for Full_Citations in `toCitation`, and `citationCarries` in `anchor.ts` requires the previous and new `caseName` to be equal. `party.ts` and `case-name.ts` are unchanged.
+Why this spec exists. Five lines typed into the live editor on 2026-11-11 (live mode) gave these results:
+
+| Typed in the editor                                                           | Result today                                                           |
+| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Henderson v. Pacific Housing Authority, 556 U.S. 662, 678 (2009)              | CIT ✓, "No issues", Export enabled (556 U.S. 662 is Ashcroft v. Iqbal) |
+| Varghese v. China Southern Airlines Co., Ltd., 925 F.3d 1339 (11th Cir. 2019) | CIT ✘                                                                  |
+| Petersen v. Iran Air, 905 F. Supp. 2d 121 (D.D.C. 2012)                       | CIT ✓                                                                  |
+| Miller v. United Airlines, Inc., 174 F.3d 366, 371-72 (2d Cir. 1999)          | CIT ✓                                                                  |
+| Zicherman v. Korean Air Lines Co., Ltd., 516 F.3d 1237, 1254 (11th Cir. 2008) | CIT ✘                                                                  |
+
+A reporter citation that exists but belongs to another case passed as verified. The spec adds a `wrong_case` status (`CIT ≠`) that blocks export.
+
+### What was built
+
+- Engine: `ExtractedCitation` gains an optional `caseName`. `citations/cited-name.ts` reads it (`citedNameFor`: tail comma, Strict_Read through `partyStartFor`, `isCaseName` and the new In_Re_Name rule, then the Tolerant_Read only when the Strict_Read finds nothing). `citationCarries` in `anchor.ts` requires equal names. `party.ts` and `case-name.ts` are unchanged. The `wrong_case` status and `CIT ≠` Issue code are validated in `verification.ts` and round-trip through the Reveal Codes form.
+- Verifier: name matching (`name-expansion.ts` with a new 30-entry table, `name-normalise.ts`, `name-initials.ts`, `name-match.ts`), `lookupWithInfo` with Display_Info, the browser-safe `@reveal-codes/verifier/link` subpath, and a cache that treats a `verified` entry without cluster data as a miss. `/api/verify` accepts `caseName` and answers `{ results, info }`. `lookup_citations` in the MCP server reports `wrong_case` and the cited name.
+- Web: `CIT ≠` in the Pane, Legend and page marks, a `wrong case` term in the Citations line, a CourtListener link on the Issues row, and a Resolved citations list below the Issues list.
+- Export and Sentinel: a `wrong_case` count and Status cell in the Statement, and `wrong_case` drift findings in the Sentinel.
+- Avianca sample (`packages/engine/fixtures/avianca-citations.txt`), two empty-page links, and `packages/verifier/scripts/record-lookups.ts`.
+- Six new recorded lookup fixtures and a re-fetched `556 U.S. 662`.
+
+### Live recording (2026-11-15)
+
+Run through `record-lookups.ts`; the results agree with Requirement 12.
+
+| Line                  | Status | Cluster id | Case name                                  |
+| --------------------- | ------ | ---------- | ------------------------------------------ |
+| `556 U.S. 662`        | 200    | 145875     | Ashcroft v. Iqbal                          |
+| `925 F.3d 1339`       | 404    | none       | none                                       |
+| `905 F. Supp. 2d 121` | 200    | 2661490    | United States v. ISS Marine Services, Inc. |
+| `174 F.3d 366`        | 200    | 3011108    | Greenleaf v. Garlock, Inc.                 |
+| `516 F.3d 1237`       | 404    | none       | none                                       |
+| `516 U.S. 217`        | 200    | 117990     | Zicherman v. Korean Air Lines Co.          |
+| `501 U.S. 32`         | 200    | 112616     | Chambers v. Nasco, Inc.                    |
+
+`556 U.S. 662` was re-fetched so the fixture keeps `case_name_full` and `case_name_short`. The Petersen and Miller lines resolve to other cases, so the rule gives `wrong_case` for both.
 
 ### Existing tests changed (Requirement 13, criterion 9)
 
-- Req 1.10 says existing extraction properties pass unedited, but several existing tests compare whole citations with `toEqual`, so the new field alone failed them. The conflict was put to the user, who chose to apply Req 13.9 and edit the tests:
-  - `packages/engine/test/extract.test.ts`: 17 expected Full_Citations gain the `caseName` the Extractor now reads (Roe v. Wade, Casey v. Smith, United States v. John Q. Public, A, Inc. v. A & A, Smith v. Local 2092 Union), through a local `named` helper.
-  - `packages/engine/test/demo.test.ts`: the five Demo_Motion Full_Citations gain their names; Alvarez and Okafor come from the Tolerant_Read.
-  - `packages/engine/test/extract.properties.test.ts` Property 18 and Property 20, `packages/engine/test/arb-text-citations.test.ts` ("the constructed Extraction equals extract(text)") and `packages/engine/test/support/gap-signal-insert.ts` (Property 51): citations are compared with `caseName` removed (`withoutCaseName`, `withoutCaseNames` in `test/support/expected.ts`). In Property 20 and Property 51 a quote mark glued to or inserted before a name changes the name read, which is correct; the name itself is checked by case-match Property 3 (task 1.5).
-  - `packages/engine/test/anchor.properties.test.ts` Property 26: the model's `citationSurvives` now also requires equal `caseName`, matching Req 1.11. Counterexample before the edit: an insert inside `Kpappxogip’s, Corp. v. Qitjqorjql J's` before `85452 So. 81276` changed the name, so the citation correctly got a fresh key.
+Checked against `git diff 96cd39d HEAD` (the commit before the spec files). Requirement 1.10 says the existing extraction properties pass unedited, but several existing tests compare whole citations with `toEqual`, so the new `caseName` field alone failed them. The conflict was put to the user, who chose to apply Requirement 13, criterion 9 and edit the tests.
+
+Engine:
+
+- `packages/engine/test/extract.test.ts`: 17 expected Full_Citations gain the `caseName` the Extractor now reads, through a local `named` helper.
+- `packages/engine/test/demo.test.ts`: the five Demo_Motion Full_Citations gain their names; Alvarez and Okafor come from the Tolerant_Read.
+- `packages/engine/test/extract.properties.test.ts` (Properties 18 and 20), `packages/engine/test/arb-text-citations.test.ts` and `packages/engine/test/support/gap-signal-insert.ts` (Property 51): citations are compared with `caseName` removed (`withoutCaseName`, `withoutCaseNames` in `test/support/expected.ts`). A quote mark glued to or inserted before a name changes the name read, which is correct; case-match Property 3 checks the name itself.
+- `packages/engine/test/anchor.properties.test.ts` (Property 26): the model's `citationSurvives` also requires equal `caseName`, matching Requirement 1.11. Counterexample before the edit: an insert inside `Kpappxogip’s, Corp. v. Qitjqorjql J's` before `85452 So. 81276` changed the name, so the citation correctly got a fresh key.
+- `packages/engine/test/syntax.test.ts`: the code-name list gains `CIT ≠`.
+- `packages/engine/test/arb-state.test.ts`: `arbDocument` now reaches `wrong_case`, so the expected status set has five members.
+- `packages/engine/test/issues.properties.test.ts`: the status-to-code table gains `wrong_case: "CIT ≠"`.
+- `packages/engine/test/support/codes-model.ts`: the independent Reveal Codes model renders and parses `wrong_case`.
+- `packages/engine/test/verification.properties.test.ts`: the "not verified" filter also excludes `wrong_case`, which is treated like `verified` for `not_verifiable`.
+- `packages/engine/test/inventory.test.ts`: skips `case-match.properties.test.ts`; the aggregate inventory test covers it.
+
+Verifier and MCP:
+
+- `packages/verifier/test/inventory.test.ts`: skips `case-match.properties.test.ts`.
+- `packages/courtlistener-mcp/test/tools.test.ts`: additive only (the new `lookup_citations case match` describe); no existing test was edited.
+
+Export:
+
+- `packages/export/test/render-statement.test.ts` and `packages/export/test/null-order.test.ts`: the Statement paragraph has a new `resolved to a different case` term.
+- `packages/export/test/statement.properties.test.ts`: the Property 2 check of the cluster id cell needed `wrong_case` fields (`clusterId`, `foundName`, `foundYear`), and now asserts them.
+- `packages/export/test/static/boundaries.test.ts`: skips `case-match.properties.test.ts`.
+
+Web and Sentinel:
+
+- `apps/web/test/export-flow.test.tsx`: the Statement paragraph in the Export flow gains the new term.
+- `apps/web/test/pane.test.tsx`, `failing.test.ts`, `layout.test.ts`: the Legend has eight entries, three failing entries wear the ring, `CIT ≠` is a failing opener, and its plain words are `Citation is a different case`.
+- `apps/web/test/marks.test.ts`: additive (the wrong case mark title).
+- `apps/web/test/api.test.ts`, `verify-route.test.ts`, `verify-flow.test.ts`, `verify-flow.properties.test.ts`: the verify response is now `{ results, info }`, and the property that no text leaves the browser outside the records also allows `caseName`.
+- `apps/web/test/verify-summary.test.ts`: the tally gains `wrong_case`.
+- `apps/web/test/demo-path.test.tsx`: Issues rows are counted outside the new Resolved `section`.
+- `apps/web/test/static/boundaries.test.ts`: `client/*` may import the `/link` subpath.
+- `apps/web/test/static/package-json.test.ts`: the verifier exports gain `./link`.
+- `apps/web/test/static/docs.test.ts`: checks that the MCP tool text mentions the case name.
+- `apps/web/test/static/inventory.test.ts`: skips `case-match.properties.test.ts`.
+- `crew/sentinel/test/static/boundaries.test.ts`: skips `case-match.properties.test.ts`.
 
 ### Where Kiro got something wrong, and what fixed it
 
+- The brief named a recording script, `record-lookups.ts`, that did not exist. It was added (task 10.1).
+- `abbreviations.ts` held no expansions, so the name rule had nothing to expand. A new 30-entry table in `name-expansion.ts` replaced the assumption.
+- The first Avianca sample had two unsuitable citations: Ehrlich was not found and `In re Air Crash` was ambiguous. The sample was replaced.
+- The Strict_Read truncated some names (`Aaaa. Aaaa v. Dep't`, `Nnnn de Bbbb v. Nnnn`), so Property 3 failed. Option 1 (prefer the longer tolerant read) broke two anchor tests by absorbing a prior sentence into the name. Rule A fixed both: the tolerant result replaces the strict one only when it extends it and the added words contain no token ending in a period.
+- Requirement 1.10 conflicts with the existing whole-citation equality tests. They were edited to drop `caseName` (list above).
+- The export Property 2 check needed `wrong_case` fields before it could pass.
+- The per-package inventory and boundary tests counted `case-match.properties.test.ts`, which numbers its properties within its own spec. They skip it now, and one aggregate inventory test (task 13.6) requires all eighteen.
 - A local variable named `window` in `cited-name.ts` tripped the engine purity scan ("DOM global"); it was renamed.
 - A `git stash` and `stash pop` pair, meant to compare against the clean tree while another task's edits were in the working tree, timed out. Afterwards the stash list was empty and every working-tree change was present. No stash was used again.
+- A one-hour time zone offset in a failing test came from running vitest outside the root config. It was not a bug, and no code changed.
+- The six new fixtures were first written with `"recorded": "2026-11-07"` in `manifest.json` and `fixtures/README.md`, but they were recorded on 2026-11-15. The six dates were corrected, and the `556 U.S. 662` re-fetch note now says 2026-11-15. The original 2026-11-07 recording date of that fixture is kept.
+
+### Left alone
+
+- The Miller pincite range `371-72` still truncates the citation text. This was agreed and nothing was changed.
