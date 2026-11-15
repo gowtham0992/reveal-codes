@@ -8,7 +8,7 @@ The statement starts on a new page under the title "AI-Use and Verification Stat
 
 1. Names the drafting tool, Reveal Codes, and says it records the origin of every character.
 2. States whether generative AI was used. If so, it lists the tools, the share of characters the tool inserted, and how many of those the author later edited. If not, it says none was used.
-3. Reports the citation check against CourtListener with the date of the last Verify, and counts how many citations resolved, were not found, were ambiguous or were unchecked. A table lists each citation with its status.
+3. Reports the citation check against CourtListener with the date of the last Verify, and counts five outcomes in one sentence: how many citations "resolved to a single reported decision", how many "resolved to a different case than the one named", how many "could not be found", how many "matched more than one decision", and how many "were not checked". A table lists each citation with its status. For a citation that resolved to a different case, the Status cell shows the code `CIT ≠` followed by the name and year of the case CourtListener found, for example `CIT ≠ (Other v. Case, 1999)`.
 4. Reports the quotation check against the cited opinions, with counts of matched, mismatched and unchecked quotations and a table of each one.
 5. Lists the overrides. Each red code the author overrode is printed with its code, its text, the written override reason and the time it was written. This paragraph appears only when there are overrides.
 6. Says the author has read the filing in full and takes responsibility for it, followed by a signature line and the date. The date is the local date on your machine when you export or print.

@@ -4,7 +4,7 @@ import { extract } from "../src/citations/extract";
 import { apply, createDocument } from "../src/document";
 import { blockingIssues, issues, recordOverride } from "../src/issues";
 import { setVerification } from "../src/verification";
-import type { CitationRecord, Document } from "../src/types";
+import type { CitationRecord, Document, VerificationResult } from "../src/types";
 import {
   arbWrongCaseResult,
   type WrongCaseResult,
@@ -375,5 +375,79 @@ describe("case-match malformed wrong_case is rejected and named _Requirements: 2
       }),
       runs(),
     );
+  });
+});
+
+/** A result of any status, with distinct payloads so two results of one status can differ. */
+const arbAnyResult: fc.Arbitrary<VerificationResult> = fc.oneof(
+  fc.string({ minLength: 1, maxLength: 6 }).map((clusterId) => ({
+    status: "verified" as const,
+    clusterId,
+  })),
+  arbWrongCaseResult,
+  fc
+    .uniqueArray(fc.string({ minLength: 1, maxLength: 6 }), { minLength: 2, maxLength: 4 })
+    .map((candidates) => ({ status: "ambiguous" as const, candidates })),
+  fc.constant({ status: "not_found" as const }),
+  fc.constant({ status: "unchecked" as const }),
+);
+
+/** A result that raises an Issue, so an Override can be recorded against it. */
+const arbIssueResult: fc.Arbitrary<VerificationResult> = arbAnyResult.filter(
+  (r) => r.status !== "verified",
+);
+
+// Property 7
+describe("case-match an Override survives only an unchanged status _Requirements: 2.9_", () => {
+  it("keeps the Override iff the new result has the previous status, including wrong_case to wrong_case with a new cluster or name", () => {
+    let kept = 0;
+    let dropped = 0;
+    let wrongToWrong = 0;
+    fc.assert(
+      fc.property(
+        arbNamedDocument,
+        fc.nat(),
+        arbIssueResult,
+        arbAnyResult,
+        fc.string({ minLength: 1, maxLength: 20 }).filter((r) => r.trim() !== ""),
+        (start, pick, previous, next, reason) => {
+          const records = fullRecords(start);
+          const rec = records[pick % records.length];
+          if (rec === undefined) return;
+          const first = setVerification(start, rec.key, previous);
+          if (!first.ok) return; // an unlisted Database_Citation is not verifiable
+          const overridden = recordOverride(first.value, rec.key, reason, TIMESTAMP);
+          expect(overridden.ok).toBe(true);
+          if (!overridden.ok) return;
+          const before = overridden.value;
+          expect(before.overrides.some((o) => o.key === rec.key)).toBe(true);
+
+          const second = setVerification(before, rec.key, next);
+          expect(second.ok).toBe(true);
+          if (!second.ok) return;
+
+          const survives = second.value.overrides.some((o) => o.key === rec.key);
+          expect(survives).toBe(previous.status === next.status);
+          if (survives) {
+            kept += 1;
+            const original = before.overrides.find((o) => o.key === rec.key);
+            expect(second.value.overrides.find((o) => o.key === rec.key)).toEqual(original);
+            if (
+              previous.status === "wrong_case" &&
+              JSON.stringify(previous) !== JSON.stringify(next)
+            )
+              wrongToWrong += 1;
+          } else dropped += 1;
+          // Overrides on the other citations are untouched.
+          expect(second.value.overrides.filter((o) => o.key !== rec.key)).toEqual(
+            before.overrides.filter((o) => o.key !== rec.key),
+          );
+        },
+      ),
+      runs(),
+    );
+    expect(kept).toBeGreaterThan(0);
+    expect(dropped).toBeGreaterThan(0);
+    expect(wrongToWrong).toBeGreaterThan(0);
   });
 });

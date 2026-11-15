@@ -68,7 +68,7 @@ Conventions for every task:
     - **Property 6: A malformed `wrong_case` result is rejected and named**
     - **Validates: Requirements 2.3, 2.4, 2.5**
 
-  - [~]* 1.9 Write property test for Override survival
+  - [-]* 1.9 Write property test for Override survival
     - **Property 7: An Override survives only an unchanged status**
     - **Validates: Requirements 2.9**
 
@@ -139,7 +139,7 @@ Conventions for every task:
     - **Property 11: The lookup request carries no case name**
     - **Validates: Requirements 5.6, 15.7**
 
-  - [~]* 3.9 Write property test for Display_Info derivation
+  - [x]* 3.9 Write property test for Display_Info derivation
     - **Property 12: Display_Info derivation**
     - **Validates: Requirements 5.8, 5.9**
 
@@ -318,13 +318,13 @@ Conventions for every task:
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.6, 13.5_
 
 - [ ] 13. Documentation and steering (Requirements 6, 8, 14)
-  - [~] 13.1 Update the README
+  - [-] 13.1 Update the README
     - Add one line under "It checks citations and quotations" saying a citation must also name the case it points to, and one line in the demo path naming the Avianca sample. No exclamation mark or marketing text.
     - Edit the first bullet under "What leaves your machine" (the heading stays verbatim) to read: `Verify sends only citation records to this app's own server, and each record includes the case name written before the citation; from there only citation strings go to CourtListener. The rest of your draft text is not sent.` Keep the other bullets of the section as they are.
     - Check `apps/web/test/static/docs.test.ts` first: it matches `Verify sends only citation records to this app's own server` and `from there only citation strings go to CourtListener`, and both must still match. Add one assertion there that the section matches `each record includes the case name written before the citation`. Do not edit any other README test, and confirm the export-certification README test (one line saying exporting and printing send nothing) still passes.
     - _Requirements: 14.1, 14.6, 14.7_
 
-  - [~] 13.2 Update `docs/CERTIFICATION.md`
+  - [-] 13.2 Update `docs/CERTIFICATION.md`
     - Update the statement paragraph to the new five-term sentence and name the count of citations that resolved to a different case than the one named.
     - _Requirements: 8.9, 14.2, 14.6_
 
@@ -337,7 +337,7 @@ Conventions for every task:
     - Edit the `MCP | courtlistener` row: `lookup_citations` now reports `wrong_case` and returns the `caseName` it read, because `structure.md` asks for a line when an MCP tool changes.
     - _Requirements: 14.4_
 
-  - [~] 13.5 Update the steering files
+  - [-] 13.5 Update the steering files
     - `.kiro/steering/product.md`: add the `[CIT ≠]` code line to the Citation codes, `wrong_case` to the verification status vocabulary, `CIT ≠` to the codes named in principle 4, and `CIT ≠` to the Failing_Block row of the Pane palette.
     - `.kiro/steering/citations.md`: add the comparison rule and the `wrong_case` mapping to the verification contract, and say that `lookup` applies the rule, so the MCP `lookup_citations` tool reports `wrong_case` too.
     - `.kiro/steering/structure.md`: add `scripts/` under `packages/verifier/` naming `record-lookups.ts`.

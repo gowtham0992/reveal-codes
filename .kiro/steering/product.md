@@ -32,7 +32,7 @@ Courts have sanctioned lawyers in several hundred decisions for filings that cit
 1. **Provenance is captured, never inferred.** We record how text entered the document (typed, pasted, AI-inserted, AI-then-edited). We never run an "AI detector." If we cannot know, the code is PST.
 2. **Verification is deterministic and reproducible.** Same text plus same CourtListener data gives the same codes. No LLM decides whether a citation is real.
 3. **Nothing leaves the machine silently.** Citation strings go to CourtListener. Draft text goes to the LLM provider only when the author uses the assistant, and the UI says so. There is no telemetry.
-4. **Red codes block export.** Only `CIT ✓` and `QUO ✓` pass. A filing with any `CIT ✘`, `CIT ?`, `CIT …`, `QUO ✘`, or `QUO …` code cannot export unless the author writes an override reason for each one. Overrides are printed in the certification. The product never hides a problem to be convenient.
+4. **Red codes block export.** Only `CIT ✓` and `QUO ✓` pass. A filing with any `CIT ✘`, `CIT ≠`, `CIT ?`, `CIT …`, `QUO ✘`, or `QUO …` code cannot export unless the author writes an override reason for each one. Overrides are printed in the certification. The product never hides a problem to be convenient.
 5. **One keystroke to the truth.** Alt-F3 always toggles the Reveal Codes pane. The pane is a faithful serialization of the document's provenance; it is not a summary.
 6. **Quotes are checked, not just citations.** A real case with an invented quotation is the failure mode that existence checkers miss. `QUO ✘` is a headline result, shown with where the quote diverges from the opinion.
 7. **Respect the period.** The pane looks like 1989 (blue field, pale text, bracketed codes, monospace). The editor above it looks like 2026. The contrast is the point. Spooky theming is not; this is not a Costume entry.
@@ -48,7 +48,7 @@ Use these words consistently in code, specs, UI, and docs:
 - **origin**: one of `HUM`, `PST`, `AI`, `AI>HUM`.
 - **citation**: a reference to a judicial opinion in a recognised reporter form, e.g. `410 U.S. 113`, `598 F.3d 1, 7 (2d Cir. 2010)`, `2024 WL 123456`.
 - **cluster**: CourtListener's identifier for one opinion across reporters.
-- **verification status**: `verified`, `not_found`, `ambiguous`, `unchecked`.
+- **verification status**: `verified`, `not_found`, `wrong_case`, `ambiguous`, `unchecked`.
 - **quote check**: whether text inside quotation marks attributed to a citation appears verbatim (whitespace-normalised) in the opinion.
 - **certification**: the exported statement of AI use, verification results, and overrides.
 
@@ -67,6 +67,7 @@ Citation codes, opening at the start of a citation and closed by `[/CIT]`:
 
 - `[CIT ✓]`: verified; CourtListener resolved it to exactly one cluster.
 - `[CIT ✘]`: not found.
+- `[CIT ≠]`: wrong case; CourtListener resolved the citation to exactly one cluster whose case name does not match the name the filing gives.
 - `[CIT ?]`: ambiguous; more than one candidate cluster. Shows the candidate count.
 - `[CIT …]`: unchecked; not yet verified, could not be verified, or a short form (such as `Id.`) with no preceding citation to refer to.
 
@@ -102,7 +103,7 @@ Colours of the codes in the Reveal Codes pane (text, background, outline). This 
 | `CIT …`, `QUO …` (unchecked) and `REF` | `#BAC4E2` | none | none |
 | `OVR` | `#F5D98B` | none | none |
 | Closers (`/CIT`, `/QUO`, `/REF`) | the colour of their opener | the background of their opener | the outline of their opener |
-| Failing_Block: `CIT ✘`, `CIT ?`, `QUO ✘`, their text and their closers | `#FFFFFF` | `#A8001C` | 2px `#FF8A8A` ring (1px in the Legend) |
+| Failing_Block: `CIT ✘`, `CIT ≠`, `CIT ?`, `QUO ✘`, their text and their closers | `#FFFFFF` | `#A8001C` | 2px `#FF8A8A` ring (1px in the Legend) |
 | Cursor | `#0F2766` | `#E8ECF6` | none |
 | Pane body | `#E8ECF6` | `#0F2766` | none |
 | Pane_Header | title `#FFFFFF`, Legend `#BAC4E2` | `#0F2766` | 1px `#2E4A8F` rule |

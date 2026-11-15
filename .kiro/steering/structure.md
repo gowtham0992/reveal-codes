@@ -24,6 +24,7 @@ reveal-codes/
         testing/arbitraries.ts
       test/                   *.test.ts (examples) and *.properties.test.ts (PBT)
     verifier/                 CourtListener client, quote matcher, cache, fixtures
+      scripts/                record-lookups.ts (the one script that records live lookups as fixtures)
     courtlistener-mcp/        MCP server exposing verifier as tools
     export/                   pure export package: gate, certification statement, appendix, DOCX builder, file name (depends on engine and docx)
   apps/

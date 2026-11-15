@@ -39,6 +39,14 @@
     "1.8 Write property test for malformed `wrong_case` results": {
       "status": "passed",
       "lastRunTimestamp": 1794780338928
+    },
+    "3.9 Write property test for Display_Info derivation": {
+      "status": "passed",
+      "lastRunTimestamp": 1794780483055
+    },
+    "1.9 Write property test for Override survival": {
+      "status": "passed",
+      "lastRunTimestamp": 1794780502526
     }
   },
   "executionHistory": {
@@ -432,6 +440,11 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772475654
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780434625
       }
     ],
     "13.2 Update `docs/CERTIFICATION.md`": [
@@ -439,6 +452,11 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772475670
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780436146
       }
     ],
     "13.3 Add the BUILD_LOG entry": [
@@ -460,6 +478,11 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772475721
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780436229
       }
     ],
     "13.6 Add the aggregate property inventory test": [
@@ -549,6 +572,11 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772481251
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780433274
       }
     ],
     "1.10 Write property test for Short_Forms of a `wrong_case` target": [
@@ -645,6 +673,16 @@
         "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794772487282
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780434212
+      },
+      {
+        "executionId": "db53b7a9-d3d5-4a4b-b872-e9e16d359c25",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794780512680
       }
     ],
     "3.10 Write property test for link construction": [

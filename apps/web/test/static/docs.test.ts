@@ -55,6 +55,7 @@ describe("docs: README _Requirements: 26.1_", () => {
   it("states what Verify sends and that quotation text is checked in the browser and never sent", () => {
     expect(leaves).toMatch(/Verify sends only citation records to this app's own server/);
     expect(leaves).toMatch(/from there only citation strings go to CourtListener/);
+    expect(leaves).toMatch(/each record includes the case name written before the citation/);
     expect(leaves).toMatch(/Quotation text is checked in the browser/);
     expect(leaves).toMatch(/never sent/);
   });

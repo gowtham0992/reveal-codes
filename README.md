@@ -18,7 +18,7 @@ WordPerfect 5.1 for DOS, in 1989, had a key that split the screen and showed eve
 
 **It records provenance instead of guessing it.** Every character carries a code for how it arrived: `HUM` typed, `PST` pasted, `AI` written by the assistant, `AI>HUM` assistant text the author then edited. Nothing is inferred by a detector.
 
-**It checks citations and quotations.** Verify looks up every legal citation on CourtListener and compares each quotation with the text of the opinion it is attributed to. A citation that cannot be found, or a quotation the opinion does not contain, becomes a red code and a blocking item.
+**It checks citations and quotations.** Verify looks up every legal citation on CourtListener and compares each quotation with the text of the opinion it is attributed to. A citation that cannot be found, or a quotation the opinion does not contain, becomes a red code and a blocking item. A citation must also name the case it points to: if the case name written before it does not match the opinion CourtListener finds, it is reported too.
 
 **Alt-F3 shows everything.** The codes pane opens under the page and prints the same text with every code inline. The margin numbers are the document's line numbers, the same ones the status line and the Sentinel use.
 
@@ -40,6 +40,8 @@ On the hosted site citations are checked live. Locally, with no token set, the a
 4. Select Verify. Two citations are found. Three are not, and one quotation is not in its opinion: they turn red in the pane, are underlined on the page, and are listed under Issues. Go jumps to each.
 5. Select Export. Choose a court, for example N.D. Tex. The dialog says how many blocking items remain and keeps Download .docx disabled.
 6. Select Override… on an item and write a reason, or correct the text and Verify again. When nothing blocks, Download .docx produces the filing with its statement and appendix.
+
+To see the case-name check, select Load the Avianca citations on the empty page instead of the demo motion, then Verify.
 
 Paste text of your own on the hosted site to see real citations found and invented ones caught.
 
