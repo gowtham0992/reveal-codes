@@ -332,7 +332,7 @@ Conventions for every task:
     - Add a dated entry that begins with the five-row table of the Introduction as the reason for the spec, then lists every existing test changed under Requirement 13, criterion 9 (collected from tasks 1.3, 3.2, 3.3, 3.12, 5.1, 5.2, 7.1, 12.2 and 13.1), and any finding of the recording task.
     - _Requirements: 14.3, 13.9_
 
-  - [-] 13.4 Update `docs/KIRO_USAGE.md`
+  - [x] 13.4 Update `docs/KIRO_USAGE.md`
     - Add a row for this spec, a row for its `.config.kiro` and `tasks.meta.json` (where present), and a row for each steering file this feature edits (`product.md`, `citations.md`, `structure.md`).
     - Edit the `MCP | courtlistener` row: `lookup_citations` now reports `wrong_case` and returns the `caseName` it read, because `structure.md` asks for a line when an MCP tool changes.
     - _Requirements: 14.4_
