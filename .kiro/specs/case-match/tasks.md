@@ -284,7 +284,7 @@ Conventions for every task:
     - Add a test under `packages/verifier/test/` that reads every file under `packages/verifier/fixtures/` and fails when any contains a `Token ` or `Bearer ` credential value or the word `authorization` in any case.
     - _Requirements: 11.3_
 
-  - [-]* 10.3 Write property test for credential-free recordings
+  - [x]* 10.3 Write property test for credential-free recordings
     - **Property 18: Recorded fixtures carry no credentials**
     - **Validates: Requirements 11.2, 11.5, 11.11**
 
