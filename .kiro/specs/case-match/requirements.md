@@ -26,8 +26,10 @@ Interpretation notes, so that the criteria below are testable:
 - `caseName` holds the name as written, without its closing comma and without any lead-in word.
 - The Party_Run rule of `party.ts` reads only Capitalised_Words, Legal_Abbreviations and Connectors, so it does not read `Cascade Residential Mgmt., LLC` or `Dep't of Homeland Sec.`. A citation with such a name would reach the Verifier with no `caseName` and would pass on existence alone. The Tolerant_Read of Requirement 1, criteria 13 to 15 closes that gap inside `cited-name.ts`. `party.ts` and `case-name.ts` do not change, so quote attachment and sentence segmentation are untouched.
 - The lookup request carries the Citation_Lines only. Its response carries, per cluster, `case_name`, `date_filed` and `absolute_url` (see `packages/verifier/fixtures/lookup/556-us-662.json`). The comparison therefore runs per record after the lookup entry is read, not per line.
-- The pincite range `371-72` in the Miller row ends the Extractor's citation text at `174 F.3d 366, 371`. That is existing behaviour and stays unchanged.
+- The pincite range `371-72` in the Miller row ended the Extractor's citation text at `174 F.3d 366, 371` when this note was first written, and the note said to leave it. The author withdrew that instruction on 2026-11-12; Requirement 18 now makes the citation text cover the whole range and the parenthetical after it.
 - The Pane and the page underline are driven by the Document alone, so everything they show for `wrong_case` (found name, found year) is stored in the Document. The found name of a verified citation and the `absolute_url` of any citation are display data and are not stored in the Document. The link of a `wrong_case` row survives a reload because it can be built from the stored `clusterId`.
+
+Follow-up (Requirements 17 to 21). The author walked the finished feature in a browser on 2026-11-12 and reported four findings: the two empty-page links cannot be clicked with a pointer (Requirement 17); a page range such as `371-72` ends the citation inside the range and leaves the court-and-year parenthetical outside it (Requirement 18); the rows and dialogs where the author decides do not say which name the filing gave (Requirement 19); and role words in a long `case_name_full` make a chance match easier (Requirement 20). Requirement 21 holds the process rules. Criterion 8 of Requirement 9 is reworded as the author asked. The original Requirements 1 to 16 are otherwise unchanged. The earlier instruction to leave page ranges alone (the interpretation note on `371-72`) is withdrawn by Requirement 18.
 
 ## Glossary
 
@@ -50,7 +52,11 @@ Interpretation notes, so that the criteria below are testable:
 - **wrong_case**: the verification status `{ status: "wrong_case"; clusterId: string; foundName: string; foundYear?: number }`. Its code is `CIT ≠`.
 - **Name_Match**: the pure function `namesMatch(cited: string, found: string): boolean` of the Verifier.
 - **Normalised_Words**: the words of a name after Normalisation (Requirement 4).
-- **Dropped_Words**: v, vs, in, re, the, of, and, et, al, ex, rel, inc, co, corp, corporation, company, llc, ltd, lp, llp, plc, na.
+- **Dropped_Words**: v, vs, in, re, the, of, and, et, al, ex, rel, inc, co, corp, corporation, company, llc, ltd, lp, llp, plc, na, and the fifteen Role_Words added by Requirement 20.
+- **Role_Words**: plaintiff, plaintiffs, defendant, defendants, appellant, appellants, appellee, appellees, petitioner, petitioners, respondent, respondents, individually, deceased, no.
+- **Pincite_Expression**: the text a citation gives after its page or `at`: one page (`371`), a range of two pages joined by a hyphen or an en dash with the second number written in full or shortened (`371-72`, `371–372`), or a list of up to five such items separated by a comma and one space (`678, 680-81`). A shortened second number is a run of one to five ASCII digits.
+- **First_Page**: the first number of a Pincite_Expression; it is the only part stored as the value's `pincite`.
+- **Walkthrough_Findings**: the four findings of the author's browser walkthrough of 2026-11-12 that Requirements 17 to 20 answer.
 - **Joined_Letters**: a run of two or more consecutive single-letter words that Normalisation joins into one word, so that `u s` becomes `us` and `n l r b` becomes `nlrb`.
 - **Initials_Skip_Words**: of, and, the, for; the only words skipped when initials are taken.
 - **Initialism_Match**: the relation in which a word of two or more letters on one side equals the initials of two or more consecutive words on the other side, taking the first letter of each word and skipping Initials_Skip_Words.
@@ -243,7 +249,7 @@ Interpretation notes, so that the criteria below are testable:
 5. WHEN a citation's recorded status and its re-check are both `wrong_case` with the same cluster id, THE Sentinel SHALL report no finding for it, whatever the two `foundName` values are.
 6. THE Sentinel SHALL re-check each recorded citation with the `caseName` that the Extractor reads from the recorded text, so that no Sentinel source file other than `status-text.ts` and `findings.ts` needs to change, and `reverify` receives the comparison through `lookup` (Requirement 5, criterion 14).
 7. THE Sentinel tests SHALL gain one example test for the direction `verified` to `wrong_case`, one for `wrong_case` to `verified`, and one example test in which an appendix containing `CIT ≠` parses.
-8. WHEN the Sentinel sweeps a filing exported before this spec, whose Statement citation paragraph has no wrong-case term and whose appendix holds no `CIT ≠`, THE Sentinel SHALL report no finding and no error for it when the re-check data is unchanged, and the Sentinel tests SHALL contain one example test for this case.
+8. WHEN the Sentinel sweeps a filing exported before this spec, whose Statement citation paragraph has no wrong-case term and whose appendix holds no `CIT ≠`, THE Sentinel SHALL report no finding and no error for it when the name each recorded `verified` citation gives matches the re-check data, and SHALL report one `citation_changed` finding (Before `verified <clusterId>`, After `wrong_case <clusterId> <foundName>`) for each recorded `verified` citation whose written name now resolves to a different case; the Sentinel tests SHALL contain one example test for each of the two outcomes.
 
 ### Requirement 10: The Avianca sample and the empty-page links
 
@@ -367,3 +373,86 @@ Interpretation notes, so that the criteria below are testable:
 3. THE spec phases SHALL make no code change; every code change belongs to a task.
 4. THE tasks SHALL group the work in this order: the Engine (Requirements 1 to 3), the Verifier and the MCP server (Requirements 4 and 5), the Pane, page and Issues_Region (Requirements 6 and 7), the Statement (Requirement 8), the Sentinel (Requirement 9), the Avianca sample, then the Recording_Script and its tests, then the recording, which is a stop-and-report gate (Requirements 10 and 11), the documentation (Requirement 14), and one final checkpoint.
 5. THE final checkpoint task SHALL run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, the clean-checkout web build `pnpm --filter @reveal-codes/web build`, and `pnpm kiro:check`, and SHALL state that the browser check and the push are left to the author.
+
+### Requirement 17: The empty-page links take a pointer click
+
+**User Story:** As a judge using a mouse, I want the two sample links on the empty page to respond to a click, so that I can load a sample without the keyboard.
+
+#### Acceptance Criteria
+
+1. WHILE the Document text is empty and the empty-page links are shown, THE Web_App SHALL make each link the target of the pointer at every point inside that link's own box, so that `document.elementFromPoint` at the centre of each link returns that link's `a` element and not the Editor's content element.
+2. WHILE the Document text is empty, THE Web_App SHALL leave every point of the page outside the two link boxes as part of the Editor's content element, so that a click there places the caret.
+3. WHEN the author presses a mouse button on a link, THE Web_App SHALL cancel the default action of the `mousedown` event, so that the keyboard focus and the selection stay where they were.
+4. WHEN the author clicks a link, THE Web_App SHALL load the sample that the link names, through the same path as a keyboard activation.
+5. WHEN the author activates a link from the keyboard, THE Web_App SHALL load the sample that the link names, as before this requirement.
+6. THE Web_App SHALL render the link list after the Editor's content element in DOM order, outside that element, and THE stylesheet `apps/web/src/components/editor-surface.module.css` SHALL limit the pointer target of the list to the links themselves, without adding a `z-index` to any rule, so that the Modal overlay still covers the links.
+7. THE Web_App tests SHALL contain a static test of the stylesheet rules of criterion 6, a structure test of the link list and its DOM position relative to the Editor's content element, and a test that a `mousedown` on each link is default-prevented and leaves `document.activeElement` unchanged.
+8. THE BUILD_LOG entry for this requirement SHALL state what a test under jsdom can prove (the rules exist, the structure, the cancelled default) and what it cannot prove (paint order, hit testing and the browser's focus behaviour, because jsdom does no layout), SHALL record whether a real-browser check could be run with tooling already in the repository, and SHALL list the manual check for the author when it could not.
+9. THE change SHALL add no colour literal, no Token, no icon, no transition and no outline, and the links SHALL keep the link colour of `ui.md`.
+
+### Requirement 18: Page ranges and lists in a pincite
+
+**User Story:** As a filer, I want a citation with a page range to be read as one citation from its volume to the end of its parenthetical, so that the code, the underline and the Issues row cover the whole citation.
+
+#### Acceptance Criteria
+
+1. WHEN a Reporter_Citation member, a Parallel_Citation member, an `Id. at` Short_Form or a party Short_Form (`<volume> <reporter> at`) is followed at the place of its pincite by a Pincite_Expression, THE Extractor SHALL read the whole Pincite_Expression.
+2. WHEN a Database_Citation is followed by `, at *` and a range of pages, THE Extractor SHALL read the whole range, and SHALL read no comma-separated list there.
+3. THE Extractor SHALL set `text` and the `[start, end)` range of a citation to cover the whole Pincite_Expression and, when a recognised parenthetical follows it, that parenthetical, as it does today for a single page.
+4. THE Extractor SHALL set the `pincite` of the value to the First_Page, so that the value of a citation written with a Pincite_Expression equals the value of the same citation written with the First_Page alone.
+5. THE Verifier SHALL derive the Citation_Line of a citation written with a Pincite_Expression identically to the Citation_Line of the same citation written with the First_Page alone, and the Reveal Codes payload of the two SHALL be identical.
+6. IF a list item starts a Parallel_Citation member (`<volume> <reporter> <page>`) or a Database_Citation (`<year> WL <n>`, `<year> <court> LEXIS <n>`), THEN THE Extractor SHALL end the Pincite_Expression before the comma that precedes that item.
+7. IF a hyphen or an en dash is not followed by one to five ASCII digits that end before a letter or a number, THEN THE Extractor SHALL end the Pincite_Expression before the dash.
+8. THE Extractor SHALL read at most five items in one Pincite_Expression and at most 24 code units for it, and every match SHALL stay at most `MAX_MATCH` code units.
+9. WHEN a Full_Citation is written with a Pincite_Expression that is not a single page, THE Extractor SHALL record `normalised` as the Canonical_Form of its value, as it does for any citation written other than in Canonical_Form.
+10. THE Extractor SHALL return, for a text without a range or list in any pincite, the same citations as before this requirement, and every existing extraction property SHALL pass without being edited.
+11. THE incremental rescan SHALL return exactly the match list of a full scan for texts that hold a Pincite_Expression.
+12. WHEN the Extractor reads `Miller v. United Airlines, Inc., 174 F.3d 366, 371-72 (2d Cir. 1999)`, THE Extractor SHALL return one Full_Citation whose `text` is `174 F.3d 366, 371-72 (2d Cir. 1999)` and whose `value` holds pincite 371, and THE Pane SHALL render it as one code pair from `174 F.3d 366` to `1999)`.
+13. WHEN the Extractor reads the Avianca_Sample, THE Extractor SHALL return the Miller citation with that text and the other five citations unchanged.
+14. THE shared arbitraries SHALL generate Pincite_Expressions (single pages, ranges with a hyphen or an en dash with full and shortened second numbers, and lists) for Full_Citations and Short_Forms.
+15. FOR ALL generated Full_Citations and Short_Forms written with a Pincite_Expression, THE Extractor SHALL return a citation whose `text` is the whole written citation (the Pincite_Expression and any parenthetical included) and whose `value` equals the value extracted from the same citation written with the First_Page alone, so that the Citation_Line and the Reveal Codes payload are the same (Property 19).
+16. IF Reveal Codes written before this requirement (an autosaved draft or a Provenance_Appendix) close a citation code inside a Pincite_Expression, THEN THE Engine SHALL return `malformed_codes` with the rule `extractor_mismatch` from `parse`, as it does for any codes that disagree with the Extractor, and the BUILD_LOG entry SHALL record this consequence.
+17. THE Engine SHALL change no existing field of `ExtractedCitation` and SHALL change no type of `CitationValue`.
+
+### Requirement 19: Say what the mismatch is where the author decides
+
+**User Story:** As a filer deciding whether to fix or override a wrong-case item, I want to see the name my filing gave next to the name the decision has, so that I can judge the mismatch without opening the Document.
+
+#### Acceptance Criteria
+
+1. WHEN the Issues_Region shows a row for a `wrong_case` Issue whose citation has a `caseName`, THE Web_App SHALL show under the citation text the two lines `Cited as <caseName>` and `This citation is <foundName> (<foundYear>)`, in that order, with `<foundYear>` and its parentheses left out when `foundYear` is absent.
+2. WHEN the Export dialog shows a row for a `wrong_case` Issue whose citation has a `caseName`, THE Web_App SHALL show the same two lines and the CourtListener_Link in that row.
+3. WHEN the Override dialog opens for a `wrong_case` Issue whose citation has a `caseName`, THE Web_App SHALL show the same two lines above the reason box.
+4. THE Web_App SHALL read `caseName` from the citation record of the current Document, and SHALL NOT store it in the `wrong_case` result, in the autosaved value or in the Display_Info.
+5. IF a `wrong_case` Issue's citation has no `caseName`, THEN THE Web_App SHALL omit the line `Cited as <caseName>` and SHALL show the line `This citation is <foundName> (<foundYear>)`.
+6. THE Web_App SHALL write neither line with a trailing full stop, and SHALL write each name in full as it is stored, with no shortening.
+7. THE Issues_Region, the Export dialog and the Override dialog SHALL build the two lines with one shared function, so that the three places cannot differ.
+8. THE row text and dialog text of this requirement SHALL contain no exclamation mark, no icon and no emoji, and SHALL leave the buttons, the Overridden line and the severity words of Requirement 7 as they are.
+9. THE change SHALL leave the Resolved_List, the Statement and the Provenance_Appendix as they are.
+
+### Requirement 20: Role words do not count as shared words
+
+**User Story:** As a maintainer of the name rule, I want words that name a party's role to be dropped, so that a long `case_name_full` that lists thirty parties with their roles cannot make a chance match.
+
+#### Acceptance Criteria
+
+1. THE Verifier SHALL add the fifteen Role_Words to its Dropped_Words, and SHALL change no other Dropped_Word and no entry of the Name_Expansion_Table.
+2. THE Name_Match SHALL treat a Role_Word as any other Dropped_Word: it SHALL NOT count as a Normalised_Word of a cited party and SHALL NOT count as a found word.
+3. WHEN every Normalised_Word that a cited party shares with the found words is a Role_Word, THE Name_Match SHALL return `false` for a cited party that has at least one other Normalised_Word.
+4. THE copy of the Dropped_Words held as plain data in `packages/engine/src/testing/arb-case-match.ts` SHALL list the same words as the Verifier, and a Verifier test SHALL fail when the two lists differ.
+5. THE generator of Property 1 SHALL keep its words and initialisms clear of the Role_Words, as it does for the other Dropped_Words (design D10), and Property 1 SHALL stay as written.
+6. THE Verifier tests SHALL contain an example test in which an invented cited name, whose only words shared with the recorded `case_name_full` of `174 F.3d 366` are Role_Words, gives `wrong_case` against the recorded fixture.
+7. THE outcomes of the worked-outcomes tables SHALL stay as they are: Henderson, Petersen and Miller give `wrong_case`, and Ashcroft v. Iqbal, Haines v. Kerner, the Zicherman citation to 516 U.S. 217 and Chambers v. NASCO give `verified`, and the task SHALL report any outcome that changes.
+
+### Requirement 21: Process and final checkpoint for the follow-up
+
+**User Story:** As the author, I want the follow-up grouped and checked at the end, so that I can walk the product again before anything is pushed.
+
+#### Acceptance Criteria
+
+1. THE spec phases of the follow-up SHALL make no code change and SHALL NOT commit.
+2. THE follow-up tasks SHALL group the work in this order: the empty-page links (Requirement 17), the pincite (Requirement 18), the mismatch lines (Requirement 19), the role words (Requirement 20), the Sentinel examples of Requirement 9 criterion 8, the inventory test and the documentation, and one final checkpoint.
+3. THE aggregate inventory test `apps/web/test/static/case-match-inventory.test.ts` SHALL require nineteen properties, numbered 1 to 19, with Property 19 in `packages/engine/test/case-match.properties.test.ts`.
+4. THE follow-up SHALL change every existing test whose expected outcome changes because of Requirements 17 to 20, and the BUILD_LOG entry SHALL list each such test.
+5. THE `citations.md` steering file SHALL state the Pincite_Expression rule and the Role_Words, and the BUILD_LOG entry SHALL state what the follow-up changed and why.
+6. THE final checkpoint task SHALL run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, the clean-checkout web build `pnpm --filter @reveal-codes/web build`, and `pnpm kiro:check`, and SHALL state that the browser check and the push are left to the author.

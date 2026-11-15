@@ -33,12 +33,18 @@ Each decision below resolves a point where the requirements leave room or two do
 | D6 | `caseName` is computed in `extractFromMatches`, by a new engine module `citations/cited-name.ts`, from `text` and each match's `start`. It is not a field of the scan-layer `Match`. | Requirement 1, criterion 9. `matchesOf` rebuilds matches without it, so the incremental path needs no change. |
 | D7 | The Verifier gains `lookupWithInfo(records, deps)` returning `{ results, info }`. `lookup(records, deps)` stays as a wrapper that returns `lookupWithInfo(records, deps).results`, so **`lookup` applies the comparison** (Requirement 5, criterion 14). | The Sentinel's `reverify` and the MCP tool call `lookup`. Both receive `wrong_case` through it with no change to how they call it. The MCP tool needs one output change (D14); the Sentinel needs none beyond Requirement 9. |
 | D8 | The cluster data is added to the cache with a new guard `isCachedLine`; `isTerminalResult` is unchanged. A `verified` entry without a `cluster` record fails the guard and counts as a miss. | Requirement 5, criterion 7. Keeping `isTerminalResult` and `mapEntry` untouched leaves the existing cache and status-mapping tests as they are. |
-| D9 | `[Property N]` markers for this spec live in files named `case-match.properties.test.ts` in each package, and the existing inventory tests of the engine and the verifier skip files with that name. One new aggregate inventory test (`apps/web/test/static/case-match-inventory.test.ts`, task 13.6) reads this design and the five property files and requires all eighteen markers, 1 to 18, each exactly once, in the package the table in "Testing Strategy" assigns it to. | The existing inventories require every `// Property N` marker in a package to match the provenance-engine design (engine) or to be exactly 1 to 12 (verifier). Requirement 13 fixes Property 1 and Property 2 as numbers. Without this change the markers collide. |
+| D9 | `[Property N]` markers for this spec live in files named `case-match.properties.test.ts` in each package, and the existing inventory tests of the engine and the verifier skip files with that name. One new aggregate inventory test (`apps/web/test/static/case-match-inventory.test.ts`, task 13.6) reads this design and the five property files and requires all nineteen markers, 1 to 19 (Property 19 was added by the follow-up, Requirement 18), each exactly once, in the package the table in "Testing Strategy" assigns it to. | The existing inventories require every `// Property N` marker in a package to match the provenance-engine design (engine) or to be exactly 1 to 12 (verifier). Requirement 13 fixes Property 1 and Property 2 as numbers. Without this change the markers collide. |
 | D10 | In the initialism arbitrary of Property 1, an initialism that equals a Dropped_Word or a Name_Expansion_Table key is excluded from the generator. | The rule cannot represent such a word (`inc` for `Insurance Network Co`). The exclusion states the domain; it does not weaken the assertion. |
 | D11 | The strict rule reads no name for the Demo_Motion's Alvarez and Okafor citations, because their parties hold `Mgmt.` and `Props.`, which are neither Legal_Abbreviations nor Capitalised_Words (derived by reading `case-name.ts` and `party.ts`). Instead of leaving them without a `caseName`, the Tolerant_Read of D13 reads them, so both carry a `caseName`. Their outcome stays `not_found`, because a 404 line is never compared. | Requirement 1, criteria 13 to 15 and Requirement 12, criterion 3. A citation with an unlisted abbreviation must not pass on existence alone. |
 | D12 | The case name travels from the browser to the app's own verify route in the request body and stops in the Verifier. It is never part of a CourtListener request. The README bullet under "What leaves your machine" (the heading stays verbatim) becomes: `Verify sends only citation records to this app's own server, and each record includes the case name written before the citation; from there only citation strings go to CourtListener. The rest of your draft text is not sent.` The existing docs test matches `Verify sends only citation records to this app's own server` and `from there only citation strings go to CourtListener`, and both still match. Any in-app privacy copy that says only citation strings leave the browser changes in the task that adds the route field (task 3.3). | Principle 3 as Requirement 5, criterion 6 states it. |
 | D13 | `cited-name.ts` runs the strict read first, then a tolerant read over a larger token set (Components and Interfaces, "Engine: the cited name"). The strict result is used, unless the tolerant result is longer, ends with it (the strict name is its right-hand suffix) and the words it adds on the left contain no token ending in a period (rule A), in which case the tolerant result is used. When the strict read finds nothing, the tolerant result is used. `party.ts`, `case-name.ts`, the Segmenter and quote attachment are unchanged. | The Party_Run rule serves quote attachment and segmentation, so widening it would move properties that must stay green unedited. A second reader in the one new module has no such reach. The suffix rule exists because the strict read can stop inside the first party (`Nnnn de Bbbb v. Nnnn` reads as `Bbbb v. Nnnn`); the tolerant read recovers the dropped words, and since it only adds words to the first party, a match can only become easier. Rule A refuses the extension over a period-ending word, because such a word cannot be told from the end of a sentence: without it, `New. Intro. Roe v. Wade` would read in full, and the `caseName`, and with it the anchor key of the citation, would change when an earlier sentence is edited. Keeping the strict name keeps keys stable. |
 | D14 | `handleLookupCitations` in `packages/courtlistener-mcp/src/tools/lookup-citations.ts` already builds a Document from each input string and passes the records (a spread of `r`, so `r.citation.caseName` travels) to `lookup`. It therefore reports `wrong_case` once `lookup` applies the rule (D7). The one code change is that `describeDoc` adds `caseName` to each Full_Citation it describes, when there is one. There is no output schema and no switch over statuses in that package, so nothing else changes. | Requirement 5, criteria 12 and 13. An earlier version of this design said the MCP tool builds records without a `caseName`; that was wrong. |
+| D15 | The empty-page link list is rendered after the Editor's content element so that tree order paints it above, is limited to its links' own boxes with `pointer-events: none` on the list and `auto` on the links, and each link cancels `mousedown`. No `z-index`. See "The empty-page links". | Requirement 17. The cause is a paint-order tie between two positioned elements, not a missing handler. A `z-index` would also lift the list above the Modal overlay, which has none. |
+| D16 | The value keeps the First_Page as `pincite`. A Pincite_Expression only moves the match `end`. `ExtractedCitation`, `CitationValue`, `format`, the Citation_Line and the Reveal Codes payload do not change. | Requirement 18, criteria 4, 5 and 17. Every site that reads a pincite already stores one number and takes `end` from the read, so extending `end` is the whole change. Nothing reads the second page. |
+| D17 | `normalisedOf` is not changed, so a citation written with a range or list gets `normalised` equal to the Canonical_Form of its value (the First_Page form). | Requirement 18, criterion 9. Suppressing it would need a new field on `Match`. Only `citationCarries` reads `normalised`, and it compares the field with itself. |
+| D18 | The two mismatch lines are written without a trailing full stop: `Cited as <caseName>` and `This citation is <foundName> (<foundYear>)`. | The existing Requirement 7 line has none, existing tests match it, and a name that ends in `Co.` would otherwise read `Co..`. The full stop in the author's request is read as punctuation of the sentence that lists the lines. |
+| D19 | The fifteen Role_Words join `DROPPED_WORDS`. No other table changes. | Requirement 20. A dropped word can only remove shared words, so no `wrong_case` outcome of the worked tables can become `verified`. |
+| D20 | Reveal Codes written before the pincite change that close a citation code inside a Pincite_Expression fail `parse` with `extractor_mismatch`. No migration is written. | Requirement 18, criterion 16. The code check compares code ranges with Extractor ranges, which is its job. The product is unreleased; the one affected value is the author's own draft. |
 
 ## Architecture
 
@@ -302,7 +308,7 @@ A party with no Normalised_Word is skipped; every other party must share a word 
 
 The apostrophe contractions of the Tolerant_Read reach these keys through normalisation step 2, which deletes the apostrophe: `Dep't` gives `dept`, `Ass'n` gives `assn`, `Comm'r` gives `commr`, `Comm'n` gives `commn`, `Int'l` gives `intl`, `Nat'l` gives `natl` and `Gov't` gives `govt`. No expansion is another entry's key, so expansion is one pass. The rule is lenient (one shared word per party), so an unlisted abbreviation fails a match only when a party consists of nothing else, which is rare. A later entry needs a requirement change so that the "no key stands for two words" check stays true. `ins` is a known near-collision (`INS` is also an agency's initials), and it stays because the requirement lists it. The Initialism_Match covers the agency reading.
 
-**Dropped_Words** (Glossary): `v, vs, in, re, the, of, and, et, al, ex, rel, inc, co, corp, corporation, company, llc, ltd, lp, llp, plc, na`. **Initials_Skip_Words**: `of, and, the, for`.
+**Dropped_Words** (Glossary): `v, vs, in, re, the, of, and, et, al, ex, rel, inc, co, corp, corporation, company, llc, ltd, lp, llp, plc, na`, and since the follow-up (D19, Requirement 20) the Role_Words `plaintiff, plaintiffs, defendant, defendants, appellant, appellants, appellee, appellees, petitioner, petitioners, respondent, respondents, individually, deceased, no`. **Initials_Skip_Words**: `of, and, the, for`.
 
 #### Name-match examples (Requirement 4, criterion 11)
 
@@ -523,7 +529,7 @@ function citationDiffers(old: VerificationResult, now: VerificationResult): bool
 }
 ```
 
-That gives the four outcomes of criteria 2 to 5: a change between `verified` and `wrong_case` is a finding whose Before and After are `statusText` of each side; two `wrong_case` results with different cluster ids are a finding; two with the same cluster id are not, whatever the names are. The function is exported for Property 15. `reverify.ts`, `recorded.ts`, `split.ts` and `analyse.ts` do not change: `recordedDocument` parses the Appendix with `parse`, whose Extractor derives `caseName` from the recorded text, and `reverify` calls `lookup` with those records (criterion 6). `split.ts` locates the Appendix by the paragraph count of its introduction and never reads the Statement's citation paragraph, so a filing exported before this feature splits and parses as before (criterion 8). The Sentinel's tests that the old paragraph text appears in fixtures are unaffected for the same reason.
+That gives the four outcomes of criteria 2 to 5: a change between `verified` and `wrong_case` is a finding whose Before and After are `statusText` of each side; two `wrong_case` results with different cluster ids are a finding; two with the same cluster id are not, whatever the names are. The function is exported for Property 15. `reverify.ts`, `recorded.ts`, `split.ts` and `analyse.ts` do not change: `recordedDocument` parses the Appendix with `parse`, whose Extractor derives `caseName` from the recorded text, and `reverify` calls `lookup` with those records (criterion 6). `split.ts` locates the Appendix by the paragraph count of its introduction and never reads the Statement's citation paragraph, so a filing exported before this feature splits and parses as before (criterion 8, reworded by the follow-up). Such a filing sweeps clean while every recorded `verified` citation's written name still matches the re-check data. A recorded `verified` citation whose written name now resolves to a different case is reported as one `citation_changed` finding with Before `verified <clusterId>` and After `wrong_case <clusterId> <foundName>`. No Sentinel source file changes for this: `recordedDocument` re-derives each `caseName` from the recorded text and `reverify` calls `lookup`, which applies the rule. The follow-up adds one example test for each outcome and no code. A filing exported before the pincite change whose appendix closes a citation code inside a range reports `appendix_unparseable` (D20). The Sentinel's tests that the old paragraph text appears in fixtures are unaffected for the same reason.
 
 ### Recording script and token handling (Requirement 11)
 
@@ -685,9 +691,120 @@ The task that changes each of these lists it in the BUILD_LOG entry. Every other
 | `apps/web/test/` verify-summary tests and any test that enumerates the five statuses | `tallyDocument` and the `Citations:` line gain `wrong_case`. |
 | Tests that enumerate the Legend entries or the failing opener set | The Legend gains one entry and `FAILING_OPENERS` one member. |
 | `packages/verifier/test/fixtures.test.ts`, `demo-corpus.test.ts` | They enumerate the manifest and fixtures. Six entries are added. The task re-checks each count they assert. |
+| `packages/engine/test/avianca.test.ts`, `packages/verifier/test/worked-outcomes.test.ts` (follow-up) | The Miller citation's text is now `174 F.3d 366, 371-72 (2d Cir. 1999)`. Tests that slice or compare the Miller text change; the lookup outcomes do not. |
+| Tests of the Issues row, Export dialog row and Override dialog (follow-up) | They gain the line `Cited as <caseName>` and the `This citation is …` line in two more places. Tests that match the exact paragraphs of a `wrong_case` row are edited. |
+| Existing engine properties that opt in to range arbitraries (follow-up) | Property 2 (round trip) and the incremental-equals-full property are given the range option so ranges are covered. The option is off by default, so every other existing property keeps its domain. |
 | `apps/web/test/static/docs.test.ts` | One assertion is added: the "What leaves your machine" section says a record includes the case name written before the citation. The two existing assertions about Verify (`Verify sends only citation records to this app's own server` and `from there only citation strings go to CourtListener`) still match the new sentence and are not edited. |
 
 The existing tests of `packages/courtlistener-mcp` pass unedited: they match with `toMatchObject` or read statuses of citation strings that carry no name.
+
+## Follow-up: walkthrough findings (Requirements 17 to 21)
+
+The author's browser walkthrough of 2026-11-12 found four faults. This section is the design for each. It was written after reading the code named in each part, and it changes no earlier decision except where D15 to D20 say so.
+
+### The empty-page links (Requirement 17)
+
+**Cause.** `EditorSurface` renders, inside `.page` (`position: relative`), the placeholder, the link list `.samples` (`position: absolute; top: 172px`, `z-index` unset) and then `EditorContent`. `EditorContent` renders `.content` and, inside it, the element `.ProseMirror`. TipTap's core stylesheet and `prosemirror-view`'s `prosemirror.css` both declare `.ProseMirror { position: relative }`, and our `.content :global(.ProseMirror)` rule gives it `min-height: 24em`, so its box starts at the top of the page's content box (96px down) and covers the link list (76px further down). Both the list and the editor are positioned with `z-index: auto`, so they paint in tree order, and the later one, the editor, paints on top. `document.elementFromPoint` at a link therefore returns the editor. Tab and script `click()` reach the link without hit testing, which is why the keyboard path and the tests worked. jsdom does no layout and no hit testing, so no existing test could see it.
+
+**Fix (D15).** Two changes in `editor-surface.tsx` and `editor-surface.module.css`:
+
+1. Render the link list **after** `EditorContent` inside `.page`, not before it. With both positioned and `z-index: auto`, the later element in tree order paints on top, so the list paints over the editor instead of under it. No `z-index` is added.
+2. Limit the list's pointer target to the links:
+
+```css
+.samples { pointer-events: none; /* existing position rules stay */ }
+.samples a { pointer-events: auto; display: inline-block; }
+```
+
+`pointer-events: none` on the list and `auto` on the links make the links the only hit targets of the list, so a click on the page next to a link, or on the blank part of a list row, still reaches the editor and places the caret (criterion 2). `display: inline-block` gives each link a box of its own that `pointer-events: auto` applies to. The list stays outside the editor's DOM subtree, so ProseMirror never sees it. No colour, token, outline or transition is added, so the `ui.md` rules hold.
+
+**Why not `z-index`.** Raising the list with `z-index: 1` was the first idea, and the code rules it out. No stylesheet in `apps/web` sets a `z-index`, and the Modal overlay (`modal.module.css`, `position: fixed`) has `z-index: auto` and relies on tree order to cover the page. A list at `z-index: 1` would paint above that overlay and take its clicks while the page is empty (for example with the Export dialog open). Tree order keeps the list on the same layer as the editor it sits above, so the overlay still covers both. The cost is that the links come after the editor in tab and reading order while the page is empty. That is acceptable: the editor is the first control on an empty page and the links follow it.
+
+**Focus.** Chrome and Firefox move focus to an `a[href]` on `mousedown`, which blurs the editor and drops its caret. Each link gets `onMouseDown={(e) => { e.preventDefault(); }}`. Cancelling `mousedown` keeps focus and selection where they were, still allows `click`, and does nothing in Safari, which does not focus links on click. Keyboard activation (Tab, Enter) never fires `mousedown`, so it is unchanged, and `onClick` keeps its own `preventDefault` and the load call.
+
+**Alternatives rejected.** A `z-index` on the list (above). Making `.ProseMirror` `position: static` would remove the tie, but TipTap's gap cursor, widget decorations and placeholder code assume a positioned editor. Moving the links into the Document would put chrome text in the Document. `tabIndex={-1}` would stop focus theft and break keyboard access.
+
+**What each test proves.**
+
+| Test | Proves | Cannot prove |
+| ---- | ------ | ------------ |
+| Static rule test in `editor-surface-css.test.ts`: `.samples` is `position: absolute` with `pointer-events: none`, `.samples a` has `pointer-events: auto`; no rule in the stylesheet or `modal.module.css` sets a `z-index` (so tree order is what decides, and the overlay still wins); no `outline` or colour literal is added | The rules the fix relies on are in the stylesheet and cannot be removed unnoticed | That the browser honours them |
+| Structure test (render `EditorSurface` with a stub editor): the list is a sibling of the editor content inside `.page`, comes after it in DOM order (`compareDocumentPosition`), is not a descendant of `.content`; it renders only while `empty`; the two links are `a` elements in order | The list is outside the editor's subtree and later in tree order, which is the precondition of the paint order | The paint order itself |
+| Event test: `fireEvent.mouseDown` on each link is default-prevented and `document.activeElement` is unchanged; `click` and keyboard `click` call `onLoadSample` with the key | The handler cancels the default and activation still works | Whether a real mouse press would move focus; jsdom never moves focus on `mousedown` itself |
+
+**Real-browser check.** The repository has no browser driver (`apps/web/package.json` lists only `jsdom`; no Playwright or Puppeteer), and the follow-up adds no dependency. The BUILD_LOG entry records this and lists the manual check for the author: run `pnpm dev`, open the empty page, run `document.elementFromPoint` at the centre of each link in the console and expect an `A` element; click each link and expect the sample to load; type text, delete it, and click empty page space next to the links and expect the caret there; with the caret in the page, press the mouse on a link and expect the caret to stay.
+
+### The pincite expression (Requirement 18)
+
+**Does the value change? No (D16).** All four sites that read a pincite do the same thing: they read one number with `PINCITE_RANGE` (or `PAGE_RANGE`, the same range), check it is not followed by a letter or number, store it as `pincite`, and take the match `end` from the read: `readPincite` and `readMember` in `grammar.ts` for reporter and parallel members, `matchIdAt` and `matchPartyTailAt` in `grammar-short.ts` for `Id. at` and party Short_Forms, `readPincite` in `grammar-db.ts` for `, at *`. `format()` prints the stored number only, `lines.ts` builds the Citation_Line from volume, reporter and page without any pincite, and the Reveal Codes payload carries no pincite (the codes check compares code ranges with Extractor ranges). Nothing reads a second page. So the smallest change keeps the First_Page as `pincite` and moves only `end`. `types.ts`, `format.ts`, `codes/*` and `verifier/src/lines.ts` do not change.
+
+**Grammar.** A new module `packages/engine/src/citations/pincite.ts` with no imports from the other grammar modules (so there is no import cycle):
+
+```ts
+export type PinciteRead = Readonly<{ first: number; end: number }>;
+export type PinciteOptions = Readonly<{
+  /** Read `, <item>` repeats (reporter and Short_Form sites). False for a Database_Citation. */
+  list: boolean;
+  /** True when `at` starts a Parallel_Citation member; passed in by the caller (`startsMember`). */
+  startsMember: (text: string, at: number) => boolean;
+}>;
+export function readPinciteExpression(text: string, at: number, o: PinciteOptions): PinciteRead | null;
+```
+
+```text
+expression = item { ", " item }            at most 5 items, at most 24 code units in all
+item       = page [ dash short ]
+page       = ASCII digits, 1 to 99,999, no leading zero (readInt with PINCITE_RANGE)
+dash       = "-" | "–"                     U+002D or U+2013, no spaces
+short      = 1 to 5 ASCII digits           leading zero allowed (371-05)
+```
+
+- An item is accepted only when its last digit is not followed by a letter or a number (Req 9.8, as the single page is today). When `dash short` fails that check or is absent, the item is the page alone and the expression ends there, which is today's behaviour for `371-A`, `371-` and `371-72a` (criterion 7).
+- A further item after `, ` is refused when `startsMember(text, itemStart)` is true (`93 S. Ct. 705`), or when the item is a four-digit number from 1600 to 2999 followed by a space and an uppercase letter (the start of `2010 WL 123456` or `2010 U.S. Dist. LEXIS 9`) (criterion 6). The first item keeps the check the grammar makes today.
+- `first` is the first item's page. `end` is one past the last accepted item. The short second number and later items are not stored.
+
+Callers: `grammar.ts#readPincite` returns `{ value: first, end }` shaped like its current `IntRead` and passes `{ list: true, startsMember }` (the function is exported from `grammar.ts`); `grammar-short.ts` passes the same options for `Id. at` and for the party tail, where `first` becomes `pincite` and `end` the tail end; `grammar-db.ts` passes `{ list: false, startsMember: () => false }`. After the expression `matchParenthetical` reads the court-and-year parenthetical at the new end, so `174 F.3d 366, 371-72 (2d Cir. 1999)` is one match. A parallel member's expression stops at `, 93 S. Ct. 705`, which `matchParallelTail` then reads as the next member, as today.
+
+**Bounds.** A member is at most 5 + 1 + 40 + 1 + 5 = 52 code units; a pincite adds `, ` and at most 24, so 78. Four members, three joining `, ` and a parenthetical of at most 47 code units come to 4 × 78 + 6 + 47 = 365, under `MAX_MATCH` (512). The look-ahead of `startsMember` for an item at most 52 code units past its start keeps every read inside `LOOKAHEAD` (1,024). The header comments of `grammar.ts`, `grammar-short.ts` and `grammar-db.ts` get the new figures, and an example test builds the maximal parallel citation and asserts it is extracted whole. If the test shows a match over 512, the cap of 24 is lowered; `MAX_MATCH` is not raised.
+
+**Consequences.** `normalised` (D17): a citation written with a range or list is not in Canonical_Form, so it records `format(value)`, the First_Page form. A string cite is not read as a list: `410 U.S. 113, 116; 411 U.S. 5` ends at `116` because `;` is not `, `. A prose number after a citation that follows `, ` (`410 U.S. 113, 116, 118 and 120`) is read as a list item; that is the author's stated list form. Short_Form linking uses the volume and reporter and never the pincite. Quote attachment uses citation `end`, so a quotation after a ranged citation attaches as it does for a single page. Reveal Codes written before this change (D20): `check-extractor` reports `extractor_mismatch` when a code range does not equal an Extractor range, so an autosaved draft or an Appendix that closed `[/CIT]` inside `371-72` fails `parse`; `persist.ts` turns that into the error `bad_codes`, and the Sentinel reports `appendix_unparseable`. The task that adds the example test also reads the autosave load path and records in the BUILD_LOG what the author sees for a `bad_codes` draft (the design has not traced that path). An example test pins the `parse` result. No migration is written because the product is unreleased and the only such value is the author's draft.
+
+**Arbitraries.** `arb-citation.ts` and `arb-text-builder.ts` gain `arbPinciteExpression`, which returns `{ text, first }`: a single page, a range with `-` or `–` and a full or shortened second number, or a list of two to five items drawn from those, with items that would start a member or a database citation filtered out. The existing builders take an option `pinciteStyle: "single" | "expression"` that defaults to `"single"`, so every existing property keeps its domain, including those that assert `normalised` is absent for canonical text. Property 2 (round trip) and the incremental-equals-full property opt in to `"expression"`.
+
+### The mismatch lines (Requirement 19)
+
+A new module `apps/web/src/client/mismatch.ts` holds the one function all three places use:
+
+```ts
+export type Mismatch = Readonly<{ cited: string | null; found: string; clusterId: string }>;
+/** The wrong_case citation `key` of `document`: `cited` read from the record's `caseName`, `found` as `<foundName> (<foundYear>)`. */
+export function mismatchOf(document: Document, key: IssueKey): Mismatch | null;
+/** The lines in order: `Cited as <cited>` when `cited` is not null, then `This citation is <found>`. */
+export function mismatchLines(m: Mismatch): readonly string[];
+```
+
+`mismatchOf` returns `null` unless the key is a Full record with the status `wrong_case`. `cited` is `rec.citation.caseName ?? null`, read from the Document passed in, never from the result, so it is never stored (D18, Requirement 19, criterion 4). When `cited` is `null` the first line is left out (criterion 5). A `wrong_case` result can exist without a `caseName` only when `parse` accepts a `[CIT ≠]` code for a citation that has none, since a changed `caseName` resets the result. No line ends in a full stop (D18), and no name is shortened.
+
+A small component `components/mismatch-lines.tsx` renders the lines as `p` elements with a `className` prop, so each consumer keeps its own CSS module class. `issues-list.tsx` drops `wrongCaseFor`'s line and uses `mismatchOf`, `mismatchLines` and `courtListenerLink` (unchanged). `ExportIssues` renders the same component and the `CourtListenerLink` in a `wrong_case` row, and takes an optional `info` prop (the session's usable Display_Info) and falls back to the link built from `clusterId` when it has none (Requirement 7, criterion 4); no new state is added to get it. `OverrideDialog` gains the prop `mismatch: readonly string[] | null`, rendered inside the `describedBy` block between the issue text and the printed-statement line, so the lines sit above the reason box. Both `OverrideSlot` sites, in `issues-region.tsx` and `export-dialog.tsx`, compute it from the current Document. An Override opened for a key whose citation changed in the meantime gets `null` and shows no lines; saving it fails as today. The Resolved_List, the Statement and the Appendix are not touched.
+
+### Role words (Requirement 20)
+
+`DROPPED_WORDS` gains `plaintiff, plaintiffs, defendant, defendants, appellant, appellants, appellee, appellees, petitioner, petitioners, respondent, respondents, individually, deceased, no`. `name-normalise.ts` and `name-initials.ts` read the set, so nothing else changes. The engine's copy in `arb-case-match.ts` (`DROPPED`, today a private constant) is extended with the same words and exported, and a verifier test compares it with `DROPPED_WORDS` so the two cannot drift. Property 1's generator already reserves every word of that list and the table keys (D10), so the new words are kept out of generated words and initialisms and the property stays as written.
+
+**Effect on outcomes.** A dropped word can only remove words from a party or from the found pool. It cannot make a failing match pass, except that a cited party made only of dropped words has no Normalised_Word and is skipped (Requirement 4, criterion 9). Walking the tables: Henderson (`henderson` shares nothing), Petersen and Miller (`miller` shares nothing with `greenleaf garlock …`; the thirty-party `case_name_full` holds `plaintiffs`, `defendants`, `appellant`, `deceased` but none is shared with `miller`) stay `wrong_case`. Ashcroft v. Iqbal and Haines v. Kerner stay `verified` through their surnames. Zicherman v. Korean Air Lines Co. stays `verified` through `zicherman` and `korean air lines`; the found `individually` is dropped and unused. Chambers v. NASCO stays `verified`. No outcome changes. The word `no` is dropped only as a whole token after normalisation, so `No.` in a docket (`No. 97-1820`) becomes `no` and is dropped, and `97-1820` becomes `971820` as before; no cited name in the tests or fixtures contains `no` as a word. Initialism windows still use `joined`, which keeps dropped words, so `NLRB` still matches `National Labor Relations Board, Appellant`.
+
+**Example test.** The cited name `Kowalski, Appellant v. Quimby, Defendants` has the words `kowalski` and `quimby` after dropping, which share nothing with the three Found_Names of the recorded `174 F.3d 366` (the `case_name_full` holds `Appellant`, `Defendants` and `Deceased`). Before the change `appellant` and `defendants` were shared words and the name matched. The test calls `namesMatch` with the three names read from the fixture and expects `false`, and runs `lookupWithInfo` for a record whose `caseName` the Extractor reads from `Kowalski Appellant v. Quimby Defendants, 174 F.3d 366 (3d Cir. 1999)` and expects `wrong_case` with cluster 3011108. If the Extractor reads no name for that text the task picks a text it reads and reports the change.
+
+### Where each follow-up change lands
+
+| Area | Files | Requirements |
+| ---- | ----- | ------------ |
+| Links | `apps/web/src/components/editor-surface.tsx`, `editor-surface.module.css`, `apps/web/test/static/editor-surface-css.test.ts`, a new component test | 17 |
+| Pincite | `packages/engine/src/citations/pincite.ts` (new), `grammar.ts`, `grammar-short.ts`, `grammar-db.ts`, `testing/arb-citation.ts`, `testing/arb-text-builder.ts` | 18 |
+| Mismatch | `apps/web/src/client/mismatch.ts` (new), `components/mismatch-lines.tsx` (new), `issues-list.tsx`, `export-issues.tsx`, `export-dialog.tsx`, `override-dialog.tsx`, `issues-region.tsx` | 19 |
+| Role words | `packages/verifier/src/name-expansion.ts`, `packages/engine/src/testing/arb-case-match.ts` | 20 |
+| Sentinel examples | `crew/sentinel/test/` (tests only) | 9.8 |
+| Docs | `BUILD_LOG.md`, `.kiro/steering/citations.md`, `docs/KIRO_USAGE.md` | 21 |
 
 ## Correctness Properties
 
@@ -813,6 +930,12 @@ The numbers below are scoped to this spec. Each property lives in a file named `
 
 **Validates: Requirements 11.2, 11.5, 11.11**
 
+### Property 19: A pincite expression extends the citation and leaves its value
+
+*For any* generated Full_Citation (reporter, parallel, or database with a range and no list) or Short_Form (`Id.` or party form), *for any* Pincite_Expression with First_Page `p` written in place of the single page `p` (a single page, a range with a hyphen or an en dash and a full or shortened second number, or a list of up to five such items), and *for any* parenthetical that follows, `extract` of the text returns the same number of citations as for the single-page text, and each citation `c` satisfies two relations. First, `c.text` is the whole written citation, from its first code unit through the last code unit of the Pincite_Expression and of the parenthetical. Second, `c.value` equals the value extracted from the single-page text, so the Citation_Line and the Reveal Codes payload, which are functions of the value, are the same as for the single-page form.
+
+**Validates: Requirements 18.1, 18.2, 18.3, 18.4, 18.5, 18.14, 18.15**
+
 ## Error Handling
 
 Errors are values in the Engine and the Verifier. Only the app boundary throws.
@@ -835,6 +958,12 @@ Errors are values in the Engine and the Verifier. Only the app boundary throws.
 | The recording differs from the Expected_Outcomes | The script prints each difference, exits with code 2 and writes nothing. The task stops and reports. It changes no sample, rule or fixture to make a result fit. |
 | The Sentinel re-checks a filing whose recorded `verified` now resolves to another name | One `citation_changed` finding with Before `verified <id>` and After `wrong_case <id> <name>`. |
 | A name rule that gives a false `wrong_case` for a correct citation | The author clears it with a written Override, which the certification lists. This is the reason the rule is lenient and the reason `wrong_case` blocks rather than warns. |
+| A dash in a pincite not followed by one to five digits, or a second number followed by a letter or number | The expression ends before the dash; the citation ends where it ended before the follow-up. |
+| A list item that starts a parallel member or a database citation | The expression ends before the comma; the next reader takes the item. |
+| A pincite expression that would pass five items or 24 code units | The expression ends at the last item that fits. |
+| Reveal Codes from before the pincite change that close a citation inside a range | `parse` returns `malformed_codes` with `extractor_mismatch`; `persist` returns `bad_codes`; the Sentinel reports `appendix_unparseable`. |
+| A `wrong_case` citation with no `caseName` | The `Cited as` line is left out; the `This citation is` line shows. |
+| A role word is the only word of a cited party | The party has no Normalised_Word and is skipped (Requirement 4, criterion 9). |
 
 ## Testing Strategy
 
@@ -856,7 +985,7 @@ This feature has pure functions with large input spaces (the name rule, the cite
 
 | Package | File | Properties |
 | ------- | ---- | ---------- |
-| `packages/engine` | `test/case-match.properties.test.ts` | 2, 3, 4, 5, 6, 7, 8 |
+| `packages/engine` | `test/case-match.properties.test.ts` | 2, 3, 4, 5, 6, 7, 8, 19 |
 | `packages/verifier` | `test/case-match.properties.test.ts` | 1, 9, 10, 11, 12, 13, 18 |
 | `packages/export` | `test/case-match.properties.test.ts` | 14 |
 | `crew/sentinel` | `test/case-match.properties.test.ts` | 15 |
@@ -864,7 +993,7 @@ This feature has pure functions with large input spaces (the name rule, the cite
 
 Property 13 sits with the verifier because `link.ts` lives there. Property 18 tests `trimEntry` and the script's writer through an injected `fetch` and an in-memory writer, so it makes no network call.
 
-**Inventory (D9).** This design lists exactly eighteen properties, numbered 1 to 18 once each; the table above assigns them as 7 (engine), 7 (verifier), 1 (export), 1 (Sentinel) and 2 (web), which sum to 18. This revision adds no property and renumbers none: the tolerant read extends Property 3, and `lookup` extends Property 9. `packages/engine/test/inventory.test.ts` and `packages/verifier/test/inventory.test.ts` skip files named `case-match.properties.test.ts`. One aggregate inventory test, `apps/web/test/static/case-match-inventory.test.ts` (task 13.6), reads this file and the five property files above. It requires that this file holds exactly eighteen `### Property N` headings numbered 1 to 18, that all eighteen `// Property N` markers are present across the five files, each exactly once and in the package the table assigns it to, that each marker is followed by exactly one `fc.assert(fc.property(...))`, and that each describe title ends in `_Requirements: x.y_`. A missing marker fails the test, so skipping an optional property sub-task is caught at the final checkpoint. The two changed existing inventory tests are listed in the BUILD_LOG entry (Requirement 13, criterion 9).
+**Inventory (D9).** This design lists exactly nineteen properties, numbered 1 to 19 once each; the table above assigns them as 8 (engine), 7 (verifier), 1 (export), 1 (Sentinel) and 2 (web), which sum to 19. The follow-up adds Property 19 and renumbers none; Requirements 17, 19 and 20 add no property (the prework found their criteria are examples or static rules, and the role words are covered by Property 1 and one example). The tolerant read extends Property 3, and `lookup` extends Property 9. The follow-up's aggregate test (task 20.2) requires 1 to 19 with 19 in the engine file. `packages/engine/test/inventory.test.ts` and `packages/verifier/test/inventory.test.ts` skip files named `case-match.properties.test.ts`. One aggregate inventory test, `apps/web/test/static/case-match-inventory.test.ts` (task 13.6), reads this file and the five property files above. It requires that this file holds exactly eighteen `### Property N` headings numbered 1 to 18, that all eighteen `// Property N` markers are present across the five files, each exactly once and in the package the table assigns it to, that each marker is followed by exactly one `fc.assert(fc.property(...))`, and that each describe title ends in `_Requirements: x.y_`. A missing marker fails the test, so skipping an optional property sub-task is caught at the final checkpoint. The two changed existing inventory tests are listed in the BUILD_LOG entry (Requirement 13, criterion 9).
 
 **Arbitraries** (shared, in `packages/engine/src/testing/arbitraries.ts`, built from fast-check combinators so shrinking works):
 
@@ -908,6 +1037,14 @@ Example tests cover the exact cases in the requirements and the planted errors i
 - The recording: a missing token exits with code 1 and makes no request, `checkExpected` stops on a changed status, cluster or outcome, the `556 U.S. 662` comparison reports `matches` and `differs`, and no fixture under `packages/verifier/fixtures/` holds an authorization value.
 - The request body holds no case name, and a cached `verified` entry without cluster data is a cache miss.
 - The route accepts an absent `caseName` and a 200-unit string, and answers 400 for a 201-unit string and for a number.
+
+Follow-up example tests (Requirements 17 to 20):
+
+- Links: the stylesheet rules, the DOM position, the cancelled `mousedown` with focus unchanged, and `click` and keyboard activation (design "The empty-page links", with what each can and cannot prove).
+- Pincite: Miller (`174 F.3d 366, 371-72 (2d Cir. 1999)` is one citation, pincite 371, and the Pane string is one code pair); `501 U.S. 32, 45-46 (1991)`; `516 U.S. 217, 220-21 (1996)`; an en dash and a full second number (`371–372`); a list (`678, 680-81`); `Id. at 678-79`; `Roe, 556 U.S. at 678-79`; a parallel citation with ranges in two members; a list that stops before `, 93 S. Ct. 705` and before `, 2010 WL 123456`; `371-A`, `371-` and `371-72a` ending where they ended before; the maximal parallel citation under 512 code units; the incremental rescan equal to a full scan; `memberLines` of the range text equal to that of the single page; old-form codes failing `parse` with `extractor_mismatch`.
+- Mismatch: the two lines in an Issues row, an Export dialog row (with the link) and an Override dialog (above the reason box); the omitted `Cited as` line; the lines read from the current Document; no trailing full stop.
+- Role words: the Greenleaf example, the verifier-and-arbitrary list comparison, and a re-run of the worked outcomes.
+- Sentinel: a pre-spec filing that sweeps clean, and one whose recorded `verified` citation now resolves to a different case.
 
 ### Rules that apply to all tests
 

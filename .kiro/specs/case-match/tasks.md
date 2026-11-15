@@ -355,6 +355,125 @@ Conventions for every task:
   - Ensure all tests pass, ask the user if questions arise.
   - _Requirements: 16.5_
 
+### Follow-up group: the browser walkthrough findings (Requirements 17 to 21)
+
+Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. They are written from the design section "Follow-up: walkthrough findings". No task commits or pushes. Each existing test that changes is edited in the task that changes it and listed in the BUILD_LOG entry of task 20.3.
+
+- [ ] 15. Empty-page links take a pointer click (Requirement 17)
+  - [ ] 15.1 Make the links the hit target and keep focus in the editor
+    - In `apps/web/src/components/editor-surface.tsx` render the `samples` list after `<EditorContent>` inside `.page`, still only while `empty` and `onLoadSample` is given.
+    - Add `onMouseDown` on each link that calls `e.preventDefault()`. Keep `onClick`'s `preventDefault` and the load call.
+    - In `editor-surface.module.css` add `pointer-events: none` to `.samples` and a rule `.samples a { pointer-events: auto; display: inline-block; }`. Add no `z-index` anywhere (design D15: the Modal overlay has none, and a `z-index` on the list would lift it above the overlay). Add no colour literal, Token, outline or transition.
+    - Before editing, confirm the cause by reading the stylesheet and TipTap's injected `.ProseMirror { position: relative }`, and record the one-sentence cause in the BUILD_LOG entry of task 20.3.
+    - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.9_
+
+  - [ ] 15.2 Add the static stylesheet test
+    - In `apps/web/test/static/editor-surface-css.test.ts` add a describe titled `static: empty-page links _Requirements: 17.6_` with cases: `.samples` is `position: absolute` and has `pointer-events: none`; `.samples a` has `pointer-events: auto`; no declaration in `editor-surface.module.css` or `modal.module.css` sets `z-index`; no new `outline` or colour literal. Add a planted-violation case so the check is shown to fail on a `z-index` or a missing `pointer-events` rule.
+    - State in a comment what the test cannot prove (that the browser applies the rules).
+    - _Requirements: 17.6, 17.7_
+
+  - [ ] 15.3 Add the structure and event tests
+    - In a new `apps/web/test/editor-surface-links.test.tsx` render `EditorSurface` (with the stub editor the existing editor-surface tests use) and assert: the list is not a descendant of the editor content element; it follows the editor content element in DOM order (`compareDocumentPosition`); it renders only while `empty` is true and `onLoadSample` is given; the two links are `a` elements named `Load demo motion` and `Load the Avianca citations` in that order.
+    - Assert `fireEvent.mouseDown` on each link is default-prevented and `document.activeElement` is unchanged; a `click` and a keyboard activation each call `onLoadSample` with `"demo"` and `"avianca"`.
+    - Add a comment that jsdom does no layout, so these tests cannot prove paint order, hit testing or a real browser's focus handling.
+    - _Requirements: 17.3, 17.4, 17.5, 17.7_
+
+- [ ] 16. Page ranges and lists in a pincite (Requirement 18)
+  - [ ] 16.1 Read the Pincite_Expression and keep the value
+    - Create `packages/engine/src/citations/pincite.ts` with `readPinciteExpression(text, at, { list, startsMember })` as designed: items `page [dash short]` with `-` or `–`, a shortened second number of one to five ASCII digits, at most five items and 24 code units, items after the first refused when `startsMember` is true or when they are a four-digit number from 1600 to 2999 followed by a space and an uppercase letter, an item accepted only when its last digit is not followed by a letter or number, and a failed `dash short` leaving the item as the page alone. No import from the other grammar modules.
+    - Export `startsMember` from `grammar.ts` and use the new reader in `grammar.ts#readPincite` (`list: true`), in `grammar-short.ts` for `Id. at` and for the party tail (`list: true`; `first` becomes `pincite`, `end` the tail end), and in `grammar-db.ts#readPincite` (`list: false`, `startsMember: () => false`). Keep the existing `startsMember` check for the first item.
+    - The value's `pincite` stays the First_Page. Do not change `types.ts`, `format.ts`, `codes/*` or `packages/verifier/src/lines.ts`. If an edit to any of them looks necessary, stop and report why before making it.
+    - Update the header comments of the three grammar files with the new read bounds. Keep every function under 40 lines and each module under 300.
+    - _Requirements: 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 18.8, 18.9, 18.10, 18.11, 18.17_
+
+  - [ ] 16.2 Extend the citation arbitraries
+    - In `packages/engine/src/testing/arb-citation.ts` and `arb-text-builder.ts` add `arbPinciteExpression` returning `{ text, first }` (single page, range with `-` or `–` and a full or shortened second number, list of two to five items with items that would start a member or a database citation filtered out) and an option `pinciteStyle: "single" | "expression"` on the Full and Short_Form builders, defaulting to `"single"` so every existing property keeps its domain.
+    - Opt the round-trip property (Property 2's domain) and the incremental-equals-full property in to `"expression"`. List both edits for the BUILD_LOG. Confirm the other existing extraction properties pass unedited.
+    - _Requirements: 18.10, 18.11, 18.14_
+
+  - [ ]* 16.3 Write property test for the pincite expression
+    - In `packages/engine/test/case-match.properties.test.ts` add `// Property 19` above one `fc.assert(fc.property(...))` and a describe title ending `_Requirements: 18.15_`.
+    - **Property 19: A pincite expression extends the citation and leaves its value**
+    - Generate a citation (reporter, parallel, database with a range, `Id.`, party Short_Form) with `arbPinciteExpression`, an optional parenthetical, and the single-page twin; assert equal citation counts, `c.text` equal to the whole written citation, and `c.value` structurally equal to the twin's value.
+    - **Validates: Requirements 18.1, 18.2, 18.3, 18.4, 18.5, 18.14, 18.15**
+
+  - [ ] 16.4 Write the pincite example tests
+    - In a new `packages/engine/test/pincite.test.ts`: Miller (`Miller v. United Airlines, Inc., 174 F.3d 366, 371-72 (2d Cir. 1999)` is one citation whose text is `174 F.3d 366, 371-72 (2d Cir. 1999)`, pincite 371, and `render(…, "display")` closes `[/CIT]` after `1999)`); `501 U.S. 32, 45-46 (1991)`; `516 U.S. 217, 220-21 (1996)`; an en dash with a full second number (`371–372`); a list (`678, 680-81`); `Id. at 678-79`; `Roe, 556 U.S. at 678-79`; a parallel citation with a range in two members; a list that stops before `, 93 S. Ct. 705` and before `, 2010 WL 123456`; `371-A`, `371-` and `371-72a` ending where they ended before the follow-up; a database `, at *5-6` read and `, at *5, 7` read as `, at *5` only; `normalised` recorded for a range; the incremental rescan equal to a full scan on a ranged text; the maximal four-member parallel citation with 40-code-unit reporters, five-item expressions and a parenthetical extracted whole and under 512 code units (if it is not, lower the 24 cap and report; do not raise `MAX_MATCH`).
+    - Add a verifier example (`packages/verifier/test/lines.test.ts` or a new file) that `memberLines` of the ranged Miller text equals that of the single-page text.
+    - Add an engine example that Reveal Codes written the old way (`[CIT ≠…]174 F.3d 366, 371[/CIT]-72 (2d Cir. 1999)`, with a valid `[DOC]` and spans) fail `parse` with `malformed_codes` and rule `extractor_mismatch`. Read the autosave load path from `persist.ts` onward and record in the BUILD_LOG what the author sees for a `bad_codes` draft.
+    - _Requirements: 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 18.8, 18.9, 18.11, 18.12, 18.16_
+
+  - [ ] 16.5 Re-check the Avianca sample and the worked outcomes
+    - Edit `packages/engine/test/avianca.test.ts` so the Miller citation's text is `174 F.3d 366, 371-72 (2d Cir. 1999)` and the other five are unchanged, and edit `packages/verifier/test/worked-outcomes.test.ts` wherever it compares the Miller text. The lookup outcomes (`wrong_case`, cluster 3011108) do not change.
+    - Check that `packages/engine/fixtures/avianca-citations.txt` is unchanged and that `501 U.S. 32` and `516 U.S. 217` in it still extract as before (the sample holds no range for them; the ranged forms are covered by task 16.4).
+    - Run the engine and verifier suites and list every other test that fails because a citation now ends later. Edit only those whose expected text is wrong for the right reason, and list them for the BUILD_LOG; stop and report any test that fails for another reason.
+    - _Requirements: 18.12, 18.13, 18.10_
+
+- [ ] 17. Checkpoint - Links and pincite complete
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [ ] 18. Say what the mismatch is where the author decides (Requirement 19)
+  - [ ] 18.1 Add the shared lines and use them in the Issues row
+    - Create `apps/web/src/client/mismatch.ts` with `mismatchOf(document, key)` and `mismatchLines(m)` and `apps/web/src/components/mismatch-lines.tsx` rendering the lines as `p` elements with a `className` prop.
+    - `mismatchOf` returns `null` unless the key is a Full record with the status `wrong_case`; `cited` is `rec.citation.caseName ?? null` from the Document passed in; `found` is `<foundName> (<foundYear>)` or `<foundName>`. `mismatchLines` returns `Cited as <cited>` (only when not null) then `This citation is <found>`, with no trailing full stop.
+    - In `issues-list.tsx` replace the `wrongCaseFor` line with these, keep the `CourtListenerLink` and `courtListenerLink` use, and place the two lines directly under the citation text. Keep the buttons, the severity words and the `Overridden:` line.
+    - _Requirements: 19.1, 19.4, 19.5, 19.6, 19.7, 19.8_
+
+  - [ ] 18.2 Show the lines and the link in the Export dialog row
+    - In `export-issues.tsx` render `MismatchLines` and the `CourtListenerLink` for a `wrong_case` row, after the severity words and before the actions. Add an optional `info` prop (the session's usable Display_Info) passed from `export-dialog.tsx` only if the dialog already has it; otherwise use the link built from `clusterId`. Add no new state.
+    - Use the existing `text` class of `export-dialog.module.css`; add no colour literal.
+    - _Requirements: 19.2, 19.7, 19.8_
+
+  - [ ] 18.3 Show the lines in the Override dialog
+    - Add the prop `mismatch: readonly string[] | null` to `OverrideDialog` and render the lines inside the `describedBy` block between the issue text and the printed-statement line, above the reason box.
+    - Compute it with `mismatchOf` and `mismatchLines` from the current Document in both `OverrideSlot` sites (`issues-region.tsx` and `export-dialog.tsx`), passing `null` when `mismatchOf` returns `null`.
+    - _Requirements: 19.3, 19.4, 19.7, 19.8_
+
+  - [ ] 18.4 Write the mismatch tests
+    - Add example tests: an Issues row shows `Cited as Henderson v. Pacific Housing Authority` then `This citation is Ashcroft v. Iqbal (2009)` under the citation text; the lines drop the year when `foundYear` is absent and drop the first line when the citation has no `caseName`; the Export dialog row shows both lines and the `View on CourtListener` link; the Override dialog for `CIT ≠` shows both lines before the reason textarea in DOM order; no line ends in a full stop; `mismatchOf` reads `caseName` from the Document passed in and returns `null` for a non-`wrong_case` key.
+    - Edit the existing tests that match the exact paragraphs of a `wrong_case` row and list them for the BUILD_LOG. Run `copy-rules.test.ts` and `limits.test.ts` and keep them passing.
+    - _Requirements: 19.1, 19.2, 19.3, 19.4, 19.5, 19.6, 19.8, 19.9_
+
+- [ ] 19. Role words do not count as shared words (Requirement 20)
+  - [ ] 19.1 Add the Role_Words to the Dropped_Words
+    - In `packages/verifier/src/name-expansion.ts` add `plaintiff, plaintiffs, defendant, defendants, appellant, appellants, appellee, appellees, petitioner, petitioners, respondent, respondents, individually, deceased, no` to `DROPPED_WORDS`. Change no other word and no `NAME_EXPANSION_TABLE` entry.
+    - _Requirements: 20.1, 20.2, 20.3_
+
+  - [ ] 19.2 Mirror the words in the engine arbitraries
+    - In `packages/engine/src/testing/arb-case-match.ts` add the same fifteen words to `DROPPED`, export it, and keep the existing exclusion of initialisms equal to a Dropped_Word or table key (design D10) so Property 1's generator stays clear of the new words. Do not edit Property 1.
+    - _Requirements: 20.4, 20.5_
+
+  - [ ] 19.3 Add the list-drift test
+    - In the verifier tests add a test that the exported engine `DROPPED` list and `DROPPED_WORDS` hold exactly the same words (import the engine testing module the way `packages/verifier/test/case-match.properties.test.ts` does), with a planted-difference case showing it fails.
+    - _Requirements: 20.4_
+
+  - [ ] 19.4 Write the role-word examples and re-run the worked outcomes
+    - In a new `packages/verifier/test/role-words.test.ts`: `namesMatch("Kowalski, Appellant v. Quimby, Defendants", [the three names of the recorded 174 F.3d 366 fixture])` is `false`; a `lookupWithInfo` over the recorded fixture for a record whose `caseName` the Extractor reads from `Kowalski Appellant v. Quimby Defendants, 174 F.3d 366 (3d Cir. 1999)` gives `wrong_case` with cluster 3011108 (if the Extractor reads no name for that text, pick a text it reads and report the change); a cited party made only of Role_Words is skipped and the other party decides; `No.` in a cited name is dropped.
+    - Run `worked-outcomes.test.ts` and `case-match.properties.test.ts` of the verifier. Report in the BUILD_LOG that Henderson, Petersen and Miller stay `wrong_case` and Ashcroft v. Iqbal, Haines v. Kerner, Zicherman (516 U.S. 217) and Chambers stay `verified`, or report any outcome that changes and stop.
+    - _Requirements: 20.2, 20.3, 20.6, 20.7_
+
+- [ ] 20. Sentinel examples, inventory and documentation (Requirements 9, 21)
+  - [ ] 20.1 Add the two Sentinel examples for Requirement 9, criterion 8
+    - In a new `crew/sentinel/test/pre-spec-filing.test.ts` (tests only; no Sentinel source changes) sweep a filing exported before this spec: one whose recorded `verified` citations still match the re-check data gives no finding and no error, and one whose recorded `verified` citation has a written name that now resolves to a different case gives one `citation_changed` finding with Before `verified <clusterId>` and After `wrong_case <clusterId> <foundName>`. Build both from the existing Sentinel test support and the recorded fixtures.
+    - _Requirements: 9.8, 13.5_
+
+  - [ ] 20.2 Update the aggregate inventory test
+    - In `apps/web/test/static/case-match-inventory.test.ts` change the engine entry of `OWNERS` to `[2, 3, 4, 5, 6, 7, 8, 19]`, and change every `18`, `eighteen` and `"1 to 18"` check and test title to nineteen and 1 to 19 (design headings, the table, the all-files list). Keep the self-test.
+    - Confirm the design holds the heading `### Property 19:` and that the test fails if Property 19's marker or its engine file entry is removed.
+    - _Requirements: 21.3_
+
+  - [ ] 20.3 Write the BUILD_LOG entry and update the steering file and usage doc
+    - Add a dated BUILD_LOG entry: the four findings; the cause of the links (two positioned elements with `z-index: auto` painted in tree order, TipTap's `.ProseMirror { position: relative }`, and why jsdom tests could not see it); the fix and why no `z-index` was used; what the new link tests prove and cannot prove; whether any real-browser tooling exists in the repository (none was found in `apps/web/package.json`, and no dependency was added) and the manual check for the author (`pnpm dev`, `document.elementFromPoint` at the centre of each link returns an `A` element, click each link, click blank page next to the links and see the caret, press the mouse on a link with the caret in the page and see the caret stay); the pincite decision (the value does not change; only `end` moves; `normalised` is now set for a ranged citation); the old-codes consequence and what the author sees for a `bad_codes` draft; the role words and the unchanged outcomes; and every existing test edited in tasks 16.2, 16.5 and 18.4.
+    - In `.kiro/steering/citations.md` add the Pincite_Expression rule (page, range with hyphen or en dash, list; value keeps the first page) and the Role_Words to the dropped words of the comparison rule.
+    - In `docs/KIRO_USAGE.md` update the existing `citations.md` row to say the file now also records the Pincite_Expression rule and the Role_Words.
+    - _Requirements: 17.8, 18.16, 21.4, 21.5_
+
+- [ ] 21. Final checkpoint
+  - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, `pnpm --filter @reveal-codes/web build` (the clean-checkout web build) and `pnpm kiro:check`, and fix any failure in the code, never in a test's meaning.
+  - State in the report that the browser check (task 20.3's manual steps) and the push are left to the author. Do not push.
+  - Ensure all tests pass, ask the user if questions arise.
+  - _Requirements: 21.6_
+
 ## Notes
 
 - Tasks marked with `*` are optional test sub-tasks. Several requirements say tests "SHALL" exist (13.1, 13.2, 12.6), so skip them only knowingly. Skipping a property sub-task makes the aggregate inventory test of task 13.6 fail.
@@ -362,6 +481,10 @@ Conventions for every task:
 - Tasks 3.13 (MCP tests) and 13.6 (aggregate inventory) are not optional. Task 13.6 requires all eighteen property markers, so every `*` property sub-task must be done before the final checkpoint.
 - Task 9.3 and Requirement 10, criterion 15: if any line of the Avianca sample reads differently from the six expected citations, report which line and why before changing the text.
 - Property tests of one package share one `case-match.properties.test.ts`, so their tasks sit in different waves.
+- Follow-up group (tasks 15 to 21): Property 19 (task 16.3) is optional like the other property sub-tasks, and task 20.2 makes the inventory test require it, so skipping 16.3 fails the inventory test and the final checkpoint.
+- The follow-up checkpoints (17 and 21) and the top-level tasks are not in the dependency graph.
+- Task 16.1 stops and reports before changing `types.ts`, `format.ts`, `codes/*` or `lines.ts`; the design expects none of them to change.
+- Task 20.3 states what the link tests cannot prove and lists the manual real-browser check; the repository has no browser driver and no dependency is added.
 - Each task references granular acceptance criteria for traceability.
 
 ## Task Dependency Graph
@@ -381,7 +504,13 @@ Conventions for every task:
     { "id": 9, "tasks": ["1.11", "10.3"] },
     { "id": 10, "tasks": ["12.1"] },
     { "id": 11, "tasks": ["12.2"] },
-    { "id": 12, "tasks": ["12.3", "13.1", "13.2", "13.3", "13.4", "13.5", "13.6"] }
+    { "id": 12, "tasks": ["12.3", "13.1", "13.2", "13.3", "13.4", "13.5", "13.6"] },
+    { "id": 13, "tasks": ["15.1", "16.1", "19.1", "20.1"] },
+    { "id": 14, "tasks": ["15.2", "15.3", "16.2", "18.1", "19.2"] },
+    { "id": 15, "tasks": ["16.3", "16.4", "18.2", "19.3", "19.4"] },
+    { "id": 16, "tasks": ["16.5", "18.3"] },
+    { "id": 17, "tasks": ["18.4"] },
+    { "id": 18, "tasks": ["20.2", "20.3"] }
   ]
 }
 ```
