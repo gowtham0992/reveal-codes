@@ -299,7 +299,7 @@ Conventions for every task:
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 12. Recording gate (Requirement 11, Requirement 12)
-  - [~] 12.1 Run the recording dry run and stop or report
+  - [x] 12.1 Run the recording dry run and stop or report
     - This task is a stop-and-report gate. Do not edit code, the sample, the rule, the Expected_Outcomes or any fixture in it.
     - Check whether `COURTLISTENER_TOKEN` is set in the shell. If it is absent, stop and tell the user to run `pnpm --filter @reveal-codes/verifier exec tsx scripts/record-lookups.ts` (dry run first, then `--write`) in their own terminal, with the token in their environment. Do not ask for the token and do not read `.env`.
     - If the token is present, run the script as a dry run and report, for each of the seven lines, the status, cluster id and found name. If any result differs from the Requirement 12 table (a status, a cluster, or a name that makes the rule give a different outcome, including a Petersen or Miller name that would give `verified`), report the difference and stop. Do not change the sample, the rule, the Expected_Outcomes or the fixtures to make a result fit.
