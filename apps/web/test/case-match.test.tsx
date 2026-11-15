@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
-import { createDocument, recordOverride, setVerification } from "@reveal-codes/engine";
-import type { Document, IssueKey, VerificationResult } from "@reveal-codes/engine";
+import type { VerificationResult } from "@reveal-codes/engine";
 import { ORDERS } from "@reveal-codes/export";
 import type { DisplayInfo } from "@reveal-codes/verifier/link";
 import { describe, expect, it } from "vitest";
@@ -8,7 +7,6 @@ import { AppShell } from "../src/components/app-shell";
 import { ExportDialog } from "../src/components/export-dialog";
 import { IssuesRegion } from "../src/components/issues-region";
 import { PrintView } from "../src/components/print-view";
-import type { ResolvedSession } from "../src/client/resolved";
 import { createOrderSelectionStore } from "../src/order-selection";
 import { AUTOSAVE_KEY, serialise } from "../src/persist";
 import type { AppServices } from "../src/services";
@@ -20,77 +18,20 @@ import { modeApi } from "./support/mode-fetch";
 import { act, renderUi, screen, within } from "./support/render";
 import { createFakeViewport } from "./support/viewport";
 
-const ISO = "2026-11-02T12:00:00.000Z";
-const NOW = (): Date => new Date(ISO);
-const noop = (): void => undefined;
-const WRONG: VerificationResult = {
-  status: "wrong_case",
-  clusterId: "145875",
-  foundName: "Ashcroft v. Iqbal",
-  foundYear: 2009,
-};
-const WRONG_NO_YEAR: VerificationResult = {
-  status: "wrong_case",
-  clusterId: "145875",
-  foundName: "Ashcroft v. Iqbal",
-};
-const TEXT = "See Henderson v. Pacific Housing Authority, 556 U.S. 662, 678 (2009).";
-const LINK = "View on CourtListener";
-
-function build(text: string): Document {
-  const created = createDocument(text, ISO);
-  if (!created.ok) throw new Error("fixture rejected");
-  return created.value;
-}
-
-function keysOf(doc: Document): IssueKey[] {
-  return doc.citations.filter((c) => c.kind === "full").map((c) => c.key);
-}
-
-function withResults(text: string, results: readonly VerificationResult[]): Document {
-  let doc = build(text);
-  keysOf(doc).forEach((key, i) => {
-    const result = results[i];
-    if (result === undefined) return;
-    const set = setVerification(doc, key, result);
-    if (!set.ok) throw new Error(`verification rejected: ${set.error.kind}`);
-    doc = set.value;
-  });
-  return doc;
-}
-
-function overridden(doc: Document): Document {
-  const key = keysOf(doc)[0];
-  if (key === undefined) throw new Error("no citation");
-  const r = recordOverride(doc, key, "Checked by hand against the reporter.", ISO);
-  if (!r.ok) throw new Error(`override rejected: ${r.error.kind}`);
-  return r.value;
-}
-
-type RegionExtra = Readonly<{ resolved?: ResolvedSession; verifiedAt?: string | null }>;
-
-function region(doc: Document, extra: RegionExtra = {}) {
-  const store = createStore(NOW);
-  const props = {
-    document: doc,
-    store,
-    now: NOW,
-    onGo: noop,
-    verifiedAt: extra.verifiedAt ?? null,
-    note: null,
-    verify: { start: noop, disabled: false },
-    ...(extra.resolved === undefined ? {} : { resolved: extra.resolved }),
-  };
-  renderUi(<IssuesRegion {...props} />);
-  return store;
-}
-
-function sessionFor(
-  store: ReturnType<typeof createStore>,
-  info: ReadonlyMap<IssueKey, DisplayInfo>,
-): ResolvedSession {
-  return { epoch: store.getState().epoch, info };
-}
+import {
+  ISO,
+  LINK,
+  NOW,
+  noop,
+  TEXT,
+  WRONG,
+  WRONG_NO_YEAR,
+  keysOf,
+  overridden,
+  region,
+  sessionFor,
+  withResults,
+} from "./support/case-match-region";
 
 describe("Issues row for a wrong case citation _Requirements: 7.1, 7.2, 7.3, 7.4, 7.10_", () => {
   it("shows the chip, the words, the citation, the found line and the buttons", () => {

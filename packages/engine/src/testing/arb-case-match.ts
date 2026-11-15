@@ -158,6 +158,39 @@ function initialismOf(words: readonly string[]): string | null {
   return RESERVED.has(initials.toLowerCase()) ? null : initials.toUpperCase();
 }
 
+function arbExpandVariant(second: string): fc.Arbitrary<NameVariant> {
+  return fc
+    .tuple(fc.constantFrom(...EXPANSION_ENTRIES), fc.boolean())
+    .map(([[key, words], cited]): NameVariant => {
+      const abbreviated = `${capitalise(key)}.`;
+      const long = expansionText(words);
+      return cited
+        ? {
+            kind: "expand",
+            cited: `${abbreviated} v. ${second}`,
+            found: `${long} v. ${second}`,
+            expected: true,
+          }
+        : {
+            kind: "contract",
+            cited: `${long} v. ${second}`,
+            found: `${abbreviated} v. ${second}`,
+            expected: true,
+          };
+    });
+}
+
+function arbInitialismVariant(second: string): fc.Arbitrary<NameVariant> {
+  return arbPartyWords(POOL_A_M, 3, 4)
+    .filter((words) => initialismOf(words) !== null)
+    .map((words): NameVariant => ({
+      kind: "initialism",
+      cited: `${initialismOf(words) ?? ""} v. ${second}`,
+      found: `${words.join(" ")} v. ${second}`,
+      expected: true,
+    }));
+}
+
 /**
  * Variants of `name` (a `<Party> v. <Party>` string) that must match it:
  * identity, a case change, punctuation removal, a table abbreviation against
@@ -185,33 +218,8 @@ export function arbNameVariant(name: string): fc.Arbitrary<NameVariant> {
     found: name,
     expected: true,
   });
-  const expand = fc
-    .tuple(fc.constantFrom(...EXPANSION_ENTRIES), fc.boolean())
-    .map(([[key, words], cited]): NameVariant => {
-      const abbreviated = `${capitalise(key)}.`;
-      const long = expansionText(words);
-      return cited
-        ? {
-            kind: "expand",
-            cited: `${abbreviated} v. ${second}`,
-            found: `${long} v. ${second}`,
-            expected: true,
-          }
-        : {
-            kind: "contract",
-            cited: `${long} v. ${second}`,
-            found: `${abbreviated} v. ${second}`,
-            expected: true,
-          };
-    });
-  const initialism = arbPartyWords(POOL_A_M, 3, 4)
-    .filter((words) => initialismOf(words) !== null)
-    .map((words): NameVariant => ({
-      kind: "initialism",
-      cited: `${initialismOf(words) ?? ""} v. ${second}`,
-      found: `${words.join(" ")} v. ${second}`,
-      expected: true,
-    }));
+  const expand = arbExpandVariant(second);
+  const initialism = arbInitialismVariant(second);
   return fc.oneof(identity, changed, bare, expand, initialism);
 }
 

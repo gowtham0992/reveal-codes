@@ -1,0 +1,113 @@
+import fc from "fast-check";
+import { apply, createDocument } from "../../src/document";
+import type { CitationRecord, Document } from "../../src/types";
+import {
+  arbCitationTargetedOp,
+  arbInReName,
+  arbLeadIn,
+  arbNameBoundary,
+  arbTolerantCaseName,
+  POOL_A_M,
+  POOL_N_Z,
+} from "../../src/testing/arbitraries";
+
+export const FULL_CITATIONS = [
+  "410 U.S. 113, 116 (1973)",
+  "598 F.3d 1, 7 (2d Cir. 2010)",
+  "2024 WL 123456",
+  "410 U.S. 113, 93 S. Ct. 705 (1973)",
+  "2023 U.S. Dist. LEXIS 98765",
+] as const;
+
+export type Scenario = Readonly<{
+  name: string;
+  leadIn: string;
+  boundary: string;
+  gap: string;
+  citation: (typeof FULL_CITATIONS)[number];
+  stringCite: boolean;
+}>;
+
+export const arbName: fc.Arbitrary<{ name: string; leadInAllowed: boolean }> = fc.oneof(
+  fc
+    .constantFrom(POOL_A_M, POOL_N_Z)
+    .chain((pool) => arbTolerantCaseName(pool).map((name) => ({ name, leadInAllowed: true }))),
+  arbInReName.map((name) => ({ name, leadInAllowed: false })),
+);
+
+export const arbScenario: fc.Arbitrary<Scenario> = fc
+  .tuple(
+    arbName,
+    arbLeadIn,
+    arbNameBoundary,
+    fc.constantFrom(" ", "  ", "\n", " \n "),
+    fc.constantFrom(...FULL_CITATIONS),
+    fc.boolean(),
+  )
+  .map(([n, leadIn, boundary, gap, citation, stringCite]) => ({
+    name: n.name,
+    leadIn: n.leadInAllowed ? leadIn : "",
+    boundary,
+    gap,
+    citation,
+    stringCite,
+  }));
+
+/** The text before the name: boundary, optional string-cite prefix, lead-in. */
+export function prefixOf(s: Scenario): string {
+  const lead = s.leadIn === "" ? "" : `${s.leadIn} `;
+  return s.stringCite ? `${s.boundary}410 U.S. 113 (1973); ${lead}` : `${s.boundary}${lead}`;
+}
+
+export type Nameless = Readonly<{
+  boundary: string;
+  lead: string;
+  citation: (typeof FULL_CITATIONS)[number];
+  short: string;
+}>;
+
+export const arbNameless: fc.Arbitrary<Nameless> = fc.record({
+  boundary: arbNameBoundary,
+  lead: fc.constantFrom("", "the holding is in ", "see "),
+  citation: fc.constantFrom(...FULL_CITATIONS),
+  short: fc.constantFrom("Id.", "Id. at 118", "Roe, 410 U.S. at 116"),
+});
+
+export type FullRecord = Extract<CitationRecord, { kind: "full" }>;
+
+export function fullRecords(doc: Document): readonly FullRecord[] {
+  return doc.citations.filter((r): r is FullRecord => r.kind === "full");
+}
+
+export const TIMESTAMP = "2024-01-01T00:00:00.000Z";
+
+/** A starting Document whose text holds one to three named Full_Citations. */
+export const arbNamedDocument: fc.Arbitrary<Document> = fc
+  .array(arbScenario, { minLength: 1, maxLength: 3 })
+  .map((scenarios) =>
+    scenarios.map((s) => `${prefixOf(s)}${s.name},${s.gap}${s.citation}`).join("\n\n"),
+  )
+  .map((text) => {
+    const created = createDocument(text, TIMESTAMP);
+    if (!created.ok) throw new Error("arbNamedDocument: createDocument rejected generated text");
+    return created.value;
+  });
+
+/** Up to `n` citation-targeted edits, each drawn against the Document the previous ones produced. */
+export function arbEditedStates(doc: Document, n: number): fc.Arbitrary<readonly Document[]> {
+  if (n === 0) return fc.constant([]);
+  return arbCitationTargetedOp(doc).chain((op) => {
+    const applied = apply(doc, op);
+    if (!applied.ok)
+      throw new Error(`arbEditedStates: apply rejected a generated op: ${applied.error.kind}`);
+    const next = applied.value.document;
+    return arbEditedStates(next, n - 1).map((rest) => [next, ...rest]);
+  });
+}
+
+export const arbHistory: fc.Arbitrary<readonly Document[]> = arbNamedDocument.chain((start) =>
+  fc
+    .integer({ min: 0, max: 8 })
+    .chain((n) => arbEditedStates(start, n))
+    .map((rest) => [start, ...rest]),
+);

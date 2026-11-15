@@ -441,14 +441,20 @@ Seven small fixes in `apps/web` (plus CI, README and `.env.example`), made witho
 - Reading `NEXT_PUBLIC_*` in the component broke the scan that allows `process.env` only in `deps.ts`; the read moved there and the page passes the links down.
 - I read only the last lines of `pnpm lint`, which hid two eslint errors in the export tests. They were found later and fixed in their own commit.
 - A helper inserted by a script landed inside a doc comment in `toolbar.tsx` and broke 16 test files until it was moved by hand.
+
 ## 2026-11-15 case-match task 1.1: the cited name in the Extractor and in carry-over
+
 - `ExtractedCitation` gains an optional `caseName`. The new module `packages/engine/src/citations/cited-name.ts` reads it (`citedNameFor`: tail comma, Strict_Read through `partyStartFor`, `isCaseName` and the new In_Re_Name rule, then the Tolerant_Read only when the Strict_Read finds nothing). `extract.ts` sets it with a conditional spread for Full_Citations in `toCitation`, and `citationCarries` in `anchor.ts` requires the previous and new `caseName` to be equal. `party.ts` and `case-name.ts` are unchanged.
+
 ### Existing tests changed (Requirement 13, criterion 9)
+
 - Req 1.10 says existing extraction properties pass unedited, but several existing tests compare whole citations with `toEqual`, so the new field alone failed them. The conflict was put to the user, who chose to apply Req 13.9 and edit the tests:
   - `packages/engine/test/extract.test.ts`: 17 expected Full_Citations gain the `caseName` the Extractor now reads (Roe v. Wade, Casey v. Smith, United States v. John Q. Public, A, Inc. v. A & A, Smith v. Local 2092 Union), through a local `named` helper.
   - `packages/engine/test/demo.test.ts`: the five Demo_Motion Full_Citations gain their names; Alvarez and Okafor come from the Tolerant_Read.
   - `packages/engine/test/extract.properties.test.ts` Property 18 and Property 20, `packages/engine/test/arb-text-citations.test.ts` ("the constructed Extraction equals extract(text)") and `packages/engine/test/support/gap-signal-insert.ts` (Property 51): citations are compared with `caseName` removed (`withoutCaseName`, `withoutCaseNames` in `test/support/expected.ts`). In Property 20 and Property 51 a quote mark glued to or inserted before a name changes the name read, which is correct; the name itself is checked by case-match Property 3 (task 1.5).
   - `packages/engine/test/anchor.properties.test.ts` Property 26: the model's `citationSurvives` now also requires equal `caseName`, matching Req 1.11. Counterexample before the edit: an insert inside `Kpappxogip’s, Corp. v. Qitjqorjql J's` before `85452 So. 81276` changed the name, so the citation correctly got a fresh key.
+
 ### Where Kiro got something wrong, and what fixed it
+
 - A local variable named `window` in `cited-name.ts` tripped the engine purity scan ("DOM global"); it was renamed.
 - A `git stash` and `stash pop` pair, meant to compare against the clean tree while another task's edits were in the working tree, timed out. Afterwards the stash list was empty and every working-tree change was present. No stash was used again.

@@ -295,7 +295,7 @@ Conventions for every task:
     - `trimEntry` keeps exactly the identifying fields.
     - _Requirements: 11.2, 11.4, 11.5, 11.8, 11.10, 13.5_
 
-- [~] 11. Checkpoint - Everything before the recording passes
+- [x] 11. Checkpoint - Everything before the recording passes
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 12. Recording gate (Requirement 11, Requirement 12)
@@ -328,7 +328,7 @@ Conventions for every task:
     - Update the statement paragraph to the new five-term sentence and name the count of citations that resolved to a different case than the one named.
     - _Requirements: 8.9, 14.2, 14.6_
 
-  - [~] 13.3 Add the BUILD_LOG entry
+  - [-] 13.3 Add the BUILD_LOG entry
     - Add a dated entry that begins with the five-row table of the Introduction as the reason for the spec, then lists every existing test changed under Requirement 13, criterion 9 (collected from tasks 1.3, 3.2, 3.3, 3.12, 5.1, 5.2, 7.1, 12.2 and 13.1), and any finding of the recording task.
     - _Requirements: 14.3, 13.9_
 
