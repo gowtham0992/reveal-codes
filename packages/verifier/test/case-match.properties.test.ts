@@ -4,12 +4,16 @@ import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import {
   POOL_A_M,
+  POOL_N_Z,
   arbDisjointNames,
   arbNameVariant,
   arbPooledCaseName,
 } from "../../engine/src/testing/arb-case-match";
+import type { CitationRecord, IssueKey, VerificationResult } from "@reveal-codes/engine";
+import { lookup, lookupWithInfo, planLookup } from "../src/lookup";
 import { namesMatch } from "../src/name-match";
 import { runs } from "./support/fc";
+import { makeDeps } from "./support/make-deps";
 
 type NamePair = Readonly<{ cited: string; found: string; expected: boolean }>;
 
@@ -29,6 +33,228 @@ describe("Property 1: Name matching _Requirements: 4.12_", () => {
         expect(first).toBe(expected);
         expect(namesMatch(cited, [found])).toBe(first);
         if (expected) expect(namesMatch(found, [cited])).toBe(true);
+      }),
+      { numRuns: runs() },
+    );
+  });
+});
+
+// ---- Property 9 harness: records over three shared lines, one scripted lookup answer per line. ----
+
+type LineKind = "200" | "300" | "400" | "404" | "429" | "junk";
+type Datum = Readonly<{
+  caseName: string | undefined;
+  full: string | undefined;
+  short: string | undefined;
+  date: string | undefined;
+}>;
+type RecSpec = Readonly<{
+  /** Two line indexes for a Parallel_Citation, or null for a single reporter citation. */
+  parallel: readonly [number, number] | null;
+  line: number;
+  cited: string | undefined;
+}>;
+type Scenario = Readonly<{
+  kinds: readonly LineKind[];
+  clusterOf: readonly number[];
+  data: readonly [Datum, Datum];
+  records: readonly RecSpec[];
+}>;
+
+const LINE_COUNT = 3;
+const lineText = (i: number): string => `${String(100 + i)} U.S. 1`;
+const member = (i: number): { volume: number; reporter: string; page: number } => ({
+  volume: 100 + i,
+  reporter: "U.S.",
+  page: 1,
+});
+
+const arbScenario: fc.Arbitrary<Scenario> = fc
+  .tuple(
+    fc.tuple(arbPooledCaseName(POOL_A_M), arbPooledCaseName(POOL_A_M)),
+    arbPooledCaseName(POOL_N_Z),
+  )
+  .chain(([[n0, n1], other]) => {
+    const nameField = fc.constantFrom<string | undefined>(undefined, "", "  ", n0, n1, other);
+    const datum: fc.Arbitrary<Datum> = fc.record({
+      caseName: fc.constantFrom<string | undefined>(n0, n0, n1, other, "", undefined),
+      full: nameField,
+      short: nameField,
+      date: fc.constantFrom<string | undefined>(
+        undefined,
+        "2009-05-18",
+        "1000-01-01",
+        "0999-01-01",
+        "abcd-01-01",
+        "20",
+      ),
+    });
+    const lineIdx = fc.integer({ min: 0, max: LINE_COUNT - 1 });
+    const record: fc.Arbitrary<RecSpec> = fc.record({
+      parallel: fc.option(fc.tuple(lineIdx, lineIdx), { nil: null }),
+      line: lineIdx,
+      cited: fc.constantFrom<string | undefined>(undefined, n0, n1),
+    });
+    return fc.record({
+      kinds: fc.array(
+        fc.constantFrom<LineKind>("200", "200", "200", "200", "300", "400", "404", "429", "junk"),
+        { minLength: LINE_COUNT, maxLength: LINE_COUNT },
+      ),
+      clusterOf: fc.array(fc.constantFrom(1, 2), { minLength: LINE_COUNT, maxLength: LINE_COUNT }),
+      data: fc.tuple(datum, datum),
+      records: fc.array(record, { minLength: 1, maxLength: 6 }),
+    });
+  });
+
+function clusterJson(id: number, d: Datum): Record<string, unknown> {
+  return {
+    id,
+    ...(d.caseName === undefined ? {} : { case_name: d.caseName }),
+    ...(d.full === undefined ? {} : { case_name_full: d.full }),
+    ...(d.short === undefined ? {} : { case_name_short: d.short }),
+    ...(d.date === undefined ? {} : { date_filed: d.date }),
+  };
+}
+
+function entryOf(s: Scenario, i: number): unknown {
+  const kind = s.kinds[i];
+  const id = s.clusterOf[i] ?? 1;
+  const [d1, d2] = s.data;
+  const datum = id === 1 ? d1 : d2;
+  switch (kind) {
+    case "200":
+      return { status: 200, clusters: [clusterJson(id, datum)] };
+    case "300":
+      return { status: 300, clusters: [clusterJson(1, d1), clusterJson(2, d2)] };
+    case "400":
+      return { status: 400, clusters: [] };
+    case "404":
+      return { status: 404, clusters: [] };
+    case "429":
+      return { status: 429, clusters: [] };
+    default:
+      return "junk";
+  }
+}
+
+function recordsOf(s: Scenario, withNames: boolean): CitationRecord[] {
+  return s.records.map((r, i): CitationRecord => {
+    const value =
+      r.parallel === null
+        ? ({ kind: "reporter", ...member(r.line) } as const)
+        : ({ kind: "parallel", members: r.parallel.map(member) } as const);
+    const text = r.parallel === null ? lineText(r.line) : r.parallel.map(lineText).join(", ");
+    const caseName = withNames && r.cited !== undefined ? { caseName: r.cited } : {};
+    return {
+      kind: "full",
+      key: `k${String(i)}`,
+      citation: { start: 0, end: text.length, text, value, ...caseName },
+      result: { status: "unchecked" },
+    };
+  });
+}
+
+type Both = Readonly<{
+  info: ReadonlyMap<IssueKey, VerificationResult>;
+  plain: ReadonlyMap<IssueKey, VerificationResult>;
+}>;
+
+async function runBoth(s: Scenario, withNames: boolean): Promise<Both> {
+  const records = recordsOf(s, withNames);
+  const answer = (): Awaited<ReturnType<typeof makeDeps>> => {
+    const steps = planLookup(records)
+      .chunks.filter((chunk) => !chunk.oversize)
+      .map((chunk) => ({
+        status: 200,
+        body: chunk.lines.map((line) => entryOf(s, Number.parseInt(line, 10) - 100)),
+      }));
+    return makeDeps(steps);
+  };
+  const withInfo = await lookupWithInfo(records, answer().deps);
+  const plain = await lookup(records, answer().deps);
+  return { info: withInfo.results, plain };
+}
+
+/** The result of a line before any name comparison. */
+function lineOutcome(s: Scenario, i: number): VerificationResult {
+  switch (s.kinds[i]) {
+    case "200":
+      return { status: "verified", clusterId: String(s.clusterOf[i] ?? 1) };
+    case "300":
+      return { status: "ambiguous", candidates: ["1", "2"] };
+    case "400":
+      return { status: "not_found", reason: "unknown_reporter" };
+    case "404":
+      return { status: "not_found" };
+    default:
+      return { status: "unchecked" };
+  }
+}
+
+const isBlank = (v: string | undefined): boolean => v === undefined || v.trim() === "";
+
+/** The rule of Requirement 5, criterion 1, for the cluster `clusterId`. */
+function judged(s: Scenario, clusterId: string, cited: string | undefined): VerificationResult {
+  const d = clusterId === "1" ? s.data[0] : s.data[1];
+  const verified: VerificationResult = { status: "verified", clusterId };
+  if (cited === undefined || d.caseName === undefined || isBlank(d.caseName)) return verified;
+  const names = [d.caseName, d.full, d.short].filter(
+    (n): n is string => n !== undefined && n.trim() !== "",
+  );
+  if (namesMatch(cited, names)) return verified;
+  const head = d.date?.slice(0, 4);
+  const year = head !== undefined && /^[0-9]{4}$/.test(head) ? Number(head) : undefined;
+  return year !== undefined && year >= 1000
+    ? { status: "wrong_case", clusterId, foundName: d.caseName, foundYear: year }
+    : { status: "wrong_case", clusterId, foundName: d.caseName };
+}
+
+type Expectation = VerificationResult | "unresolved";
+
+function expectedFor(s: Scenario, r: RecSpec): Expectation {
+  if (r.parallel === null) {
+    const out = lineOutcome(s, r.line);
+    return out.status === "verified" ? judged(s, out.clusterId, r.cited) : out;
+  }
+  const verified = r.parallel.flatMap((i) => {
+    const o = lineOutcome(s, i);
+    return o.status === "verified" ? [o.clusterId] : [];
+  });
+  const ids = [...new Set(verified)];
+  const [only] = ids;
+  if (ids.length === 0 || only === undefined) return "unresolved";
+  return ids.length === 1 ? judged(s, only, r.cited) : { status: "ambiguous", candidates: ids };
+}
+
+// Feature: case-match, Property 9: the verifier rule
+// Property 9
+describe("Property 9: The verifier rule _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.14_", () => {
+  it("judges each record by its own name against its cluster, leaves other statuses alone, and lookup equals lookupWithInfo", async () => {
+    await fc.assert(
+      fc.asyncProperty(arbScenario, async (s) => {
+        const named = await runBoth(s, true);
+        const bare = await runBoth(s, false);
+        // `lookup` returns the results of `lookupWithInfo` for the same input (5.14).
+        expect(named.plain).toEqual(named.info);
+        expect(bare.plain).toEqual(bare.info);
+        s.records.forEach((r, i) => {
+          const key = `k${String(i)}`;
+          const got = named.info.get(key);
+          const expected = expectedFor(s, r);
+          if (expected === "unresolved") {
+            expect(got?.status).not.toBe("verified");
+            expect(got?.status).not.toBe("wrong_case");
+          } else {
+            expect(got).toEqual(expected);
+          }
+          // Without a name on the record the result is `verified` or the unchanged status (5.2, 5.3).
+          const unnamed = bare.info.get(key);
+          if (got?.status !== "verified" && got?.status !== "wrong_case") {
+            expect(got).toEqual(unnamed);
+          } else {
+            expect(unnamed?.status).toBe("verified");
+          }
+        });
       }),
       { numRuns: runs() },
     );

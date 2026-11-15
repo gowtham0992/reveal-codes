@@ -56,7 +56,7 @@ Conventions for every task:
     - Generate names with `arbTolerantCaseName` (unlisted dotted abbreviations and apostrophe contractions as well as listed forms), `arbInReName`, `arbLeadIn` and `arbNameBoundary`, and assert the `caseName` equals the name as written, without lead-in and closing comma, and is at most 164 code units.
     - **Validates: Requirements 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.13, 1.14, 1.15**
 
-  - [~]* 1.6 Write property test for carry-over of `caseName`
+  - [x]* 1.6 Write property test for carry-over of `caseName`
     - **Property 4: A kept citation keeps its name**
     - **Validates: Requirements 1.9, 1.11**
 
@@ -126,7 +126,7 @@ Conventions for every task:
     - **Property 1: Name matching**
     - **Validates: Requirements 4.2, 4.5, 4.6, 4.7, 4.8, 4.10, 4.12, 4.13**
 
-  - [~]* 3.6 Write property test for the verifier rule
+  - [x]* 3.6 Write property test for the verifier rule
     - **Property 9: The verifier rule**
     - Include the clause that `lookup` returns a map equal to the `results` of `lookupWithInfo` for the same records and fixture `fetch`.
     - **Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.5, 5.14**
@@ -204,7 +204,7 @@ Conventions for every task:
     - **Property 16: Resolved list selection**
     - **Validates: Requirements 7.5, 7.12, 7.13, 7.14, 7.15, 7.17**
 
-  - [~]* 5.5 Write property test for the Citations line
+  - [x]* 5.5 Write property test for the Citations line
     - **Property 17: The `wrong case` term of the Citations line**
     - **Validates: Requirements 7.9**
 
@@ -230,7 +230,7 @@ Conventions for every task:
     - **Property 14: Statement counts and status cell**
     - **Validates: Requirements 8.1, 8.2, 8.3, 8.4**
 
-  - [~]* 7.3 Write Statement example tests
+  - [-]* 7.3 Write Statement example tests
     - Statement paragraph, Status cell with and without year, Overrides table row with `CIT ≠`, DOCX builder and `/print` view show the new blocks.
     - _Requirements: 8.1, 8.4, 8.5, 8.7, 13.5_
 
@@ -246,7 +246,7 @@ Conventions for every task:
     - **Property 15: Sentinel finding rule**
     - **Validates: Requirements 9.2, 9.3, 9.4, 9.5**
 
-  - [~]* 8.3 Write Sentinel example tests
+  - [-]* 8.3 Write Sentinel example tests
     - `verified` to `wrong_case`, `wrong_case` to `verified`, an appendix containing `CIT ≠` parses, and a pre-spec filing yields no finding and no error.
     - _Requirements: 9.2, 9.3, 9.7, 9.8, 13.5_
 

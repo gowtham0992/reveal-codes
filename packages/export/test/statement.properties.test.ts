@@ -66,9 +66,16 @@ function checkRecords(c: ExportCase, s: Statement): void {
     const got = s.citations[i];
     expect(got?.text).toBe(r.citation.text);
     expect(got?.status).toBe(r.result.status);
-    const id = r.result.status === "verified" ? r.result.clusterId : undefined;
+    const id =
+      r.result.status === "verified" || r.result.status === "wrong_case"
+        ? r.result.clusterId
+        : undefined;
     expect(got?.clusterId).toBe(id);
     expect(got !== undefined && "clusterId" in got).toBe(id !== undefined);
+    const found = r.result.status === "wrong_case" ? r.result : undefined;
+    expect(got?.foundName).toBe(found?.foundName);
+    expect(got?.foundYear).toBe(found?.foundYear);
+    expect(got !== undefined && "foundYear" in got).toBe(found?.foundYear !== undefined);
   });
   expect(s.quotes).toHaveLength(doc.quotes.length);
   doc.quotes.forEach((r, i) => {

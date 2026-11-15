@@ -4,6 +4,7 @@ import type { Document, IssueKey, VerificationResult } from "@reveal-codes/engin
 import type { DisplayInfo } from "@reveal-codes/verifier/link";
 import { describe, expect, it } from "vitest";
 import { resolvedRows } from "../src/client/resolved";
+import { summaryLines } from "../src/client/verify-summary";
 import type { ResolvedSession } from "../src/client/resolved";
 import { CLUSTER_POOL, arbCitingDocument } from "./arbitraries";
 import { runs } from "./support/fc";
@@ -139,6 +140,40 @@ describe("Resolved list selection _Requirements: 7.5, 7.12, 7.13, 7.14, 7.15, 7.
           expect(row.clusterId).toBe(c.result.clusterId);
           expect(row.found).toBe(usable ? foundTextOf(d) : null);
         });
+      }),
+      { numRuns: runs() },
+    );
+  });
+});
+
+describe("Citations line _Requirements: 7.9_", () => {
+  // Property 17
+  it("lists found, wrong case, not found, ambiguous, not checked in order, each only when above zero", () => {
+    fc.assert(
+      fc.property(arbScenario, (s) => {
+        const doc = assign(s.doc, s.choices);
+        const fulls = doc.citations.flatMap((c) => (c.kind === "full" ? [c.result.status] : []));
+        const count = (status: string): number => fulls.filter((x) => x === status).length;
+        const expectedTerms = [
+          [count("verified"), "found"],
+          [count("wrong_case"), "wrong case"],
+          [count("not_found"), "not found"],
+          [count("ambiguous"), "ambiguous"],
+          [count("unchecked"), "not checked"],
+        ]
+          .filter(([n]) => (n as number) > 0)
+          .map(([n, t]) => `${String(n)} ${String(t)}`);
+        const line = summaryLines(doc, "2026-01-01T12:00:00Z", null).find((l) =>
+          l.startsWith("Citations:"),
+        );
+        if (expectedTerms.length === 0) {
+          expect(line).toBeUndefined();
+          return;
+        }
+        expect(line).toBe(`Citations: ${expectedTerms.join(" · ")}`);
+        const wrong = count("wrong_case");
+        expect(line?.includes(`${String(wrong)} wrong case`) ?? false).toBe(wrong > 0);
+        expect(line?.includes("wrong case") ?? false).toBe(wrong > 0);
       }),
       { numRuns: runs() },
     );
