@@ -318,7 +318,7 @@ Conventions for every task:
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.6, 13.5_
 
 - [ ] 13. Documentation and steering (Requirements 6, 8, 14)
-  - [-] 13.1 Update the README
+  - [x] 13.1 Update the README
     - Add one line under "It checks citations and quotations" saying a citation must also name the case it points to, and one line in the demo path naming the Avianca sample. No exclamation mark or marketing text.
     - Edit the first bullet under "What leaves your machine" (the heading stays verbatim) to read: `Verify sends only citation records to this app's own server, and each record includes the case name written before the citation; from there only citation strings go to CourtListener. The rest of your draft text is not sent.` Keep the other bullets of the section as they are.
     - Check `apps/web/test/static/docs.test.ts` first: it matches `Verify sends only citation records to this app's own server` and `from there only citation strings go to CourtListener`, and both must still match. Add one assertion there that the section matches `each record includes the case name written before the citation`. Do not edit any other README test, and confirm the export-certification README test (one line saying exporting and printing send nothing) still passes.
