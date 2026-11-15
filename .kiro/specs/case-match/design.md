@@ -4,7 +4,7 @@
 
 A citation that resolves to a real decision with a different name than the one the filing gives must fail the way a citation that cannot be found fails. Today the Verifier asks only whether a citation exists. This design adds three things and changes everything that switches on a verification status.
 
-1. **The Extractor records the name written before each Full_Citation** (`ExtractedCitation.caseName`). The name is read from the text and the matches, after the match layer, so the incremental rescan is untouched.
+1. **The Extractor records the name written before each Full_Citation** (`ExtractedCitation.caseName`). The name is read from the text and the matches, after the match layer, so the incremental rescan is untouched. The strict rule of `party.ts` and `case-name.ts` reads it first; a tolerant read inside the new module reads names the strict rule cannot (`Mgmt.`, `Dep't`), so that no citation with a written name escapes the comparison for lack of a name.
 2. **The Verifier compares that name with the name CourtListener returns** and produces the new status `wrong_case` (code `CIT ≠`). The comparison is one pure function, `namesMatch`, and it runs once per record after the lookup entry is read. The request to CourtListener stays the formatted Citation_Lines, so no case name leaves the machine.
 3. **`wrong_case` is treated exactly like `not_found`** in the Engine (an Issue that blocks export until an Override), the Reveal Codes form, the Pane, the page underline, the Issues region, the Statement, the Appendix and the Sentinel.
 
@@ -31,12 +31,14 @@ Each decision below resolves a point where the requirements leave room or two do
 | D4 | The verify route answers `{ results: [[key, result], …], info: [[key, DisplayInfo], …] }` instead of the bare array of pairs. | A JSON array has no room for a second list. The client guard in `api.ts` and its tests change (listed under "Existing tests that change"). |
 | D5 | The Verifier sets `foundYear` only when the first four characters of `date_filed` are digits **and** the integer is at least 1000. | The Engine rejects a `wrong_case` result whose `foundYear` is outside 1000 to 9999 (Requirement 2, criterion 4), and one rejected result would make `setVerification` skip a whole line. |
 | D6 | `caseName` is computed in `extractFromMatches`, by a new engine module `citations/cited-name.ts`, from `text` and each match's `start`. It is not a field of the scan-layer `Match`. | Requirement 1, criterion 9. `matchesOf` rebuilds matches without it, so the incremental path needs no change. |
-| D7 | The Verifier gains `lookupWithInfo(records, deps)` returning `{ results, info }`. `lookup(records, deps)` stays as a wrapper that returns `results`. | The Sentinel and the MCP server call `lookup` and need no change in behaviour (Requirement 5, criterion 12; Requirement 9, criterion 6). |
+| D7 | The Verifier gains `lookupWithInfo(records, deps)` returning `{ results, info }`. `lookup(records, deps)` stays as a wrapper that returns `lookupWithInfo(records, deps).results`, so **`lookup` applies the comparison** (Requirement 5, criterion 14). | The Sentinel's `reverify` and the MCP tool call `lookup`. Both receive `wrong_case` through it with no change to how they call it. The MCP tool needs one output change (D14); the Sentinel needs none beyond Requirement 9. |
 | D8 | The cluster data is added to the cache with a new guard `isCachedLine`; `isTerminalResult` is unchanged. A `verified` entry without a `cluster` record fails the guard and counts as a miss. | Requirement 5, criterion 7. Keeping `isTerminalResult` and `mapEntry` untouched leaves the existing cache and status-mapping tests as they are. |
-| D9 | `[Property N]` markers for this spec live in files named `case-match.properties.test.ts` in each package, and the existing inventory tests of the engine and the verifier skip files with that name. A new inventory test per package checks the case-match markers against this design. | The existing inventories require every `// Property N` marker in a package to match the provenance-engine design (engine) or to be exactly 1 to 12 (verifier). Requirement 13 fixes Property 1 and Property 2 as numbers. Without this change the markers collide. |
+| D9 | `[Property N]` markers for this spec live in files named `case-match.properties.test.ts` in each package, and the existing inventory tests of the engine and the verifier skip files with that name. One new aggregate inventory test (`apps/web/test/static/case-match-inventory.test.ts`, task 13.6) reads this design and the five property files and requires all eighteen markers, 1 to 18, each exactly once, in the package the table in "Testing Strategy" assigns it to. | The existing inventories require every `// Property N` marker in a package to match the provenance-engine design (engine) or to be exactly 1 to 12 (verifier). Requirement 13 fixes Property 1 and Property 2 as numbers. Without this change the markers collide. |
 | D10 | In the initialism arbitrary of Property 1, an initialism that equals a Dropped_Word or a Name_Expansion_Table key is excluded from the generator. | The rule cannot represent such a word (`inc` for `Insurance Network Co`). The exclusion states the domain; it does not weaken the assertion. |
-| D11 | The Alvarez and Okafor citations of the Demo_Motion carry no `caseName`, because their parties hold `Mgmt.` and `Props.`, which are neither Legal_Abbreviations nor Capitalised_Words. This was derived by reading `case-name.ts` and `party.ts`; the extraction example test is the authority. Their outcome is `not_found` either way. | Requirement 1, criterion 7 and Requirement 12, criterion 3. |
-| D12 | The case name travels from the browser to the app's own verify route in the request body and stops in the Verifier. It is never part of a CourtListener request. If the app's privacy copy says that only citation strings leave the browser, the copy changes in the task that adds the route field. | Principle 3 as Requirement 5, criterion 6 states it. |
+| D11 | The strict rule reads no name for the Demo_Motion's Alvarez and Okafor citations, because their parties hold `Mgmt.` and `Props.`, which are neither Legal_Abbreviations nor Capitalised_Words (derived by reading `case-name.ts` and `party.ts`). Instead of leaving them without a `caseName`, the Tolerant_Read of D13 reads them, so both carry a `caseName`. Their outcome stays `not_found`, because a 404 line is never compared. | Requirement 1, criteria 13 to 15 and Requirement 12, criterion 3. A citation with an unlisted abbreviation must not pass on existence alone. |
+| D12 | The case name travels from the browser to the app's own verify route in the request body and stops in the Verifier. It is never part of a CourtListener request. The README bullet under "What leaves your machine" (the heading stays verbatim) becomes: `Verify sends only citation records to this app's own server, and each record includes the case name written before the citation; from there only citation strings go to CourtListener. The rest of your draft text is not sent.` The existing docs test matches `Verify sends only citation records to this app's own server` and `from there only citation strings go to CourtListener`, and both still match. Any in-app privacy copy that says only citation strings leave the browser changes in the task that adds the route field (task 3.3). | Principle 3 as Requirement 5, criterion 6 states it. |
+| D13 | `cited-name.ts` runs the strict read first and, only when it finds nothing, a tolerant read over a larger token set (Components and Interfaces, "Engine: the cited name"). `party.ts`, `case-name.ts`, the Segmenter and quote attachment are unchanged. | The Party_Run rule serves quote attachment and segmentation, so widening it would move properties that must stay green unedited. A second reader in the one new module has no such reach. |
+| D14 | `handleLookupCitations` in `packages/courtlistener-mcp/src/tools/lookup-citations.ts` already builds a Document from each input string and passes the records (a spread of `r`, so `r.citation.caseName` travels) to `lookup`. It therefore reports `wrong_case` once `lookup` applies the rule (D7). The one code change is that `describeDoc` adds `caseName` to each Full_Citation it describes, when there is one. There is no output schema and no switch over statuses in that package, so nothing else changes. | Requirement 5, criteria 12 and 13. An earlier version of this design said the MCP tool builds records without a `caseName`; that was wrong. |
 
 ## Architecture
 
@@ -84,10 +86,11 @@ The first two steps are the existing cache-then-gate flow. The new step is the l
 
 | Area | Packages and files | Requirements |
 | ---- | ------------------ | ------------ |
-| Extractor and Document | `packages/engine/src/types.ts`, `citations/cited-name.ts` (new), `citations/extract.ts`, `anchor.ts`, `verification.ts`, `issues.ts` | 1, 2 |
+| Extractor and Document | `packages/engine/src/types.ts`, `citations/cited-name.ts` (new; strict and tolerant read), `citations/extract.ts`, `anchor.ts`, `verification.ts`, `issues.ts`. `party.ts` and `case-name.ts` do not change. | 1, 2 |
 | Reveal Codes form | `packages/engine/src/codes/syntax.ts`, `lex.ts`, `decode.ts`, `decode-types.ts`, `build.ts`, `check-citations.ts`, `render.ts` | 3 |
 | Name rule | `packages/verifier/src/name-expansion.ts`, `name-normalise.ts`, `name-initials.ts`, `name-match.ts` (all new) | 4 |
 | Verifier rule | `packages/verifier/src/clusters.ts`, `judge.ts`, `link.ts` (new), `lookup.ts`, `index.ts`, `fixtures.ts`, `package.json` exports | 5 |
+| MCP tool | `packages/courtlistener-mcp/src/tools/lookup-citations.ts` (`describeDoc` adds `caseName`), `src/server.ts` (tool description) | 5 |
 | Pane, page, Issues, Resolved list | `apps/web/src/pane/*`, `editor/marks.ts`, `components/issues-list.tsx`, `issues-region.tsx`, `export-issues.tsx`, `resolved-list.tsx` (new), `use-verify.ts`, `client/*`, `server/verify-route.ts` | 6, 7 |
 | Statement and Appendix | `packages/export/src/wording.ts`, `render-statement.ts`, `statement-parts.ts`, `types.ts` | 8 |
 | Sentinel | `crew/sentinel/src/status-text.ts`, `findings.ts` | 9 |
@@ -113,9 +116,51 @@ The steps, in order:
 1. **The tail comma.** Walk left from `start` over whitespace only. The code unit before that run must be `,`. Call its offset `c`. Otherwise return `undefined` (Requirement 1, criterion 2: "only whitespace lies between the closing comma and the start").
 2. **The Case_Name.** `s = partyStartFor(text, c)`. When `s` is not `null` and `isCaseName(text, s, c + 1)` is true, return `text.slice(s, c)`. `partyStartFor` strips Signals and the lead-ins `In`, `As`, `Under`, `Following`, `Applying` and `The court in` through the Party_Stop_List, so criterion 3 needs no new list. The semicolon of a string cite stops the Party_Run because the token before the name is not a Capitalised_Word, so criterion 5 needs no new rule.
 3. **The In_Re_Name.** Otherwise look for the last occurrence of `In re ` or `In Re ` in `text[c − 86 .. c)` that starts at offset 0 or after a whitespace code unit or `(`. Let `n` be the text between that occurrence's `re ` and `c`. When `isPartyName(text, n.start, c)` is true, return `text.slice(occurrence, c)`. The window is `MAX_PARTY` plus the six code units of `In re `. Commas inside the name are allowed because `isPartyName` allows them, which is what Requirement 1, criterion 4 needs for `In re Air Crash Disaster Near New Orleans, LA`.
-4. Otherwise return `undefined`.
+4. **The Tolerant_Read.** Only when steps 2 and 3 return nothing, run the tolerant read below on the same tail comma `c` and return its result, if any (Requirement 1, criteria 13 and 14).
+5. Otherwise return `undefined`.
 
-The returned string has no closing comma and no lead-in word. The function reads only `text[start − 170 .. start)` and never throws.
+Steps 2 and 3 are the Strict_Read. Their result is final: when they find a name, step 4 never runs and never replaces it (Requirement 1, criterion 15). The returned string has no closing comma and no lead-in word. The function reads only `text[start − 170 .. start)` and never throws. `citedNameFor` stays under 40 lines by calling three functions of the module, `tailComma`, `strictName` and `tolerantName`. If the module nears 300 lines, `tolerantName` and its helpers move to a new sibling `cited-name-tolerant.ts`; no existing file other than `extract.ts` and `anchor.ts` changes.
+
+#### The Tolerant_Read
+
+The tolerant read exists because the Party_Run automaton of `party.ts` accepts only Capitalised_Words, Legal_Abbreviations and Connectors. A name such as `Alvarez v. Cascade Residential Mgmt., LLC` stops it at `Mgmt.,`, so it reads no name and the citation would pass on existence alone (D11). `party.ts` and `case-name.ts` cannot be widened, because quote attachment and sentence segmentation use them and their properties must stay green unedited. The tolerant read is a second reader in `cited-name.ts` over a larger token set.
+
+**Scan.** Starting at the tail comma `c`, read tokens right to left. Tokens are separated by exactly one space (U+0020). A token is a maximal run of code units that holds no space and no line break. Accept a token when it is one of:
+
+| Class | Rule | Examples |
+| ----- | ---- | -------- |
+| Name_Token | `^\p{Lu}[\p{L}\p{N}'’.-]*$`. When the token ends in `.` it may carry one trailing comma, which is part of the name as written. | `Cascade`, `Mgmt.`, `Mgmt.,`, `Co.,`, `U.S.`, `Dep't`, `Ass'n`, `Comm'r`, `Int'l`, `Nat'l`, `Gov't` |
+| Digits | `^[0-9]+$` | `1199` |
+| Connector | exactly one of `of`, `the`, `and`, `for`, `&`, `de`, `la` | `of`, `&` |
+| Versus | exactly `v.`, accepted once | `v.` |
+| In re pair | lowercase `re` directly right of `In`. Both tokens are taken and the scan ends. (`Re` after `In` is a Name_Token and needs no rule.) | `In re` |
+
+The scan stops at the first token that is not accepted, at a line break (the code unit before the token is a line break, or is a space that follows a line break or another space), at a second `v.`, and when taking the next token would make the name longer than 164 code units (`MAX_CASE_NAME − 1`). The 164 limit keeps every `caseName`, from either read, under the 200 code unit cap of the verify route (Requirement 5, criterion 10), so the Extractor can never cause a 400 for a whole run.
+
+**Trim.** From the leftmost accepted token, remove leading Party_Stop_List entries and Connectors in the way `strippedWordIndex` does in `party.ts` (the exported `PARTY_STOP_LIST` and `CONNECTORS` constants are read; the file is not changed). This removes `See`, `Cf.`, `In`, `As`, `Under` and the other lead-ins, so the result carries no lead-in word (Requirement 1, criterion 3).
+
+**Accept.** The trimmed text, up to `c`, is the `caseName` only when it holds `v.` with at least one token to its left and one to its right, or begins with `In re` or `In Re` followed by at least one token. Otherwise there is no name and the key is absent (Requirement 1, criterion 14).
+
+**What the scan reads in the worked texts.**
+
+| Text before the tail comma | Tokens read, right to left | `caseName` |
+| -------------------------- | -------------------------- | ---------- |
+| `…asks for an accommodation. Alvarez v. Cascade Residential Mgmt., LLC` (Demo_Motion) | `LLC`, `Mgmt.,`, `Residential`, `Cascade`, `v.`, `Alvarez`; stop at the lowercase `accommodation.` | `Alvarez v. Cascade Residential Mgmt., LLC` |
+| `…is in writing. Okafor v. Lindqvist Props.` (Demo_Motion) | `Props.`, `Lindqvist`, `v.`, `Okafor`; stop at the lowercase `writing.` | `Okafor v. Lindqvist Props.` |
+| `The Court said so in Twombly. Alvarez v. Cascade Residential Mgmt., LLC` | the six tokens above, then `Twombly.` (a Name_Token that ends in a period); stop at the lowercase `in` | `Twombly. Alvarez v. Cascade Residential Mgmt., LLC` |
+| `See Dep't of Homeland Sec. v. Regents of the Univ. of Cal.` after a line break | `Cal.`, `of`, `Univ.`, `the`, `of`, `Regents`, `v.`, `Sec.`, `Homeland`, `of`, `Dep't`, `See`; stop at the line break; trim removes `See` | `Dep't of Homeland Sec. v. Regents of the Univ. of Cal.` (the same string whichever rule reads it) |
+| `Smith v. Jones v. Brown Mgmt.` | `Mgmt.`, `Brown`, `v.`, `Jones`; stop at the second `v.` | `Jones v. Brown Mgmt.` |
+| `Cascade Residential Mgmt., LLC` after a line break | `LLC`, `Mgmt.,`, `Residential`, `Cascade`; stop at the line break | none: no `v.` |
+| `(Alvarez v. Cascade Mgmt.` | `Mgmt.`, `Cascade`, `v.`; stop at `(Alvarez` | none: nothing to the left of `v.` |
+
+The third row is the sentence-boundary case. The extra word `Twombly.` joins the first party only, and the second party's words (`cascade residential management`, with `llc` dropped) are exactly those of the name as written, so the comparison of the right-hand party is unaffected.
+
+**Why extra words on the left are safe, and what is not claimed.**
+
+- *Scope of the tolerant read.* It runs only where the Strict_Read found nothing. For every citation the strict rule reads, `caseName` is unchanged by this feature (Requirement 1, criterion 15).
+- *Claim made (extension).* Take a name N that the strict rule reads in full, and suppose the tolerant scan, applied to the same text, accepted extra tokens X to its left (for example the last word of the previous sentence). The only ` v. ` is inside N, so X joins the first party and nothing else changes: the second party and the found words are the same. `namesMatch` needs, for each party, one shared Normalised_Word or one Initialism_Match, and each is an "exists" condition over the party's words and over the windows of its consecutive words. Prepending tokens keeps every old word and every old window and adds new ones. So if N matches, X plus N matches. There is one exception, Joined_Letters: if X ends in a single-letter token and the first party begins with spaced single-letter tokens, normalisation joins the two runs into one word (`A. U. S. Steel` joins `a u s` to `aus`, and the old `us` is lost). That needs a one-letter token directly before a spaced initial group, which is rare. An Override clears it.
+- *Claim not made (truncation).* Neither read is a superset of the name the author wrote. Both stop at the first token they cannot read. If that token lies inside the first party (`Doe, Roe v. Smith Mgmt.` stops at `Doe,`, giving `Roe v. Smith Mgmt.`), the first party loses words and a match can become a mismatch. The strict rule behaves the same way, and the tolerant read adds no new case of it beyond names the strict rule did not read at all.
+- *Claim not made (no new `wrong_case`).* Where the Strict_Read reads no name, the tolerant read newly produces a `caseName`. A citation that was `verified` because it had no `caseName` may therefore become `wrong_case`. That is the intended detection (`Alvarez v. Cascade Residential Mgmt., LLC, 556 U.S. 662` is now `wrong_case`, not `verified`). It is limited to citations with a written name that the strict rule cannot read, and an Override clears each one.
 
 `extract.ts` changes in one place. `toCitation(text, m)` adds `caseName` for a Full_Citation, with a conditional spread so the field is absent and never `undefined`:
 
@@ -232,7 +277,7 @@ A party with no Normalised_Word is skipped; every other party must share a word 
 
 **Initialism_Match** (`initialismMatch(a, b)`, criterion 10). `initialisms(joined)` removes the Initials_Skip_Words (`of`, `and`, `the`, `for`) from `joined`, then returns the set of initials of every window of two or more consecutive remaining words. Initials are taken from `joined`, so a Dropped_Word such as `corp` or `v` still counts as a word, and only the four skip words are skipped. The candidates on one side are its `words` plus its `joined` words that are not Dropped_Words, of at least two letters. The match holds when a candidate of `a` is in `initialisms(b.joined)`, or a candidate of `b` is in `initialisms(a.joined)`. Adding the `joined` words as candidates lets a cited `US` (expanded to `united states` in `words`) still match the initials of `Union Steel`. A name of n words has O(n²) windows; the cited name is capped at 200 code units by the route, so this is bounded.
 
-**Name_Expansion_Table, final entries** (criteria 3 and 4). Every key is punctuation-free and lower-case. No key stands for two different words. The table holds exactly the seventeen entries that Requirement 4 requires:
+**Name_Expansion_Table, final entries** (criteria 3 and 4). Every key is punctuation-free and lower-case. No key stands for two different words. The table holds exactly the thirty entries that Requirement 4, criterion 4 requires: the seventeen of the first draft and the thirteen that name-style abbreviations such as `Mgmt.`, `Props.`, `Ass'n`, `Int'l` and `Nat'l` need.
 
 | Key | Expansion | Key | Expansion |
 | --- | --------- | --- | --------- |
@@ -244,9 +289,15 @@ A party with no Normalised_Word is skipped; every other party must share a word 
 | `educ` | `education` | `fedn` | `federation` |
 | `ins` | `insurance` | `socy` | `society` |
 | `mfg` | `manufacturing` | `ctr` | `center` |
-| `sys` | `system` | | |
+| `sys` | `system` | `hosp` | `hospital` |
+| `mgmt` | `management` | `auth` | `authority` |
+| `assn` | `association` | `cnty` | `county` |
+| `intl` | `international` | `commn` | `commission` |
+| `natl` | `national` | `props` | `properties` |
+| `bros` | `brothers` | `cos` | `companies` |
+| `univ` | `university` | `assocs` | `associates` |
 
-I add no further entries. The rule is lenient (one shared word per party), so an unlisted abbreviation fails a match only when a party consists of nothing else, which is rare. A later entry needs a requirement change so that the "no key stands for two words" check stays true. `ins` is a known near-collision (`INS` is also an agency's initials), and it stays because the requirement lists it. The Initialism_Match covers the agency reading.
+The apostrophe contractions of the Tolerant_Read reach these keys through normalisation step 2, which deletes the apostrophe: `Dep't` gives `dept`, `Ass'n` gives `assn`, `Comm'r` gives `commr`, `Comm'n` gives `commn`, `Int'l` gives `intl`, `Nat'l` gives `natl` and `Gov't` gives `govt`. No expansion is another entry's key, so expansion is one pass. The rule is lenient (one shared word per party), so an unlisted abbreviation fails a match only when a party consists of nothing else, which is rare. A later entry needs a requirement change so that the "no key stands for two words" check stays true. `ins` is a known near-collision (`INS` is also an agency's initials), and it stays because the requirement lists it. The Initialism_Match covers the agency reading.
 
 **Dropped_Words** (Glossary): `v, vs, in, re, the, of, and, et, al, ex, rel, inc, co, corp, corporation, company, llc, ltd, lp, llp, plc, na`. **Initials_Skip_Words**: `of, and, the, for`.
 
@@ -263,6 +314,8 @@ I add no further entries. The rule is lenient (one shared word per party), so an
 | `Petersen v. Iran Air` | `United States of America v. ISS Marine Services, Inc.` | `petersen`: not in the pool, and `petersen` has one word so it has no window. | not reached | `false` |
 | `Miller v. United Airlines, Inc.` | `Greenleaf v. Garlock, Inc.` | `miller`: not in the pool. | not reached | `false` |
 | `Smith v. Jones` | found names: `Smith v. Brown` | `smith`: in the pool. | `jones`: not in the pool | `false` |
+| `Dep't of Homeland Sec. v. Regents of the Univ. of Cal.` | `Department of Homeland Security v. Regents of Univ. of Cal.` | `dep't` loses its apostrophe to give `dept`, a table key, so `joined` is `dept of homeland sec` and `words` is `department homeland sec` (`of` dropped). The found pool is `department homeland security regents university cal` (`univ` expands to `university`; `of` and `v` dropped). `department` is in the pool, so the party shares a word. | `regents of the univ of cal` gives `regents university cal`. `regents` is in the pool. | `true` (no initialism needed; `sec` and `security` do not match each other, and the rule does not require them to) |
+| `Alvarez v. Cascade Residential Mgmt., LLC` | `Ashcroft v. Iqbal` | `alvarez`: not in the pool. | not reached (`mgmt` would give `management`, `llc` is dropped) | `false` |
 
 A name that matches only through `case_name_full` or `case_name_short` is the sixth row's shape: the found array holds the three Found_Names and the pool is their union. The Requirement 13, criterion 5 example test uses a recorded-style entry whose `case_name` alone would fail and whose `case_name_full` matches.
 
@@ -322,7 +375,7 @@ export type DisplayInfo = Readonly<{
 
 `isSafeAbsoluteUrl(s)` is `typeof s === "string" && s.startsWith("/") && !s.startsWith("//")` (criterion 8). `combineParallel`, `map-status.ts`, `chunk.ts`, `bucket.ts`, `transport.ts` and `request.ts` do not change.
 
-**`lookupWithInfo`** wraps the existing flow. The request body is built by `buildLookupRequest(deps, lines)` from Citation_Lines, so it is byte-for-byte the body before this feature (criterion 6, Property 11). The `lookup` wrapper returns `.results`, so the Sentinel's `reverify` and the MCP tool call the same function as before. The MCP tool builds records without a `caseName`, so it reports `verified` as before (criterion 12).
+**`lookupWithInfo`** wraps the existing flow. The request body is built by `buildLookupRequest(deps, lines)` from Citation_Lines, so it is byte-for-byte the body before this feature (criterion 6, Property 11). The exported `lookup` is the wrapper `(records, deps) => lookupWithInfo(records, deps).then((o) => o.results)`, so **`lookup` applies the comparison**: it runs the same cache read, request, `resultsForRecords` and `judgeRecords` steps and drops only the Display_Info (criterion 14). The Sentinel's `reverify` and the MCP tool call `lookup`, so both receive `wrong_case` through it with no change to the call.
 
 **`link.ts`** (browser-safe, no imports; exported as `@reveal-codes/verifier/link`):
 
@@ -336,6 +389,26 @@ export function courtListenerLink(clusterId: string, absoluteUrl?: string): stri
 `courtListenerLink` returns `null` unless `clusterId` is a string of ASCII digits (`/^[0-9]+$/`). Otherwise it returns `COURTLISTENER_ORIGIN + absoluteUrl` when `isSafeAbsoluteUrl(absoluteUrl)`, and `COURTLISTENER_ORIGIN + "/opinion/" + clusterId + "/x/"` when not (Requirement 7, criterion 4). The origin is a constant, so a response can never point the link at another host (Property 13).
 
 **The route** (`apps/web/src/server/verify-route.ts`). `isFullRecord` gains one check: when `citation` has a `caseName` key, it must be a string of at most 200 code units, else `parseVerifyBody` returns the existing `BAD_BODY` (400, `Request body is not valid.`) (criterion 10). The handler calls `lookupWithInfo` and answers `200` with `{ results: [...], info: [...] }` (D4). The client guard in `client/api.ts` accepts the five statuses, requires `wrong_case` to carry a non-empty `clusterId` and `foundName` and an integer `foundYear` from 1000 to 9999 when present, and treats any other status as a shape error (criterion 11). It checks each `info` item with `isDisplayInfo`.
+
+### MCP: `lookup_citations` (Requirement 5, criteria 12 and 13)
+
+`packages/courtlistener-mcp/src/tools/lookup-citations.ts` builds a Document from each input string with `createDocument`, so the Extractor reads the name written in the string. `prefixed` spreads each Full_Record (`{ ...r, key }`), which keeps `r.citation.caseName`, and passes the records to `lookup`. Because `lookup` applies the rule (D7), the tool reports `wrong_case` with no change to this flow. The only code change is in `describeDoc`, which adds the name the Extractor read to each citation it describes:
+
+```ts
+const citations = doc.citations.map((r, n) => ({
+  index: n,
+  text: r.citation.text,
+  start: r.citation.start,
+  end: r.citation.end,
+  kind: r.kind,
+  ...(r.citation.caseName === undefined ? {} : { caseName: r.citation.caseName }),
+  result: r.kind === "other" ? null : verificationOf(doc, r.key),
+}));
+```
+
+The spread keeps the key absent when there is no name (Requirement 5, criterion 13), and a Short_Form or an Other_Reference never has one. `setVerification` accepts `wrong_case` through the Engine's new checker, and a Short_Form reports its target's `wrong_case` through `verificationOf`, so the tool needs no other change. The package has no output schema and no `switch` over statuses (the only status literals are in `check-quote.ts`, which is the quote status and unrelated), so nothing else needs an exhaustive-case edit. `server.ts` gains the words `and the case name read before each full citation` in the tool description. The tool sends CourtListener the Citation_Lines only, as before.
+
+Two outcomes follow for the recorded fixtures, which both tests run against. `Henderson v. Pacific Housing Authority, 556 U.S. 662, 678 (2009)` gives `{ status: "wrong_case", clusterId: "145875", foundName: "Ashcroft v. Iqbal", foundYear: 2009 }`. `556 U.S. 662` alone has no name and gives `{ status: "verified", clusterId: "145875" }`. The existing tests of the package keep passing unedited: they match with `toMatchObject` or read statuses only, and `See Ashcroft v. Iqbal, 556 U.S. 662, 678 (2009).` still resolves to `verified` because its name matches.
 
 ### Web: Pane, page underline and tables (Requirement 6)
 
@@ -397,16 +470,16 @@ Petersen v. Iran Air, 905 F. Supp. 2d 121 (D.D.C. 2012)
 Miller v. United Airlines, Inc., 174 F.3d 366, 371-72 (2d Cir. 1999)
 Zicherman v. Korean Air Lines Co., Ltd., 516 F.3d 1237, 1254 (11th Cir. 2008)
 
-The fourth and fifth citations below share a name. The fourth is invented. The fifth is the Supreme Court's real decision.
+The citation above and the one below share a name. The one above is invented. The one below is the real decision of the Supreme Court.
 
 Zicherman v. Korean Air Lines Co., 516 U.S. 217 (1996)
 
-The sixth is a real decision with a different name, included as a plain comparison.
+A second real decision, for comparison:
 
 Chambers v. NASCO, Inc., 501 U.S. 32 (1991)
 ```
 
-Each Case_Name starts a line, so the Party_Run stops at the line break (`party.ts` reads tokens across single spaces only). The first line holds `Mata v. Avianca, Inc., No. 22-cv-1461`, which has no reporter and is not a citation. The wording says the fourth and fifth share a name and that one is invented, and says nothing that implies the brief cited the fifth or the sixth (criterion 4). One caveat: "The fourth and fifth citations below" is the author's wording and is final only after the example test of criterion 5 passes against the real Extractor; if the Extractor reads a seventh citation anywhere, the text changes, not the rule.
+The first paragraph is the exact first line of Requirement 10, criterion 1, on one line, followed by one blank line. Each citation sits on its own line after a blank line, so both reads stop at the line break and neither reaches back into the first paragraph or into the explanatory sentences. The first paragraph holds `Mata v. Avianca, Inc., No. 22-cv-1461 (S.D.N.Y. 2023)` and `ECF 54 at 7`, which have no reporter and are not Full_Citations. The Tolerant_Read runs only before a Full_Citation, so that paragraph is never scanned, and the Extractor example test asserts that it contributes no citation and no `caseName`. For the six citations the Strict_Read and the Tolerant_Read agree: for `Varghese v. China Southern Airlines Co., Ltd.` the tolerant scan reads `Ltd.`, `Co.,`, `Airlines`, `Southern`, `China`, `v.`, `Varghese` and stops at the line break, which is the same string. The wording says the two Zicherman citations share a name and that the first is invented, and says nothing that implies the brief cited the fifth or the sixth (criterion 4). The text is final only after the example test of criterion 5 passes against the real Extractor. If any line reads differently from the six expected citations and `caseName` values, the task reports which line and why before it changes the text (Requirement 10, criterion 15).
 
 `apps/web/scripts/copy-demo.ts` copies the sample byte for byte to `apps/web/public/avianca-citations.txt`. With no argument it copies both files; with explicit arguments it copies one pair, as today, so its existing tests keep their meaning. `.gitignore` gains the second public file next to `demo-motion.txt`.
 
@@ -546,13 +619,25 @@ Henderson and Ashcroft share one lookup line. They are two records, each judged 
 | ------------------- | ---- | --------------- | ---- | ------ | ---------- | ------- |
 | Ashcroft v. Iqbal, 556 U.S. 662, 678 (2009) | Full | Ashcroft v. Iqbal | 556 U.S. 662 | 200 | Ashcroft v. Iqbal | `verified` |
 | Haines v. Kerner, 404 U.S. 519, 520 (1972) | Full | Haines v. Kerner | 404 U.S. 519 | 200 | Haines v. Kerner | `verified` |
-| Alvarez v. Cascade Residential Mgmt., LLC, 1047 F.3d 212, 219 (5th Cir. 2019) | Full | none (D11) | 1047 F.3d 212 | 404 | none | `not_found` |
+| Alvarez v. Cascade Residential Mgmt., LLC, 1047 F.3d 212, 219 (5th Cir. 2019) | Full | Alvarez v. Cascade Residential Mgmt., LLC (Tolerant_Read, D11) | 1047 F.3d 212 | 404 | none | `not_found`; no comparison |
 | Id. at 221 | Short_Form, target Alvarez | none | not sent | none | none | takes its target's result: `not_found` |
 | Brennan v. Harbor Point Apartments, 1012 F. Supp. 2d 88, 95 (N.D. Tex. 2015) | Full | Brennan v. Harbor Point Apartments | 1012 F. Supp. 2d 88 | 404 | none | `not_found` |
-| Okafor v. Lindqvist Props., 912 F. 4th 33, 41 (5th Cir. 2023) | Full | none (D11) | 912 F.4th 33 | 404 | none | `not_found` |
+| Okafor v. Lindqvist Props., 912 F. 4th 33, 41 (5th Cir. 2023) | Full | Okafor v. Lindqvist Props. (Tolerant_Read, D11) | 912 F.4th 33 | 404 | none | `not_found`; no comparison |
 | Iqbal, 556 U.S. at 679 | Short_Form, target Ashcroft | none | not sent | none | none | takes its target's result: `verified` |
 
 The two statutes of the motion (`42 U.S.C. § 3617`, `Fed. R. Civ. P. 12(b)(6)`, `Fed. R. Civ. P. 15(a)(2)`) are Other_References: `[REF]`, never verified, no `caseName`. The fabricated Iqbal quotation keeps its `QUO ✘` as before.
+
+### The Tolerant_Read cases (example tests)
+
+These rows are not in the Demo_Motion. Each has one example test (Requirement 12, criterion 7; Requirement 13, criterion 5). The first two run against the recorded `556 U.S. 662` fixture. The third calls `namesMatch` on the `caseName` the Extractor returns.
+
+| Text as written | Cited name read | Line | Found name | Outcome |
+| --------------- | --------------- | ---- | ---------- | ------- |
+| `Alvarez v. Cascade Residential Mgmt., LLC, 556 U.S. 662, 678 (2009)` | `Alvarez v. Cascade Residential Mgmt., LLC` | 556 U.S. 662 | Ashcroft v. Iqbal (145875), 2009 | `wrong_case` (`alvarez` is not in the pool `ashcroft iqbal`). Before this feature it was `verified`. |
+| `The Court said so in Twombly. Alvarez v. Cascade Residential Mgmt., LLC, 556 U.S. 662, 678 (2009)` | `Twombly. Alvarez v. Cascade Residential Mgmt., LLC` | 556 U.S. 662 | Ashcroft v. Iqbal (145875), 2009 | `wrong_case`. The first party now holds `twombly alvarez`, the second party's words are unchanged (`cascade residential management`), and neither is in the pool. |
+| `See Dep't of Homeland Sec. v. Regents of the Univ. of Cal., 591 U.S. 1 (2020)`, name only | `Dep't of Homeland Sec. v. Regents of the Univ. of Cal.` | not looked up | `Department of Homeland Security v. Regents of Univ. of Cal.` | `namesMatch` is `true`, by the hand work in "Name-match examples". |
+
+The hand work for the third row found no gap. Both parties share a word without any initialism, because `dept` is a table key and `univ` expands to `university`. Without the restored entries the first party would still match through `homeland` and the second through `regents`.
 
 ### The Avianca sample (six citations, in order)
 
@@ -597,6 +682,9 @@ The task that changes each of these lists it in the BUILD_LOG entry. Every other
 | `apps/web/test/` verify-summary tests and any test that enumerates the five statuses | `tallyDocument` and the `Citations:` line gain `wrong_case`. |
 | Tests that enumerate the Legend entries or the failing opener set | The Legend gains one entry and `FAILING_OPENERS` one member. |
 | `packages/verifier/test/fixtures.test.ts`, `demo-corpus.test.ts` | They enumerate the manifest and fixtures. Six entries are added. The task re-checks each count they assert. |
+| `apps/web/test/static/docs.test.ts` | One assertion is added: the "What leaves your machine" section says a record includes the case name written before the citation. The two existing assertions about Verify (`Verify sends only citation records to this app's own server` and `from there only citation strings go to CourtListener`) still match the new sentence and are not edited. |
+
+The existing tests of `packages/courtlistener-mcp` pass unedited: they match with `toMatchObject` or read statuses of citation strings that carry no name.
 
 ## Correctness Properties
 
@@ -628,9 +716,9 @@ The numbers below are scoped to this spec. Each property lives in a file named `
 
 ### Property 3: The cited name is read back
 
-*For any* generated Case_Name or In_Re_Name (including names with commas), any lead-in from the Signal and lead-in lists, any run of whitespace between the closing comma and the citation, and any Full_Citation (reporter, parallel or database), `extract` returns for that citation a `caseName` equal to the name as written, without the closing comma and without the lead-in; for a citation in a string cite after a semicolon the same holds; for a Short_Form, an Other_Reference, or a Full_Citation not immediately preceded by a name, the `caseName` key is absent.
+*For any* generated Case_Name or In_Re_Name (including names with commas, names with unlisted dotted abbreviations such as `Mgmt.` and `Props.`, and names with apostrophe contractions such as `Dep't`, `Ass'n`, `Comm'r`, `Int'l`, `Nat'l` and `Gov't`), any lead-in from the Signal and lead-in lists, any run of whitespace between the closing comma and the citation, any text before the name that ends at a line break, the start of the text, or a lowercase word that is not one of `of`, `the`, `and`, `for`, `de` and `la` (so that the left edge of the name is the left edge of the scan), and any Full_Citation (reporter, parallel or database), `extract` returns for that citation a `caseName` equal to the name as written, without the closing comma and without the lead-in; the `caseName` is at most 164 code units; for a citation in a string cite after a semicolon the same holds; for a Short_Form, an Other_Reference, or a Full_Citation not immediately preceded by a name (or preceded by a name whose scan holds no `v.` with a token on each side), the `caseName` key is absent.
 
-**Validates: Requirements 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8**
+**Validates: Requirements 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.13, 1.14, 1.15**
 
 ### Property 4: A kept citation keeps its name
 
@@ -664,9 +752,9 @@ The numbers below are scoped to this spec. Each property lives in a file named `
 
 ### Property 9: The verifier rule
 
-*For any* lookup entry, any `caseName` (or none) on the record and any cluster data (with or without `case_name`, `case_name_full`, `case_name_short`, `date_filed`), the result of `lookupWithInfo` for a record that resolves to exactly one cluster is `verified` when the record has no `caseName`, or the cluster has no non-blank `case_name`, or `namesMatch(caseName, foundNames)` is true, and otherwise `wrong_case` with that cluster's id, its `case_name` as `foundName` and `foundYear` from `date_filed`; the result for an entry with status 300, 400, 404 or 429 or malformed data equals the result for the same entry without any `caseName`; two records of one line with different `caseName` values are judged separately; and a Parallel_Citation whose members resolve to different clusters is `ambiguous`.
+*For any* lookup entry, any `caseName` (or none) on the record and any cluster data (with or without `case_name`, `case_name_full`, `case_name_short`, `date_filed`), the result of `lookupWithInfo` for a record that resolves to exactly one cluster is `verified` when the record has no `caseName`, or the cluster has no non-blank `case_name`, or `namesMatch(caseName, foundNames)` is true, and otherwise `wrong_case` with that cluster's id, its `case_name` as `foundName` and `foundYear` from `date_filed`; the result for an entry with status 300, 400, 404 or 429 or malformed data equals the result for the same entry without any `caseName`; two records of one line with different `caseName` values are judged separately; and a Parallel_Citation whose members resolve to different clusters is `ambiguous`; and `lookup` called with the same records and the same fixture `fetch` returns a map equal to the `results` of `lookupWithInfo`.
 
-**Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.5**
+**Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.5, 5.14**
 
 ### Property 10: A cache hit gives the live result
 
@@ -728,7 +816,7 @@ Errors are values in the Engine and the Verifier. Only the app boundary throws.
 
 | Situation | Behaviour |
 | --------- | --------- |
-| `caseName` cannot be read, or the Party_Run is too long (over 80 code units) | `citedNameFor` returns `undefined`; the citation verifies by existence alone, as before this feature. `extract` stays total (Requirement 1, criterion 12). |
+| `caseName` cannot be read by the Strict_Read, or the Party_Run is too long (over 80 code units) | The Tolerant_Read runs. When it also finds no `v.` with a token on each side and no `In re` name, or the name would pass 164 code units, `citedNameFor` returns `undefined`; the citation verifies by existence alone, as before this feature. `extract` stays total (Requirement 1, criterion 12). |
 | A `wrong_case` payload with an empty `clusterId` or `foundName`, or a `foundYear` outside 1000 to 9999 | `setVerification` returns `invalid_verification_result` naming the field and the Document is unchanged. The store counts the pair as `skipped`, and the Verify result line prints its existing "some items were skipped" sentence. |
 | A `[CIT ≠…]` code in an Appendix or autosave with a bad field | `parse` returns `malformed_codes` with rule `bad_field` and the input index. The existing load path shows its existing corrupt-draft notice. |
 | `lookup` entry with status 300, 400, 404, 429 or malformed data | The existing mapping, with no name comparison (Requirement 5, criterion 3). |
@@ -773,14 +861,18 @@ This feature has pure functions with large input spaces (the name rule, the cite
 
 Property 13 sits with the verifier because `link.ts` lives there. Property 18 tests `trimEntry` and the script's writer through an injected `fetch` and an in-memory writer, so it makes no network call.
 
-**Inventory (D9).** `packages/engine/test/inventory.test.ts` and `packages/verifier/test/inventory.test.ts` skip files named `case-match.properties.test.ts`. Each package that holds such a file gains `case-match-inventory.test.ts`, which reads the file and checks that its markers are exactly the numbers in the table above, that each marker has one `fc.assert`, and that its describe title carries `_Requirements:`. The two changed inventory tests are listed in the BUILD_LOG entry (Requirement 13, criterion 9).
+**Inventory (D9).** This design lists exactly eighteen properties, numbered 1 to 18 once each; the table above assigns them as 7 (engine), 7 (verifier), 1 (export), 1 (Sentinel) and 2 (web), which sum to 18. This revision adds no property and renumbers none: the tolerant read extends Property 3, and `lookup` extends Property 9. `packages/engine/test/inventory.test.ts` and `packages/verifier/test/inventory.test.ts` skip files named `case-match.properties.test.ts`. One aggregate inventory test, `apps/web/test/static/case-match-inventory.test.ts` (task 13.6), reads this file and the five property files above. It requires that this file holds exactly eighteen `### Property N` headings numbered 1 to 18, that all eighteen `// Property N` markers are present across the five files, each exactly once and in the package the table assigns it to, that each marker is followed by exactly one `fc.assert(fc.property(...))`, and that each describe title ends in `_Requirements: x.y_`. A missing marker fails the test, so skipping an optional property sub-task is caught at the final checkpoint. The two changed existing inventory tests are listed in the BUILD_LOG entry (Requirement 13, criterion 9).
 
 **Arbitraries** (shared, in `packages/engine/src/testing/arbitraries.ts`, built from fast-check combinators so shrinking works):
 
 | Arbitrary | Produces |
 | --------- | -------- |
-| `arbPartyWords(pool)` | One to four words of 4 to 8 lower-case letters from a pool of letters (`a-m` or `n-z`), capitalised for the written form, never a Dropped_Word or table key |
+| `arbPartyWords(pool)` | One to four words of 4 to 8 lower-case letters from a pool of letters (`a-m` or `n-z`), capitalised for the written form, never a Dropped_Word or one of the thirty table keys |
 | `arbCaseName(pool)` | `<Party> v. <Party>` over `arbPartyWords`, with an optional Entity_Suffix |
+| `arbUnlistedAbbreviation` | A capital letter, three to six lower-case letters and a period, filtered against the Engine's Legal_Abbreviation index (`Mgmt.`, `Props.`, `Hldgs.`); optionally followed by a comma when it is not the last word of the name |
+| `arbContraction` | One of `Dep't`, `Ass'n`, `Comm'r`, `Int'l`, `Nat'l`, `Gov't`, or a capital letter, lower-case letters, `'` and one lower-case letter |
+| `arbTolerantCaseName(pool)` | `arbCaseName` whose party words are drawn from `arbPartyWords`, `arbUnlistedAbbreviation` and `arbContraction`, and Connectors from `of`, `the`, `and`, `for`, `&`, `de`, `la`; at most 164 code units |
+| `arbNameBoundary` | The text before a name: empty, a line break, or a lowercase word that is not a Connector followed by one space (optionally with a period); it makes the left edge of the scan the left edge of the name |
 | `arbInReName` | `In re <Name>` with optional commas inside the name, at most 80 code units |
 | `arbLeadIn` | The empty string, a Signal, `In`, `As`, `Under`, `Following`, `Applying`, `The court in` |
 | `arbNameVariant(name)` | A pair of the cited and found forms with an expected outcome: identity, case change, punctuation removal, table expansion (both directions), initialism of a party of at least three words (D10) |
@@ -801,7 +893,10 @@ Example tests cover the exact cases in the requirements and the planted errors i
 - The three name pairs and the `U. S.` form, and a name that matches only through `case_name_full` or `case_name_short`.
 - The render and parse round trip of `[CIT ≠]` for the Ashcroft payload, the exact full and display strings, and the tamper cases (`bad_field`, `short_form_code`).
 - An In_Re_Name with commas read from text written for the test (Requirement 1, criterion 4).
-- The Extractor on the Avianca sample returns six Full_Citations, each with its own `caseName`, and none from the first line.
+- The Tolerant_Read: the Demo_Motion's Alvarez and Okafor citations carry `Alvarez v. Cascade Residential Mgmt., LLC` and `Okafor v. Lindqvist Props.`; a name after a sentence that ends just before it carries the extra word on the left and the right-hand party words unchanged; a scan with no `v.`, with nothing left of `v.`, with a second `v.`, or that meets a line break gives no `caseName`; a Strict_Read name is never replaced; the longest accepted name is 164 code units.
+- The Extractor on the Avianca sample returns exactly six Full_Citations, each with its own `caseName`, none from the first paragraph (`Mata v. Avianca, Inc., No. 22-cv-1461 (S.D.N.Y. 2023)`, `ECF 54 at 7`), and no `caseName` taken from across a blank line.
+- `Alvarez v. Cascade Residential Mgmt., LLC, 556 U.S. 662, 678 (2009)` gives `wrong_case` against the recorded `556 U.S. 662` fixture, and `Dep't of Homeland Sec. v. Regents of the Univ. of Cal.` matches `Department of Homeland Security v. Regents of Univ. of Cal.` (the hand work is in "Name-match examples").
+- The MCP server (task 3.13, through the package's harness and recorded fixtures): `lookup_citations` on `Henderson v. Pacific Housing Authority, 556 U.S. 662, 678 (2009)` returns `wrong_case` with `foundName` `Ashcroft v. Iqbal` and `foundYear` 2009; on `556 U.S. 662` alone it returns `verified`; each Full_Citation in its output carries the `caseName` that was read, and the key is absent for a citation with no name.
 - The Statement paragraph and Status cell, the Overrides table, the DOCX builder and the `/print` view.
 - The Issues row text and link (`href`, `target`, `rel`), the link built from `clusterId` when no `absoluteUrl` is at hand, the row after a reload, and the Export dialog row.
 - The Resolved list: hidden before a Verify_Run, one row per `verified` citation, no effect on the blocking count, the Export button, the Next_Step or the `No issues.` line.
