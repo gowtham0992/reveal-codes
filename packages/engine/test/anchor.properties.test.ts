@@ -229,7 +229,13 @@ const citationSurvives = (
   const [a, b] = [r.citation, n.citation];
   if (a.end - a.start !== b.end - b.start || a.text !== b.text) return false;
   if (r.kind === "full") {
-    return n.kind === "full" && structuralEqual(a.value, b.value) && a.normalised === b.normalised;
+    // case-match Req 1.11: a changed Cited_Name makes the citation fresh.
+    return (
+      n.kind === "full" &&
+      structuralEqual(a.value, b.value) &&
+      a.normalised === b.normalised &&
+      a.caseName === b.caseName
+    );
   }
   if (r.kind !== "short" || n.kind !== "short") return false;
   if (a.value.kind !== "short" || b.value.kind !== "short") return false;

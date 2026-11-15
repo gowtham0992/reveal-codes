@@ -4,7 +4,7 @@
  * the start Offset and the text as written. Kept here so extract.test.ts
  * stays under the 300-line module limit.
  */
-import type { ExtractedCitation, ExtractedQuote } from "../../src/types";
+import type { ExtractedCitation, ExtractedQuote, Extraction } from "../../src/types";
 
 export const rep = (
   start: number,
@@ -105,4 +105,22 @@ export const pre = (start: number, text: string, citationStart: number): Extract
 export const fol = (start: number, text: string, citationStart: number): ExtractedQuote => ({
   ...pre(start, text, citationStart),
   rule: "following",
+});
+
+/**
+ * `c` without its Cited_Name (case-match Req 13.9). The extraction properties
+ * that predate `caseName` compare every other field through this; the name
+ * itself is checked by case-match Property 3.
+ */
+export function withoutCaseName(c: ExtractedCitation): ExtractedCitation {
+  if (c.caseName === undefined) return c;
+  return Object.fromEntries(
+    Object.entries(c).filter(([k]) => k !== "caseName"),
+  ) as ExtractedCitation;
+}
+
+/** An Extraction with every `caseName` removed. */
+export const withoutCaseNames = (x: Extraction): Extraction => ({
+  citations: x.citations.map(withoutCaseName),
+  quotes: x.quotes,
 });

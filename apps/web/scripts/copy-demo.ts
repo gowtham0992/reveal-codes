@@ -5,8 +5,12 @@ import { fileURLToPath } from "node:url";
 type CopyResult = Readonly<{ ok: true; value: undefined }> | Readonly<{ ok: false; error: string }>;
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const DEFAULT_SRC = resolve(HERE, "../../../packages/engine/fixtures/demo-motion.txt");
-const DEFAULT_DEST = resolve(HERE, "../public/demo-motion.txt");
+const FIXTURES = resolve(HERE, "../../../packages/engine/fixtures");
+const PUBLIC = resolve(HERE, "../public");
+const DEFAULT_PAIRS: readonly (readonly [string, string])[] = [
+  [resolve(FIXTURES, "demo-motion.txt"), resolve(PUBLIC, "demo-motion.txt")],
+  [resolve(FIXTURES, "avianca-citations.txt"), resolve(PUBLIC, "avianca-citations.txt")],
+];
 
 /** Copies the demo motion byte for byte, creating the destination directory. */
 export function copyDemo(src: string, dest: string): CopyResult {
@@ -17,10 +21,17 @@ export function copyDemo(src: string, dest: string): CopyResult {
 }
 
 function main(argv: readonly string[]): number {
-  const result = copyDemo(argv[0] ?? DEFAULT_SRC, argv[1] ?? DEFAULT_DEST);
-  if (result.ok) return 0;
-  process.stderr.write(`copy-demo: ${result.error}\n`);
-  return 1;
+  const [src, dest] = argv;
+  const pairs =
+    src === undefined ? DEFAULT_PAIRS : [[src, dest ?? DEFAULT_PAIRS[0]?.[1] ?? ""] as const];
+  let code = 0;
+  for (const [from, to] of pairs) {
+    const result = copyDemo(from, to);
+    if (result.ok) continue;
+    process.stderr.write(`copy-demo: ${result.error}\n`);
+    code = 1;
+  }
+  return code;
 }
 
 const entry = process.argv[1];

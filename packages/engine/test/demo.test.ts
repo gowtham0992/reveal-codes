@@ -28,14 +28,17 @@ const EXPECTED_CITATIONS = [
   { ...at(787, 803), value: { kind: "other", form: "usc", title: 42, section: "3617" } },
   {
     ...at(962, 986),
+    caseName: "Ashcroft v. Iqbal",
     value: { kind: "reporter", volume: 556, reporter: "U.S.", page: 662, pincite: 678, year: 2009 },
   },
   {
     ...at(1070, 1094),
+    caseName: "Haines v. Kerner",
     value: { kind: "reporter", volume: 404, reporter: "U.S.", page: 519, pincite: 520, year: 1972 },
   },
   {
     ...at(1474, 1508),
+    caseName: "Alvarez v. Cascade Residential Mgmt., LLC",
     value: {
       kind: "reporter",
       volume: 1047,
@@ -49,6 +52,7 @@ const EXPECTED_CITATIONS = [
   { ...at(1581, 1591), value: { kind: "short", form: "id", pincite: 221, targetStart: 1474 } },
   {
     ...at(1704, 1744),
+    caseName: "Brennan v. Harbor Point Apartments",
     value: {
       kind: "reporter",
       volume: 1012,
@@ -61,6 +65,7 @@ const EXPECTED_CITATIONS = [
   },
   {
     ...at(2015, 2048),
+    caseName: "Okafor v. Lindqvist Props.",
     value: {
       kind: "reporter",
       volume: 912,

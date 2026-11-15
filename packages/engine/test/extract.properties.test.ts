@@ -33,6 +33,7 @@ import {
 import { expectPartyExample, PARTY_EXAMPLES } from "./support/party-examples";
 import { arbP49Input, expectPartyForms, isPartyRunRef } from "./support/party-run";
 import { modelQuotes } from "./support/quote-model";
+import { withoutCaseName, withoutCaseNames } from "./support/expected";
 import { arbNoisyText, shifted } from "./support/quote-noise";
 import { sentenceIndex, sentencesOf } from "./support/sentence-index";
 
@@ -57,7 +58,7 @@ describe("extract on constructed text _Requirements: 9.1, 9.3, 9.4, 9.5, 9.6, 12
     const seen: Coverage = new Set();
     fc.assert(
       fc.property(arbTextWithCitations, (v) => {
-        expect(extract(v.text)).toEqual(v.expected);
+        expect(withoutCaseNames(extract(v.text))).toEqual(v.expected);
         record(seen, v);
       }),
       { numRuns: runs().numRuns + COVERAGE_EXAMPLES.length, examples: COVERAGE_EXAMPLES },
@@ -109,7 +110,9 @@ describe("extract quote reference model _Requirements: 13.1, 13.5, 13.6, 13.7, 1
     fc.assert(
       fc.property(arbNoisyText, ({ base, text, shift }) => {
         const got = extract(text);
-        expect(got.citations).toEqual(extract(base).citations.map((c) => shifted(c, shift)));
+        expect(got.citations.map(withoutCaseName)).toEqual(
+          extract(base).citations.map((c) => withoutCaseName(shifted(c, shift))),
+        );
         expect(got.quotes).toEqual(modelQuotes(text, got.citations));
       }),
       runs(),

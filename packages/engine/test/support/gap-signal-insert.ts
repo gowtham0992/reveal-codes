@@ -27,6 +27,7 @@ import {
   canonical,
 } from "../../src/testing/arbitraries";
 import type { FullValue, ReporterValue } from "../../src/types";
+import { withoutCaseName } from "./expected";
 import { shifted } from "./quote-noise";
 import { sentenceIndex, sentencesOf } from "./sentence-index";
 
@@ -90,9 +91,9 @@ export function expectSignalKeepsAttachment(k: P51Case): P51Branch {
   const shift = k.g.length + 1;
   const base = extract(t);
   const got = extract(t2);
-  expect({ t2, citations: got.citations }).toEqual({
+  expect({ t2, citations: got.citations.map(withoutCaseName) }).toEqual({
     t2,
-    citations: base.citations.map((c) => shifted(c, (o) => o + shift)),
+    citations: base.citations.map((c) => withoutCaseName(shifted(c, (o) => o + shift))),
   });
   const xStart = t.length - x.length;
   const attached = base.quotes.some((q) => q.rule === "preceding" && q.citationStart === xStart);

@@ -13,6 +13,7 @@ dist/
 out/
 next-env.d.ts
 apps/web/public/demo-motion.txt
+apps/web/public/avianca-citations.txt
 
 # Environment: never commit secrets, but do commit .env.example
 .env

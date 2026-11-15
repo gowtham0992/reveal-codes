@@ -8,6 +8,8 @@
  * 3. Normalised_Form: for a Full_Citation, `format(value)`, recorded only
  *    when it differs from the text as written (Req 11.2, 11.4). Short_Forms
  *    and Other_References never carry one.
+ * 3b. Cited_Name: for a Full_Citation, `citedNameFor(text, start)`, set only
+ *    when a name is found (never `undefined`).
  * 4. Quote layer: `pairQuoteMarks`, then `attachQuotes` on the linked
  *    citations, which are already sorted by `start`.
  *
@@ -17,6 +19,7 @@
  */
 
 import type { CitationValue, ExtractedCitation, Extraction } from "../types.js";
+import { citedNameFor } from "./cited-name.js";
 import { format } from "./format.js";
 import { linkShortForms } from "./link.js";
 import { attachQuotes, pairQuoteMarks } from "./quotes.js";
@@ -39,7 +42,12 @@ function toCitation(text: string, m: Match): ExtractedCitation {
   const written = text.slice(m.start, m.end);
   const base = { start: m.start, end: m.end, text: written, value: m.value };
   const normalised = normalisedOf(m.value, written);
-  return normalised === undefined ? base : { ...base, normalised };
+  const name = isFull(m.value) ? citedNameFor(text, m.start) : undefined;
+  return {
+    ...base,
+    ...(normalised === undefined ? {} : { normalised }),
+    ...(name === undefined ? {} : { caseName: name }),
+  };
 }
 
 /**

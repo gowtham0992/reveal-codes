@@ -106,6 +106,8 @@ export type ExtractedCitation = Readonly<{
   text: string;
   value: CitationValue;
   normalised?: string;
+  /** The Cited_Name written before a Full_Citation; absent when none applies. */
+  caseName?: string;
 }>;
 
 /** Preceding_Quote (Req 13.1) or Following_Quote (Req 13.8). */

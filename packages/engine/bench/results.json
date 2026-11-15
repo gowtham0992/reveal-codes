@@ -16,32 +16,32 @@
   "scenarios": [
     {
       "scenario": "21.1 insert outside every citation and run extent",
-      "medianMs": 0.43641700000000583,
-      "p95Ms": 0.5216669999999795,
+      "medianMs": 0.5392919999999322,
+      "p95Ms": 3.861791999999923,
       "pass": true
     },
     {
       "scenario": "21.2 insert inside a citation and a run extent",
-      "medianMs": 0.44014549999997143,
-      "p95Ms": 0.5993750000000091,
+      "medianMs": 0.48716650000005757,
+      "p95Ms": 3.1083749999997963,
       "pass": true
     },
     {
       "scenario": "21.3 delete outside every citation",
-      "medianMs": 0.4323339999999689,
-      "p95Ms": 0.5579579999998714,
+      "medianMs": 0.4828334999999697,
+      "p95Ms": 3.201000000000022,
       "pass": true
     },
     {
       "scenario": "21.3 replace outside every citation",
-      "medianMs": 0.4438749999999345,
-      "p95Ms": 0.5281250000000455,
+      "medianMs": 0.5848544999998921,
+      "p95Ms": 2.7978329999996276,
       "pass": true
     }
   ],
   "machine": {
     "nodeVersion": "v22.23.4",
-    "os": "Darwin 27.0.0 arm64",
+    "os": "Darwin 27.2.0 arm64",
     "cpuModel": "Apple M4",
     "totalMemoryBytes": 25769803776
   }

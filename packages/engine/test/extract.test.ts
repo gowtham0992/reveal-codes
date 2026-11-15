@@ -16,6 +16,9 @@ import {
   usc1983,
 } from "./support/expected";
 
+/** `c` with the Cited_Name the Extractor reads before it (case-match Req 1.2). */
+const named = (c: ExtractedCitation, caseName: string): ExtractedCitation => ({ ...c, caseName });
+
 const oneSpan = (text: string): Span[] =>
   text.length === 0
     ? []
@@ -102,7 +105,12 @@ describe("extract _Requirements: 9.1, 9.4, 9.9, 11.2, 11.3, 11.4_", () => {
 
   it("does not let a number in a party name start a LEXIS citation (D22)", () => {
     expect(extract("Smith v. Local 2092 Union, 2023 U.S. Dist. LEXIS 5")).toEqual({
-      citations: [lexis(27, "2023 U.S. Dist. LEXIS 5", true, "U.S. Dist.")],
+      citations: [
+        named(
+          lexis(27, "2023 U.S. Dist. LEXIS 5", true, "U.S. Dist."),
+          "Smith v. Local 2092 Union",
+        ),
+      ],
       quotes: [],
     });
   });
@@ -153,11 +161,19 @@ describe("extract Preceding_Quote attaches _Requirements: 13.1, 8.10, D21_", () 
       [party(14, "Roe, 410 U.S. at 153", "Roe", 410, 153)],
       [pre(1, "the right .", 14)],
     ],
-    ['"the right," Roe v. Wade, 410 U.S. 113 (1973)', [roe1973(26)], [pre(1, "the right,", 26)]],
-    ['"the right." See Roe v. Wade, 410 U.S. 113', [roe113(30)], [pre(1, "the right.", 30)]],
+    [
+      '"the right," Roe v. Wade, 410 U.S. 113 (1973)',
+      [named(roe1973(26), "Roe v. Wade")],
+      [pre(1, "the right,", 26)],
+    ],
+    [
+      '"the right." See Roe v. Wade, 410 U.S. 113',
+      [named(roe113(30), "Roe v. Wade")],
+      [pre(1, "the right.", 30)],
+    ],
     [
       '"the right," See Roe v. Wade, 410 U.S. 113 (1973)',
-      [roe1973(30)],
+      [named(roe1973(30), "Roe v. Wade")],
       [pre(1, "the right,", 30)],
     ],
     [
@@ -165,21 +181,37 @@ describe("extract Preceding_Quote attaches _Requirements: 13.1, 8.10, D21_", () 
       [party(16, "Planned Parenthood, 505 U.S. at 833", "Planned Parenthood", 505, 833)],
       [pre(1, "the right", 16)],
     ],
-    ['"the right" (quoting Roe v. Wade, 410 U.S. 113)', [roe113(34)], [pre(1, "the right", 34)]],
+    [
+      '"the right" (quoting Roe v. Wade, 410 U.S. 113)',
+      [named(roe113(34), "Roe v. Wade")],
+      [pre(1, "the right", 34)],
+    ],
     ['"the right" (citing Casey, 505 U.S. at 833)', [casey833(20)], [pre(1, "the right", 20)]],
-    ['"the right" See, e.g., Roe v. Wade, 410 U.S. 113', [roe113(36)], [pre(1, "the right", 36)]],
-    ['"the right" Cf. Roe v. Wade, 410 U.S. 113', [roe113(29)], [pre(1, "the right", 29)]],
+    [
+      '"the right" See, e.g., Roe v. Wade, 410 U.S. 113',
+      [named(roe113(36), "Roe v. Wade")],
+      [pre(1, "the right", 36)],
+    ],
+    [
+      '"the right" Cf. Roe v. Wade, 410 U.S. 113',
+      [named(roe113(29), "Roe v. Wade")],
+      [pre(1, "the right", 29)],
+    ],
     // D21: the longest Gap_Signal at the gap start, `See also`, leaves a Case_Name.
-    ['"the right" See also Roe v. Wade, 410 U.S. 113', [roe113(34)], [pre(1, "the right", 34)]],
+    [
+      '"the right" See also Roe v. Wade, 410 U.S. 113',
+      [named(roe113(34), "Roe v. Wade")],
+      [pre(1, "the right", 34)],
+    ],
     // Req 8.10: no boundary after `Q.`, so the gap holds only the boundary after `."`.
     [
       '"the right." United States v. John Q. Public, 5 U.S. 1',
-      [marbury1(46)],
+      [named(marbury1(46), "United States v. John Q. Public")],
       [pre(1, "the right.", 46)],
     ],
     [
       '"the right." Compare Roe v. Wade, 410 U.S. 113, with Casey, 505 U.S. at 833',
-      [roe113(34), casey833(53)],
+      [named(roe113(34), "Roe v. Wade"), casey833(53)],
       [pre(1, "the right.", 34)],
     ],
   ])("%s", (text, citations, quotes) => {
@@ -192,13 +224,16 @@ describe("extract Preceding_Quote does not attach _Requirements: 13.1, 13.9, D19
     ['"the right" In Casey, 505 U.S. at 833', [casey833(15)]],
     [
       '"the right," with Casey v. Smith, 5 U.S. 1 (1801)',
-      [rep(34, "5 U.S. 1 (1801)", 5, "U.S.", 1, { year: 1801 })],
+      [named(rep(34, "5 U.S. 1 (1801)", 5, "U.S.", 1, { year: 1801 }), "Casey v. Smith")],
     ],
-    ['"the right" See accord Roe v. Wade, 410 U.S. 113', [roe113(36)]],
-    ['"the right" See Accord Roe v. Wade, 410 U.S. 113', [roe113(36)]],
+    ['"the right" See accord Roe v. Wade, 410 U.S. 113', [named(roe113(36), "Roe v. Wade")]],
+    ['"the right" See Accord Roe v. Wade, 410 U.S. 113', [named(roe113(36), "Roe v. Wade")]],
     // D21: `See` would leave `also See A, Inc. v. A & A,`, a Case_Name; `See also` is tried instead.
-    ['"the right" See also See A, Inc. v. A & A, 5 U.S. 1', [marbury1(43)]],
-    ['"the right ." Cf. Roe v. Wade, 410 U.S. 113', [roe113(31)]],
+    [
+      '"the right" See also See A, Inc. v. A & A, 5 U.S. 1',
+      [named(marbury1(43), "A, Inc. v. A & A")],
+    ],
+    ['"the right ." Cf. Roe v. Wade, 410 U.S. 113', [named(roe113(31), "Roe v. Wade")]],
     ['"the right." It was. 410 U.S. 113', [roe113(21)]],
   ])("%s", (text, citations) => {
     expect(extract(text)).toEqual({ citations, quotes: [] });
@@ -242,7 +277,7 @@ describe("extract Following_Quote and quote ownership _Requirements: 13.5, 13.6,
 
   it('pairs no quote from a `“…"` mixture (13.6)', () => {
     expect(extract('“the right" Roe v. Wade, 410 U.S. 113')).toEqual({
-      citations: [roe113(25)],
+      citations: [named(roe113(25), "Roe v. Wade")],
       quotes: [],
     });
   });
@@ -264,7 +299,7 @@ describe("extract earlier-opening quote pair wins _Requirements: 13.7, 13.10, D2
   it.each<[string, ExtractedCitation[], ExtractedQuote[]]>([
     [
       '"He wrote “no” 410 U.S. 113 today." Roe v. Wade, 410 U.S. 113',
-      [roe113(15), roe113(49)],
+      [roe113(15), named(roe113(49), "Roe v. Wade")],
       [pre(1, "He wrote “no” 410 U.S. 113 today.", 49)],
     ],
     ['"a “b" 410 U.S. 113 c” 5 U.S. 1', [roe113(7), marbury1(23)], [pre(1, "a “b", 7)]],

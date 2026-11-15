@@ -154,7 +154,8 @@ function citationCarries(p: Mapped<CitationRecord>, c: ExtractedCitation, links:
       c.value.kind !== "short" &&
       c.value.kind !== "other" &&
       structuralEqual(prev.value, c.value) &&
-      prev.normalised === c.normalised
+      prev.normalised === c.normalised &&
+      prev.caseName === c.caseName
     );
   }
   return (

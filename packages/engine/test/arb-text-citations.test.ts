@@ -21,6 +21,7 @@ import {
   type GroupRecord,
   type TextWithCitations,
 } from "../src/testing/arbitraries";
+import { withoutCaseNames } from "./support/expected";
 import { runs } from "./support/fc";
 
 const TAGS = [
@@ -54,7 +55,7 @@ describe("arbTextWithCitations _Requirements: 22.1, 22.4_", () => {
     fc.assert(
       fc.property(arbTextWithCitations, ({ text, expected }) => {
         expect(text.length).toBeLessThanOrEqual(MAX_TEXT_WITH_CITATIONS);
-        expect(extract(text)).toEqual(expected);
+        expect(withoutCaseNames(extract(text))).toEqual(expected);
       }),
       runs(),
     );
