@@ -211,7 +211,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - _Requirements: 8.6, 8.9, 12.9_
 
 - [ ] 13. Documentation
-  - [-] 13.1 Write `docs/CERTIFICATION.md`
+  - [x] 13.1 Write `docs/CERTIFICATION.md`
     - Describe the statement paragraph by paragraph and label each sentence as a Record_Sentence or an Author_Sentence. Give the cases of paragraph 2 with their exact wording. Explain the declaration and its two subjects, the clearing rule, the single definition of AI use, and the prohibition reasons.
     - Use "record", "pasted or imported", "declaration" and "author states" consistently. Do not use "detected" or "inferred" about AI.
     - _Requirements: 13.1, 13.2, 13.7_
