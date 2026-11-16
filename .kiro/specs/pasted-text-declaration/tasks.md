@@ -135,7 +135,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Keep `export-dialog.tsx` under 300 lines.
     - _Requirements: 3.8, 4.1, 4.2, 4.6, 4.7, 4.9, 4.10, 4.11, 4.12, 4.13, 6.5, 6.8_
 
-  - [-] 7.2 Add the static scan for the single definition of AI use
+  - [x] 7.2 Add the static scan for the single definition of AI use
     - New file in `packages/export/test/static/`: `usedAi` is defined once; `isAiSpan` is not read outside `declaration.ts` and `ai-paragraphs.ts`; the strings "No generative artificial intelligence was used", "No program was used." and "states that no program was used" appear nowhere under `packages/*/src`, `apps/web/src` or `docs/`.
     - _Requirements: 1.3, 6.1_
 
