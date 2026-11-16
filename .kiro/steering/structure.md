@@ -37,6 +37,8 @@ reveal-codes/
         history.ts            undo and redo stacks, emptied by the history barrier
         persist.ts            Persisted_Value encode and decode for localStorage
         autosave.ts           debounced autosave and mount-time load
+        draft-gate.ts         Draft_Gate: blocks autosave while the stored draft is unreadable
+        saved-draft.ts        Save a copy: file name and download of the stored draft string
         services.ts           AppServices (fetch, storage, clock, timers) and defaultServices
         notices.ts            Notice text for the status region
         assistant-run.ts      assistant run bookkeeping (Tier 2)

@@ -5,11 +5,11 @@ import { WEB_ROOT } from "../support/scan";
 
 const REPO_ROOT = join(WEB_ROOT, "..", "..");
 
-/** Where each of the nineteen properties lives (design D9, "Testing Strategy"). */
+/** Where each of the twenty properties lives (design D9, "Testing Strategy"). */
 const OWNERS: Readonly<Record<string, readonly number[]>> = {
   "packages/engine/test/case-match.properties.test.ts": [2, 3, 4, 5, 6, 7, 8, 19],
   "packages/verifier/test/case-match.properties.test.ts": [1, 9, 10, 11, 12, 13, 18],
-  "apps/web/test/case-match.properties.test.ts": [16, 17],
+  "apps/web/test/case-match.properties.test.ts": [16, 17, 20],
   "packages/export/test/case-match.properties.test.ts": [14],
   "crew/sentinel/test/case-match.properties.test.ts": [15],
 };
@@ -51,17 +51,17 @@ describe("case-match property inventory _Requirements: 13.1, 13.9_", () => {
     expect(assertsPerMarker(planted)).toEqual([1, 2]);
   });
 
-  it("the design lists exactly nineteen headings, Property 1 to 19", () => {
+  it("the design lists exactly twenty headings, Property 1 to 20", () => {
     const design = read(".kiro/specs/case-match/design.md");
     const heads = [...design.matchAll(/^### Property (\d+):/gm)].map((m) => Number(m[1]));
-    expect(heads).toEqual(Array.from({ length: 19 }, (_, i) => i + 1));
+    expect(heads).toEqual(Array.from({ length: 20 }, (_, i) => i + 1));
   });
 
-  it("the table assigns each of 1 to 19 to exactly one package", () => {
+  it("the table assigns each of 1 to 20 to exactly one package", () => {
     const all = Object.values(OWNERS)
       .flat()
       .sort((a, b) => a - b);
-    expect(all).toEqual(Array.from({ length: 19 }, (_, i) => i + 1));
+    expect(all).toEqual(Array.from({ length: 20 }, (_, i) => i + 1));
   });
 
   it("each package file holds exactly its assigned markers, once each", () => {
@@ -73,9 +73,9 @@ describe("case-match property inventory _Requirements: 13.1, 13.9_", () => {
     }
   });
 
-  it("all nineteen markers appear exactly once across the five files", () => {
+  it("all twenty markers appear exactly once across the five files", () => {
     const all = files.flatMap((f) => markersOf(f.text)).sort((a, b) => a - b);
-    expect(all).toEqual(Array.from({ length: 19 }, (_, i) => i + 1));
+    expect(all).toEqual(Array.from({ length: 20 }, (_, i) => i + 1));
   });
 
   it("each marker is followed by exactly one fc.assert before the next marker", () => {

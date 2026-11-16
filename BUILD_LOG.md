@@ -583,3 +583,53 @@ The author walked the app in a browser and found four things. Requirement 9.8 wa
 ### Left alone
 
 - The README limit and the old-draft overwrite above are not fixed here. The browser check in finding 1 and the push are the author's.
+
+## 2026-11-15: case-match second follow-up, the CI failure of aef6d70 and the unreadable draft
+
+### The CI failure
+
+- Commit `aef6d70` failed the job `check`, step `pnpm test`. `packages/engine/test/arb-codes.test.ts`, the reachability test for `arbSemanticTamper`, saw 21 of 22 kinds in 1,500 runs.
+- Cause: the test drew 1,500 random values with a literal `numRuns: 1500` and no seed, then compared the kinds seen with `TAMPER_KINDS`. Any rare kind can be missing from a draw of that size. It was a flaky test, not a bug in the arbitrary.
+
+### The measurement (task 22.1)
+
+- Method: a throwaway script drew 100,000 values of `arbTamperDocument.chain((d) => arbSemanticTamper(d))` and counted each kind. The script was deleted and not committed.
+- Kind count: `TAMPER_KINDS` has 23 kinds in the tree. The CI message said 22, and the author reported 22. The count in the tree is 23; the discrepancy is recorded here and was not explained further.
+- The rarest kind is `short_count`: 314 of 100,000 draws (p = 0.00314). The next is `override_nonissue` at p = 0.00732.
+- Miss probability for `short_count` over 1,500 draws: (1 - 0.00314)^1500, about 0.0089 (0.9%). Any kind could be the one missed, so the failure rate of the old test was about 0.9% per run.
+- Syntax faults: 8 kinds. The rarest is `unbalanced_close` at p = 0.2077. The old test used `max(runs().numRuns, 400)` draws, so the miss probability is about 3.5e-41. It was no flake risk, and was rewritten in the same shape as the tamper test.
+
+### The fix (tasks 22.2 to 22.4)
+
+- Per-kind arbitraries `arbTamperOfKind` and `arbSyntaxFaultOf` replace the "draw until every kind appears" check. Each kind is tested on its own.
+- `packages/engine/test/support/tamper-witnesses.ts` holds `TAMPER_WITNESSES: Record<TamperKind, Document>`. A new kind with no witness fails `pnpm typecheck`.
+- The random rejection properties are unchanged. The seeded reachability check in `codes.properties.test.ts` was replaced by a pointer to the per-kind tests.
+- The multi-fault test is restricted to `unknown_code`, `unclosed_open`, `bad_field` and `dangling_escape`. `assemble()` drops faults placed before `[DOC]` when `missing_doc` is drawn, and drops an `unbalanced_close` that follows an `unterminated_code`. The builder was not changed.
+
+### The audit of unseeded draws (task 22.5)
+
+- Seeded and left alone: `arb-edit.test.ts` (seeds 42, 7, 3 and 11, 13), `arbitraries.test.ts` (seed 1), `arb-citation.test.ts`, `arb-segment-inputs.test.ts`, `arb-text-citations.test.ts`, `arb-api.test.ts`, `incremental.test.ts`, `rate-limit.properties.test.ts`.
+- Unseeded and safe, with the probability that a random run misses: tests whose draw covers each member with a probability high enough that the miss probability is negligible, for example the 8 syntax faults above (3.5e-41).
+- Fixed, two: the engine `case-match.properties.test.ts` Property 7 `wrongToWrong` guard (a wrong_case to wrong_case rewrite with a different name drew 5.15% of runs, so at 200 runs about 2.5e-5 of runs missed it) and the export `case-match.properties.test.ts` Property 14 `wrongCaseSeen` guard (5.7% of draws, about 7.5e-6 at 200 runs). Both now carry fixed examples run first. fast-check counts examples inside `numRuns`, so `numRuns` is raised by their number to keep the random runs.
+
+### The unreadable draft (Requirement 23)
+
+- The finding recorded in the entry above (an unreadable autosave is overwritten by the first keystroke) is fixed. That entry stays as the record of the old behaviour. The README Limits bullet about it is removed.
+- `apps/web/src/draft-gate.ts` holds the Draft_Gate. It is set at load when the stored draft fails `deserialise` with `not_json`, `bad_shape` or `bad_codes`; all three block. While it is set, autosave starts no timer and writes nothing, including flush, hidden and unmount.
+- The Issues region shows the notice: "A saved draft could not be read, so it was not loaded. It is still stored in this browser. Nothing you type is saved until you choose."
+- Save a copy (`apps/web/src/saved-draft.ts`) downloads the stored string as `reveal-codes-saved-draft.txt`, `text/plain;charset=utf-8`, the exact UTF-8 bytes of the stored string. Limit: a lone surrogate in the stored string cannot be encoded as UTF-8 and is written as U+FFFD, so that copy differs from the stored string in those characters. Save a copy does not lift the gate, so "until you choose" means until Start a new document.
+- Start a new document opens a confirm. It clears the stored draft and releases the gate only if the clear succeeded. It also discards what is on the page, and the confirm says so.
+- The Toolbar's New while blocked opens the same dialog. Sample loads do not lift the gate. The print view is guarded and shows its own notice while blocked.
+- Out of scope: more than one tab.
+- Property 20 (`apps/web/test/case-match.properties.test.ts`, input `arbUnreadableStored`): for each of the three failure kinds, load, edits, a wait, flush, hidden and unmount leave the stored value equal and call `setItem` zero times. A static test (`apps/web/test/static/draft-storage-writes.test.ts`) checks that the autosave module is the only writer of the draft key. Example tests are in `apps/web/test/unreadable-draft.test.tsx`.
+
+### Existing tests edited (checked with `git diff 3763778 HEAD --name-status`, plus the working tree)
+
+- `packages/engine/test/arb-codes.test.ts`: rewritten to the per-kind tests above (tamper and syntax reachability, the witness table, the restricted multi-fault test).
+- `packages/engine/test/codes.properties.test.ts`: the seeded tamper reachability check (seed 41, 1,500 runs) was removed, with a comment that points to `arb-codes.test.ts`.
+- `packages/engine/test/case-match.properties.test.ts` (Property 7) and `packages/export/test/case-match.properties.test.ts` (Property 14): fixed examples, as in the audit.
+- `apps/web/test/export-dialog-orders.test.tsx`: `useExport` takes a `gate` parameter now, and the harness passes `createDraftGate()`.
+- `apps/web/test/autosave.test.ts`: gains the Draft_Gate and clear-result describe (additive).
+- `apps/web/test/case-match.properties.test.ts`: gains Property 20 (additive).
+- `apps/web/test/arbitraries.ts`: gains `arbUnreadableStored` (additive).
+- `apps/web/test/static/case-match-inventory.test.ts` (task 24.1): the count is twenty and the web file owns Property 20.
