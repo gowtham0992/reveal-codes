@@ -39,7 +39,9 @@ function expectedLabels(input: NextStepCase): string[] {
   };
   if (input.verifying) return table.none;
   if (input.empty) return table["load-demo"];
-  if (input.uncheckedCitations + input.uncheckedQuotations > 0) return table.verify;
+  if (input.uncheckedCitations + input.uncheckedQuotations > 0 || input.needsCheckDate) {
+    return table.verify;
+  }
   return table.export;
 }
 

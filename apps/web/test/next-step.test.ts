@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { nextStep } from "../src/components/next-step";
 
-const BASE = { empty: false, verifying: false, verifiableUnchecked: 0, blocking: 0 };
+const BASE = {
+  empty: false,
+  verifying: false,
+  verifiableUnchecked: 0,
+  needsCheckDate: false,
+  blocking: 0,
+};
 
 describe("nextStep _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_", () => {
   it("names Load demo motion for an empty document", () => {
@@ -10,6 +16,12 @@ describe("nextStep _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_", () => {
 
   it("names Verify when something checkable is unchecked", () => {
     expect(nextStep({ ...BASE, verifiableUnchecked: 2 })).toBe("verify");
+  });
+
+  it("names Verify for a check-date gap with nothing unchecked, but not while running or empty", () => {
+    expect(nextStep({ ...BASE, needsCheckDate: true })).toBe("verify");
+    expect(nextStep({ ...BASE, needsCheckDate: true, verifying: true })).toBe("none");
+    expect(nextStep({ ...BASE, needsCheckDate: true, empty: true })).toBe("load-demo");
   });
 
   it("names Export when nothing is left to verify, even with blocking items", () => {

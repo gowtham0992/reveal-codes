@@ -252,6 +252,7 @@ function stepFor(doc: Document): string {
     empty: doc.text.length === 0,
     verifying: false,
     verifiableUnchecked: countVerifiableUnchecked(doc),
+    needsCheckDate: false,
     blocking: 0,
   });
 }

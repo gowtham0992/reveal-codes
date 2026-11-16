@@ -1,5 +1,5 @@
 import { apply, createDocument, parse, render } from "@reveal-codes/engine";
-import type { Document } from "@reveal-codes/engine";
+import type { CallerOperation, Document } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import {
   CONTEXT_LIMIT,
@@ -38,6 +38,31 @@ describe("assistant-run _Requirements: 22.7, 23.1, 23.4, 23.5_", () => {
     const entry = { runId: "r1", provider: "x", modelId: null, prompt: "p", timestamp: "t" };
     expect(nextRunId(doc.value, [])).toBe("r1");
     expect(nextRunId(doc.value, [entry, { ...entry, runId: "r2" }])).toBe("r3");
+  });
+
+  it("skips past the highest run id when ids are not contiguous _Requirements: 13.1_", () => {
+    const base = createDocument("", "2026-01-01T00:00:00.000Z");
+    if (!base.ok) throw new Error("fixture rejected");
+    const ai = (at: number, runId: string): CallerOperation => ({
+      kind: "insert",
+      at,
+      text: "x",
+      provenance: { origin: "AI", runId, timestamp: "2026-01-01T00:00:00.000Z" },
+    });
+    const first = apply(base.value, ai(0, "r1"));
+    if (!first.ok) throw new Error("fixture rejected");
+    const second = apply(first.value.document, ai(1, "r3"));
+    if (!second.ok) throw new Error("fixture rejected");
+    const result = second.value.document;
+    expect(result.runs.map((run) => run.runId)).toEqual(["r1", "r3"]);
+    expect(nextRunId(result, [])).toBe("r4");
+  });
+
+  it("uses the highest id in a restored run log with no Engine runs", () => {
+    const doc = createDocument("", "2026-01-01T00:00:00.000Z");
+    if (!doc.ok) throw new Error("fixture rejected");
+    const entry = { runId: "r5", provider: "x", modelId: null, prompt: "p", timestamp: "t" };
+    expect(nextRunId(doc.value, [entry])).toBe("r6");
   });
 
   it("words the disclosure by provider", () => {

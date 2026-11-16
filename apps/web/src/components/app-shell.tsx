@@ -194,7 +194,7 @@ function useShellState(svc: AppServices) {
     actions,
     issues: { doc, store, svc, binding, mode, verifiedAt, verify, draft },
     bottom: { paneControl, doc, cursor, mode, binding },
-    toolbar: { notice, doc, verify, exportGate, pane: paneControl, actions },
+    toolbar: { notice, doc, verifiedAt, verify, exportGate, pane: paneControl, actions },
   };
 }
 

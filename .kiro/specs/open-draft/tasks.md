@@ -31,7 +31,7 @@ Conventions that apply to every task:
     - Run the Sentinel package tests and the `packages/export` tests; the Sentinel Findings, report text and error kinds are as before.
     - _Requirements: 1.7, 1.8, 19.11_
 
-- [ ] 2. Reader group in `packages/export`: helpers, additions, `readWordDraft` and their tests
+- [x] 2. Reader group in `packages/export`: helpers, additions, `readWordDraft` and their tests
   - [x] 2.1 Fixture builder and endnotes helper, each with its self-test
     - In `packages/export/test/support/`, a deterministic helper that builds `.docx` bytes with the `docx` library (paragraphs, a table, a tracked insertion and deletion, two footnotes) with every date and zip timestamp fixed. A second helper, the endnotes helper, post-processes the bytes with `fflate` to add `word/endnotes.xml` with its content-type and relationship entries (the `docx` library writes none) and Word's separator and continuation-separator notes.
     - Fixtures also built by it: a password-protected stand-in (compound-file header with an `EncryptedPackage` stream name), a truncated zip, a zip without `word/document.xml`, a zip whose central directory declares a small part but whose stream is larger, and an export edited by one character. Add a `README` line under `packages/export/fixtures/` for any committed fixture file (source and date).
@@ -72,7 +72,7 @@ Conventions that apply to every task:
     - **Property 3: A changed export imports as pasted body text**
     - Same file as 2.9. `arbBodyEdit` over the exported body; assert `changed` with the changed text, the installed Document is one `PST` span with no Declaration and the Open_Note of Requirement 10 criterion 4, and the Sentinel's `analyseFile` reports `body_edited` exactly when `readWordDraft` reports `changed`.
     - **Validates: Requirements 9.9, 10.1, 10.2, 10.5, 10.6, 10.7, 18.5**
-  - [~] 2.11 Write property test for statement and appendix exclusion
+  - [x] 2.11 Write property test for statement and appendix exclusion
     - **Property 8: The statement and the Appendix are never body text**
     - Same file as 2.9. Documents including a line equal to a member of `STATEMENT_TITLES`; for a restore and a body-only import no paragraph at or after the Filing_End is in the installed text.
     - **Validates: Requirements 11.1, 11.2, 11.3**
@@ -124,10 +124,10 @@ Conventions that apply to every task:
     - `apps/web/src/assistant-run.ts`: `nextRunId` returns `r` plus one more than the highest number in any `r<digits>` id held by `document.runs` or `runLog`. For contiguous ids the result is as before. This change is outside the modules the requirements name and is **approved by the author** (design, Resolved decision 11); an empty restored Run_Log needs it so that a second run never reuses an id.
     - Update existing store tests that build a full `StoreState`.
     - _Requirements: 4.8, 15.2, 15.3, 15.6, 13.1_
-  - [~] 6.3 Write Store examples: `nextRunId` and `openNote`
+  - [x] 6.3 Write Store examples: `nextRunId` and `openNote`
     - `nextRunId` gives `r4` for runs `r1` and `r3` with an empty run log, and the old result for contiguous ids and for a run log longer than the runs; `replace` sets `openNote` to `null`; the `openNote` action sets and clears it; `persist.ts` stores no `openNote`.
     - _Requirements: 13.1, 15.2, 15.3, 15.6, 19.7_
-  - [~] 6.4 Next_Step gap: `needsCheckDate`, `check-date.ts` and the callers
+  - [x] 6.4 Next_Step gap: `needsCheckDate`, `check-date.ts` and the callers
     - New `apps/web/src/client/check-date.ts` with `hasVerificationResult(document)` (a full citation or a quote whose `result.status` is not `unchecked`; a short form does not count) and `needsCheckDate(document, verifiedAt)` (`verifiedAt === null && hasVerificationResult(document) && hasFullRecord(document)`). The `hasFullRecord` term is the design's guard: it mirrors `verify.disabled`, so the Next_Step is never a disabled Verify; this differs from the Glossary Check_Date_Gap only for a Document with a quote result and no full citation (design, Flag 4, for the author to approve).
     - `apps/web/src/components/next-step.ts`: `NextStepInput` gains the required field `needsCheckDate: boolean`; `nextStep` returns `none` while verifying, `load-demo` when empty, `verify` when `verifiableUnchecked > 0 || needsCheckDate`, else `export`. With `needsCheckDate: false` the function equals the old one. `blocking` stays ignored.
     - `apps/web/src/components/shell-toolbar.tsx`: take `verifiedAt` from the Store state beside `doc` and pass `needsCheckDate: needsCheckDate(doc, verifiedAt)`. Verify's own behaviour, the gate and `use-verify.ts` are not changed (the design checked that `runVerifyFlow` re-checks verified results and dispatches `verified`).

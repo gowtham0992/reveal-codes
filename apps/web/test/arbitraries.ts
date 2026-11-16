@@ -238,6 +238,7 @@ export type NextStepCase = Readonly<{
   uncheckedCitations: number;
   uncheckedQuotations: number;
   blocking: number;
+  needsCheckDate: boolean;
   /** The sum of the citation and quotation counts. */
   verifiableUnchecked: number;
 }>;
@@ -250,6 +251,7 @@ export const arbNextStepInput: fc.Arbitrary<NextStepCase> = fc
     uncheckedCitations: arbCount,
     uncheckedQuotations: arbCount,
     blocking: arbCount,
+    needsCheckDate: fc.boolean(),
   })
   .map((r) => ({ ...r, verifiableUnchecked: r.uncheckedCitations + r.uncheckedQuotations }));
 

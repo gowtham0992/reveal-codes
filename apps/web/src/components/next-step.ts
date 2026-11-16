@@ -7,6 +7,8 @@ export type NextStepInput = Readonly<{
   verifying: boolean;
   /** Unchecked citations plus unchecked quotations that Verify can act on. */
   verifiableUnchecked: number;
+  /** The Document is in the Check_Date_Gap and Verify can run (see needsCheckDate). */
+  needsCheckDate: boolean;
   /** Length of the blocking issues; ignored by the rules. */
   blocking: number;
 }>;
@@ -15,7 +17,7 @@ export type NextStepInput = Readonly<{
 export function nextStep(input: NextStepInput): NextStep {
   if (input.verifying) return "none";
   if (input.empty) return "load-demo";
-  if (input.verifiableUnchecked > 0) return "verify";
+  if (input.verifiableUnchecked > 0 || input.needsCheckDate) return "verify";
   return "export";
 }
 

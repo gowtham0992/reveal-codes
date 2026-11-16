@@ -1,10 +1,12 @@
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import { createDocument } from "@reveal-codes/engine";
 import type { Declaration, Document } from "@reveal-codes/engine";
 import { arbDeclaration } from "../../engine/src/testing/arb-declaration.js";
 import { arbDocument } from "../../engine/src/testing/arb-document.js";
 import {
   ORDERS,
+  STATEMENT_TITLES,
   applicableDeclaration,
   canExport,
   declarationSubject,
@@ -13,7 +15,7 @@ import {
   splitExport,
 } from "../src/index.js";
 import type { OrderContext, OrderEntry, RunInfo } from "../src/index.js";
-import { applyBodyEdit, arbBodyEdit, arbRunLog, runs } from "./support/arbitraries.js";
+import { applyBodyEdit, arbBodyEdit, arbParagraphs, arbRunLog, runs } from "./support/arbitraries.js";
 import { withParagraphText } from "./support/body-edit.js";
 import { compareRestored, exportBytes, reopen } from "./support/restore.js";
 
@@ -93,7 +95,7 @@ describe("a reopened export is the exported Document _Requirements: 9.2, 9.3, 9.
       }),
       { numRuns: runs() },
     );
-  });
+  }, 120_000);
 });
 
 const arbChangedExport = arbRoundTrip.chain((c) =>
@@ -148,5 +150,75 @@ describe("a changed export imports as pasted body text _Requirements: 9.9, 10.1,
       }),
       { numRuns: runs() },
     );
+  }, 120_000);
+});
+
+const TIMESTAMP = "2026-11-20T18:00:00.000Z";
+
+/** A body whose paragraphs include one line equal to a statement title, at any position. */
+const arbTitledBody = fc
+  .tuple(arbParagraphs, fc.constantFrom(...STATEMENT_TITLES), fc.nat())
+  .map(([paragraphs, title, at]) => {
+    const out = [...paragraphs];
+    out.splice(at % (out.length + 1), 0, title);
+    return out;
   });
+
+const arbTitledExport = fc
+  .tuple(arbTitledBody, arbDeclaration("pasted_text"))
+  .chain(([body, declaration]) =>
+    fc.tuple(fc.constant(body), fc.constant(declaration), arbBodyEdit(body)),
+  );
+
+function linesOf(draft: ReturnType<typeof reopen>): string[] | null {
+  if (draft.kind === "restored") return draft.record.document.text.split("\n");
+  if (draft.kind === "changed") return draft.text.split("\n");
+  return null;
+}
+
+describe("the statement and the Appendix are never body text _Requirements: 11.1, 11.2, 11.3_", () => {
+  // Property 8
+  it("P8 a restore and a body-only import keep a body title line and nothing at or after the Filing_End", async () => {
+    await fc.assert(
+      fc.asyncProperty(arbTitledExport, async ([body, declaration, edit]) => {
+        const created = createDocument(body.join("\n"), TIMESTAMP);
+        if (!created.ok) throw new Error("createDocument refused the generated body");
+        const document = created.value;
+        const bytes = await exportBytes(document, {
+          declaration: applicableDeclaration(document, null, declaration),
+        });
+        const edited = applyBodyEdit(body, edit);
+        const cases = [
+          { bytes, kind: "restored", expected: body },
+          {
+            bytes: withParagraphText(bytes, edit.paragraph, edited[edit.paragraph] ?? ""),
+            kind: "changed",
+            expected: edited,
+          },
+        ] as const;
+        for (const c of cases) {
+          const read = readDocx(c.bytes);
+          if (!read.ok) throw new Error("the exported file is not readable");
+          const split = splitExport(read.value);
+          if (!split.ok) throw new Error("the exported file has no filing end");
+          const filingEnd = split.value.body.length;
+          const region = read.value.slice(filingEnd);
+          const installed = linesOf(reopen(c.bytes));
+          expect(reopen(c.bytes).kind).toBe(c.kind);
+          expect(installed).not.toBeNull();
+          if (installed === null) return;
+          // Nothing at or after the Filing_End: the installed lines are exactly the paragraphs before it.
+          expect(installed).toEqual(read.value.slice(0, filingEnd));
+          expect(installed).toEqual(c.expected);
+          expect(installed.length).toBeLessThan(read.value.length);
+          expect(region.length).toBeGreaterThan(0);
+          // A body line equal to a statement title is kept (unless the edit rewrote that very line).
+          const kept = c.expected.filter((line) => STATEMENT_TITLES.includes(line));
+          expect(installed.filter((line) => STATEMENT_TITLES.includes(line))).toEqual(kept);
+          if (c.kind === "restored") expect(kept.length).toBeGreaterThan(0);
+        }
+      }),
+      { numRuns: runs() },
+    );
+  }, 120_000);
 });

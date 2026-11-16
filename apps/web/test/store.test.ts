@@ -1,6 +1,7 @@
 import { createDocument } from "@reveal-codes/engine";
 import type { CallerOperation, Document, Origin } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
+import { deserialise, serialise } from "../src/persist";
 import { reduce, initialState } from "../src/store";
 import type { StoreAction, StoreState } from "../src/store";
 import { createManualClock } from "./support/clock";
@@ -282,6 +283,47 @@ describe("replace and notice", () => {
     const r = reduce(s, { type: "notice", text: "hello" }, now);
     expect(r.state).toEqual({ ...s, notice: "hello" });
     expect(r.changed).toBe(false);
+  });
+});
+
+describe("openNote _Requirements: 15.2, 15.3, 15.6_", () => {
+  it("starts null; the openNote action sets and clears it and nothing else", () => {
+    const s = initialState(now);
+    expect(s.openNote).toBeNull();
+    const set = reduce(s, { type: "openNote", text: "Opened draft.docx." }, now);
+    expect(set.state).toEqual({ ...s, openNote: "Opened draft.docx." });
+    expect(set.changed).toBe(false);
+    const cleared = reduce(set.state, { type: "openNote", text: null }, now);
+    expect(cleared.state.openNote).toBeNull();
+  });
+
+  it("replace clears it, with or without a supplied runLog", () => {
+    const withNote = run(initialState(now), { type: "openNote", text: "note" });
+    const plain = reduce(withNote, { type: "replace", document: docOf("x") }, now);
+    expect(plain.state.openNote).toBeNull();
+    const run1 = { runId: "r1", provider: "p", modelId: null, prompt: "q", timestamp: ISO };
+    const logged = reduce(withNote, { type: "replace", document: docOf("x"), runLog: [run1] }, now);
+    expect(logged.state.openNote).toBeNull();
+  });
+
+  it("is not persisted: the stored value has no note and a reload shows none", () => {
+    const withNote = run(initialState(now), { type: "openNote", text: "A unique note." });
+    const raw = serialise(
+      withNote.document,
+      withNote.runLog,
+      withNote.verifiedAt,
+      withNote.declaration,
+    );
+    expect(raw).not.toContain("A unique note.");
+    expect(raw).not.toContain("openNote");
+    const restored = deserialise(raw);
+    if (!restored.ok) throw new Error("restore failed");
+    const reloaded = reduce(
+      initialState(now),
+      { type: "replace", document: restored.value.document },
+      now,
+    );
+    expect(reloaded.state.openNote).toBeNull();
   });
 });
 
