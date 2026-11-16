@@ -227,7 +227,7 @@ Conventions that apply to every task:
     - A dated entry recording the decision to share one reader, the decision to defer the record additions, the DOCX-safe text fix (with any shrunk counterexample from a failing run), the `nextRunId` change (approved by the author), the Next_Step change (the `needsCheckDate` input to `nextStep`, the `hasFullRecord` guard of Flag 4 and the `ui.md` primary-button rule, so a restore that holds results gets Verify and the check date back), and what Kiro got wrong in the requirements pass or "No Kiro errors", taken from the task completion notes.
     - _Requirements: 13.11, 18.8, 20.5_
 
-- [~] 10. Final checkpoint - Ensure all checks pass
+- [x] 10. Final checkpoint - Ensure all checks pass
   - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, the clean-checkout web build `pnpm --filter @reveal-codes/web build` and `pnpm kiro:check`, and record each result in BUILD_LOG.md. Do not push to any remote. Ensure all tests pass, ask the user if questions arise.
   - _Requirements: 21.3, 21.4_
 

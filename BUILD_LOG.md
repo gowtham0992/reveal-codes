@@ -756,3 +756,22 @@ When `needsCheckDate` is true (the opened draft's check date is absent or stale)
 ### Issues note (three cases)
 
 The Open_Note in the Issues region covers three cases: (1) the draft opened successfully but its check date is stale or absent, so Next_Step is Verify; (2) the draft opened but has no check date at all; (3) the parse was partial — some content was recovered but some structure was lost. Each case has distinct message text in `open-messages.ts`.
+
+### Final checkpoint (task 10), open-draft, HEAD ed99136
+
+Every command run from the repository root on 2026-11-16. No failures, so no code changed.
+
+- `pnpm lint`: exit 0 (eslint with `--max-warnings 0`, then prettier: all matched files use Prettier code style).
+- `pnpm typecheck`: exit 0 (`tsc -b`, no output).
+- `pnpm test`: exit 0. 343 test files passed, 3742 tests passed, 0 failed.
+- `pnpm test:pbt` (`FC_NUM_RUNS=500`): exit 0. 53 property test files passed, 184 tests passed, 0 failed. No shrunk counterexample, so no seed to record.
+- Clean-checkout web build: `git worktree add --detach` of HEAD in a temp directory outside the repository, with the uncommitted diff applied (only `.kiro/specs/open-draft/tasks.md` and `tasks.meta.json`). `pnpm install --frozen-lockfile` exit 0, then `pnpm --filter @reveal-codes/web build` exit 0 (TypeScript finished, 5 static pages generated, routes `/`, `/print`, `/api/assistant`, `/api/mode`, `/api/opinion/[clusterId]`, `/api/verify`). Worktree and temp directory removed; `git worktree list` shows only the main checkout.
+- `pnpm kiro:check`: exit 0. `docs/KIRO_USAGE.md`: 57 rows (Hook 7, Spec 13, Steering 25, MCP 1, Spec metadata 3, Agent 2, Skill 3, Script 2, Power 1).
+- Secret and forbidden check: `git status` shows only the two spec files above as modified, no untracked files, no stray `.d.ts`. The only tracked env file is `.env.example`. A scan for key-shaped strings found only the `sk-ant-SENTINEL-KEY` test values in `apps/web/test/assistant-route.test.ts` and `mode-route.test.ts`. No task, script or workflow runs `git push`. Nothing was pushed.
+- The 59-task count and "318 to about 350 test files" in the entry above are estimates. The measured count at this checkpoint is 343 test files and 3742 tests.
+
+### Known limits and follow-ups (open-draft)
+
+- **Notes_Block detection.** `readWordDraft` and `openFile` find the notes block by the text pattern `\n\nFootnotes\n1. `, not by a flag from the reader. A Word body that holds that exact text would get the footnote sentence in the Open_Note by mistake. Not fixed; a flag from `readWordDraft` is the follow-up.
+- **Oversize-part limit.** `openFile` passes `maxPartBytes` 33 554 432 (32 MiB) to `readWordDraft`. A `.docx` whose `word/document.xml`, `footnotes.xml` or `endnotes.xml` declares more than that is refused as damaged before anything is inflated. The check reads the zip's declared sizes (settled by the oversize-part fixture whose declared and real sizes differ).
+- **Real Word-saved fixture.** Every `.docx` fixture is built by the `docx` library and the endnotes helper. No file saved by Microsoft Word is committed, and no test reads one. A test over a real Word-saved fixture is a follow-up.
