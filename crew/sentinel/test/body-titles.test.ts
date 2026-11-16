@@ -10,6 +10,7 @@ import { nodeFiles } from "../src/files.js";
 import { run } from "../src/run.js";
 import type { RunIo } from "../src/run.js";
 import { splitExport } from "../src/split.js";
+import { declarationFor } from "./support/export-support.js";
 import { testSleep } from "./support/test-deps.js";
 
 const dirs: string[] = [];
@@ -32,7 +33,7 @@ async function exportOf(text: string): Promise<Uint8Array> {
   const created = createDocument(text, ISO);
   if (!created.ok) throw new Error("document rejected");
   const meta = { now: new Date(ISO), verifiedAt: ISO };
-  const built = buildStatement(created.value, [], meta, null);
+  const built = buildStatement(created.value, [], meta, null, declarationFor(created.value, null));
   if (!built.ok) throw new Error("statement rejected");
   expect(renderStatement(built.value).length).toBeGreaterThan(0);
   return buildDocx(created.value, built.value);

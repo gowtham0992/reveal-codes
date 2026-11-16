@@ -3,7 +3,11 @@ import { describe, expect, it } from "vitest";
 import { readDocx } from "../src/docx-read.js";
 import { splitExport } from "../src/split.js";
 import { renameTitles } from "./support/docx-edit.js";
-import { buildDemoDocument, buildDemoDocumentStatement } from "./support/export-support.js";
+import {
+  DEMO_DECLARATION,
+  buildDemoDocument,
+  buildDemoDocumentStatement,
+} from "./support/export-support.js";
 
 const NOT_EXPORT = { ok: false, error: { kind: "not_reveal_codes_export" } };
 
@@ -24,7 +28,7 @@ describe("splitExport", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value.body).toEqual(doc.text.split("\n"));
-    expect(result.value.appendix).toEqual(buildAppendix(doc).lines);
+    expect(result.value.appendix).toEqual(buildAppendix(doc, DEMO_DECLARATION).lines);
   });
 
   it("returns not_reveal_codes_export when the titles are renamed", async () => {

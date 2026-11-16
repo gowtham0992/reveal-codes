@@ -3,7 +3,11 @@ import { strToU8, zipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 import { readDocx } from "../src/docx-read.js";
 import { zipWithout } from "./support/docx-edit.js";
-import { buildDemoDocument, buildDemoDocumentStatement } from "./support/export-support.js";
+import {
+  DEMO_DECLARATION,
+  buildDemoDocument,
+  buildDemoDocumentStatement,
+} from "./support/export-support.js";
 
 describe("readDocx", () => {
   it("reads the filing, the titles and the Appendix in document order", async () => {
@@ -14,7 +18,7 @@ describe("readDocx", () => {
     if (!result.ok) return;
     const list = result.value;
     const body = doc.text.split("\n");
-    const lines = buildAppendix(doc).lines;
+    const lines = buildAppendix(doc, DEMO_DECLARATION).lines;
     expect(list.slice(0, body.length)).toEqual(body);
     const s = list.indexOf(STATEMENT_TITLE);
     const a = list.indexOf(APPENDIX_TITLE);

@@ -1,10 +1,11 @@
-import { parse } from "@reveal-codes/engine";
+import { parseRecord } from "@reveal-codes/engine";
 import { APPENDIX_TITLE, STATEMENT_TITLE, buildDocx, buildStatement } from "@reveal-codes/export";
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { arbDocument } from "../../../packages/engine/src/testing/arb-document";
 import { readDocx } from "../src/docx-read.js";
 import { splitExport } from "../src/split.js";
+import { declarationFor } from "./support/export-support.js";
 import { docxRuns } from "./support/fc.js";
 
 const META = {
@@ -24,7 +25,7 @@ describe("docx round trip _Requirements: 2.14, 4.6_", () => {
       fc.asyncProperty(
         arbDocument.filter((d) => !CONTROL.test(d.text)),
         async (d) => {
-          const st = buildStatement(d, [], META);
+          const st = buildStatement(d, [], META, null, declarationFor(d, null));
           expect(st.ok).toBe(true);
           if (!st.ok) return;
           const read = readDocx(await buildDocx(d, st.value));
@@ -40,10 +41,11 @@ describe("docx round trip _Requirements: 2.14, 4.6_", () => {
           expect(parts.ok).toBe(true);
           if (!parts.ok) return;
           expect(parts.value.body.join("\n")).toBe(d.text);
-          const parsed = parse(parts.value.appendix.join("\n"));
+          const parsed = parseRecord(parts.value.appendix.join("\n"));
           expect(parsed.ok).toBe(true);
           if (!parsed.ok) return;
-          expect(parsed.value).toEqual(d);
+          expect(parsed.value.document).toEqual(d);
+          expect(parsed.value.declaration).toEqual(declarationFor(d, null));
         },
       ),
       { numRuns: docxRuns(process.env) },

@@ -139,13 +139,13 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - New file in `packages/export/test/static/`: `usedAi` is defined once; `isAiSpan` is not read outside `declaration.ts` and `ai-paragraphs.ts`; the strings "No generative artificial intelligence was used", "No program was used." and "states that no program was used" appear nowhere under `packages/*/src`, `apps/web/src` or `docs/`.
     - _Requirements: 1.3, 6.1_
 
-- [ ] 8. Sentinel: read the Declaration
+- [x] 8. Sentinel: read the Declaration
   - [x] 8.1 Add `recordedRecord` to `crew/sentinel/src/recorded.ts`
     - `recordedRecord(appendix): Result<{ document: Document; declaration: Declaration | null }, SentinelError>` via `parseRecord`. `recordedDocument` stays and returns the Document of `recordedRecord`, so `analyse.ts`, `deriveFindings` and `splitExport` are unchanged and the Declaration is an input to no Finding.
     - This task must land before task 7.1. A file exported before this feature reads with `declaration: null` and no Finding.
     - _Requirements: 8.6, 8.9_
 
-  - [~] 8.2 Update existing Sentinel tests and fixtures
+  - [x] 8.2 Update existing Sentinel tests and fixtures
     - `crew/sentinel/test/*` and fixtures that build an export from the demo Document pass a Declaration or use a typed-only Document, and read back through the new Statement shape.
     - _Requirements: 8.6, 8.9_
 
@@ -175,7 +175,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Over Documents with no blocking issues, assert `canExport` is `false` exactly when the entry kind is `prohibition` and (the spans hold an `AI` or `AI>HUM` span or the applicable Declaration is `declared_ai`). Compute the expected value from spans and text, not from `usedAi`. Include a Declaration of the wrong subject. Assert that changing Declared_AI to None on a Document with no Assistant_Text makes `canExport` true.
     - **Validates: Requirements 6.2, 6.3, 6.4, 6.9, 6.10**
 
-  - [~] 11.3 Write the property test for the record round trip
+  - [-] 11.3 Write the property test for the record round trip
     - `crew/sentinel/test/recorded-declaration.properties.test.ts`, `// Property 3`, `_Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.7, 8.8, 8.12, 11.4_` in the describe title.
     - **Property 3: The Declaration survives the record**
     - Assert `parseRecord(renderRecord(document, declaration, "full").text)` returns an equal Document and Declaration for both subjects and Tool_Names with brackets, parentheses, quotation marks, commas, semicolons, equals signs, backslashes and non-ASCII; the display form contains no declaration text; a rendering with no Declaration equals `render(document, "full")`; no Statement_Text paragraph equals a `STATEMENT_TITLES` member other than its own title; and the Declaration survives DOCX export, `readDocx`, `splitExport` and `recordedRecord` with the verifier `fetch` stubbed.
