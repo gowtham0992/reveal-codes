@@ -33,7 +33,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - The Power copy is byte-equal to the dataset
     - _Requirements: 1.6, 15.2, 15.3, 15.4_
 
-- [ ] 3. Pure filter, grouping and stats
+- [x] 3. Pure filter, grouping and stats
   - [x] 3.1 Implement `filterOrders` in `packages/export/src/order-filter.ts`
     - Export `KindChoice`, `FilterState`, `CLEARED_FILTER`, `normaliseText` (`toLowerCase().replace(/[^\p{L}\p{N}]/gu, "")`) and `filterOrders` exactly as the design specifies; input order preserved; a query that normalises to empty matches everything
     - No `node:` or DOM import; plain data only
@@ -55,7 +55,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - The oracle is written independently of `filterOrders` and does not call `normaliseText`; assert id-list equality including order, and equality with `status === "current"` for the cleared state
     - No `try/catch`, no snapshot
 
-  - [~] 3.4 Write example tests for grouping, ordering and stats
+  - [x] 3.4 Write example tests for grouping, ordering and stats
     - `packages/export/test/order-groups.test.ts`: group order uses the same `compareAbbreviations`; a synthetic list with "5th Cir." and "10th Cir. BAP" puts 5th first; Court_Wide before Judge_Level; newest first; id tie-break; `orderStats` equals counts computed from the shipped dataset
     - _Requirements: 2.2, 3.2, 3.3, 3.4, 16.2, 16.4_
 
@@ -68,7 +68,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Create `apps/web/src/courts/links.ts` exporting `COURT_RULES_PATH`, `COURT_RULES_SHORT` ("Court rules") and `COURT_RULES_LONG` ("See all court rules")
     - _Requirements: 4.6, 9.1, 9.2, 9.4_
 
-  - [~] 5.2 Create the view model, intro text and hash helper
+  - [-] 5.2 Create the view model, intro text and hash helper
     - `apps/web/src/courts/view-model.ts`: `buildCourtsModel(dataset, repoBase)` returning `stats`, `repoLinks` (trailing slashes stripped, `/blob/main/data/standing-orders.json` and `/blob/main/data/README.md`; null when Repo_Base is null), `inactiveIds`, `words`, `titles`
     - `apps/web/src/courts/intro.ts`: `introText(stats, repoLinks)`; every figure comes from `orderStats`, none is a literal; states each instrument was read from the court's own text and that the data is CC0
     - `apps/web/src/courts/hash.ts`: `decodeHash` (catches only `URIError`, returns the raw text) and `showInactiveForHash`
