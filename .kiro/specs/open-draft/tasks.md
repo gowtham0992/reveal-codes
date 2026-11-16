@@ -76,7 +76,7 @@ Conventions that apply to every task:
     - **Property 8: The statement and the Appendix are never body text**
     - Same file as 2.9. Documents including a line equal to a member of `STATEMENT_TITLES`; for a restore and a body-only import no paragraph at or after the Filing_End is in the installed text.
     - **Validates: Requirements 11.1, 11.2, 11.3**
-  - [-] 2.12 Write reader and `readWordDraft` examples
+  - [x] 2.12 Write reader and `readWordDraft` examples
     - Files under `packages/export/test/`. The `.docx` fixture of Requirement 19 criterion 3 (table, tracked deletion and insertion, two footnotes, one endnote, separators never numbered) with the exact text, the Notes_Block and its wording; `readDocx` returns the same paragraphs as before for the Sentinel (no notes); `isCompoundFile` cases; the oversize-part zip (declared size versus real size) settles the `fflate` size-header question; `readWordDraft` for plain, restored, changed and each refusal (damaged, truncated, no `word/document.xml`, encrypted, no filing end); the Sentinel and `readWordDraft` agree on an edited fixture; static check that no moved module exists in `crew/sentinel/src`, that the shared modules import no `node:` or DOM, and that the Engine has no runtime dependency.
     - _Requirements: 1.3, 1.4, 1.5, 1.9, 6.2, 6.3, 6.4, 6.5, 6.6, 6.8, 7.1, 7.2, 7.3, 9.9, 10.8, 11.3, 11.4, 14.1, 14.2, 14.9, 14.10, 19.3, 19.8, 19.13_
 
