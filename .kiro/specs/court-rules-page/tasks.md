@@ -21,7 +21,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Export `OrderDataset` and `OrderVocabulary` from `index.ts`; no existing export changes shape
     - _Requirements: 1.6_
 
-  - [-] 2.2 Replace the `negative_certification_when_unused` vocabulary sentence and regenerate the Power copy
+  - [x] 2.2 Replace the `negative_certification_when_unused` vocabulary sentence and regenerate the Power copy
     - Replace only `vocabulary.elements.negative_certification_when_unused` in `data/standing-orders.json` with the exact text of requirement 15.1; leave every entry byte for byte unchanged and keep the file's formatting
     - Run `pnpm power:build` so `powers/citation-check/skills/court-ai-rules/references/standing-orders.json` equals the dataset
     - _Requirements: 15.1, 15.2, 15.3_
