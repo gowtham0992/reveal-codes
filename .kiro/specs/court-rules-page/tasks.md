@@ -87,11 +87,11 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Imports only from `src/`; no fetch, no API route, no mark or wordmark
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.7, 2.8, 11.1, 11.2_
 
-  - [~] 5.5 Write page content tests in `apps/web/test/courts-page.test.tsx`
+  - [x] 5.5 Write page content tests in `apps/web/test/courts-page.test.tsx`
     - Every id appears exactly once as an `id` attribute; intro figures equal `orderStats`; each superseded link target exists on the page; In_Force ids have the encoded Order_Link at any viewport width and Not_In_Force ids have none; no `retrieved`, `source_kind` or `notes` text; Repo_Base unset, set with a trailing slash, set without one; metadata has exactly `title` and `description`
     - _Requirements: 1.3, 2.2, 2.5, 2.6, 4.10, 4.11, 5.1, 5.2, 7.1, 7.2, 8.13, 11.2, 16.1, 16.2, 16.3, 16.7, 16.9_
 
-  - [~] 5.6 Write filter UI tests in `apps/web/test/courts-browser.test.tsx`
+  - [-] 5.6 Write filter UI tests in `apps/web/test/courts-browser.test.tsx`
     - Controls absent before mount and present after; initial state; checkbox ticked from a hash naming a superseded id; Count_Line text and `role="status"`; empty-result sentence; empty groups omitted; Court_Group and instrument order on the rendered page equals the order from `courtGroups`
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 5.4, 6.1, 6.3, 6.6, 6.7, 6.9, 16.4_
 
