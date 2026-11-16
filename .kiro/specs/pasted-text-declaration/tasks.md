@@ -153,7 +153,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 10. Samples and demo path
-  - [-] 10.1 Confirm both samples land with a Pending Declaration
+  - [x] 10.1 Confirm both samples land with a Pending Declaration
     - `installDocument` dispatches `replace` with no Declaration for Load demo motion, Load the Avianca citations and New. Both samples remain one `PST` insert, so the subject is `pasted_text` and the dialog asks.
     - Update the web demo walkthrough tests to make the declaration (Declaration_Choice_AI with a named tool under N.D. Tex.) before asserting the export buttons are enabled.
     - _Requirements: 10.1, 10.2, 10.5, 10.6_
