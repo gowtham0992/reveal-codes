@@ -35,6 +35,7 @@ export function ShellToolbar(props: ShellToolbarProps) {
       notice={verify.waiting ? WAITING_TEXT : notice}
       step={step}
       onNew={actions.onNew}
+      onOpen={actions.onOpen}
       onLoadDemo={actions.onLoadDemo}
       paneOpen={pane.open}
       verifyDisabled={verify.disabled}

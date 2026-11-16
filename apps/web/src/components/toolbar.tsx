@@ -15,6 +15,7 @@ export type ToolbarProps = Readonly<{
   /** True when the Document has no character other than whitespace. */
   exportDisabled?: boolean;
   onNew?: () => void;
+  onOpen?: () => void;
   onLoadDemo?: () => void;
   onVerify?: () => void;
   onTogglePane?: () => void;
@@ -50,22 +51,31 @@ function ExportButton(props: ToolbarProps) {
     </button>
   );
 }
+function FileGroup(props: ToolbarProps) {
+  return (
+    <div role="group" className={styles["group"]}>
+      <button type="button" onClick={props.onNew}>
+        New
+      </button>
+      <button type="button" onClick={props.onOpen}>
+        Open
+      </button>
+      <button
+        type="button"
+        data-primary={primary(props.step, "load-demo")}
+        onClick={props.onLoadDemo}
+      >
+        Load demo motion
+      </button>
+    </div>
+  );
+}
+
 export function Toolbar(props: ToolbarProps) {
   return (
     <div role="toolbar" aria-label="Document actions" className={styles["toolbar"]}>
       <Wordmark />
-      <div role="group" className={styles["group"]}>
-        <button type="button" onClick={props.onNew}>
-          New
-        </button>
-        <button
-          type="button"
-          data-primary={primary(props.step, "load-demo")}
-          onClick={props.onLoadDemo}
-        >
-          Load demo motion
-        </button>
-      </div>
+      <FileGroup {...props} />
       <div role="group" className={styles["group"]}>
         <button
           type="button"

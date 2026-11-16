@@ -39,7 +39,7 @@ describe("EditorSurface _Requirements: 6.5, 6.6, 10.3_", () => {
     const placeholder = screen.getByText(EDITOR_PLACEHOLDER);
     expect(placeholder.getAttribute("aria-hidden")).toBe("true");
     expect(EDITOR_PLACEHOLDER).toBe(
-      "Type or paste your filing here. Load demo motion to see a worked example.",
+      "Type or paste your filing here, or open a draft.",
     );
   });
 

@@ -214,6 +214,8 @@ function Shell({ svc }: Readonly<{ svc: AppServices }>) {
         editor={s.binding.editor}
         empty={s.doc.text.length === 0}
         onLoadSample={s.actions.onLoadSample}
+        onOpenDraft={s.actions.onOpen}
+        openInput={s.actions.openInput}
       />
       <IssuesSlot {...s.issues} />
       {s.exportGate.dialog}

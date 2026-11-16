@@ -33,6 +33,36 @@ const arbGapDocument: fc.Arbitrary<Case> = fc
     return { document: set.value, withResult: true, hasFull: true };
   });
 
+type Step = ReturnType<typeof nextStep>;
+
+/** The rule before open-draft, as a table: key is verifying, empty, verifiableUnchecked above 0. */
+const OLD_RULE: Readonly<Record<string, Step>> = {
+  "true,true,true": "none",
+  "true,true,false": "none",
+  "true,false,true": "none",
+  "true,false,false": "none",
+  "false,true,true": "load-demo",
+  "false,true,false": "load-demo",
+  "false,false,true": "verify",
+  "false,false,false": "export",
+};
+
+describe("Property 6: outside the gap the Next_Step is unchanged _Requirements: 13.14_", () => {
+  it("equals the pre-change rule table whenever needsCheckDate is false", () => {
+    // Property 6
+    fc.assert(
+      fc.property(arbNextStepInput, (input) => {
+        const outside = { ...input, needsCheckDate: false };
+        const key = [outside.verifying, outside.empty, outside.verifiableUnchecked > 0]
+          .map(String)
+          .join(",");
+        expect(nextStep(outside)).toBe(OLD_RULE[key]);
+      }),
+      { numRuns: runs() },
+    );
+  });
+});
+
 describe("Property 5: a missing check date makes Verify the next step _Requirements: 13.11, 13.13_", () => {
   it("gives verify in the gap whatever the counts, keeps the rule order, and ties the gap to verifiedAt", async () => {
     // Property 5

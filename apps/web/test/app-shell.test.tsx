@@ -93,6 +93,7 @@ describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () =
     const buttons = within(bar).getAllByRole("button");
     expect(buttons.map((b) => b.textContent)).toEqual([
       "New",
+      "Open",
       "Load demo motion",
       "Verify",
       "Show codes (Alt-F3)",

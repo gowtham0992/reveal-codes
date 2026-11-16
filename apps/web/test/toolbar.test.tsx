@@ -53,7 +53,14 @@ describe("Toolbar _Requirements: 10.1, 10.2, 10.6, 10.7_", () => {
     const names = within(bar)
       .getAllByRole("button")
       .map((b) => b.textContent);
-    expect(names).toEqual(["New", "Load demo motion", "Verify", "Show codes (Alt-F3)", "Export"]);
+    expect(names).toEqual([
+      "New",
+      "Open",
+      "Load demo motion",
+      "Verify",
+      "Show codes (Alt-F3)",
+      "Export",
+    ]);
   });
 
   it("contains no Mode_Text", () => {
@@ -69,7 +76,7 @@ describe("Toolbar _Requirements: 10.1, 10.2, 10.6, 10.7_", () => {
     const groups = within(bar).getAllByRole("group");
     expect(groups).toHaveLength(3);
     expect(groups.map((g) => [...g.querySelectorAll("button")].map((b) => b.textContent))).toEqual([
-      ["New", "Load demo motion"],
+      ["New", "Open", "Load demo motion"],
       ["Verify"],
       ["Show codes (Alt-F3)", "Export"],
     ]);

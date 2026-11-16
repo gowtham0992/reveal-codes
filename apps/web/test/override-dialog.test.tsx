@@ -38,7 +38,7 @@ function Harness(props: { store: Store; issueKey: string; issueText?: string }) 
           setOpen(true);
         }}
       >
-        Open
+        Open override dialog
       </button>
       {open ? (
         <OverrideDialog
@@ -59,7 +59,7 @@ function Harness(props: { store: Store; issueKey: string; issueText?: string }) 
 }
 
 function openDialog(): HTMLElement {
-  const opener = screen.getByRole("button", { name: "Open" });
+  const opener = screen.getByRole("button", { name: "Open override dialog" });
   opener.focus();
   act(() => {
     fireEvent.click(opener);

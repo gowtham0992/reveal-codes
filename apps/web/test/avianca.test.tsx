@@ -27,7 +27,7 @@ const DEMO = readFileSync(
   "utf8",
 );
 const FAILED = "The Avianca citations could not be loaded. Your document is unchanged.";
-const LINK_NAMES = ["Load demo motion", "Load the Avianca citations"];
+const LINK_NAMES = ["Open a draft", "Load demo motion", "Load the Avianca citations"];
 
 function typed(text: string): Document {
   const created = createDocument("", ISO);

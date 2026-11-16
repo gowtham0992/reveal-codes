@@ -11,6 +11,7 @@ import { saveDraftCopy } from "../saved-draft";
 import type { AppServices } from "../services";
 import type { Store } from "../store-runtime";
 import { ConfirmDialog } from "./confirm-dialog";
+import { useOpenDraft } from "./use-open-draft";
 
 export const DEMO_FAILED = "Could not load the demo motion.";
 
@@ -106,10 +107,10 @@ function saveCopyOrNotice(svc: AppServices, store: Store): void {
 export function useDocumentActions(deps: Deps) {
   const { store, svc, gate, doc } = deps;
   const { pending, setPending, opener, ask } = useDialogOpener();
+  const open = useOpenDraft(store, svc);
   const confirm = (): void => {
-    const kind = pending;
     setPending(null);
-    if (kind !== null) runPending(kind, deps);
+    if (pending !== null) runPending(pending, deps);
   };
   return {
     onNew: (): void => {
@@ -121,6 +122,8 @@ export function useDocumentActions(deps: Deps) {
     onSaveDraftCopy: (): void => {
       saveCopyOrNotice(svc, store);
     },
+    /** `openDraft(file)` is the one function the Picker and the drop (task 8.4) both call. */
+    ...open.api,
     onLoadDemo: (): void => {
       if (doc.text.length === 0) runPending("demo", deps);
       else ask("demo");
@@ -130,15 +133,14 @@ export function useDocumentActions(deps: Deps) {
       else ask(key);
     },
     dialog:
-      pending === null ? null : (
+      open.dialog ??
+      (pending === null ? null : (
         <ConfirmDialog
           {...COPY[pending]}
           restoreFocus={opener}
           onConfirm={confirm}
-          onCancel={() => {
-            setPending(null);
-          }}
+          onCancel={() => { setPending(null); }}
         />
-      ),
+      )),
   };
 }
