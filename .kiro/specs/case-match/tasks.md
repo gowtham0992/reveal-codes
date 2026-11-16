@@ -515,7 +515,7 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - In `apps/web/src/autosave.ts` add the optional `gate` dependency: `schedule` starts no timer and keeps no pending job while blocked, `write` drops a pending job while blocked, and `clear()` returns `boolean` (true when the key was removed; false after calling `onError`). With no gate the behaviour is unchanged.
     - _Requirements: 23.4, 23.20_
 
-  - [-] 23.2 Block on load and move the autosave wiring into a plain function
+  - [x] 23.2 Block on load and move the autosave wiring into a plain function
     - In `apps/web/src/components/use-autosave.ts` give `loadAutosave(services, store, gate?)` the rule: a value is present and `deserialise` fails with any kind other than `absent` (`not_json`, `bad_shape`, `bad_codes`), call `gate?.block()`, leave the empty Document and write nothing. A thrown read leaves the gate open.
     - Move the subscription, the `visibilitychange` and `pagehide` listeners and the cleanup into an exported `startAutosave(services, store, autosave, gate)` that returns its stop function. `useAutosave(store, services, autosave, gate)` calls it from its effect. Below `NARROW_WIDTH` nothing is read or blocked.
     - In `app-shell.tsx`, `useShellParts` creates the gate, passes it to `createAutosave` and `useAutosave`, and returns it.
