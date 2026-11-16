@@ -413,7 +413,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 18. Say what the mismatch is where the author decides (Requirement 19)
-  - [-] 18.1 Add the shared lines and use them in the Issues row
+  - [x] 18.1 Add the shared lines and use them in the Issues row
     - Create `apps/web/src/client/mismatch.ts` with `mismatchOf(document, key)` and `mismatchLines(m)` and `apps/web/src/components/mismatch-lines.tsx` rendering the lines as `p` elements with a `className` prop.
     - `mismatchOf` returns `null` unless the key is a Full record with the status `wrong_case`; `cited` is `rec.citation.caseName ?? null` from the Document passed in; `found` is `<foundName> (<foundYear>)` or `<foundName>`. `mismatchLines` returns `Cited as <cited>` (only when not null) then `This citation is <found>`, with no trailing full stop.
     - In `issues-list.tsx` replace the `wrongCaseFor` line with these, keep the `CourtListenerLink` and `courtListenerLink` use, and place the two lines directly under the citation text. Keep the buttons, the severity words and the `Overridden:` line.
