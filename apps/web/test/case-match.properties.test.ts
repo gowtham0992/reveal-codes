@@ -2,12 +2,24 @@ import * as fc from "fast-check";
 import { setVerification } from "@reveal-codes/engine";
 import type { Document, IssueKey, VerificationResult } from "@reveal-codes/engine";
 import type { DisplayInfo } from "@reveal-codes/verifier/link";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolvedRows } from "../src/client/resolved";
 import { summaryLines } from "../src/client/verify-summary";
 import type { ResolvedSession } from "../src/client/resolved";
-import { CLUSTER_POOL, arbCitingDocument } from "./arbitraries";
+import { CLUSTER_POOL, arbCitingDocument, arbUnreadableStored } from "./arbitraries";
+import { arbCreatedDocument } from "../../../packages/engine/src/testing/arb-document";
+import { arbOpSequence } from "../../../packages/engine/src/testing/arb-ops";
+import { createAutosave } from "../src/autosave";
+import { startAutosave } from "../src/components/use-autosave";
+import { createDraftGate } from "../src/draft-gate";
+import { AUTOSAVE_KEY, deserialise } from "../src/persist";
+import type { AppServices } from "../src/services";
+import { createStore } from "../src/store-runtime";
+import { createManualTimers } from "./support/clock";
 import { runs } from "./support/fc";
+import { createMemoryStorage } from "./support/memory-storage";
+import { modeApi } from "./support/mode-fetch";
+import { createFakeViewport } from "./support/viewport";
 
 const OTHER_CLUSTER = "999";
 
@@ -175,6 +187,72 @@ describe("Citations line _Requirements: 7.9_", () => {
         expect(line?.includes(`${String(wrong)} wrong case`) ?? false).toBe(wrong > 0);
         expect(line?.includes("wrong case") ?? false).toBe(wrong > 0);
       }),
+      { numRuns: runs() },
+    );
+  });
+});
+
+describe("An unreadable stored draft is never changed _Requirements: 23.23_", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  // Property 20
+  it("load, edits, a wait, flush, hidden and unmount leave the stored value equal and call setItem zero times", () => {
+    const arbRun = arbCreatedDocument.chain((start) =>
+      arbOpSequence(start).map((ops) => ({ start, ops })),
+    );
+    fc.assert(
+      fc.property(
+        arbUnreadableStored,
+        arbRun,
+        fc.integer({ min: 300, max: 5000 }),
+        (raw, { start, ops }, wait) => {
+          const rejected = deserialise(raw);
+          expect(!rejected.ok && rejected.error.kind !== "absent").toBe(true);
+
+          const storage = createMemoryStorage();
+          (storage.data as Map<string, string>).set(AUTOSAVE_KEY, raw);
+          const timers = createManualTimers();
+          const services: AppServices = {
+            api: modeApi("fixtures").api,
+            now: timers.clock.now,
+            setTimer: (fn, ms) => timers.setTimeout(fn, ms),
+            clearTimer: (h) => {
+              timers.clearTimeout(h as number);
+            },
+            storage,
+            download: () => undefined,
+            openPrint: () => true,
+            viewport: createFakeViewport(1280),
+          };
+          const gate = createDraftGate();
+          const store = createStore(timers.clock.now);
+          const autosave = createAutosave({
+            storage,
+            setTimer: services.setTimer,
+            clearTimer: services.clearTimer,
+            onError: () => undefined,
+            gate,
+          });
+
+          const fakeDocument = Object.assign(new EventTarget(), { visibilityState: "visible" });
+          vi.stubGlobal("document", fakeDocument);
+          vi.stubGlobal("window", new EventTarget());
+          const stop = startAutosave(services, store, autosave, gate);
+          store.dispatch({ type: "replace", document: start, runLog: [], verifiedAt: null });
+          store.dispatch({ type: "edit", ops });
+          timers.advance(wait);
+          autosave.flush();
+          fakeDocument.visibilityState = "hidden";
+          fakeDocument.dispatchEvent(new Event("visibilitychange"));
+          stop();
+
+          expect(storage.getItem(AUTOSAVE_KEY)).toBe(raw);
+          expect(storage.writes()).toBe(0);
+          expect(gate.blocked()).toBe(true);
+        },
+      ),
       { numRuns: runs() },
     );
   });

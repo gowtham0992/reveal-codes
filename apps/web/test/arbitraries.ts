@@ -1,5 +1,11 @@
 import * as fc from "fast-check";
-import { apply, createDocument } from "@reveal-codes/engine";
+import { apply, createDocument, render } from "@reveal-codes/engine";
+import { deserialise } from "../src/persist";
+import {
+  arbSemanticTamper,
+  arbSyntaxFault,
+  arbTamperDocument,
+} from "../../../packages/engine/src/testing/arb-codes";
 import { PANE_ALLOWED, PRINT_COLOUR_VALUES, TOKEN_VALUES } from "./static/css-colours";
 import type { CallerOperation, Document, VerificationResult } from "@reveal-codes/engine";
 import { arbCreatedDocument, arbDocument } from "../../../packages/engine/src/testing/arb-document";
@@ -292,3 +298,65 @@ export const arbStrayColour = (): fc.Arbitrary<string> =>
       .map(([r, g, b, a]) => `rgba(${String(r)}, ${String(g)}, ${String(b)}, ${String(a)})`),
     fc.constantFrom(...STRAY_NAMED),
   );
+
+const arbNotJson: fc.Arbitrary<string> = fc
+  .tuple(fc.constantFrom("{", "[1", "v1:", '{"version":1,'), fc.string({ maxLength: 40 }))
+  .map(([prefix, rest]) => `${prefix}${rest}`)
+  .filter((raw) => {
+    const r = deserialise(raw);
+    return !r.ok && r.error.kind === "not_json";
+  });
+
+const arbWrongShape: fc.Arbitrary<string> = fc
+  .oneof(
+    fc.jsonValue().map((v) => JSON.stringify(v)),
+    fc
+      .record({
+        version: fc.constantFrom(0, 2, "1", null, true),
+        codes: fc.string({ maxLength: 20 }),
+        runLog: fc.constant([]),
+        verifiedAt: fc.constant(null),
+      })
+      .map((v) => JSON.stringify(v)),
+    fc
+      .record({
+        version: fc.constant(1),
+        codes: fc.oneof(fc.integer(), fc.constant(null), fc.array(fc.string(), { maxLength: 2 })),
+        runLog: fc.constant([]),
+        verifiedAt: fc.constant(null),
+      })
+      .map((v) => JSON.stringify(v)),
+    fc
+      .record({
+        version: fc.constant(1),
+        codes: fc.string({ maxLength: 20 }),
+        runLog: fc.oneof(fc.constant("x"), fc.constant([{ runId: 1 }])),
+        verifiedAt: fc.constant(null),
+      })
+      .map((v) => JSON.stringify(v)),
+  )
+  .filter((raw) => {
+    const r = deserialise(raw);
+    return !r.ok && r.error.kind === "bad_shape";
+  });
+
+function envelope(codes: string): string {
+  return JSON.stringify({ version: 1, codes, runLog: [], verifiedAt: null });
+}
+
+const arbBadCodes: fc.Arbitrary<string> = fc
+  .oneof(
+    arbDocument.chain((d) => arbSyntaxFault(render(d, "full").text)).map((f) => envelope(f.text)),
+    arbTamperDocument.chain((d) => arbSemanticTamper(d)).map((t) => envelope(t.text)),
+  )
+  .filter((raw) => {
+    const r = deserialise(raw);
+    return !r.ok && r.error.kind === "bad_codes";
+  });
+
+/** Property 20 input: a stored string `deserialise` rejects with not_json, bad_shape or bad_codes. */
+export const arbUnreadableStored: fc.Arbitrary<string> = fc.oneof(
+  arbNotJson,
+  arbWrongShape,
+  arbBadCodes,
+);

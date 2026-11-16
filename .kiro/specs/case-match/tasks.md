@@ -478,7 +478,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
 
 Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new and written from the design section "Second follow-up". No task commits or pushes.
 
-- [ ] 22. Reachability tests without a seed (Requirement 22)
+- [x] 22. Reachability tests without a seed (Requirement 22)
   - [x] 22.1 Measure the kind frequencies before changing anything
     - Do this first, with no code changed. Write a throwaway script under `packages/engine/` (for example `measure-kinds.tmp.ts`), run it with the package's `tsx` runner, and delete it before the task ends. Do not commit it.
     - Draw 100,000 values of `arbTamperDocument.chain((d) => arbSemanticTamper(d))` with `fc.sample` (use 20,000 and say so if 100,000 takes more than about ten minutes). Print each `TamperKind` with its count and rate, sorted ascending, the number of members of `TAMPER_KINDS`, and `(1 - p)^1500` for the rarest kind. Print the same for the Syntax_Fault_Kinds over `arbDocument.chain((d) => arbSyntaxFault(render(d, "full").text))` and the share of draws with more than one fault.
@@ -503,7 +503,7 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - Replace the seeded `ref_payload` test with the per-kind case for `ref_payload` (rule `bad_field`, text starting `[REF{k=k0}]` at the index), and replace the seeded reachability test in `packages/engine/test/codes.properties.test.ts` (line near 202) with a reference to the per-kind test. Do not weaken any assertion: every member of both exported lists must still be shown reachable.
     - _Requirements: 22.1, 22.2, 22.3, 22.4, 22.5, 22.6, 22.7, 22.8_
 
-  - [~] 22.5 Audit the other reachability tests
+  - [x] 22.5 Audit the other reachability tests
     - Search every package, `apps/web` and `crew/sentinel` for tests that collect kinds, statuses or codes over random runs and compare them with a list: `fc.sample(`, `new Set<` followed by an `fc.assert` callback that adds to it, and `.sort()).toEqual(` against an exported list. Read each hit.
     - Convert any whose draw is not seeded to per-kind draws as in task 22.4. Leave the seeded `fc.sample` checks (known: `arb-edit.test.ts` seeds 42, 7, 3 and 11, 13; `arbitraries.test.ts` seed 1; `arb-citation.test.ts`; `arb-segment-inputs.test.ts`; `arb-text-citations.test.ts`; `arb-api.test.ts`; `incremental.test.ts`; `rate-limit.properties.test.ts`) unless the audit shows one that is not deterministic.
     - Record in the BUILD_LOG entry of task 24.2 every test examined, with its seed or "unseeded", and what was done.
@@ -538,7 +538,7 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - In `use-export.tsx`, `printFlow` checks the gate first and dispatches `PRINT_BLOCKED` without calling `autosave` or `openPrint`.
     - _Requirements: 23.10, 23.12, 23.13, 23.14, 23.15, 23.16, 23.17, 23.18_
 
-  - [~] 23.6 Write the example tests for the unreadable draft
+  - [-] 23.6 Write the example tests for the unreadable draft
     - New `apps/web/test/unreadable-draft.test.tsx`, rendering `AppShell` with the memory storage and the manual timers of `test/support`: for each of `not_json`, `bad_shape` and `bad_codes` (the last from the old pincite draft of `autosave-old-pincite.test.ts`), the stored value survives the load, typing and a 300 ms wait (compare `storage.getItem` and `storage.writes()` before and after); the notice text and the two buttons are present, the notice sits in a polite status region and the buttons are outside it; the notice leaves the blocking count, the Issues heading, the Export button, the Next_Step and `No issues.` as they are.
     - Save a copy: the `download` double receives the stored bytes unchanged (an ASCII value, a non-ASCII value, the old pincite draft), the name `reveal-codes-saved-draft.txt` and the type `text/plain;charset=utf-8`, and the stored value and the notice stay; with `getItem` returning `null` or `download` throwing, `SAVE_COPY_FAILED` shows.
     - Start a new document: the confirm dialog shows the title, message and label of the design; cancelling changes nothing; confirming clears the stored value, empties the page, removes the notice and a later edit is saved after 300 ms; with a storage whose `removeItem` throws, `AUTOSAVE_FAILED` shows, the notice stays and nothing is written. The Toolbar's New button while blocked opens the same dialog.
@@ -547,7 +547,7 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - Edit any existing test that breaks because `clear()` returns `boolean` or `download` has a third parameter, and list it for the BUILD_LOG. `autosave-old-pincite.test.ts` must pass unedited.
     - _Requirements: 23.1, 23.3, 23.4, 23.5, 23.6, 23.7, 23.8, 23.9, 23.10, 23.11, 23.12, 23.13, 23.14, 23.15, 23.16, 23.17, 23.18, 23.19, 23.22, 23.25_
 
-  - [~]* 23.7 Write property test for the unreadable stored draft
+  - [x]* 23.7 Write property test for the unreadable stored draft
     - In `apps/web/test/case-match.properties.test.ts` add `// Property 20` above one `fc.assert(fc.property(...))`, a describe title ending `_Requirements: 23.23_`, and `numRuns` from the web `runs()` helper.
     - **Property 20: An unreadable stored draft is never changed by load, typing or saving**
     - Add `arbUnreadableStored` to `apps/web/test/arbitraries.ts` with three branches: text that is not JSON, JSON of the wrong shape or version (built from `fc.jsonValue()` and forced fields), and a well-formed envelope whose `codes` come from the engine's `arbSemanticTamper` or `arbSyntaxFault`. Inside the property, assert `deserialise(raw)` is an error other than `absent`, then run `loadAutosave` and `startAutosave` over `createMemoryStorage`, the manual timers and a `createDraftGate`, dispatch edits from `arbOpSequence` to the store, advance 300 ms or more, call `flush`, fire a hidden visibility change and stop; assert the stored value equals `raw` and `setItem` was not called after the seed.

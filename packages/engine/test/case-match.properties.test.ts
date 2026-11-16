@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { extract } from "../src/citations/extract";
 import { parse, render } from "../src/codes";
 import { structuralEqual } from "../src/equal";
+import { createDocument } from "../src/document";
+import type { Document, VerificationResult } from "../src/types";
 import { arbDocument, arbExpressionDocument } from "../src/testing/arbitraries";
 import { runs } from "./support/fc";
 import {
@@ -29,6 +31,29 @@ import {
   checkOverrideSurvival,
   shortFormDocument,
 } from "./support/case-match-malformed";
+import { TIMESTAMP } from "./support/case-match-scenario";
+
+/**
+ * Fixed examples for Property 7, run before the random runs. A wrong_case to
+ * wrong_case rewrite with a different name drew about 5% of random runs, so
+ * at 200 runs alone the tally guard below missed about 1 run in 40,000. These
+ * make the guard hold on every run. fast-check counts examples inside
+ * `numRuns`, so the count is raised by their number to keep `runs()` random runs.
+ */
+const OVERRIDE_START = createDocument("See Roe v. Wade, 410 U.S. 113 (1973).", TIMESTAMP);
+const wrong = (foundName: string): VerificationResult => ({
+  status: "wrong_case",
+  clusterId: "1",
+  foundName,
+});
+const OVERRIDE_EXAMPLES: [Document, number, VerificationResult, VerificationResult, string][] =
+  OVERRIDE_START.ok
+    ? [
+        [OVERRIDE_START.value, 0, wrong("Doe v. Roe"), wrong("Poe v. Roe"), "reason"],
+        [OVERRIDE_START.value, 0, wrong("Doe v. Roe"), { status: "not_found" }, "reason"],
+        [OVERRIDE_START.value, 0, { status: "not_found" }, { status: "not_found" }, "reason"],
+      ]
+    : [];
 
 // Property 19
 describe("case-match a pincite expression extends the citation and leaves its value _Requirements: 18.15_", () => {
@@ -156,7 +181,7 @@ describe("case-match an Override survives only an unchanged status _Requirements
           checkOverrideSurvival(start, pick, previous, next, reason, tally);
         },
       ),
-      runs(),
+      { numRuns: runs().numRuns + OVERRIDE_EXAMPLES.length, examples: OVERRIDE_EXAMPLES },
     );
     expect(tally.kept).toBeGreaterThan(0);
     expect(tally.dropped).toBeGreaterThan(0);

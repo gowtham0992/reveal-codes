@@ -72,6 +72,18 @@ function check(c: ExportCase): number {
   return counts.wrong_case;
 }
 
+/**
+ * A Document with a wrong_case citation drew about 6% of random runs, so at
+ * 200 runs alone the guard below missed about 1 run in 130,000. This fixed
+ * example (seed 1) makes it hold on every run. fast-check counts examples
+ * inside `numRuns`, so the count is raised by their number.
+ */
+const WRONG_CASE_EXAMPLES: [ExportCase][] = fc
+  .sample(arbExportCase, { numRuns: 400, seed: 1 })
+  .filter((c) => expectedOf(c.document).counts.wrong_case > 0)
+  .slice(0, 1)
+  .map((c): [ExportCase] => [c]);
+
 describe("statement citation counts _Requirements: 8.1, 8.2, 8.3, 8.4_", () => {
   // Property 14
   it("P14 the five counts sum to the Full_Citations, wrong_case has its own term and Status cell", () => {
@@ -80,7 +92,7 @@ describe("statement citation counts _Requirements: 8.1, 8.2, 8.3, 8.4_", () => {
       fc.property(arbExportCase, (c) => {
         wrongCaseSeen += check(c);
       }),
-      { numRuns: runs() },
+      { numRuns: runs() + WRONG_CASE_EXAMPLES.length, examples: WRONG_CASE_EXAMPLES },
     );
     expect(wrongCaseSeen).toBeGreaterThan(0);
   }, 120_000);
