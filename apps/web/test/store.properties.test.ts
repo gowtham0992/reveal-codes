@@ -17,6 +17,7 @@ describe("Property 3: undo restores exactly _Requirements: 8.5, 8.6, 8.11_", () 
           redo: [],
           runLog: [],
           verifiedAt: null,
+          declaration: null,
           notice: null,
           epoch: 0,
         };

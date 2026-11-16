@@ -28,7 +28,7 @@ function headerOptions(heading: FirstPageHeading | null) {
 
 /** Packs the filing, Statement_Text and Appendix. Rejects if the packer result is not bytes. */
 export async function buildDocx(document: Document, statement: Statement): Promise<Uint8Array> {
-  const appendix = buildAppendix(document);
+  const appendix = buildAppendix(document, statement.declaration);
   const file = new DocxDocument({
     creator: CREATOR,
     lastModifiedBy: CREATOR,

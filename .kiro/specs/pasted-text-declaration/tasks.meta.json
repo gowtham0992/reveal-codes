@@ -1,5 +1,10 @@
 {
-  "pbtResults": {},
+  "pbtResults": {
+    "11.1 Write the property test for the Statement text": {
+      "status": "passed",
+      "lastRunTimestamp": 1794800819425
+    }
+  },
   "executionHistory": {
     "1.1 Replace the `[DOC]` line in `.kiro/steering/product.md` (the Structural codes list, line 88)": [
       {
@@ -159,6 +164,16 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800255277
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800712168
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800918366
       }
     ],
     "3.6 Update existing Export package tests and fixtures": [
@@ -180,6 +195,11 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800255343
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800712202
       }
     ],
     "5.2 Persist the Declaration in `apps/web/src/persist.ts` and `apps/web/src/autosave.ts`": [
@@ -232,6 +252,11 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800255454
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800712239
       }
     ],
     "8.1 Add `recordedRecord` to `crew/sentinel/src/recorded.ts`": [
@@ -284,6 +309,11 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800255567
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800712562
       }
     ],
     "11.2 Write the property test for the gate": [
@@ -291,6 +321,11 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800255586
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800713052
       }
     ],
     "11.3 Write the property test for the record round trip": [

@@ -1,6 +1,7 @@
 import { createDocument } from "@reveal-codes/engine";
 import type {
   CallerOperation,
+  Declaration,
   Document,
   EngineError,
   IssueKey,
@@ -9,6 +10,7 @@ import type {
 } from "@reveal-codes/engine";
 import type { UndoEntry } from "./history";
 import {
+  reduceDeclaration,
   reduceEdit,
   reduceHistory,
   reduceOverride,
@@ -36,6 +38,8 @@ export type StoreState = Readonly<{
   runLog: readonly RunLogEntry[];
   /** ISO instant of the last completed Verify, or null. */
   verifiedAt: string | null;
+  /** The stored Declaration about pasted text; apply it with applicableDeclaration at use sites. */
+  declaration: Declaration | null;
   notice: string | null;
   epoch: number;
 }>;
@@ -55,7 +59,9 @@ export type StoreAction =
       document: Document;
       runLog?: readonly RunLogEntry[];
       verifiedAt?: string | null;
+      declaration?: Declaration | null;
     }>
+  | Readonly<{ type: "declaration"; declaration: Declaration | null }>
   | Readonly<{ type: "verified"; at: string }>
   | Readonly<{ type: "notice"; text: string | null }>;
 
@@ -81,6 +87,7 @@ export function initialState(now: () => Date): StoreState {
     redo: [],
     runLog: [],
     verifiedAt: null,
+    declaration: null,
     notice: null,
     epoch: 0,
   };
@@ -100,7 +107,9 @@ export function reduce(state: StoreState, action: StoreAction, now: () => Date):
     case "override":
       return reduceOverride(state, action);
     case "replace":
-      return reduceReplace(state, action.document, action.runLog, action.verifiedAt);
+      return reduceReplace(state, action.document, action.runLog, action.verifiedAt, action.declaration);
+    case "declaration":
+      return reduceDeclaration(state, action.declaration);
     case "verified":
       return reduceVerified(state, action.at);
     case "notice":

@@ -1,5 +1,13 @@
 import { apply, recordOverride, setQuoteCheck, setVerification } from "@reveal-codes/engine";
-import type { CallerOperation, Document, EngineError, Inverse, Result } from "@reveal-codes/engine";
+import type {
+  CallerOperation,
+  Declaration,
+  Document,
+  EngineError,
+  Inverse,
+  Result,
+} from "@reveal-codes/engine";
+import { declarationAfter, insertedPasted } from "./declaration-clearing";
 import { pushEdit, runRedo, runUndo } from "./history";
 import { noticeForError, noticeForHistoryError } from "./notices";
 import type { ActionResult, RunLogEntry, StoreAction, StoreState } from "./store";
@@ -47,7 +55,20 @@ export function reduceEdit(
   if (applied.inverses.length === 0) return result(state);
   const undo = pushEdit(state.undo, applied.inverses, ops, nowMs);
   const runLog = run === undefined ? state.runLog : withRun(state.runLog, run);
-  const next = { ...state, document: applied.document, undo, redo: [], runLog, notice: null };
+  const declaration = declarationAfter(
+    state.declaration,
+    applied.document,
+    insertedPasted(ops),
+  );
+  const next = {
+    ...state,
+    document: applied.document,
+    undo,
+    redo: [],
+    runLog,
+    declaration,
+    notice: null,
+  };
   return result(next, { changed: true });
 }
 
@@ -75,7 +96,16 @@ export function reduceHistory(state: StoreState, direction: "undo" | "redo"): Ac
       ? { ...state, undo: rest, redo: [...state.redo, produced] }
       : { ...state, redo: rest, undo: [...state.undo, produced] };
   return result(
-    { ...next, document: stepped.value.document, notice: null },
+    {
+      ...next,
+      document: stepped.value.document,
+      declaration: declarationAfter(
+        state.declaration,
+        stepped.value.document,
+        insertedPasted(entry.group),
+      ),
+      notice: null,
+    },
     { changed: true, caret: stepped.value.caret },
   );
 }
@@ -131,15 +161,25 @@ export function reduceReplace(
   document: Document,
   runLog: readonly RunLogEntry[] | undefined,
   verifiedAt?: string | null,
+  declaration?: Declaration | null,
 ): ActionResult {
   const next: StoreState = {
     ...barrier(state, document),
     runLog: runLog ?? [],
     verifiedAt: verifiedAt ?? null,
+    declaration: declarationAfter(declaration ?? null, document, false),
     notice: null,
     epoch: state.epoch + 1,
   };
   return result(next, { changed: true });
+}
+
+/** `declaration`: stores the author's answer as given; no Document change. */
+export function reduceDeclaration(
+  state: StoreState,
+  declaration: Declaration | null,
+): ActionResult {
+  return result({ ...state, declaration });
 }
 
 /** `verified`: records the Verify time; no Document change, so no history barrier. */

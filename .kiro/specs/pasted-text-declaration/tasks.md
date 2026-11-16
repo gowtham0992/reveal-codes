@@ -79,7 +79,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - `order-rules.ts`: `needsConfidentiality(document, entry, declaration)` uses `usedAi`. `prohibitionNotice(document, entry, declaration)` is non-null when the entry prohibits and `usedAi`. Branch on `holdsAssistantText`: existing line plus " The author also declared that generative AI was used to prepare <subject>." when the Applicable_Declaration is `declared_ai`; otherwise `prohibitionDeclaredLine`. Factor `prohibitionSubject` out of `prohibitionLine`.
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.10, 4.9, 4.10_
 
-  - [~] 3.5 Carry the Declaration into the Appendix, the DOCX and the first-page heading
+  - [x] 3.5 Carry the Declaration into the Appendix, the DOCX and the first-page heading
     - `buildAppendix(document, declaration = null)`: `lines` come from `renderRecord(document, declaration, "full").text.split("\n")`.
     - `buildDocx(document, statement)` keeps its signature and calls `buildAppendix(document, statement.declaration)`. `firstPageHeading(statement)` keeps its signature and reads `statement.aiUsed`, now Used_AI. Heading wording is unchanged.
     - Title and declaration-clause placements render as today for every Used_AI value.
@@ -94,7 +94,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 5. Web: Store, clearing rule and persistence
-  - [~] 5.1 Add the Declaration to the Store and the clearing rule
+  - [-] 5.1 Add the Declaration to the Store and the clearing rule
     - New `apps/web/src/declaration-clearing.ts`: `insertedPasted(operations)` and `declarationAfter(stored, after, pastedInserted)` as in the design.
     - `store.ts` and `store-actions.ts`: `StoreState.declaration: Declaration | null`; action `{ type: "declaration"; declaration: Declaration | null }`; `replace` gains optional `declaration` defaulting to `null`, so samples and "New" clear it. `reduceEdit` and `reduceHistory` call `declarationAfter` (history passes `insertedPasted(entry.group)` for undo and redo); `reduceReplace` runs the drop check. `reducePairs`, `reduceOverride` and `reduceVerified` leave it alone.
     - Keep each function under 40 lines and each module under 300; put new reducers in `declaration-state.ts` if `store-actions.ts` would grow too large.
@@ -135,7 +135,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Keep `export-dialog.tsx` under 300 lines.
     - _Requirements: 3.8, 4.1, 4.2, 4.6, 4.7, 4.9, 4.10, 4.11, 4.12, 4.13, 6.5, 6.8_
 
-  - [~] 7.2 Add the static scan for the single definition of AI use
+  - [-] 7.2 Add the static scan for the single definition of AI use
     - New file in `packages/export/test/static/`: `usedAi` is defined once; `isAiSpan` is not read outside `declaration.ts` and `ai-paragraphs.ts`; the strings "No generative artificial intelligence was used", "No program was used." and "states that no program was used" appear nowhere under `packages/*/src`, `apps/web/src` or `docs/`.
     - _Requirements: 1.3, 6.1_
 
@@ -163,13 +163,13 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - _Requirements: 10.3, 10.4, 10.6_
 
 - [ ] 11. Property tests (one file per module, `// Property N` comment, `_Requirements_` in the describe title)
-  - [~] 11.1 Write the property test for the Statement text
+  - [-] 11.1 Write the property test for the Statement text
     - `packages/export/test/statement-declaration.properties.test.ts`, `// Property 1`, `describe("... _Requirements: 1.3, 1.4, 1.5, 1.6, 2.5, 2.6, 2.7, 2.8, 2.10, 2.11, 7.18, 11.2_")`.
     - **Property 1: The Statement asserts no AI-free claim the author did not make**
     - Generate `arbMixedOriginDocument`, `arbOrderChoice` and Pending, None or Declared_AI Declarations of either subject. Assert the old sentence never appears; every sentence matching `/\bno (generative (artificial intelligence|AI)|program) was used\b/i` is either the None Declaration sentence ("The author states that no generative AI was used to prepare <subject>.") or equals one of the two fixed Record_Sentences (so "The author states that no program was used to prepare <subject>." fails the oracle and "states that no program was used" never appears); the None Declaration sentence appears exactly once when the test's own applicability calculation says None applies and otherwise zero times, including under an order with `negative_certification_when_unused` or `certification_every_filing`; no Declaration sentence when the subject is `none`; the Tool_Name appears verbatim; building twice gives the same text.
     - **Validates: Requirements 1.3, 1.4, 1.5, 1.6, 2.5, 2.6, 2.7, 2.8, 2.10, 2.11, 7.18**
 
-  - [~] 11.2 Write the property test for the gate
+  - [-] 11.2 Write the property test for the gate
     - `packages/export/test/declaration-gate.properties.test.ts`, `// Property 2`, `_Requirements: 6.2, 6.3, 6.4, 6.9, 6.10, 11.3_` in the describe title.
     - **Property 2: Export is refused without an override exactly when the order prohibits and AI was used**
     - Over Documents with no blocking issues, assert `canExport` is `false` exactly when the entry kind is `prohibition` and (the spans hold an `AI` or `AI>HUM` span or the applicable Declaration is `declared_ai`). Compute the expected value from spans and text, not from `usedAi`. Include a Declaration of the wrong subject. Assert that changing Declared_AI to None on a Document with no Assistant_Text makes `canExport` true.
