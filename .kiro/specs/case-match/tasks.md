@@ -424,7 +424,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - Use the existing `text` class of `export-dialog.module.css`; add no colour literal.
     - _Requirements: 19.2, 19.7, 19.8_
 
-  - [-] 18.3 Show the lines in the Override dialog
+  - [x] 18.3 Show the lines in the Override dialog
     - Add the prop `mismatch: readonly string[] | null` to `OverrideDialog` and render the lines inside the `describedBy` block between the issue text and the printed-statement line, above the reason box.
     - Compute it with `mismatchOf` and `mismatchLines` from the current Document in both `OverrideSlot` sites (`issues-region.tsx` and `export-dialog.tsx`), passing `null` when `mismatchOf` returns `null`.
     - _Requirements: 19.3, 19.4, 19.7, 19.8_
