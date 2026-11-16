@@ -26,7 +26,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - _Requirements: 8.11, 14.5_
 
 - [ ] 2. Engine: Declaration type, validation, predicates and the `[DOC]` field
-  - [~] 2.1 Add `packages/engine/src/declaration.ts` and export it from `packages/engine/src/index.ts`
+  - [x] 2.1 Add `packages/engine/src/declaration.ts` and export it from `packages/engine/src/index.ts`
     - Types `DeclarationSubject`, `Declaration`, `ToolNameFault`; constants `TOOL_NAME_MIN` (2) and `TOOL_NAME_MAX` (100).
     - `checkToolName(raw)`: trim, then fault order `too_short`, `too_long`, `control_character` (`/[\p{Cc}\u2028\u2029]/u`), `unpaired_surrogate` (reuse `firstUnpairedSurrogate` from `validate.ts`). Returns the trimmed name in a `Result`.
     - `declareNone(subject)`, `declareAi(subject, rawToolName)` returning `Result<Declaration, ToolNameFault>`, and `isDeclaration(value: unknown)` narrowing (shape, known subject, known choice, trimmed and valid name).

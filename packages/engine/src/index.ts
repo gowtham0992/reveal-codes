@@ -19,6 +19,19 @@ export { blockingIssues, issues, overrides, recordOverride } from "./issues.js";
 // Reveal Codes
 export { parse, render, strip, stripPositions } from "./codes.js";
 
+// pasted-text declaration
+export {
+  TOOL_NAME_MAX,
+  TOOL_NAME_MIN,
+  checkToolName,
+  declareAi,
+  declareNone,
+  holdsSubstantivePasted,
+  insertsPasted,
+  isDeclaration,
+} from "./declaration.js";
+export type { Declaration, DeclarationSubject, ToolNameFault } from "./declaration.js";
+
 // results and errors
 export { err, ok } from "./result.js";
 export type { Result } from "./result.js";
