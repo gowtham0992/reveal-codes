@@ -220,7 +220,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - "What it does": the statement states the record and the author states the rest. "Demo path": the step of task 10.2, naming N.D. Tex. and Declaration_Choice_AI with a named tool.
     - _Requirements: 10.3, 10.4, 13.3_
 
-  - [-] 13.3 Add the rule to principle 1 of `.kiro/steering/product.md`
+  - [x] 13.3 Add the rule to principle 1 of `.kiro/steering/product.md`
     - The tool states the record; the author states the rest; the two kinds of sentence are never mixed; the tool never asserts "no AI" on its own. Change no other principle.
     - _Requirements: 13.4_
 
