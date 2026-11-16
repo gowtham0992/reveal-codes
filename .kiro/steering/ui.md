@@ -72,6 +72,9 @@ Sizes and line heights:
 - Links are `--oxblood`.
 - Selects are 34px high with a 1px `--ink` border and a `--white` fill.
 - Text areas have a 1px `--ink` border and a 2px `--oxblood` border while focused, with no layout shift and no outline: the border is the one focus ring.
+- Text inputs (`input[type="text"]`, used by the `/courts` filter) are 34px high with a 1px `--ink` border, a `--white` fill, no radius and Public Sans 13px / 16px weight 500. Focused, the border is 2px `--oxblood` with the padding reduced by 1px and no outline, so nothing shifts.
+- Checkboxes (`input[type="checkbox"]`) are 16px by 16px with no margin and `accent-color: var(--oxblood)`; they take the standard 2px `--oxblood` focus outline and always sit beside a text label.
+- A quotation on `/courts` is a `blockquote` in Libre Caslon Text roman, wrapped in real quotation marks, with a 1px `--rule` rule on its left edge. It is not italic, centred or indented beyond that rule's padding. A status is shown in words ("Not in force."), never by colour alone.
 - Control rules live in `globals.css` and the shared Modal styles. Component stylesheets set only heights.
 
 ## Layout
@@ -82,7 +85,7 @@ Sizes and line heights:
 - Issues region 300px, with a 1px `--rule` left edge.
 - The Sheet is 816px wide (8.5in), with padding 96px 96px 96px 104px, on the `--desk` background. It takes 100% of the column when the column is narrower.
 - Dialogs are `min(600px, 100vw - 32px)` wide.
-- The Shell is at least 1150px wide. Between 800px and 1150px the page scrolls sideways. Below 800px a plain page replaces it.
+- The Shell is at least 1150px wide. Between 800px and 1150px the page scrolls sideways. Below 800px a plain page replaces it. The 1150px minimum applies to the Shell only: `/courts` is a one-column page that reads from 320px up, uses no width at-rule, and never scrolls sideways.
 - Pane 40% of the viewport height when open.
 
 ## Pane

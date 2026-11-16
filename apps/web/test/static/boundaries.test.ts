@@ -89,6 +89,13 @@ const routeImports: Check = (ref, file) => {
   return "anything but server/ and next/server";
 };
 
+const COURTS_PAGE = /^app\/courts\//;
+/** Requirements 16.10, 16.14: the Courts page imports only from `src/`, its own folder or packages. */
+const courtsPageImports: Check = (ref, file) => {
+  const t = target(file, ref);
+  if (t === null || t.startsWith("src/") || t.startsWith("app/courts/")) return null;
+  return "anything but src/, app/courts/ and packages";
+};
 function checksFor(path: string): Check[] {
   const checks: Check[] = [];
   const inServer = path.startsWith("src/server/") || path.startsWith("app/api/");
@@ -100,6 +107,8 @@ function checksFor(path: string): Check[] {
   if (path.startsWith("src/server/")) checks.push(noReact, noTiptap, noClientSide);
   if (/^src\/(?:components|editor)\//.test(path)) checks.push(noServer);
   if (ROUTE_FILE.test(path)) checks.push(routeImports);
+  if (COURTS_PAGE.test(path)) checks.push(courtsPageImports);
+  if (path.startsWith("src/courts/")) checks.push(noServer);
   return checks;
 }
 
@@ -191,6 +200,16 @@ describe("static: boundaries self-test (planted violations)", () => {
     ]);
   });
 
+  it("reports a Courts page import from outside src/ and a courts module importing server/", () => {
+    const page =
+      'import { x } from "../api/verify/route";\nimport { y } from "../../src/courts/hash";\n';
+    expect(reported("app/courts/page.tsx", page)).toEqual([
+      "app/courts/page.tsx:1 imports ../api/verify/route: not allowed (anything but src/, app/courts/ and packages)",
+    ]);
+    expect(reported("src/courts/x.ts", 'import { d } from "../server/deps";\n')).toEqual([
+      "src/courts/x.ts:1 imports ../server/deps: not allowed (server/)",
+    ]);
+  });
   it("reports TipTap in pane/layout.ts and server modules importing client-side code", () => {
     expect(reported("src/pane/layout.ts", 'import { Editor } from "@tiptap/core";\n')).toHaveLength(
       1,

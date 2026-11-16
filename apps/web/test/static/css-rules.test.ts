@@ -42,9 +42,10 @@ const VARIABLE_VALUES: Readonly<Record<string, string>> = {
 const FOCUS_OUTLINE = /^2px solid var\(--oxblood\)$/;
 /**
  * The two places a focus outline is removed: the Editor's content element, whose caret is the
- * indicator, and a text area, whose 2px oxblood border is (one ring, not border and outline).
+ * indicator, and a text area or text input, whose 2px oxblood border is (one ring, not border and outline).
  */
-const EDITOR_CONTENT_FOCUS = /^(?:\.content :global\(\.ProseMirror\)|textarea):focus(?:-visible)?$/;
+const EDITOR_CONTENT_FOCUS =
+  /^(?:\.content :global\(\.ProseMirror\)|textarea|input\[type="text"\]):focus(?:-visible)?$/;
 
 const norm = (v: string): string =>
   v

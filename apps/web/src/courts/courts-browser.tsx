@@ -22,7 +22,27 @@ function scrollToHash(): void {
 }
 
 type ControlsProps = Readonly<{ state: FilterState; onChange: (next: FilterState) => void }>;
-
+function KindSelect({ state, onChange }: ControlsProps) {
+  return (
+    <label className={styles["field"]}>
+      <span>Kind</span>
+      <select
+        value={state.kind}
+        onChange={(e) => {
+          const value = e.target.value;
+          if (isKindChoice(value)) onChange({ ...state, kind: value });
+        }}
+      >
+        <option value="all">All kinds</option>
+        {ORDER_KINDS.map((kind) => (
+          <option key={kind} value={kind}>
+            {kindWords[kind]}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
 function Controls({ state, onChange }: ControlsProps) {
   return (
     <form
@@ -42,23 +62,7 @@ function Controls({ state, onChange }: ControlsProps) {
           }}
         />
       </label>
-      <label className={styles["field"]}>
-        <span>Kind</span>
-        <select
-          value={state.kind}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (isKindChoice(value)) onChange({ ...state, kind: value });
-          }}
-        >
-          <option value="all">All kinds</option>
-          {ORDER_KINDS.map((kind) => (
-            <option key={kind} value={kind}>
-              {kindWords[kind]}
-            </option>
-          ))}
-        </select>
-      </label>
+      <KindSelect state={state} onChange={onChange} />
       <label className={styles["check"]}>
         <input
           type="checkbox"
@@ -72,25 +76,37 @@ function Controls({ state, onChange }: ControlsProps) {
     </form>
   );
 }
-
-/** The court list. The first render shows every instrument and no control, as the server does. */
-export function CourtsBrowser({ entries, model }: CourtsBrowserProps) {
+type GroupsProps = Readonly<{ shown: readonly OrderEntry[]; model: CourtsModel }>;
+function Groups({ shown, model }: GroupsProps) {
+  return courtGroups(shown).map((group) => (
+    <section key={group.court.abbreviation} className={styles["group"]}>
+      <h2 className={styles["groupTitle"]}>
+        {group.court.name} ({group.court.abbreviation})
+      </h2>
+      {group.entries.map((entry) => (
+        <InstrumentView key={entry.id} entry={entry} words={model.words} titles={model.titles} />
+      ))}
+    </section>
+  ));
+}
+function useMounted(model: CourtsModel, setState: (f: (s: FilterState) => FilterState) => void) {
   const [mounted, setMounted] = useState(false);
-  const [state, setState] = useState<FilterState>(CLEARED_FILTER);
-
   useEffect(() => {
     if (showInactiveForHash(window.location.hash, model.inactiveIds)) {
       setState((s) => ({ ...s, showInactive: true }));
     }
     setMounted(true);
-  }, [model.inactiveIds]);
-
+  }, [model.inactiveIds, setState]);
   useEffect(() => {
     if (mounted) scrollToHash();
   }, [mounted]);
-
+  return mounted;
+}
+/** The court list. The first render shows every instrument and no control, as the server does. */
+export function CourtsBrowser({ entries, model }: CourtsBrowserProps) {
+  const [state, setState] = useState<FilterState>(CLEARED_FILTER);
+  const mounted = useMounted(model, setState);
   const shown = mounted ? filterOrders(entries, state) : entries;
-  const groups = courtGroups(shown);
   return (
     <>
       {mounted ? <Controls state={state} onChange={setState} /> : null}
@@ -104,21 +120,7 @@ export function CourtsBrowser({ entries, model }: CourtsBrowserProps) {
           No rule matches. Clear the filter to see every rule in force.
         </p>
       ) : null}
-      {groups.map((group) => (
-        <section key={group.court.abbreviation} className={styles["group"]}>
-          <h2 className={styles["groupTitle"]}>
-            {group.court.name} ({group.court.abbreviation})
-          </h2>
-          {group.entries.map((entry) => (
-            <InstrumentView
-              key={entry.id}
-              entry={entry}
-              words={model.words}
-              titles={model.titles}
-            />
-          ))}
-        </section>
-      ))}
+      <Groups shown={shown} model={model} />
     </>
   );
 }

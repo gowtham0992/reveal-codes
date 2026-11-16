@@ -56,6 +56,8 @@ Paste text of your own on the hosted site to see real citations found and invent
 
 `data/standing-orders.json` holds 41 federal instruments on generative AI in court filings, across 27 courts: local rules, general orders, and judges' standing orders. 36 are in force. Each entry was read from the court's own published text and records what the instrument requires, whom it applies to, one quoted sentence and the source URL. We found no official list of them. The method and fields are in [data/README.md](data/README.md). The dataset is released under CC0.
 
+The instruments are also listed, by court, at https://reveal-codes.gowthamsarveswaran.com/courts.
+
 ## Use the checker inside Kiro
 
 The citation checker is also packaged as a Kiro Power that works in any workspace: import `powers/citation-check` from a folder or from GitHub, and ask Kiro to check the citations in a file. It runs on recorded responses with no setup and checks live when `COURTLISTENER_TOKEN` is set; see [the Power's README](powers/citation-check/README.md).
