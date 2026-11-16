@@ -182,7 +182,7 @@ Conventions that apply to every task:
     - **Property 10: UTF-8 text round trip**
     - File `apps/web/test/open-file.properties.test.ts`. `decodeTextFile` over UTF-8 encodings with and without a byte-order mark, with and without `\r\n` and lone `\r`. Update `apps/web/test/static/inventory.test.ts` with the new `// Property 10` comment in this task.
     - **Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.6**
-  - [-] 8.7 Write property test for installed opened text
+  - [x] 8.7 Write property test for installed opened text
     - **Property 11: Opened text installs as one PST span**
     - Same file as 8.6. Any accepted text including Docx_Unsafe_Characters: one `PST` span over the text after `docxSafe`, Declaration `null`, empty run log, no verification time, no override or result, and the removed-character sentence exactly when `removed` is at least 1 with that count. Update `apps/web/test/static/inventory.test.ts` with the new `// Property 11` comment in this task.
     - **Validates: Requirements 8.1, 8.2, 8.6, 22.3, 22.5**
