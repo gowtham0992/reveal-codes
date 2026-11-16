@@ -83,7 +83,7 @@ Conventions that apply to every task:
 - [~] 3. Checkpoint - shared reader and `readWordDraft`
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 4. `docxSafe`, the editor-input changes and the export refusal
+- [x] 4. `docxSafe`, the editor-input changes and the export refusal
   - [x] 4.1 `docxSafe` and `holdsDocxUnsafe` over one range table
     - New `packages/export/src/docx-text.ts`: one table of allowed ranges (U+0009, U+000A, U+000D, U+0020 to U+D7FF, U+E000 to U+FFFD, U+10000 to U+10FFFF), defined once and read by both functions. `docxSafe(text)` returns `{ text, removed }`: U+000B and U+000C become `\n`, `\r\n` and a lone `\r` become `\n`, every other Docx_Unsafe_Character (an unpaired surrogate included) is removed and counted once; the converted characters are not counted. It is idempotent and returns its input unchanged when the input holds none and no `\r`. `holdsDocxUnsafe(text)` is true for any Docx_Unsafe_Character, U+000B and U+000C included, and is false for the text of any `docxSafe` result. No imports. Export both from `index.ts`.
     - _Requirements: 22.1, 22.2, 22.5_
@@ -115,7 +115,7 @@ Conventions that apply to every task:
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 6. Limits, Store changes and the Next_Step gap
-  - [-] 6.1 Move `MAX_TEXT_CHARS` to `apps/web/src/limits.ts`
+  - [x] 6.1 Move `MAX_TEXT_CHARS` to `apps/web/src/limits.ts`
     - Create `apps/web/src/limits.ts` with the one definition (`200_000`, no imports). `apps/web/src/server/verify-route.ts` imports it and re-exports the name so `test/verify-route.test.ts` is unchanged. Add `limits.ts` to the browser-bundle check in `apps/web/test/static/boundaries.test.ts` only if the rule table needs it.
     - Run `pnpm --filter @reveal-codes/web test -- test/static/boundaries.test.ts` with the real files in place and record that it passes (and that `forbidden.test.ts`, `package-json.test.ts` and `env-and-size.test.ts` still pass).
     - _Requirements: 14.4, 21.8_
