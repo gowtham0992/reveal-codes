@@ -140,6 +140,7 @@ Working on the repository with Kiro:
 - The free CourtListener tier is rate-limited, and the hosted site limits requests per visitor. A second Verify within a minute can take up to a minute.
 - With no assistant provider configured, the assistant returns a recorded reply, and the statement says so.
 - The editor is plain text. It does not format captions, italics or indents.
+- A draft autosaved before the pincite-range change, with a citation code closed inside a page range (such as `371[/CIT]-72`), no longer parses. The editor opens empty with no notice, and the first keystroke's autosave (300 ms) overwrites the old draft in localStorage. Export drafts you want to keep before updating.
 - It is a desktop editor and needs a screen at least 1150 pixels wide.
 
 ## Licence

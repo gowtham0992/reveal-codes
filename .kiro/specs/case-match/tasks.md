@@ -452,17 +452,17 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - Run `worked-outcomes.test.ts` and `case-match.properties.test.ts` of the verifier. Report in the BUILD_LOG that Henderson, Petersen and Miller stay `wrong_case` and Ashcroft v. Iqbal, Haines v. Kerner, Zicherman (516 U.S. 217) and Chambers stay `verified`, or report any outcome that changes and stop.
     - _Requirements: 20.2, 20.3, 20.6, 20.7_
 
-- [ ] 20. Sentinel examples, inventory and documentation (Requirements 9, 21)
+- [x] 20. Sentinel examples, inventory and documentation (Requirements 9, 21)
   - [x] 20.1 Add the two Sentinel examples for Requirement 9, criterion 8
     - In a new `crew/sentinel/test/pre-spec-filing.test.ts` (tests only; no Sentinel source changes) sweep a filing exported before this spec: one whose recorded `verified` citations still match the re-check data gives no finding and no error, and one whose recorded `verified` citation has a written name that now resolves to a different case gives one `citation_changed` finding with Before `verified <clusterId>` and After `wrong_case <clusterId> <foundName>`. Build both from the existing Sentinel test support and the recorded fixtures.
     - _Requirements: 9.8, 13.5_
 
-  - [~] 20.2 Update the aggregate inventory test
+  - [x] 20.2 Update the aggregate inventory test
     - In `apps/web/test/static/case-match-inventory.test.ts` change the engine entry of `OWNERS` to `[2, 3, 4, 5, 6, 7, 8, 19]`, and change every `18`, `eighteen` and `"1 to 18"` check and test title to nineteen and 1 to 19 (design headings, the table, the all-files list). Keep the self-test.
     - Confirm the design holds the heading `### Property 19:` and that the test fails if Property 19's marker or its engine file entry is removed.
     - _Requirements: 21.3_
 
-  - [~] 20.3 Write the BUILD_LOG entry and update the steering file and usage doc
+  - [x] 20.3 Write the BUILD_LOG entry and update the steering file and usage doc
     - Add a dated BUILD_LOG entry: the four findings; the cause of the links (two positioned elements with `z-index: auto` painted in tree order, TipTap's `.ProseMirror { position: relative }`, and why jsdom tests could not see it); the fix and why no `z-index` was used; what the new link tests prove and cannot prove; whether any real-browser tooling exists in the repository (none was found in `apps/web/package.json`, and no dependency was added) and the manual check for the author (`pnpm dev`, `document.elementFromPoint` at the centre of each link returns an `A` element, click each link, click blank page next to the links and see the caret, press the mouse on a link with the caret in the page and see the caret stay); the pincite decision (the value does not change; only `end` moves; `normalised` is now set for a ranged citation); the old-codes consequence and what the author sees for a `bad_codes` draft; the role words and the unchanged outcomes; and every existing test edited in tasks 16.2, 16.5 and 18.4.
     - In `.kiro/steering/citations.md` add the Pincite_Expression rule (page, range with hyphen or en dash, list; value keeps the first page) and the Role_Words to the dropped words of the comparison rule.
     - In `docs/KIRO_USAGE.md` update the existing `citations.md` row to say the file now also records the Pincite_Expression rule and the Role_Words.

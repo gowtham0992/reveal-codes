@@ -540,3 +540,46 @@ Web and Sentinel:
 ### Left alone
 
 - The Miller pincite range `371-72` still truncates the citation text. This was agreed and nothing was changed.
+
+## 2026-11-15: case-match follow-up, four browser-walkthrough findings
+
+The author walked the app in a browser and found four things. Requirement 9.8 was also reworded (it now says what a pre-spec filing must give: no finding when the recorded `verified` still matches, one `citation_changed` finding when the written name now resolves to a different case) and two Sentinel examples cover it (`crew/sentinel/test/pre-spec-filing.test.ts`, tests only). The earlier instruction to leave pincite ranges alone was withdrawn; the Miller entry under "Left alone" above no longer holds.
+
+### 1. The empty-page links did not take a pointer click (Requirements 17)
+
+- Cause: `.samples` is `position: absolute` with `z-index: auto`, and TipTap injects `.ProseMirror { position: relative }`, also `z-index: auto`. Two positioned elements with `z-index: auto` paint in tree order, and the editor came later in the DOM, so it painted over the links and took the click.
+- Fix: the list renders after the editor content; `.samples` has `pointer-events: none` and `.samples a` has `pointer-events: auto`; each link has `onMouseDown` calling `preventDefault()`, so the editor keeps focus. No `z-index` was added, because the Modal overlay has none and a `z-index` on the list would lift the links above an open dialog.
+- Tests: a static CSS test (`apps/web/test/static/editor-surface-css.test.ts`) and DOM order and mousedown-focus tests (`apps/web/test/editor-surface-links.test.tsx`). Against the pre-fix code, 2 of the 7 structure tests failed (list after editor, mousedown default-prevented) and so did the two `pointer-events` CSS cases.
+- What jsdom cannot prove: it does no layout, so paint order, hit testing and a real browser's focus handling are not checked. The tests prove the DOM order, the declared rules and the event handling. The repository has no browser driver (none in `apps/web/package.json`) and none was added. The real-browser check is the author's: run `pnpm dev`; `document.elementFromPoint` at the centre of each link returns an `A` element; click each link; click blank page beside the links and see the caret; press the mouse on a link with the caret in the page and see the caret stay.
+
+### 2. Page ranges and lists in a pincite (Requirement 18)
+
+- The stored value does not change: `pincite` is the first page, so the Citation_Line, the payload, `types.ts`, `format.ts` and `codes/*` are unchanged. Only the citation's `end` moves, through the new `packages/engine/src/citations/pincite.ts`. `normalised` is now set for a ranged citation (D17). Property 19 covers it (`case-match.properties.test.ts`).
+- Accepted with no migration (D20): Reveal Codes written the old way, with `[/CIT]` inside a range, fail `parse` with `malformed_codes` and rule `extractor_mismatch`. The Sentinel reports old exported appendices with such a citation as `appendix_unparseable`.
+- Task 16.4 found, and this is data loss: an autosaved draft that fails to parse (`bad_codes`) opens as an empty editor with no notice, and the first keystroke's autosave (300 ms) overwrites the old value in localStorage, so that draft is silently lost. This is existing behaviour for any unreadable autosave; this change makes it reachable for drafts saved before it. Until the load path shows a notice and keeps the old value, it stays. `apps/web/test/autosave-old-pincite.test.ts` records the load behaviour (`deserialise` gives `bad_codes`; the load leaves the empty Document with no notice and leaves the stored value; `savedDraftExists` is false; the print view says unreadable). The README Limits section says it too.
+
+### 3. The mismatch said where the author decides (Requirement 19)
+
+- A `wrong_case` row now shows `Cited as <name>` and `This citation is <found name> (<year>)` in the Issues row, the Export dialog row (with the `View on CourtListener` link) and the Override dialog (before the reason box). `caseName` is read from the current Document, and no line ends in a full stop. Shared code: `apps/web/src/client/mismatch.ts` and `components/mismatch-lines.tsx`. Tests: `apps/web/test/mismatch.test.tsx`.
+
+### 4. Role words (Requirement 20)
+
+- `plaintiff(s)`, `defendant(s)`, `appellant(s)`, `appellee(s)`, `petitioner(s)`, `respondent(s)`, `individually`, `deceased` and `no` joined `DROPPED_WORDS`. Greenleaf example: `Kowalski, Appellant v. Quimby, Defendants` no longer matches on a shared role word (`packages/verifier/test/role-words.test.ts`). The engine arbitrary `DROPPED` mirrors the words, and `list-drift.test.ts` fails if the two lists differ.
+- No outcome changed: Henderson, Petersen and Miller stay `wrong_case`; Ashcroft v. Iqbal, Haines v. Kerner, Zicherman (516 U.S. 217) and Chambers stay `verified`.
+
+### Existing tests edited in this follow-up (checked with `git diff 61c2836 HEAD --name-status`, plus the working tree)
+
+- `packages/engine/test/codes.properties.test.ts` (Property 36): the Reveal Codes round trip also draws `arbExpressionDocument`, so ranged citations are round-tripped.
+- `packages/engine/test/case-match.properties.test.ts` (Property 2): the round trip with `wrong_case` also draws `arbExpressionDocument`. Property 19 was added in the same file.
+- `packages/engine/test/anchor.properties.test.ts` (Property 25): the incremental-equals-full texts gain `arbTextWithCitationsWith("expression")`.
+- `packages/engine/test/avianca.test.ts`: the Miller, Petersen, Zicherman and Chambers expected lines now include the pincite expression and parenthetical, and a case checks each citation's whole text. The sample file is unchanged.
+- `packages/verifier/test/worked-outcomes.test.ts`: asserts the ranged Miller text (`174 F.3d 366, 371-72 (2d Cir. 1999)`) and the Zicherman 516 F.3d text. Outcomes unchanged.
+- `apps/web/test/case-match.test.tsx`: the `wrong_case` Issues row has one more paragraph, `Cited as …`, before the found line.
+- `apps/web/test/override-dialog.test.tsx`: the harness passes the new `mismatch={null}` prop.
+- `apps/web/test/static/editor-surface-css.test.ts`: gained the empty-page links describe (additive).
+- `apps/web/test/static/case-match-inventory.test.ts` (task 20.2): the count is nineteen, and the engine file owns Property 19.
+- Not a test: `packages/engine/bench/results.json` changed because the benchmark was re-run.
+
+### Left alone
+
+- The README limit and the old-draft overwrite above are not fixed here. The browser check in finding 1 and the push are the author's.
