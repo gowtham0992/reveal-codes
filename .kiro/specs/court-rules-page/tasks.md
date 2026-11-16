@@ -68,7 +68,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Create `apps/web/src/courts/links.ts` exporting `COURT_RULES_PATH`, `COURT_RULES_SHORT` ("Court rules") and `COURT_RULES_LONG` ("See all court rules")
     - _Requirements: 4.6, 9.1, 9.2, 9.4_
 
-  - [-] 5.2 Create the view model, intro text and hash helper
+  - [x] 5.2 Create the view model, intro text and hash helper
     - `apps/web/src/courts/view-model.ts`: `buildCourtsModel(dataset, repoBase)` returning `stats`, `repoLinks` (trailing slashes stripped, `/blob/main/data/standing-orders.json` and `/blob/main/data/README.md`; null when Repo_Base is null), `inactiveIds`, `words`, `titles`
     - `apps/web/src/courts/intro.ts`: `introText(stats, repoLinks)`; every figure comes from `orderStats`, none is a literal; states each instrument was read from the court's own text and that the data is CC0
     - `apps/web/src/courts/hash.ts`: `decodeHash` (catches only `URIError`, returns the raw text) and `showInactiveForHash`
