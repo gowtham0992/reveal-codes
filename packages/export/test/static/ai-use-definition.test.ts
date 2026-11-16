@@ -58,6 +58,7 @@ const REMOVED_STRINGS = [
   "No generative artificial intelligence was used",
   "No program was used.",
   "states that no program was used",
+  "no generative artificial intelligence program was used in the editor",
 ];
 
 function parseAny(file: Source): ts.SourceFile {

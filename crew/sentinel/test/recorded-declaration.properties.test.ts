@@ -68,6 +68,34 @@ describe("the Declaration survives the record _Requirements: 8.1, 8.2, 8.3, 8.4,
     expect(EVERY_FILING).toBeDefined();
   });
 
+  it("regression: Tool_Name 'a[' (seed -723012165) does not appear to leak into display text holding 'alpha[PST]'", () => {
+    const created = createDocument("", TIMESTAMP);
+    if (!created.ok) throw new Error(`createDocument failed: ${created.error.kind}`);
+    const typed = apply(created.value, {
+      kind: "insert",
+      at: 0,
+      text: "alpha",
+      provenance: { origin: "HUM", timestamp: TIMESTAMP },
+    });
+    if (!typed.ok) throw new Error(`apply failed: ${typed.error.kind}`);
+    const pasted = apply(typed.value.document, {
+      kind: "insert",
+      at: 5,
+      text: " beta",
+      provenance: { origin: "PST", timestamp: TIMESTAMP },
+    });
+    if (!pasted.ok) throw new Error(`apply failed: ${pasted.error.kind}`);
+    const document = pasted.value.document;
+    const declaration: Declaration = {
+      subject: "pasted_text",
+      choice: "declared_ai",
+      toolName: "a[",
+    };
+    const withDeclaration = renderRecord(document, declaration, "display").text;
+    expect(withDeclaration).toContain("a[");
+    expect(withDeclaration).toBe(renderRecord(document, null, "display").text);
+    expect(withDeclaration).toBe(render(document, "display").text);
+  });
   // Property 3
   it("P3 render, parse, display, no-Declaration, titles and DOCX path keep the Declaration", async () => {
     await fc.assert(
@@ -83,9 +111,7 @@ describe("the Declaration survives the record _Requirements: 8.1, 8.2, 8.3, 8.4,
         // Display form carries no declaration text.
         const display = renderRecord(document, declaration, "display").text;
         expect(display).toBe(render(document, "display").text);
-        if (declaration.choice === "declared_ai") {
-          expect(display).not.toContain(declaration.toolName);
-        }
+        expect(display).toBe(renderRecord(document, null, "display").text);
 
         // No Declaration renders as before.
         expect(renderRecord(document, null, "full")).toEqual(render(document, "full"));

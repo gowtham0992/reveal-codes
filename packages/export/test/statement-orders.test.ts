@@ -19,11 +19,7 @@ import type {
   StatementBlock,
 } from "../src/index.js";
 import { declarationFor } from "./support/declarations.js";
-import {
-  NO_PROGRAM_RECORD,
-  declarationNone,
-  typedOnlySentence,
-} from "../src/declaration-wording.js";
+import { declarationNone, typedOnlySentence } from "../src/declaration-wording.js";
 import { ORDER_ELEMENTS } from "../src/orders-types.js";
 import {
   ALL_DRAFTERS_SUFFIX,
@@ -315,11 +311,9 @@ describe("tool sentence under edtex-love-2025 _Requirements: 4.9, 4.10, 9.5_", (
     expect(para(s, 3)).toContain(`${lead} is not recorded.`);
   });
 
-  it("adds the no-program sentence to the no-AI paragraph", () => {
+  it("prints the typed-only sentence then the None sentence and no third sentence", () => {
     const s = stmt(plain("No AI."), [], ctx(love));
-    expect(para(s, 3)).toBe(
-      `${typedOnlySentence} ${declarationNone("this_filing")} ${NO_PROGRAM_RECORD}`,
-    );
+    expect(para(s, 3)).toBe(`${typedOnlySentence} ${declarationNone("this_filing")}`);
   });
 });
 

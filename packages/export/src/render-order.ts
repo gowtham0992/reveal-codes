@@ -1,6 +1,5 @@
 import type { DeclarationSubject } from "@reveal-codes/engine";
 import {
-  NO_PROGRAM_RECORD,
   howUsedDeclared,
   portionsDeclared,
   programAsNamed,
@@ -42,7 +41,7 @@ function toolsText(s: Statement): string | null {
 
 function toolSentences(s: Statement, has: (e: OrderElement) => boolean): string[] {
   if (!has("tool_name")) return [];
-  if (!s.aiUsed) return [NO_PROGRAM_RECORD];
+  if (!s.aiUsed) return [];
   const d = s.declaration;
   const named = d !== null && d.choice === "declared_ai" ? d.toolName : null;
   if (named === null) return [toolsSentence(s.tools)];

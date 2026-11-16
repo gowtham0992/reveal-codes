@@ -196,10 +196,8 @@ describe("Declared_AI pasted text under each Order_Entry kind _Requirements: 7.1
 describe("typed-only filing under a statement-requiring order _Requirements: 2.5, 2.7, 7.6, 12.3_", () => {
   const love = entry("edtex-love-2025");
 
-  it("this_filing None adds the author's no-AI sentence and the record sentence about the program", () => {
-    expect(para(stmt(typed(), love, noneFor("this_filing")))).toBe(
-      `${TYPED_ONLY} ${NONE_FILING} The record shows that no generative artificial intelligence program was used in the editor.`,
-    );
+  it("this_filing None adds the author's no-AI sentence and no program sentence", () => {
+    expect(para(stmt(typed(), love, noneFor("this_filing")))).toBe(`${TYPED_ONLY} ${NONE_FILING}`);
   });
 
   it("this_filing Declared_AI names the tool as the author's and says how_used was not recorded", () => {

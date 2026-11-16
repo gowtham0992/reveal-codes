@@ -49,9 +49,6 @@ export function pastedAfterAssistantSentence(f: PastedAfterAssistantFigures): st
   return `${n(f.pasted)} of ${n(f.total)} characters (${f.pastedPct}%) were pasted or imported; the tool did not record their origin.`;
 }
 
-export const NO_PROGRAM_RECORD =
-  "The record shows that no generative artificial intelligence program was used in the editor.";
-
 export const howUsedDeclared = (s: DeclarationSubject): string =>
   `The tool did not record how generative AI was used to prepare ${subjectPhrase(s)}.`;
 

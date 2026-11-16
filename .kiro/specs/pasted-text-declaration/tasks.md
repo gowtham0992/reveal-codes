@@ -245,12 +245,12 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Update `requirements.md` (the Requirement 2 and 7 criteria and any example that prints `NO_PROGRAM_RECORD`), `design.md` (the order-sentence table and wording table) so that an order's `tool_name` element prints a sentence only when there is a tool to name (Used_AI holds). When the filing did not use AI, paragraph 2 already says the editor's assistant was not used, so nothing is added.
     - _Requirements: 2.x, 7.x (as renumbered by the edit)_
 
-  - [~] 15.2 Code and example tests for the tool_name change
+  - [x] 15.2 Code and example tests for the tool_name change
     - Remove `NO_PROGRAM_RECORD` from `declaration-wording.ts` and its use in `render-order.ts`. Update `docs/CERTIFICATION.md` and every example and property test that expects the sentence, including a typed-only filing under Judge Love's order (`edtex-love-2025`), which must print the typed-only sentence and the None Declaration sentence with no third sentence.
     - Do not weaken any test.
     - _Requirements: as edited in 15.1_
 
-  - [~] 15.3 Fix chance-collision assertions in this spec's tests
+  - [x] 15.3 Fix chance-collision assertions in this spec's tests
     - Reproduce the failure in `crew/sentinel/test/recorded-declaration.properties.test.ts` with seed `-723012165` (path `3:0:0:0:0:0:0:0:1:1:1:1:1:1`) first. Replace the `not.toContain(<Tool_Name>)` check on the display form with: the display rendering with a Declaration equals the display rendering without one. Do not narrow the Tool_Name generator. Keep the seed as a named regression example in the test and add a line to `BUILD_LOG.md`.
     - Search every test added by this spec for the same shape (`not.toContain` / `not.toMatch` / `not.toBe` of a generated string against text that could contain it by chance) and fix each the same way. Report the list found.
     - _Requirements: 8.3, 8.4, 11.4_

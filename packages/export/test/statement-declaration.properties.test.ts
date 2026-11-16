@@ -15,9 +15,11 @@ const NO_PROGRAM_AUTHOR = /states that no program was used/i;
 const NO_AI_PATTERN =
   /\bno (generative (artificial intelligence( program)?|AI)|program) was used\b/i;
 
-/** The two fixed Record_Sentences that may say no AI was used, written out here. */
+const REMOVED_PROGRAM_RECORD =
+  "The record shows that no generative artificial intelligence program was used in the editor.";
+
+/** The one fixed Record_Sentence that may say no AI was used, written out here. */
 const RECORD_SENTENCES: readonly string[] = [
-  "The record shows that no generative artificial intelligence program was used in the editor.",
   "The record shows that every character was typed in the editor and that the editor's assistant was not used.",
 ];
 
@@ -74,6 +76,7 @@ function build(i: Input) {
 
 function checkText(i: Input, text: string, subject: Subject | "none"): void {
   expect(text).not.toContain(OLD_SENTENCE);
+  expect(text).not.toContain(REMOVED_PROGRAM_RECORD);
   expect(text).not.toMatch(NO_PROGRAM_AUTHOR);
   const applicable = i.stored !== null && i.stored.subject === subject ? i.stored : null;
   const noneApplies = applicable !== null && applicable.choice === "none" && subject !== "none";
