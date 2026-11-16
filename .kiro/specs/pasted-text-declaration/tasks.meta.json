@@ -1,0 +1,288 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Replace the `[DOC]` line in `.kiro/steering/product.md` (the Structural codes list, line 88)": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255035
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800259094
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800273189
+      }
+    ],
+    "2.1 Add `packages/engine/src/declaration.ts` and export it from `packages/engine/src/index.ts`": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255083
+      }
+    ],
+    "2.2 Add the optional `d` field to `[DOC]` and the record codec": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255111
+      }
+    ],
+    "2.3 Add shared arbitraries in `packages/engine/src/testing/arb-declaration.ts` and re-export them from `packages/engine/src/testing/arbitraries.ts`": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255144
+      }
+    ],
+    "2.4 Write example tests for the Engine pieces": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255175
+      }
+    ],
+    "3.1 Add `packages/export/src/declaration.ts`": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255200
+      }
+    ],
+    "3.2 Add `packages/export/src/declaration-wording.ts` and `packages/export/src/statement-error.ts`": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255222
+      }
+    ],
+    "3.3 Rebuild the Statement and paragraph 2": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255240
+      }
+    ],
+    "3.4 Change the gate, confidentiality condition and prohibition notice": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255258
+      }
+    ],
+    "3.5 Carry the Declaration into the Appendix, the DOCX and the first-page heading": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255277
+      }
+    ],
+    "3.6 Update existing Export package tests and fixtures": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255303
+      }
+    ],
+    "4. Checkpoint - Engine and Export compile and pass": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255325
+      }
+    ],
+    "5.1 Add the Declaration to the Store and the clearing rule": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255343
+      }
+    ],
+    "5.2 Persist the Declaration in `apps/web/src/persist.ts` and `apps/web/src/autosave.ts`": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255361
+      }
+    ],
+    "6.1 Add the declaration controls": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255379
+      }
+    ],
+    "6.2 Add the `declaration_pending` Print view": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255402
+      }
+    ],
+    "6.3 Change the Legend entry in `apps/web/src/pane/pane-header.tsx`": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255417
+      }
+    ],
+    "7.1 Wire the gates into the dialog and the flows": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255436
+      }
+    ],
+    "7.2 Add the static scan for the single definition of AI use": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255454
+      }
+    ],
+    "8.1 Add `recordedRecord` to `crew/sentinel/src/recorded.ts`": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255471
+      }
+    ],
+    "8.2 Update existing Sentinel tests and fixtures": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255490
+      }
+    ],
+    "9. Checkpoint - gates, Sentinel and web wiring pass": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255509
+      }
+    ],
+    "10.1 Confirm both samples land with a Pending Declaration": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255526
+      }
+    ],
+    "10.2 Update `docs/demo-script.md`": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255545
+      }
+    ],
+    "11.1 Write the property test for the Statement text": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255567
+      }
+    ],
+    "11.2 Write the property test for the gate": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255586
+      }
+    ],
+    "11.3 Write the property test for the record round trip": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255605
+      }
+    ],
+    "11.4 Write the property test for the clearing rule": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255624
+      }
+    ],
+    "12.1 Export package example tests": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255644
+      }
+    ],
+    "12.2 Web dialog and Print view example tests": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255667
+      }
+    ],
+    "12.3 Web Store, persistence, Legend and sample example tests": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255691
+      }
+    ],
+    "12.4 Sentinel example tests": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255712
+      }
+    ],
+    "13.1 Write `docs/CERTIFICATION.md`": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255734
+      }
+    ],
+    "13.2 Update `README.md`": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255761
+      }
+    ],
+    "13.3 Add the rule to principle 1 of `.kiro/steering/product.md`": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255785
+      }
+    ],
+    "13.4 Add a dated entry to `BUILD_LOG.md`": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255809
+      }
+    ],
+    "13.5 Add rows to `docs/KIRO_USAGE.md`": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255826
+      }
+    ],
+    "14. Final checkpoint - run every check, no push": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800255877
+      }
+    ],
+    "1. Edit the product.md `[DOC]` entry before any engine code": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800273249
+      }
+    ]
+  }
+}

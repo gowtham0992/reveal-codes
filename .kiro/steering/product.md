@@ -85,7 +85,7 @@ Structural codes:
 
 - `[/CIT]`, `[/QUO]`, `[/REF]`: close the most recent citation, quote, or reference code.
 - `[OVR]`: the author's written override reason for the red code it follows. Shows the reason.
-- `[DOC]`: document header carrying engine state. Present only in the full serialisation, never in the pane.
+- `[DOC]`: document header carrying engine state and, optionally, the author's Declaration about pasted text (see the pasted-text-declaration spec). Present only in the full serialisation, never in the pane.
 
 `CIT ✓` and `QUO ✓` are the only codes that pass export (principle 4). The pane shows the display form: the codes above with no payload except the run id, the `[CIT ?]` candidate count, and the `[OVR]` reason. The full form, used for round-tripping, carries every payload.
 
