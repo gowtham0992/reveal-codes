@@ -111,6 +111,32 @@ select {
   font-weight: 500;
 }
 
+input[type="text"] {
+  height: 34px;
+  padding: 0 8px;
+  background: var(--white);
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+input[type="text"]:focus {
+  padding: 0 7px;
+  border: 2px solid var(--oxblood);
+  outline: none;
+}
+
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--oxblood);
+}
+
 textarea {
   padding: 4px;
   background: var(--paper);

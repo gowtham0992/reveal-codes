@@ -74,7 +74,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - `apps/web/src/courts/hash.ts`: `decodeHash` (catches only `URIError`, returns the raw text) and `showInactiveForHash`
     - _Requirements: 2.2, 2.3, 2.4, 2.5, 2.6, 4.10, 5.4_
 
-  - [~] 5.3 Build `InstrumentView`, `CourtsBrowser`, the stylesheet and control rules
+  - [x] 5.3 Build `InstrumentView`, `CourtsBrowser`, the stylesheet and control rules
     - `apps/web/src/courts/instrument-view.tsx`: hook-free; shows title (`h3`, `instrument` when empty), instrument name, judge name and role, Kind_Words and Applies_Words, date and `date_note`, "Not in force." with the status sentence and the `superseded_by` link, the Element_Words list (omitted when empty), caption and Placement_Words, `blockquote` with `curlyQuoted` key language, "Read the court's text" (`target="_blank" rel="noreferrer"`), and "Draft under this rule" to `/?order=<encoded id>` for In_Force instruments only; never reads `retrieved`, `source_kind` or `notes`; each instrument element has `id` equal to the entry id
     - `apps/web/src/courts/courts-browser.tsx`: client component; first render shows every instrument and no control; after mount sets `mounted`, applies the hash rule, shows labelled controls (text box, kind select with "All kinds" and Kind_Words, checkbox "Show rules no longer in force"), the `role="status"` Count_Line `Showing n of m`, the empty-result sentence, and re-scrolls to the hash target; groups come from `courtGroups(filterOrders(...))`
     - `apps/web/app/courts/courts.module.css`: heights and layout only, Tokens only, one column from 320px, `overflow-wrap: anywhere`, `max-width: 100%`, no width at-rule, quotation with 1px `--rule` left edge, links `--oxblood`
