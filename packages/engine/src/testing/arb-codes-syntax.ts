@@ -125,20 +125,33 @@ function assemble(s: Scanned, planned: readonly Planned[]): SyntaxFault {
  * Each of the eight kinds is reachable, alone or together with others.
  */
 export function arbSyntaxFault(rendering: string, maxFaults = 3): Arbitrary<SyntaxFault> {
+  return arbSyntaxFaultOf(rendering, SYNTAX_FAULT_KINDS, { minFaults: 1, maxFaults });
+}
+
+/**
+ * Like `arbSyntaxFault`, but each fault is drawn from `kinds` and the
+ * number of faults lies in `minFaults..maxFaults`. With one kind and
+ * `minFaults` 1 every draw contains that kind (Req 22.1).
+ */
+export function arbSyntaxFaultOf(
+  rendering: string,
+  kinds: readonly SyntaxFaultKind[],
+  { minFaults, maxFaults }: Readonly<{ minFaults: number; maxFaults: number }>,
+): Arbitrary<SyntaxFault> {
   const s = scanRendering(rendering);
   const cuts = usableCuts(s);
   const none: Cut = { index: rendering.length, offset: s.textLength };
   return fc
-    .array(fc.constantFrom(...SYNTAX_FAULT_KINDS), { minLength: 1, maxLength: maxFaults })
-    .chain((kinds) => {
-      const n = Math.min(kinds.length, Math.max(cuts.length, 1));
+    .array(fc.constantFrom(...kinds), { minLength: Math.max(minFaults, 1), maxLength: maxFaults })
+    .chain((drawn) => {
+      const n = Math.min(drawn.length, Math.max(cuts.length, 1));
       return fc
         .uniqueArray(fc.integer({ min: 0, max: Math.max(cuts.length - 1, 0) }), {
           minLength: n,
           maxLength: n,
         })
         .chain((ids) => {
-          const picks = kinds.slice(0, n).map((rule, i) => ({
+          const picks = drawn.slice(0, n).map((rule, i) => ({
             rule,
             at: cuts[ids[i] ?? 0] ?? none,
           }));

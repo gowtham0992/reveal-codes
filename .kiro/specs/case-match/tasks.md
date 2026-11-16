@@ -485,7 +485,7 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - Keep the numbers for the BUILD_LOG entry of task 24.2: the Rare_Kind, its count and rate, the miss probability over 1,500 draws, the kind count found in the tree (the author counted 22 in the failing run; report the difference if there is one), the fact that 1,500 is a literal `numRuns`, and that the syntax test used `max(runs().numRuns, 400)`.
     - _Requirements: 22.10, 22.11, 22.12_
 
-  - [~] 22.2 Add the per-kind arbitraries
+  - [x] 22.2 Add the per-kind arbitraries
     - In `packages/engine/src/testing/arb-codes.ts` export `arbTamperOfKind(kind, doc)` (the builder's arbitrary for the Document, or `undefined`) and rewrite `arbSemanticTamper` to call it for each kind of `TAMPER_KINDS`, with the same distribution. Do not change the weights of `arbTamperDocument`.
     - In `arb-codes-syntax.ts` add `arbSyntaxFaultOf(rendering, kinds, { minFaults, maxFaults })` and make `arbSyntaxFault(rendering, maxFaults)` call it with all kinds and `minFaults` 1. Export both from `arbitraries.ts`. Keep each function under 40 lines and each module under 300.
     - Run the existing engine properties and confirm they pass unedited.
@@ -515,13 +515,13 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - In `apps/web/src/autosave.ts` add the optional `gate` dependency: `schedule` starts no timer and keeps no pending job while blocked, `write` drops a pending job while blocked, and `clear()` returns `boolean` (true when the key was removed; false after calling `onError`). With no gate the behaviour is unchanged.
     - _Requirements: 23.4, 23.20_
 
-  - [~] 23.2 Block on load and move the autosave wiring into a plain function
+  - [-] 23.2 Block on load and move the autosave wiring into a plain function
     - In `apps/web/src/components/use-autosave.ts` give `loadAutosave(services, store, gate?)` the rule: a value is present and `deserialise` fails with any kind other than `absent` (`not_json`, `bad_shape`, `bad_codes`), call `gate?.block()`, leave the empty Document and write nothing. A thrown read leaves the gate open.
     - Move the subscription, the `visibilitychange` and `pagehide` listeners and the cleanup into an exported `startAutosave(services, store, autosave, gate)` that returns its stop function. `useAutosave(store, services, autosave, gate)` calls it from its effect. Below `NARROW_WIDTH` nothing is read or blocked.
     - In `app-shell.tsx`, `useShellParts` creates the gate, passes it to `createAutosave` and `useAutosave`, and returns it.
     - _Requirements: 23.1, 23.2, 23.3, 23.19, 23.20_
 
-  - [~] 23.3 Add the saved-copy helper, the download media type and the notices
+  - [-] 23.3 Add the saved-copy helper, the download media type and the notices
     - In `apps/web/src/client/download.ts` give `browserDownload` an optional `mime` argument (default `DOCX_MIME`), and give `AppServices["download"]` in `services.ts` the same optional third parameter; pass it through in `defaultServices`.
     - Create `apps/web/src/saved-draft.ts` with `SAVED_DRAFT_FILE` (`reveal-codes-saved-draft.txt`), `SAVED_DRAFT_MIME` (`text/plain;charset=utf-8`) and `saveDraftCopy(svc)`, which reads `AUTOSAVE_KEY` with `readRaw`, encodes the string with `TextEncoder`, calls `svc.download`, and returns `false` for a thrown read, a `null` value or a thrown download (converted at the boundary, as `use-export` does).
     - In `notices.ts` add `UNREADABLE_DRAFT`, `SAVE_COPY_FAILED` and `PRINT_BLOCKED` with the texts of the design.

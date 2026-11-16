@@ -4,6 +4,7 @@ import { useRef, useState, useSyncExternalStore } from "react";
 import type { Document } from "@reveal-codes/engine";
 import { createAutosave } from "../autosave";
 import type { Autosave } from "../autosave";
+import { createDraftGate } from "../draft-gate";
 import { useEditorBinding } from "../editor/use-editor-binding";
 import { NARROW_WIDTH, SHELL_MIN_WIDTH, defaultServices } from "../services";
 import { SmallScreenPage } from "./small-screen-page";
@@ -47,8 +48,10 @@ function useNoticeAndDocument(store: Store) {
 
 function useShellParts(svc: AppServices) {
   const [store] = useState(() => createStore(svc.now));
+  const [gate] = useState(() => createDraftGate());
   const [autosave] = useState(() =>
     createAutosave({
+      gate,
       storage: svc.storage,
       setTimer: svc.setTimer,
       clearTimer: svc.clearTimer,
@@ -57,8 +60,8 @@ function useShellParts(svc: AppServices) {
       },
     }),
   );
-  useAutosave(store, svc, autosave);
-  return { svc, store, autosave };
+  useAutosave(store, svc, autosave, gate);
+  return { svc, store, autosave, gate };
 }
 
 /** The caret Offset as a ref, so a draft that ends later inserts where the caret is then. */

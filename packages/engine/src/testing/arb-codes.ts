@@ -36,7 +36,7 @@ import {
 import * as T from "./arb-codes-tampers.js";
 import * as C from "./arb-codes-citations.js";
 
-export { arbSyntaxFault, SYNTAX_FAULT_KINDS } from "./arb-codes-syntax.js";
+export { arbSyntaxFault, arbSyntaxFaultOf, SYNTAX_FAULT_KINDS } from "./arb-codes-syntax.js";
 export type { InjectedFault, SyntaxFault, SyntaxFaultKind } from "./arb-codes-syntax.js";
 export type { SemanticTamper, TamperKind } from "./arb-codes-scan.js";
 
@@ -75,12 +75,28 @@ export const TAMPER_KINDS: readonly TamperKind[] = Object.keys(BUILDERS) as Tamp
  * choice is never empty.
  */
 export function arbSemanticTamper(doc: Document): Arbitrary<SemanticTamper> {
-  const ctx = { doc, s: scanRendering(render(doc, "full").text) };
+  const ctx = tamperContext(doc);
   const applicable = TAMPER_KINDS.flatMap((k) => {
     const arb = BUILDERS[k](ctx);
     return arb === undefined ? [] : [arb];
   });
   return fc.constantFrom(...applicable).chain((arb) => arb);
+}
+
+function tamperContext(doc: Document): Parameters<Builder>[0] {
+  return { doc, s: scanRendering(render(doc, "full").text) };
+}
+
+/**
+ * The builder's arbitrary for one `kind` on `doc`, or `undefined` when that
+ * kind does not apply to `doc`. Lets a test draw each kind directly instead
+ * of waiting for `arbSemanticTamper` to pick it (Req 22.1).
+ */
+export function arbTamperOfKind(
+  kind: TamperKind,
+  doc: Document,
+): Arbitrary<SemanticTamper> | undefined {
+  return BUILDERS[kind](tamperContext(doc));
 }
 
 const isOk = (r: Result<Document, EngineError>): r is Readonly<{ ok: true; value: Document }> =>

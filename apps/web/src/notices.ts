@@ -35,3 +35,15 @@ export const ASSISTANT_HOURLY = "The assistant has reached its hourly limit. Try
 
 /** Sent by /api/verify with status 413 when the request carries more than 200 000 characters. */
 export const DOCUMENT_TOO_LONG = "This document is too long to check in one request.";
+
+/** Shown in the Issues region while the Draft_Gate is blocked (Requirement 23). */
+export const UNREADABLE_DRAFT =
+  "A saved draft could not be read, so it was not loaded. It is still stored in this browser. Nothing you type is saved until you choose.";
+
+/** Save a copy could not read the stored draft, or the download threw. */
+export const SAVE_COPY_FAILED =
+  "The saved draft could not be copied. It is still stored in this browser.";
+
+/** Open print view while the Draft_Gate is blocked. */
+export const PRINT_BLOCKED =
+  "Choose Save a copy or Start a new document before opening the print view.";

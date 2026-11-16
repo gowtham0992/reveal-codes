@@ -48,7 +48,7 @@ export type AppServices = Readonly<{
   setTimer: AutosaveDeps["setTimer"];
   clearTimer: AutosaveDeps["clearTimer"];
   storage: StorageLike;
-  download: (bytes: Uint8Array, fileName: string) => void;
+  download: (bytes: Uint8Array, fileName: string, mime?: string) => void;
   /** True when the print tab opened. */
   openPrint: () => boolean;
   viewport: Viewport;
@@ -83,8 +83,9 @@ export function defaultServices(): AppServices {
         window.localStorage.removeItem(key);
       },
     },
-    download: (bytes, fileName) => {
-      browserDownload(bytes, fileName);
+    download: (bytes, fileName, mime) => {
+      if (mime === undefined) browserDownload(bytes, fileName);
+      else browserDownload(bytes, fileName, mime);
     },
     openPrint: openPrintTab,
     viewport: browserViewport(),
