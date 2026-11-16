@@ -171,7 +171,7 @@ Conventions that apply to every task:
     - `components/toolbar.tsx` and `shell-toolbar.tsx`: a button labelled "Open" after New and before Load demo motion, no `data-primary`, enabled while a Verify run is in flight; the confirm dialog uses title "Open a draft", message "Discard the current draft and open <file name>?", confirm label "Discard and open", focus on Cancel, through the existing confirm dialog.
     - `components/editor-surface.tsx`: while `document.text` is empty, the placeholder "Type or paste your filing here, or open a draft." and under it three plain links in the order "Open a draft" (opens the Picker, navigates nowhere), "Load demo motion", "Load the Avianca citations"; none while the Document has a character. The old placeholder text no longer appears. Link style `var(--oxblood)`, no icon, in the component's CSS module.
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 4.2, 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7_
-  - [-] 8.4 Drop and wiring
+  - [x] 8.4 Drop and wiring
     - `components/use-file-drop.ts`: capture-phase `dragover` and `drop` listeners on `document` that act only when `dataTransfer.types` includes `"Files"`; they call `preventDefault` and `stopPropagation` so ProseMirror inserts nothing and the browser navigates nowhere. Exactly one file goes to the same `openFile` as the Picker; more than one dispatches the Open_Note "Open one file at a time. Drop a single file." and the Toolbar notice "Open one file at a time." and opens none; a drag with no file is left to the existing drop behaviour (`PST`). No overlay, outline or animation.
     - Wire `use-open`, `use-file-drop` and the confirm dialog into `components/app-shell.tsx`.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 14.8_
