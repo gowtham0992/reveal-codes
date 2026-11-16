@@ -1,0 +1,14 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "courtlistener": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${PLUGIN_ROOT}/server/courtlistener-mcp.mjs"],
+      "env": {
+        "COURTLISTENER_TOKEN": "${COURTLISTENER_TOKEN}",
+        "REVEAL_CODES_CACHE_DIR": "${PLUGIN_DATA}/cache"
+      }
+    }
+  }
+}

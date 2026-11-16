@@ -1,0 +1,25 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "reveal-codes-citations",
+  "version": "0.1.0",
+  "description": "Checks the legal citations and quotations in a document against CourtListener and reports any that cannot be found or that belong to a different case.",
+  "author": {
+    "name": "Reveal Codes",
+    "url": "https://github.com/gowtham0992/reveal-codes"
+  },
+  "repository": "https://github.com/gowtham0992/reveal-codes",
+  "license": "Apache-2.0",
+  "keywords": [
+    "citation",
+    "citations",
+    "cite check",
+    "case law",
+    "legal brief",
+    "court filing",
+    "motion",
+    "courtlistener",
+    "standing order",
+    "fake case",
+    "hallucinated citation"
+  ]
+}
