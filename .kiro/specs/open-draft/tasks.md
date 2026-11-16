@@ -94,7 +94,7 @@ Conventions that apply to every task:
     - **Property 4: DOCX-safe text**
     - File `packages/export/test/docx-text.properties.test.ts`. Any string and any code-unit sequence (`arbDocxHostileText`): no Docx_Unsafe_Character in the result, idempotence with `removed` 0 on the second pass, identity when none present and no `\r`; and export then reopen of a Document built from `docxSafe` text, through the restore helpers of 2.5, equals the original by `structuralEqual`.
     - **Validates: Requirements 22.1, 22.2, 22.6, 22.7, 18.6**
-  - [-] 4.4 Write test that `holdsDocxUnsafe` is false for any `docxSafe` output
+  - [x] 4.4 Write test that `holdsDocxUnsafe` is false for any `docxSafe` output
     - File `packages/export/test/docx-text.test.ts`. Exhaustively over every UTF-16 code unit U+0000 to U+FFFF, alone and between two ASCII letters, and over sampled astral pairs, lone high and lone low surrogates, `\r`, `\r\n`, U+000B and U+000C: `holdsDocxUnsafe(docxSafe(s).text)` is false. Also assert the two functions agree on the table: `holdsDocxUnsafe(s)` is true exactly when `docxSafe(s)` removed at least one character or `s` held U+000B or U+000C.
     - _Requirements: 22.1, 22.2, 22.5_
   - [-] 4.5 Apply `docxSafe` at every editor Entry_Point
