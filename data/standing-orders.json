@@ -959,6 +959,38 @@
       "notes": "Warns that Rule 11 sanctions can include dismissal."
     },
     {
+      "id": "dcolo-neureiter-2026",
+      "court": {
+        "name": "United States District Court for the District of Colorado",
+        "abbreviation": "D. Colo.",
+        "level": "district"
+      },
+      "judge": { "name": "N. Reid Neureiter", "role": "magistrate" },
+      "instrument": "Standing order",
+      "title": "Standing Order Regarding the Use of Generative Artificial Intelligence (\"AI\") in Court Filings",
+      "date": "2026-09-22",
+      "date_note": "Effective date as stated on the face of the order.",
+      "kind": "certification_every_filing",
+      "applies_to": "all",
+      "elements": [
+        "signed_by_all_drafters",
+        "human_review",
+        "accuracy_certification",
+        "citations_verified",
+        "negative_certification_when_unused"
+      ],
+      "caption": {
+        "placement": "statement_title",
+        "text": "AI Certification"
+      },
+      "key_language": "every filing shall contain an AI Certification regarding the use, or non-use, of generative AI (such as ChatGPT, Harvey.AI, or Google Gemini) in preparing the filing, signed by all individuals who contributed to the drafting of the filing.",
+      "source_url": "https://www.cod.uscourts.gov/Portals/0/Documents/Judges/NRN/NRN_Standing_Order_on_AI_Certification.pdf",
+      "source_kind": "primary",
+      "retrieved": "2026-11-15",
+      "status": "current",
+      "notes": "In consented cases, applies to every filing. In cases where the court is in the referral role, applies only to opposed motions referred to the court. AI Certification does not count against page limits. The court will strike non-compliant filings and may award attorney fees where an AI filing lacked substantial justification."
+    },
+    {
       "id": "ca5-proposed-rule-32-3",
       "court": {
         "name": "United States Court of Appeals for the Fifth Circuit",

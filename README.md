@@ -50,7 +50,7 @@ Paste text of your own on the hosted site to see real citations found and invent
 
 ## The dataset
 
-`data/standing-orders.json` holds 40 federal instruments on generative AI in court filings, across 27 courts: local rules, general orders, and judges' standing orders. 35 are in force. Each entry was read from the court's own published text and records what the instrument requires, whom it applies to, one quoted sentence and the source URL. We found no official list of them. The method and fields are in [data/README.md](data/README.md). The dataset is released under CC0.
+`data/standing-orders.json` holds 41 federal instruments on generative AI in court filings, across 27 courts: local rules, general orders, and judges' standing orders. 36 are in force. Each entry was read from the court's own published text and records what the instrument requires, whom it applies to, one quoted sentence and the source URL. We found no official list of them. The method and fields are in [data/README.md](data/README.md). The dataset is released under CC0.
 
 ## Sentinel
 

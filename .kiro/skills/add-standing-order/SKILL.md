@@ -24,7 +24,7 @@ Add or update one entry in `data/standing-orders.json`. Work as a careful person
 3. Quote one sentence from the instrument in `key_language`, verbatim, 400 characters at most. If the PDF is a scanned image and you cannot copy the text exactly, make `key_language` a close paraphrase and say so in `notes`.
 4. Use the instrument's own date in `date`. If the posted document has no date, use the best date available and explain which and why in `date_note`.
 5. Build the `id` in the existing style: lowercase, hyphen-separated court or judge slug, then the instrument or year (for example `ndtex-lr-7-2-f`, `edtex-love-2025`, `sdohio-newman`). Check that it is unique in the file.
-6. Fill every other field as the existing entries do: `court`, `judge`, `instrument`, `title`, `source_url`, `source_kind` (`primary`), `retrieved` (today's date), `notes`.
+6. Fill every other field as the existing entries do: `court`, `judge`, `instrument`, `title`, `source_url`, `source_kind` (`primary`), `retrieved` (run `date +%F` and use the output exactly), `notes`.
 7. If the new entry replaces an older one, set `supersedes` on the new entry and `superseded_by` on the old one, and set the old entry's `status` to `superseded`. Change nothing else on the old entry.
 8. Show the new entry and the quoted sentence with the page it came from. Then save.
 9. Update the counts in `data/README.md`: the total entries, the number of courts, the per-kind counts, the number of entries whose status is not `current`, and the sentence about entries no longer in force (it must list each of them). Update the same counts in `README.md` wherever it states them.
