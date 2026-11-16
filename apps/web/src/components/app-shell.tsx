@@ -18,6 +18,7 @@ import type { ServerMode } from "./use-server-mode";
 import { windowTitle } from "./use-document-title";
 import { StatusLine } from "./status-line";
 import { IssuesRegion } from "./issues-region";
+import type { DraftNotice } from "./issues-region";
 import { ShellToolbar } from "./shell-toolbar";
 import { useVerify } from "./use-verify";
 import { useAutosave } from "./use-autosave";
@@ -128,9 +129,19 @@ type IssuesSlotProps = Readonly<{
   mode: ServerMode;
   verifiedAt: string | null;
   verify: ReturnType<typeof useVerify>;
+  draft: DraftNotice;
 }>;
 
-function IssuesSlot({ doc, store, svc, binding, mode, verifiedAt, verify }: IssuesSlotProps) {
+function IssuesSlot({
+  doc,
+  store,
+  svc,
+  binding,
+  mode,
+  verifiedAt,
+  verify,
+  draft,
+}: IssuesSlotProps) {
   return (
     <IssuesRegion
       document={doc}
@@ -143,12 +154,16 @@ function IssuesSlot({ doc, store, svc, binding, mode, verifiedAt, verify }: Issu
       failure={verify.failure}
       verify={verify}
       resolved={verify.resolved}
+      draft={draft}
     />
   );
 }
 
+function noop(): void {}
+
 function useShellState(svc: AppServices) {
-  const { store, autosave } = useShellParts(svc);
+  const { store, autosave, gate } = useShellParts(svc);
+  const blocked = useSyncExternalStore(gate.subscribe, gate.blocked, () => false);
   const { cursor, onCaret, getCaret } = useCaretRef();
   const binding = useEditorBinding({ store, now: svc.now, onCaret });
   const paneControl = usePaneControl(svc);
@@ -165,13 +180,15 @@ function useShellState(svc: AppServices) {
     notice,
     onGo,
   });
+  // The button handlers are wired in task 23.5 (use-document-actions).
+  const draft: DraftNotice = { blocked, onSaveCopy: noop, onStartNew: noop };
   return {
     slot,
     binding,
     doc,
     exportGate,
     actions,
-    issues: { doc, store, svc, binding, mode, verifiedAt, verify },
+    issues: { doc, store, svc, binding, mode, verifiedAt, verify, draft },
     bottom: { paneControl, doc, cursor, mode, binding },
     toolbar: { notice, doc, verify, exportGate, pane: paneControl, actions },
   };

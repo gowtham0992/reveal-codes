@@ -1,0 +1,15 @@
+.draft {
+  --control-h: 24px;
+
+  margin: 0 0 8px;
+}
+
+.text {
+  margin: 0 0 8px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

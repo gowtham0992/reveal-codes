@@ -491,7 +491,7 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - Run the existing engine properties and confirm they pass unedited.
     - _Requirements: 22.1, 22.5, 22.9_
 
-  - [~] 22.3 Add the Witness_Documents
+  - [-] 22.3 Add the Witness_Documents
     - Create `packages/engine/test/support/tamper-witnesses.ts` with `TAMPER_WITNESSES: Readonly<Record<TamperKind, Document>>` and a pure `missingWitnesses(kinds, witnesses)`. Read each builder in `arb-codes-tampers.ts`, `arb-codes-citations.ts` and `arb-codes-extractor.ts`, choose the smallest fixed Document on which it returns an arbitrary, and build it from fixed text with `createDocument` and fixed `setVerification` and `recordOverride` calls, not drawn state writes.
     - Add a second fixed Document with at least three cut points for the multi-fault test.
     - If the builder of any kind returns `undefined` for every Document you can construct, stop and report that kind. Do not drop it, lower the assertion or change the builder without the author's decision (Requirement 22, criterion 14).
@@ -527,7 +527,7 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - In `notices.ts` add `UNREADABLE_DRAFT`, `SAVE_COPY_FAILED` and `PRINT_BLOCKED` with the texts of the design.
     - _Requirements: 23.9, 23.11, 23.18, 23.21, 23.22_
 
-  - [~] 23.4 Show the Draft_Notice in the Issues region
+  - [x] 23.4 Show the Draft_Notice in the Issues region
     - Create `apps/web/src/components/unreadable-draft.tsx` and `unreadable-draft.module.css`: a paragraph in a `role="status"` element holding `UNREADABLE_DRAFT`, then two `button type="button"` elements `Save a copy` and `Start a new document` outside it, 24px high, existing Tokens only, no colour literal, no icon.
     - In `issues-region.tsx` add the optional `draft` prop and render the notice first in the body while `draft.blocked`. It does not change `issuesHeading`, the list or the Resolved list.
     - In `app-shell.tsx` read the gate with `useSyncExternalStore` and pass `draft` through `IssuesSlot`.

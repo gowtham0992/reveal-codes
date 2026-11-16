@@ -12,6 +12,7 @@ import type { VerifyAction } from "./issues-list";
 import styles from "./issues-region.module.css";
 import { OverrideDialog } from "./override-dialog";
 import { ResolvedList } from "./resolved-list";
+import { UnreadableDraft } from "./unreadable-draft";
 import { VerifyResult } from "./verify-result";
 
 export const DEMO_MODE_LINE =
@@ -33,6 +34,14 @@ export type IssuesRegionProps = Readonly<{
   verify: VerifyAction;
   /** Display_Info of the latest Verify_Run this session; null until one completes. */
   resolved?: ResolvedSession;
+  /** The Draft_Notice, shown first in the body while `blocked` (Requirement 23). */
+  draft?: DraftNotice | undefined;
+}>;
+
+export type DraftNotice = Readonly<{
+  blocked: boolean;
+  onSaveCopy: () => void;
+  onStartNew: () => void;
 }>;
 
 type Target = Readonly<{ issue: Issue; opener: HTMLElement }>;
@@ -71,23 +80,31 @@ function IssuesHeading({ document }: Readonly<{ document: Document }>) {
     </h2>
   );
 }
+/** The Draft_Notice (first, while blocked), the Verify result and the Fixtures_Mode line. */
+function IssuesTop(props: IssuesRegionProps) {
+  const { document, demoMode = false, verifiedAt, note, failure = null, draft } = props;
+  return (
+    <>
+      {draft?.blocked === true ? (
+        <UnreadableDraft onSaveCopy={draft.onSaveCopy} onStartNew={draft.onStartNew} />
+      ) : null}
+      <VerifyResult document={document} verifiedAt={verifiedAt} further={note} failure={failure} />
+      {demoMode ? <p className={styles["note"]}>{DEMO_MODE_LINE}</p> : null}
+    </>
+  );
+}
+
 /** The Issues region: Fixtures_Mode line (15.7), the list and the Override_Dialog (Req 18). */
 export function IssuesRegion(props: IssuesRegionProps) {
-  const { document, store, now, onGo, demoMode = false, verifiedAt, note, verify } = props;
-  const { failure = null, resolved = null } = props;
+  const { document, store, now, onGo, verifiedAt, verify } = props;
+  const { resolved = null } = props;
   const epoch = store.getState().epoch;
   const [target, setTarget] = useState<Target | null>(null);
   return (
     <aside aria-labelledby="issues-heading" className={styles["issues"]}>
       <IssuesHeading document={document} />
       <div className={styles["body"]}>
-        <VerifyResult
-          document={document}
-          verifiedAt={verifiedAt}
-          further={note}
-          failure={failure}
-        />
-        {demoMode ? <p className={styles["note"]}>{DEMO_MODE_LINE}</p> : null}
+        <IssuesTop {...props} />
         <IssuesList
           document={document}
           collapseUnchecked={verifiedAt === null}
