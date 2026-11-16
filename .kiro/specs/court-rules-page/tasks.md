@@ -104,7 +104,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Route `/` stays static; the parameter is read only in a client effect
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9, 8.10, 8.11, 8.12_
 
-  - [-] 6.2 Add the Court_Rules_Link in three places
+  - [x] 6.2 Add the Court_Rules_Link in three places
     - `components/toolbar.tsx`: last child, an `<a href="/courts" target="_blank" rel="noreferrer">Court rules</a>`, no `data-primary`, Toolbar height and button groups unchanged (adjust `toolbar.module.css` only if needed)
     - `ExportDialog`: "See all court rules" link beside the Picker, `target="_blank" rel="noreferrer"`; `OrderPicker` is not changed
     - `SmallScreenPage`: links row always renders, "See all court rules" first and in the same tab, video and repository links each conditional on their own value (remove the both-null guard)
