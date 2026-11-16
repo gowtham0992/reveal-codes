@@ -13,11 +13,16 @@ This design answers the questions the requirements left to it. The answers are c
 | Which fix for characters DOCX cannot carry (Req 22) | **Decided.** `docxSafe` at every Entry_Point, an export refusal as backstop. Never narrow the arbitrary. | "Q12: characters DOCX cannot carry" |
 | Where is the export date (Req 9.6) | Confirmed. It is the paragraph immediately before the Appendix title. | "Where the export date is" |
 | Where does `MAX_TEXT_CHARS` live (Req 21.8) | `apps/web/src/limits.ts`. The boundary test accepts it for both importers (run, result below). | "`MAX_TEXT_CHARS`" |
+| What the Next_Step is after a restore that holds results (Req 13.11 to 13.14) | Verify, through one added input `needsCheckDate`. Verify's start already re-checks verified results and sets the check date, so Verify's behaviour is unchanged. | "Next_Step after a restore" |
 | What was cut from this spec | The record additions (tool names, check date) and the rule that a reopened export gives the same statement. | "Deferred" |
 
 ### Flags for the author
 
-1. **Q12 is decided.** The fix is `docxSafe` at every Entry_Point with the export refusal as backstop. Requirement 5 criterion 4 already names the Docx_Safe_Text step for text files, so no requirement is left to amend.
+1. **Q12 is decided.** The fix is `docxSafe` at every Entry_Point with the export refusal as backstop. Requirement 5 criterion 4 already names the Docx_Safe_Text step for text files. The one amendment is the split into two functions, `docxSafe` and `holdsDocxUnsafe`, which Requirement 22 criterion 1 already states (see "Q12: characters DOCX cannot carry").
+2. **Verify's start re-checks already-verified results, checked in the code, so no fix to Verify is needed.** `runVerifyFlow` (`apps/web/src/client/verify-flow.ts`) sends every full record to `/api/verify` through `buildVerifyBody`, whatever its status, folds the answers in with `setVerification`, checks the quotes of every cluster whose owner is `verified`, and then dispatches `verified` with `now()`, which `reduceVerified` stores as `verifiedAt`. Only the Next_Step rule looks at the count of unchecked items (`countVerifiableUnchecked`). The Verify button is enabled for a restored Document with no unchecked item, because `verify.disabled` is `running || !hasFullRecord(document)` and does not read the count. See "Next_Step after a restore".
+3. **A re-check can drop a restored override.** `setVerification` and `setQuoteCheck` drop the override of a key when the new result differs from the old. If CourtListener now answers differently from the record, the author loses that override and the red code returns. This is existing behaviour and is what principle 4 wants. The design leaves it, and the Open_Note does not mention it.
+4. **Edge case outside the requirement text.** A Document can hold a quote result and no full citation, so it is in the Check_Date_Gap while Verify is disabled. The design computes `needsCheckDate` with a `hasFullRecord` guard so that the Next_Step is never a disabled Verify. This differs from the Glossary definition of Check_Date_Gap in that one case. It is for the author to approve.
+5. **Existing tests change.** `NextStepInput` gains a required field, so `apps/web/test/next-step.test.ts`, `next-step.properties.test.ts` (through `arbNextStepInput`), `verify-flow.test.ts` (`stepFor`) and `shell-toolbar.tsx` change. `apps/web/test/static/inventory.test.ts` pins the exact list of `// Property N` comments in the web tests, so the new property files make it fail until it is updated in the same task.
 
 ### Interpretations the design makes
 
@@ -133,7 +138,7 @@ Components: `components/use-open.ts` (Picker through a hidden file input whose v
 
 **Store changes.** `StoreState` gains `openNote: string | null` (initial `null`). A new action `{ type: "openNote"; text: string | null }` sets it. `reduceReplace` sets it to `null`, which covers New, Load demo motion and Load the Avianca citations (Req 15.2). `replace` also sets `notice` to `null`, so the Open_Flow dispatches `replace` first and `notice` and `openNote` after, the same order Load demo motion uses. `persist.ts` is untouched, so the note is never stored (Req 15.6). The Open_Flow dispatches `openNote: null` on entry (Req 15.3) and `use-verify.ts` dispatches it on run start.
 
-**`nextRunId` after a restore.** `nextRunId` (`apps/web/src/assistant-run.ts`) returns `r` plus `max(document.runs.length, runLog.length) + 1`. With a full run log that avoided a clash when undo had left `runLog` longer than `document.runs`. With an empty run log it can clash: a Document whose runs are `r1` and `r3` (run `r2` was undone) has `document.runs.length` 2, so the next run would be `r3`, a second run with an existing id. The design changes `nextRunId` to also take the highest number in any `r<digits>` id held by `document.runs` or `runLog`. For contiguous ids the result is unchanged, so existing tests keep passing, and an example test pins the `r1`, `r3` case. This is a change outside the list of modules the requirements name, made because the empty restore needs it.
+**`nextRunId` after a restore.** `nextRunId` (`apps/web/src/assistant-run.ts`) returns `r` plus `max(document.runs.length, runLog.length) + 1`. With a full run log that avoided a clash when undo had left `runLog` longer than `document.runs`. With an empty run log it can clash: a Document whose runs are `r1` and `r3` (run `r2` was undone) has `document.runs.length` 2, so the next run would be `r3`, a second run with an existing id. The design changes `nextRunId` to also take the highest number in any `r<digits>` id held by `document.runs` or `runLog`. For contiguous ids the result is unchanged, so existing tests keep passing, and an example test pins the `r1`, `r3` case. This is a change outside the list of modules the requirements name, made because the empty restore needs it. **Approved by the author** (Resolved decision 11).
 
 ### Open_Flow algorithm
 
@@ -244,10 +249,12 @@ store.dispatch({ type: "openNote", text: restoreNote(record.document) });
 
 | `hasAiRun` | `hasResult` | Open_Note |
 | ---------- | ----------- | --------- |
-| yes | yes | "The tool names of the assistant runs and the check date were not in this file, so the next statement cannot give them." |
-| yes | no | "The tool names of the assistant runs were not in this file, so the next statement cannot name them." |
-| no | yes | "The check date was not in this file, so the next statement cannot give it." |
+| yes | yes | "The tool names of the assistant runs and the check date were not in this file, so the next statement cannot give them. Run Verify to check the citations again and record the date." |
+| yes | no | "The tool names of the assistant runs were not in this file, so the next statement cannot name them." (unchanged, no added sentence) |
+| no | yes | "The check date was not in this file, so the next statement cannot give it. Run Verify to check the citations again and record the date." |
 | no | no | no note (`null`) |
+
+The added sentence is in the two rows where the Document holds a Verification_Result, because those are the two rows in which the Document is in the Check_Date_Gap after a restore (`verifiedAt` is `null`). It matches the Next_Step, which is Verify in those two rows (next section). `restoreNote` and `needsCheckDate` read the same `hasVerificationResult` helper, so the note and the Next_Step cannot disagree.
 
 **Verified against the code.** A Document with AI spans and an empty Run_Log is accepted by both consumers:
 
@@ -267,9 +274,74 @@ What the Store holds after a restore, and what the next statement prints, for ea
 | Declaration | the recorded Declaration, kept or dropped by `declarationAfter` | the Declaration sentence, as recorded |
 | Spans, results, overrides | as recorded, inside the Document | counts and tables of the Document, with the recorded timestamps |
 
+### Next_Step after a restore
+
+**Verify's start, checked.** `runVerifyFlow` does not act on unchecked items only. `buildVerifyBody` returns every record with `kind === "full"`, whatever its result. The answers go through `setVerification`, which overwrites a `verified` result with the new one. `runQuotePhase` checks the quotes of every cluster whose owner is `verified`, and `applyQuoteChecks` writes each result. When both phases finish, the flow dispatches `{ type: "verified", at: now().toISOString() }` and `reduceVerified` stores it as `verifiedAt`. A restored Document with no unchecked item is therefore re-checked and gets its check date. Only the Next_Step rule counts unchecked items. No change to Verify is needed. The Verify button for a restored Document is enabled whenever it holds a full citation: `verify.disabled = running || !hasFullRecord(document)` (`use-verify.ts`).
+
+**Input.** `nextStep` in `apps/web/src/components/next-step.ts` takes one more required input.
+
+```ts
+export type NextStepInput = Readonly<{
+  empty: boolean;
+  verifying: boolean;
+  verifiableUnchecked: number;
+  /** The Document is in the Check_Date_Gap and Verify can run (see needsCheckDate). */
+  needsCheckDate: boolean;
+  blocking: number; // ignored by the rules
+}>;
+
+export function nextStep(input: NextStepInput): NextStep {
+  if (input.verifying) return "none";
+  if (input.empty) return "load-demo";
+  if (input.verifiableUnchecked > 0 || input.needsCheckDate) return "verify";
+  return "export";
+}
+```
+
+The rule order is the one of Requirement 13 criterion 11: in flight gives none, empty gives Load demo motion, then Verify when the count is above 0 or the Document needs the check date, otherwise Export. Requirement 13 criterion 14 holds because `needsCheckDate: false` gives exactly the old function. The field is required, not optional, so a caller that forgets it fails `pnpm typecheck`. Callers updated in the same task: `shell-toolbar.tsx`, `test/next-step.test.ts` (`BASE`), `test/arbitraries.ts` (`arbNextStepInput`), `test/verify-flow.test.ts` (`stepFor`).
+
+**Computation.** A new module `apps/web/src/client/check-date.ts` holds two pure functions and is imported by `shell-toolbar.tsx` and `open-note.ts`:
+
+```ts
+/** Verification_Result (Glossary): a full citation or a quote whose status is not "unchecked". */
+export function hasVerificationResult(document: Document): boolean;
+
+/** The Check_Date_Gap, limited to a Document that Verify can run on. */
+export function needsCheckDate(document: Document, verifiedAt: string | null): boolean {
+  return verifiedAt === null && hasVerificationResult(document) && hasFullRecord(document);
+}
+```
+
+`ShellToolbar` receives `verifiedAt` from the Store state beside `doc` and passes `needsCheckDate: needsCheckDate(doc, verifiedAt)`. A short form does not count in `hasVerificationResult`, as the Glossary says. The `hasFullRecord` term mirrors `verify.disabled`. Without it a Document with a quote result and no full citation would show Verify as the primary button while the button is disabled, and the author would have no next step. With it, that Document gets Export.
+
+**Behaviour.**
+
+| State | Next_Step |
+| ----- | --------- |
+| Restore, results held, `verifiedAt` null, nothing unchecked | `verify` |
+| The same, run in flight | `none` |
+| The same, after a completed run (`verifiedAt` not null) | `export` |
+| Opened text (Plain_Reading, Text_File, changed export): no result | follows the old rules (`verify` only when a full citation is unchecked) |
+| Document with results and `verifiedAt` not null | the old rules |
+| Restore, red codes without override | `verify` while the check date is missing; the export gate blocks as before |
+
+**Gate unchanged (Requirement 13 criterion 12).** `needsCheckDate` and the step are read only by the Toolbar's primary-button choice. `canExport` and the export gate take the Document, the overrides and the court, and never the Next_Step, so a `CIT ✘`, `CIT ≠`, `CIT ?`, `CIT …`, `QUO ✘` or `QUO …` code without an override blocks export while the primary button says Verify. The Export button is a different button from the primary one and stays enabled or disabled by the gate.
+
+**Requirement 13 criteria 11 to 14, traceability.** The design has no separate traceability section. Each criterion is covered here and by the properties named in the last column.
+
+| Criterion | Where the design meets it | Tests |
+| --------- | ------------------------- | ----- |
+| 13.11 Next_Step is Verify in the gap | `NextStepInput.needsCheckDate`, rule order above, `needsCheckDate()` | Property 5 |
+| 13.12 gate unchanged, restored override still counts | gate takes no Next_Step; `canExport` unchanged | Property 7, restore example |
+| 13.13 completed run: check date set, gap closed, old rules | `runVerifyFlow` dispatches `verified`; `reduceVerified` | example test on a restored Store with a fake API; Property 5 |
+| 13.14 not in the gap: previous behaviour | `needsCheckDate: false` gives the old function | Property 6 |
+
+
 ### Q12: characters DOCX cannot carry
 
 **Decided: `docxSafe` at every Entry_Point, with an export refusal as backstop. The arbitrary is not narrowed.**
+
+**Amendment of Requirement 22 criterion 1 (already in requirements.md).** The criterion first described one function. It now describes two over one table of allowed ranges. `docxSafe(text)` returns the Docx_Safe_Text and the removed count, and converts U+000B and U+000C to `\n` without counting them. `holdsDocxUnsafe(text)` is true exactly when the text holds any Docx_Unsafe_Character, U+000B and U+000C included, and is false for the text of any `docxSafe` result. The split exists because the export guard must see U+000B and U+000C, which `docxSafe` has already converted at the Entry_Points and so never reports. This design implements the amended criterion; no further change to the requirement is needed.
 
 Evidence for the choice:
 
@@ -337,9 +409,9 @@ export type OpenOutcome =
 
 *A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
 
-Reflection. The prework found these overlaps and the design resolves them. The restore criteria (9.2, 9.3, 9.7, 9.10, 12.1, 13.8) are one property (Property 2), and the changed-export criteria (9.9, 10.1 to 10.7) are another (Property 3). The criterion that red codes still block export after a reopen (9.7) follows from structural equality of the Document and is checked inside Property 2 by comparing `canExport` before and after. The criterion that the Open_Flow and the Sentinel agree on whether a file was edited (9.9) follows from sharing `splitExport` and is checked inside Property 3 by comparing the Sentinel's `body_edited` Finding. The default-reader behaviour for the Sentinel (1.9) is an example test, not a property. The empty Run_Log and null check date after a restore (13.1) are a fixed install, so they are example tests. The README, ordering of refusals, the Toolbar and the empty page are examples.
+Reflection. The prework found these overlaps and the design resolves them. The restore criteria (9.2, 9.3, 9.7, 9.10, 12.1, 13.8) are one property (Property 2), and the changed-export criteria (9.9, 10.1 to 10.7) are another (Property 3). The criterion that red codes still block export after a reopen (9.7) follows from structural equality of the Document and is checked inside Property 2 by comparing `canExport` before and after. The criterion that the Open_Flow and the Sentinel agree on whether a file was edited (9.9) follows from sharing `splitExport` and is checked inside Property 3 by comparing the Sentinel's `body_edited` Finding. The default-reader behaviour for the Sentinel (1.9) is an example test, not a property. The empty Run_Log and null check date after a restore (13.1) are a fixed install, so they are example tests. The README, ordering of refusals, the Toolbar and the empty page are examples. The Next_Step criteria (13.11, 13.12, 13.14) are Properties 5, 6 and 7, because `nextStep` and `needsCheckDate` are pure; criterion 13.13 (a completed run closes the gap) needs the Store and a fake API, so it is an example test. The restore-note strings (13.4) are one property over the two booleans (Property 13).
 
-Each property is one `fc.assert(fc.property(...))` (or `fc.asyncProperty` where the body awaits `buildDocx`) in a file named `<module>.properties.test.ts`, with `// Property N` above it and `_Requirements: x.y_` in the `describe` title, at `numRuns` 200 locally and 500 in CI. The numbers match Requirement 18 and Requirement 22: Properties 1 to 4 are the four the requirements name.
+Each property is one `fc.assert(fc.property(...))` (or `fc.asyncProperty` where the body awaits `buildDocx`) in a file named `<module>.properties.test.ts`, with `// Property N` above it and `_Requirements: x.y_` in the `describe` title, at `numRuns` 200 locally and 500 in CI. The numbers match Requirement 18 and Requirement 22: Properties 1 to 4 are the four the requirements name, and they keep their numbers. Properties 5 to 7 cover the Next_Step of Requirement 13 criteria 11 to 14, and Properties 8 to 14 follow in order.
 
 ### Property 1: Word text round trip
 
@@ -365,43 +437,61 @@ For any string, including any sequence of UTF-16 code units, `docxSafe` returns 
 
 **Validates: Requirements 22.1, 22.2, 22.6, 22.7, 18.6**
 
-### Property 5: The statement and the Appendix are never body text
+### Property 5: A missing check date makes Verify the next step
+
+For any Document and any Next_Step input with `verifying` false and `empty` false, `needsCheckDate` true gives `verify`, whatever `verifiableUnchecked` and `blocking` are, including `verifiableUnchecked` 0. For any Document that holds a Verification_Result and a full citation and a Store with `verifiedAt` null, `needsCheckDate` is true; with `verifiedAt` not null, or with no Verification_Result, it is false. The rule order holds: `verifying` gives `none` and `empty` gives `load-demo`, whatever `needsCheckDate` is.
+
+**Validates: Requirements 13.11, 13.13**
+
+### Property 6: Outside the gap the Next_Step is unchanged
+
+For any Next_Step input with `needsCheckDate` false, `nextStep` returns what the function returned before this spec: `none` while verifying, else `load-demo` when empty, else `verify` when `verifiableUnchecked` is above 0, else `export`. The expected value is written as a separate table in the test, not as a second copy of the function.
+
+**Validates: Requirements 13.14, 8.4**
+
+### Property 7: Red codes still block export while the Next_Step is Verify
+
+For any Document with at least one red code (`CIT ✘`, `CIT ≠`, `CIT ?`, `CIT …`, `QUO ✘` or `QUO …`) that has no override, any court, and any `verifiedAt`, `canExport` is false whether `nextStep` returns `verify` or `export`; and `canExport` is the same for a Document before and after its Next_Step input changes. For a restored Document, an override that the record held still counts.
+
+**Validates: Requirements 13.12, 9.7**
+
+### Property 8: The statement and the Appendix are never body text
 
 For any Document, including one whose text holds a line equal to a member of `STATEMENT_TITLES`, and for both a restore and a body-only import, no paragraph at or after the Filing_End appears in the text the Open_Flow installs. The text is the paragraphs before the last statement title that precedes the Appendix title, joined with `\n`.
 
 **Validates: Requirements 11.1, 11.2, 11.3**
 
-### Property 6: The reader is total
+### Property 9: The reader is total
 
 For any bytes, including truncated zips, zips with random part content and random data, `readDocx` and `readDocxWithNotes` return a value and throw nothing.
 
 **Validates: Requirements 1.6**
 
-### Property 7: UTF-8 text round trip
+### Property 10: UTF-8 text round trip
 
 For any string with no `\r` and no Docx_Unsafe_Character, encoded as UTF-8 with or without a leading byte-order mark, `decodeTextFile` returns the string. For any string with `\r\n` or lone `\r` and no Docx_Unsafe_Character, it returns the string with each replaced by `\n`.
 
 **Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.6**
 
-### Property 8: Opened text installs as one PST span
+### Property 11: Opened text installs as one PST span
 
 For any accepted text, including text that holds Docx_Unsafe_Characters, installing it through the Open_Flow gives a Document with exactly one span, of origin `PST`, covering the whole text after `docxSafe`, with the current time, and a Store with Declaration `null`, an empty run log, no verification time, no override and no verification result. The Open_Message carries the removed-character sentence exactly when `removed` is at least 1, with `removed` as its count.
 
 **Validates: Requirements 8.1, 8.2, 8.6, 22.3, 22.5**
 
-### Property 9: Notes are numbered 1..N without separators
+### Property 12: Notes are numbered 1..N without separators
 
 For any list of footnote and endnote entries, including Separator_Notes and notes with empty text, `notesBlock` lists only the notes with text, numbered from 1 with no gap, footnotes before endnotes in part order, one line each with paragraphs joined by a single space and line breaks and tabs as spaces; and it is the empty string when no note has text.
 
 **Validates: Requirements 7.1, 7.2, 7.3, 7.4, 7.5, 7.6**
 
-### Property 10: The restore note follows AI runs and verification results
+### Property 13: The restore note follows AI runs and verification results
 
-For any Document, `restoreNote` returns the note of Requirement 13 criterion 4 for the case given by "has an AI run" and "has a verification result" (AI runs and results; AI runs only; results only), and returns `null` when the Document has neither.
+For any Document, `restoreNote` returns the note of Requirement 13 criterion 4 for the case given by "has an AI run" and "has a verification result", and returns `null` when the Document has neither. The strings are exact: with AI runs and results, "The tool names of the assistant runs and the check date were not in this file, so the next statement cannot give them. Run Verify to check the citations again and record the date."; with AI runs only, "The tool names of the assistant runs were not in this file, so the next statement cannot name them."; with results only, "The check date was not in this file, so the next statement cannot give it. Run Verify to check the citations again and record the date." The sentence "Run Verify to check the citations again and record the date." ends the note exactly when the Document holds a Verification_Result, and appears in no other note. "Has a verification result" is `hasVerificationResult`, the helper `needsCheckDate` reads.
 
 **Validates: Requirements 13.2, 13.3, 13.4, 13.5**
 
-### Property 11: A refusal changes nothing but the note and the message
+### Property 14: A refusal changes nothing but the note and the message
 
 For any file the Open_Flow refuses, and any prior Store state, the Store after the open equals the Store before except for `openNote` and `notice`, and no confirm dialog opened.
 
@@ -433,10 +523,11 @@ No `try`/`catch` in the Open_Flow discards an error. The only `try` is the one i
 
 | File | Properties |
 | ---- | ---------- |
-| `packages/export/test/docx-read.properties.test.ts` | 1, 6, 9 |
-| `packages/export/test/word-draft.properties.test.ts` | 2, 3, 5 |
+| `packages/export/test/docx-read.properties.test.ts` | 1, 9, 12 |
+| `packages/export/test/word-draft.properties.test.ts` | 2, 3, 8 |
 | `packages/export/test/docx-text.properties.test.ts` | 4 |
-| `apps/web/test/open-file.properties.test.ts` | 7, 8, 10, 11 |
+| `apps/web/test/next-step-gap.properties.test.ts` | 5, 6, 7 |
+| `apps/web/test/open-file.properties.test.ts` | 10, 11, 13, 14 |
 
 New shared arbitraries live in `packages/export/test/support/arbitraries.ts`, the Export_Package equivalent that Requirement 18 criterion 7 allows, because `packages/engine` is not changed by this spec and the arbitraries are used by three export test files: `arbParagraphs` (paragraph lists with leading and trailing spaces, tabs, quotation marks, `&`, `<`, `>`, non-ASCII characters and empty paragraphs), `arbBodyEdit` (one single-character change to a body paragraph) and `arbDocxHostileText` (text that includes U+0000 to U+001F, U+FFFE, U+FFFF and unpaired surrogates). `arbDocument`, `arbText` and `arbRunLog` are not changed, and Properties 1 to 3 keep using the existing arbitraries.
 
@@ -449,6 +540,7 @@ New shared arbitraries live in `packages/export/test/support/arbitraries.ts`, th
 - Confirm-before-replace: dialog for a non-empty draft, none for an empty one, Cancel changes nothing, Confirm replaces.
 - The three Toolbar messages, the Open_Note in the Issues region and its clearing by New, the empty-page text and its three links in order, the Open button after New, and zero `fetch`, `XMLHttpRequest`, `sendBeacon` and form-post calls during an open.
 - The restore install: `replace` with `runLog: []` and `verifiedAt: null` for a Document with AI spans, accepted by `reduceReplace`, and `buildStatement` on that state builds. The Open_Note for each case of Requirement 13 criterion 4 and no note for criterion 5. The statement built after a restore prints no sentence about prompt records (Requirement 19 criterion 16).
+- `nextStep` and the Check_Date_Gap, in `apps/web/test/next-step.test.ts` and `verify-flow.test.ts`: a gap with no unchecked item gives `verify`; the same state while a run is in flight gives `none`; an empty Document gives `load-demo`; a Document not in the gap gives what it gave before; and a restored Store (results held, `verifiedAt` null, nothing unchecked) after `runVerifyFlow` against a fake API that answers every record has a `verifiedAt` that is not null, the already-verified results re-checked, and `export` as the Next_Step. A second example restores a Document with a `CIT ✘` and no override, and asserts that the Next_Step is `verify` and that the export gate still blocks. A third pins the edge case of Flag 4: a quote result with no full citation gives `export`, not `verify`.
 - `nextRunId` for a Document whose runs are `r1` and `r3` with an empty run log gives `r4`, and for contiguous ids gives what it gave before.
 - Requirement 22: `docxSafe` at paste, drop, the two samples and assistant insertion (a reply that splits a surrogate pair across chunks is not cut); the Open_Message for `removed` 0, 1 and more than 1, with the sentences in the order of Requirement 7 criterion 7; a restore of a record that holds an unsafe character is not changed; and the export refusal for a stored draft with a Docx_Unsafe_Character in the text and in an override reason, with the exact message, nothing downloaded and the Document unchanged.
 - The Sentinel: every existing Sentinel test passes with import paths changed only.
@@ -456,6 +548,19 @@ New shared arbitraries live in `packages/export/test/support/arbitraries.ts`, th
 - Static tests: no copy of the moved modules, no `node:` or DOM import in the shared modules, no `try`/`catch` that discards in the Open_Flow, no route under `apps/web/app/api` for opening, the docs tests of Requirement 17 criterion 4, and `boundaries.test.ts` with `src/limits.ts` in place.
 
 **Fixtures** are built by a deterministic helper in the Export_Package tests: `docx` for paragraphs, tables, tracked changes and footnotes, then a post-processing step with `fflate` that adds `word/endnotes.xml` with its content-type and relationship entries (the `docx` library writes none), with every date and zip timestamp fixed. A password-protected stand-in is a compound-file header with an `EncryptedPackage` stream name. Also built: a truncated zip, a zip without `word/document.xml`, and an export edited by one character. A file saved by Word is out of scope (Requirement 19 criterion 14).
+
+**Fixtures and arbitraries land before the first test that uses them.** The fixture builder, the endnotes helper and the shared arbitraries are tasks of their own, not part of a test task, and each is committed with its own self-test (the builder's output bytes are identical on two runs; the endnotes helper's output holds `word/endnotes.xml` with its content-type and relationship entries) before any test imports it.
+
+| Helper | First test that uses it | Lands in step |
+| ------ | ----------------------- | ------------- |
+| Fixture builder (`docx` paragraphs, tables, tracked changes, footnotes, fixed dates and zip timestamps) | the reader examples of Requirement 19 criterion 3 and `readWordDraft` examples | 3, first |
+| Endnotes helper (`fflate` post-processing) | the same reader example (one endnote) and Property 12 | 3, with the builder |
+| `arbParagraphs`, `arbBodyEdit` | Properties 1, 3 and 8 | 3, before those tests |
+| `arbDocxHostileText` | Property 4 (the `docxSafe` property) | 4, before Property 4 |
+| Restore helpers (export a Document, reopen it, compare by `structuralEqual`) | Properties 2, 3 and 4 and the restore examples | 3, before Property 2 |
+| `needsCheckDate` fixtures (a restored Store, a fake API) | the Next_Step examples and Property 7 | 5, before those tests |
+
+Property 4's round-trip half uses the fixture builder and the restore helpers from step 3, so step 4 depends on step 3.
 
 **Why property tests apply.** The reader, the split, the classification and `docxSafe` are pure functions of bytes or plain data with round-trip and invariant statements. The Toolbar, the drop handling, the empty page and the messages are UI wiring and wording, so they are example tests.
 
@@ -465,9 +570,9 @@ The author asked for the shared reader first. Each step keeps `pnpm lint`, `pnpm
 
 1. **Spec.** Commit the spec (`spec(open-draft): ...`) before any implementation task (Requirement 21 criterion 1).
 2. **The shared reader move.** Move the four modules into `packages/export/src`, add `read-types.ts`, move `fflate` to `dependencies`, update `packages/export/test/package.test.ts`, change Sentinel import paths. No behaviour changes. This step ships on its own.
-3. **Reader additions and `word-draft.ts`.** Notes, part-size limit, signature check, `readWordDraft`, the fixtures helper, Properties 1, 2, 3, 5, 6 and 9.
-4. **`docxSafe` with the editor-input changes.** `docx-text.ts`, the calls in `clipboard.ts`, the sample loaders and the assistant insertion, the export guard and its notice, `arbDocxHostileText`, Property 4.
-5. **The app.** `limits.ts` with the `verify-route.ts` change and the boundary test run, the Store `openNote`, the `nextRunId` change, the Open_Flow modules, Toolbar, drop, empty page, Issues region, restore install, Properties 7, 8, 10 and 11.
+3. **Reader additions and `word-draft.ts`.** The fixture builder, the endnotes helper, `arbParagraphs`, `arbBodyEdit` and the restore helpers first, each with its self-test, then notes, part-size limit, signature check, `readWordDraft`, and Properties 1, 2, 3, 8, 9 and 12.
+4. **`docxSafe` with the editor-input changes.** `docx-text.ts`, the calls in `clipboard.ts`, the sample loaders and the assistant insertion, the export guard and its notice, then `arbDocxHostileText`, then Property 4.
+5. **The app.** `limits.ts` with the `verify-route.ts` change and the boundary test run, the Store `openNote`, the `nextRunId` change, `client/check-date.ts` and the `needsCheckDate` input of `nextStep` with its four callers, the Open_Flow modules, Toolbar, drop, empty page, Issues region, restore install, the update of `test/static/inventory.test.ts` for the new `// Property N` comments, Properties 10, 11, 13 and 14, and Properties 5, 6 and 7 with the `needsCheckDate` change.
 6. **Documentation and the final checkpoint.** README, KIRO_USAGE, BUILD_LOG, `ui.md`, `structure.md`, `tech.md`, then the checks of Requirement 21 criterion 3.
 
 ## Deferred
