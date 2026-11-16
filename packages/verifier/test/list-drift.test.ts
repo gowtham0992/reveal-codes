@@ -37,8 +37,9 @@ describe("list drift _Requirements: 20.4_", () => {
     expect(sameWords(DROPPED, [...DROPPED_WORDS, "planted"])).toBe(false);
     expect(sameTable([...EXPANSION_ENTRIES, ["zz", ["zed"]]], NAME_EXPANSION_TABLE)).toBe(false);
     expect(sameTable(EXPANSION_ENTRIES.slice(1), NAME_EXPANSION_TABLE)).toBe(false);
-    const [[key]] = EXPANSION_ENTRIES;
-    const changed = [[key as string, ["planted"]] as const, ...EXPANSION_ENTRIES.slice(1)];
+    const first = EXPANSION_ENTRIES[0];
+    if (first === undefined) throw new Error("EXPANSION_ENTRIES is empty");
+    const changed = [[first[0], ["planted"]] as const, ...EXPANSION_ENTRIES.slice(1)];
     expect(sameTable(changed, NAME_EXPANSION_TABLE)).toBe(false);
   });
 });

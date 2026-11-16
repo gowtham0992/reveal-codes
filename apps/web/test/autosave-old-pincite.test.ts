@@ -39,7 +39,7 @@ describe("loading an old draft with [/CIT] inside a range _Requirements: 18.16_"
     const after = store.getState();
     expect(after.document.text).toBe("");
     expect(after.document).toBe(before.document);
-    expect(after.notices).toEqual(before.notices);
+    expect(after.notice).toEqual(before.notice);
     expect(storage.getItem(AUTOSAVE_KEY)).toBe(oldDraft());
   });
 

@@ -409,7 +409,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - Run the engine and verifier suites and list every other test that fails because a citation now ends later. Edit only those whose expected text is wrong for the right reason, and list them for the BUILD_LOG; stop and report any test that fails for another reason.
     - _Requirements: 18.12, 18.13, 18.10_
 
-- [~] 17. Checkpoint - Links and pincite complete
+- [x] 17. Checkpoint - Links and pincite complete
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 18. Say what the mismatch is where the author decides (Requirement 19)
@@ -429,7 +429,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - Compute it with `mismatchOf` and `mismatchLines` from the current Document in both `OverrideSlot` sites (`issues-region.tsx` and `export-dialog.tsx`), passing `null` when `mismatchOf` returns `null`.
     - _Requirements: 19.3, 19.4, 19.7, 19.8_
 
-  - [~] 18.4 Write the mismatch tests
+  - [-] 18.4 Write the mismatch tests
     - Add example tests: an Issues row shows `Cited as Henderson v. Pacific Housing Authority` then `This citation is Ashcroft v. Iqbal (2009)` under the citation text; the lines drop the year when `foundYear` is absent and drop the first line when the citation has no `caseName`; the Export dialog row shows both lines and the `View on CourtListener` link; the Override dialog for `CIT ≠` shows both lines before the reason textarea in DOM order; no line ends in a full stop; `mismatchOf` reads `caseName` from the Document passed in and returns `null` for a non-`wrong_case` key.
     - Edit the existing tests that match the exact paragraphs of a `wrong_case` row and list them for the BUILD_LOG. Run `copy-rules.test.ts` and `limits.test.ts` and keep them passing.
     - _Requirements: 19.1, 19.2, 19.3, 19.4, 19.5, 19.6, 19.8, 19.9_
