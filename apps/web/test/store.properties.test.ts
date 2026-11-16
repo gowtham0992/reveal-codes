@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { reduce, type StoreAction, type StoreState } from "../src/store";
+import { initialState, reduce, type StoreAction, type StoreState } from "../src/store";
 import { arbHistoryPlan } from "./arbitraries";
 import { createManualClock } from "./support/clock";
 import { runs } from "./support/fc";
@@ -11,16 +11,7 @@ describe("Property 3: undo restores exactly _Requirements: 8.5, 8.6, 8.11_", () 
     fc.assert(
       fc.property(arbHistoryPlan, ({ start, actions, gaps }) => {
         const clock = createManualClock();
-        let state: StoreState = {
-          document: start,
-          undo: [],
-          redo: [],
-          runLog: [],
-          verifiedAt: null,
-          declaration: null,
-          notice: null,
-          epoch: 0,
-        };
+        let state: StoreState = { ...initialState(clock.now), document: start };
         const step = (action: StoreAction): void => {
           state = reduce(state, action, clock.now).state;
         };

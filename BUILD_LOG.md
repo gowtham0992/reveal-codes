@@ -641,3 +641,22 @@ The author walked the app in a browser and found four things. Requirement 9.8 wa
 - `apps/web/test/case-match.properties.test.ts`: gains Property 20 (additive).
 - `apps/web/test/arbitraries.ts`: gains `arbUnreadableStored` (additive).
 - `apps/web/test/static/case-match-inventory.test.ts` (task 24.1): the count is twenty and the web file owns Property 20.
+
+## 2026-11-15: pasted-text-declaration, the statement may only say what the record shows
+
+### Why
+- A filing made only of pasted text exported a certification sentence saying no generative AI was used. The tool had no basis for it. `PST` means the origin is unknown (product.md, principle 1), and `usedAi(document)` counted only `AI` and `AI>HUM` spans, so one `PST` span read as "no AI". That is the path of a person who drafted in a chatbot and pasted the result, the user the product exists for.
+- The sentence is removed as a tool assertion. The statement now has Record_Sentences (counts and shares from the spans) and Author_Sentences ("The author states that ...", only for what the record cannot show). When the document holds pasted text, or a selected court order requires a statement for a typed-only filing, the Export dialog requires the author's two-way declaration first. The declaration counts as AI use for every court rule.
+
+### What Kiro got wrong in the requirements pass
+- An earlier draft had the tool assert, as an author sentence, that no program was used. That claim is the same kind of overreach as the one being removed, written in the author's voice without the author saying it.
+- It also assumed the tool could print a no-AI statement for typed text. It cannot: typed text may have been copied from a chatbot by hand. Only the author can say so, and only when a court order asks.
+- The design had to reconcile Requirement 7 criteria 7, 8 and 16, which were written separately and disagreed on when a declaration is required and which subject it answers. The Declaration_Subject rule (`pasted_text`, then `this_filing`, then `none`) and the Applicable_Declaration rule (a declaration for one subject never answers the other) came out of that reconciliation.
+
+### Compatibility limit
+- A file exported with the declaration carries `d=` in its `[DOC]` line. An older Sentinel does not know that field and reads such a file as one `unreadable` Finding, not as a drift report. Sweep exported files with a Sentinel built from this change or later.
+
+### Test-design notes
+- `packages/export/test/statement-declaration.properties.test.ts` failed `pnpm typecheck` with TS2367 (a comparison between types with no overlap). It was fixed in the test file, and the property's intent is unchanged.
+- Duplicate Property numbering shows up in the static inventory tests: `crew/sentinel/test/static/boundaries.test.ts` and `apps/web/test/static/inventory.test.ts` currently fail. They are handled at the final checkpoint and are not changed here.
+- The static test `packages/export/test/static/ai-use-definition.test.ts` lists the removed sentences as forbidden strings. This entry paraphrases them for that reason.

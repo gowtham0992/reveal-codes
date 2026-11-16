@@ -5,6 +5,7 @@ import {
   arbDeclaration,
   arbEditSequence,
   arbMixedOriginDocument,
+  type EditStep,
 } from "../../../packages/engine/src/testing/arb-declaration";
 import { reduce, type StoreAction, type StoreState } from "../src/store";
 import { createManualClock } from "./support/clock";
@@ -66,76 +67,98 @@ const sameCells = (a: Cells, b: Cells): boolean =>
 
 const textOf = (cells: Cells): string => cells.map((c) => c.unit).join("");
 
+/** The reference model: cells plus the snapshot stacks for undo and redo. */
+type Model = { cells: Cells; undoStack: Cells[]; redoStack: Cells[]; counter: number };
+
+const nextIdOf = (model: Model) => (): number => (model.counter += 1);
+
+function initialState(doc: Document, declaration: Declaration): StoreState {
+  return {
+    document: doc,
+    undo: [],
+    redo: [],
+    runLog: [],
+    verifiedAt: null,
+    declaration,
+    notice: null,
+    epoch: 0,
+  };
+}
+
+function modelEdit(model: Model, op: CallerOperation, rejected: boolean): void {
+  const next = rejected ? model.cells : applyToCells(model.cells, op, nextIdOf(model));
+  if (sameCells(next, model.cells)) return;
+  model.undoStack.push(model.cells);
+  model.redoStack.length = 0;
+  model.cells = next;
+}
+
+function modelMove(model: Model, from: Cells[], to: Cells[]): void {
+  const target = from.pop();
+  if (target === undefined) return;
+  to.push(model.cells);
+  model.cells = target;
+}
+
+/** Applies one step to the model and returns the Store action for it. */
+function stepAction(model: Model, state: StoreState, step: EditStep, now: () => Date): StoreAction {
+  if (step.kind === "edit") {
+    const action: StoreAction = { type: "edit", ops: [step.op] };
+    // The generator tracks the engine's history, which also records no-op edits; the Store
+    // does not, so after an undo an operation can be out of range for the Store's Document.
+    // The Store rejects it with a notice and the model skips it.
+    modelEdit(model, step.op, reduce(state, action, now).state.notice !== null);
+    return action;
+  }
+  if (step.kind === "undo") {
+    modelMove(model, model.undoStack, model.redoStack);
+    return { type: "undo" };
+  }
+  modelMove(model, model.redoStack, model.undoStack);
+  return { type: "redo" };
+}
+
+function expectDeclaration(
+  model: Model,
+  beforeIds: ReadonlySet<number>,
+  before: Declaration | null,
+  after: Declaration | null,
+): void {
+  const addedPasted = model.cells.some((c) => c.pasted && !beforeIds.has(c.id));
+  const substantive = model.cells.some((c) => c.pasted && NON_SPACE.test(c.unit));
+  if (addedPasted || before === null) {
+    expect(after).toBeNull();
+  } else if (before.subject === "pasted_text" && !substantive) {
+    expect(after).toBeNull();
+  } else {
+    expect(after).toEqual(before);
+  }
+}
+
+function runScenario(scenario: {
+  doc: Document;
+  declaration: Declaration;
+  steps: readonly EditStep[];
+}): void {
+  const clock = createManualClock();
+  let state = initialState(scenario.doc, scenario.declaration);
+  const model: Model = { cells: [], undoStack: [], redoStack: [], counter: 0 };
+  model.cells = cellsOf(scenario.doc, nextIdOf(model));
+  for (const step of scenario.steps) {
+    // Beyond the coalescing window, so every edit is its own Undo_Group.
+    clock.advance(5000);
+    const beforeIds = new Set(model.cells.map((c) => c.id));
+    const before = state.declaration;
+    const action = stepAction(model, state, step, clock.now);
+    state = reduce(state, action, clock.now).state;
+    expect(state.document.text).toBe(textOf(model.cells));
+    expectDeclaration(model, beforeIds, before, state.declaration);
+  }
+}
+
 describe("Property 4: a stored Declaration is cleared exactly when pasted text is added or none remains _Requirements: 5.3, 5.6, 5.7, 5.12, 11.5_", () => {
   // Property 4
   it("P4 the stored Declaration is null on new PST, null on no substantive PST for pasted_text, else unchanged", () => {
-    fc.assert(
-      fc.property(arbScenario, ({ doc, declaration, steps }) => {
-        const clock = createManualClock();
-        let state: StoreState = {
-          document: doc,
-          undo: [],
-          redo: [],
-          runLog: [],
-          verifiedAt: null,
-          declaration,
-          notice: null,
-          epoch: 0,
-        };
-        let counter = 0;
-        const nextId = (): number => (counter += 1);
-        let cells = cellsOf(doc, nextId);
-        const undoStack: Cells[] = [];
-        const redoStack: Cells[] = [];
-
-        for (const step of steps) {
-          // Beyond the coalescing window, so every edit is its own Undo_Group.
-          clock.advance(5000);
-          const beforeIds = new Set(cells.map((c) => c.id));
-          const before: Declaration | null = state.declaration;
-          let action: StoreAction;
-          if (step.kind === "edit") {
-            action = { type: "edit", ops: [step.op] };
-            // The generator tracks the engine's history, which also records no-op edits;
-            // the Store does not, so after an undo an operation can be out of range for the
-            // Store's Document. The Store rejects it with a notice and the model skips it.
-            const rejected = reduce(state, action, clock.now).state.notice !== null;
-            const next = rejected ? cells : applyToCells(cells, step.op, nextId);
-            if (!sameCells(next, cells)) {
-              undoStack.push(cells);
-              redoStack.length = 0;
-              cells = next;
-            }
-          } else if (step.kind === "undo") {
-            action = { type: "undo" };
-            const prior = undoStack.pop();
-            if (prior !== undefined) {
-              redoStack.push(cells);
-              cells = prior;
-            }
-          } else {
-            action = { type: "redo" };
-            const later = redoStack.pop();
-            if (later !== undefined) {
-              undoStack.push(cells);
-              cells = later;
-            }
-          }
-          state = reduce(state, action, clock.now).state;
-
-          expect(state.document.text).toBe(textOf(cells));
-          const addedPasted = cells.some((c) => c.pasted && !beforeIds.has(c.id));
-          const substantive = cells.some((c) => c.pasted && NON_SPACE.test(c.unit));
-          if (addedPasted || before === null) {
-            expect(state.declaration).toBeNull();
-          } else if (before.subject === "pasted_text" && !substantive) {
-            expect(state.declaration).toBeNull();
-          } else {
-            expect(state.declaration).toEqual(before);
-          }
-        }
-      }),
-      { numRuns: runs() },
-    );
+    fc.assert(fc.property(arbScenario, runScenario), { numRuns: runs() });
   });
 });

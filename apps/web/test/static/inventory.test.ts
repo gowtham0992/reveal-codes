@@ -102,8 +102,12 @@ describe("inventory: BUILD_LOG has an editor-app entry _Requirements: 26.5_", ()
 
 describe("inventory: properties _Requirements: 25.1, 25.2, 25.3, 25.4, 25.5, 25.7_", () => {
   // case-match.properties.test.ts is checked by the aggregate case-match-inventory.test.ts (task 13.6).
+  // declaration-clearing.properties.test.ts holds Property 4 of the pasted-text-declaration spec,
+  // whose numbering is its own; that spec's design.md lists it.
   const files = walkFiles(join(WEB_ROOT, "test"), /\.properties\.test\.ts$/).filter(
-    (f) => !f.endsWith("case-match.properties.test.ts"),
+    (f) =>
+      !f.endsWith("case-match.properties.test.ts") &&
+      !f.endsWith("declaration-clearing.properties.test.ts"),
   );
   const texts = files.map((file) => readFileSync(file, "utf8"));
 

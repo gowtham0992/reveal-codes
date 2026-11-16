@@ -200,7 +200,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - The dialog, Print view and `exportDocx` make no network request carrying the Declaration or the Tool_Name.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.8, 3.9, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.9, 4.10, 4.11, 12.4, 12.6, 12.7_
 
-  - [~] 12.3 Web Store, persistence, Legend and sample example tests
+  - [-] 12.3 Web Store, persistence, Legend and sample example tests
     - A paste clears a stored Declaration; loading a sample clears it; starting a new document discards it; a partial delete of the pasted text keeps it; deleting all substantive pasted text drops it; a `this_filing` answer is kept but not applied when the order stops requiring a statement and applies again when it does.
     - Persistence: a Declaration round-trips through `serialise` and `deserialise` with `version` 1; an absent key and an unreadable key both give `null` and load the draft unchanged; a draft from before this feature with substantive pasted text asks again.
     - The Legend shows "pasted, origin not recorded" and the other seven entries are unchanged. The demo motion and the Avianca sample each ask for the declaration.
@@ -224,11 +224,11 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - The tool states the record; the author states the rest; the two kinds of sentence are never mixed; the tool never asserts "no AI" on its own. Change no other principle.
     - _Requirements: 13.4_
 
-  - [~] 13.4 Add a dated entry to `BUILD_LOG.md`
+  - [x] 13.4 Add a dated entry to `BUILD_LOG.md`
     - Give the Introduction's observation (a pasted-only filing exported "No generative artificial intelligence was used in preparing this filing.") as the reason, and record what Kiro got wrong in the requirements pass. Record the compatibility limit: an older Sentinel reads a file with `d=` as one `unreadable` Finding.
     - _Requirements: 13.5_
 
-  - [~] 13.5 Add rows to `docs/KIRO_USAGE.md`
+  - [-] 13.5 Add rows to `docs/KIRO_USAGE.md`
     - A row for this spec, with the paths of `requirements.md`, `design.md` and `tasks.md`, and a row for the `product.md` steering changes (the `[DOC]` line and principle 1). No hook, agent or MCP tool is added by this feature, so add none.
     - _Requirements: 13.6_
 
