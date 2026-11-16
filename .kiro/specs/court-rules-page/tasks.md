@@ -81,7 +81,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Add text input and checkbox control rules to `apps/web/app/globals.css`; no new Token
     - _Requirements: 3.5, 3.6, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 4.10, 4.11, 5.1, 5.2, 5.3, 5.4, 6.1, 6.2, 6.3, 6.6, 6.7, 6.9, 6.10, 7.1, 7.2, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8, 10.10_
 
-  - [~] 5.4 Create the server route `apps/web/app/courts/page.tsx`
+  - [x] 5.4 Create the server route `apps/web/app/courts/page.tsx`
     - Server component reading `ORDERS` and `getPublicLinks()`; renders the single `h1` "Federal court rules on AI in filings", the intro paragraph, the snapshot / not legal advice sentence, the "Open the editor" link to `/` (same tab) and `<CourtsBrowser>`
     - Export `metadata` with only `title` ("Federal court rules on AI in filings — Reveal Codes") and a one-sentence `description` with no figure
     - Imports only from `src/`; no fetch, no API route, no mark or wordmark
