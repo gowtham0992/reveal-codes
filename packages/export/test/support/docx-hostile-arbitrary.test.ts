@@ -5,7 +5,11 @@ import { arbDocxHostileText } from "./arbitraries.js";
 const CLASSES: Readonly<Record<string, (s: string) => boolean>> = {
   "U+000B": (s) => s.includes("\u000B"),
   "U+000C": (s) => s.includes("\u000C"),
-  "other C0 control": (s) => /[\u0000-\u0008\u000E-\u001F]/.test(s),
+  "other C0 control": (s) =>
+    s.split("").some((c) => {
+      const u = c.charCodeAt(0);
+      return u <= 0x08 || (u >= 0x0e && u <= 0x1f);
+    }),
   "U+FFFE": (s) => s.includes("\uFFFE"),
   "U+FFFF": (s) => s.includes("\uFFFF"),
   "unpaired high surrogate": (s) => /[\uD800-\uDBFF](?![\uDC00-\uDFFF])/.test(s),

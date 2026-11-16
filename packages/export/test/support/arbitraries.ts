@@ -244,7 +244,7 @@ export function applyBodyEdit(paragraphs: readonly string[], edit: BodyEdit): st
 }
 
 const arbHostileToken: fc.Arbitrary<string> = fc.oneof(
-  { weight: 4, arbitrary: fc.constantFrom(..."abcXYZ019 .,;:'\"&<>\n\t") },
+  { weight: 4, arbitrary: fc.constantFrom(..."abcXYZ019 .,;:'\"&<>\n\t".split("")) },
   { weight: 1, arbitrary: fc.constantFrom("\u000B", "\u000C") },
   { weight: 2, arbitrary: fc.integer({ min: 0x00, max: 0x1f }).map((c) => String.fromCharCode(c)) },
   { weight: 1, arbitrary: fc.constantFrom("\uFFFE", "\uFFFF") },

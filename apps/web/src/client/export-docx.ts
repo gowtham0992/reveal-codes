@@ -7,10 +7,11 @@ import {
   canExport,
   declarationRequired,
   exportFileName,
+  holdsDocxUnsafe,
   needsConfidentiality,
 } from "@reveal-codes/export";
 import type { OrderContext, Statement } from "@reveal-codes/export";
-import { EXPORT_FAILED, exportedNotice } from "../notices";
+import { EXPORT_FAILED, EXPORT_UNSAFE_CHARACTER, exportedNotice } from "../notices";
 import type { StoreAction, StoreState } from "../store";
 
 export type ExportDeps = Readonly<{
@@ -35,6 +36,13 @@ const FAILED: ExportOutcome = { status: "failed" };
 function fail(store: ExportStore): ExportOutcome {
   store.dispatch({ type: "notice", text: EXPORT_FAILED });
   return FAILED;
+}
+
+/** The text or any override reason holds a character a Word file cannot store (Req 22.8). */
+function storedUnsafe(document: Document): boolean {
+  return (
+    holdsDocxUnsafe(document.text) || document.overrides.some((o) => holdsDocxUnsafe(o.reason))
+  );
 }
 
 /** Subject, choice and Tool_Name agree (both absent counts as the same). */
@@ -87,6 +95,10 @@ function orderBlocks(
 export async function exportDocx(store: ExportStore, deps: ExportDeps): Promise<ExportOutcome> {
   const { document, runLog, verifiedAt, declaration } = store.getState();
   if (orderBlocks(document, deps.orderContext, declaration)) return { status: "blocked" };
+  if (storedUnsafe(document)) {
+    store.dispatch({ type: "notice", text: EXPORT_UNSAFE_CHARACTER });
+    return FAILED;
+  }
   const now = deps.now();
   const built = buildStatement(
     document,

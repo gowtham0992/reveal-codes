@@ -8,30 +8,41 @@ function agrees(s: string): boolean {
   return holdsDocxUnsafe(s) === (docxSafe(s).removed > 0 || converted);
 }
 
+/** Every code unit U+0000 to U+FFFF, passed through `strings`; returns the units whose strings fail `ok`. */
+function failingUnits(strings: (c: string) => string[], ok: (s: string) => boolean): string[] {
+  const failures: string[] = [];
+  for (let u = 0; u <= 0xffff; u++) {
+    for (const s of strings(String.fromCharCode(u))) {
+      if (!ok(s)) failures.push(`U+${u.toString(16)} ${JSON.stringify(s)}`);
+    }
+  }
+  return failures;
+}
+
 const ASTRAL = ["\u{10000}", "\u{1F600}", "\u{1F4A9}", "\u{10FFFF}", "\u{20000}", "\u{E0001}"];
 
 describe("holdsDocxUnsafe over docxSafe output", () => {
   it("is false for every UTF-16 code unit alone", () => {
-    for (let u = 0; u <= 0xffff; u++) {
-      const s = String.fromCharCode(u);
-      expect(holdsDocxUnsafe(docxSafe(s).text), `U+${u.toString(16)}`).toBe(false);
-    }
+    expect(
+      failingUnits(
+        (c) => [c],
+        (s) => !holdsDocxUnsafe(docxSafe(s).text),
+      ),
+    ).toEqual([]);
   });
 
   it("is false for every UTF-16 code unit between two ASCII letters", () => {
-    for (let u = 0; u <= 0xffff; u++) {
-      const s = `a${String.fromCharCode(u)}b`;
-      expect(holdsDocxUnsafe(docxSafe(s).text), `U+${u.toString(16)}`).toBe(false);
-    }
+    expect(
+      failingUnits(
+        (c) => [`a${c}b`],
+        (s) => !holdsDocxUnsafe(docxSafe(s).text),
+      ),
+    ).toEqual([]);
   });
 
   it("is false for every code unit next to a surrogate and a CR", () => {
-    for (let u = 0; u <= 0xffff; u++) {
-      const c = String.fromCharCode(u);
-      for (const s of [`\ud83d${c}`, `${c}\ude00`, `\r${c}`, `${c}\r`]) {
-        expect(holdsDocxUnsafe(docxSafe(s).text), `U+${u.toString(16)}`).toBe(false);
-      }
-    }
+    const around = (c: string): string[] => [`\ud83d${c}`, `${c}\ude00`, `\r${c}`, `${c}\r`];
+    expect(failingUnits(around, (s) => !holdsDocxUnsafe(docxSafe(s).text))).toEqual([]);
   });
 
   it("is false for astral characters, surrogate pairs and unpaired surrogates", () => {
@@ -71,11 +82,7 @@ describe("holdsDocxUnsafe over docxSafe output", () => {
 
 describe("holdsDocxUnsafe agrees with docxSafe on the table", () => {
   it("holds for every code unit alone and between letters", () => {
-    for (let u = 0; u <= 0xffff; u++) {
-      const c = String.fromCharCode(u);
-      expect(agrees(c), `U+${u.toString(16)}`).toBe(true);
-      expect(agrees(`a${c}b`), `U+${u.toString(16)}`).toBe(true);
-    }
+    expect(failingUnits((c) => [c, `a${c}b`], agrees)).toEqual([]);
   });
 
   it("holds for sampled astral, surrogate and control cases", () => {

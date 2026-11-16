@@ -1,6 +1,8 @@
 import type { EngineError } from "@reveal-codes/engine";
 
 export const EXPORT_FAILED = "Export failed. Your document is unchanged.";
+export const EXPORT_UNSAFE_CHARACTER =
+  "This draft holds a character that Word files cannot store, so it was not exported. Paste the text again or remove the character.";
 export const PRINT_FAILED = "The print view did not open.";
 
 /** Notice after a successful download. */

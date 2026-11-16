@@ -103,7 +103,7 @@ Conventions that apply to every task:
     - `apps/web/src/components/use-assistant.ts`: in `insertReply`, apply `docxSafe` once to the accumulated reply, never per chunk, so a surrogate pair split across chunks is not cut.
     - Update any existing test the change breaks. The examples are in task 4.7.
     - _Requirements: 22.3_
-  - [~] 4.6 Export refusal for a stored unsafe character
+  - [x] 4.6 Export refusal for a stored unsafe character
     - `apps/web/src/notices.ts`: add the constant with the text "This draft holds a character that Word files cannot store, so it was not exported. Paste the text again or remove the character." beside `EXPORT_FAILED`.
     - `apps/web/src/client/export-docx.ts`: after the existing order and gate checks and before `buildStatement`, test `holdsDocxUnsafe` on `document.text` and on every override reason; on a hit dispatch the notice, return `{ status: "failed" }`, download nothing and leave the Document unchanged.
     - _Requirements: 22.8_

@@ -93,7 +93,16 @@ type NoteEntry = Readonly<{
 }>;
 
 const arbNoteEntry: fc.Arbitrary<NoteEntry> = fc.record({
-  shape: fc.constantFrom("text", "text", "text", "empty", "blank", "sepId", "sepType", "sepContinuation"),
+  shape: fc.constantFrom(
+    "text",
+    "text",
+    "text",
+    "empty",
+    "blank",
+    "sepId",
+    "sepType",
+    "sepContinuation",
+  ),
   text: fc.stringMatching(/^[A-Za-z0-9]+( [A-Za-z0-9]+){0,3}$/),
 });
 

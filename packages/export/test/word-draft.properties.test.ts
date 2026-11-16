@@ -46,16 +46,15 @@ const arbRoundTrip: fc.Arbitrary<RoundTrip> = fc
       ? { entry, confidentialityCertified: false }
       : null;
     const subject = declarationSubject(document, orderContext === null ? null : entry);
-    const declaration = subject === "pasted_text" ? pasted : subject === "this_filing" ? filing : null;
-    return arbRunLog(document).map(
-      (runLog): RoundTrip => ({
-        document,
-        runLog,
-        verifiedAt: verified === null ? null : verified.toISOString(),
-        orderContext,
-        declaration,
-      }),
-    );
+    const declaration =
+      subject === "pasted_text" ? pasted : subject === "this_filing" ? filing : null;
+    return arbRunLog(document).map((runLog): RoundTrip => ({
+      document,
+      runLog,
+      verifiedAt: verified === null ? null : verified.toISOString(),
+      orderContext,
+      declaration,
+    }));
   });
 
 describe("a reopened export is the exported Document _Requirements: 9.2, 9.3, 9.7, 9.10, 12.1, 12.5, 13.8, 18.4_", () => {
