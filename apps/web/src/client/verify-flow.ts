@@ -160,6 +160,7 @@ export async function runVerifyFlow(
   store: FlowStore,
   now: () => Date,
 ): Promise<VerifyOutcome> {
+  if (store.getState().openNote !== null) store.dispatch({ type: "openNote", text: null });
   const epoch = store.getState().epoch;
   const verified = await api.verify(buildVerifyBody(store.getState().document).records);
   if (store.getState().epoch !== epoch) return outcome("discarded", store, 0, 0);

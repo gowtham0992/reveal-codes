@@ -1,4 +1,5 @@
-import { createDocument, setVerification } from "@reveal-codes/engine";
+import { createDocument, setQuoteCheck, setVerification } from "@reveal-codes/engine";
+import { canExport } from "@reveal-codes/export";
 import type { Document } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import { createApiClient } from "../src/client/api";
@@ -10,10 +11,12 @@ import {
   quotesByCluster,
   runVerifyFlow,
 } from "../src/client/verify-flow";
+import { hasVerificationResult, needsCheckDate } from "../src/client/check-date";
 import { nextStep } from "../src/components/next-step";
 import { furtherLine } from "../src/client/verify-summary";
 import { createStore } from "../src/store-runtime";
 import { ISO, demoMotionText, verifiedDemoDocument } from "./support/persist-fixtures";
+import { fakeVerifyApi, restoredDemoStore, restoredStore } from "./support/check-date-fixtures";
 import { routeFetch } from "./support/route-fetch";
 
 function demoStore() {
@@ -291,5 +294,90 @@ describe("countVerifiableUnchecked _Requirements: 4.2, 4.4, 4.5_", () => {
     const doc = parsed(`See ${FULL}.`);
     expect(countVerifiableUnchecked(doc)).toBe(1);
     expect(stepFor(doc)).toBe("verify");
+  });
+});
+
+function withVerifiedQuote(): Document {
+  const doc = verifyAllFull(parsed(`See ${FULL} ("the right of privacy is broad").`));
+  const key = doc.quotes[0]?.key;
+  if (key === undefined) throw new Error("fixture has no quote");
+  const set = setQuoteCheck(doc, key, { status: "match" });
+  if (!set.ok) throw new Error("quote check rejected");
+  return set.value;
+}
+
+function restoredStep(doc: Document, verifying = false): string {
+  const state = restoredStore(doc).getState();
+  return nextStep({
+    empty: state.document.text.length === 0,
+    verifying,
+    verifiableUnchecked: countVerifiableUnchecked(state.document),
+    needsCheckDate: needsCheckDate(state.document, state.verifiedAt),
+    blocking: 0,
+  });
+}
+
+describe("Next_Step after a restore _Requirements: 13.11, 13.12, 13.13, 13.14, 19.16_", () => {
+  it("names Verify for a restored Document with results, a missing check date and nothing unchecked", () => {
+    const doc = withVerifiedQuote();
+    expect(countVerifiableUnchecked(doc)).toBe(0);
+    expect(restoredStep(doc)).toBe("verify");
+    expect(restoredStep(doc, true)).toBe("none");
+  });
+
+  it("names Export when the check date is set or the Document holds no result", () => {
+    const doc = withVerifiedQuote();
+    expect(needsCheckDate(doc, ISO)).toBe(false);
+    expect(restoredStep(parsed(`See ${FULL}.`))).toBe("verify");
+    expect(restoredStep(parsed("Id. at 5."))).toBe("export");
+  });
+
+  it("sets the check date and re-checks every verified result after Verify, giving Export", async () => {
+    const store = await restoredDemoStore();
+    const before = store.getState().document;
+    const { api, seen } = fakeVerifyApi();
+    const outcome = await runVerifyFlow(api, store, CLOCK);
+    expect(outcome.status).toBe("completed");
+    const state = store.getState();
+    expect(state.verifiedAt).toBe(CLOCK().toISOString());
+    expect(seen.map((r) => r.key)).toEqual(buildVerifyBody(before).records.map((r) => r.key));
+    expect(seen.length).toBeGreaterThan(0);
+    expect(needsCheckDate(state.document, state.verifiedAt)).toBe(false);
+    expect(
+      nextStep({
+        empty: false,
+        verifying: false,
+        verifiableUnchecked: countVerifiableUnchecked(state.document),
+        needsCheckDate: needsCheckDate(state.document, state.verifiedAt),
+        blocking: 0,
+      }),
+    ).toBe("export");
+  });
+
+  it("keeps blocking export for a restored CIT ✘ while the Next_Step is Verify", () => {
+    const base = parsed(`See ${FULL}.`);
+    const key = base.citations.find((c) => c.kind === "full")?.key;
+    if (key === undefined) throw new Error("fixture has no citation");
+    const set = setVerification(base, key, { status: "not_found" });
+    if (!set.ok) throw new Error("rejected");
+    const state = restoredStore(set.value).getState();
+    expect(restoredStep(state.document)).toBe("verify");
+    expect(canExport(state.document, null, null)).toBe(false);
+  });
+
+  it("names Export, not Verify, for a quote result with no full citation (Flag 4)", () => {
+    const doc = withVerifiedQuote();
+    const noFull: Document = { ...doc, citations: doc.citations.filter((c) => c.kind !== "full") };
+    expect(hasVerificationResult(noFull)).toBe(true);
+    expect(hasFullRecord(noFull)).toBe(false);
+    expect(needsCheckDate(noFull, null)).toBe(false);
+    expect(restoredStep(noFull)).toBe("export");
+  });
+
+  it("hasVerificationResult ignores a short form", () => {
+    expect(hasVerificationResult(parsed("Id. at 5."))).toBe(false);
+    expect(hasVerificationResult(parsed(`See ${FULL}. Id. at 5.`))).toBe(false);
+    const verified = verifyAllFull(parsed(`See ${FULL}. Id. at 5.`));
+    expect(hasVerificationResult(verified)).toBe(true);
   });
 });

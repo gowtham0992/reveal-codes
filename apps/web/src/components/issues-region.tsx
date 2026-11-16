@@ -2,7 +2,7 @@
 
 import { blockingIssues } from "@reveal-codes/engine";
 import type { Document, Issue } from "@reveal-codes/engine";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { overrideMismatch } from "../client/mismatch";
 import { resolvedRows, usableInfo } from "../client/resolved";
 import type { ResolvedSession } from "../client/resolved";
@@ -80,6 +80,19 @@ function IssuesHeading({ document }: Readonly<{ document: Document }>) {
     </h2>
   );
 }
+/** The Open_Note (Requirement 15): text in a live status element, which stays mounted so a new note is announced once. */
+function OpenNote({ store }: Readonly<{ store: Store }>) {
+  const text = useSyncExternalStore(
+    store.subscribe,
+    () => store.getState().openNote,
+    () => null,
+  );
+  return (
+    <p role="status" className={styles["openNote"]}>
+      {text}
+    </p>
+  );
+}
 /** The Draft_Notice (first, while blocked), the Verify result and the Fixtures_Mode line. */
 function IssuesTop(props: IssuesRegionProps) {
   const { document, demoMode = false, verifiedAt, note, failure = null, draft } = props;
@@ -88,6 +101,7 @@ function IssuesTop(props: IssuesRegionProps) {
       {draft?.blocked === true ? (
         <UnreadableDraft onSaveCopy={draft.onSaveCopy} onStartNew={draft.onStartNew} />
       ) : null}
+      <OpenNote store={props.store} />
       <VerifyResult document={document} verifiedAt={verifiedAt} further={note} failure={failure} />
       {demoMode ? <p className={styles["note"]}>{DEMO_MODE_LINE}</p> : null}
     </>

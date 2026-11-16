@@ -114,13 +114,15 @@ describe("inventory: properties _Requirements: 25.1, 25.2, 25.3, 25.4, 25.5, 25.
   // Property numbers are per spec: editor-app has 1 to 5, first-run-and-flow adds its own Property 1
   // in next-step.properties.test.ts, and the deploy-readiness limiter property is Property 1 in
   // rate-limit.properties.test.ts, and legal-record-ui adds its Property 1 in
-  // css-tokens.properties.test.ts.
-  it("has exactly eight properties: editor-app 1 to 5, first-run-and-flow 1, the limiter 1 and legal-record-ui 1", () => {
+  // css-tokens.properties.test.ts, and open-draft adds its Property 5 in
+  // next-step-gap.properties.test.ts.
+  it("has exactly nine properties: editor-app 1 to 5, first-run-and-flow 1, the limiter 1, legal-record-ui 1 and open-draft 5", () => {
     const numbers = texts.flatMap((t) => [...t.matchAll(/^\s*\/\/ Property (\d+)$/gm)]);
-    expect(numbers.map((m) => m[1]).sort()).toEqual(["1", "1", "1", "1", "2", "3", "4", "5"]);
+    expect(numbers.map((m) => m[1]).sort()).toEqual(["1", "1", "1", "1", "2", "3", "4", "5", "5"]);
     expect(files.some((f) => f.endsWith("next-step.properties.test.ts"))).toBe(true);
     expect(files.some((f) => f.endsWith("rate-limit.properties.test.ts"))).toBe(true);
     expect(files.some((f) => f.endsWith("css-tokens.properties.test.ts"))).toBe(true);
+    expect(files.some((f) => f.endsWith("next-step-gap.properties.test.ts"))).toBe(true);
   });
 
   it("has exactly one fc.assert per file, using runs()", () => {

@@ -25,3 +25,12 @@
   margin: 0 0 8px;
   color: var(--muted);
 }
+
+.openNote {
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+
+.openNote:empty {
+  margin: 0;
+}
