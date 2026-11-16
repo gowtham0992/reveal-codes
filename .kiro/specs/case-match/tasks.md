@@ -491,7 +491,7 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - Run the existing engine properties and confirm they pass unedited.
     - _Requirements: 22.1, 22.5, 22.9_
 
-  - [-] 22.3 Add the Witness_Documents
+  - [x] 22.3 Add the Witness_Documents
     - Create `packages/engine/test/support/tamper-witnesses.ts` with `TAMPER_WITNESSES: Readonly<Record<TamperKind, Document>>` and a pure `missingWitnesses(kinds, witnesses)`. Read each builder in `arb-codes-tampers.ts`, `arb-codes-citations.ts` and `arb-codes-extractor.ts`, choose the smallest fixed Document on which it returns an arbitrary, and build it from fixed text with `createDocument` and fixed `setVerification` and `recordOverride` calls, not drawn state writes.
     - Add a second fixed Document with at least three cut points for the multi-fault test.
     - If the builder of any kind returns `undefined` for every Document you can construct, stop and report that kind. Do not drop it, lower the assertion or change the builder without the author's decision (Requirement 22, criterion 14).
