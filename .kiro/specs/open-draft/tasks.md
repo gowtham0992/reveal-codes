@@ -97,7 +97,7 @@ Conventions that apply to every task:
   - [x] 4.4 Write test that `holdsDocxUnsafe` is false for any `docxSafe` output
     - File `packages/export/test/docx-text.test.ts`. Exhaustively over every UTF-16 code unit U+0000 to U+FFFF, alone and between two ASCII letters, and over sampled astral pairs, lone high and lone low surrogates, `\r`, `\r\n`, U+000B and U+000C: `holdsDocxUnsafe(docxSafe(s).text)` is false. Also assert the two functions agree on the table: `holdsDocxUnsafe(s)` is true exactly when `docxSafe(s)` removed at least one character or `s` held U+000B or U+000C.
     - _Requirements: 22.1, 22.2, 22.5_
-  - [-] 4.5 Apply `docxSafe` at every editor Entry_Point
+  - [x] 4.5 Apply `docxSafe` at every editor Entry_Point
     - `apps/web/src/editor/clipboard.ts`: `plainTextOf` calls `docxSafe(...).text` instead of `normaliseNewlines` (paste and drop); `normaliseNewlines` stays exported for its tests.
     - `apps/web/src/components/use-document-actions.tsx`: apply `docxSafe` to the demo-motion and Avianca texts before `pastedDocument`; no message.
     - `apps/web/src/components/use-assistant.ts`: in `insertReply`, apply `docxSafe` once to the accumulated reply, never per chunk, so a surrogate pair split across chunks is not cut.
