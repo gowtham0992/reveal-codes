@@ -117,7 +117,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.7, 8.9, 8.11, 8.12, 9.1, 9.2, 9.3, 9.4, 9.5, 16.5, 16.6, 16.8_
 
 - [ ] 7. Repairs
-  - [-] 7.1 Fix the Override_Table headers in the print view
+  - [x] 7.1 Fix the Override_Table headers in the print view
     - In `print-view.tsx` give `BlockTable` the `overrides` class when its columns equal `OVERRIDE_COLUMNS` (confirm `OVERRIDE_COLUMNS` is exported from `@reveal-codes/export`)
     - In `print-view.module.css` add `.overrides th { overflow-wrap: normal; word-break: keep-all; }` and `min-width` rules for the Code (10ch) and Timestamp columns, sized from the longest value plus padding; leave body-cell `overflow-wrap: anywhere` as it is
     - _Requirements: 12.1, 12.2, 12.3_
