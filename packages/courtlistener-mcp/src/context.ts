@@ -11,8 +11,11 @@ import type { Log } from "./log";
 
 export const BASE_URL = "https://www.courtlistener.com/api/rest/v4";
 
+/** Where answers come from: recorded fixtures, CourtListener with a token, or CourtListener without one. */
+export type Mode = "fixtures" | "live" | "live_without_token";
 /** What every tool handler receives. */
 export type ToolContext = Readonly<{
+  mode: Mode;
   deps: Deps;
   now: () => Date;
   /** Redacts the token and writes to stderr unless a sink was given to `buildContext`. */
@@ -64,5 +67,10 @@ export function buildContext(env: Env, sink?: (line: string) => void): ToolConte
   const log = sink === undefined ? createLog(env.token) : createLog(env.token, sink);
   const scrub = (text: string): string =>
     env.token === undefined ? text : text.split(env.token).join("[redacted]");
-  return { deps: depsFor(env, now), now, log, scrub };
+  const mode: Mode = env.fixturesOnly
+    ? "fixtures"
+    : env.token === undefined
+      ? "live_without_token"
+      : "live";
+  return { mode, deps: depsFor(env, now), now, log, scrub };
 }

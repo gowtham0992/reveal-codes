@@ -2,11 +2,15 @@ import { homedir } from "node:os";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { buildContext } from "./context";
 import { readEnv } from "./env";
+import { powerEnv } from "./power-env";
 import { createServer } from "./server";
 
+/** Set to true by the Power bundle (esbuild `define`); absent when run from source by `pnpm mcp`. */
+declare const REVEAL_CODES_POWER: boolean | undefined;
+const isPower = typeof REVEAL_CODES_POWER !== "undefined" && REVEAL_CODES_POWER;
 /** Entry point and the only module that touches `process`: stdout carries protocol messages only. */
 async function main(): Promise<void> {
-  const env = readEnv(process.env, homedir());
+  const env = readEnv(isPower ? powerEnv(process.env) : process.env, homedir());
   const ctx = buildContext(env);
   const server = createServer(ctx);
   await server.connect(new StdioServerTransport());

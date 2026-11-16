@@ -208,6 +208,8 @@ describe("verifier_status _Requirements: 13.8_", () => {
     expect(body).toEqual({
       bucket: { available: 60, capacity: 60 },
       counters: { hits: 0, misses: 0, writes: 0 },
+      mode: "fixtures",
+      message: expect.any(String) as string,
     });
   });
 
@@ -216,6 +218,18 @@ describe("verifier_status _Requirements: 13.8_", () => {
     expect(JSON.parse(textOf(handleVerifierStatus(ctx)))).toEqual({
       bucket: { available: 60, capacity: 60 },
       counters: { hits: 0, misses: 0, writes: 0 },
+      mode: "fixtures",
+      message: expect.any(String) as string,
     });
+  });
+});
+describe("verifier_status mode", () => {
+  it("says in plain words which mode is in use", () => {
+    const base = makeCtx().ctx;
+    const text = (mode: "fixtures" | "live" | "live_without_token"): string =>
+      textOf(handleVerifierStatus({ ...base, mode }));
+    expect(text("fixtures")).toContain("recorded CourtListener responses");
+    expect(text("live")).toContain("Live mode: citations are checked against CourtListener");
+    expect(text("live_without_token")).toContain("COURTLISTENER_TOKEN is not set");
   });
 });

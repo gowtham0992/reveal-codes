@@ -41,7 +41,7 @@ export function makeCtx(
   const scrub = (t: string): string =>
     token === undefined ? t : t.split(token).join("[redacted]");
   const log = createLog(token, (line) => logs.push(line));
-  return { ctx: { deps, now, log, scrub }, logs, calls: () => count };
+  return { ctx: { mode: "fixtures", deps, now, log, scrub }, logs, calls: () => count };
 }
 
 export async function makeHarness(token?: string): Promise<Harness> {
