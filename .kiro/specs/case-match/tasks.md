@@ -434,7 +434,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - Edit the existing tests that match the exact paragraphs of a `wrong_case` row and list them for the BUILD_LOG. Run `copy-rules.test.ts` and `limits.test.ts` and keep them passing.
     - _Requirements: 19.1, 19.2, 19.3, 19.4, 19.5, 19.6, 19.8, 19.9_
 
-- [ ] 19. Role words do not count as shared words (Requirement 20)
+- [x] 19. Role words do not count as shared words (Requirement 20)
   - [x] 19.1 Add the Role_Words to the Dropped_Words
     - In `packages/verifier/src/name-expansion.ts` add `plaintiff, plaintiffs, defendant, defendants, appellant, appellants, appellee, appellees, petitioner, petitioners, respondent, respondents, individually, deceased, no` to `DROPPED_WORDS`. Change no other word and no `NAME_EXPANSION_TABLE` entry.
     - _Requirements: 20.1, 20.2, 20.3_
@@ -447,7 +447,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - In the verifier tests add a test that the exported engine `DROPPED` list and `DROPPED_WORDS` hold exactly the same words (import the engine testing module the way `packages/verifier/test/case-match.properties.test.ts` does), with a planted-difference case showing it fails.
     - _Requirements: 20.4_
 
-  - [-] 19.4 Write the role-word examples and re-run the worked outcomes
+  - [x] 19.4 Write the role-word examples and re-run the worked outcomes
     - In a new `packages/verifier/test/role-words.test.ts`: `namesMatch("Kowalski, Appellant v. Quimby, Defendants", [the three names of the recorded 174 F.3d 366 fixture])` is `false`; a `lookupWithInfo` over the recorded fixture for a record whose `caseName` the Extractor reads from `Kowalski Appellant v. Quimby Defendants, 174 F.3d 366 (3d Cir. 1999)` gives `wrong_case` with cluster 3011108 (if the Extractor reads no name for that text, pick a text it reads and report the change); a cited party made only of Role_Words is skipped and the other party decides; `No.` in a cited name is dropped.
     - Run `worked-outcomes.test.ts` and `case-match.properties.test.ts` of the verifier. Report in the BUILD_LOG that Henderson, Petersen and Miller stay `wrong_case` and Ashcroft v. Iqbal, Haines v. Kerner, Zicherman (516 U.S. 217) and Chambers stay `verified`, or report any outcome that changes and stop.
     - _Requirements: 20.2, 20.3, 20.6, 20.7_
