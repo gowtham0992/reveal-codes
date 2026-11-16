@@ -108,7 +108,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - _Requirements: 5.1, 5.9, 5.10, 5.11_
 
 - [ ] 6. Web: Export dialog, Print view and Legend
-  - [-] 6.1 Add the declaration controls
+  - [x] 6.1 Add the declaration controls
     - New `components/use-declaration.ts` (`DeclarationView`: subject, required, choice, toolText, toolFault, setChoice, setToolText), `components/declaration-controls.tsx` and `components/declaration-controls.module.css`.
     - Initial state is read from `applicableDeclaration`; with none, no radio is selected. No default, nothing derived from the text. Mount with `key={subject}`.
     - `<fieldset>` with `<legend>` "Generative AI", two native radios labelled with `choiceNoneLabel(subject)` and `choiceAiLabel(subject)`, and a labelled text input for the Tool_Name shown on the second choice. `TOOL_NAME_LINE` shows for an empty or faulty name and is tied by `aria-describedby`. The input has no `maxLength`.
