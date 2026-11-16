@@ -6,8 +6,8 @@ Implementation follows the design's task order: commit the spec, extend the load
 
 ## Tasks
 
-- [ ] 1. Commit the spec
-  - [-] 1.1 Commit the spec files locally, before any other task
+- [x] 1. Commit the spec
+  - [x] 1.1 Commit the spec files locally, before any other task
     - Stage by name only: `.kiro/specs/court-rules-page/requirements.md`, `design.md`, `tasks.md` and `.config.kiro`
     - Commit with a message such as `spec: court-rules-page requirements, design, tasks`
     - Do not push, do not stage any other file, do not modify code

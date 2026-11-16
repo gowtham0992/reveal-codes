@@ -1,0 +1,197 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Commit the spec files locally, before any other task": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868667788
+      },
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868676444
+      },
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868762243
+      }
+    ],
+    "2.1 Add `OrderVocabulary` and `OrderDataset` to `packages/export`": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868667825
+      }
+    ],
+    "2.2 Replace the `negative_certification_when_unused` vocabulary sentence and regenerate the Power copy": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868667875
+      }
+    ],
+    "2.3 Write loader and dataset tests in `packages/export/test/`": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868667897
+      }
+    ],
+    "3.1 Implement `filterOrders` in `packages/export/src/order-filter.ts`": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868667918
+      }
+    ],
+    "3.2 Implement `courtGroups`, `compareAbbreviations` and `orderStats` in `packages/export/src/order-groups.ts`": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868667941
+      }
+    ],
+    "3.3 Write property test for the filter": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868667962
+      }
+    ],
+    "3.4 Write example tests for grouping, ordering and stats": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868667989
+      }
+    ],
+    "4. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668020
+      }
+    ],
+    "5.1 Add Placement_Words and link constants": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668038
+      }
+    ],
+    "5.2 Create the view model, intro text and hash helper": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668058
+      }
+    ],
+    "5.3 Build `InstrumentView`, `CourtsBrowser`, the stylesheet and control rules": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668074
+      }
+    ],
+    "5.4 Create the server route `apps/web/app/courts/page.tsx`": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668092
+      }
+    ],
+    "5.5 Write page content tests in `apps/web/test/courts-page.test.tsx`": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668108
+      }
+    ],
+    "5.6 Write filter UI tests in `apps/web/test/courts-browser.test.tsx`": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668140
+      }
+    ],
+    "6.1 Implement the Order_Parameter": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668182
+      }
+    ],
+    "6.2 Add the Court_Rules_Link in three places": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668203
+      }
+    ],
+    "6.3 Write Order_Parameter and link tests in `apps/web/test/`": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668224
+      }
+    ],
+    "7.1 Fix the Override_Table headers in the print view": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668243
+      }
+    ],
+    "7.2 Clear the old message when an Open starts": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668263
+      }
+    ],
+    "7.3 Ignore declaration files and find the emitting process": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668283
+      }
+    ],
+    "7.4 Write repair tests": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668302
+      }
+    ],
+    "8.1 Extend the static scans in `apps/web/test/static/`": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668337
+      }
+    ],
+    "8.2 Update docs": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668370
+      }
+    ],
+    "9. Final checkpoint - Run the full verification": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868668391
+      }
+    ],
+    "1. Commit the spec": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794868762270
+      }
+    ]
+  }
+}
