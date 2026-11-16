@@ -1,11 +1,15 @@
+import { setQuoteCheck, setVerification } from "@reveal-codes/engine";
+import type { Document } from "@reveal-codes/engine";
 import { docxSafe, holdsDocxUnsafe } from "@reveal-codes/export";
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { removedSentence } from "../src/client/open-messages";
 import { textOutcome } from "../src/client/open-outcome";
+import { restoreNote } from "../src/client/open-note";
 import { decodeTextFile } from "../src/client/open-text";
 import { pastedDocument } from "../src/client/pasted-document";
 import { initialState, reduce } from "../src/store";
+import { arbCitingDocument } from "./arbitraries";
 import { runs } from "./support/fc";
 
 const BOM_BYTES = [0xef, 0xbb, 0xbf];
@@ -100,6 +104,63 @@ describe("open-file: opened text installs as one PST span _Requirements: 8.1, 8.
         expect(state.declaration).toBeNull();
         expect(state.runLog).toEqual([]);
         expect(state.verifiedAt).toBeNull();
+      }),
+      { numRuns: runs() },
+    );
+  });
+});
+
+const RUN_VERIFY_SENTENCE = "Run Verify to check the citations again and record the date.";
+const NOTE_BOTH =
+  "The tool names of the assistant runs and the check date were not in this file, so the next statement cannot give them. Run Verify to check the citations again and record the date.";
+const NOTE_RUNS_ONLY =
+  "The tool names of the assistant runs were not in this file, so the next statement cannot name them.";
+const NOTE_RESULTS_ONLY =
+  "The check date was not in this file, so the next statement cannot give it. Run Verify to check the citations again and record the date.";
+
+type RestoreCase = Readonly<{ document: Document; withRuns: boolean; withResult: boolean }>;
+
+/** Writes a result onto the first full citation, else the first quote; reports whether one was written. */
+function withOneResult(doc: Document): { document: Document; written: boolean } {
+  const full = doc.citations.find((c) => c.kind === "full");
+  if (full !== undefined) {
+    const set = setVerification(doc, full.key, { status: "not_found" });
+    if (set.ok) return { document: set.value, written: true };
+  }
+  const quote = doc.quotes[0];
+  if (quote !== undefined) {
+    const set = setQuoteCheck(doc, quote.key, { status: "match" });
+    if (set.ok) return { document: set.value, written: true };
+  }
+  return { document: doc, written: false };
+}
+
+/** Documents with and without AI runs, and with and without a result; the flags come from the generator. */
+const arbRestoreCase: fc.Arbitrary<RestoreCase> = fc
+  .tuple(arbCitingDocument, fc.boolean(), fc.boolean())
+  .map(([cited, wantRuns, wantResult]) => {
+    const resulted = wantResult ? withOneResult(cited) : { document: cited, written: false };
+    const run = { runId: "r1", originalLength: 5, editedCount: 0, relabelled: false };
+    const document = wantRuns ? { ...resulted.document, runs: [run] } : resulted.document;
+    return { document, withRuns: wantRuns, withResult: resulted.written };
+  });
+
+function expectedNote(c: RestoreCase): string | null {
+  if (c.withRuns && c.withResult) return NOTE_BOTH;
+  if (c.withRuns) return NOTE_RUNS_ONLY;
+  return c.withResult ? NOTE_RESULTS_ONLY : null;
+}
+
+describe("open-file: the restore note follows AI runs and verification results _Requirements: 13.2, 13.3, 13.4, 13.5_", () => {
+  // Property 13
+  it("P13 restoreNote gives the exact note of the case, and the Run Verify sentence ends it exactly when a result exists", () => {
+    fc.assert(
+      fc.property(arbRestoreCase, (c) => {
+        const note = restoreNote(c.document);
+        expect(note).toBe(expectedNote(c));
+        if (note === null) return;
+        expect(note.endsWith(RUN_VERIFY_SENTENCE)).toBe(c.withResult);
+        expect(note.includes(RUN_VERIFY_SENTENCE)).toBe(c.withResult);
       }),
       { numRuns: runs() },
     );
