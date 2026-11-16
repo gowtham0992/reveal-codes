@@ -359,7 +359,7 @@ Conventions for every task:
 
 Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. They are written from the design section "Follow-up: walkthrough findings". No task commits or pushes. Each existing test that changes is edited in the task that changes it and listed in the BUILD_LOG entry of task 20.3.
 
-- [ ] 15. Empty-page links take a pointer click (Requirement 17)
+- [x] 15. Empty-page links take a pointer click (Requirement 17)
   - [x] 15.1 Make the links the hit target and keep focus in the editor
     - In `apps/web/src/components/editor-surface.tsx` render the `samples` list after `<EditorContent>` inside `.page`, still only while `empty` and `onLoadSample` is given.
     - Add `onMouseDown` on each link that calls `e.preventDefault()`. Keep `onClick`'s `preventDefault` and the load call.
@@ -367,7 +367,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - Before editing, confirm the cause by reading the stylesheet and TipTap's injected `.ProseMirror { position: relative }`, and record the one-sentence cause in the BUILD_LOG entry of task 20.3.
     - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.9_
 
-  - [-] 15.2 Add the static stylesheet test
+  - [x] 15.2 Add the static stylesheet test
     - In `apps/web/test/static/editor-surface-css.test.ts` add a describe titled `static: empty-page links _Requirements: 17.6_` with cases: `.samples` is `position: absolute` and has `pointer-events: none`; `.samples a` has `pointer-events: auto`; no declaration in `editor-surface.module.css` or `modal.module.css` sets `z-index`; no new `outline` or colour literal. Add a planted-violation case so the check is shown to fail on a `z-index` or a missing `pointer-events` rule.
     - State in a comment what the test cannot prove (that the browser applies the rules).
     - _Requirements: 17.6, 17.7_
