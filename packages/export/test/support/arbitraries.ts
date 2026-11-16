@@ -129,3 +129,27 @@ export const arbGateClearAiDocument: fc.Arbitrary<Document> = fc.oneof(
     .tuple(arbGateClearDocument, fc.constantFrom(...AI_SENTENCES))
     .map(([doc, sentence]) => appendAiSentence(doc, sentence)),
 );
+
+const entriesOf = (pick: (e: OrderEntry) => boolean): readonly OrderEntry[] =>
+  SELECTABLE_ENTRIES.filter(pick);
+
+/** One shipped entry per kind, plus the two shapes that require a statement. */
+const CHOICE_GROUPS: readonly (readonly OrderEntry[])[] = [
+  ...(
+    [
+      "certification_every_filing",
+      "disclosure_when_used",
+      "prohibition",
+      "verification_only",
+      "guidance",
+    ] as const
+  ).map((kind) => entriesOf((e) => e.kind === kind)),
+  entriesOf((e) => e.kind === "certification_every_filing"),
+  entriesOf((e) => e.elements.includes("negative_certification_when_unused")),
+].filter((g) => g.length > 0);
+
+/** `null` (no order) or an entry of each kind, including both statement-requiring shapes. */
+export const arbOrderChoice: fc.Arbitrary<OrderEntry | null> = fc.oneof(
+  fc.constant(null),
+  ...CHOICE_GROUPS.map((g) => fc.constantFrom(...g)),
+);

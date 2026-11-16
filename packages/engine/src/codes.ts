@@ -10,11 +10,12 @@ import { check } from "./codes/check.js";
 import { decodeTokens } from "./codes/decode.js";
 import { lexAll } from "./codes/lex.js";
 import type { EngineError, MalformedRule } from "./errors.js";
-import { err } from "./result.js";
+import { err, ok } from "./result.js";
 import type { Result } from "./result.js";
+import type { Declaration } from "./declaration.js";
 import type { Document } from "./types.js";
 
-export { render } from "./codes/render.js";
+export { render, renderRecord } from "./codes/render.js";
 export { strip, stripPositions } from "./codes/strip.js";
 
 const malformed = (f: Readonly<{ index: number; rule: MalformedRule }>): EngineError => ({
@@ -30,11 +31,15 @@ function lowestFault(a: Fault | undefined, b: Fault | undefined): Fault | undefi
   return b.index < a.index ? b : a;
 }
 
+/** A Document and the author's Declaration read from one Full_Rendering. */
+export type DocumentRecord = Readonly<{ document: Document; declaration: Declaration | null }>;
+
 /**
- * Parses a Full_Rendering back into a Document. `parse(render(d, "full").text)`
- * equals `d` structurally. Returns `malformed_codes` for any fault; never throws.
+ * Parses a Full_Rendering back into a Document and its optional Declaration.
+ * A file with no `d` field gives `declaration: null`. Returns
+ * `malformed_codes` for any fault; never throws.
  */
-export function parse(revealCodesText: string): Result<Document, EngineError> {
+export function parseRecord(revealCodesText: string): Result<DocumentRecord, EngineError> {
   const lexed = lexAll(revealCodesText);
   const decoded = decodeTokens(lexed.tokens);
   // Req 20.3: the lowest index among all syntax faults, lex-level or decode-level.
@@ -45,5 +50,12 @@ export function parse(revealCodesText: string): Result<Document, EngineError> {
   const checked = check(decoded.value);
   if (!checked.ok) return err(malformed(checked.error));
   const built = build(checked.value);
-  return built.ok ? built : err(malformed(built.error));
+  if (!built.ok) return err(malformed(built.error));
+  return ok({ document: built.value, declaration: checked.value.draft.declaration ?? null });
+}
+
+/** Parses a Full_Rendering into its Document, discarding any Declaration. */
+export function parse(revealCodesText: string): Result<Document, EngineError> {
+  const record = parseRecord(revealCodesText);
+  return record.ok ? ok(record.value.document) : record;
 }

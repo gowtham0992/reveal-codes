@@ -8,8 +8,10 @@
  */
 import { err, ok } from "../result.js";
 import type { Result } from "../result.js";
+import type { Declaration } from "../declaration.js";
 import type { RunEntry } from "../types.js";
 import { isTimestamp } from "../validate.js";
+import { DECLARATION_KEY, decodeDeclaration } from "./doc-declaration.js";
 import type { CodeToken } from "./lex.js";
 
 export const BAD = "bad" as const;
@@ -56,6 +58,14 @@ export function readList(code: CodeToken, key: string): Read<readonly string[]> 
 /** The `v` field of `[DOC]`: exactly `1`. */
 export function readVersion(code: CodeToken): Read<1> {
   return single(code, "v", (s) => (s === "1" ? 1 : undefined));
+}
+
+/** The `d` field of `[DOC]`: absent is `ok(undefined)`; any malformed value is `err(BAD)`. */
+export function readDeclaration(code: CodeToken): Read<Declaration> {
+  const values = valuesOf(code, DECLARATION_KEY);
+  if (values === undefined) return ok(undefined);
+  const declaration = decodeDeclaration(values);
+  return declaration === undefined ? err(BAD) : ok(declaration);
 }
 
 function decodeRun(values: readonly string[]): RunEntry | undefined {

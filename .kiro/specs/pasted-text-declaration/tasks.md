@@ -34,7 +34,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - `insertsPasted(operation)`: `insert` and `replace` with non-empty text and `PST` origin; `delete` is false; an Inverse is true when `restore.insertText` is non-empty and a `PST` span of `restore.spans` overlaps `[at, at + insertText.length)`.
     - _Requirements: 3.3, 3.4, 3.5, 3.7, 5.3, 5.7, 14.4_
 
-  - [~] 2.2 Add the optional `d` field to `[DOC]` and the record codec
+  - [x] 2.2 Add the optional `d` field to `[DOC]` and the record codec
     - `codes/lex.ts`: add `"d"` to the `[DOC]` schema `optional` list (one occurrence). `required` stays `["v","n"]` and the version stays 1.
     - New `codes/doc-declaration.ts`: encode `d=<subject>,<choice>[,<toolName>]` with the existing `escapePayload`, and decode it.
     - `codes/decode-types.ts`, `codes/decode-fields.ts` (`readDeclaration`), `codes/decode.ts`: `DraftDocument` gains `declaration?: Declaration`. A second `d`, an unknown subject or choice, `declared_ai` with no name, `none` with a name, and an invalid name are `malformed_codes` at index 0 with rule `bad_field`.
@@ -42,7 +42,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Keep `render(document, mode)` as `renderRecord(document, null, mode)` and `parse(text)` as `parseRecord(text)` with the Document only. A rendering with no Declaration is byte for byte the current output.
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.8, 8.9, 8.10, 14.4_
 
-  - [~] 2.3 Add shared arbitraries in `packages/engine/src/testing/arb-declaration.ts` and re-export them from `packages/engine/src/testing/arbitraries.ts`
+  - [x] 2.3 Add shared arbitraries in `packages/engine/src/testing/arb-declaration.ts` and re-export them from `packages/engine/src/testing/arbitraries.ts`
     - `arbToolName` (valid trimmed names of 2 to 100 code units, including `()[]{}"';=,\`, spaces, accents, CJK and an emoji pair), `arbBadToolName` (empty, one character, 101 characters, whitespace only, `\n`, `\r`, `\t`, U+0000, U+2028, lone surrogate), `arbDeclaration(subject?)`, `arbMixedOriginDocument` (all four origins, whitespace-only `PST` spans included), `arbOrderChoice` (`null` or an `OrderEntry` of each kind and of the two statement-requiring shapes, built on `packages/export/test/support/arbitraries.ts`), and `arbEditSequence` (edit, undo, redo steps).
     - If `arbOrderChoice` would make the engine import from the export package, place it in `packages/export/test/support/arbitraries.ts` instead and keep the other five in the engine.
     - _Requirements: 11.6_
@@ -53,12 +53,12 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - _Requirements: 3.3, 3.4, 3.5, 8.3, 8.4, 8.8, 8.9, 8.10_
 
 - [ ] 3. Export package: subject, wording, statement, gate, appendix
-  - [~] 3.1 Add `packages/export/src/declaration.ts`
+  - [-] 3.1 Add `packages/export/src/declaration.ts`
     - `holdsAssistantText`, `orderRequiresStatement`, `declarationSubject`, `applicableDeclaration`, `declarationRequired`, and the single `usedAi(document, entry, stored)`, as defined in the design. Subject order: `pasted_text` when substantive pasted text, else `this_filing` when no assistant text and the order requires a statement, else `none`.
     - Export them from the package index. `isAiSpan` stays in `statement-parts.ts` for `aiPassages` only.
     - _Requirements: 4.8, 5.8, 5.9, 6.1_
 
-  - [~] 3.2 Add `packages/export/src/declaration-wording.ts` and `packages/export/src/statement-error.ts`
+  - [-] 3.2 Add `packages/export/src/declaration-wording.ts` and `packages/export/src/statement-error.ts`
     - Builders with the exact strings of the design: `subjectPhrase`, `choiceNoneLabel`, `choiceAiLabel`, `TOOL_NAME_LINE`, `requiredLine`, `typedOnlySentence`, `typedAndPastedSentence`, `pastedAfterAssistantSentence`, `NO_PROGRAM_RECORD` (the constant "The record shows that no generative artificial intelligence program was used in the editor."), `declarationNone`, `declarationAi` (both subjects), `portionsDeclared`, `programWithAuthor` (with the "is not recorded" variant), `programAsNamed`, `howUsedDeclared`, `promptRecordsDeclared`, `prohibitionDeclaredLine`.
     - `StatementError = EngineError | { kind: "declaration_required"; subject } | { kind: "invalid_tool_name"; fault }`.
     - No builder renders "The author states that no program was used to prepare <subject>."; the Declaration None sentence of `declarationNone` is the only author no-AI sentence.

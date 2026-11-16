@@ -13,7 +13,7 @@
  */
 import { err, ok } from "../result.js";
 import type { Result } from "../result.js";
-import type { Origin, Provenance, QuoteCheckResult, RunEntry } from "../types.js";
+import type { Origin, Provenance, QuoteCheckResult } from "../types.js";
 import type {
   DecodeFault,
   DraftCitation,
@@ -24,8 +24,9 @@ import type {
   DraftSpan,
   DraftStatus,
 } from "./decode-types.js";
-import { BAD, decodeInt, readInt, readKey, readList, readRuns } from "./decode-fields.js";
-import { readText, readTimestamp, readVersion } from "./decode-fields.js";
+import { BAD, decodeInt, readInt, readKey, readList } from "./decode-fields.js";
+import { readText, readTimestamp } from "./decode-fields.js";
+import { decodeHeader } from "./decode-header.js";
 import type { Read } from "./decode-fields.js";
 import type { CodeToken, LexToken } from "./lex.js";
 import { CODE_NAMES } from "./syntax.js";
@@ -40,8 +41,6 @@ type Payload =
   | Readonly<{ family: "quo"; result: QuoteCheckResult }>
   | Readonly<{ family: "ref" }>;
 
-type Header = Readonly<{ keyCounter: number; runs: readonly RunEntry[] }>;
-
 const fault = (index: number, rule: DecodeFault["rule"]): DecodeFault => ({ index, rule });
 const bad = (code: CodeToken): DecodeFault => fault(code.index, "bad_field");
 
@@ -51,16 +50,6 @@ function opt<K extends string, T>(key: K, r: Read<T>): Result<Partial<Record<K, 
   const out: Partial<Record<K, T>> = {};
   if (r.value !== undefined) out[key] = r.value;
   return ok(out);
-}
-
-function decodeHeader(code: CodeToken): Result<Header, DecodeFault> {
-  const v = readVersion(code);
-  const n = readInt(code, "n");
-  const runs = readRuns(code);
-  if (!v.ok || v.value === undefined || !n.ok || n.value === undefined || runs === undefined) {
-    return err(bad(code));
-  }
-  return ok({ keyCounter: n.value, runs });
 }
 
 function originOf(name: string): Origin | undefined {
@@ -289,6 +278,7 @@ export function decodeTokens(tokens: readonly LexToken[]): Result<DraftDocument,
     text,
     keyCounter: header.value.keyCounter,
     runs: header.value.runs,
+    ...(header.value.declaration === undefined ? {} : { declaration: header.value.declaration }),
     spans: closeSpans(out.spans, text.length),
     citations: done(out.citations),
     quotes: done(out.quotes),

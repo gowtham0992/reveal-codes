@@ -42,7 +42,7 @@ const RUN_T: Schema = { retained: true, required: ["t"], optional: [] };
 const K: Schema = { retained: false, required: ["k"], optional: [] };
 
 const SCHEMAS: Readonly<Record<CodeName, Schema>> = {
-  [CODE_NAMES.doc]: { retained: false, required: ["v", "n"], optional: [], repeat: "r" },
+  [CODE_NAMES.doc]: { retained: false, required: ["v", "n"], optional: ["d"], repeat: "r" },
   [CODE_NAMES.hum]: T,
   [CODE_NAMES.pst]: T,
   [CODE_NAMES.ai]: RUN_T,

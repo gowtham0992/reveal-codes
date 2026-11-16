@@ -17,7 +17,8 @@ export { setQuoteCheck, setVerification, verificationOf } from "./verification.j
 export { blockingIssues, issues, overrides, recordOverride } from "./issues.js";
 
 // Reveal Codes
-export { parse, render, strip, stripPositions } from "./codes.js";
+export { parse, parseRecord, render, renderRecord, strip, stripPositions } from "./codes.js";
+export type { DocumentRecord } from "./codes.js";
 
 // pasted-text declaration
 export {

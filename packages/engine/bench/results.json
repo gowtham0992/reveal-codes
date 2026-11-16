@@ -16,26 +16,26 @@
   "scenarios": [
     {
       "scenario": "21.1 insert outside every citation and run extent",
-      "medianMs": 0.5335830000001351,
-      "p95Ms": 5.703666000000339,
+      "medianMs": 1.1973129999998946,
+      "p95Ms": 5.146332999999913,
       "pass": true
     },
     {
       "scenario": "21.2 insert inside a citation and a run extent",
-      "medianMs": 0.543874500000129,
-      "p95Ms": 6.091042000000016,
+      "medianMs": 1.225563000000193,
+      "p95Ms": 3.269749999999931,
       "pass": true
     },
     {
       "scenario": "21.3 delete outside every citation",
-      "medianMs": 0.5294999999996435,
-      "p95Ms": 3.6202919999996084,
+      "medianMs": 1.0970834999993713,
+      "p95Ms": 3.0463339999996606,
       "pass": true
     },
     {
       "scenario": "21.3 replace outside every citation",
-      "medianMs": 0.6414789999998902,
-      "p95Ms": 2.9251249999997526,
+      "medianMs": 1.170875000000251,
+      "p95Ms": 3.1683750000001965,
       "pass": true
     }
   ],

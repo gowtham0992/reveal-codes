@@ -1,4 +1,5 @@
 /** Draft Document types produced by decode (design A12 step 2). */
+import type { Declaration } from "../declaration.js";
 import type { Provenance, QuoteCheckResult, RunEntry } from "../types.js";
 import type { LexFault } from "./lex.js";
 
@@ -56,6 +57,8 @@ export type DraftDocument = Readonly<{
   keyCounter: number;
   /** In input order; check verifies they are sorted. */
   runs: readonly RunEntry[];
+  /** The `d` field of `[DOC]`, when present. */
+  declaration?: Declaration;
   spans: readonly DraftSpan[];
   /** In opening-Code order. */
   citations: readonly DraftCitation[];

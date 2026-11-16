@@ -25,6 +25,17 @@ export { ellipsize } from "./text.js";
 export { isInstant, localDate, localDateTime } from "./time.js";
 export { buildDocx } from "./docx.js";
 export { canExport } from "./gate.js";
+export type { StatementError } from "./statement-error.js";
+export * from "./declaration-wording.js";
+export {
+  applicableDeclaration,
+  declarationRequired,
+  declarationSubject,
+  holdsAssistantText,
+  orderRequiresStatement,
+  usedAi,
+} from "./declaration.js";
+export type { SubjectOrNone } from "./declaration.js";
 export { APPENDIX_TITLE, STATEMENT_TITLE, STATEMENT_TITLES } from "./wording.js";
 export { ORDERS, loadOrders, selectableOrders, orderById, judgeSurname } from "./orders.js";
 export { APPLIES_TO, ORDER_KINDS } from "./orders-types.js";

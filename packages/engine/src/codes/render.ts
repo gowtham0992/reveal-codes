@@ -3,6 +3,7 @@
  * open events in the Req 19.6 order, then emits Text and Codes in one pass,
  * building Code_Positions as it goes.
  */
+import type { Declaration } from "../declaration.js";
 import type {
   CitationRecord,
   CodePosition,
@@ -15,6 +16,7 @@ import type {
   VerificationResult,
 } from "../types.js";
 import { verificationOf } from "../verification.js";
+import { encodeDeclaration } from "./doc-declaration.js";
 import { CODE_NAMES, codeString, escapeText } from "./syntax.js";
 import type { CodeField, CodeName } from "./syntax.js";
 
@@ -36,11 +38,12 @@ type Event = Readonly<{ offset: number; rank: number; code: string }>;
 
 const field = (key: string, ...values: readonly string[]): CodeField => ({ key, values });
 
-function docCode(doc: Document, mode: RenderMode): string {
+function docCode(doc: Document, declaration: Declaration | null, mode: RenderMode): string {
   const runs = doc.runs.map((r) =>
     field("r", r.runId, String(r.originalLength), String(r.editedCount), r.relabelled ? "1" : "0"),
   );
-  const fields = [field("v", "1"), field("n", String(doc.keyCounter)), ...runs];
+  const d = declaration === null ? [] : [encodeDeclaration(declaration)];
+  const fields = [field("v", "1"), field("n", String(doc.keyCounter)), ...d, ...runs];
   return codeString(CODE_NAMES.doc, null, fields, mode);
 }
 
@@ -177,10 +180,11 @@ function quoteEvents(doc: Document, mode: RenderMode, byKey: Map<string, Overrid
   return out;
 }
 
-function collectEvents(doc: Document, mode: RenderMode): Event[] {
+function collectEvents(doc: Document, declaration: Declaration | null, mode: RenderMode): Event[] {
   const byKey = new Map(doc.overrides.map((o) => [o.key, o] as const));
   const events: Event[] = [];
-  if (mode === "full") events.push({ offset: 0, rank: RANK.doc, code: docCode(doc, mode) });
+  if (mode === "full")
+    events.push({ offset: 0, rank: RANK.doc, code: docCode(doc, declaration, mode) });
   for (const s of doc.spans) {
     events.push({ offset: s.start, rank: RANK.span, code: spanCode(s, mode) });
   }
@@ -191,10 +195,16 @@ function collectEvents(doc: Document, mode: RenderMode): Event[] {
 
 /**
  * Renders a Document as Reveal_Codes_Text plus Code_Positions (Req 19). In
- * `display` mode `[DOC]` and every Payload_Section are omitted (Req 19.10).
+ * `display` mode `[DOC]` and every Payload_Section are omitted (Req 19.10),
+ * so the Declaration is never written there. A `null` Declaration gives the
+ * same bytes as before the `d` field existed.
  */
-export function render(doc: Document, mode: RenderMode): Rendering {
-  const events = collectEvents(doc, mode);
+export function renderRecord(
+  doc: Document,
+  declaration: Declaration | null,
+  mode: RenderMode,
+): Rendering {
+  const events = collectEvents(doc, declaration, mode);
   const positions: CodePosition[] = [];
   let out = "";
   let cursor = 0;
@@ -206,4 +216,9 @@ export function render(doc: Document, mode: RenderMode): Rendering {
   }
   out += escapeText(doc.text.slice(cursor));
   return { text: out, positions };
+}
+
+/** Renders a Document with no Declaration. */
+export function render(doc: Document, mode: RenderMode): Rendering {
+  return renderRecord(doc, null, mode);
 }
