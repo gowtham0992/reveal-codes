@@ -140,7 +140,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - _Requirements: 1.3, 6.1_
 
 - [ ] 8. Sentinel: read the Declaration
-  - [-] 8.1 Add `recordedRecord` to `crew/sentinel/src/recorded.ts`
+  - [x] 8.1 Add `recordedRecord` to `crew/sentinel/src/recorded.ts`
     - `recordedRecord(appendix): Result<{ document: Document; declaration: Declaration | null }, SentinelError>` via `parseRecord`. `recordedDocument` stays and returns the Document of `recordedRecord`, so `analyse.ts`, `deriveFindings` and `splitExport` are unchanged and the Declaration is an input to no Finding.
     - This task must land before task 7.1. A file exported before this feature reads with `declaration: null` and no Finding.
     - _Requirements: 8.6, 8.9_
