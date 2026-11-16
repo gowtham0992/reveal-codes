@@ -62,7 +62,7 @@ Implementation follows the design's task order: commit the spec, extend the load
 - [~] 4. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 5. The `/courts` page
+- [x] 5. The `/courts` page
   - [x] 5.1 Add Placement_Words and link constants
     - In `apps/web/src/order-copy.ts` add `placementWords: Record<CaptionPlacement, string>` ("Heading on the first page", "Title of the statement", "Separate declaration")
     - Create `apps/web/src/courts/links.ts` exporting `COURT_RULES_PATH`, `COURT_RULES_SHORT` ("Court rules") and `COURT_RULES_LONG` ("See all court rules")
@@ -91,7 +91,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Every id appears exactly once as an `id` attribute; intro figures equal `orderStats`; each superseded link target exists on the page; In_Force ids have the encoded Order_Link at any viewport width and Not_In_Force ids have none; no `retrieved`, `source_kind` or `notes` text; Repo_Base unset, set with a trailing slash, set without one; metadata has exactly `title` and `description`
     - _Requirements: 1.3, 2.2, 2.5, 2.6, 4.10, 4.11, 5.1, 5.2, 7.1, 7.2, 8.13, 11.2, 16.1, 16.2, 16.3, 16.7, 16.9_
 
-  - [-] 5.6 Write filter UI tests in `apps/web/test/courts-browser.test.tsx`
+  - [x] 5.6 Write filter UI tests in `apps/web/test/courts-browser.test.tsx`
     - Controls absent before mount and present after; initial state; checkbox ticked from a hash naming a superseded id; Count_Line text and `role="status"`; empty-result sentence; empty groups omitted; Court_Group and instrument order on the rendered page equals the order from `courtGroups`
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 5.4, 6.1, 6.3, 6.6, 6.7, 6.9, 16.4_
 
