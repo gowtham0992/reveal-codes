@@ -94,7 +94,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 5. Web: Store, clearing rule and persistence
-  - [-] 5.1 Add the Declaration to the Store and the clearing rule
+  - [x] 5.1 Add the Declaration to the Store and the clearing rule
     - New `apps/web/src/declaration-clearing.ts`: `insertedPasted(operations)` and `declarationAfter(stored, after, pastedInserted)` as in the design.
     - `store.ts` and `store-actions.ts`: `StoreState.declaration: Declaration | null`; action `{ type: "declaration"; declaration: Declaration | null }`; `replace` gains optional `declaration` defaulting to `null`, so samples and "New" clear it. `reduceEdit` and `reduceHistory` call `declarationAfter` (history passes `insertedPasted(entry.group)` for undo and redo); `reduceReplace` runs the drop check. `reducePairs`, `reduceOverride` and `reduceVerified` leave it alone.
     - Keep each function under 40 lines and each module under 300; put new reducers in `declaration-state.ts` if `store-actions.ts` would grow too large.
