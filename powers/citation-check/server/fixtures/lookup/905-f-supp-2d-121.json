@@ -1,0 +1,21 @@
+{
+  "line": "905 F. Supp. 2d 121",
+  "entry": {
+    "citation": "905 F. Supp. 2d 121",
+    "normalized_citations": ["905 F. Supp. 2d 121"],
+    "start_index": 0,
+    "end_index": 19,
+    "status": 200,
+    "error_message": "",
+    "clusters": [
+      {
+        "id": 2661490,
+        "absolute_url": "/opinion/2661490/united-states-of-america-v-iss-marine-services-inc/",
+        "case_name": "United States of America v. Iss Marine Services, Inc.",
+        "case_name_full": "UNITED STATES of America, Et Al., Petitioners, v. ISS MARINE SERVICES, INC., Respondent",
+        "case_name_short": "",
+        "date_filed": "2012-11-21"
+      }
+    ]
+  }
+}

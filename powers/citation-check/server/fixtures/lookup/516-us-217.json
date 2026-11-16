@@ -1,0 +1,21 @@
+{
+  "line": "516 U.S. 217",
+  "entry": {
+    "citation": "516 U.S. 217",
+    "normalized_citations": ["516 U.S. 217"],
+    "start_index": 0,
+    "end_index": 12,
+    "status": 200,
+    "error_message": "",
+    "clusters": [
+      {
+        "id": 117990,
+        "absolute_url": "/opinion/117990/zicherman-ex-rel-estate-of-kole-v-korean-air-lines-co/",
+        "case_name": "Zicherman Ex Rel. Estate of Kole v. Korean Air Lines Co.",
+        "case_name_full": "ZICHERMAN, Individually and as Executrix of THE ESTATE OF KOLE, Et Al. v. KOREAN AIR LINES CO., LTD.",
+        "case_name_short": "Zicherman",
+        "date_filed": "1996-01-16"
+      }
+    ]
+  }
+}

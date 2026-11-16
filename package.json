@@ -17,11 +17,13 @@
     "dev": "pnpm --filter @reveal-codes/web dev",
     "mcp": "pnpm --filter @reveal-codes/courtlistener-mcp start",
     "sentinel": "pnpm --filter @reveal-codes/sentinel run cli",
-    "kiro:check": "node scripts/kiro-usage-check.mjs"
+    "kiro:check": "node scripts/kiro-usage-check.mjs",
+    "power:build": "node scripts/build-power.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
     "eslint": "10.14.0",
     "eslint-config-prettier": "10.1.8",
     "jiti": "2.7.0",

@@ -1,0 +1,21 @@
+{
+  "line": "556 U.S. 662",
+  "entry": {
+    "citation": "556 U.S. 662",
+    "normalized_citations": ["556 U.S. 662"],
+    "start_index": 0,
+    "end_index": 12,
+    "status": 200,
+    "error_message": "",
+    "clusters": [
+      {
+        "id": 145875,
+        "absolute_url": "/opinion/145875/ashcroft-v-iqbal/",
+        "case_name": "Ashcroft v. Iqbal",
+        "case_name_full": "ASHCROFT, FORMER ATTORNEY GENERAL, Et Al. v. IQBAL Et Al.",
+        "case_name_short": "Iqbal",
+        "date_filed": "2009-05-18"
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "line": "174 F.3d 366",
+  "entry": {
+    "citation": "174 F.3d 366",
+    "normalized_citations": ["174 F.3d 366"],
+    "start_index": 0,
+    "end_index": 12,
+    "status": 200,
+    "error_message": "",
+    "clusters": [
+      {
+        "id": 3011108,
+        "absolute_url": "/opinion/3011108/greenleaf-v-garlock-inc/",
+        "case_name": "Greenleaf v. Garlock, Inc.",
+        "case_name_full": "Charles GREENLEAF, Jr., Alternate Executor of the Estate of Charles Greenleaf, Sr., Deceased; Naomi Greenleaf, in Her Own Right v. GARLOCK, INC.; Fibreboard Corporation; Celotex Corporation; Owens Corning Fiberglas Corp.; Owens-Illinois Glass Co.; Eagle-Picher Industries, Inc.; John Crane-Houdaille, Inc.; A.W. Chesterton; Sepco Corp.; Uniroyal, Inc.; Owens Corning Fiberglas Corp.; Owens-Illinois Glass Co., Third-Party Plaintiffs, v. Hopeman Brothers, Inc.; Combustion Engineering, Inc.; Anchor Packing Co., Inc.; Armstrong World Industries, Inc.; Green Tweed & Co., Inc.; Melrath Gasket Company, Inc.; Melrath Basket Holding Co., Inc.; Pars Manufacturing Co., Third-Party Defendants. Owens Corning, Appellant, No. 97-1820; Charles Greenleaf, Jr., Alternate Executor of the Estate of Charles Greenleaf, Sr., Deceased; Naomi Greenleaf, in Her Own Right v. Garlock, Inc.; Fibreboard Corporation; Celotex Corporation; Owens Corning Fiberglas Corp.; Owens-Illinois Glass Co.; Eagle-Picher Industries, Inc.; John Crane-Houdaille, Inc.; A.W. Chesterton; Sepco Corp.; Uniroyal, Inc.; Owens Corning Fiberglas Corp.; Owens-Illinois Glass Co., Third-Party Plaintiffs, v. Hopeman Brothers, Inc.; Combustion Engineering, Inc.; Anchor Packing Co., Inc.; Armstrong World Industries, Inc.; Green Tweed & Co., Inc.; Melrath Gasket Company, Inc.; Melrath Basket Holding Co., Inc.; Pars Manufacturing Co., Third-Party Defendants. Garlock, Inc., Appellant, No. 97-1821",
+        "case_name_short": "Greenleaf",
+        "date_filed": "1999-04-26"
+      }
+    ]
+  }
+}

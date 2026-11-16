@@ -1,0 +1,8 @@
+{
+  "status": 429,
+  "headers": { "Retry-After": "30" },
+  "body": {
+    "detail": "Request was throttled. Expected available in 30 seconds.",
+    "wait_until": "2026-11-02T12:00:30Z"
+  }
+}

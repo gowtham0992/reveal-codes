@@ -11,6 +11,7 @@ export default defineConfig(
       "**/node_modules/**",
       "**/next-env.d.ts",
       "vitest.config.d.ts",
+      "powers/*/server/*.mjs",
     ],
   },
   eslint.configs.recommended,

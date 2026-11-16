@@ -1,0 +1,22 @@
+{
+  "line": "404 U.S. 519",
+  "entry": {
+    "citation": "404 U.S. 519",
+    "normalized_citations": ["404 U.S. 519"],
+    "start_index": 13,
+    "end_index": 25,
+    "status": 200,
+    "error_message": "",
+    "clusters": [
+      {
+        "resource_uri": "https://www.courtlistener.com/api/rest/v4/clusters/108432/",
+        "id": 108432,
+        "absolute_url": "/opinion/108432/haines-v-kerner/",
+        "docket_id": 366051,
+        "sub_opinions": ["https://www.courtlistener.com/api/rest/v4/opinions/108432/"],
+        "case_name": "Haines v. Kerner",
+        "date_filed": "1972-02-22"
+      }
+    ]
+  }
+}

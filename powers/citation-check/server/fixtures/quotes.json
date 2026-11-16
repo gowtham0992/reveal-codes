@@ -1,0 +1,26 @@
+{
+  "genuine": [
+    {
+      "opinion": "9435339",
+      "text": "A claim has facial plausibility when the plaintiff pleads factual content that allows the court to draw the reasonable inference that the defendant is liable for the misconduct alleged."
+    },
+    {
+      "opinion": "9435339",
+      "text": "Threadbare recitals of the elements of a cause of action, supported by mere conclusory statements, do not suffice."
+    },
+    {
+      "opinion": "108432",
+      "text": "less stringent standards than formal pleadings drafted by lawyers",
+      "inMotion": true
+    },
+    {
+      "opinion": "108432",
+      "text": "allegations such as those asserted by petitioner, however inartfully pleaded, are sufficient to call for the opportunity to offer supporting evidence"
+    }
+  ],
+  "fabricated": {
+    "opinion": "9435339",
+    "text": "a pro se plaintiff who alleges retaliation is entitled to discovery before a motion to dismiss may be granted.",
+    "inMotion": true
+  }
+}
