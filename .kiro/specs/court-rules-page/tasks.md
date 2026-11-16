@@ -138,13 +138,13 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Repository test: `git ls-files` lists no `.d.ts` other than `apps/web/src/css-modules.d.ts`
     - _Requirements: 12.4, 13.2, 13.3, 14.4_
 
-- [ ] 8. Scans and documentation
+- [x] 8. Scans and documentation
   - [x] 8.1 Extend the static scans in `apps/web/test/static/`
     - Cover `app/courts/` and `src/courts/` in `css-rules`, the colour scan, `copy-rules`, `forbidden`, `boundaries` and `inventory`: Tokens only, allowed sizes and weights, no `@media (min-width|max-width)` other than the Shell's 799px rule, no icon, emoji, shadow, gradient, radius, animation or transition, and `app/courts/` imports only from `src/`
     - Add stylesheet assertions for the 320px causes: no fixed width above 100%, `overflow-wrap: anywhere`, `max-width: 100%` on the list
     - _Requirements: 10.2, 10.3, 10.4, 16.10, 16.14_
 
-  - [-] 8.2 Update docs
+  - [x] 8.2 Update docs
     - `README.md`: one line in the dataset section with `https://reveal-codes.gowthamsarveswaran.com/courts`; README tests stay green
     - `docs/KIRO_USAGE.md`: add the `court-rules-page` spec row with its path `.kiro/specs/court-rules-page/`
     - `BUILD_LOG.md`: dated entry stating what was built, what Kiro got wrong, what fixed it, the shared-arbitraries location flagged in the design, and the emitting-process search result if it was not found
