@@ -80,7 +80,7 @@ Conventions that apply to every task:
     - Files under `packages/export/test/`. The `.docx` fixture of Requirement 19 criterion 3 (table, tracked deletion and insertion, two footnotes, one endnote, separators never numbered) with the exact text, the Notes_Block and its wording; `readDocx` returns the same paragraphs as before for the Sentinel (no notes); `isCompoundFile` cases; the oversize-part zip (declared size versus real size) settles the `fflate` size-header question; `readWordDraft` for plain, restored, changed and each refusal (damaged, truncated, no `word/document.xml`, encrypted, no filing end); the Sentinel and `readWordDraft` agree on an edited fixture; static check that no moved module exists in `crew/sentinel/src`, that the shared modules import no `node:` or DOM, and that the Engine has no runtime dependency.
     - _Requirements: 1.3, 1.4, 1.5, 1.9, 6.2, 6.3, 6.4, 6.5, 6.6, 6.8, 7.1, 7.2, 7.3, 9.9, 10.8, 11.3, 11.4, 14.1, 14.2, 14.9, 14.10, 19.3, 19.8, 19.13_
 
-- [~] 3. Checkpoint - shared reader and `readWordDraft`
+- [x] 3. Checkpoint - shared reader and `readWordDraft`
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 4. `docxSafe`, the editor-input changes and the export refusal
