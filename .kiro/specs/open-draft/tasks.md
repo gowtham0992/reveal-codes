@@ -49,14 +49,14 @@ Conventions that apply to every task:
     - In `export-split.ts` add `exportDate(paragraphs)`: the paragraph at `lastIndexOf(APPENDIX_TITLE) - 1` when it matches `/^\d{4}-\d{2}-\d{2}$/`, else `null`.
     - New `packages/export/src/word-draft.ts` with `WordLimits`, `WordDraft` (`plain | restored | changed | refused`) and `readWordDraft(bytes, limits)` as the design gives: encrypted and compound-file checks first (`refused / encrypted`, `refused / damaged`); `readDocxWithNotes` (`not_docx` and `part_too_large` give `refused / damaged`); no Appendix title gives `plain` with `paragraphs.join("\n") + notesBlock(notes)`; otherwise `splitExport` (`refused / no_filing_end` when it fails), `bodyText = body.join("\n") + notesBlock(notes)`, `recordedRecord(appendix)`; a parse whose `document.text === bodyText` gives `restored` with `exportedOn`, anything else gives `changed` with `text = bodyText`. It calls no `docxSafe`. Normalise `\r\n` and lone `\r` to `\n` in the returned text. Export from `index.ts`.
     - _Requirements: 1.10, 6.1, 6.7, 7.1, 9.1, 9.2, 9.6, 9.9, 10.1, 10.6, 10.8, 11.1, 11.2, 11.3, 11.4, 14.1, 14.2, 14.9, 14.10_
-  - [~] 2.5 Restore helpers
+  - [x] 2.5 Restore helpers
     - In `packages/export/test/support/`, helpers that export a Document (`buildStatement`, `buildDocx`), reopen the bytes with `readWordDraft` and compare by `structuralEqual`, so that Properties 2, 3 and 4 and the restore examples share one path. Add a self-test: the helper restores a small fixed Document and reports equality, and reports inequality for a one-character change.
     - _Requirements: 9.10, 18.4, 18.5_
   - [x] 2.6 Write property test for the Word text round trip
     - **Property 1: Word text round trip**
     - File `packages/export/test/docx-read.properties.test.ts`. Build with `filingParagraph` over `arbParagraphs`, read with `readDocx`, assert equality with the paragraphs joined by `\n`.
     - **Validates: Requirements 6.2, 6.3, 6.8, 6.9, 18.2, 18.3**
-  - [~] 2.7 Write property test for reader totality
+  - [x] 2.7 Write property test for reader totality
     - **Property 9: The reader is total**
     - Same file as 2.6. Random bytes, truncated zips and zips with random part content; `readDocx` and `readDocxWithNotes` return a value and throw nothing.
     - **Validates: Requirements 1.6**
@@ -76,7 +76,7 @@ Conventions that apply to every task:
     - **Property 8: The statement and the Appendix are never body text**
     - Same file as 2.9. Documents including a line equal to a member of `STATEMENT_TITLES`; for a restore and a body-only import no paragraph at or after the Filing_End is in the installed text.
     - **Validates: Requirements 11.1, 11.2, 11.3**
-  - [~] 2.12 Write reader and `readWordDraft` examples
+  - [-] 2.12 Write reader and `readWordDraft` examples
     - Files under `packages/export/test/`. The `.docx` fixture of Requirement 19 criterion 3 (table, tracked deletion and insertion, two footnotes, one endnote, separators never numbered) with the exact text, the Notes_Block and its wording; `readDocx` returns the same paragraphs as before for the Sentinel (no notes); `isCompoundFile` cases; the oversize-part zip (declared size versus real size) settles the `fflate` size-header question; `readWordDraft` for plain, restored, changed and each refusal (damaged, truncated, no `word/document.xml`, encrypted, no filing end); the Sentinel and `readWordDraft` agree on an edited fixture; static check that no moved module exists in `crew/sentinel/src`, that the shared modules import no `node:` or DOM, and that the Engine has no runtime dependency.
     - _Requirements: 1.3, 1.4, 1.5, 1.9, 6.2, 6.3, 6.4, 6.5, 6.6, 6.8, 7.1, 7.2, 7.3, 9.9, 10.8, 11.3, 11.4, 14.1, 14.2, 14.9, 14.10, 19.3, 19.8, 19.13_
 
@@ -84,7 +84,7 @@ Conventions that apply to every task:
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 4. `docxSafe`, the editor-input changes and the export refusal
-  - [~] 4.1 `docxSafe` and `holdsDocxUnsafe` over one range table
+  - [-] 4.1 `docxSafe` and `holdsDocxUnsafe` over one range table
     - New `packages/export/src/docx-text.ts`: one table of allowed ranges (U+0009, U+000A, U+000D, U+0020 to U+D7FF, U+E000 to U+FFFD, U+10000 to U+10FFFF), defined once and read by both functions. `docxSafe(text)` returns `{ text, removed }`: U+000B and U+000C become `\n`, `\r\n` and a lone `\r` become `\n`, every other Docx_Unsafe_Character (an unpaired surrogate included) is removed and counted once; the converted characters are not counted. It is idempotent and returns its input unchanged when the input holds none and no `\r`. `holdsDocxUnsafe(text)` is true for any Docx_Unsafe_Character, U+000B and U+000C included, and is false for the text of any `docxSafe` result. No imports. Export both from `index.ts`.
     - _Requirements: 22.1, 22.2, 22.5_
   - [~] 4.2 `arbDocxHostileText`

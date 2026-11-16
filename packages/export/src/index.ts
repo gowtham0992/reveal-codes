@@ -57,5 +57,7 @@ export type { SplitError } from "./export-split.js";
 export { recordedRecord, recordedDocument } from "./appendix-parse.js";
 export type { AppendixParseError, RecordedError, RecordedRecord } from "./appendix-parse.js";
 export type { DocxReadError, DocxText, DocxWithNotes, ExportParts } from "./read-types.js";
+export { docxSafe, holdsDocxUnsafe } from "./docx-text.js";
+export type { DocxSafe } from "./docx-text.js";
 export { readWordDraft } from "./word-draft.js";
 export type { WordDraft, WordLimits } from "./word-draft.js";

@@ -242,29 +242,39 @@ describe("package boundaries _Requirements: 9.1, 10.9_", () => {
 });
 
 type PropertyFile = {
-  readonly spec: "export-certification" | "court-orders" | "pasted-text-declaration";
+  readonly spec: "export-certification" | "court-orders" | "pasted-text-declaration" | "open-draft";
   readonly file: string;
-  readonly number: number;
+  readonly numbers: readonly number[];
 };
 const PROPERTY_FILES: readonly PropertyFile[] = [
-  { spec: "export-certification", file: "gate.properties.test.ts", number: 1 },
-  { spec: "export-certification", file: "statement.properties.test.ts", number: 2 },
-  { spec: "export-certification", file: "appendix.properties.test.ts", number: 3 },
-  { spec: "export-certification", file: "docx.properties.test.ts", number: 4 },
-  { spec: "court-orders", file: "order-citation.properties.test.ts", number: 1 },
-  { spec: "court-orders", file: "order-gate.properties.test.ts", number: 2 },
-  { spec: "pasted-text-declaration", file: "statement-declaration.properties.test.ts", number: 1 },
-  { spec: "pasted-text-declaration", file: "declaration-gate.properties.test.ts", number: 2 },
+  { spec: "export-certification", file: "gate.properties.test.ts", numbers: [1] },
+  { spec: "export-certification", file: "statement.properties.test.ts", numbers: [2] },
+  { spec: "export-certification", file: "appendix.properties.test.ts", numbers: [3] },
+  { spec: "export-certification", file: "docx.properties.test.ts", numbers: [4] },
+  { spec: "court-orders", file: "order-citation.properties.test.ts", numbers: [1] },
+  { spec: "court-orders", file: "order-gate.properties.test.ts", numbers: [2] },
+  {
+    spec: "pasted-text-declaration",
+    file: "statement-declaration.properties.test.ts",
+    numbers: [1],
+  },
+  { spec: "pasted-text-declaration", file: "declaration-gate.properties.test.ts", numbers: [2] },
+  // open-draft: Properties 1, 9 (task 2.7) and later 12 (task 2.8) share this one file.
+  // word-draft.properties.test.ts (tasks 2.9-2.11) is added with its file: the per-spec
+  // check below requires every listed file to exist.
+  { spec: "open-draft", file: "docx-read.properties.test.ts", numbers: [1, 9] },
 ];
 const EXPECTED_NUMBERS: Readonly<Record<PropertyFile["spec"], readonly number[]>> = {
   "export-certification": [1, 2, 3, 4],
   "court-orders": [1, 2],
   // Properties 3 and 4 of this spec live in crew/sentinel and apps/web.
   "pasted-text-declaration": [1, 2],
+  // Task 2.8 adds 12 here; tasks 2.9-2.11 add 2, 3 and 8 with word-draft.properties.test.ts.
+  "open-draft": [1, 9],
 };
 
-/** Each `// Property N` comment must be followed by exactly one `fc.assert` before the next one. */
-function propertyViolations(file: Source, expected: number): Violation[] {
+/** Each `// Property N` comment, in order, must match `expected` and be followed by its own `fc.assert`. */
+function propertyViolations(file: Source, expected: readonly number[]): Violation[] {
   const lines = file.text.split("\n");
   const marks: { line: number; n: number }[] = [];
   lines.forEach((text, i) => {
@@ -272,17 +282,20 @@ function propertyViolations(file: Source, expected: number): Violation[] {
     if (m?.[1] !== undefined) marks.push({ line: i + 1, n: Number(m[1]) });
   });
   const out: Violation[] = [];
-  const asserts = lines.filter((l) => l.includes("fc.assert(")).length;
-  if (marks.length !== 1)
-    out.push(at(file, 1, `${String(marks.length)} Property comments, want 1`));
-  if (asserts !== 1) out.push(at(file, 1, `${String(asserts)} fc.assert calls, want 1`));
-  for (const mark of marks) {
-    if (mark.n !== expected)
-      out.push(at(file, mark.line, `Property ${String(mark.n)}, want ${String(expected)}`));
-    const rest = lines.slice(mark.line);
-    const first = rest.findIndex((l) => l.includes("fc.assert("));
-    if (first === -1) out.push(at(file, mark.line, "no fc.assert below the comment"));
-  }
+  const assertLines = lines.flatMap((l, i) => (l.includes("fc.assert(") ? [i + 1] : []));
+  const want = String(expected.length);
+  if (marks.length !== expected.length)
+    out.push(at(file, 1, `${String(marks.length)} Property comments, want ${want}`));
+  if (assertLines.length !== expected.length)
+    out.push(at(file, 1, `${String(assertLines.length)} fc.assert calls, want ${want}`));
+  marks.forEach((mark, i) => {
+    const wantN = expected[i];
+    if (wantN !== undefined && mark.n !== wantN)
+      out.push(at(file, mark.line, `Property ${String(mark.n)}, want ${String(wantN)}`));
+    const next = marks[i + 1]?.line ?? Infinity;
+    const own = assertLines.filter((l) => l > mark.line && l < next);
+    if (own.length !== 1) out.push(at(file, mark.line, "want one fc.assert below the comment"));
+  });
   return out;
 }
 
@@ -292,10 +305,10 @@ describe("property files _Requirements: 10.5_", () => {
       "// Property 7\nit('x', () => {\n  fc.assert(a);\n  fc.assert(b);\n});\n",
       "p.ts",
     );
-    const found = format(propertyViolations(bad, 2));
+    const found = format(propertyViolations(bad, [2]));
     expect(found).toContain("p.ts:1 2 fc.assert calls, want 1".replace("p.ts:1 2", "p.ts:1 2"));
     expect(found).toContain("p.ts:1 Property 7, want 2");
-    const none = format(propertyViolations(src("it('x', () => {});\n", "q.ts"), 1));
+    const none = format(propertyViolations(src("it('x', () => {});\n", "q.ts"), [1]));
     expect(none).toContain("q.ts:1 0 Property comments, want 1");
   });
 
@@ -308,7 +321,7 @@ describe("property files _Requirements: 10.5_", () => {
     const violations = sources.flatMap((s) => {
       const entry = PROPERTY_FILES.find((p) => p.file === basename(s.path));
       if (entry === undefined) return [at(s, 1, "property file is not one of the known files")];
-      return propertyViolations(s, entry.number);
+      return propertyViolations(s, entry.numbers);
     });
     expect(format(violations)).toEqual([]);
     expect(present.length).toBe(sources.length);
@@ -329,7 +342,7 @@ describe("property files _Requirements: 10.5_", () => {
           .filter((v): v is string => v !== undefined)
           .map(Number),
       );
-      expect(numbers.sort((a, b) => a - b)).toEqual(EXPECTED_NUMBERS[spec]);
+      expect(numbers.sort((a, b) => a - b)).toEqual([...EXPECTED_NUMBERS[spec]]);
     },
   );
 });
