@@ -3,6 +3,7 @@
 import { blockingIssues } from "@reveal-codes/engine";
 import type { Document, Issue } from "@reveal-codes/engine";
 import { useState } from "react";
+import { overrideMismatch } from "../client/mismatch";
 import { resolvedRows, usableInfo } from "../client/resolved";
 import type { ResolvedSession } from "../client/resolved";
 import type { Store } from "../store-runtime";
@@ -55,6 +56,7 @@ function OverrideSlot({ target, document, store, now, close }: OverrideSlotProps
       issueKey={target.issue.key}
       code={target.issue.code}
       issueText={issueText(document, target.issue)}
+      mismatch={overrideMismatch(document, target.issue)}
       store={store}
       now={now}
       restoreFocus={target.opener}

@@ -16,3 +16,13 @@ export function mismatchLines(m: Mismatch): readonly string[] {
   const found = `This citation is ${m.found}`;
   return m.cited === null ? [found] : [`Cited as ${m.cited}`, found];
 }
+
+/** The Override_Dialog lines of `issue`: only for a `CIT ≠` issue whose record is wrong_case, else null. */
+export function overrideMismatch(
+  document: Document,
+  issue: Readonly<{ code: string; key: IssueKey }>,
+): readonly string[] | null {
+  if (issue.code !== "CIT ≠") return null;
+  const m = mismatchOf(document, issue.key);
+  return m === null ? null : mismatchLines(m);
+}

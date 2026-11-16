@@ -4,6 +4,7 @@ import { blockingIssues } from "@reveal-codes/engine";
 import type { Document, Issue } from "@reveal-codes/engine";
 import type { OrderContext } from "@reveal-codes/export";
 import { useEffect, useRef, useState } from "react";
+import { overrideMismatch } from "../client/mismatch";
 import type { OrderSelectionStore } from "../order-selection";
 import type { Store } from "../store-runtime";
 import { ConfidentialityCheckbox } from "./confidentiality-checkbox";
@@ -110,6 +111,7 @@ function OverrideTarget({ document, target, store, now, onClose }: OverrideTarge
       issueKey={target.issue.key}
       code={target.issue.code}
       issueText={issueText(document, target.issue)}
+      mismatch={overrideMismatch(document, target.issue)}
       store={store}
       now={now}
       restoreFocus={target.opener}

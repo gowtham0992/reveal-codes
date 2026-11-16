@@ -3,6 +3,7 @@
 import type { IssueKey } from "@reveal-codes/engine";
 import { useId, useState } from "react";
 import type { Store } from "../store-runtime";
+import { MismatchLines } from "./mismatch-lines";
 import { Modal, ModalActions } from "./modal";
 import styles from "./override-dialog.module.css";
 
@@ -15,6 +16,8 @@ export type OverrideDialogProps = Readonly<{
   code: string;
   /** The shortened text of the item being overridden (Requirement 8). */
   issueText: string;
+  /** The mismatch lines of a `CIT ≠` issue; null for any other (Requirement 19.3). */
+  mismatch: readonly string[] | null;
   store: Store;
   now: () => Date;
   restoreFocus: HTMLElement | null;
@@ -79,7 +82,7 @@ function ReasonField({ reason, setReason, valid, error }: FieldProps) {
 
 /** Override_Dialog (Requirements 18.5 to 18.9). */
 export function OverrideDialog(props: OverrideDialogProps) {
-  const { code, issueText, restoreFocus, onClose } = props;
+  const { code, issueText, mismatch, restoreFocus, onClose } = props;
   const describeId = useId();
   const { reason, setReason, error, valid, save } = useOverrideForm(props);
   return (
@@ -91,6 +94,9 @@ export function OverrideDialog(props: OverrideDialogProps) {
     >
       <div id={describeId}>
         <p className={styles["issueText"]}>{issueText}</p>
+        {mismatch === null ? null : (
+          <MismatchLines lines={mismatch} className={styles["mismatch"]} />
+        )}
         <p className={styles["statement"]}>{PRINTED_STATEMENT}</p>
       </div>
       <ReasonField reason={reason} setReason={setReason} valid={valid} error={error} />

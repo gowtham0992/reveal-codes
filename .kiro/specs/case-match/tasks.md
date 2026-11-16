@@ -378,7 +378,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - Add a comment that jsdom does no layout, so these tests cannot prove paint order, hit testing or a real browser's focus handling.
     - _Requirements: 17.3, 17.4, 17.5, 17.7_
 
-- [ ] 16. Page ranges and lists in a pincite (Requirement 18)
+- [x] 16. Page ranges and lists in a pincite (Requirement 18)
   - [x] 16.1 Read the Pincite_Expression and keep the value
     - Create `packages/engine/src/citations/pincite.ts` with `readPinciteExpression(text, at, { list, startsMember })` as designed: items `page [dash short]` with `-` or `–`, a shortened second number of one to five ASCII digits, at most five items and 24 code units, items after the first refused when `startsMember` is true or when they are a four-digit number from 1600 to 2999 followed by a space and an uppercase letter, an item accepted only when its last digit is not followed by a letter or number, and a failed `dash short` leaving the item as the page alone. No import from the other grammar modules.
     - Export `startsMember` from `grammar.ts` and use the new reader in `grammar.ts#readPincite` (`list: true`), in `grammar-short.ts` for `Id. at` and for the party tail (`list: true`; `first` becomes `pincite`, `end` the tail end), and in `grammar-db.ts#readPincite` (`list: false`, `startsMember: () => false`). Keep the existing `startsMember` check for the first item.
@@ -403,7 +403,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - Add an engine example that Reveal Codes written the old way (`[CIT ≠…]174 F.3d 366, 371[/CIT]-72 (2d Cir. 1999)`, with a valid `[DOC]` and spans) fail `parse` with `malformed_codes` and rule `extractor_mismatch`. Read the autosave load path from `persist.ts` onward and record in the BUILD_LOG what the author sees for a `bad_codes` draft.
     - _Requirements: 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 18.8, 18.9, 18.11, 18.12, 18.16_
 
-  - [~] 16.5 Re-check the Avianca sample and the worked outcomes
+  - [x] 16.5 Re-check the Avianca sample and the worked outcomes
     - Edit `packages/engine/test/avianca.test.ts` so the Miller citation's text is `174 F.3d 366, 371-72 (2d Cir. 1999)` and the other five are unchanged, and edit `packages/verifier/test/worked-outcomes.test.ts` wherever it compares the Miller text. The lookup outcomes (`wrong_case`, cluster 3011108) do not change.
     - Check that `packages/engine/fixtures/avianca-citations.txt` is unchanged and that `501 U.S. 32` and `516 U.S. 217` in it still extract as before (the sample holds no range for them; the ranged forms are covered by task 16.4).
     - Run the engine and verifier suites and list every other test that fails because a citation now ends later. Edit only those whose expected text is wrong for the right reason, and list them for the BUILD_LOG; stop and report any test that fails for another reason.
@@ -424,7 +424,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - Use the existing `text` class of `export-dialog.module.css`; add no colour literal.
     - _Requirements: 19.2, 19.7, 19.8_
 
-  - [~] 18.3 Show the lines in the Override dialog
+  - [-] 18.3 Show the lines in the Override dialog
     - Add the prop `mismatch: readonly string[] | null` to `OverrideDialog` and render the lines inside the `describedBy` block between the issue text and the printed-statement line, above the reason box.
     - Compute it with `mismatchOf` and `mismatchLines` from the current Document in both `OverrideSlot` sites (`issues-region.tsx` and `export-dialog.tsx`), passing `null` when `mismatchOf` returns `null`.
     - _Requirements: 19.3, 19.4, 19.7, 19.8_

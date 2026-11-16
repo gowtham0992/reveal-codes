@@ -4,6 +4,11 @@
   font-family: var(--font-editor);
 }
 
+.mismatch {
+  margin: 0 0 8px;
+  overflow-wrap: anywhere;
+}
+
 .statement {
   margin: 0 0 8px;
 }

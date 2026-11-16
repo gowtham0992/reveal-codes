@@ -44,6 +44,7 @@ function Harness(props: { store: Store; issueKey: string; issueText?: string }) 
         <OverrideDialog
           issueKey={props.issueKey}
           code="CIT …"
+          mismatch={null}
           issueText={props.issueText ?? "410 U.S. 113"}
           store={props.store}
           now={now}

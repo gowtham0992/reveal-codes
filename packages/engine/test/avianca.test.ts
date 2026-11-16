@@ -7,23 +7,23 @@ const text = readFileSync(new URL("../fixtures/avianca-citations.txt", import.me
 
 const EXPECTED = [
   {
-    line: "Varghese v. China Southern Airlines Co., Ltd., 925 F.3d 1339",
+    line: "Varghese v. China Southern Airlines Co., Ltd., 925 F.3d 1339 (11th Cir. 2019)",
     name: "Varghese v. China Southern Airlines Co., Ltd.",
   },
-  { line: "Petersen v. Iran Air, 905 F. Supp. 2d 121", name: "Petersen v. Iran Air" },
+  { line: "Petersen v. Iran Air, 905 F. Supp. 2d 121 (D.D.C. 2012)", name: "Petersen v. Iran Air" },
   {
-    line: "Miller v. United Airlines, Inc., 174 F.3d 366",
+    line: "Miller v. United Airlines, Inc., 174 F.3d 366, 371-72 (2d Cir. 1999)",
     name: "Miller v. United Airlines, Inc.",
   },
   {
-    line: "Zicherman v. Korean Air Lines Co., Ltd., 516 F.3d 1237",
+    line: "Zicherman v. Korean Air Lines Co., Ltd., 516 F.3d 1237, 1254 (11th Cir. 2008)",
     name: "Zicherman v. Korean Air Lines Co., Ltd.",
   },
   {
-    line: "Zicherman v. Korean Air Lines Co., 516 U.S. 217",
+    line: "Zicherman v. Korean Air Lines Co., 516 U.S. 217 (1996)",
     name: "Zicherman v. Korean Air Lines Co.",
   },
-  { line: "Chambers v. NASCO, Inc., 501 U.S. 32", name: "Chambers v. NASCO, Inc." },
+  { line: "Chambers v. NASCO, Inc., 501 U.S. 32 (1991)", name: "Chambers v. NASCO, Inc." },
 ];
 
 describe("Avianca sample extraction _Requirements: 10.5, 10.15_", () => {
@@ -32,6 +32,12 @@ describe("Avianca sample extraction _Requirements: 10.5, 10.15_", () => {
   it("returns exactly six Full_Citations, each with its own caseName, in order", () => {
     expect(citations.map((c) => c.value.kind)).toEqual(Array(6).fill("reporter"));
     expect(citations.map((c) => c.caseName)).toEqual(EXPECTED.map((e) => e.name));
+  });
+
+  it("extracts each citation's full text, with pincite expression and parenthetical", () => {
+    expect(citations.map((c) => c.text)).toEqual(
+      EXPECTED.map((e) => e.line.slice(e.name.length + 2)),
+    );
   });
 
   it("places each citation on its own line, right after its name as written", () => {

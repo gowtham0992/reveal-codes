@@ -102,6 +102,7 @@ describe("Worked outcomes: Introduction rows _Requirements: 12.1, 12.2, 12.3_", 
 
   it("Miller 174 F.3d 366 is wrong_case", async () => {
     const [row] = await run("Miller v. United Airlines, Inc., 174 F.3d 366, 371-72 (2d Cir. 1999)");
+    expect(row?.text).toBe("174 F.3d 366, 371-72 (2d Cir. 1999)");
     expect(row?.result).toMatchObject(MILLER);
   });
 
@@ -140,6 +141,8 @@ describe("Worked outcomes: Avianca sample in demo mode _Requirements: 12.3, 12.6
       ["full", "Chambers v. NASCO, Inc.", "verified"],
     ]);
     expect(rows[1]?.result).toMatchObject(PETERSEN);
+    expect(rows[2]?.text).toBe("174 F.3d 366, 371-72 (2d Cir. 1999)");
+    expect(rows[3]?.text).toBe("516 F.3d 1237, 1254 (11th Cir. 2008)");
     expect(rows[2]?.result).toMatchObject(MILLER);
     expect(rows[4]?.result).toEqual({ status: "verified", clusterId: "117990" });
     expect(rows[5]?.result).toEqual({ status: "verified", clusterId: "112616" });
