@@ -14,14 +14,14 @@ Implementation follows the design's task order: commit the spec, extend the load
     - _Requirements: 17.3_
 
 - [ ] 2. Loader returns `compiled` and `vocabulary`; dataset wording
-  - [~] 2.1 Add `OrderVocabulary` and `OrderDataset` to `packages/export`
+  - [x] 2.1 Add `OrderVocabulary` and `OrderDataset` to `packages/export`
     - In `orders-types.ts` add `OrderVocabulary` and `OrderDataset = OrderSet & { compiled; vocabulary }`
     - In `orders-parse.ts` read `compiled` (string, else `orders: "compiled" is missing or malformed`) and add `readVocabulary(raw)` that fails the load when a member of an enumerated list is absent from its group or is not a string
     - In `orders.ts` make `loadOrders` return `Result<OrderDataset, string>` and `ORDERS` an `OrderDataset`
     - Export `OrderDataset` and `OrderVocabulary` from `index.ts`; no existing export changes shape
     - _Requirements: 1.6_
 
-  - [~] 2.2 Replace the `negative_certification_when_unused` vocabulary sentence and regenerate the Power copy
+  - [-] 2.2 Replace the `negative_certification_when_unused` vocabulary sentence and regenerate the Power copy
     - Replace only `vocabulary.elements.negative_certification_when_unused` in `data/standing-orders.json` with the exact text of requirement 15.1; leave every entry byte for byte unchanged and keep the file's formatting
     - Run `pnpm power:build` so `powers/citation-check/skills/court-ai-rules/references/standing-orders.json` equals the dataset
     - _Requirements: 15.1, 15.2, 15.3_
@@ -63,7 +63,7 @@ Implementation follows the design's task order: commit the spec, extend the load
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 5. The `/courts` page
-  - [~] 5.1 Add Placement_Words and link constants
+  - [-] 5.1 Add Placement_Words and link constants
     - In `apps/web/src/order-copy.ts` add `placementWords: Record<CaptionPlacement, string>` ("Heading on the first page", "Title of the statement", "Separate declaration")
     - Create `apps/web/src/courts/links.ts` exporting `COURT_RULES_PATH`, `COURT_RULES_SHORT` ("Court rules") and `COURT_RULES_LONG` ("See all court rules")
     - _Requirements: 4.6, 9.1, 9.2, 9.4_
@@ -117,7 +117,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.7, 8.9, 8.11, 8.12, 9.1, 9.2, 9.3, 9.4, 9.5, 16.5, 16.6, 16.8_
 
 - [ ] 7. Repairs
-  - [~] 7.1 Fix the Override_Table headers in the print view
+  - [-] 7.1 Fix the Override_Table headers in the print view
     - In `print-view.tsx` give `BlockTable` the `overrides` class when its columns equal `OVERRIDE_COLUMNS` (confirm `OVERRIDE_COLUMNS` is exported from `@reveal-codes/export`)
     - In `print-view.module.css` add `.overrides th { overflow-wrap: normal; word-break: keep-all; }` and `min-width` rules for the Code (10ch) and Timestamp columns, sized from the longest value plus padding; leave body-cell `overflow-wrap: anywhere` as it is
     - _Requirements: 12.1, 12.2, 12.3_
@@ -126,7 +126,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - In `runOpen` of `use-open-draft.tsx` dispatch `{ type: "notice", text: null }` and `{ type: "openNote", text: null }` before `await openFile(file)`; give `refuseSeveral` the same `notice` reset
     - _Requirements: 13.1, 13.2_
 
-  - [~] 7.3 Ignore declaration files and find the emitting process
+  - [-] 7.3 Ignore declaration files and find the emitting process
     - Add `*.d.ts` and `!apps/web/src/css-modules.d.ts` to `.gitignore`
     - Search `package.json` scripts, `.kiro/hooks/*.json`, `.github/workflows/ci.yml`, `scripts/` and `vitest.config.ts` for the process that emits `.d.ts` into `crew/sentinel/src` and `packages/export/test/support`; fix it if found, otherwise record what was searched in the `BUILD_LOG.md` entry (task 8.2)
     - Remove no tracked file other than any stray untracked `.d.ts`; do not delete `apps/web/src/css-modules.d.ts`

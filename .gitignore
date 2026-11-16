@@ -26,3 +26,6 @@ apps/web/public/avianca-citations.txt
 coverage/
 # Stray declaration emit of the root vitest config (not produced by tsc -b)
 /vitest.config.d.ts
+# Declaration files are never committed (tsc -b writes to dist/); this one is hand-written
+*.d.ts
+!apps/web/src/css-modules.d.ts

@@ -1,7 +1,7 @@
 "use client";
 
 import type { DeclarationSubject } from "@reveal-codes/engine";
-import { ORDERS, orderById, subjectPhrase } from "@reveal-codes/export";
+import { ORDERS, OVERRIDE_COLUMNS, orderById, subjectPhrase } from "@reveal-codes/export";
 import type { Appendix, OrderEntry, StatementBlock } from "@reveal-codes/export";
 import { useEffect, useState } from "react";
 import { CONFIDENTIALITY_REQUIRED } from "../order-copy";
@@ -68,9 +68,18 @@ function StatementBlockView({ block }: Readonly<{ block: StatementBlock }>) {
   }
 }
 
-function BlockTable(props: { columns: readonly string[]; rows: readonly (readonly string[])[] }) {
+function isOverrideTable(columns: readonly string[]): boolean {
   return (
-    <table className={styles["table"]}>
+    columns.length === OVERRIDE_COLUMNS.length && columns.every((c, i) => c === OVERRIDE_COLUMNS[i])
+  );
+}
+
+function BlockTable(props: { columns: readonly string[]; rows: readonly (readonly string[])[] }) {
+  const tableClass = isOverrideTable(props.columns)
+    ? `${styles["table"] ?? ""} ${styles["overrides"] ?? ""}`
+    : styles["table"];
+  return (
+    <table className={tableClass}>
       <thead>
         <tr>
           {props.columns.map((c, i) => (

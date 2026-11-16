@@ -26,7 +26,7 @@
       "human_review": "A human reviewed and approved AI-drafted text.",
       "confidentiality": "Certify that no confidential or business proprietary information was disclosed to the tool.",
       "prompt_records": "Retain records of prompts submitted to the tool.",
-      "negative_certification_when_unused": "A filing without the disclosure certifies that no generative AI was used.",
+      "negative_certification_when_unused": "The filer certifies that no generative AI was used: by filing without the disclosure, or by a statement of non-use that the instrument requires.",
       "signed_by_all_drafters": "Everyone who contributed to drafting signs the certification."
     },
     "caption.placement": {

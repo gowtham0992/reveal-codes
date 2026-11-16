@@ -68,6 +68,18 @@ export type OrderEntry = Readonly<{
 
 export type OrderSet = Readonly<{ version: 1; entries: readonly OrderEntry[] }>;
 
+/** The dataset's plain-language wording for every member of each enumerated list. */
+export type OrderVocabulary = Readonly<{
+  kind: Readonly<Record<OrderKind, string>>;
+  applies_to: Readonly<Record<AppliesTo, string>>;
+  elements: Readonly<Record<OrderElement, string>>;
+  "caption.placement": Readonly<Record<CaptionPlacement, string>>;
+  status: Readonly<Record<OrderStatus, string>>;
+}>;
+
+/** The validated entries plus the compile date and vocabulary the file carries. */
+export type OrderDataset = OrderSet & Readonly<{ compiled: string; vocabulary: OrderVocabulary }>;
+
 /** The order chosen for a filing, with the author's confidentiality tick; `null` means none. */
 export type OrderContext = Readonly<{
   entry: OrderEntry;

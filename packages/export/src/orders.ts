@@ -10,8 +10,8 @@ import {
   checkUrls,
   checkVocabulary,
 } from "./orders-check.js";
-import { parseRoot } from "./orders-parse.js";
-import type { OrderEntry, OrderJudge, OrderSet } from "./orders-types.js";
+import { parseRoot, readVocabulary } from "./orders-parse.js";
+import type { OrderDataset, OrderEntry, OrderJudge, OrderSet } from "./orders-types.js";
 
 export type OrderGroup = Readonly<{ court: string; entries: readonly OrderEntry[] }>;
 
@@ -26,7 +26,7 @@ const TYPED_CHECKS: readonly Check[] = [
 ];
 
 /** Validates a dataset value check by check (D1). Never throws. */
-export function loadOrders(value: unknown): Result<OrderSet, string> {
+export function loadOrders(value: unknown): Result<OrderDataset, string> {
   const root = parseRoot(value);
   if (!root.ok) return root;
   const typed = checkVocabulary(root.value.entries, root.value.vocabulary);
@@ -35,17 +35,24 @@ export function loadOrders(value: unknown): Result<OrderSet, string> {
     const message = check(typed.value);
     if (message !== null) return err(message);
   }
-  return ok({ version: 1, entries: typed.value });
+  const vocabulary = readVocabulary(root.value.vocabulary);
+  if (!vocabulary.ok) return vocabulary;
+  return ok({
+    version: 1,
+    entries: typed.value,
+    compiled: root.value.compiled,
+    vocabulary: vocabulary.value,
+  });
 }
 
-function loadShipped(): OrderSet {
+function loadShipped(): OrderDataset {
   const loaded = loadOrders(data);
   if (!loaded.ok) throw new Error(`data/standing-orders.json is invalid: ${loaded.error}`);
   return loaded.value;
 }
 
 /** Loaded once at module load; throws only if the shipped file fails its own validation (D4). */
-export const ORDERS: OrderSet = loadShipped();
+export const ORDERS: OrderDataset = loadShipped();
 
 /** The last whitespace-separated token of the judge's name. */
 export function judgeSurname(judge: OrderJudge): string {

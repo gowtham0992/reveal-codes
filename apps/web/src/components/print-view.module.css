@@ -90,6 +90,21 @@
   font-weight: 700;
 }
 
+.overrides th {
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+
+.overrides th:nth-child(1),
+.overrides td:nth-child(1) {
+  min-width: 10ch;
+}
+
+.overrides th:nth-child(4),
+.overrides td:nth-child(4) {
+  min-width: 26ch;
+}
+
 .signature {
   margin: 24px 0 0;
 }

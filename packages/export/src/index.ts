@@ -36,7 +36,7 @@ export {
   usedAi,
 } from "./declaration.js";
 export type { SubjectOrNone } from "./declaration.js";
-export { APPENDIX_TITLE, STATEMENT_TITLE, STATEMENT_TITLES } from "./wording.js";
+export { APPENDIX_TITLE, OVERRIDE_COLUMNS, STATEMENT_TITLE, STATEMENT_TITLES } from "./wording.js";
 export { ORDERS, loadOrders, selectableOrders, orderById, judgeSurname } from "./orders.js";
 export { APPLIES_TO, ORDER_KINDS } from "./orders-types.js";
 export type { OrderGroup } from "./orders.js";
@@ -46,6 +46,8 @@ export type {
   OrderEntry,
   OrderKind,
   OrderSet,
+  OrderDataset,
+  OrderVocabulary,
 } from "./orders-types.js";
 export { decodeEntities, paragraphsOf } from "./xml-text.js";
 export { readDocx, readDocxWithNotes } from "./docx-read.js";

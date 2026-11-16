@@ -2,7 +2,14 @@
 // The output is a raw entry: vocabulary fields are still plain strings (see orders-check.ts).
 import { err, ok } from "@reveal-codes/engine";
 import type { Result } from "@reveal-codes/engine";
-import type { OrderCourt, OrderJudge } from "./orders-types.js";
+import {
+  APPLIES_TO,
+  CAPTION_PLACEMENTS,
+  ORDER_ELEMENTS,
+  ORDER_KINDS,
+  ORDER_STATUSES,
+} from "./orders-types.js";
+import type { OrderCourt, OrderJudge, OrderVocabulary } from "./orders-types.js";
 
 export type RawCaption = Readonly<{ placement: string; text: string }>;
 
@@ -28,7 +35,11 @@ export type RawEntry = Readonly<{
   notes?: string;
 }>;
 
-export type RawOrders = Readonly<{ entries: readonly RawEntry[]; vocabulary: unknown }>;
+export type RawOrders = Readonly<{
+  entries: readonly RawEntry[];
+  vocabulary: unknown;
+  compiled: string;
+}>;
 
 export type Rec = Readonly<Record<string, unknown>>;
 
@@ -169,5 +180,44 @@ export function parseRoot(value: unknown): Result<RawOrders, string> {
     if (!parsed.ok) return parsed;
     entries.push(parsed.value);
   }
-  return ok({ entries, vocabulary: value["vocabulary"] });
+  const compiled = value["compiled"];
+  if (typeof compiled !== "string") return malformed("orders", "compiled");
+  return ok({ entries, vocabulary: value["vocabulary"], compiled });
+}
+
+function readGroup<K extends string>(
+  vocabulary: Rec,
+  group: string,
+  words: readonly K[],
+): Result<Readonly<Record<K, string>>, string> {
+  const raw = vocabulary[group];
+  const out = {} as Record<K, string>;
+  for (const word of words) {
+    const text = isRec(raw) ? raw[word] : undefined;
+    if (typeof text !== "string") return err(`orders: vocabulary "${group}" lacks "${word}"`);
+    out[word] = text;
+  }
+  return ok(out);
+}
+
+/** Reads the vocabulary; fails when a listed member is absent from its group or not a string. */
+export function readVocabulary(raw: unknown): Result<OrderVocabulary, string> {
+  if (!isRec(raw)) return err('orders: "vocabulary" is missing or malformed');
+  const kind = readGroup(raw, "kind", ORDER_KINDS);
+  if (!kind.ok) return kind;
+  const appliesTo = readGroup(raw, "applies_to", APPLIES_TO);
+  if (!appliesTo.ok) return appliesTo;
+  const elements = readGroup(raw, "elements", ORDER_ELEMENTS);
+  if (!elements.ok) return elements;
+  const placement = readGroup(raw, "caption.placement", CAPTION_PLACEMENTS);
+  if (!placement.ok) return placement;
+  const status = readGroup(raw, "status", ORDER_STATUSES);
+  if (!status.ok) return status;
+  return ok({
+    kind: kind.value,
+    applies_to: appliesTo.value,
+    elements: elements.value,
+    "caption.placement": placement.value,
+    status: status.value,
+  });
 }

@@ -1,6 +1,9 @@
 import { ellipsize, judgeSurname } from "@reveal-codes/export";
 import type { OrderEntry, OrderKind } from "@reveal-codes/export";
 
+/** Where a court's caption sits; derived because the package index does not export the type. */
+type CaptionPlacement = NonNullable<OrderEntry["caption"]>["placement"];
+
 export const NO_ORDER_LABEL = "No specific order \u2014 general statement";
 
 export const CONFIDENTIALITY_LABEL =
@@ -22,6 +25,13 @@ export const appliesWords: Record<OrderEntry["applies_to"], string> = {
   all: "attorneys and self-represented parties",
   attorneys: "attorneys",
   pro_se: "self-represented parties",
+};
+
+/** Typed over every placement, so a new placement fails to compile until it has words. */
+export const placementWords: Record<CaptionPlacement, string> = {
+  first_page_heading: "Heading on the first page",
+  statement_title: "Title of the statement",
+  separate_declaration: "Separate declaration",
 };
 
 /** Longest title or instrument shown in an option; the year stays visible after it. */
