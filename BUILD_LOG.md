@@ -710,3 +710,49 @@ The author walked the app in a browser and found four things. Requirement 9.8 wa
 
 - The first commit of the MCP change failed `eslint` (an unused destructured variable and two `any` assertions from `expect.stringContaining`). It was fixed and the commit amended before anything else was built on it.
 - Fixtures mode reports a real case that is not recorded as `not_found`. The status message, both skills and the README now say that "not found" there means only "not in the recorded set".
+
+## 2026-11-16 open-draft
+
+### What was built
+
+The open-draft spec adds the ability to open an existing `.docx` file as a new draft. The work landed in five groups after the shared-reader move.
+
+**Group 1 — shared reader move.** `crew/sentinel/src/docx-read.ts`, `xml-text.ts`, `split.ts` and `recorded.ts` moved to `packages/export/src/` as `docx-read.ts`, `xml-text.ts`, `export-split.ts` and `appendix-parse.ts`. A new `read-types.ts` holds `DocxText`, `ExportParts` and `DocxReadError`. `fflate` moved from devDependencies to dependencies in `packages/export/package.json`. Sentinel import paths updated; test bodies unchanged.
+
+**Group 2 — shared reader in `packages/export`.** `docx-notes.ts` (endnotes helper), `docx-signature.ts` (certification-statement check), `docx-text.ts` (`docxSafe`, `holdsDocxUnsafe`), `word-draft.ts` (`readWordDraft`, `WordDraft`), and restore helpers (`open-outcome.ts`, `open-text.ts`, `open-note.ts`). Properties 1, 2, 3, 8, 9 and 12 in `packages/export/test/`. An `arbParagraphs` and `arbBodyEdit` shared arbitrary.
+
+**Group 3 — `docxSafe` and export refusal.** `docxSafe` applied at every entry point that writes text to a `.docx` (paragraph bodies, header, certification statement, running header). `holdsDocxUnsafe` and `arbDocxHostileText`. Property 4 (`docxSafe` strips every hostile character). The editor input path strips hostile characters on paste and on open. Export is refused (`DocxSafeError`) when any character survives after `docxSafe`. The Export dialog shows the refusal notice.
+
+**Group 4 — `limits.ts`, Store `openNote`, `nextRunId`, Next_Step gap.** `limits.ts` gained the open-file size constants. The Store gained `openNote` for the Open_Note notice. The `nextRunId` function was approved with an explicit comment. `needsCheckDate` in `check-date.ts` gates the Next_Step: when the opened draft's check date is stale or absent, Next_Step is Verify so the author reruns to record the date. Properties 5, 6 and 7.
+
+**Group 5 — Open flow in `apps/web`.** Toolbar Open button (file-input click, no `data-primary`). Drag-and-drop onto the editor surface. Confirm dialog when the editor has content. `Open_Note` in the Issues region (three cases: success with stale check date, missing check date, and partial parse). Empty-page links for the demo and open paths. `open-messages.ts` for the notice strings. Properties 10, 11, 13 and 14.
+
+**Counts.** 59 tasks, Properties 1–14, 318 → ~350 test files. `pnpm test`, `pnpm test:pbt`, `pnpm lint`, `pnpm typecheck` all green at the final checkpoint.
+
+### Where Kiro got something wrong, and what fixed it
+
+Task numbers refer to `.kiro/specs/open-draft/tasks.md`.
+
+- **1.1 — DocxReadError / SentinelError union mismatch.** After the move, `appendix-parse.ts` used `SentinelError` in a union that now expected `DocxReadError`. Moving the code narrowed the error types. Fixed by widening `RecordedError` in `appendix-parse.ts` to include both.
+- **1.2 — Sentinel test body edited when only import lines should change.** The task spec said to change only import lines in Sentinel tests. Kiro edited a test body as well. The original body was restored from the pre-move commit, and the error type was fixed at the source (the moved module) rather than in the test.
+- **2.1 — `addEndnotes` replaces rather than adds.** `docx` 9.15.3 already writes `word/endnotes.xml` with separator entries. The `addEndnotes` helper was treating that file as absent and replacing it, not augmenting it. Fixed so it merges its entries with the existing separators.
+- **2.4 — `WordDraft` uses `RecordedRecord`, not `DocumentRecord`.** The design named the type `DocumentRecord`; the actual type in the codebase is `RecordedRecord`. The implementation used the design name and failed typecheck. Fixed by using the correct name.
+- **2.5 — `structuralEqual` not exported from `@reveal-codes/engine` index.** The engine's public index did not re-export `structuralEqual`. Fixed by using a relative import inside the package rather than the package entry point.
+- **2.7 — `boundaries.test.ts` expected one property comment per file.** The static boundaries test assumed each file held at most one `// Property N` comment. The open-draft spec added files with multiple properties. Fixed by changing the check to accept an array of property numbers per file.
+- **2.9 — `arbRunLog` generates duplicate run ids the Store never holds.** The Store enforces unique run ids; the arbitrary did not. Rather than restricting the arbitrary (which would have changed shared code), the limitation was annotated in the test with a comment explaining the gap. Recorded as a known limit.
+- **4.1 — `\r` followed by U+000B or U+000C gives two newlines.** The one-pass state machine in the XML-text normaliser treated a bare `\r` as a newline and then treated the following U+000B or U+000C as a second newline. Fixed by consuming the following character when it is a known line-ending that follows `\r`.
+- **4.3 — Property 4 first failed with `declaration_required`.** The property ran against an empty pasted document, which requires a declaration before export. Fixed by passing `DEMO_DECLARATION` to the export call in that property's setup.
+- **4.4 — Exhaustive loop with per-iteration `expect` caused timeout.** The property iterated over all hostile characters and called `expect` inside each iteration. Under fast-check's shrinking loop this hit the vitest timeout. Fixed by collecting all failures into an array and asserting the array is empty once after the loop.
+- **5175115 — Stray `.d.ts` files committed in `crew/sentinel/src`.** A `tsc` run during task 2.10 emitted declaration files into `crew/sentinel/src/`. They were accidentally staged and committed. Removed with `git rm`.
+- **6.2 — `reduce` hit the 40-line function limit.** A `reduce` callback inside `open-text.ts` grew to 41 lines. Fixed by extracting an `unchanged()` helper that brought the callback within the limit.
+- **8.1 — Notes_Block sentence detection uses a text pattern.** `readWordDraft` detects the Notes_Block by matching the literal pattern `\n\nFootnotes\n1. ` in the body text. A Word document whose body happened to contain that exact string would falsely receive the footnote-sentence treatment. Recorded as a known limit; not fixed.
+- **8.2 — `openFile` detects Notes_Block by pattern rather than a flag from `readWordDraft`.** The open flow in `apps/web` re-detects the Notes_Block using the same text pattern rather than a flag set by `readWordDraft`. Noted for a follow-up refactor; not fixed here.
+- **8.4 — Stray `.d.ts` files committed in `packages/export/test/support`.** Same cause as the sentinel case above: a `tsc` run during task 8.4 emitted declaration files into `packages/export/test/support/`. Removed with `git rm`.
+
+### Next_Step gap
+
+When `needsCheckDate` is true (the opened draft's check date is absent or stale), `Next_Step` is set to Verify rather than Export. This prompts the author to rerun verification so the certification carries the current check date. The gap is closed by `check-date.ts`; `Open_Note` in the Issues region shows the reason.
+
+### Issues note (three cases)
+
+The Open_Note in the Issues region covers three cases: (1) the draft opened successfully but its check date is stale or absent, so Next_Step is Verify; (2) the draft opened but has no check date at all; (3) the parse was partial — some content was recovered but some structure was lost. Each case has distinct message text in `open-messages.ts`.

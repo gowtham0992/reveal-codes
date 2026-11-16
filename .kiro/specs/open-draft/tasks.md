@@ -190,7 +190,7 @@ Conventions that apply to every task:
     - **Property 13: The restore note follows AI runs and verification results**
     - Same file as 8.6. `restoreNote` over generated Documents returns the exact note of the matching case or `null`, and the sentence "Run Verify to check the citations again and record the date." ends the note exactly when the Document holds a Verification_Result and appears in no other note. Update `apps/web/test/static/inventory.test.ts` with the new `// Property 13` comment in this task.
     - **Validates: Requirements 13.2, 13.3, 13.4, 13.5**
-  - [x] 8.9 Write property test for refusals
+  - [ ] 8.9 Write property test for refusals
     - **Property 14: A refusal changes nothing but the note and the message**
     - Same file as 8.6. Any refused file and any prior Store state: the Store after equals the Store before except `openNote` and `notice`, and no confirm dialog opened. Update `apps/web/test/static/inventory.test.ts` with the new `// Property 14` comment in this task.
     - **Validates: Requirements 4.6, 4.7, 14.11, 19.1**
@@ -210,7 +210,7 @@ Conventions that apply to every task:
     - File `apps/web/test/open-text-safety.test.ts`. The Open_Message for `removed` 0, 1 and more than 1, with the sentences in the order opened sentence, removed sentence, notes sentence; a file that holds only control characters is refused as empty; a restore of a record that holds an unsafe character is not changed.
     - _Requirements: 7.7, 22.3, 22.4, 22.5, 19.15_
 
-- [ ] 9. Documentation
+- [x] 9. Documentation
   - [x] 9.1 README
     - Add one line to "What it does" (a draft can be opened from a `.docx`, `.txt` or `.md` file, and an exported `.docx` reopens with its record), one line to "Demo path" naming Open as the other way in beside Load demo motion, and one sentence to "What leaves your machine": opening a file reads it in your browser; the file is not uploaded. No exclamation mark; the words "opened", "reopened", "record", "pasted" and "changed after it was exported"; no "detected" or "inferred" about authorship. `apps/web/test/static/docs.test.ts` stays green.
     - _Requirements: 17.3, 17.4, 20.1, 20.2, 20.3, 20.9_
@@ -223,7 +223,7 @@ Conventions that apply to every task:
   - [x] 9.4 `.kiro/steering/structure.md` and `tech.md`
     - `structure.md`: the shared reader modules, `readWordDraft` and the DOCX-safe text function in `packages/export`, the Open flow modules, `client/check-date.ts` and `limits.ts` in `apps/web/src`, and `crew/sentinel` as an importer. `tech.md`: keep the Stack section true by saying the export package has `docx` and `fflate` as runtime dependencies.
     - _Requirements: 1.2, 20.7, 20.8_
-  - [~] 9.5 `BUILD_LOG.md` entry
+  - [x] 9.5 `BUILD_LOG.md` entry
     - A dated entry recording the decision to share one reader, the decision to defer the record additions, the DOCX-safe text fix (with any shrunk counterexample from a failing run), the `nextRunId` change (approved by the author), the Next_Step change (the `needsCheckDate` input to `nextStep`, the `hasFullRecord` guard of Flag 4 and the `ui.md` primary-button rule, so a restore that holds results gets Verify and the check date back), and what Kiro got wrong in the requirements pass or "No Kiro errors", taken from the task completion notes.
     - _Requirements: 13.11, 18.8, 20.5_
 
