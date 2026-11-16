@@ -153,12 +153,12 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 10. Samples and demo path
-  - [~] 10.1 Confirm both samples land with a Pending Declaration
+  - [-] 10.1 Confirm both samples land with a Pending Declaration
     - `installDocument` dispatches `replace` with no Declaration for Load demo motion, Load the Avianca citations and New. Both samples remain one `PST` insert, so the subject is `pasted_text` and the dialog asks.
     - Update the web demo walkthrough tests to make the declaration (Declaration_Choice_AI with a named tool under N.D. Tex.) before asserting the export buttons are enabled.
     - _Requirements: 10.1, 10.2, 10.5, 10.6_
 
-  - [~] 10.2 Update `docs/demo-script.md`
+  - [-] 10.2 Update `docs/demo-script.md`
     - Add the declaration step in the order: Export, choose the court (N.D. Tex.), make the declaration with Declaration_Choice_AI and a named tool, resolve or override, Download. State that the statement then prints the Requirement 2 criterion 6 sentence and that the first-page heading appears. Keep the demo within the ninety-second budget.
     - _Requirements: 10.3, 10.4, 10.6_
 
@@ -194,7 +194,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - The N.D. Tex. `first_page_heading` in the DOCX; "ChatGPT (GPT-4o)" printed unchanged; `buildStatement` error values; the prohibition lines of Requirement 6 criteria 6 and 7; the `programWithAuthor` variant with no recorded tool.
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.11, 2.12, 6.6, 6.7, 7.1, 7.5, 7.6, 12.1, 12.2, 12.3, 12.4, 12.5_
 
-  - [~] 12.2 Web dialog and Print view example tests
+  - [x] 12.2 Web dialog and Print view example tests
     - The dialog shows no statement and keeps both export buttons disabled until a choice is made; no radio is preselected; the Tool_Name limits at 1, 2, 100 and 101 characters after trimming, a whitespace-only name, a name with a line break, and a name with parentheses; the Confidentiality_Checkbox appears only when Used_AI holds; the tick and notice clear when the Declaration changes.
     - The Print view shows the one-line notice and the link back to the editor, has no declaration control, hides the block in print CSS, and shows the first-page heading lines for N.D. Tex. with Declared_AI pasted text.
     - The dialog, Print view and `exportDocx` make no network request carrying the Declaration or the Tool_Name.
@@ -211,7 +211,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - _Requirements: 8.6, 8.9, 12.9_
 
 - [ ] 13. Documentation
-  - [~] 13.1 Write `docs/CERTIFICATION.md`
+  - [-] 13.1 Write `docs/CERTIFICATION.md`
     - Describe the statement paragraph by paragraph and label each sentence as a Record_Sentence or an Author_Sentence. Give the cases of paragraph 2 with their exact wording. Explain the declaration and its two subjects, the clearing rule, the single definition of AI use, and the prohibition reasons.
     - Use "record", "pasted or imported", "declaration" and "author states" consistently. Do not use "detected" or "inferred" about AI.
     - _Requirements: 13.1, 13.2, 13.7_
@@ -220,7 +220,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - "What it does": the statement states the record and the author states the rest. "Demo path": the step of task 10.2, naming N.D. Tex. and Declaration_Choice_AI with a named tool.
     - _Requirements: 10.3, 10.4, 13.3_
 
-  - [~] 13.3 Add the rule to principle 1 of `.kiro/steering/product.md`
+  - [-] 13.3 Add the rule to principle 1 of `.kiro/steering/product.md`
     - The tool states the record; the author states the rest; the two kinds of sentence are never mixed; the tool never asserts "no AI" on its own. Change no other principle.
     - _Requirements: 13.4_
 

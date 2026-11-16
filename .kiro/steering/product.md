@@ -29,7 +29,7 @@ Courts have sanctioned lawyers in several hundred decisions for filings that cit
 ## Product principles (binding on every feature)
 
 0. **Paste is the front door.** Most users draft elsewhere. The first-run experience is: paste, see codes, verify, export. The in-app assistant is a second path, not a prerequisite.
-1. **Provenance is captured, never inferred.** We record how text entered the document (typed, pasted, AI-inserted, AI-then-edited). We never run an "AI detector." If we cannot know, the code is PST.
+1. **Provenance is captured, never inferred.** We record how text entered the document (typed, pasted, AI-inserted, AI-then-edited). We never run an "AI detector." If we cannot know, the code is PST. The tool states the record; the author states the rest. The two kinds of sentence are never mixed, and the tool never asserts "no AI" on its own.
 2. **Verification is deterministic and reproducible.** Same text plus same CourtListener data gives the same codes. No LLM decides whether a citation is real.
 3. **Nothing leaves the machine silently.** Citation strings go to CourtListener. Draft text goes to the LLM provider only when the author uses the assistant, and the UI says so. There is no telemetry.
 4. **Red codes block export.** Only `CIT ✓` and `QUO ✓` pass. A filing with any `CIT ✘`, `CIT ≠`, `CIT ?`, `CIT …`, `QUO ✘`, or `QUO …` code cannot export unless the author writes an override reason for each one. Overrides are printed in the certification. The product never hides a problem to be convenient.

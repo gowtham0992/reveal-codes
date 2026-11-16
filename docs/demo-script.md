@@ -1,1 +1,24 @@
 # Demo script
+
+The 90-second demo, step by step. Timings are cumulative and end at 1:30. No account or token is needed; citation lookups are served from recorded fixtures.
+
+| Time | Step | What the viewer sees |
+| ---- | ---- | -------------------- |
+| 0:00 | Open the site and select **Load demo motion**. | The text enters as one `PST` span. The declaration is Pending. |
+| 0:10 | The codes pane is open. Alt-F3 hides and shows it. | The Reveal Codes pane, blue field, bracketed codes. |
+| 0:20 | Select **Verify**. | Two citations are found. Three are not, and one quotation is not in its opinion. They turn red in the pane, are underlined on the page, and are listed under Issues. |
+| 0:35 | Select **Export** and choose the court, **N.D. Tex.** | The dialog counts the blocking items and keeps **Download .docx** disabled. |
+| 0:45 | Make the declaration: choose **Declaration_Choice_AI** (generative AI was used to prepare some or all of the pasted text) and type a named tool in the tool field. | The declaration controls name the subject "the pasted text". The dialog accepts the declaration. |
+| 0:55 | Resolve or override: select **Override…** on one item and write a reason, and correct the text for the others, then **Verify** again. | The blocking count falls to zero. The one override is listed. |
+| 1:15 | Select **Download .docx**. | The filing downloads with its statement and Provenance Appendix. |
+| 1:25 | Show the first page of the DOCX. | The first-page heading appears. The statement prints the sentence "The author states that generative AI was used to prepare some or all of the pasted text, and names the tool as <tools>. The tool did not record which pasted passages." The certification lists the one override. |
+| 1:30 | End. | |
+
+## Notes on the declaration step
+
+- The order is fixed: Export, choose the court, make the declaration, resolve or override, Download.
+- The declaration is the author's statement, not the tool's. The tool states the record (the text entered as `PST`, and which passages it did not record); the author states the rest.
+- With Declaration_Choice_AI and a named tool under N.D. Tex., the statement prints the sentence above, with the tool name in place of `<tools>`, and the first-page heading appears.
+- Without a declaration the export buttons stay disabled.
+
+To see the case-name check, select **Load the Avianca citations** on the empty page instead of the demo motion, then **Verify**. That sample also asks for the declaration.

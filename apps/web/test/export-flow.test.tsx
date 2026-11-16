@@ -80,6 +80,11 @@ function declareToolInDialog(): void {
     true,
   );
   act(() => {
+    fireEvent.change(within(dialog).getByLabelText("Court or judge"), {
+      target: { value: "ndtex-lr-7-2-f" },
+    });
+  });
+  act(() => {
     fireEvent.click(within(dialog).getByLabelText(/^Generative AI was used to prepare/u));
   });
   act(() => {
@@ -132,22 +137,25 @@ function statementOf(bytes: Uint8Array): string[] {
 }
 
 function expectStatementWording(statement: readonly string[]): void {
-  const three = statement.find((p) => p.startsWith("3. ")) ?? "";
+  const three = statement.find((p) => p.startsWith("4. ")) ?? "";
   expect(three).toMatch(
-    /^3\. Every legal citation in this filing was checked against the CourtListener database on \d{4}-\d{2}-\d{2}\. /,
+    /^4\. Every legal citation in this filing was checked against the CourtListener database on \d{4}-\d{2}-\d{2}\. /,
   );
   expect(three).toContain(
     "2 resolved to a single reported decision, 0 resolved to a different case than the one named, 3 could not be found, 0 matched more than one decision, and 0 were not checked.",
   );
-  expect(statement).toContain(
-    "4. Quotations attributed to a cited decision were compared with the text of that decision. 1 matched, 1 did not, 0 were not checked.",
+  expect(statement.find((p) => p.startsWith("3. "))).toContain(
+    "The author states that generative AI was used to prepare some or all of the pasted text, and names the tool as ChatGPT.",
   );
   expect(statement).toContain(
-    "5. The author chose to file despite the following unresolved items, for the reasons stated:",
+    "5. Quotations attributed to a cited decision were compared with the text of that decision. 1 matched, 1 did not, 0 were not checked.",
+  );
+  expect(statement).toContain(
+    "6. The author chose to file despite the following unresolved items, for the reasons stated:",
   );
   for (const reason of REASONS) expect(statement).toContain(reason);
   expect(statement).toContain(
-    "6. The author has read the filing in full and takes responsibility for its contents.",
+    "7. The author has read the filing in full and takes responsibility for its contents.",
   );
 }
 
