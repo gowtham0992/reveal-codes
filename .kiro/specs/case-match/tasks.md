@@ -509,7 +509,7 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - Record in the BUILD_LOG entry of task 24.2 every test examined, with its seed or "unseeded", and what was done.
     - _Requirements: 22.8, 22.13_
 
-- [ ] 23. An unreadable saved draft is never silently replaced (Requirement 23)
+- [x] 23. An unreadable saved draft is never silently replaced (Requirement 23)
   - [x] 23.1 Add the Draft_Gate and make Autosave respect it
     - Create `apps/web/src/draft-gate.ts` with `createDraftGate()` (`blocked`, `block`, `release`, `subscribe`; notify only on a change).
     - In `apps/web/src/autosave.ts` add the optional `gate` dependency: `schedule` starts no timer and keeps no pending job while blocked, `write` drops a pending job while blocked, and `clear()` returns `boolean` (true when the key was removed; false after calling `onError`). With no gate the behaviour is unchanged.
@@ -538,7 +538,7 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - In `use-export.tsx`, `printFlow` checks the gate first and dispatches `PRINT_BLOCKED` without calling `autosave` or `openPrint`.
     - _Requirements: 23.10, 23.12, 23.13, 23.14, 23.15, 23.16, 23.17, 23.18_
 
-  - [-] 23.6 Write the example tests for the unreadable draft
+  - [x] 23.6 Write the example tests for the unreadable draft
     - New `apps/web/test/unreadable-draft.test.tsx`, rendering `AppShell` with the memory storage and the manual timers of `test/support`: for each of `not_json`, `bad_shape` and `bad_codes` (the last from the old pincite draft of `autosave-old-pincite.test.ts`), the stored value survives the load, typing and a 300 ms wait (compare `storage.getItem` and `storage.writes()` before and after); the notice text and the two buttons are present, the notice sits in a polite status region and the buttons are outside it; the notice leaves the blocking count, the Issues heading, the Export button, the Next_Step and `No issues.` as they are.
     - Save a copy: the `download` double receives the stored bytes unchanged (an ASCII value, a non-ASCII value, the old pincite draft), the name `reveal-codes-saved-draft.txt` and the type `text/plain;charset=utf-8`, and the stored value and the notice stay; with `getItem` returning `null` or `download` throwing, `SAVE_COPY_FAILED` shows.
     - Start a new document: the confirm dialog shows the title, message and label of the design; cancelling changes nothing; confirming clears the stored value, empties the page, removes the notice and a later edit is saved after 300 ms; with a storage whose `removeItem` throws, `AUTOSAVE_FAILED` shows, the notice stays and nothing is written. The Toolbar's New button while blocked opens the same dialog.
