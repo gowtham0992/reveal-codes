@@ -15,7 +15,13 @@ import {
   splitExport,
 } from "../src/index.js";
 import type { OrderContext, OrderEntry, RunInfo } from "../src/index.js";
-import { applyBodyEdit, arbBodyEdit, arbParagraphs, arbRunLog, runs } from "./support/arbitraries.js";
+import {
+  applyBodyEdit,
+  arbBodyEdit,
+  arbParagraphs,
+  arbRunLog,
+  runs,
+} from "./support/arbitraries.js";
 import { withParagraphText } from "./support/body-edit.js";
 import { compareRestored, exportBytes, reopen } from "./support/restore.js";
 

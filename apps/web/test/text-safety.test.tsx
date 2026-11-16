@@ -124,7 +124,9 @@ describe("Entry_Points: assistant insertion _Requirements: 22.3_", () => {
     expect(outcome.message).toBeNull();
     const text = store.getState().document.text;
     expect(text).toContain("a\nbc\u{1F600}de");
-    expect(/[\u0000\u0001\u000b\u000c]/.test(text)).toBe(false);
+    const banned = new Set([0x00, 0x01, 0x0b, 0x0c]);
+    const codes = Array.from({ length: text.length }, (_, i) => text.charCodeAt(i));
+    expect(codes.some((code) => banned.has(code))).toBe(false);
     expect(store.getState().document.spans.some((s) => s.provenance.origin === "AI")).toBe(true);
   });
 });

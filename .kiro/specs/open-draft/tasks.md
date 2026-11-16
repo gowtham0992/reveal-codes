@@ -133,7 +133,7 @@ Conventions that apply to every task:
     - `apps/web/src/components/shell-toolbar.tsx`: take `verifiedAt` from the Store state beside `doc` and pass `needsCheckDate: needsCheckDate(doc, verifiedAt)`. Verify's own behaviour, the gate and `use-verify.ts` are not changed (the design checked that `runVerifyFlow` re-checks verified results and dispatches `verified`).
     - Update the callers in the same task so `pnpm typecheck` stays green: `apps/web/test/next-step.test.ts` (`BASE`), `arbNextStepInput` in `apps/web/test/arbitraries.ts` (so `next-step.properties.test.ts` still runs), and `stepFor` in `apps/web/test/verify-flow.test.ts`. New assertions are in tasks 6.6 to 6.9.
     - _Requirements: 13.11, 13.13, 13.14_
-  - [~] 6.5 `needsCheckDate` test support
+  - [x] 6.5 `needsCheckDate` test support
     - In `apps/web/test/support/`, a builder for a restored Store (a Document holding results, with `replace` dispatched with `runLog: []` and `verifiedAt: null`) and a fake verify API that answers every record, used by the Next_Step examples and Property 7. Add a self-test: the builder's Store has `verifiedAt` null and `needsCheckDate` true, and the fake API answers each record it is given.
     - _Requirements: 13.1, 13.11, 13.13_
   - [~] 6.6 Write property test for the missing check date
@@ -156,7 +156,7 @@ Conventions that apply to every task:
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 8. The Open flow in the app: Toolbar, drop, empty page, Issues note
-  - [~] 8.1 Pure helpers: `pastedDocument`, `open-text`, `open-messages`, `open-note`
+  - [-] 8.1 Pure helpers: `pastedDocument`, `open-text`, `open-messages`, `open-note`
     - `apps/web/src/client/pasted-document.ts`: move `pastedDocument(text, iso)` out of `components/use-document-actions.tsx` (keeping the `docxSafe` call of task 4.5 in the loaders); Open and Load demo motion both import it (one insert over an empty Document with origin `PST` and the current time).
     - `client/open-text.ts`: `decodeTextFile(bytes)` with `new TextDecoder("utf-8", { fatal: true })`, one leading U+FEFF removed, `\r\n` and lone `\r` to `\n`; invalid UTF-8 (UTF-16 included) is a value (`Result`), not a throw.
     - `client/open-messages.ts`: string builders holding the exact wording of Requirement 14 (criteria 1 to 9 and the Toolbar "Could not open <file name>."), Requirement 8 criterion 3, Requirement 9 criteria 5 and 6, Requirement 7 criterion 7, Requirement 10 criterion 4 and Requirement 22 criterion 5 (" <k> characters that Word files cannot store were removed." and the singular), built in the order: opened sentence, removed sentence, notes sentence.

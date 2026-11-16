@@ -1,12 +1,12 @@
 "use client";
 
-import { apply, createDocument } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
 import { docxSafe } from "@reveal-codes/export";
 import { useState } from "react";
 import type { Autosave } from "../autosave";
+import { pastedDocument } from "../client/pasted-document";
 import type { DraftGate } from "../draft-gate";
-import { SAVE_COPY_FAILED, noticeForError } from "../notices";
+import { SAVE_COPY_FAILED } from "../notices";
 import { saveDraftCopy } from "../saved-draft";
 import type { AppServices } from "../services";
 import type { Store } from "../store-runtime";
@@ -19,19 +19,6 @@ export const AVIANCA_FAILED =
 
 export type SampleKey = "demo" | "avianca";
 type Pending = "new" | "newBlocked" | SampleKey;
-
-/** One PST insert over an empty Document; the whole text is a single span (Requirement 20). */
-function pastedDocument(text: string, iso: string): Document | string {
-  const empty = createDocument("", iso);
-  if (!empty.ok) return noticeForError(empty.error);
-  const inserted = apply(empty.value, {
-    kind: "insert",
-    at: 0,
-    text,
-    provenance: { origin: "PST", timestamp: iso },
-  });
-  return inserted.ok ? inserted.value.document : noticeForError(inserted.error);
-}
 
 function installDocument(store: Store, svc: AppServices, text: string): void {
   const doc = pastedDocument(text, svc.now().toISOString());
