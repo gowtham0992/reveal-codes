@@ -156,7 +156,7 @@ Conventions that apply to every task:
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 8. The Open flow in the app: Toolbar, drop, empty page, Issues note
-  - [-] 8.1 Pure helpers: `pastedDocument`, `open-text`, `open-messages`, `open-note`
+  - [x] 8.1 Pure helpers: `pastedDocument`, `open-text`, `open-messages`, `open-note`
     - `apps/web/src/client/pasted-document.ts`: move `pastedDocument(text, iso)` out of `components/use-document-actions.tsx` (keeping the `docxSafe` call of task 4.5 in the loaders); Open and Load demo motion both import it (one insert over an empty Document with origin `PST` and the current time).
     - `client/open-text.ts`: `decodeTextFile(bytes)` with `new TextDecoder("utf-8", { fatal: true })`, one leading U+FEFF removed, `\r\n` and lone `\r` to `\n`; invalid UTF-8 (UTF-16 included) is a value (`Result`), not a throw.
     - `client/open-messages.ts`: string builders holding the exact wording of Requirement 14 (criteria 1 to 9 and the Toolbar "Could not open <file name>."), Requirement 8 criterion 3, Requirement 9 criteria 5 and 6, Requirement 7 criterion 7, Requirement 10 criterion 4 and Requirement 22 criterion 5 (" <k> characters that Word files cannot store were removed." and the singular), built in the order: opened sentence, removed sentence, notes sentence.
