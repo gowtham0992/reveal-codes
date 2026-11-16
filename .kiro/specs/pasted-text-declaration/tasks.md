@@ -216,7 +216,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Use "record", "pasted or imported", "declaration" and "author states" consistently. Do not use "detected" or "inferred" about AI.
     - _Requirements: 13.1, 13.2, 13.7_
 
-  - [~] 13.2 Update `README.md`
+  - [x] 13.2 Update `README.md`
     - "What it does": the statement states the record and the author states the rest. "Demo path": the step of task 10.2, naming N.D. Tex. and Declaration_Choice_AI with a named tool.
     - _Requirements: 10.3, 10.4, 13.3_
 

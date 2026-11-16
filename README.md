@@ -26,6 +26,8 @@ WordPerfect 5.1 for DOS, in 1989, had a key that split the screen and showed eve
 
 <img src="docs/images/statement.png" alt="The AI-Use and Verification Statement in the print view: the court's rule cited, a table of citations with their status, a table of quotations, and the override reasons">
 
+**The statement states the record; the author states the rest.** The statement reports what the tool recorded: how text entered, which citations and quotations were checked, which overrides were written. Text that was pasted or imported has no recorded origin beyond that, so the author makes a declaration about it, and the statement prints it as the author's own. The tool never asserts on its own that no AI was used.
+
 **The statement follows the court.** Pick the court or judge and the statement takes that instrument's citation, title and required elements. The details are in [docs/CERTIFICATION.md](docs/CERTIFICATION.md).
 
 <img src="docs/images/export.png" alt="The Export dialog with Northern District of Texas Local Civil Rule 7.2(f) selected, its quoted language, and four blocking items">
@@ -39,7 +41,8 @@ On the hosted site citations are checked live. Locally, with no token set, the a
 3. The codes pane is already open on a first visit; Alt-F3 hides and shows it.
 4. Select Verify. Two citations are found. Three are not, and one quotation is not in its opinion: they turn red in the pane, are underlined on the page, and are listed under Issues. Go jumps to each.
 5. Select Export. Choose a court, for example N.D. Tex. The dialog says how many blocking items remain and keeps Download .docx disabled.
-6. Select Override… on an item and write a reason, or correct the text and Verify again. When nothing blocks, Download .docx produces the filing with its statement and appendix.
+6. Make the declaration about the pasted text: choose Declaration_Choice_AI (generative AI was used to prepare some or all of it) and type a named tool in the tool field.
+7. Select Override… on an item and write a reason, or correct the text and Verify again. When nothing blocks, Download .docx produces the filing with its statement and appendix. The statement prints the declaration as the author's statement, with the tool you named.
 
 To see the case-name check, select Load the Avianca citations on the empty page instead of the demo motion, then Verify.
 
