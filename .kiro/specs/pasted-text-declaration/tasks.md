@@ -163,7 +163,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - _Requirements: 10.3, 10.4, 10.6_
 
 - [ ] 11. Property tests (one file per module, `// Property N` comment, `_Requirements_` in the describe title)
-  - [-] 11.1 Write the property test for the Statement text
+  - [x] 11.1 Write the property test for the Statement text
     - `packages/export/test/statement-declaration.properties.test.ts`, `// Property 1`, `describe("... _Requirements: 1.3, 1.4, 1.5, 1.6, 2.5, 2.6, 2.7, 2.8, 2.10, 2.11, 7.18, 11.2_")`.
     - **Property 1: The Statement asserts no AI-free claim the author did not make**
     - Generate `arbMixedOriginDocument`, `arbOrderChoice` and Pending, None or Declared_AI Declarations of either subject. Assert the old sentence never appears; every sentence matching `/\bno (generative (artificial intelligence|AI)|program) was used\b/i` is either the None Declaration sentence ("The author states that no generative AI was used to prepare <subject>.") or equals one of the two fixed Record_Sentences (so "The author states that no program was used to prepare <subject>." fails the oracle and "states that no program was used" never appears); the None Declaration sentence appears exactly once when the test's own applicability calculation says None applies and otherwise zero times, including under an order with `negative_certification_when_unused` or `certification_every_filing`; no Declaration sentence when the subject is `none`; the Tool_Name appears verbatim; building twice gives the same text.
