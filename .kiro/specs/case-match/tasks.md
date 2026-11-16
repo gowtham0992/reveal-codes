@@ -443,7 +443,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - In `packages/engine/src/testing/arb-case-match.ts` add the same fifteen words to `DROPPED`, export it, and keep the existing exclusion of initialisms equal to a Dropped_Word or table key (design D10) so Property 1's generator stays clear of the new words. Do not edit Property 1.
     - _Requirements: 20.4, 20.5_
 
-  - [-] 19.3 Add the list-drift test
+  - [x] 19.3 Add the list-drift test
     - In the verifier tests add a test that the exported engine `DROPPED` list and `DROPPED_WORDS` hold exactly the same words (import the engine testing module the way `packages/verifier/test/case-match.properties.test.ts` does), with a planted-difference case showing it fails.
     - _Requirements: 20.4_
 
