@@ -506,6 +506,11 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794802184946
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794802344871
       }
     ],
     "12.4 Sentinel example tests": [
@@ -685,6 +690,13 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794802344472
+      }
+    ],
+    "12. Example tests (exact cases)": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794802344895
       }
     ]
   }

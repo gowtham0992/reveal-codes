@@ -187,7 +187,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Drive the Store with `arbEditSequence` (insert, delete, replace over `HUM`, `PST` and `AI`; undo; redo). Use an independent reference model with a unique id per character and a snapshot stack for undo and redo; do not call `insertsPasted`. After each action assert `null` when a `PST` id is new, `null` when the subject is `pasted_text` and no non-whitespace `PST` character remains, and otherwise the unchanged value.
     - **Validates: Requirements 5.3, 5.6, 5.7, 5.12**
 
-- [ ] 12. Example tests (exact cases)
+- [x] 12. Example tests (exact cases)
   - [x] 12.1 Export package example tests
     - Paragraph 2 cases: assistant text with and without pasted text; typed only with no order; typed only under an order that requires a statement with None and with Declared_AI; substantive pasted text with None and with Declared_AI; whitespace-only paste with no order and no Author_Sentence.
     - For each Order_Entry kind, Declared_AI pasted text with no Assistant_Text, asserting the Requirement 7 sentences or the prohibition refusal. For an order that requires a statement, a typed-only filing with the `this_filing` Declaration None and Declared_AI.
@@ -200,7 +200,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - The dialog, Print view and `exportDocx` make no network request carrying the Declaration or the Tool_Name.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.8, 3.9, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.9, 4.10, 4.11, 12.4, 12.6, 12.7_
 
-  - [-] 12.3 Web Store, persistence, Legend and sample example tests
+  - [x] 12.3 Web Store, persistence, Legend and sample example tests
     - A paste clears a stored Declaration; loading a sample clears it; starting a new document discards it; a partial delete of the pasted text keeps it; deleting all substantive pasted text drops it; a `this_filing` answer is kept but not applied when the order stops requiring a statement and applies again when it does.
     - Persistence: a Declaration round-trips through `serialise` and `deserialise` with `version` 1; an absent key and an unreadable key both give `null` and load the draft unchanged; a draft from before this feature with substantive pasted text asks again.
     - The Legend shows "pasted, origin not recorded" and the other seven entries are unchanged. The demo motion and the Avianca sample each ask for the declaration.
