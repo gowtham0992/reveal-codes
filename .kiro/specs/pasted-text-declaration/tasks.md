@@ -149,7 +149,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - `crew/sentinel/test/*` and fixtures that build an export from the demo Document pass a Declaration or use a typed-only Document, and read back through the new Statement shape.
     - _Requirements: 8.6, 8.9_
 
-- [~] 9. Checkpoint - gates, Sentinel and web wiring pass
+- [x] 9. Checkpoint - gates, Sentinel and web wiring pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 10. Samples and demo path
