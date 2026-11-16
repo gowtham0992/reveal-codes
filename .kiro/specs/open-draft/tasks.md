@@ -220,7 +220,7 @@ Conventions that apply to every task:
   - [x] 9.3 `.kiro/steering/ui.md`
     - Describe the Open button after New in "Layout", the empty-page placeholder and three links in "Copy", and the Open_Note in the Issues region. In "Controls", add to the primary-button rule that Verify is also the Next_Step when the Document holds a Verification_Result, has no check date and holds a full citation (Requirement 13 criterion 11 is the only change to the Next_Step rules). Add no Token, no icon and no animation.
     - _Requirements: 13.11, 20.6, 20.9_
-  - [~] 9.4 `.kiro/steering/structure.md` and `tech.md`
+  - [x] 9.4 `.kiro/steering/structure.md` and `tech.md`
     - `structure.md`: the shared reader modules, `readWordDraft` and the DOCX-safe text function in `packages/export`, the Open flow modules, `client/check-date.ts` and `limits.ts` in `apps/web/src`, and `crew/sentinel` as an importer. `tech.md`: keep the Stack section true by saying the export package has `docx` and `fflate` as runtime dependencies.
     - _Requirements: 1.2, 20.7, 20.8_
   - [~] 9.5 `BUILD_LOG.md` entry

@@ -13,7 +13,7 @@ inclusion: always
 - `packages/courtlistener-mcp` uses `@modelcontextprotocol/sdk` over stdio. Tool handlers are thin wrappers over `packages/verifier`.
 - `apps/web` is Next.js (App Router) with TipTap on ProseMirror. Provenance is captured in a ProseMirror plugin that inspects every transaction; it is the only place origin is assigned.
 - LLM access goes through one interface, `draft(prompt, context): AsyncIterable<string>` in `apps/web/src/server/llm.ts`. The provider is chosen by which credentials are set: Amazon Bedrock (`AWS_REGION` and `BEDROCK_MODEL_ID`), else Anthropic (`ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`), else a recorded-response fixture provider. There is no `LLM_PROVIDER` variable and no hard-coded model id. No other module imports a provider SDK.
-- Export uses the `docx` package for DOCX and print CSS for PDF.
+- Export uses the `docx` package for DOCX and print CSS for PDF. `packages/export` has `docx` and `fflate` as runtime dependencies; `fflate` unzips opened .docx files in the shared reader, which `apps/web` and `crew/sentinel` import from `@reveal-codes/export`.
 
 ## Commands (must stay true; CI runs them)
 

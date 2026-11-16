@@ -26,7 +26,7 @@ reveal-codes/
     verifier/                 CourtListener client, quote matcher, cache, fixtures
       scripts/                record-lookups.ts (the one script that records live lookups as fixtures)
     courtlistener-mcp/        MCP server exposing verifier as tools
-    export/                   pure export package: gate, certification statement, appendix, DOCX builder, file name (depends on engine and docx)
+    export/                   pure export package: gate, certification statement, appendix, DOCX builder, file name, and the shared .docx reader: docx-read.ts (readDocx), docx-notes.ts, docx-signature.ts, export-split.ts (splitExport), appendix-parse.ts, word-draft.ts (readWordDraft), docx-text.ts (docxSafe) (depends on engine, docx and fflate)
   apps/
     web/                      Next.js editor (source under apps/web/src/ and apps/web/app/, tests under apps/web/test/)
       app/                    Next App Router: layout.tsx, page.tsx, globals.css, api/ route files (assistant, mode, opinion/[clusterId], verify) that import only src/server/
@@ -45,9 +45,10 @@ reveal-codes/
         index.ts              package entry
         editor/               TipTap setup, provenance plugin, clipboard, reconcile, shortcuts, offset mapping
         pane/                 Reveal Codes pane: layout.ts, pane.tsx, pane.module.css
-        client/               browser-side flows: api.ts, verify-flow.ts, verify-summary.ts, divergence.ts, assistant-client.ts
+        limits.ts             size and text limits for opened files
+        client/               browser-side flows: api.ts, verify-flow.ts, verify-summary.ts, divergence.ts, assistant-client.ts; Open flow: open-file.ts, open-outcome.ts, open-text.ts, open-messages.ts, open-note.ts; check-date.ts, pasted-document.ts
         server/               route logic: deps.ts (only reader of process.env), http.ts, body.ts, verify, opinion, mode and assistant routes, llm*.ts (draft provider selection)
-        components/           React components with one CSS module each: app-shell, toolbar, editor-surface, issues list and region, dialogs, status line, assistant column and panel
+        components/           React components with one CSS module each: app-shell, toolbar, editor-surface, issues list and region, dialogs, status line, assistant column and panel; Open wiring: use-open.ts, use-open-draft.tsx, use-file-drop.ts
       scripts/                copy-demo.ts (predev and prebuild)
       fixtures/assistant/     recorded assistant response used by the fixture LLM provider
       public/                 demo-motion.txt, copied from packages/engine/fixtures by copy-demo.ts; gitignored
@@ -58,7 +59,7 @@ reveal-codes/
   powers/
     citation-check/           Kiro Power: plugin.json, mcp.json, built single-file MCP server, fixtures, two skills; generated parts come from pnpm power:build
   crew/
-    sentinel/                 the sweep CLI that the Reveal Codes Sentinel Crew app (separate repository) runs on a schedule
+    sentinel/                 the sweep CLI that the Reveal Codes Sentinel Crew app (separate repository) runs on a schedule; reads exports with the reader in @reveal-codes/export
   data/
     standing-orders.json      public, CC0 dataset of court orders; validated by packages/export/src/orders.ts
     README.md
