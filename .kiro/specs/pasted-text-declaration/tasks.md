@@ -239,6 +239,31 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
   - Ensure all tests pass, ask the user if questions arise.
   - _Requirements: 14.2, 14.3, 14.4_
 
+- [ ] 15. Follow-up: review fixes (lint, chance-collision assertions, redundant tool_name sentence)
+
+  - [x] 15.1 Spec first: remove the tool_name record sentence for filings that did not use AI
+    - Update `requirements.md` (the Requirement 2 and 7 criteria and any example that prints `NO_PROGRAM_RECORD`), `design.md` (the order-sentence table and wording table) so that an order's `tool_name` element prints a sentence only when there is a tool to name (Used_AI holds). When the filing did not use AI, paragraph 2 already says the editor's assistant was not used, so nothing is added.
+    - _Requirements: 2.x, 7.x (as renumbered by the edit)_
+
+  - [~] 15.2 Code and example tests for the tool_name change
+    - Remove `NO_PROGRAM_RECORD` from `declaration-wording.ts` and its use in `render-order.ts`. Update `docs/CERTIFICATION.md` and every example and property test that expects the sentence, including a typed-only filing under Judge Love's order (`edtex-love-2025`), which must print the typed-only sentence and the None Declaration sentence with no third sentence.
+    - Do not weaken any test.
+    - _Requirements: as edited in 15.1_
+
+  - [~] 15.3 Fix chance-collision assertions in this spec's tests
+    - Reproduce the failure in `crew/sentinel/test/recorded-declaration.properties.test.ts` with seed `-723012165` (path `3:0:0:0:0:0:0:0:1:1:1:1:1:1`) first. Replace the `not.toContain(<Tool_Name>)` check on the display form with: the display rendering with a Declaration equals the display rendering without one. Do not narrow the Tool_Name generator. Keep the seed as a named regression example in the test and add a line to `BUILD_LOG.md`.
+    - Search every test added by this spec for the same shape (`not.toContain` / `not.toMatch` / `not.toBe` of a generated string against text that could contain it by chance) and fix each the same way. Report the list found.
+    - _Requirements: 8.3, 8.4, 11.4_
+
+  - [~] 15.4 Format `BUILD_LOG.md` and record the follow-up
+    - Run Prettier on `BUILD_LOG.md`. Add a dated follow-up entry covering the three fixes. This is the last edit of the group.
+    - _Requirements: 13.5_
+
+  - [~] 15.5 Final checkpoint after the last edit
+    - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt` three times, `pnpm test:pbt` once with `FC_NUM_RUNS=500`, the web build on a clean copy after a fresh install, and `pnpm kiro:check`. Change no file after the checks start; if a check forces an edit, rerun every check. Record the results in `BUILD_LOG.md` only before the first check, as a placeholder-free summary written afterwards is an edit: report results in the reply instead.
+    - Do not push and do not commit.
+    - _Requirements: 14.2, 14.3, 14.4_
+
 ## Notes
 
 - Test sub-tasks are not marked optional: Requirements 11 and 12 say the tests SHALL exist, so they are part of the work.
@@ -260,7 +285,11 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     { "id": 6, "tasks": ["6.2", "12.1", "12.4"] },
     { "id": 7, "tasks": ["7.1"] },
     { "id": 8, "tasks": ["10.1", "10.2", "12.2", "13.1", "13.2", "13.3"] },
-    { "id": 9, "tasks": ["12.3", "13.4", "13.5"] }
+    { "id": 9, "tasks": ["12.3", "13.4", "13.5"] },
+    { "id": 10, "tasks": ["15.1"] },
+    { "id": 11, "tasks": ["15.2", "15.3"] },
+    { "id": 12, "tasks": ["15.4"] },
+    { "id": 13, "tasks": ["15.5"] }
   ]
 }
 ```

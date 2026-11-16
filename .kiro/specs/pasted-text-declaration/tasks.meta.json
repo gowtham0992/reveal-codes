@@ -728,6 +728,51 @@
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794802344895
       }
+    ],
+    "15.1 Spec first: remove the tool_name record sentence for filings that did not use AI": [
+      {
+        "executionId": "b152ebfe-e213-437d-8d22-d9d020cf9d71",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794803188210
+      },
+      {
+        "executionId": "b152ebfe-e213-437d-8d22-d9d020cf9d71",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794803190341
+      },
+      {
+        "executionId": "b152ebfe-e213-437d-8d22-d9d020cf9d71",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794803226632
+      }
+    ],
+    "15.2 Code and example tests for the tool_name change": [
+      {
+        "executionId": "b152ebfe-e213-437d-8d22-d9d020cf9d71",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794803188233
+      }
+    ],
+    "15.3 Fix chance-collision assertions in this spec's tests": [
+      {
+        "executionId": "b152ebfe-e213-437d-8d22-d9d020cf9d71",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794803188251
+      }
+    ],
+    "15.4 Format `BUILD_LOG.md` and record the follow-up": [
+      {
+        "executionId": "b152ebfe-e213-437d-8d22-d9d020cf9d71",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794803188268
+      }
+    ],
+    "15.5 Final checkpoint after the last edit": [
+      {
+        "executionId": "b152ebfe-e213-437d-8d22-d9d020cf9d71",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794803188301
+      }
     ]
   }
 }
