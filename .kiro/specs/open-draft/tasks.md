@@ -190,7 +190,7 @@ Conventions that apply to every task:
     - **Property 13: The restore note follows AI runs and verification results**
     - Same file as 8.6. `restoreNote` over generated Documents returns the exact note of the matching case or `null`, and the sentence "Run Verify to check the citations again and record the date." ends the note exactly when the Document holds a Verification_Result and appears in no other note. Update `apps/web/test/static/inventory.test.ts` with the new `// Property 13` comment in this task.
     - **Validates: Requirements 13.2, 13.3, 13.4, 13.5**
-  - [ ] 8.9 Write property test for refusals
+  - [x] 8.9 Write property test for refusals
     - **Property 14: A refusal changes nothing but the note and the message**
     - Same file as 8.6. Any refused file and any prior Store state: the Store after equals the Store before except `openNote` and `notice`, and no confirm dialog opened. Update `apps/web/test/static/inventory.test.ts` with the new `// Property 14` comment in this task.
     - **Validates: Requirements 4.6, 4.7, 14.11, 19.1**
