@@ -468,7 +468,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - In `docs/KIRO_USAGE.md` update the existing `citations.md` row to say the file now also records the Pincite_Expression rule and the Role_Words.
     - _Requirements: 17.8, 18.16, 21.4, 21.5_
 
-- [-] 21. Final checkpoint
+- [x] 21. Final checkpoint
   - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, `pnpm --filter @reveal-codes/web build` (the clean-checkout web build) and `pnpm kiro:check`, and fix any failure in the code, never in a test's meaning.
   - State in the report that the browser check (task 20.3's manual steps) and the push are left to the author. Do not push.
   - Ensure all tests pass, ask the user if questions arise.
