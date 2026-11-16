@@ -55,8 +55,11 @@ function expectedPaths() {
     ...filesUnder(".kiro/settings"),
     ...filesUnder(".kiro/skills").filter((p) => p.endsWith("/SKILL.md")),
   ];
+  const powers = dirsUnder("powers")
+    .filter((name) => existsSync(join(root, "powers", name, "plugin.json")))
+    .map((name) => `powers/${name}/plugin.json`);
   const specs = dirsUnder(".kiro/specs").map((name) => `.kiro/specs/${name}`);
-  return { files, specs };
+  return { files: [...files, ...powers], specs };
 }
 
 function countByKind(rows) {

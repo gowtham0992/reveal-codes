@@ -70,4 +70,19 @@ describe("kiro-usage-check script", () => {
       "docs/KIRO_USAGE.md names a path that does not exist: .kiro/steering/dead.md",
     ]);
   });
+  it("exits 1 with one line for a Power whose plugin.json has no row", () => {
+    const result = run(repo([...FILES, "powers/p/plugin.json"], ROWS));
+    expect(result.status).toBe(1);
+    expect(result.lines).toEqual(["not in docs/KIRO_USAGE.md: powers/p/plugin.json"]);
+  });
+  it("exits 0 for a Power whose plugin.json has a row, and ignores a folder without one", () => {
+    const row = "| Power | P | powers/p/plugin.json | six |";
+    const result = run(
+      repo([...FILES, "powers/p/plugin.json", "powers/q/README.md"], [...ROWS, row]),
+    );
+    expect(result.status).toBe(0);
+    expect(result.lines).toEqual([
+      "docs/KIRO_USAGE.md: 4 rows. Hook: 1, Agent: 1, Skill: 1, Power: 1",
+    ]);
+  });
 });

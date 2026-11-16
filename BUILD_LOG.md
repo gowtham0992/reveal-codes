@@ -691,3 +691,22 @@ The author walked the app in a browser and found four things. Requirement 9.8 wa
 
 - For a typed-only filing under Judge Love's order, the tool_name element repeated what paragraph 2 already says. It now prints only when there is a tool to name.
 - Updated to match: requirements 7.7 and 7.8, design interpretation 3, the wording table, CERTIFICATION.md, and the tests.
+
+## 2026-11-15: citation-check Power
+
+### What was built
+
+- `powers/citation-check/`: a Kiro Power (plugin.json, mcp.json, README, two skills) that packages the CourtListener MCP server for any workspace. `pnpm power:build` (scripts/build-power.mjs, esbuild 0.28.2 pinned) bundles `packages/courtlistener-mcp/src/main.ts` into one ESM file, copies the verifier fixtures and the dataset into the Power, and gives identical bytes on every run.
+- Fixtures mode is chosen by the bundle, not by `env.ts`. A new pure `powerEnv` in `src/power-env.ts` drops a token that is empty or starts with `${` and then sets `REVEAL_CODES_FIXTURES_ONLY=1`. `main.ts` calls it only when esbuild's `define` sets `REVEAL_CODES_POWER`, so `pnpm mcp` runs the same path as before.
+- `verifier_status` now returns `mode` and a plain-words `message` in every run, not only in the Power. The two exact-match assertions in `packages/courtlistener-mcp/test/tools.test.ts` were updated for the two new fields.
+- `pnpm kiro:check` now also requires a row for every `powers/*/plugin.json`.
+
+### Where the format pages differ from the brief
+
+- The MCP page requires `"type": "stdio"` and a `$schema` in `mcp.json`, and the plugin schema requires `$schema` in `plugin.json`. Both were added. Both files were validated once against the live schemas with ajv. The tests check the same rules by hand, because tests do not use the network.
+- The portable spec expands only `${PLUGIN_ROOT}` and `${PLUGIN_DATA}`. An unexpanded `${COURTLISTENER_TOKEN}` is therefore possible, and the server treats it as no token.
+
+### What Kiro got wrong
+
+- The first commit of the MCP change failed `eslint` (an unused destructured variable and two `any` assertions from `expect.stringContaining`). It was fixed and the commit amended before anything else was built on it.
+- Fixtures mode reports a real case that is not recorded as `not_found`. The status message, both skills and the README now say that "not found" there means only "not in the recorded set".

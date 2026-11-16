@@ -55,6 +55,8 @@ reveal-codes/
         static/               source scans: boundaries, css-rules, copy-rules, limits, forbidden, env-and-size, package-json, docs, inventory
         support/              shared test helpers: fc.ts, clock.ts, memory-storage.ts, dom-shims.ts, render.tsx, scan.ts, fetch fakes
         smoke/                API assumption regression tests for ProseMirror and TipTap
+  powers/
+    citation-check/           Kiro Power: plugin.json, mcp.json, built single-file MCP server, fixtures, two skills; generated parts come from pnpm power:build
   crew/
     sentinel/                 the sweep CLI that the Reveal Codes Sentinel Crew app (separate repository) runs on a schedule
   data/
