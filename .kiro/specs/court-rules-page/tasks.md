@@ -63,7 +63,7 @@ Implementation follows the design's task order: commit the spec, extend the load
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 5. The `/courts` page
-  - [-] 5.1 Add Placement_Words and link constants
+  - [x] 5.1 Add Placement_Words and link constants
     - In `apps/web/src/order-copy.ts` add `placementWords: Record<CaptionPlacement, string>` ("Heading on the first page", "Title of the statement", "Separate declaration")
     - Create `apps/web/src/courts/links.ts` exporting `COURT_RULES_PATH`, `COURT_RULES_SHORT` ("Court rules") and `COURT_RULES_LONG` ("See all court rules")
     - _Requirements: 4.6, 9.1, 9.2, 9.4_
