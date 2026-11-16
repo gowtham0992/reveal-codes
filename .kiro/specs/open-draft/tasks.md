@@ -87,7 +87,7 @@ Conventions that apply to every task:
   - [x] 4.1 `docxSafe` and `holdsDocxUnsafe` over one range table
     - New `packages/export/src/docx-text.ts`: one table of allowed ranges (U+0009, U+000A, U+000D, U+0020 to U+D7FF, U+E000 to U+FFFD, U+10000 to U+10FFFF), defined once and read by both functions. `docxSafe(text)` returns `{ text, removed }`: U+000B and U+000C become `\n`, `\r\n` and a lone `\r` become `\n`, every other Docx_Unsafe_Character (an unpaired surrogate included) is removed and counted once; the converted characters are not counted. It is idempotent and returns its input unchanged when the input holds none and no `\r`. `holdsDocxUnsafe(text)` is true for any Docx_Unsafe_Character, U+000B and U+000C included, and is false for the text of any `docxSafe` result. No imports. Export both from `index.ts`.
     - _Requirements: 22.1, 22.2, 22.5_
-  - [-] 4.2 `arbDocxHostileText`
+  - [x] 4.2 `arbDocxHostileText`
     - In `packages/export/test/support/arbitraries.ts` add `arbDocxHostileText`: text that includes U+0000 to U+001F, U+FFFE, U+FFFF and unpaired surrogates, with code-unit sequences as well as strings. The existing arbitraries are not narrowed.
     - _Requirements: 22.6, 22.7_
   - [~] 4.3 Write property test for DOCX-safe text
