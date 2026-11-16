@@ -30,7 +30,15 @@ export type Pair = Readonly<{ volume: number; reporter: string }>;
 export type FullCite = Readonly<{ kind: "full"; value: FullValue; text: string }>;
 
 /** `Id.` (`pincite` null) or `Id. at <pincite>`. */
-export type IdCite = Readonly<{ kind: "id"; pincite: number | null }>;
+export type IdCite = Readonly<{
+  kind: "id";
+  pincite: number | null;
+  /** The Pincite_Expression as written; absent means `String(pincite)`. */
+  pinciteText?: string;
+}>;
+
+/** How a builder writes a pincite: one page, or a Pincite_Expression (Req 18). */
+export type PinciteStyle = "single" | "expression";
 
 /**
  * A party Short_Form. Its pair is the `pick`-th distinct pair written so far
@@ -42,6 +50,8 @@ export type PartyCite = Readonly<{
   pick: number | null;
   fallback: Pair;
   pincite: number;
+  /** The Pincite_Expression as written; absent means `String(pincite)`. */
+  pinciteText?: string;
 }>;
 
 /** A Full_Citation or Short_Form, the citing pieces quote groups use. */
@@ -126,7 +136,7 @@ function putId(b: Builder, c: IdCite): number {
   if (c.pincite === null) {
     return record(b, "Id.", { kind: "short", form: "id", targetStart });
   }
-  const text = `Id. at ${String(c.pincite)}`;
+  const text = `Id. at ${c.pinciteText ?? String(c.pincite)}`;
   return record(b, text, { kind: "short", form: "id", pincite: c.pincite, targetStart });
 }
 
@@ -136,7 +146,7 @@ function putParty(b: Builder, c: PartyCite): number {
       ? c.fallback
       : (b.pairs[c.pick % b.pairs.length] ?? c.fallback);
   const targetStart = b.byPair.get(keyOf(pair)) ?? null;
-  const text = `${c.party}, ${String(pair.volume)} ${pair.reporter} at ${String(c.pincite)}`;
+  const text = `${c.party}, ${String(pair.volume)} ${pair.reporter} at ${c.pinciteText ?? String(c.pincite)}`;
   const value: CitationValue = {
     kind: "short",
     form: "party",
@@ -154,8 +164,11 @@ function putParty(b: Builder, c: PartyCite): number {
 /** Appends a citing piece and returns its start Offset. */
 export function putCite(b: Builder, c: Cite): number {
   switch (c.kind) {
-    case "full":
-      return putFull(b, c.value, c.text);
+    case "full": {
+      // A text written with a range or list is not canonical, so it records the Normalised_Form (D17).
+      const form = canonical(c.value);
+      return putFull(b, c.value, c.text, c.text === form ? undefined : form);
+    }
     case "id":
       return putId(b, c);
     case "party":

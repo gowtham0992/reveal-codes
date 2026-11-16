@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { extract } from "../src/citations/extract";
 import { parse, render } from "../src/codes";
 import { structuralEqual } from "../src/equal";
-import { arbDocument } from "../src/testing/arbitraries";
+import { arbDocument, arbExpressionDocument } from "../src/testing/arbitraries";
 import { runs } from "./support/fc";
 import {
   arbHistory,
@@ -168,7 +168,7 @@ describe("case-match Reveal Codes round trip with wrong_case _Requirements: 3.1,
   it("parse(render(d, full).text) is ok and structurally equals d, and re-renders to the same text", () => {
     let wrongSeen = 0;
     fc.assert(
-      fc.property(fc.oneof(arbDocument, arbWrongCaseDocument), (d) => {
+      fc.property(fc.oneof(arbDocument, arbExpressionDocument, arbWrongCaseDocument), (d) => {
         wrongSeen += fullRecords(d).filter((r) => r.result.status === "wrong_case").length;
         const text = render(d, "full").text;
         const parsed = parse(text);

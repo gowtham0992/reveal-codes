@@ -37,10 +37,11 @@ describe("Issues row for a wrong case citation _Requirements: 7.1, 7.2, 7.3, 7.4
   it("shows the chip, the words, the citation, the found line and the buttons", () => {
     region(withResults(TEXT, [WRONG]));
     const row = screen.getByRole("listitem");
-    const [lineA, words, text, found] = Array.from(row.children);
+    const [lineA, words, text, cited, found] = Array.from(row.children);
     expect(lineA?.firstElementChild?.textContent).toBe("CIT ≠");
     expect(words?.textContent).toBe("blocking, wrong case");
     expect(text?.textContent).toBe("556 U.S. 662, 678 (2009)");
+    expect(cited?.textContent).toBe("Cited as Henderson v. Pacific Housing Authority");
     expect(found?.textContent).toBe("This citation is Ashcroft v. Iqbal (2009)");
     expect(within(row).getByRole("button", { name: "Go" })).not.toBeNull();
     expect(within(row).getByRole("button", { name: "Override…" })).not.toBeNull();

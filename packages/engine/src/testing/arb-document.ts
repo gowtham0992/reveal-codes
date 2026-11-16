@@ -17,7 +17,7 @@ import type { Document, EngineConfig } from "../types.js";
 import { arbOpTrace, type OpStep } from "./arb-ops.js";
 import { applyStateWrites, arbStateWrites } from "./arb-state.js";
 import { arbText, arbTimestamp } from "./arb-text.js";
-import { arbTextWithCitations } from "./arb-text-citations.js";
+import { arbTextWithCitations, arbTextWithCitationsWith } from "./arb-text-citations.js";
 
 /** The two threshold settings documents are built under: default 0.4, and 0.05. */
 export const BUILD_CONFIGS: readonly (EngineConfig | undefined)[] = [
@@ -49,12 +49,36 @@ export const arbCreatedDocument: fc.Arbitrary<Document> = fc
 const lastDocument = (start: Document, steps: readonly OpStep[]): Document =>
   steps.reduce((doc, s) => (s.result.ok ? s.result.value.document : doc), start);
 
+/** `arbDocument` over a given created-Document arbitrary. */
+const documentFrom = (created: fc.Arbitrary<Document>): fc.Arbitrary<Document> =>
+  fc
+    .tuple(created, fc.constantFrom(...BUILD_CONFIGS))
+    .chain(([start, config]) =>
+      arbOpTrace(start, config).map((steps) => lastDocument(start, steps)),
+    )
+    .chain((doc) => arbStateWrites(doc).map((writes) => applyStateWrites(doc, writes)));
+
 /**
  * A Canonical_Document reached from `createDocument` by 0 to 20 valid
  * Caller_Operations, applied under the default threshold or 0.05, then 0 to
  * 12 verification, quote-check, and Override writes (skipped on error).
  */
-export const arbDocument: fc.Arbitrary<Document> = fc
-  .tuple(arbCreatedDocument, fc.constantFrom(...BUILD_CONFIGS))
-  .chain(([start, config]) => arbOpTrace(start, config).map((steps) => lastDocument(start, steps)))
-  .chain((doc) => arbStateWrites(doc).map((writes) => applyStateWrites(doc, writes)));
+export const arbDocument: fc.Arbitrary<Document> = documentFrom(arbCreatedDocument);
+
+/**
+ * `arbDocument` whose citation text writes pincites as Pincite_Expressions
+ * (Req 18.10, 18.11). Opt-in: `arbDocument` keeps one-page pincites.
+ */
+export const arbExpressionDocument: fc.Arbitrary<Document> = documentFrom(
+  fc
+    .tuple(
+      fc.oneof(
+        { arbitrary: arbTextWithCitationsWith("expression").map((t) => t.text), weight: 3 },
+        { arbitrary: arbText, weight: 1 },
+      ),
+      arbTimestamp,
+    )
+    .map(([text, timestamp]) => createDocument(text, timestamp))
+    .filter(isOk)
+    .map((r) => r.value),
+);

@@ -7,6 +7,7 @@ import {
   TAMPER_KINDS,
   arbAnyString,
   arbDocument,
+  arbExpressionDocument,
   arbSemanticTamper,
   arbSyntaxFault,
   arbTamperDocument,
@@ -19,7 +20,7 @@ describe("Property 36: Full Reveal Codes round trip _Requirements: 19.2, 19.3, 2
   it("parse(render(d, full)) is ok, equals d, and re-renders to the same text", () => {
     // Property 36
     fc.assert(
-      fc.property(arbDocument, (d) => {
+      fc.property(fc.oneof(arbDocument, arbExpressionDocument), (d) => {
         const text = render(d, "full").text;
         const parsed = parse(text);
         expect(parsed.ok).toBe(true);

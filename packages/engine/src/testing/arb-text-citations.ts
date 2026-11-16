@@ -30,13 +30,8 @@ import { GAP_SIGNALS } from "../citations/signals.js";
 import type { Extraction, OtherValue } from "../types.js";
 import { LIVE_STOP_ENTRIES } from "./arb-case-name.js";
 import { arbNearMissCitation, arbReporterValue, type NearMiss } from "./arb-citation.js";
-import {
-  arbCite,
-  arbIdCite,
-  arbFullCite,
-  arbPartyCite,
-  arbWrappedGroup,
-} from "./arb-quote-groups.js";
+import { arbFullCiteWith, arbIdCiteWith, arbPartyCiteWith } from "./arb-cite-style.js";
+import { arbCite, arbPartyCite, arbWrappedGroup } from "./arb-quote-groups.js";
 import { arbProseWord } from "./arb-quote-parts.js";
 import { renderGroup, type GroupRecord, type WrappedGroup } from "./arb-quote-render.js";
 import { arbStopListPrefix } from "./arb-short-form-party.js";
@@ -51,6 +46,7 @@ import {
   type Builder,
   type Cite,
   type PartyCite,
+  type PinciteStyle,
 } from "./arb-text-builder.js";
 
 /** Upper bound on `arbTextWithCitations` text length. */
@@ -112,19 +108,34 @@ const arbPartyContext: fc.Arbitrary<string> = fc.oneof(
   fc.constantFrom(...GAP_SIGNALS).map((s) => `${s} `),
 );
 
-const arbPartyFragment: fc.Arbitrary<Fragment> = fc
-  .record({ context: arbPartyContext, prefix: arbStopListPrefix, cite: arbPartyCite })
-  .map((party): Fragment => ({ kind: "party", party }));
+const arbPartyFragment = (style: PinciteStyle): fc.Arbitrary<Fragment> =>
+  fc
+    .record({
+      context: arbPartyContext,
+      prefix: arbStopListPrefix,
+      cite: arbPartyCiteWith(style),
+    })
+    .map((party): Fragment => ({ kind: "party", party }));
 
-const arbFragment: fc.Arbitrary<Fragment> = fc.oneof(
-  { arbitrary: arbProseWord.map((word): Fragment => ({ kind: "prose", word })), weight: 4 },
-  { arbitrary: arbFullCite.map((cite): Fragment => ({ kind: "cite", cite })), weight: 3 },
-  { arbitrary: arbIdCite.map((cite): Fragment => ({ kind: "cite", cite })), weight: 1 },
-  { arbitrary: arbPartyFragment, weight: 2 },
-  { arbitrary: arbNearMissCitation.map((near): Fragment => ({ kind: "near", near })), weight: 1 },
-  { arbitrary: arbOther, weight: 1 },
-  { arbitrary: arbWrappedGroup.map((group): Fragment => ({ kind: "group", group })), weight: 5 },
-);
+const arbFragment = (style: PinciteStyle): fc.Arbitrary<Fragment> =>
+  fc.oneof(
+    { arbitrary: arbProseWord.map((word): Fragment => ({ kind: "prose", word })), weight: 4 },
+    {
+      arbitrary: arbFullCiteWith(style).map((cite): Fragment => ({ kind: "cite", cite })),
+      weight: 3,
+    },
+    {
+      arbitrary: arbIdCiteWith(style).map((cite): Fragment => ({ kind: "cite", cite })),
+      weight: 1,
+    },
+    { arbitrary: arbPartyFragment(style), weight: 2 },
+    {
+      arbitrary: arbNearMissCitation.map((near): Fragment => ({ kind: "near", near })),
+      weight: 1,
+    },
+    { arbitrary: arbOther, weight: 1 },
+    { arbitrary: arbWrappedGroup.map((group): Fragment => ({ kind: "group", group })), weight: 5 },
+  );
 
 const LIVE: ReadonlySet<string> = new Set(LIVE_STOP_ENTRIES);
 
@@ -186,13 +197,22 @@ function build(placed: readonly Placed[]): TextWithCitations {
   return { text: b.text, expected: { citations: b.citations, quotes: b.quotes }, groups };
 }
 
+/**
+ * `arbTextWithCitations` with the pincite style of its Full_Citation and
+ * Short_Form fragments chosen. `"single"` is `arbTextWithCitations`. Quote
+ * groups keep one-page pincites in both styles.
+ */
+export const arbTextWithCitationsWith = (style: PinciteStyle): fc.Arbitrary<TextWithCitations> =>
+  fc
+    .array(
+      fc.record({ sep: fc.constantFrom<" " | ". ">(" ", ". "), fragment: arbFragment(style) }),
+      { maxLength: 30, size: "max" },
+    )
+    .map(build);
+
 /** Text with citations, links, and quotes, and the `Extraction` it must yield (P18). */
-export const arbTextWithCitations: fc.Arbitrary<TextWithCitations> = fc
-  .array(fc.record({ sep: fc.constantFrom<" " | ". ">(" ", ". "), fragment: arbFragment }), {
-    maxLength: 30,
-    size: "max",
-  })
-  .map(build);
+export const arbTextWithCitations: fc.Arbitrary<TextWithCitations> =
+  arbTextWithCitationsWith("single");
 
 /** A citing string and the start of the citation a following quote attaches to. */
 export type CitingString = Readonly<{ text: string; citationStart: number }>;

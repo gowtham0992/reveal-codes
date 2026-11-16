@@ -36,6 +36,13 @@ import type {
   ReporterValue,
 } from "../types.js";
 
+export {
+  arbPinciteExpression,
+  arbPinciteRange,
+  withExpressions,
+  type PinciteExpr,
+} from "./arb-pincite.js";
+
 const COURT_WORDS = ["D.", "Cir.", "2d", "9th", "N.Y.", "Cal.", "App.", "Ct.", "Dist.", "S.D."];
 const COURT_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.&'-";
 

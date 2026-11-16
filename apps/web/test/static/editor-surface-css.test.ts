@@ -131,3 +131,78 @@ describe("static: Document text is never styled _Requirements: 5.16_", () => {
     ]);
   });
 });
+
+/**
+ * Requirements 17.6, 17.7 (the empty-page links).
+ *
+ * What this proves: the stylesheet text holds the rules that limit the pointer target of the link
+ * list to the links themselves (`.samples` is absolutely positioned with `pointer-events: none`,
+ * `.samples a` has `pointer-events: auto`), no rule in this sheet or the Modal sheet sets
+ * `z-index`, and the link rules add no colour literal or outline.
+ *
+ * What it cannot prove: that a browser applies those rules. jsdom does no layout, so paint order,
+ * hit testing (`elementFromPoint`) and focus behaviour are not exercised here. The author's manual
+ * check in the BUILD_LOG covers them.
+ */
+const MODAL_PATH = "src/components/modal.module.css";
+const modal = readSources(["src"], /modal\.module\.css$/).find((s) => s.path === MODAL_PATH);
+const modalDecls = parseCss(modal?.text ?? "").declarations;
+const COLOUR_LITERAL = /#[0-9a-fA-F]{3,8}\b|\b(?:rgb|rgba|hsl|hsla)\(/;
+/** Violations of the pointer rules of the empty-page link list, one string each. */
+function linkRuleViolations(
+  sheetDecls: readonly CssDeclaration[],
+  otherDecls: readonly CssDeclaration[],
+): string[] {
+  const find = (sel: string, prop: string): string[] =>
+    sheetDecls.filter((d) => norm(d.selector) === sel && d.prop === prop).map((d) => norm(d.value));
+  const out: string[] = [];
+  if (!find(".samples", "position").includes("absolute"))
+    out.push(".samples lacks position: absolute");
+  if (!find(".samples", "pointer-events").includes("none"))
+    out.push(".samples lacks pointer-events: none");
+  if (!find(".samples a", "pointer-events").includes("auto"))
+    out.push(".samples a lacks pointer-events: auto");
+  for (const d of [...sheetDecls, ...otherDecls]) {
+    if (d.prop === "z-index") out.push(`${d.selector.trim()} sets z-index`);
+  }
+  for (const d of sheetDecls) {
+    if (!/^\.samples(?: a)?$/.test(norm(d.selector))) continue;
+    if (d.prop === "outline") out.push(`${d.selector.trim()} sets outline`);
+    if (COLOUR_LITERAL.test(d.value)) out.push(`${d.selector.trim()} has a colour literal`);
+  }
+  return out;
+}
+
+describe("static: empty-page links _Requirements: 17.6_", () => {
+  it("finds both stylesheets", () => {
+    expect(modalDecls.length).toBeGreaterThan(0);
+  });
+  it("makes .samples absolutely positioned with pointer-events: none", () => {
+    expect(valuesOf(".samples", "position")).toEqual(["absolute"]);
+    expect(valuesOf(".samples", "pointer-events")).toEqual(["none"]);
+  });
+  it("gives .samples a pointer-events: auto", () => {
+    expect(valuesOf(".samples a", "pointer-events")).toEqual(["auto"]);
+  });
+  it("sets no z-index in editor-surface.module.css or modal.module.css", () => {
+    expect(decls.filter((d) => d.prop === "z-index")).toEqual([]);
+    expect(modalDecls.filter((d) => d.prop === "z-index")).toEqual([]);
+  });
+  it("adds no outline or colour literal to the link rules", () => {
+    expect(linkRuleViolations(decls, modalDecls)).toEqual([]);
+  });
+  it("reports a planted z-index, a missing pointer-events rule, an outline and a colour literal", () => {
+    const planted = parseCss(
+      ".samples {\n  position: absolute;\n  z-index: 2;\n  color: #A8001C;\n}\n.samples a {\n  outline: 1px solid red;\n}",
+    ).declarations;
+    const planted2 = parseCss(".overlay {\n  z-index: 5;\n}").declarations;
+    expect(linkRuleViolations(planted, planted2)).toEqual([
+      ".samples lacks pointer-events: none",
+      ".samples a lacks pointer-events: auto",
+      ".samples sets z-index",
+      ".overlay sets z-index",
+      ".samples has a colour literal",
+      ".samples a sets outline",
+    ]);
+  });
+});

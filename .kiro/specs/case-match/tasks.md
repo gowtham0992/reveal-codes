@@ -367,12 +367,12 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - Before editing, confirm the cause by reading the stylesheet and TipTap's injected `.ProseMirror { position: relative }`, and record the one-sentence cause in the BUILD_LOG entry of task 20.3.
     - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.9_
 
-  - [~] 15.2 Add the static stylesheet test
+  - [-] 15.2 Add the static stylesheet test
     - In `apps/web/test/static/editor-surface-css.test.ts` add a describe titled `static: empty-page links _Requirements: 17.6_` with cases: `.samples` is `position: absolute` and has `pointer-events: none`; `.samples a` has `pointer-events: auto`; no declaration in `editor-surface.module.css` or `modal.module.css` sets `z-index`; no new `outline` or colour literal. Add a planted-violation case so the check is shown to fail on a `z-index` or a missing `pointer-events` rule.
     - State in a comment what the test cannot prove (that the browser applies the rules).
     - _Requirements: 17.6, 17.7_
 
-  - [~] 15.3 Add the structure and event tests
+  - [-] 15.3 Add the structure and event tests
     - In a new `apps/web/test/editor-surface-links.test.tsx` render `EditorSurface` (with the stub editor the existing editor-surface tests use) and assert: the list is not a descendant of the editor content element; it follows the editor content element in DOM order (`compareDocumentPosition`); it renders only while `empty` is true and `onLoadSample` is given; the two links are `a` elements named `Load demo motion` and `Load the Avianca citations` in that order.
     - Assert `fireEvent.mouseDown` on each link is default-prevented and `document.activeElement` is unchanged; a `click` and a keyboard activation each call `onLoadSample` with `"demo"` and `"avianca"`.
     - Add a comment that jsdom does no layout, so these tests cannot prove paint order, hit testing or a real browser's focus handling.
@@ -386,7 +386,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - Update the header comments of the three grammar files with the new read bounds. Keep every function under 40 lines and each module under 300.
     - _Requirements: 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 18.8, 18.9, 18.10, 18.11, 18.17_
 
-  - [~] 16.2 Extend the citation arbitraries
+  - [x] 16.2 Extend the citation arbitraries
     - In `packages/engine/src/testing/arb-citation.ts` and `arb-text-builder.ts` add `arbPinciteExpression` returning `{ text, first }` (single page, range with `-` or `–` and a full or shortened second number, list of two to five items with items that would start a member or a database citation filtered out) and an option `pinciteStyle: "single" | "expression"` on the Full and Short_Form builders, defaulting to `"single"` so every existing property keeps its domain.
     - Opt the round-trip property (Property 2's domain) and the incremental-equals-full property in to `"expression"`. List both edits for the BUILD_LOG. Confirm the other existing extraction properties pass unedited.
     - _Requirements: 18.10, 18.11, 18.14_
@@ -413,7 +413,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 18. Say what the mismatch is where the author decides (Requirement 19)
-  - [~] 18.1 Add the shared lines and use them in the Issues row
+  - [-] 18.1 Add the shared lines and use them in the Issues row
     - Create `apps/web/src/client/mismatch.ts` with `mismatchOf(document, key)` and `mismatchLines(m)` and `apps/web/src/components/mismatch-lines.tsx` rendering the lines as `p` elements with a `className` prop.
     - `mismatchOf` returns `null` unless the key is a Full record with the status `wrong_case`; `cited` is `rec.citation.caseName ?? null` from the Document passed in; `found` is `<foundName> (<foundYear>)` or `<foundName>`. `mismatchLines` returns `Cited as <cited>` (only when not null) then `This citation is <found>`, with no trailing full stop.
     - In `issues-list.tsx` replace the `wrongCaseFor` line with these, keep the `CourtListenerLink` and `courtListenerLink` use, and place the two lines directly under the citation text. Keep the buttons, the severity words and the `Overridden:` line.
@@ -439,7 +439,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - In `packages/verifier/src/name-expansion.ts` add `plaintiff, plaintiffs, defendant, defendants, appellant, appellants, appellee, appellees, petitioner, petitioners, respondent, respondents, individually, deceased, no` to `DROPPED_WORDS`. Change no other word and no `NAME_EXPANSION_TABLE` entry.
     - _Requirements: 20.1, 20.2, 20.3_
 
-  - [~] 19.2 Mirror the words in the engine arbitraries
+  - [-] 19.2 Mirror the words in the engine arbitraries
     - In `packages/engine/src/testing/arb-case-match.ts` add the same fifteen words to `DROPPED`, export it, and keep the existing exclusion of initialisms equal to a Dropped_Word or table key (design D10) so Property 1's generator stays clear of the new words. Do not edit Property 1.
     - _Requirements: 20.4, 20.5_
 

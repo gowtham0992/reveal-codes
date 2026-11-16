@@ -11,6 +11,7 @@ import {
   arbEdit,
   arbOpinionWithQuotes,
   arbTextWithCitations,
+  arbTextWithCitationsWith,
 } from "../src/testing/arbitraries";
 import { structuralEqual } from "../src/equal";
 import type {
@@ -26,9 +27,10 @@ import { runs } from "./support/fc";
 const never = (): boolean => false;
 const scan = (text: string): readonly Match[] => scanRange(text, 0, never);
 
-/** Property 25's texts: `arbTextWithCitations` or `arbOpinionWithQuotes`. */
+/** Property 25's texts: `arbTextWithCitations`, the same with pincite expressions (Req 18.11), or `arbOpinionWithQuotes`. */
 const arbP25Text: fc.Arbitrary<string> = fc.oneof(
   arbTextWithCitations.map((t) => t.text),
+  arbTextWithCitationsWith("expression").map((t) => t.text),
   arbOpinionWithQuotes.map((t) => t.text),
 );
 

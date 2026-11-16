@@ -59,8 +59,8 @@ export const EXPANSION_ENTRIES: readonly (readonly [string, readonly string[]])[
   ["assocs", ["associates"]],
 ];
 
-/** The Dropped_Words of the name rule. */
-const DROPPED: readonly string[] = [
+/** The Dropped_Words of the name rule, Role_Words included (D19, Requirement 20). */
+export const DROPPED: readonly string[] = [
   "v",
   "vs",
   "in",
@@ -83,6 +83,21 @@ const DROPPED: readonly string[] = [
   "llp",
   "plc",
   "na",
+  "plaintiff",
+  "plaintiffs",
+  "defendant",
+  "defendants",
+  "appellant",
+  "appellants",
+  "appellee",
+  "appellees",
+  "petitioner",
+  "petitioners",
+  "respondent",
+  "respondents",
+  "individually",
+  "deceased",
+  "no",
 ];
 
 const RESERVED: ReadonlySet<string> = new Set([...DROPPED, ...EXPANSION_ENTRIES.map(([k]) => k)]);

@@ -3,8 +3,10 @@ import type { Document, Issue, IssueCode, IssueKey } from "@reveal-codes/engine"
 import { courtListenerLink } from "@reveal-codes/verifier/link";
 import type { DisplayInfo } from "@reveal-codes/verifier/link";
 import { divergenceWords } from "../client/divergence";
+import { mismatchLines, mismatchOf } from "../client/mismatch";
 import { isFailingOpener } from "../pane/failing";
 import { CourtListenerLink } from "./courtlistener-link";
+import { MismatchLines } from "./mismatch-lines";
 import styles from "./issues-list.module.css";
 
 export const MAX_ISSUE_TEXT = 80;
@@ -44,22 +46,20 @@ export function issueText(document: Document, issue: Issue): string {
   return shorten(document.text.slice(issue.start, issue.end));
 }
 
-type WrongCase = Readonly<{ line: string; href: string | null }>;
+type WrongCase = Readonly<{ lines: readonly string[]; href: string | null }>;
 
-/** The `This citation is …` line and link of a `wrong_case` Issue, from the Document and session Display_Info. */
+/** The mismatch lines and link of a `wrong_case` Issue, from the Document and session Display_Info. */
 function wrongCaseFor(
   document: Document,
   issue: Issue,
   info: ReadonlyMap<IssueKey, DisplayInfo> | undefined,
 ): WrongCase | null {
   if (issue.code !== "CIT ≠") return null;
-  const rec = document.citations.find((c) => c.kind === "full" && c.key === issue.key);
-  if (rec?.kind !== "full" || rec.result.status !== "wrong_case") return null;
-  const { clusterId, foundName, foundYear } = rec.result;
+  const m = mismatchOf(document, issue.key);
+  if (m === null) return null;
   const shown = info?.get(issue.key);
-  const url = shown?.clusterId === clusterId ? shown.absoluteUrl : undefined;
-  const year = foundYear === undefined ? "" : ` (${String(foundYear)})`;
-  return { line: `This citation is ${foundName}${year}`, href: courtListenerLink(clusterId, url) };
+  const url = shown?.clusterId === m.clusterId ? shown.absoluteUrl : undefined;
+  return { lines: mismatchLines(m), href: courtListenerLink(m.clusterId, url) };
 }
 
 export type VerifyAction = Readonly<{ start: () => void; disabled: boolean }>;
@@ -89,7 +89,7 @@ function WrongCaseLines({ wrong }: Readonly<{ wrong: WrongCase | null }>) {
   if (wrong === null) return null;
   return (
     <>
-      <p className={styles["text"]}>{wrong.line}</p>
+      <MismatchLines lines={wrong.lines} className={styles["text"]} />
       <p className={styles["text"]}>
         <CourtListenerLink href={wrong.href} />
       </p>

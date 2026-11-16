@@ -17,6 +17,7 @@ export * from "./arb-quote-parts.js";
 export * from "./arb-text-builder.js";
 export * from "./arb-quote-render.js";
 export * from "./arb-quote-groups.js";
+export * from "./arb-cite-style.js";
 export * from "./arb-text-citations.js";
 export * from "./arb-opinion.js";
 export * from "./arb-edit.js";
