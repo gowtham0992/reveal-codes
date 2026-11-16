@@ -1,4 +1,5 @@
 import type { Document } from "@reveal-codes/engine";
+import type { DraftGate } from "./draft-gate";
 import { AUTOSAVE_KEY, serialise } from "./persist";
 import type { RunLogEntry } from "./store";
 
@@ -12,6 +13,8 @@ export type AutosaveDeps = Readonly<{
   setTimer: (fn: () => void, ms: number) => unknown;
   clearTimer: (handle: unknown) => void;
   onError: (message: string) => void;
+  /** While blocked nothing is scheduled or written (Req 23). Absent: never blocked. */
+  gate?: DraftGate;
 }>;
 
 export type Autosave = Readonly<{
@@ -19,8 +22,8 @@ export type Autosave = Readonly<{
   schedule(document: Document, runLog: readonly RunLogEntry[], verifiedAt: string | null): void;
   /** Writes a pending value now. True when nothing was pending or the write succeeded. */
   flush(): boolean;
-  /** Cancels a pending write and removes the stored key. */
-  clear(): void;
+  /** Cancels a pending write and removes the stored key. True when the key was removed; false after `onError`. */
+  clear(): boolean;
 }>;
 
 type Pending = Readonly<{
@@ -79,11 +82,17 @@ export function createAutosave(deps: AutosaveDeps): Autosave {
     cancelTimer();
     const job = pending;
     pending = null;
+    if (deps.gate?.blocked() === true) return true;
     return job === null ? true : writeJob(deps, job);
   };
 
   return {
     schedule(document, runLog, verifiedAt) {
+      if (deps.gate?.blocked() === true) {
+        cancelTimer();
+        pending = null;
+        return;
+      }
       pending = { document, runLog, verifiedAt };
       cancelTimer();
       slot.start(() => {
@@ -97,9 +106,9 @@ export function createAutosave(deps: AutosaveDeps): Autosave {
       const removal = storageFailure(() => {
         deps.storage.removeItem(AUTOSAVE_KEY);
       });
-      if (removal !== null) {
-        deps.onError(AUTOSAVE_FAILED);
-      }
+      if (removal === null) return true;
+      deps.onError(AUTOSAVE_FAILED);
+      return false;
     },
   };
 }

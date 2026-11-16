@@ -1506,6 +1506,126 @@
         "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
         "timestamp": 1794787926464
       }
+    ],
+    "22.1 Measure the kind frequencies before changing anything": [
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790982175
+      },
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790990036
+      },
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794791289144
+      }
+    ],
+    "22.2 Add the per-kind arbitraries": [
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790982226
+      }
+    ],
+    "22.3 Add the Witness_Documents": [
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790982292
+      }
+    ],
+    "22.4 Rewrite the reachability tests": [
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790982347
+      }
+    ],
+    "22.5 Audit the other reachability tests": [
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790982375
+      }
+    ],
+    "23.1 Add the Draft_Gate and make Autosave respect it": [
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790982405
+      },
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790990526
+      }
+    ],
+    "23.2 Block on load and move the autosave wiring into a plain function": [
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790982443
+      }
+    ],
+    "23.3 Add the saved-copy helper, the download media type and the notices": [
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790982473
+      }
+    ],
+    "23.4 Show the Draft_Notice in the Issues region": [
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790982499
+      }
+    ],
+    "23.5 Start a new document, Toolbar New and the print guard": [
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790982557
+      }
+    ],
+    "23.6 Write the example tests for the unreadable draft": [
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790982590
+      }
+    ],
+    "24.1 Update the aggregate inventory test to twenty": [
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790982621
+      }
+    ],
+    "24.2 Write the documentation and the BUILD_LOG entry": [
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790982646
+      }
+    ],
+    "25. Final checkpoint": [
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790982671
+      }
+    ],
+    "23.7 Write property test for the unreadable stored draft": [
+      {
+        "executionId": "c7d922aa-b877-4243-a65e-c3a6c4bfd277",
+        "chatSessionId": "sess_e01715e3-accf-4479-8b53-c90a968819db",
+        "timestamp": 1794790986418
+      }
     ]
   }
 }

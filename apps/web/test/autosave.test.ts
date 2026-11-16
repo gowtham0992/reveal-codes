@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AUTOSAVE_FAILED, createAutosave } from "../src/autosave";
+import { createDraftGate } from "../src/draft-gate";
 import { AUTOSAVE_KEY, deserialise } from "../src/persist";
 import { createManualTimers } from "./support/clock";
 import { createMemoryStorage } from "./support/memory-storage";
@@ -118,5 +119,82 @@ describe("what is stored _Requirements: 9.7_", () => {
     autosave.flush();
     const stored = JSON.parse(storage.getItem(AUTOSAVE_KEY) ?? "null") as object;
     expect(Object.keys(stored).sort()).toEqual(["codes", "runLog", "verifiedAt", "version"]);
+  });
+});
+
+describe("Draft_Gate and clear result _Requirements: 23.4, 23.20_", () => {
+  function gated(storage: MemoryStorage = createMemoryStorage()) {
+    const timers = createManualTimers();
+    const errors: string[] = [];
+    const gate = createDraftGate();
+    const autosave = createAutosave({
+      storage,
+      gate,
+      setTimer: (fn, ms) => timers.setTimeout(fn, ms),
+      clearTimer: (h) => {
+        timers.clearTimeout(h as number);
+      },
+      onError: (m) => {
+        errors.push(m);
+      },
+    });
+    return { timers, errors, autosave, storage, gate };
+  }
+
+  it("a blocked gate starts no timer, and flush writes nothing", () => {
+    const { timers, autosave, storage, gate } = gated();
+    gate.block();
+    autosave.schedule(editedDocument(), [], null);
+    expect(timers.pending()).toBe(0);
+    expect(autosave.flush()).toBe(true);
+    timers.advance(1000);
+    expect(storage.writes()).toBe(0);
+  });
+
+  it("blocking after schedule drops the pending job", () => {
+    const { timers, autosave, storage, gate } = gated();
+    autosave.schedule(editedDocument(), [], null);
+    gate.block();
+    timers.advance(300);
+    autosave.flush();
+    expect(storage.writes()).toBe(0);
+  });
+
+  it("writes resume after release", () => {
+    const { timers, autosave, storage, gate } = gated();
+    gate.block();
+    gate.release();
+    autosave.schedule(editedDocument(), [], null);
+    timers.advance(300);
+    expect(storage.writes()).toBe(1);
+  });
+
+  it("clear returns true on removal and false after onError", () => {
+    expect(gated().autosave.clear()).toBe(true);
+    const failing = createMemoryStorage();
+    const broken = {
+      ...failing,
+      removeItem: () => {
+        throw new Error("denied");
+      },
+    };
+    const { autosave, errors } = gated(broken);
+    expect(autosave.clear()).toBe(false);
+    expect(errors).toEqual([AUTOSAVE_FAILED]);
+  });
+
+  it("the gate notifies only on a change", () => {
+    const gate = createDraftGate();
+    let calls = 0;
+    const off = gate.subscribe(() => {
+      calls += 1;
+    });
+    gate.release();
+    gate.block();
+    gate.block();
+    gate.release();
+    off();
+    gate.block();
+    expect(calls).toBe(2);
   });
 });

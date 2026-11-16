@@ -479,7 +479,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
 Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new and written from the design section "Second follow-up". No task commits or pushes.
 
 - [ ] 22. Reachability tests without a seed (Requirement 22)
-  - [~] 22.1 Measure the kind frequencies before changing anything
+  - [x] 22.1 Measure the kind frequencies before changing anything
     - Do this first, with no code changed. Write a throwaway script under `packages/engine/` (for example `measure-kinds.tmp.ts`), run it with the package's `tsx` runner, and delete it before the task ends. Do not commit it.
     - Draw 100,000 values of `arbTamperDocument.chain((d) => arbSemanticTamper(d))` with `fc.sample` (use 20,000 and say so if 100,000 takes more than about ten minutes). Print each `TamperKind` with its count and rate, sorted ascending, the number of members of `TAMPER_KINDS`, and `(1 - p)^1500` for the rarest kind. Print the same for the Syntax_Fault_Kinds over `arbDocument.chain((d) => arbSyntaxFault(render(d, "full").text))` and the share of draws with more than one fault.
     - Keep the numbers for the BUILD_LOG entry of task 24.2: the Rare_Kind, its count and rate, the miss probability over 1,500 draws, the kind count found in the tree (the author counted 22 in the failing run; report the difference if there is one), the fact that 1,500 is a literal `numRuns`, and that the syntax test used `max(runs().numRuns, 400)`.
@@ -510,7 +510,7 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - _Requirements: 22.8, 22.13_
 
 - [ ] 23. An unreadable saved draft is never silently replaced (Requirement 23)
-  - [~] 23.1 Add the Draft_Gate and make Autosave respect it
+  - [-] 23.1 Add the Draft_Gate and make Autosave respect it
     - Create `apps/web/src/draft-gate.ts` with `createDraftGate()` (`blocked`, `block`, `release`, `subscribe`; notify only on a change).
     - In `apps/web/src/autosave.ts` add the optional `gate` dependency: `schedule` starts no timer and keeps no pending job while blocked, `write` drops a pending job while blocked, and `clear()` returns `boolean` (true when the key was removed; false after calling `onError`). With no gate the behaviour is unchanged.
     - _Requirements: 23.4, 23.20_
@@ -527,18 +527,18 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - In `notices.ts` add `UNREADABLE_DRAFT`, `SAVE_COPY_FAILED` and `PRINT_BLOCKED` with the texts of the design.
     - _Requirements: 23.9, 23.11, 23.18, 23.21, 23.22_
 
-  - [ ] 23.4 Show the Draft_Notice in the Issues region
+  - [~] 23.4 Show the Draft_Notice in the Issues region
     - Create `apps/web/src/components/unreadable-draft.tsx` and `unreadable-draft.module.css`: a paragraph in a `role="status"` element holding `UNREADABLE_DRAFT`, then two `button type="button"` elements `Save a copy` and `Start a new document` outside it, 24px high, existing Tokens only, no colour literal, no icon.
     - In `issues-region.tsx` add the optional `draft` prop and render the notice first in the body while `draft.blocked`. It does not change `issuesHeading`, the list or the Resolved list.
     - In `app-shell.tsx` read the gate with `useSyncExternalStore` and pass `draft` through `IssuesSlot`.
     - _Requirements: 23.6, 23.7, 23.8, 23.22_
 
-  - [ ] 23.5 Start a new document, Toolbar New and the print guard
+  - [~] 23.5 Start a new document, Toolbar New and the print guard
     - In `use-document-actions.tsx` add the pending kind `"newBlocked"` with the confirm copy of Requirement 23, criterion 12. `onNew` asks `"newBlocked"` when the gate is blocked. A confirmed `"newBlocked"` runs `startNew` and releases the gate only when `autosave.clear()` returned `true`; otherwise the gate stays blocked. Return `onStartNewDraft` and `onSaveDraftCopy` (dispatching `SAVE_COPY_FAILED` when `saveDraftCopy` returns `false`) and wire them to the Draft_Notice in `app-shell.tsx`. Sample loads do not touch the gate.
     - In `use-export.tsx`, `printFlow` checks the gate first and dispatches `PRINT_BLOCKED` without calling `autosave` or `openPrint`.
     - _Requirements: 23.10, 23.12, 23.13, 23.14, 23.15, 23.16, 23.17, 23.18_
 
-  - [ ] 23.6 Write the example tests for the unreadable draft
+  - [~] 23.6 Write the example tests for the unreadable draft
     - New `apps/web/test/unreadable-draft.test.tsx`, rendering `AppShell` with the memory storage and the manual timers of `test/support`: for each of `not_json`, `bad_shape` and `bad_codes` (the last from the old pincite draft of `autosave-old-pincite.test.ts`), the stored value survives the load, typing and a 300 ms wait (compare `storage.getItem` and `storage.writes()` before and after); the notice text and the two buttons are present, the notice sits in a polite status region and the buttons are outside it; the notice leaves the blocking count, the Issues heading, the Export button, the Next_Step and `No issues.` as they are.
     - Save a copy: the `download` double receives the stored bytes unchanged (an ASCII value, a non-ASCII value, the old pincite draft), the name `reveal-codes-saved-draft.txt` and the type `text/plain;charset=utf-8`, and the stored value and the notice stay; with `getItem` returning `null` or `download` throwing, `SAVE_COPY_FAILED` shows.
     - Start a new document: the confirm dialog shows the title, message and label of the design; cancelling changes nothing; confirming clears the stored value, empties the page, removes the notice and a later edit is saved after 300 ms; with a storage whose `removeItem` throws, `AUTOSAVE_FAILED` shows, the notice stays and nothing is written. The Toolbar's New button while blocked opens the same dialog.
@@ -547,26 +547,26 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - Edit any existing test that breaks because `clear()` returns `boolean` or `download` has a third parameter, and list it for the BUILD_LOG. `autosave-old-pincite.test.ts` must pass unedited.
     - _Requirements: 23.1, 23.3, 23.4, 23.5, 23.6, 23.7, 23.8, 23.9, 23.10, 23.11, 23.12, 23.13, 23.14, 23.15, 23.16, 23.17, 23.18, 23.19, 23.22, 23.25_
 
-  - [ ]* 23.7 Write property test for the unreadable stored draft
+  - [~]* 23.7 Write property test for the unreadable stored draft
     - In `apps/web/test/case-match.properties.test.ts` add `// Property 20` above one `fc.assert(fc.property(...))`, a describe title ending `_Requirements: 23.23_`, and `numRuns` from the web `runs()` helper.
     - **Property 20: An unreadable stored draft is never changed by load, typing or saving**
     - Add `arbUnreadableStored` to `apps/web/test/arbitraries.ts` with three branches: text that is not JSON, JSON of the wrong shape or version (built from `fc.jsonValue()` and forced fields), and a well-formed envelope whose `codes` come from the engine's `arbSemanticTamper` or `arbSyntaxFault`. Inside the property, assert `deserialise(raw)` is an error other than `absent`, then run `loadAutosave` and `startAutosave` over `createMemoryStorage`, the manual timers and a `createDraftGate`, dispatch edits from `arbOpSequence` to the store, advance 300 ms or more, call `flush`, fire a hidden visibility change and stop; assert the stored value equals `raw` and `setItem` was not called after the seed.
     - **Validates: Requirements 23.1, 23.3, 23.4, 23.23**
 
 - [ ] 24. Inventory and documentation (Requirements 21, 23, 24)
-  - [ ] 24.1 Update the aggregate inventory test to twenty
+  - [~] 24.1 Update the aggregate inventory test to twenty
     - In `apps/web/test/static/case-match-inventory.test.ts` change the web entry of `OWNERS` to `[16, 17, 20]`, and change every `19`, `nineteen` and `1 to 19` check and test title to twenty and 1 to 20. Keep the self-test.
     - Confirm the design holds the heading `### Property 20:` and that the test fails if Property 20's marker is removed.
     - _Requirements: 24.3_
 
-  - [ ] 24.2 Write the documentation and the BUILD_LOG entry
+  - [~] 24.2 Write the documentation and the BUILD_LOG entry
     - README `Limits`: remove the bullet that says an old draft is overwritten by the first autosave, and add no replacement bullet.
     - BUILD_LOG: add a dated entry with the CI failure of aef6d70 and its cause; the measurement of task 22.1 (Rare_Kind, count, rate, miss probability over 1,500 draws, kind count found against the 22 the author counted, 1,500 as a literal `numRuns`, `max(runs().numRuns, 400)` for the syntax test); the audit of task 22.5 with each test examined, its seed and what was done; the unreadable-draft change and its decisions (only Start a new document opens the gate; Save a copy and sample loads do not; the Toolbar's New while blocked is the same action; print is blocked; UTF-8 encoding of the saved copy and the lone-surrogate limit; multiple tabs out of scope); and every existing test edited in tasks 23.6 and 22.4. Keep the earlier entry that records the old behaviour.
     - `.kiro/steering/structure.md`: add `draft-gate.ts` and `saved-draft.ts` to the listing of `apps/web/src/`, and `tamper-witnesses.ts` under `packages/engine/test/support/` if the listing names that folder. Update `docs/KIRO_USAGE.md` only if a row names a file that this task changes.
     - No exclamation mark and no marketing text.
     - _Requirements: 22.10, 22.11, 22.13, 23.24, 24.4_
 
-- [ ] 25. Final checkpoint
+- [~] 25. Final checkpoint
   - Run `pnpm lint`, `pnpm typecheck`, `pnpm test` three times in a row and report each result (the three runs show that the reachability tests are stable), `pnpm test:pbt`, `pnpm --filter @reveal-codes/web build` (the clean-checkout web build) and `pnpm kiro:check`. Fix any failure in the code, never in a test's meaning.
   - State in the report that the push and the check of CI are left to the author. Do not push.
   - Ensure all tests pass, ask the user if questions arise.
