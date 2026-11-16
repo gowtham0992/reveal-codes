@@ -121,7 +121,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - The view renders one block with the line "The statement is not shown until you state whether generative AI was used to prepare <subject>. Make that statement in the Export dialog." and a link to `/` with the text "Back to the editor". The block's class hides it in `@media print`. No declaration control in the Print view. When the Declaration is applicable and Used_AI holds, render the first-page heading lines as the DOCX does.
     - _Requirements: 4.3, 4.4, 4.5, 4.8, 4.13, 7.1_
 
-  - [-] 6.3 Change the Legend entry in `apps/web/src/pane/pane-header.tsx`
+  - [x] 6.3 Change the Legend entry in `apps/web/src/pane/pane-header.tsx`
     - Change the `[PST]` entry's words from "pasted" to "pasted, origin not recorded". Change no other entry, colour, code or style.
     - _Requirements: 9.1, 9.2, 9.3_
 
