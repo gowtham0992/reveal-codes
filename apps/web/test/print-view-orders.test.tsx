@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { Document } from "@reveal-codes/engine";
+import { declareNone } from "@reveal-codes/engine";
+import type { Declaration, Document } from "@reveal-codes/engine";
 import { ORDERS, buildStatement, firstPageHeading, renderStatement } from "@reveal-codes/export";
 import { describe, expect, it } from "vitest";
 import { ExportDialog } from "../src/components/export-dialog";
@@ -22,9 +23,13 @@ import type { MemoryStorage } from "./support/memory-storage";
 import { printAiDocument, printEntry, printHumanDocument } from "./support/print-fixtures";
 import { fireEvent, renderUi, screen } from "./support/render";
 
-function seeded(document: Document, entryId: string | null): MemoryStorage {
+function seeded(
+  document: Document,
+  entryId: string | null,
+  declaration: Declaration | null = null,
+): MemoryStorage {
   const storage = createMemoryStorage();
-  storage.setItem(AUTOSAVE_KEY, serialise(document, [], EXPORT_VERIFIED_AT, null));
+  storage.setItem(AUTOSAVE_KEY, serialise(document, [], EXPORT_VERIFIED_AT, declaration));
   if (entryId !== null) {
     storage.setItem(ORDER_KEY, JSON.stringify({ version: 1, entryId }));
   }
@@ -121,7 +126,7 @@ describe("Print_View first-page block _Requirements: 7.6, 7.7_", () => {
     expect(
       print(seeded(printAiDocument(), null)).container.querySelectorAll("section"),
     ).toHaveLength(3);
-    const noAi = print(seeded(printHumanDocument(), "ndtex-lr-7-2-f"));
+    const noAi = print(seeded(printHumanDocument(), "ndtex-lr-7-2-f", declareNone("this_filing")));
     expect(noAi.container.querySelectorAll("section")).toHaveLength(3);
     expect(noAi.container.innerHTML).not.toContain("firstPage");
     noAi.unmount();

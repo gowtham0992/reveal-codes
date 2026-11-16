@@ -94,7 +94,17 @@
   margin: 24px 0 0;
 }
 
+.pending {
+  margin: 0 0 12px;
+}
+.link {
+  color: var(--print-ink);
+  text-decoration: underline;
+}
 @media print {
+  .pending {
+    display: none;
+  }
   .controls {
     display: none;
   }

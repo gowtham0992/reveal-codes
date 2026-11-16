@@ -1,6 +1,7 @@
 "use client";
 
-import { ORDERS, orderById } from "@reveal-codes/export";
+import type { DeclarationSubject } from "@reveal-codes/engine";
+import { ORDERS, orderById, subjectPhrase } from "@reveal-codes/export";
 import type { Appendix, OrderEntry, StatementBlock } from "@reveal-codes/export";
 import { useEffect, useState } from "react";
 import { CONFIDENTIALITY_REQUIRED } from "../order-copy";
@@ -194,9 +195,26 @@ function ModelView({ model, order, ticked, onTick }: ModelViewProps) {
           <ProhibitedView model={model} />
         </>
       );
+    case "declaration_pending":
+      return <PendingView subject={model.subject} />;
     case "ready":
       return <ReadyView model={model} order={order} ticked={ticked} onTick={onTick} />;
   }
+}
+
+export function declarationPendingText(subject: DeclarationSubject): string {
+  return `The statement is not shown until you state whether generative AI was used to prepare ${subjectPhrase(subject)}. Make that statement in the Export dialog.`;
+}
+
+function PendingView({ subject }: Readonly<{ subject: DeclarationSubject }>) {
+  return (
+    <div className={styles["pending"]}>
+      <p className={styles["message"]}>{declarationPendingText(subject)}</p>
+      <a href="/" className={styles["link"]}>
+        Back to the editor
+      </a>
+    </div>
+  );
 }
 
 type Loaded = Readonly<{ model: PrintModel; order: OrderEntry | null }>;

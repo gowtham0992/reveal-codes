@@ -1,3 +1,4 @@
+import { declareNone } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
 import { buildStatement, firstPageHeading, renderStatement } from "@reveal-codes/export";
 import { describe, expect, it } from "vitest";
@@ -40,7 +41,7 @@ describe("printModel with an order _Requirements: 3.12, 5.11, 6.8, 6.9, 7.6_", (
   });
 
   it("ready has no heading when the document has no AI text", () => {
-    const raw = serialise(printHumanDocument(), [], EXPORT_VERIFIED_AT, null);
+    const raw = serialise(printHumanDocument(), [], EXPORT_VERIFIED_AT, declareNone("this_filing"));
     const model = ready(printModel(raw, EXPORT_NOW, printEntry("ndtex-lr-7-2-f")));
     expect(model.heading).toBeNull();
     expect(model.certifiedBlocks).toBeNull();

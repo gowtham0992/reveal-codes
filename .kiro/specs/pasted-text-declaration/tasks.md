@@ -107,7 +107,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Update `draft-gate.ts` and every other caller of `serialise`, `schedule` and `deserialise` so a missed caller is a type error.
     - _Requirements: 5.1, 5.9, 5.10, 5.11_
 
-- [ ] 6. Web: Export dialog, Print view and Legend
+- [x] 6. Web: Export dialog, Print view and Legend
   - [x] 6.1 Add the declaration controls
     - New `components/use-declaration.ts` (`DeclarationView`: subject, required, choice, toolText, toolFault, setChoice, setToolText), `components/declaration-controls.tsx` and `components/declaration-controls.module.css`.
     - Initial state is read from `applicableDeclaration`; with none, no radio is selected. No default, nothing derived from the text. Mount with `key={subject}`.
@@ -116,7 +116,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Follow `ui.md`: text labels only, no icon, no animation, colours only as `var(--token)`, one CSS module, no network call carrying the Declaration.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.8, 3.9, 5.2_
 
-  - [~] 6.2 Add the `declaration_pending` Print view
+  - [x] 6.2 Add the `declaration_pending` Print view
     - `print-model.ts`: `PrintModel` gains `{ kind: "declaration_pending"; subject }`. `printModel` checks storage error, parse error, `canExport` (blocked or prohibited, prohibition line first), then `declarationRequired`, then builds with the stored Declaration for `buildStatement` and the Applicable_Declaration for `buildAppendix`.
     - The view renders one block with the line "The statement is not shown until you state whether generative AI was used to prepare <subject>. Make that statement in the Export dialog." and a link to `/` with the text "Back to the editor". The block's class hides it in `@media print`. No declaration control in the Print view. When the Declaration is applicable and Used_AI holds, render the first-page heading lines as the DOCX does.
     - _Requirements: 4.3, 4.4, 4.5, 4.8, 4.13, 7.1_
@@ -188,7 +188,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - **Validates: Requirements 5.3, 5.6, 5.7, 5.12**
 
 - [ ] 12. Example tests (exact cases)
-  - [~] 12.1 Export package example tests
+  - [x] 12.1 Export package example tests
     - Paragraph 2 cases: assistant text with and without pasted text; typed only with no order; typed only under an order that requires a statement with None and with Declared_AI; substantive pasted text with None and with Declared_AI; whitespace-only paste with no order and no Author_Sentence.
     - For each Order_Entry kind, Declared_AI pasted text with no Assistant_Text, asserting the Requirement 7 sentences or the prohibition refusal. For an order that requires a statement, a typed-only filing with the `this_filing` Declaration None and Declared_AI.
     - The N.D. Tex. `first_page_heading` in the DOCX; "ChatGPT (GPT-4o)" printed unchanged; `buildStatement` error values; the prohibition lines of Requirement 6 criteria 6 and 7; the `programWithAuthor` variant with no recorded tool.
@@ -206,7 +206,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - The Legend shows "pasted, origin not recorded" and the other seven entries are unchanged. The demo motion and the Avianca sample each ask for the declaration.
     - _Requirements: 5.1, 5.3, 5.4, 5.5, 5.6, 5.7, 5.9, 5.10, 5.11, 9.1, 9.2, 10.1, 10.2, 12.8, 12.10, 12.11_
 
-  - [~] 12.4 Sentinel example tests
+  - [x] 12.4 Sentinel example tests
     - "No drift." for a Declared_AI export and for a None export. A file exported before this feature (the Appendix built with `d` removed) reads as "No drift." with `declaration: null`.
     - _Requirements: 8.6, 8.9, 12.9_
 

@@ -1,3 +1,4 @@
+import { declareNone } from "@reveal-codes/engine";
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { PrintView } from "../src/components/print-view";
@@ -76,7 +77,9 @@ describe("PrintView non-ready states _Requirements: 8.6, 8.7, 8.8, 8.9_", () => 
 
 describe("PrintView ready state _Requirements: 8.2, 8.3, 8.4, 8.5, 8.9_", () => {
   function ready() {
-    return view(serialise(overriddenDocument(), [], EXPORT_VERIFIED_AT, null));
+    return view(
+      serialise(overriddenDocument(), [], EXPORT_VERIFIED_AT, declareNone("pasted_text")),
+    );
   }
 
   it("renders filing, statement and appendix sections with titles first", () => {
@@ -96,7 +99,9 @@ describe("PrintView ready state _Requirements: 8.2, 8.3, 8.4, 8.5, 8.9_", () => 
   it("prints the plain sentences and no table for a filing with no citation or quotation", () => {
     const created = createDocument("Notice of appearance.", ISO);
     if (!created.ok) throw new Error("fixture rejected");
-    const { container } = view(serialise(created.value, [], EXPORT_VERIFIED_AT, null));
+    const { container } = view(
+      serialise(created.value, [], EXPORT_VERIFIED_AT, declareNone("pasted_text")),
+    );
     const statement = container.querySelectorAll("section")[1];
     expect(statement?.textContent).toContain("3. This filing contains no legal citations.");
     expect(statement?.textContent).toContain(
@@ -122,5 +127,21 @@ describe("PrintView ready state _Requirements: 8.2, 8.3, 8.4, 8.5, 8.9_", () => 
     const sections = container.querySelectorAll("section");
     expect(sections[1]?.textContent).not.toContain("!");
     expect(sections[2]?.firstElementChild?.textContent).not.toContain("!");
+  });
+});
+
+describe("PrintView declaration pending _Requirements: 4.3, 4.4, 4.5_", () => {
+  const LINE =
+    "The statement is not shown until you state whether generative AI was used to prepare the pasted text. Make that statement in the Export dialog.";
+
+  it("shows one line and a link back to the editor, with no controls", () => {
+    const created = createDocument("Plain pasted text.", ISO);
+    if (!created.ok) throw new Error("fixture rejected");
+    const { container } = view(serialise(created.value, [], EXPORT_VERIFIED_AT, null));
+    expect(container.querySelectorAll("section")).toHaveLength(0);
+    expect(container.textContent).toBe(`${LINE}Back to the editor`);
+    const link = screen.getByRole("link", { name: "Back to the editor" });
+    expect(link.getAttribute("href")).toBe("/");
+    expect(container.querySelector("input, button, select")).toBeNull();
   });
 });

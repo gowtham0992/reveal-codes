@@ -1,4 +1,4 @@
-import { blockingIssues, createDocument, render } from "@reveal-codes/engine";
+import { blockingIssues, createDocument, declareNone, renderRecord } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import { serialise } from "../src/persist";
 import { printModel } from "../src/print-model";
@@ -43,10 +43,14 @@ describe("printModel _Requirements: 8.1, 8.6, 8.7, 8.8_", () => {
   });
 
   it("returns unreadable when the statement cannot be built", () => {
-    const raw = serialise(clean("Plain text."), [], "not a date", null);
+    const raw = serialise(clean("Plain text."), [], "not a date", declareNone("pasted_text"));
     expect(printModel(raw, EXPORT_NOW, null)).toEqual({ kind: "unreadable" });
     expect(
-      printModel(serialise(clean("Plain text."), [], null, null), new Date(Number.NaN), null),
+      printModel(
+        serialise(clean("Plain text."), [], null, declareNone("pasted_text")),
+        new Date(Number.NaN),
+        null,
+      ),
     ).toEqual({
       kind: "unreadable",
     });
@@ -65,7 +69,11 @@ describe("printModel _Requirements: 8.1, 8.6, 8.7, 8.8_", () => {
 
   it("returns ready with filing paragraphs, titles and local dates", async () => {
     const doc = await gateClearDocument();
-    const model = printModel(serialise(doc, [], EXPORT_VERIFIED_AT, null), EXPORT_NOW, null);
+    const model = printModel(
+      serialise(doc, [], EXPORT_VERIFIED_AT, declareNone("pasted_text")),
+      EXPORT_NOW,
+      null,
+    );
     if (model.kind !== "ready") throw new Error(`expected ready, got ${model.kind}`);
     expect(model.paragraphs).toEqual(doc.text.split("\n"));
     const first = model.blocks[0];
@@ -76,6 +84,28 @@ describe("printModel _Requirements: 8.1, 8.6, 8.7, 8.8_", () => {
     const para3Text = para3 !== undefined && para3.kind === "paragraph" ? para3.text : "";
     expect(para3Text).toContain(localDay(new Date(EXPORT_VERIFIED_AT)));
     expect(model.appendix.title).toBe("Provenance Appendix");
-    expect(model.appendix.lines.join("\n")).toBe(render(doc, "full").text);
+    expect(model.appendix.lines.join("\n")).toBe(
+      renderRecord(doc, declareNone("pasted_text"), "full").text,
+    );
+  });
+});
+
+describe("printModel declaration gate _Requirements: 4.4, 4.8, 4.13_", () => {
+  it("returns declaration_pending for pasted text with no stored Declaration", () => {
+    const raw = serialise(clean("Plain text."), [], EXPORT_VERIFIED_AT, null);
+    expect(printModel(raw, EXPORT_NOW, null)).toEqual({
+      kind: "declaration_pending",
+      subject: "pasted_text",
+    });
+  });
+
+  it("treats a Declaration of the other subject as pending", () => {
+    const raw = serialise(clean("Plain text."), [], EXPORT_VERIFIED_AT, declareNone("this_filing"));
+    expect(printModel(raw, EXPORT_NOW, null).kind).toBe("declaration_pending");
+  });
+
+  it("is ready once the stored Declaration applies", () => {
+    const raw = serialise(clean("Plain text."), [], EXPORT_VERIFIED_AT, declareNone("pasted_text"));
+    expect(printModel(raw, EXPORT_NOW, null).kind).toBe("ready");
   });
 });

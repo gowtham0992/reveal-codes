@@ -1,9 +1,12 @@
 import { blockingIssues } from "@reveal-codes/engine";
-import type { Document } from "@reveal-codes/engine";
+import type { Declaration, DeclarationSubject, Document } from "@reveal-codes/engine";
 import {
+  applicableDeclaration,
   buildAppendix,
   buildStatement,
   canExport,
+  declarationRequired,
+  declarationSubject,
   firstPageHeading,
   needsConfidentiality,
   prohibitionNotice,
@@ -34,6 +37,7 @@ export type PrintModel =
       blocking: readonly BlockedItem[];
       notice: ProhibitionNotice;
     }>
+  | Readonly<{ kind: "declaration_pending"; subject: DeclarationSubject }>
   | Readonly<{
       kind: "ready";
       paragraphs: readonly string[];
@@ -58,9 +62,10 @@ function build(
   meta: Readonly<{ now: Date; verifiedAt: string | null }>,
   order: OrderEntry | null,
   confidentialityCertified: boolean,
+  declaration: Declaration | null,
 ): Built | null {
   const context = order === null ? null : { entry: order, confidentialityCertified };
-  const statement = buildStatement(document, runLog, meta, context);
+  const statement = buildStatement(document, runLog, meta, context, declaration);
   if (!statement.ok) return null;
   return { statement: statement.value, blocks: renderStatement(statement.value) };
 }
@@ -79,19 +84,23 @@ export function printModel(
   if (!restored.ok) {
     return restored.error.kind === "absent" ? { kind: "absent" } : { kind: "unreadable" };
   }
-  const { document, runLog, verifiedAt } = restored.value;
-  if (!canExport(document, order)) {
+  const { document, runLog, verifiedAt, declaration } = restored.value;
+  if (!canExport(document, order, declaration)) {
     const blocking = blockedItems(document);
-    const notice = prohibitionNotice(document, order);
+    const notice = prohibitionNotice(document, order, declaration);
     return notice === null
       ? { kind: "blocked", blocking }
       : { kind: "prohibited", blocking, notice };
   }
+  if (declarationRequired(document, order, declaration)) {
+    const subject = declarationSubject(document, order);
+    if (subject !== "none") return { kind: "declaration_pending", subject };
+  }
   const meta = { now, verifiedAt };
-  const primary = build(document, runLog, meta, order, false);
+  const primary = build(document, runLog, meta, order, false, declaration);
   if (primary === null) return { kind: "unreadable" };
-  const certified = needsConfidentiality(document, order)
-    ? build(document, runLog, meta, order, true)
+  const certified = needsConfidentiality(document, order, declaration)
+    ? build(document, runLog, meta, order, true, declaration)
     : null;
   return {
     kind: "ready",
@@ -99,6 +108,6 @@ export function printModel(
     blocks: primary.blocks,
     heading: firstPageHeading(primary.statement),
     certifiedBlocks: certified === null ? null : certified.blocks,
-    appendix: buildAppendix(document),
+    appendix: buildAppendix(document, applicableDeclaration(document, order, declaration)),
   };
 }

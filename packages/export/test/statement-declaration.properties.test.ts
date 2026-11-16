@@ -79,9 +79,7 @@ function checkText(i: Input, text: string, subject: Subject | "none"): void {
   const noneApplies = applicable !== null && applicable.choice === "none" && subject !== "none";
   for (const s of sentencesOf(text)) {
     if (!NO_AI_PATTERN.test(s)) continue;
-    const allowed =
-      RECORD_SENTENCES.includes(s) ||
-      (noneApplies && subject !== "none" && s === noneSentence(subject));
+    const allowed = RECORD_SENTENCES.includes(s) || (noneApplies && s === noneSentence(subject));
     expect(allowed, `unexpected no-AI sentence: ${s}`).toBe(true);
   }
   for (const s of ["pasted_text", "this_filing"] as const) {
