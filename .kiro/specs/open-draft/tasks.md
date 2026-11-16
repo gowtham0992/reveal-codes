@@ -119,7 +119,7 @@ Conventions that apply to every task:
     - Create `apps/web/src/limits.ts` with the one definition (`200_000`, no imports). `apps/web/src/server/verify-route.ts` imports it and re-exports the name so `test/verify-route.test.ts` is unchanged. Add `limits.ts` to the browser-bundle check in `apps/web/test/static/boundaries.test.ts` only if the rule table needs it.
     - Run `pnpm --filter @reveal-codes/web test -- test/static/boundaries.test.ts` with the real files in place and record that it passes (and that `forbidden.test.ts`, `package-json.test.ts` and `env-and-size.test.ts` still pass).
     - _Requirements: 14.4, 21.8_
-  - [-] 6.2 Store `openNote` and the `nextRunId` change (approved)
+  - [x] 6.2 Store `openNote` and the `nextRunId` change (approved)
     - `apps/web/src/store.ts` (and `store-actions.ts` if the handler lives there): add `openNote: string | null` (initial `null`) and the action `{ type: "openNote"; text: string | null }`; `reduceReplace` sets `openNote` to `null` (New, Load demo motion and Load the Avianca citations clear it). `persist.ts` is untouched: the note is never stored.
     - `apps/web/src/assistant-run.ts`: `nextRunId` returns `r` plus one more than the highest number in any `r<digits>` id held by `document.runs` or `runLog`. For contiguous ids the result is as before. This change is outside the modules the requirements name and is **approved by the author** (design, Resolved decision 11); an empty restored Run_Log needs it so that a second run never reuses an id.
     - Update existing store tests that build a full `StoreState`.
