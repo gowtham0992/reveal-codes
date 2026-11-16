@@ -111,7 +111,7 @@ Conventions that apply to every task:
     - Files under `apps/web/test/`. `docxSafe` at paste, drop, the two samples and assistant insertion (a reply that splits a surrogate pair across chunks is not cut); the export refusal for a stored draft with a Docx_Unsafe_Character in the text and in an override reason, with the exact message, nothing downloaded and the Document unchanged. The Open_Message and restore examples of Requirement 22 are in task 8.14.
     - _Requirements: 22.3, 22.8, 19.15_
 
-- [~] 5. Checkpoint - `docxSafe` and the export refusal
+- [x] 5. Checkpoint - `docxSafe` and the export refusal
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 6. Limits, Store changes and the Next_Step gap
