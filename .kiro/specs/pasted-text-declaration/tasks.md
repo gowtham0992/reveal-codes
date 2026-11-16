@@ -58,7 +58,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Export them from the package index. `isAiSpan` stays in `statement-parts.ts` for `aiPassages` only.
     - _Requirements: 4.8, 5.8, 5.9, 6.1_
 
-  - [-] 3.2 Add `packages/export/src/declaration-wording.ts` and `packages/export/src/statement-error.ts`
+  - [x] 3.2 Add `packages/export/src/declaration-wording.ts` and `packages/export/src/statement-error.ts`
     - Builders with the exact strings of the design: `subjectPhrase`, `choiceNoneLabel`, `choiceAiLabel`, `TOOL_NAME_LINE`, `requiredLine`, `typedOnlySentence`, `typedAndPastedSentence`, `pastedAfterAssistantSentence`, `NO_PROGRAM_RECORD` (the constant "The record shows that no generative artificial intelligence program was used in the editor."), `declarationNone`, `declarationAi` (both subjects), `portionsDeclared`, `programWithAuthor` (with the "is not recorded" variant), `programAsNamed`, `howUsedDeclared`, `promptRecordsDeclared`, `prohibitionDeclaredLine`.
     - `StatementError = EngineError | { kind: "declaration_required"; subject } | { kind: "invalid_tool_name"; fault }`.
     - No builder renders "The author states that no program was used to prepare <subject>."; the Declaration None sentence of `declarationNone` is the only author no-AI sentence.
