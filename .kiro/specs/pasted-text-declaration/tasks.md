@@ -232,7 +232,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - A row for this spec, with the paths of `requirements.md`, `design.md` and `tasks.md`, and a row for the `product.md` steering changes (the `[DOC]` line and principle 1). No hook, agent or MCP tool is added by this feature, so add none.
     - _Requirements: 13.6_
 
-- [~] 14. Final checkpoint - run every check, no push
+- [x] 14. Final checkpoint - run every check, no push
   - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, `pnpm --filter @reveal-codes/web build` on a clean checkout (after a fresh `pnpm install`), and `pnpm kiro:check`. Record each result in `BUILD_LOG.md`.
   - Fix any failure at its cause. Do not weaken a test. If a test is hard to write, record that in `BUILD_LOG.md`.
   - Do not push to any remote and do not commit as part of this task.

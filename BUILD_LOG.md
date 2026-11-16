@@ -664,3 +664,13 @@ The author walked the app in a browser and found four things. Requirement 9.8 wa
 - `packages/export/test/statement-declaration.properties.test.ts` failed `pnpm typecheck` with TS2367 (a comparison between types with no overlap). It was fixed in the test file, and the property's intent is unchanged.
 - Duplicate Property numbering shows up in the static inventory tests: `crew/sentinel/test/static/boundaries.test.ts` and `apps/web/test/static/inventory.test.ts` currently fail. They are handled at the final checkpoint and are not changed here.
 - The static test `packages/export/test/static/ai-use-definition.test.ts` lists the removed sentences as forbidden strings. This entry paraphrases them for that reason.
+### Final checks (pasted-text-declaration, task 14)
+- `pnpm install`: passed (lockfile unchanged).
+- `pnpm lint`: passed (eslint and prettier check).
+- `pnpm typecheck`: passed.
+- `pnpm test`: passed, 318 files, 3517 tests. The two static inventory tests noted above (`crew/sentinel/test/static/boundaries.test.ts`, `apps/web/test/static/inventory.test.ts`) pass.
+- `pnpm test:pbt`: passed, 48 files, 169 tests.
+- `pnpm --filter @reveal-codes/web build`: passed in the working tree.
+- Clean checkout: the working tree was copied with rsync (excluding node_modules, .next, .git, .pnpm-store) to a temp directory outside the repo. `pnpm install --frozen-lockfile` and `pnpm --filter @reveal-codes/web build` both passed there. The temp directory was deleted.
+- `pnpm kiro:check`: passed (48 rows in docs/KIRO_USAGE.md).
+- No test was changed or weakened in this task. Nothing was committed or pushed.
