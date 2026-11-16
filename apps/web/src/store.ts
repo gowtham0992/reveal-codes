@@ -41,6 +41,8 @@ export type StoreState = Readonly<{
   /** The stored Declaration about pasted text; apply it with applicableDeclaration at use sites. */
   declaration: Declaration | null;
   notice: string | null;
+  /** The Open_Note shown in the Issues region; memory only, never persisted. */
+  openNote: string | null;
   epoch: number;
 }>;
 
@@ -63,7 +65,8 @@ export type StoreAction =
     }>
   | Readonly<{ type: "declaration"; declaration: Declaration | null }>
   | Readonly<{ type: "verified"; at: string }>
-  | Readonly<{ type: "notice"; text: string | null }>;
+  | Readonly<{ type: "notice"; text: string | null }>
+  | Readonly<{ type: "openNote"; text: string | null }>;
 
 export type ActionResult = Readonly<{
   state: StoreState;
@@ -89,8 +92,13 @@ export function initialState(now: () => Date): StoreState {
     verifiedAt: null,
     declaration: null,
     notice: null,
+    openNote: null,
     epoch: 0,
   };
+}
+
+function unchanged(state: StoreState): ActionResult {
+  return { state, changed: false, error: null, skipped: 0, caret: null };
 }
 
 /** Pure reducer. The clock is read only for coalescing (edit) and never mutates `state`. */
@@ -119,12 +127,8 @@ export function reduce(state: StoreState, action: StoreAction, now: () => Date):
     case "verified":
       return reduceVerified(state, action.at);
     case "notice":
-      return {
-        state: { ...state, notice: action.text },
-        changed: false,
-        error: null,
-        skipped: 0,
-        caret: null,
-      };
+      return unchanged({ ...state, notice: action.text });
+    case "openNote":
+      return unchanged({ ...state, openNote: action.text });
   }
 }

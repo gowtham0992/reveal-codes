@@ -165,6 +165,7 @@ export function reduceReplace(
     verifiedAt: verifiedAt ?? null,
     declaration: declarationAfter(declaration ?? null, document, false),
     notice: null,
+    openNote: null,
     epoch: state.epoch + 1,
   };
   return result(next, { changed: true });

@@ -81,6 +81,7 @@ function initialState(doc: Document, declaration: Declaration): StoreState {
     verifiedAt: null,
     declaration,
     notice: null,
+    openNote: null,
     epoch: 0,
   };
 }

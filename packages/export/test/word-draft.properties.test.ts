@@ -3,9 +3,18 @@ import { describe, expect, it } from "vitest";
 import type { Declaration, Document } from "@reveal-codes/engine";
 import { arbDeclaration } from "../../engine/src/testing/arb-declaration.js";
 import { arbDocument } from "../../engine/src/testing/arb-document.js";
-import { ORDERS, applicableDeclaration, canExport, declarationSubject } from "../src/index.js";
+import {
+  ORDERS,
+  applicableDeclaration,
+  canExport,
+  declarationSubject,
+  readDocx,
+  recordedDocument,
+  splitExport,
+} from "../src/index.js";
 import type { OrderContext, OrderEntry, RunInfo } from "../src/index.js";
-import { arbRunLog, runs } from "./support/arbitraries.js";
+import { applyBodyEdit, arbBodyEdit, arbRunLog, runs } from "./support/arbitraries.js";
+import { withParagraphText } from "./support/body-edit.js";
 import { compareRestored, exportBytes, reopen } from "./support/restore.js";
 
 const CERTIFYING: readonly OrderEntry[] = ORDERS.entries.filter(
@@ -81,6 +90,61 @@ describe("a reopened export is the exported Document _Requirements: 9.2, 9.3, 9.
             canExport(c.document, order, expected),
           );
         }
+      }),
+      { numRuns: runs() },
+    );
+  });
+});
+
+const arbChangedExport = arbRoundTrip.chain((c) =>
+  arbBodyEdit(c.document.text.split("\n")).map((edit) => ({ c, edit })),
+);
+
+/**
+ * The Sentinel's body_edited rule, run through the same shared readers `analyseFile` calls
+ * (crew/sentinel/src/analyse.ts and findings.ts): the body paragraphs joined with "\n" differ
+ * from the text recorded in the Appendix. analyseFile itself cannot be imported here: the Sentinel
+ * test project references this one, so a reference back would be a cycle.
+ */
+function sentinelEdited(bytes: Uint8Array): boolean {
+  const read = readDocx(bytes);
+  if (!read.ok) throw new Error("the exported file is not readable");
+  const parts = splitExport(read.value);
+  if (!parts.ok) throw new Error("the exported file has no statement and appendix");
+  const recorded = recordedDocument(parts.value.appendix);
+  if (!recorded.ok) throw new Error("the exported appendix is not readable");
+  return parts.value.body.join("\n") !== recorded.value.text;
+}
+
+describe("a changed export imports as pasted body text _Requirements: 9.9, 10.1, 10.2, 10.5, 10.6, 10.7, 18.5_", () => {
+  // Property 3
+  it("P3 a one-character body change reads as changed text, and the Sentinel agrees", async () => {
+    await fc.assert(
+      fc.asyncProperty(arbChangedExport, async ({ c, edit }) => {
+        const options = {
+          runLog: c.runLog,
+          verifiedAt: c.verifiedAt,
+          orderContext: c.orderContext,
+          declaration: applicableDeclaration(
+            c.document,
+            c.orderContext === null ? null : c.orderContext.entry,
+            c.declaration,
+          ),
+        };
+        const original = await exportBytes(c.document, options);
+        const paragraphs = c.document.text.split("\n");
+        const changed = applyBodyEdit(paragraphs, edit);
+        const edited = withParagraphText(original, edit.paragraph, changed[edit.paragraph] ?? "");
+
+        const draft = reopen(edited);
+        expect(draft).toEqual({ kind: "changed", text: changed.join("\n") });
+        expect(changed.join("\n")).not.toBe(c.document.text);
+        // The draft carries the changed text and nothing else: no Declaration, no spans, no Appendix data.
+        expect(Object.keys(draft).sort()).toEqual(["kind", "text"]);
+
+        const unchanged = reopen(original);
+        expect(sentinelEdited(edited)).toBe(draft.kind === "changed");
+        expect(sentinelEdited(original)).toBe(unchanged.kind === "changed");
       }),
       { numRuns: runs() },
     );

@@ -202,6 +202,16 @@
         "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
         "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
         "timestamp": 1794861515692
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794862735091
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794863097872
       }
     ],
     "2.11 Write property test for statement and appendix exclusion": [
@@ -274,6 +284,16 @@
         "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
         "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
         "timestamp": 1794861515822
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794862735138
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794863097904
       }
     ],
     "4.4 Write test that `holdsDocxUnsafe` is false for any `docxSafe` output": [
@@ -332,6 +352,16 @@
         "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
         "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
         "timestamp": 1794861515898
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794862736465
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794863097972
       }
     ],
     "5. Checkpoint - `docxSafe` and the export refusal": [
@@ -346,6 +376,11 @@
         "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
         "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
         "timestamp": 1794861515943
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794862736949
       }
     ],
     "6.2 Store `openNote` and the `nextRunId` change (approved)": [
@@ -353,6 +388,11 @@
         "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
         "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
         "timestamp": 1794861515971
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794862737553
       }
     ],
     "6.3 Write Store examples: `nextRunId` and `openNote`": [
@@ -556,6 +596,13 @@
         "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
         "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
         "timestamp": 1794861892234
+      }
+    ],
+    "4. `docxSafe`, the editor-input changes and the export refusal": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794863097998
       }
     ]
   }

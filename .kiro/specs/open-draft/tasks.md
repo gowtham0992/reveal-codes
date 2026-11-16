@@ -68,7 +68,7 @@ Conventions that apply to every task:
     - **Property 2: A reopened export is the exported Document**
     - File `packages/export/test/word-draft.properties.test.ts`. Existing `arbDocument` with overrides and every status, both Declaration subjects (Tool_Names with brackets, parentheses, quotation marks), any run log and verification time; the restore helpers of 2.5; assert `restored`, `structuralEqual`, the same Declaration, and equal `canExport` for every court.
     - **Validates: Requirements 9.2, 9.3, 9.7, 9.10, 12.1, 12.5, 13.8, 18.4**
-  - [~] 2.10 Write property test for a changed export
+  - [x] 2.10 Write property test for a changed export
     - **Property 3: A changed export imports as pasted body text**
     - Same file as 2.9. `arbBodyEdit` over the exported body; assert `changed` with the changed text, the installed Document is one `PST` span with no Declaration and the Open_Note of Requirement 10 criterion 4, and the Sentinel's `analyseFile` reports `body_edited` exactly when `readWordDraft` reports `changed`.
     - **Validates: Requirements 9.9, 10.1, 10.2, 10.5, 10.6, 10.7, 18.5**
@@ -90,7 +90,7 @@ Conventions that apply to every task:
   - [x] 4.2 `arbDocxHostileText`
     - In `packages/export/test/support/arbitraries.ts` add `arbDocxHostileText`: text that includes U+0000 to U+001F, U+FFFE, U+FFFF and unpaired surrogates, with code-unit sequences as well as strings. The existing arbitraries are not narrowed.
     - _Requirements: 22.6, 22.7_
-  - [~] 4.3 Write property test for DOCX-safe text
+  - [x] 4.3 Write property test for DOCX-safe text
     - **Property 4: DOCX-safe text**
     - File `packages/export/test/docx-text.properties.test.ts`. Any string and any code-unit sequence (`arbDocxHostileText`): no Docx_Unsafe_Character in the result, idempotence with `removed` 0 on the second pass, identity when none present and no `\r`; and export then reopen of a Document built from `docxSafe` text, through the restore helpers of 2.5, equals the original by `structuralEqual`.
     - **Validates: Requirements 22.1, 22.2, 22.6, 22.7, 18.6**
@@ -107,7 +107,7 @@ Conventions that apply to every task:
     - `apps/web/src/notices.ts`: add the constant with the text "This draft holds a character that Word files cannot store, so it was not exported. Paste the text again or remove the character." beside `EXPORT_FAILED`.
     - `apps/web/src/client/export-docx.ts`: after the existing order and gate checks and before `buildStatement`, test `holdsDocxUnsafe` on `document.text` and on every override reason; on a hit dispatch the notice, return `{ status: "failed" }`, download nothing and leave the Document unchanged.
     - _Requirements: 22.8_
-  - [~] 4.7 Write text-safety examples for the Entry_Points and the export refusal
+  - [x] 4.7 Write text-safety examples for the Entry_Points and the export refusal
     - Files under `apps/web/test/`. `docxSafe` at paste, drop, the two samples and assistant insertion (a reply that splits a surrogate pair across chunks is not cut); the export refusal for a stored draft with a Docx_Unsafe_Character in the text and in an override reason, with the exact message, nothing downloaded and the Document unchanged. The Open_Message and restore examples of Requirement 22 are in task 8.14.
     - _Requirements: 22.3, 22.8, 19.15_
 
@@ -115,11 +115,11 @@ Conventions that apply to every task:
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 6. Limits, Store changes and the Next_Step gap
-  - [~] 6.1 Move `MAX_TEXT_CHARS` to `apps/web/src/limits.ts`
+  - [-] 6.1 Move `MAX_TEXT_CHARS` to `apps/web/src/limits.ts`
     - Create `apps/web/src/limits.ts` with the one definition (`200_000`, no imports). `apps/web/src/server/verify-route.ts` imports it and re-exports the name so `test/verify-route.test.ts` is unchanged. Add `limits.ts` to the browser-bundle check in `apps/web/test/static/boundaries.test.ts` only if the rule table needs it.
     - Run `pnpm --filter @reveal-codes/web test -- test/static/boundaries.test.ts` with the real files in place and record that it passes (and that `forbidden.test.ts`, `package-json.test.ts` and `env-and-size.test.ts` still pass).
     - _Requirements: 14.4, 21.8_
-  - [~] 6.2 Store `openNote` and the `nextRunId` change (approved)
+  - [-] 6.2 Store `openNote` and the `nextRunId` change (approved)
     - `apps/web/src/store.ts` (and `store-actions.ts` if the handler lives there): add `openNote: string | null` (initial `null`) and the action `{ type: "openNote"; text: string | null }`; `reduceReplace` sets `openNote` to `null` (New, Load demo motion and Load the Avianca citations clear it). `persist.ts` is untouched: the note is never stored.
     - `apps/web/src/assistant-run.ts`: `nextRunId` returns `r` plus one more than the highest number in any `r<digits>` id held by `document.runs` or `runLog`. For contiguous ids the result is as before. This change is outside the modules the requirements name and is **approved by the author** (design, Resolved decision 11); an empty restored Run_Log needs it so that a second run never reuses an id.
     - Update existing store tests that build a full `StoreState`.

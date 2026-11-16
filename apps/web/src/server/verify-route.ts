@@ -3,6 +3,7 @@ import type { Deps } from "@reveal-codes/verifier";
 import type { CitationRecord } from "@reveal-codes/engine";
 import { readBodyCapped } from "./body";
 import { jsonResponse } from "./http";
+import { MAX_TEXT_CHARS } from "../limits";
 import { CHECKS_BUSY, DOCUMENT_TOO_LONG } from "../notices";
 import { overRouteLimit } from "./rate-limit";
 import type { RouteGuard } from "./rate-limit";
@@ -11,13 +12,7 @@ export const MAX_BODY_BYTES = 262_144;
 export const MAX_RECORDS = 500;
 /** The most code units a record's `caseName` may hold. */
 export const MAX_CASE_NAME = 200;
-/**
- * The most text, in characters, one request may carry. The body holds the citation records
- * and no draft text, so this bounds the request the route reads, ahead of any lookup. The
- * smaller caps above it still apply: 500 records is about 112 000 characters for typical
- * records, and 262 144 bytes bounds the body whatever its characters.
- */
-export const MAX_TEXT_CHARS = 200_000;
+export { MAX_TEXT_CHARS };
 
 export type FullRecord = Extract<CitationRecord, { kind: "full" }>;
 export type RouteError = Readonly<{ status: 400 | 413; message: string }>;

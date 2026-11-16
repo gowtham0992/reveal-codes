@@ -35,9 +35,25 @@ export function normaliseNewlines(text: string): string {
   return text.replace(/\r\n?/g, "\n");
 }
 
-/** `r<N>`, N one more than the larger of the Engine run count and the Run_Log length (L2). */
+/** The number in an `r<digits>` id, else 0. */
+function runNumber(runId: string): number {
+  const match = /^r(\d+)$/.exec(runId);
+  return match === null ? 0 : Number(match[1]);
+}
+
+/**
+ * `r<N>`, N one more than the largest of the Engine run count, the Run_Log length and the
+ * highest `r<digits>` number in either list (L2). The last term keeps a restored Document
+ * with an empty Run_Log from reusing an id.
+ */
 export function nextRunId(document: Document, runLog: readonly RunLogEntry[]): string {
-  return `r${String(Math.max(document.runs.length, runLog.length) + 1)}`;
+  const highest = Math.max(
+    document.runs.length,
+    runLog.length,
+    ...document.runs.map((run) => runNumber(run.runId)),
+    ...runLog.map((run) => runNumber(run.runId)),
+  );
+  return `r${String(highest + 1)}`;
 }
 
 export type Insertion = Readonly<{ ops: readonly CallerOperation[]; run: RunLogEntry }>;
