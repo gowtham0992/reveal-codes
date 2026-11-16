@@ -2,6 +2,7 @@
 
 import { apply, createDocument } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
+import { docxSafe } from "@reveal-codes/export";
 import { useState } from "react";
 import type { Autosave } from "../autosave";
 import type { DraftGate } from "../draft-gate";
@@ -42,7 +43,7 @@ async function loadSample(store: Store, svc: AppServices, key: SampleKey): Promi
   const fetched = await (key === "demo" ? svc.api.demoMotion() : svc.api.aviancaCitations());
   if (!fetched.ok) {
     store.dispatch({ type: "notice", text: key === "demo" ? DEMO_FAILED : AVIANCA_FAILED });
-  } else installDocument(store, svc, fetched.value);
+  } else installDocument(store, svc, docxSafe(fetched.value).text);
 }
 
 function startNew(store: Store, svc: AppServices, autosave: Autosave): void {

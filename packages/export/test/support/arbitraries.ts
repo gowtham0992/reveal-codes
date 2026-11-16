@@ -242,3 +242,49 @@ export function applyBodyEdit(paragraphs: readonly string[], edit: BodyEdit): st
     return chars.join("");
   });
 }
+
+const arbHostileToken: fc.Arbitrary<string> = fc.oneof(
+  { weight: 4, arbitrary: fc.constantFrom(..."abcXYZ019 .,;:'\"&<>\n\t") },
+  { weight: 1, arbitrary: fc.constantFrom("\u000B", "\u000C") },
+  { weight: 2, arbitrary: fc.integer({ min: 0x00, max: 0x1f }).map((c) => String.fromCharCode(c)) },
+  { weight: 1, arbitrary: fc.constantFrom("\uFFFE", "\uFFFF") },
+  {
+    weight: 2,
+    arbitrary: fc.integer({ min: 0xd800, max: 0xdbff }).map((c) => String.fromCharCode(c)),
+  },
+  {
+    weight: 2,
+    arbitrary: fc.integer({ min: 0xdc00, max: 0xdfff }).map((c) => String.fromCharCode(c)),
+  },
+  { weight: 2, arbitrary: fc.constantFrom("\r\n", "\r") },
+  { weight: 1, arbitrary: fc.constantFrom("\u{1F600}", "\u{10000}", "\u{10FFFF}", "\u{20000}") },
+  { weight: 1, arbitrary: fc.constantFrom("\u00E9", "\u65E5", "\u201C") },
+);
+
+/** Strings built from tokens: ordinary characters mixed with every Docx_Unsafe_Character class. */
+const arbHostileTokens: fc.Arbitrary<string> = fc
+  .array(arbHostileToken, { maxLength: 40 })
+  .map((tokens) => tokens.join(""));
+
+/** Strings built from raw UTF-16 code units, so surrogates pair up or stay unpaired by chance. */
+const arbHostileCodeUnits: fc.Arbitrary<string> = fc
+  .array(
+    fc.oneof(
+      fc.integer({ min: 0x00, max: 0x1f }),
+      fc.integer({ min: 0x20, max: 0x7e }),
+      fc.integer({ min: 0xd800, max: 0xdfff }),
+      fc.constantFrom(0xfffe, 0xffff, 0xfffd, 0xe000),
+      fc.integer({ min: 0x00, max: 0xffff }),
+    ),
+    { maxLength: 40 },
+  )
+  .map((units) => String.fromCharCode(...units));
+
+/**
+ * Text that may hold U+0000 to U+001F (U+000B and U+000C included), U+FFFE, U+FFFF, unpaired
+ * surrogates, `\r\n`, lone `\r` and astral characters, drawn as tokens and as code-unit sequences.
+ */
+export const arbDocxHostileText: fc.Arbitrary<string> = fc.oneof(
+  arbHostileTokens,
+  arbHostileCodeUnits,
+);

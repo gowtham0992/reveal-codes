@@ -3,6 +3,10 @@
     "2.6 Write property test for the Word text round trip": {
       "status": "passed",
       "lastRunTimestamp": 1794862166093
+    },
+    "2.9 Write property test for the record round trip": {
+      "status": "passed",
+      "lastRunTimestamp": 1794862486604
     }
   },
   "executionHistory": {
@@ -164,6 +168,16 @@
         "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
         "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
         "timestamp": 1794861515654
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794862380900
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794862515970
       }
     ],
     "2.9 Write property test for the record round trip": [
@@ -171,6 +185,16 @@
         "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
         "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
         "timestamp": 1794861515672
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794862380945
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794862516028
       }
     ],
     "2.10 Write property test for a changed export": [
@@ -233,6 +257,11 @@
         "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
         "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
         "timestamp": 1794861515802
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794862381022
       }
     ],
     "4.3 Write property test for DOCX-safe text": [
@@ -247,6 +276,11 @@
         "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
         "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
         "timestamp": 1794861515841
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794862382281
       }
     ],
     "4.5 Apply `docxSafe` at every editor Entry_Point": [
@@ -254,6 +288,11 @@
         "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
         "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
         "timestamp": 1794861515860
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794862382355
       }
     ],
     "4.6 Export refusal for a stored unsafe character": [

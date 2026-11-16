@@ -262,7 +262,8 @@ const PROPERTY_FILES: readonly PropertyFile[] = [
   // open-draft: Properties 1, 9 (task 2.7) and later 12 (task 2.8) share this one file.
   // word-draft.properties.test.ts (tasks 2.9-2.11) is added with its file: the per-spec
   // check below requires every listed file to exist.
-  { spec: "open-draft", file: "docx-read.properties.test.ts", numbers: [1, 9] },
+  { spec: "open-draft", file: "docx-read.properties.test.ts", numbers: [1, 9, 12] },
+  { spec: "open-draft", file: "word-draft.properties.test.ts", numbers: [2] },
 ];
 const EXPECTED_NUMBERS: Readonly<Record<PropertyFile["spec"], readonly number[]>> = {
   "export-certification": [1, 2, 3, 4],
@@ -270,7 +271,7 @@ const EXPECTED_NUMBERS: Readonly<Record<PropertyFile["spec"], readonly number[]>
   // Properties 3 and 4 of this spec live in crew/sentinel and apps/web.
   "pasted-text-declaration": [1, 2],
   // Task 2.8 adds 12 here; tasks 2.9-2.11 add 2, 3 and 8 with word-draft.properties.test.ts.
-  "open-draft": [1, 9],
+  "open-draft": [1, 2, 9, 12],
 };
 
 /** Each `// Property N` comment, in order, must match `expected` and be followed by its own `fc.assert`. */

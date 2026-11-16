@@ -1,5 +1,6 @@
 "use client";
 
+import { docxSafe } from "@reveal-codes/export";
 import { useEffect, useRef, useState } from "react";
 import { buildInsertion, insertionLine, paragraphAt } from "../assistant-run";
 import type { ApiError, AssistantInfo } from "../client/api";
@@ -36,12 +37,15 @@ type InsertArgs = Readonly<{ a: RunArgs; reply: string; stopped: boolean }>;
 
 /** One `AI` edit at the caret; `inserted` is set only when the Store accepted it. */
 function insertReply({ a, reply, stopped }: InsertArgs): DraftOutcome {
+  // Once, over the whole reply: a surrogate pair split across chunks is whole by now (Req 22.3).
+  const safe = docxSafe(reply).text;
+  if (safe.trim() === "") return NOTHING;
   const now = a.store.getState();
   const insertion = buildInsertion({
     document: now.document,
     runLog: now.runLog,
     caret: a.getCaret(),
-    text: reply,
+    text: safe,
     prompt: a.prompt,
     info: a.info,
     timestamp: a.svc.now().toISOString(),

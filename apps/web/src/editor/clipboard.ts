@@ -1,3 +1,4 @@
+import { docxSafe } from "@reveal-codes/export";
 import type { EditorState, Transaction } from "@tiptap/pm/state";
 import { PROVENANCE_META } from "./meta";
 import { editorSchema } from "./schema";
@@ -9,13 +10,15 @@ export function normaliseNewlines(text: string): string {
 }
 
 /**
- * The `text/plain` data with newlines normalised, or null when there is none.
+ * The `text/plain` data with Docx_Safe_Text (Req 22.3, which also normalises newlines), or null when there is none.
  * Other formats (HTML, files) are never read.
  */
 export function plainTextOf(data: Pick<DataTransfer, "getData"> | null | undefined): string | null {
   if (data === null || data === undefined) return null;
   const text = data.getData("text/plain");
-  return text === "" ? null : normaliseNewlines(text);
+  if (text === "") return null;
+  const safe = docxSafe(text).text;
+  return safe === "" ? null : safe;
 }
 
 /** Replace [from, to) with `text` as a paste: PST meta and uiEvent "paste". */

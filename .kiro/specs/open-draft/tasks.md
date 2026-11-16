@@ -60,11 +60,11 @@ Conventions that apply to every task:
     - **Property 9: The reader is total**
     - Same file as 2.6. Random bytes, truncated zips and zips with random part content; `readDocx` and `readDocxWithNotes` return a value and throw nothing.
     - **Validates: Requirements 1.6**
-  - [~] 2.8 Write property test for note numbering
+  - [x] 2.8 Write property test for note numbering
     - **Property 12: Notes are numbered 1..N without separators**
     - Same file as 2.6. Generated footnote and endnote entries with separators and empty notes; `notesBlock` as the property states.
     - **Validates: Requirements 7.1, 7.2, 7.3, 7.4, 7.5, 7.6**
-  - [~] 2.9 Write property test for the record round trip
+  - [x] 2.9 Write property test for the record round trip
     - **Property 2: A reopened export is the exported Document**
     - File `packages/export/test/word-draft.properties.test.ts`. Existing `arbDocument` with overrides and every status, both Declaration subjects (Tool_Names with brackets, parentheses, quotation marks), any run log and verification time; the restore helpers of 2.5; assert `restored`, `structuralEqual`, the same Declaration, and equal `canExport` for every court.
     - **Validates: Requirements 9.2, 9.3, 9.7, 9.10, 12.1, 12.5, 13.8, 18.4**
@@ -87,17 +87,17 @@ Conventions that apply to every task:
   - [x] 4.1 `docxSafe` and `holdsDocxUnsafe` over one range table
     - New `packages/export/src/docx-text.ts`: one table of allowed ranges (U+0009, U+000A, U+000D, U+0020 to U+D7FF, U+E000 to U+FFFD, U+10000 to U+10FFFF), defined once and read by both functions. `docxSafe(text)` returns `{ text, removed }`: U+000B and U+000C become `\n`, `\r\n` and a lone `\r` become `\n`, every other Docx_Unsafe_Character (an unpaired surrogate included) is removed and counted once; the converted characters are not counted. It is idempotent and returns its input unchanged when the input holds none and no `\r`. `holdsDocxUnsafe(text)` is true for any Docx_Unsafe_Character, U+000B and U+000C included, and is false for the text of any `docxSafe` result. No imports. Export both from `index.ts`.
     - _Requirements: 22.1, 22.2, 22.5_
-  - [~] 4.2 `arbDocxHostileText`
+  - [-] 4.2 `arbDocxHostileText`
     - In `packages/export/test/support/arbitraries.ts` add `arbDocxHostileText`: text that includes U+0000 to U+001F, U+FFFE, U+FFFF and unpaired surrogates, with code-unit sequences as well as strings. The existing arbitraries are not narrowed.
     - _Requirements: 22.6, 22.7_
   - [~] 4.3 Write property test for DOCX-safe text
     - **Property 4: DOCX-safe text**
     - File `packages/export/test/docx-text.properties.test.ts`. Any string and any code-unit sequence (`arbDocxHostileText`): no Docx_Unsafe_Character in the result, idempotence with `removed` 0 on the second pass, identity when none present and no `\r`; and export then reopen of a Document built from `docxSafe` text, through the restore helpers of 2.5, equals the original by `structuralEqual`.
     - **Validates: Requirements 22.1, 22.2, 22.6, 22.7, 18.6**
-  - [~] 4.4 Write test that `holdsDocxUnsafe` is false for any `docxSafe` output
+  - [-] 4.4 Write test that `holdsDocxUnsafe` is false for any `docxSafe` output
     - File `packages/export/test/docx-text.test.ts`. Exhaustively over every UTF-16 code unit U+0000 to U+FFFF, alone and between two ASCII letters, and over sampled astral pairs, lone high and lone low surrogates, `\r`, `\r\n`, U+000B and U+000C: `holdsDocxUnsafe(docxSafe(s).text)` is false. Also assert the two functions agree on the table: `holdsDocxUnsafe(s)` is true exactly when `docxSafe(s)` removed at least one character or `s` held U+000B or U+000C.
     - _Requirements: 22.1, 22.2, 22.5_
-  - [~] 4.5 Apply `docxSafe` at every editor Entry_Point
+  - [-] 4.5 Apply `docxSafe` at every editor Entry_Point
     - `apps/web/src/editor/clipboard.ts`: `plainTextOf` calls `docxSafe(...).text` instead of `normaliseNewlines` (paste and drop); `normaliseNewlines` stays exported for its tests.
     - `apps/web/src/components/use-document-actions.tsx`: apply `docxSafe` to the demo-motion and Avianca texts before `pastedDocument`; no message.
     - `apps/web/src/components/use-assistant.ts`: in `insertReply`, apply `docxSafe` once to the accumulated reply, never per chunk, so a surrogate pair split across chunks is not cut.
