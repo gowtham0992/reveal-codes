@@ -553,13 +553,13 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - Add `arbUnreadableStored` to `apps/web/test/arbitraries.ts` with three branches: text that is not JSON, JSON of the wrong shape or version (built from `fc.jsonValue()` and forced fields), and a well-formed envelope whose `codes` come from the engine's `arbSemanticTamper` or `arbSyntaxFault`. Inside the property, assert `deserialise(raw)` is an error other than `absent`, then run `loadAutosave` and `startAutosave` over `createMemoryStorage`, the manual timers and a `createDraftGate`, dispatch edits from `arbOpSequence` to the store, advance 300 ms or more, call `flush`, fire a hidden visibility change and stop; assert the stored value equals `raw` and `setItem` was not called after the seed.
     - **Validates: Requirements 23.1, 23.3, 23.4, 23.23**
 
-- [ ] 24. Inventory and documentation (Requirements 21, 23, 24)
+- [x] 24. Inventory and documentation (Requirements 21, 23, 24)
   - [x] 24.1 Update the aggregate inventory test to twenty
     - In `apps/web/test/static/case-match-inventory.test.ts` change the web entry of `OWNERS` to `[16, 17, 20]`, and change every `19`, `nineteen` and `1 to 19` check and test title to twenty and 1 to 20. Keep the self-test.
     - Confirm the design holds the heading `### Property 20:` and that the test fails if Property 20's marker is removed.
     - _Requirements: 24.3_
 
-  - [-] 24.2 Write the documentation and the BUILD_LOG entry
+  - [x] 24.2 Write the documentation and the BUILD_LOG entry
     - README `Limits`: remove the bullet that says an old draft is overwritten by the first autosave, and add no replacement bullet.
     - BUILD_LOG: add a dated entry with the CI failure of aef6d70 and its cause; the measurement of task 22.1 (Rare_Kind, count, rate, miss probability over 1,500 draws, kind count found against the 22 the author counted, 1,500 as a literal `numRuns`, `max(runs().numRuns, 400)` for the syntax test); the audit of task 22.5 with each test examined, its seed and what was done; the unreadable-draft change and its decisions (only Start a new document opens the gate; Save a copy and sample loads do not; the Toolbar's New while blocked is the same action; print is blocked; UTF-8 encoding of the saved copy and the lone-surrogate limit; multiple tabs out of scope); and every existing test edited in tasks 23.6 and 22.4. Keep the earlier entry that records the old behaviour.
     - `.kiro/steering/structure.md`: add `draft-gate.ts` and `saved-draft.ts` to the listing of `apps/web/src/`, and `tamper-witnesses.ts` under `packages/engine/test/support/` if the listing names that folder. Update `docs/KIRO_USAGE.md` only if a row names a file that this task changes.
