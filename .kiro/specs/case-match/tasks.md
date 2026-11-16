@@ -521,7 +521,7 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - In `app-shell.tsx`, `useShellParts` creates the gate, passes it to `createAutosave` and `useAutosave`, and returns it.
     - _Requirements: 23.1, 23.2, 23.3, 23.19, 23.20_
 
-  - [-] 23.3 Add the saved-copy helper, the download media type and the notices
+  - [x] 23.3 Add the saved-copy helper, the download media type and the notices
     - In `apps/web/src/client/download.ts` give `browserDownload` an optional `mime` argument (default `DOCX_MIME`), and give `AppServices["download"]` in `services.ts` the same optional third parameter; pass it through in `defaultServices`.
     - Create `apps/web/src/saved-draft.ts` with `SAVED_DRAFT_FILE` (`reveal-codes-saved-draft.txt`), `SAVED_DRAFT_MIME` (`text/plain;charset=utf-8`) and `saveDraftCopy(svc)`, which reads `AUTOSAVE_KEY` with `readRaw`, encodes the string with `TextEncoder`, calls `svc.download`, and returns `false` for a thrown read, a `null` value or a thrown download (converted at the boundary, as `use-export` does).
     - In `notices.ts` add `UNREADABLE_DRAFT`, `SAVE_COPY_FAILED` and `PRINT_BLOCKED` with the texts of the design.
