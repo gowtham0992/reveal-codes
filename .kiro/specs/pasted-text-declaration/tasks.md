@@ -53,7 +53,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - _Requirements: 3.3, 3.4, 3.5, 8.3, 8.4, 8.8, 8.9, 8.10_
 
 - [ ] 3. Export package: subject, wording, statement, gate, appendix
-  - [-] 3.1 Add `packages/export/src/declaration.ts`
+  - [x] 3.1 Add `packages/export/src/declaration.ts`
     - `holdsAssistantText`, `orderRequiresStatement`, `declarationSubject`, `applicableDeclaration`, `declarationRequired`, and the single `usedAi(document, entry, stored)`, as defined in the design. Subject order: `pasted_text` when substantive pasted text, else `this_filing` when no assistant text and the order requires a statement, else `none`.
     - Export them from the package index. `isAiSpan` stays in `statement-parts.ts` for `aiPassages` only.
     - _Requirements: 4.8, 5.8, 5.9, 6.1_
