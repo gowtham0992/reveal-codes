@@ -126,7 +126,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - In `runOpen` of `use-open-draft.tsx` dispatch `{ type: "notice", text: null }` and `{ type: "openNote", text: null }` before `await openFile(file)`; give `refuseSeveral` the same `notice` reset
     - _Requirements: 13.1, 13.2_
 
-  - [-] 7.3 Ignore declaration files and find the emitting process
+  - [x] 7.3 Ignore declaration files and find the emitting process
     - Add `*.d.ts` and `!apps/web/src/css-modules.d.ts` to `.gitignore`
     - Search `package.json` scripts, `.kiro/hooks/*.json`, `.github/workflows/ci.yml`, `scripts/` and `vitest.config.ts` for the process that emits `.d.ts` into `crew/sentinel/src` and `packages/export/test/support`; fix it if found, otherwise record what was searched in the `BUILD_LOG.md` entry (task 8.2)
     - Remove no tracked file other than any stray untracked `.d.ts`; do not delete `apps/web/src/css-modules.d.ts`
