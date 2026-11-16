@@ -122,7 +122,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - In `print-view.module.css` add `.overrides th { overflow-wrap: normal; word-break: keep-all; }` and `min-width` rules for the Code (10ch) and Timestamp columns, sized from the longest value plus padding; leave body-cell `overflow-wrap: anywhere` as it is
     - _Requirements: 12.1, 12.2, 12.3_
 
-  - [-] 7.2 Clear the old message when an Open starts
+  - [x] 7.2 Clear the old message when an Open starts
     - In `runOpen` of `use-open-draft.tsx` dispatch `{ type: "notice", text: null }` and `{ type: "openNote", text: null }` before `await openFile(file)`; give `refuseSeveral` the same `notice` reset
     - _Requirements: 13.1, 13.2_
 
