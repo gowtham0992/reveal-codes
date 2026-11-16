@@ -178,7 +178,7 @@ Conventions that apply to every task:
   - [x] 8.5 Open_Note in the Issues region
     - `components/issues-region.tsx` (and its CSS module): show `openNote` as text above the Issues list and below the Draft_Gate notice, in a `role="status"` element, in the existing region style, with no icon and no colour as the only signal. `components/use-verify.ts` dispatches `openNote: null` when a run starts.
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_
-  - [-] 8.6 Write property test for UTF-8 text decoding
+  - [x] 8.6 Write property test for UTF-8 text decoding
     - **Property 10: UTF-8 text round trip**
     - File `apps/web/test/open-file.properties.test.ts`. `decodeTextFile` over UTF-8 encodings with and without a byte-order mark, with and without `\r\n` and lone `\r`. Update `apps/web/test/static/inventory.test.ts` with the new `// Property 10` comment in this task.
     - **Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.6**
