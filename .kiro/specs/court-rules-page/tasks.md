@@ -40,14 +40,14 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Export all of them from `packages/export/src/index.ts`
     - _Requirements: 6.4, 6.5, 6.8_
 
-  - [~] 3.2 Implement `courtGroups`, `compareAbbreviations` and `orderStats` in `packages/export/src/order-groups.ts`
+  - [x] 3.2 Implement `courtGroups`, `compareAbbreviations` and `orderStats` in `packages/export/src/order-groups.ts`
     - `compareAbbreviations` is `a.localeCompare(b, "en", { numeric: true })`
     - Inside a group: Court_Wide before Judge_Level, then `date` descending, then `id` ascending by code unit
     - `orderStats(dataset)` returns total, court count, in-force count and `compiled`
     - Export `CourtGroupView`, `OrderStats` and the functions from `index.ts`
     - _Requirements: 2.2, 3.1, 3.2, 3.3, 3.4, 6.6_
 
-  - [~] 3.3 Write property test for the filter
+  - [-] 3.3 Write property test for the filter
     - **Property 1: The filter selects exactly the entries the rule names**
     - **Validates: Requirements 6.4, 6.8, 16.11, 16.12, 16.13**
     - Create `packages/export/test/support/arb-order-filter.ts` with `arbOrderEntries` and `arbFilterState(entries)` (cleared state, substring queries, case/punctuation/spacing variants, empty and punctuation-only queries, queries that match nothing, all five kinds and "all", boolean checkbox)
@@ -110,7 +110,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - `SmallScreenPage`: links row always renders, "See all court rules" first and in the same tab, video and repository links each conditional on their own value (remove the both-null guard)
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
-  - [~] 6.3 Write Order_Parameter and link tests in `apps/web/test/`
+  - [-] 6.3 Write Order_Parameter and link tests in `apps/web/test/`
     - Valid, unknown and superseded ids at 1280px: store contents, notice text, parameter removed through `replaceState` with history length unchanged
     - At 600px: store set, no notice, parameter removed, Selection_Line text with abbreviation and `optionText`; unknown, superseded and absent each leave no Selection_Line; an earlier dialog selection gives no line; one example for the `DOMException` path
     - Court_Rules_Link: Export dialog (target, rel, beside the Picker), Small_Screen_Page (target, first, present with both public addresses unset), Toolbar (last, an `a`, no `data-primary`)
