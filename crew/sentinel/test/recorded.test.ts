@@ -1,6 +1,6 @@
 import { buildAppendix } from "@reveal-codes/export";
 import { describe, expect, it } from "vitest";
-import { recordedDocument } from "../src/recorded.js";
+import { recordedDocument } from "@reveal-codes/export";
 import { buildDemoDocument } from "./support/export-support.js";
 
 describe("recordedDocument", () => {
@@ -16,11 +16,9 @@ describe("recordedDocument", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error.kind).toBe("appendix_unparseable");
-      if (result.error.kind === "appendix_unparseable") {
-        expect(result.error.detail).toMatch(/^engine error \S+/);
-        if (result.error.detail.includes("malformed_codes")) {
-          expect(result.error.detail).toMatch(/ at index \d+: \S+/);
-        }
+      expect(result.error.detail).toMatch(/^engine error \S+/);
+      if (result.error.detail.includes("malformed_codes")) {
+        expect(result.error.detail).toMatch(/ at index \d+: \S+/);
       }
     }
   });
@@ -28,7 +26,7 @@ describe("recordedDocument", () => {
   it("returns appendix_unparseable with a non-empty detail for an empty list", () => {
     const result = recordedDocument([]);
     expect(result.ok).toBe(false);
-    if (!result.ok && result.error.kind === "appendix_unparseable") {
+    if (!result.ok) {
       expect(result.error.detail.length).toBeGreaterThan(0);
       expect(result.error.detail).toContain("engine error");
     }

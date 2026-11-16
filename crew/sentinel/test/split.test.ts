@@ -1,7 +1,7 @@
 import { APPENDIX_TITLE, STATEMENT_TITLE, buildAppendix, buildDocx } from "@reveal-codes/export";
 import { describe, expect, it } from "vitest";
-import { readDocx } from "../src/docx-read.js";
-import { splitExport } from "../src/split.js";
+import { readDocx } from "@reveal-codes/export";
+import { splitExport } from "@reveal-codes/export";
 import { renameTitles } from "./support/docx-edit.js";
 import {
   DEMO_DECLARATION,

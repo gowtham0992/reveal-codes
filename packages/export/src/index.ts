@@ -47,3 +47,9 @@ export type {
   OrderKind,
   OrderSet,
 } from "./orders-types.js";
+export { readDocx } from "./docx-read.js";
+export { splitExport } from "./export-split.js";
+export type { SplitError } from "./export-split.js";
+export { recordedRecord, recordedDocument } from "./appendix-parse.js";
+export type { AppendixParseError, RecordedRecord } from "./appendix-parse.js";
+export type { DocxReadError, DocxText, ExportParts } from "./read-types.js";

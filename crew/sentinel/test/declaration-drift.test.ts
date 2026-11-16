@@ -1,10 +1,10 @@
 import { buildDocx } from "@reveal-codes/export";
 import { describe, expect, it } from "vitest";
 import { analyseFile } from "../src/analyse.js";
-import { readDocx } from "../src/docx-read.js";
-import { recordedRecord } from "../src/recorded.js";
+import { readDocx } from "@reveal-codes/export";
+import { recordedRecord } from "@reveal-codes/export";
 import { renderReport } from "../src/report.js";
-import { splitExport } from "../src/split.js";
+import { splitExport } from "@reveal-codes/export";
 import { editDocumentXml } from "./support/docx-edit.js";
 import {
   DEMO_DECLARATION,

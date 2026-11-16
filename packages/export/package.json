@@ -8,11 +8,11 @@
   "exports": "./src/index.ts",
   "dependencies": {
     "@reveal-codes/engine": "workspace:*",
-    "docx": "9.15.3"
+    "docx": "9.15.3",
+    "fflate": "0.8.3"
   },
   "devDependencies": {
     "@reveal-codes/verifier": "workspace:*",
-    "fast-check": "4.10.2",
-    "fflate": "0.8.3"
+    "fast-check": "4.10.2"
   }
 }

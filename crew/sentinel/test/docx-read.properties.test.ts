@@ -3,8 +3,8 @@ import { APPENDIX_TITLE, STATEMENT_TITLE, buildDocx, buildStatement } from "@rev
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { arbDocument } from "../../../packages/engine/src/testing/arb-document";
-import { readDocx } from "../src/docx-read.js";
-import { splitExport } from "../src/split.js";
+import { readDocx } from "@reveal-codes/export";
+import { splitExport } from "@reveal-codes/export";
 import { declarationFor } from "./support/export-support.js";
 import { docxRuns } from "./support/fc.js";
 

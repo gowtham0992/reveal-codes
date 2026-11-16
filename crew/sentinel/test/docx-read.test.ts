@@ -1,7 +1,7 @@
 import { APPENDIX_TITLE, STATEMENT_TITLE, buildAppendix, buildDocx } from "@reveal-codes/export";
 import { strToU8, zipSync } from "fflate";
 import { describe, expect, it } from "vitest";
-import { readDocx } from "../src/docx-read.js";
+import { readDocx } from "@reveal-codes/export";
 import { zipWithout } from "./support/docx-edit.js";
 import {
   DEMO_DECLARATION,

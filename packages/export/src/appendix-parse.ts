@@ -1,7 +1,7 @@
 import { err, ok, parseRecord } from "@reveal-codes/engine";
 import type { Declaration, Document, EngineError, Result } from "@reveal-codes/engine";
-import type { SentinelError } from "./types.js";
 
+export type AppendixParseError = Readonly<{ kind: "appendix_unparseable"; detail: string }>;
 export type RecordedRecord = Readonly<{ document: Document; declaration: Declaration | null }>;
 
 function describe(error: EngineError): string {
@@ -16,14 +16,18 @@ function describe(error: EngineError): string {
  * file carries none, as for a file exported before the Declaration existed)
  * from the Appendix lines. Never throws.
  */
-export function recordedRecord(appendix: readonly string[]): Result<RecordedRecord, SentinelError> {
+export function recordedRecord(
+  appendix: readonly string[],
+): Result<RecordedRecord, AppendixParseError> {
   const parsed = parseRecord(appendix.join("\n"));
   if (parsed.ok) return ok(parsed.value);
   return err({ kind: "appendix_unparseable", detail: describe(parsed.error) });
 }
 
 /** Rebuilds the Recorded_Document from the Appendix lines. Never throws. */
-export function recordedDocument(appendix: readonly string[]): Result<Document, SentinelError> {
+export function recordedDocument(
+  appendix: readonly string[],
+): Result<Document, AppendixParseError> {
   const record = recordedRecord(appendix);
   return record.ok ? ok(record.value.document) : record;
 }

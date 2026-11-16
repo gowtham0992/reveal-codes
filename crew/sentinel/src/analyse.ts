@@ -1,14 +1,15 @@
+import { readDocx, recordedDocument, splitExport } from "@reveal-codes/export";
 import type { Deps } from "@reveal-codes/verifier";
-import { readDocx } from "./docx-read.js";
 import { deriveFindings, unreadable } from "./findings.js";
-import { recordedDocument } from "./recorded.js";
 import { reverify } from "./reverify.js";
-import { splitExport } from "./split.js";
 import type { Finding } from "./types.js";
 
 async function analyse(file: string, bytes: Uint8Array, deps: Deps): Promise<readonly Finding[]> {
   const read = readDocx(bytes);
-  if (!read.ok) return [unreadable(file, read.error.kind)];
+  if (!read.ok) {
+    // readDocx has no size limit, so only not_docx occurs; part_too_large maps to read_failed.
+    return [unreadable(file, read.error.kind === "not_docx" ? "not_docx" : "read_failed")];
+  }
   const parts = splitExport(read.value);
   if (!parts.ok) return [unreadable(file, parts.error.kind)];
   const recorded = recordedDocument(parts.value.appendix);

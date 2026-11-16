@@ -1,0 +1,386 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Move the reader, split and appendix parse into `packages/export`": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515435
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861522790
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861725288
+      }
+    ],
+    "1.2 Sentinel tests: import-path change only": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515476
+      }
+    ],
+    "2.1 Fixture builder and endnotes helper, each with its self-test": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515502
+      }
+    ],
+    "2.2 Shared arbitraries `arbParagraphs` and `arbBodyEdit`": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515520
+      }
+    ],
+    "2.3 Notes, part-size limit and signature check": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515542
+      }
+    ],
+    "2.4 `exportDate` and `readWordDraft`": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515561
+      }
+    ],
+    "2.5 Restore helpers": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515581
+      }
+    ],
+    "2.6 Write property test for the Word text round trip": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515605
+      }
+    ],
+    "2.7 Write property test for reader totality": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515635
+      }
+    ],
+    "2.8 Write property test for note numbering": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515654
+      }
+    ],
+    "2.9 Write property test for the record round trip": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515672
+      }
+    ],
+    "2.10 Write property test for a changed export": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515692
+      }
+    ],
+    "2.11 Write property test for statement and appendix exclusion": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515711
+      }
+    ],
+    "2.12 Write reader and `readWordDraft` examples": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515730
+      }
+    ],
+    "3. Checkpoint - shared reader and `readWordDraft`": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515750
+      }
+    ],
+    "4.1 `docxSafe` and `holdsDocxUnsafe` over one range table": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515771
+      }
+    ],
+    "4.2 `arbDocxHostileText`": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515802
+      }
+    ],
+    "4.3 Write property test for DOCX-safe text": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515822
+      }
+    ],
+    "4.4 Write test that `holdsDocxUnsafe` is false for any `docxSafe` output": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515841
+      }
+    ],
+    "4.5 Apply `docxSafe` at every editor Entry_Point": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515860
+      }
+    ],
+    "4.6 Export refusal for a stored unsafe character": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515878
+      }
+    ],
+    "4.7 Write text-safety examples for the Entry_Points and the export refusal": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515898
+      }
+    ],
+    "5. Checkpoint - `docxSafe` and the export refusal": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515917
+      }
+    ],
+    "6.1 Move `MAX_TEXT_CHARS` to `apps/web/src/limits.ts`": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515943
+      }
+    ],
+    "6.2 Store `openNote` and the `nextRunId` change (approved)": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515971
+      }
+    ],
+    "6.3 Write Store examples: `nextRunId` and `openNote`": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861515990
+      }
+    ],
+    "6.4 Next_Step gap: `needsCheckDate`, `check-date.ts` and the callers": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516011
+      }
+    ],
+    "6.5 `needsCheckDate` test support": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516032
+      }
+    ],
+    "6.6 Write property test for the missing check date": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516052
+      }
+    ],
+    "6.7 Write property test for the unchanged Next_Step outside the gap": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516070
+      }
+    ],
+    "6.8 Write property test for red codes blocking while the Next_Step is Verify": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516093
+      }
+    ],
+    "6.9 Write `nextStep` and red-code examples": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516113
+      }
+    ],
+    "7. Checkpoint - limits, Store and Next_Step gap": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516133
+      }
+    ],
+    "8.1 Pure helpers: `pastedDocument`, `open-text`, `open-messages`, `open-note`": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516162
+      }
+    ],
+    "8.2 `OpenOutcome` and `openFile`": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516192
+      }
+    ],
+    "8.3 Open button, Picker and empty-page links": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516211
+      }
+    ],
+    "8.4 Drop and wiring": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516233
+      }
+    ],
+    "8.5 Open_Note in the Issues region": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516253
+      }
+    ],
+    "8.6 Write property test for UTF-8 text decoding": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516273
+      }
+    ],
+    "8.7 Write property test for installed opened text": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516295
+      }
+    ],
+    "8.8 Write property test for the restore note": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516314
+      }
+    ],
+    "8.9 Write property test for refusals": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516335
+      }
+    ],
+    "8.10 Write refusal and text-file examples": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516356
+      }
+    ],
+    "8.11 Write Picker, drop, confirm and message examples": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516379
+      }
+    ],
+    "8.12 Write Open_Note and restore-install examples": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516411
+      }
+    ],
+    "8.13 Write empty-page, Toolbar, network and static examples": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516431
+      }
+    ],
+    "8.14 Write Open text-safety examples": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516452
+      }
+    ],
+    "9.1 README": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516472
+      }
+    ],
+    "9.2 `docs/KIRO_USAGE.md` rows": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516493
+      }
+    ],
+    "9.3 `.kiro/steering/ui.md`": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516513
+      }
+    ],
+    "9.4 `.kiro/steering/structure.md` and `tech.md`": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516535
+      }
+    ],
+    "9.5 `BUILD_LOG.md` entry": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516560
+      }
+    ],
+    "10. Final checkpoint - Ensure all checks pass": [
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794861516583
+      }
+    ]
+  }
+}

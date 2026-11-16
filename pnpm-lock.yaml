@@ -181,6 +181,9 @@ importers:
       docx:
         specifier: 9.15.3
         version: 9.15.3
+      fflate:
+        specifier: 0.8.3
+        version: 0.8.3
     devDependencies:
       '@reveal-codes/verifier':
         specifier: workspace:*
@@ -188,9 +191,6 @@ importers:
       fast-check:
         specifier: 4.10.2
         version: 4.10.2
-      fflate:
-        specifier: 0.8.3
-        version: 0.8.3
 
   packages/verifier:
     dependencies:

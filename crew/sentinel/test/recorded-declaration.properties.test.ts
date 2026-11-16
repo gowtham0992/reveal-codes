@@ -14,9 +14,9 @@ import {
   arbDeclaration,
   arbMixedOriginDocument,
 } from "../../../packages/engine/src/testing/arb-declaration";
-import { readDocx } from "../src/docx-read.js";
-import { recordedRecord } from "../src/recorded.js";
-import { splitExport } from "../src/split.js";
+import { readDocx } from "@reveal-codes/export";
+import { recordedRecord } from "@reveal-codes/export";
+import { splitExport } from "@reveal-codes/export";
 import { runs } from "./support/fc.js";
 
 const META = {

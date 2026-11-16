@@ -4,11 +4,11 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { readDocx } from "../src/docx-read.js";
+import { readDocx } from "@reveal-codes/export";
 import { nodeFiles } from "../src/files.js";
 import { run } from "../src/run.js";
 import type { RunIo } from "../src/run.js";
-import { splitExport } from "../src/split.js";
+import { splitExport } from "@reveal-codes/export";
 import { declarationFor } from "./support/export-support.js";
 import { testSleep } from "./support/test-deps.js";
 

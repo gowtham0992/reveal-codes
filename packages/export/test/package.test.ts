@@ -27,7 +27,7 @@ describe("packages/export package.json _Requirements: 10.1, 10.2, 9.1_", () => {
 
   it("pins the expected versions", () => {
     expect(manifest.dependencies?.["docx"]).toBe("9.15.3");
-    expect(manifest.devDependencies?.["fflate"]).toBe("0.8.3");
+    expect(manifest.dependencies?.["fflate"]).toBe("0.8.3");
     expect(manifest.devDependencies?.["fast-check"]).toBe("4.10.2");
   });
 
@@ -36,9 +36,9 @@ describe("packages/export package.json _Requirements: 10.1, 10.2, 9.1_", () => {
     expect(manifest.devDependencies?.["@reveal-codes/verifier"]).toBe("workspace:*");
   });
 
-  it("has docx as the only third-party runtime dependency", () => {
+  it("has docx and fflate as the only third-party runtime dependencies", () => {
     const runtime = Object.keys(manifest.dependencies ?? {}).filter((n) => !WORKSPACE.includes(n));
-    expect(runtime).toEqual(["docx"]);
+    expect(runtime.sort()).toEqual(["docx", "fflate"]);
   });
 
   it("exports ./src/index.ts", () => {
