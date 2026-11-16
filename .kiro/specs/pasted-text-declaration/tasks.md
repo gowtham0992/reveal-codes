@@ -210,7 +210,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - "No drift." for a Declared_AI export and for a None export. A file exported before this feature (the Appendix built with `d` removed) reads as "No drift." with `declaration: null`.
     - _Requirements: 8.6, 8.9, 12.9_
 
-- [ ] 13. Documentation
+- [x] 13. Documentation
   - [x] 13.1 Write `docs/CERTIFICATION.md`
     - Describe the statement paragraph by paragraph and label each sentence as a Record_Sentence or an Author_Sentence. Give the cases of paragraph 2 with their exact wording. Explain the declaration and its two subjects, the clearing rule, the single definition of AI use, and the prohibition reasons.
     - Use "record", "pasted or imported", "declaration" and "author states" consistently. Do not use "detected" or "inferred" about AI.
@@ -228,7 +228,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Give the Introduction's observation (a pasted-only filing exported "No generative artificial intelligence was used in preparing this filing.") as the reason, and record what Kiro got wrong in the requirements pass. Record the compatibility limit: an older Sentinel reads a file with `d=` as one `unreadable` Finding.
     - _Requirements: 13.5_
 
-  - [-] 13.5 Add rows to `docs/KIRO_USAGE.md`
+  - [x] 13.5 Add rows to `docs/KIRO_USAGE.md`
     - A row for this spec, with the paths of `requirements.md`, `design.md` and `tasks.md`, and a row for the `product.md` steering changes (the `[DOC]` line and principle 1). No hook, agent or MCP tool is added by this feature, so add none.
     - _Requirements: 13.6_
 
