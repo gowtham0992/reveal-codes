@@ -116,7 +116,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Court_Rules_Link: Export dialog (target, rel, beside the Picker), Small_Screen_Page (target, first, present with both public addresses unset), Toolbar (last, an `a`, no `data-primary`)
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.7, 8.9, 8.11, 8.12, 9.1, 9.2, 9.3, 9.4, 9.5, 16.5, 16.6, 16.8_
 
-- [ ] 7. Repairs
+- [x] 7. Repairs
   - [x] 7.1 Fix the Override_Table headers in the print view
     - In `print-view.tsx` give `BlockTable` the `overrides` class when its columns equal `OVERRIDE_COLUMNS` (confirm `OVERRIDE_COLUMNS` is exported from `@reveal-codes/export`)
     - In `print-view.module.css` add `.overrides th { overflow-wrap: normal; word-break: keep-all; }` and `min-width` rules for the Code (10ch) and Timestamp columns, sized from the longest value plus padding; leave body-cell `overflow-wrap: anywhere` as it is
@@ -132,7 +132,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Remove no tracked file other than any stray untracked `.d.ts`; do not delete `apps/web/src/css-modules.d.ts`
     - _Requirements: 14.1, 14.2, 14.3_
 
-  - [-] 7.4 Write repair tests
+  - [x] 7.4 Write repair tests
     - Stylesheet test on `print-view.module.css` that fails on the old file: `.overrides th` has both declarations and the two `min-width` values, and the body-cell `overflow-wrap: anywhere` rule is still present
     - Open test: open a refused file, then a valid second file with a non-empty draft; neither the Toolbar_Notice nor the Open_Note holds "Could not open <name>." while the confirm dialog is open
     - Repository test: `git ls-files` lists no `.d.ts` other than `apps/web/src/css-modules.d.ts`
