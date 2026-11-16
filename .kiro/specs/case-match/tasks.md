@@ -510,7 +510,7 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - _Requirements: 22.8, 22.13_
 
 - [ ] 23. An unreadable saved draft is never silently replaced (Requirement 23)
-  - [-] 23.1 Add the Draft_Gate and make Autosave respect it
+  - [x] 23.1 Add the Draft_Gate and make Autosave respect it
     - Create `apps/web/src/draft-gate.ts` with `createDraftGate()` (`blocked`, `block`, `release`, `subscribe`; notify only on a change).
     - In `apps/web/src/autosave.ts` add the optional `gate` dependency: `schedule` starts no timer and keeps no pending job while blocked, `write` drops a pending job while blocked, and `clear()` returns `boolean` (true when the key was removed; false after calling `onError`). With no gate the behaviour is unchanged.
     - _Requirements: 23.4, 23.20_
