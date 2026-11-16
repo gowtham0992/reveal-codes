@@ -95,17 +95,43 @@ function useOpenState() {
   };
 }
 
+type DialogArgs = Readonly<{
+  args: UseExportArgs;
+  opener: HTMLElement | null;
+  busy: boolean;
+  setBusy: (busy: boolean) => void;
+  close: () => void;
+  setGoTo: (offset: number) => void;
+  clearNotice: () => void;
+}>;
+
+function renderDialog(d: DialogArgs) {
+  const { svc, store, autosave, gate, doc, notice, orderStore } = d.args;
+  return (
+    <ExportDialog
+      document={doc}
+      store={store}
+      orderStore={orderStore}
+      now={svc.now}
+      notice={notice}
+      clearNotice={d.clearNotice}
+      busy={d.busy}
+      restoreFocus={d.opener}
+      onGo={d.setGoTo}
+      onDownload={(context) => {
+        startDownload(svc, store, d.setBusy, d.close, context);
+      }}
+      onPrint={() => {
+        printFlow(svc, store, autosave, gate, selectedEntry(orderStore));
+      }}
+      onClose={d.close}
+    />
+  );
+}
+
 /** Owns open, opener and busy for the Export_Dialog; the toolbar button is disabled while the Document is only whitespace. */
-export function useExport({
-  svc,
-  store,
-  autosave,
-  gate,
-  doc,
-  notice,
-  orderStore,
-  onGo,
-}: UseExportArgs) {
+export function useExport(args: UseExportArgs) {
+  const { store, doc, onGo } = args;
   const { open, opener, close, show } = useOpenState();
   const [busy, setBusy] = useState(false);
   const setGoTo = useDeferredGo(open, onGo);
@@ -121,25 +147,8 @@ export function useExport({
         show();
       },
     },
-    dialog: open ? (
-      <ExportDialog
-        document={doc}
-        store={store}
-        orderStore={orderStore}
-        now={svc.now}
-        notice={notice}
-        clearNotice={clearNotice}
-        busy={busy}
-        restoreFocus={opener}
-        onGo={setGoTo}
-        onDownload={(context) => {
-          startDownload(svc, store, setBusy, close, context);
-        }}
-        onPrint={() => {
-          printFlow(svc, store, autosave, gate, selectedEntry(orderStore));
-        }}
-        onClose={close}
-      />
-    ) : null,
+    dialog: open
+      ? renderDialog({ args, opener, busy, setBusy, close, setGoTo, clearNotice })
+      : null,
   };
 }

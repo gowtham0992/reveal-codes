@@ -516,7 +516,10 @@ describe("AppShell small screen _Requirements: 10.4, 10.5, 10.6, 10.8, 10.9, 10.
     await mount(narrowFixture(799));
     expect(document.querySelector(".app")).toBeNull();
     expect(document.querySelectorAll("main p")).toHaveLength(3);
-    expect(document.querySelectorAll("button, a, svg")).toHaveLength(0);
+    expect(document.querySelectorAll("button, svg")).toHaveLength(0);
+    expect([...document.querySelectorAll("a")].map((a) => a.getAttribute("href"))).toEqual([
+      "/courts",
+    ]);
     const pictures = [...document.querySelectorAll("img")];
     expect(pictures.map((i) => i.getAttribute("aria-hidden"))).toEqual(["true"]);
     expect(titleElement()).toBe("Reveal Codes");

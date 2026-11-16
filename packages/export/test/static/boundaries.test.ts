@@ -242,7 +242,12 @@ describe("package boundaries _Requirements: 9.1, 10.9_", () => {
 });
 
 type PropertyFile = {
-  readonly spec: "export-certification" | "court-orders" | "pasted-text-declaration" | "open-draft";
+  readonly spec:
+    | "export-certification"
+    | "court-orders"
+    | "pasted-text-declaration"
+    | "open-draft"
+    | "court-rules-page";
   readonly file: string;
   readonly numbers: readonly number[];
 };
@@ -265,6 +270,7 @@ const PROPERTY_FILES: readonly PropertyFile[] = [
   { spec: "open-draft", file: "docx-read.properties.test.ts", numbers: [1, 9, 12] },
   { spec: "open-draft", file: "docx-text.properties.test.ts", numbers: [4] },
   { spec: "open-draft", file: "word-draft.properties.test.ts", numbers: [2, 3, 8] },
+  { spec: "court-rules-page", file: "order-filter.properties.test.ts", numbers: [1] },
 ];
 const EXPECTED_NUMBERS: Readonly<Record<PropertyFile["spec"], readonly number[]>> = {
   "export-certification": [1, 2, 3, 4],
@@ -273,6 +279,7 @@ const EXPECTED_NUMBERS: Readonly<Record<PropertyFile["spec"], readonly number[]>
   "pasted-text-declaration": [1, 2],
   // Task 2.8 adds 12 here; tasks 2.9-2.11 add 2, 3 and 8 with word-draft.properties.test.ts.
   "open-draft": [1, 2, 3, 4, 8, 9, 12],
+  "court-rules-page": [1],
 };
 
 /** Each `// Property N` comment, in order, must match `expected` and be followed by its own `fc.assert`. */

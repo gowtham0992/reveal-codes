@@ -17,7 +17,7 @@ import { humanDocument } from "./support/order-fixtures";
 import { act, fireEvent, renderUi, screen } from "./support/render";
 import { createFakeViewport } from "./support/viewport";
 
-function ExportHarness() {
+function useHarnessServices() {
   const storage = useMemo(() => createMemoryStorage(), []);
   const timers = useMemo(() => createManualTimers(), []);
   const svc: AppServices = {
@@ -32,6 +32,11 @@ function ExportHarness() {
     openPrint: () => true,
     viewport: createFakeViewport(),
   };
+  return { storage, svc };
+}
+
+function ExportHarness() {
+  const { storage, svc } = useHarnessServices();
   const store = useMemo(() => storeWith(humanDocument(), null), []);
   const autosave = useMemo(
     () =>
@@ -49,11 +54,12 @@ function ExportHarness() {
     () => store.getState().document,
     () => store.getState().document,
   );
+  const gate = createDraftGate();
   const x = useExport({
     svc,
     store,
     autosave,
-    gate: createDraftGate(),
+    gate,
     doc,
     notice: null,
     orderStore,

@@ -16,6 +16,7 @@ reveal-codes/
   packages/
     engine/                   pure provenance + citation-extraction engine (no deps)
       src/
+        courts/               the /courts page: view-model.ts, intro.ts, hash.ts, links.ts, instrument-view.tsx, courts-browser.tsx
         document.ts           Document, Span, Origin, apply(op)
         ops.ts                Insert/Delete/Replace operations and inverses
         segment.ts            sentence segmentation (lossless)
@@ -29,7 +30,7 @@ reveal-codes/
     export/                   pure export package: gate, certification statement, appendix, DOCX builder, file name, and the shared .docx reader: docx-read.ts (readDocx), docx-notes.ts, docx-signature.ts, export-split.ts (splitExport), appendix-parse.ts, word-draft.ts (readWordDraft), docx-text.ts (docxSafe) (depends on engine, docx and fflate)
   apps/
     web/                      Next.js editor (source under apps/web/src/ and apps/web/app/, tests under apps/web/test/)
-      app/                    Next App Router: layout.tsx, page.tsx, globals.css, api/ route files (assistant, mode, opinion/[clusterId], verify) that import only src/server/
+      app/                    Next App Router: layout.tsx, page.tsx, globals.css, api/ route files (assistant, mode, opinion/[clusterId], verify) that import only src/server/; courts/ (the public /courts page: page.tsx and courts.module.css, importing only from src/)
       src/
         store.ts              app Store: Document, selection, notices, run log; actions return new state
         store-actions.ts      Store action handlers

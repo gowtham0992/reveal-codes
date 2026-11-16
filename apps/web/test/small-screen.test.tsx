@@ -21,9 +21,12 @@ describe("SmallScreenPage _Requirements: 9.4, 9.5, 9.6, 9.7_", () => {
     expect(container.querySelector("main")?.textContent).toContain("Reveal Codes");
   });
 
-  it("has no button, link, icon or input, and no picture but the hidden mark", () => {
+  it("has no button, icon or input, only the Court_Rules_Link, and no picture but the hidden mark", () => {
     const { container } = renderUi(<SmallScreenPage />);
-    expect(container.querySelectorAll("button, a, svg, input")).toHaveLength(0);
+    expect(container.querySelectorAll("button, svg, input")).toHaveLength(0);
+    expect([...container.querySelectorAll("a")].map((a) => a.getAttribute("href"))).toEqual([
+      "/courts",
+    ]);
     const pictures = [...container.querySelectorAll("img")];
     expect(pictures.map((i) => i.getAttribute("src"))).toEqual(["/icon.svg"]);
     expect(pictures[0]?.getAttribute("aria-hidden")).toBe("true");
@@ -40,13 +43,16 @@ const VIDEO = "https://example.org/demo";
 const REPO = "https://example.org/repo";
 
 describe("SmallScreenPage links", () => {
-  it("shows no link when neither address is set", () => {
+  it("shows only the court rules link when neither address is set", () => {
     const { container } = renderUi(<SmallScreenPage links={{ video: null, repo: null }} />);
-    expect(container.querySelectorAll("a")).toHaveLength(0);
+    expect([...container.querySelectorAll("a")].map((a) => a.getAttribute("href"))).toEqual([
+      "/courts",
+    ]);
   });
   it("shows both links under the sentences, opening in a new tab with rel noreferrer", () => {
     const { container } = renderUi(<SmallScreenPage links={{ video: VIDEO, repo: REPO }} />);
-    const anchors = [...container.querySelectorAll("a")];
+    const [courts, ...anchors] = [...container.querySelectorAll("a")];
+    expect(courts?.getAttribute("href")).toBe("/courts");
     expect(anchors.map((a) => [a.textContent, a.getAttribute("href")])).toEqual([
       [VIDEO_LINK_TEXT, VIDEO],
       [REPO_LINK_TEXT, REPO],
@@ -68,6 +74,7 @@ describe("SmallScreenPage links", () => {
   it("shows only the link whose address is set", () => {
     const only = renderUi(<SmallScreenPage links={{ video: null, repo: REPO }} />);
     expect([...only.container.querySelectorAll("a")].map((a) => a.textContent)).toEqual([
+      "See all court rules",
       REPO_LINK_TEXT,
     ]);
   });

@@ -59,7 +59,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - `packages/export/test/order-groups.test.ts`: group order uses the same `compareAbbreviations`; a synthetic list with "5th Cir." and "10th Cir. BAP" puts 5th first; Court_Wide before Judge_Level; newest first; id tie-break; `orderStats` equals counts computed from the shipped dataset
     - _Requirements: 2.2, 3.2, 3.3, 3.4, 16.2, 16.4_
 
-- [~] 4. Checkpoint - Ensure all tests pass
+- [x] 4. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 5. The `/courts` page

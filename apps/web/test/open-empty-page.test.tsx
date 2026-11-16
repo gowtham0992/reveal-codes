@@ -100,7 +100,7 @@ describe("empty page _Requirements: 16.1, 16.2, 16.3, 16.4, 16.5, 16.7_", () => 
     expect(EDITOR_PLACEHOLDER).toBe(NEW_PLACEHOLDER);
     expect(screen.getByText(NEW_PLACEHOLDER)).toBeTruthy();
     expect(document.body.textContent).not.toContain(OLD_PLACEHOLDER);
-    const links = screen.getAllByRole("link");
+    const links = screen.getAllByRole("link").filter((a) => a.textContent !== "Court rules");
     expect(links.map((a) => a.textContent)).toEqual([
       "Open a draft",
       "Load demo motion",
@@ -114,7 +114,7 @@ describe("empty page _Requirements: 16.1, 16.2, 16.3, 16.4, 16.5, 16.7_", () => 
   it("removes the links once the Document has text", async () => {
     await mount();
     await pick("a.txt", new TextEncoder().encode("A filing."));
-    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.queryByRole("link", { name: "Open a draft" })).toBeNull();
     expect(screen.queryByText(NEW_PLACEHOLDER)).toBeNull();
   });
 
@@ -133,7 +133,7 @@ describe("empty page _Requirements: 16.1, 16.2, 16.3, 16.4, 16.5, 16.7_", () => 
       fireEvent.click(screen.getByRole("link", { name: "Load demo motion" }));
       await new Promise((r) => setTimeout(r, 30));
     });
-    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.queryByRole("link", { name: "Open a draft" })).toBeNull();
     expect(document.body.textContent).toContain("Dana Whitfield");
   });
 });
@@ -209,7 +209,7 @@ describe("opening makes no request _Requirements: 17.1, 17.2, 19.10_", () => {
       const spies = spyNetwork();
       const apiBefore = calls.api;
       await pick(label === "a text file" ? "a.txt" : "a.docx", await bytes());
-      expect(screen.queryByRole("link")).toBeNull();
+      expect(screen.queryByRole("link", { name: "Open a draft" })).toBeNull();
       expect(spies.fetchSpy).not.toHaveBeenCalled();
       expect(spies.xhr).not.toHaveBeenCalled();
       expect(spies.submit).not.toHaveBeenCalled();
