@@ -3,6 +3,8 @@ import type { Document } from "@reveal-codes/engine";
 import { docxSafe, holdsDocxUnsafe } from "@reveal-codes/export";
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import { openFile } from "../src/client/open-file";
+import type { OpenInput } from "../src/client/open-file";
 import { removedSentence } from "../src/client/open-messages";
 import { textOutcome } from "../src/client/open-outcome";
 import { restoreNote } from "../src/client/open-note";
@@ -11,6 +13,7 @@ import { pastedDocument } from "../src/client/pasted-document";
 import { initialState, reduce } from "../src/store";
 import { arbCitingDocument } from "./arbitraries";
 import { runs } from "./support/fc";
+import { simpleDocx, truncated } from "./support/word-fixtures";
 
 const BOM_BYTES = [0xef, 0xbb, 0xbf];
 
@@ -161,6 +164,117 @@ describe("open-file: the restore note follows AI runs and verification results _
         if (note === null) return;
         expect(note.endsWith(RUN_VERIFY_SENTENCE)).toBe(c.withResult);
         expect(note.includes(RUN_VERIFY_SENTENCE)).toBe(c.withResult);
+      }),
+      { numRuns: runs() },
+    );
+  });
+});
+
+type Refusal = Readonly<{ file: OpenInput; reads: () => number }>;
+
+const arbStem: fc.Arbitrary<string> = fc
+  .array(fc.constantFrom(...Array.from("abcdefghijklmnopqrstuvwxyz0123456789_-")), {
+    minLength: 1,
+    maxLength: 8,
+  })
+  .map((cs) => cs.join(""));
+
+function refusal(name: string, size: number | null, bytes: Uint8Array): Refusal {
+  let reads = 0;
+  const copy = bytes.slice().buffer;
+  const file: OpenInput = {
+    name,
+    size: size ?? bytes.length,
+    arrayBuffer: () => {
+      reads += 1;
+      return Promise.resolve(copy);
+    },
+  };
+  return { file, reads: () => reads };
+}
+
+const utf8 = (s: string): Uint8Array => new TextEncoder().encode(s);
+
+/** Files the Open_Flow must refuse: each of the refusals of Requirement 14 that needs no fixture beyond bytes. */
+const arbRefused: fc.Arbitrary<Refusal> = fc.oneof(
+  fc
+    .tuple(arbStem, fc.constantFrom(".pdf", ".doc", ".rtf", ".bak", ".docx.bak", ""))
+    .map(([stem, ext]) => refusal(`${stem}${ext}`, null, utf8("x"))),
+  fc
+    .tuple(
+      arbStem,
+      fc.constantFrom(".txt", ".md", ".docx"),
+      fc.integer({ min: 5_242_881, max: 50_000_000 }),
+    )
+    .map(([stem, ext, size]) => refusal(`${stem}${ext}`, size, utf8("x"))),
+  fc
+    .tuple(
+      arbStem,
+      fc.constantFrom(".txt", ".md"),
+      fc.constantFrom([0xc3, 0x28], [0xff, 0xfe, 0x41, 0x00], [0xfe, 0xff, 0x00, 0x41], [0x80]),
+      fc.string({ unit: "grapheme-ascii", maxLength: 10 }),
+    )
+    .map(([stem, ext, bad, tail]) =>
+      refusal(`${stem}${ext}`, null, Uint8Array.from([...utf8(tail), ...bad])),
+    ),
+  fc
+    .tuple(
+      arbStem,
+      fc.constantFrom(".txt", ".md"),
+      fc.array(fc.constantFrom(" ", "\n", "\t", "\r", "\uFEFF"), { maxLength: 12 }),
+    )
+    .map(([stem, ext, ws]) => refusal(`${stem}${ext}`, null, utf8(ws.join("")))),
+  fc
+    .tuple(arbStem, fc.constantFrom(".txt", ".md"), fc.integer({ min: 200_001, max: 200_040 }))
+    .map(([stem, ext, n]) => refusal(`${stem}${ext}`, null, utf8("a".repeat(n)))),
+  fc
+    .tuple(
+      arbStem,
+      fc.array(fc.constantFrom(...Array.from("abcdef \n")), { minLength: 1, maxLength: 20 }),
+      fc.boolean(),
+    )
+    .map(([stem, cs, cut]) =>
+      refusal(
+        `${stem}.docx`,
+        null,
+        cut ? truncated(simpleDocx([cs.join(""), "Second.", "Third."])) : utf8(cs.join("")),
+      ),
+    ),
+);
+
+describe("open-file: a refusal changes nothing but the note and the message _Requirements: 4.6, 4.7, 14.11, 19.1_", () => {
+  // Property 14
+  it("P14 a refused file names itself, says what to do, and leaves the Store as it was apart from notice and openNote", async () => {
+    await fc.assert(
+      fc.asyncProperty(arbRefused, arbCitingDocument, async ({ file, reads }, prior) => {
+        const clock = (): Date => NOW;
+        const before = reduce(
+          initialState(clock),
+          { type: "replace", document: prior, runLog: [], verifiedAt: null, declaration: null },
+          clock,
+        ).state;
+
+        const out = await openFile(file);
+        expect(out.kind).toBe("refused");
+        if (out.kind !== "refused") return;
+        expect(out.notice).toBe(`Could not open ${file.name}.`);
+        expect(out.note.includes(file.name)).toBe(true);
+        expect(out.note).toMatch(/\b(Choose|Save|Open|Split|Remove|paste)\b/);
+        if (file.size > 5_242_880) expect(reads()).toBe(0);
+
+        const cleared = reduce(before, { type: "openNote", text: null }, clock).state;
+        const withNotice = reduce(cleared, { type: "notice", text: out.notice }, clock).state;
+        const after = reduce(withNotice, { type: "openNote", text: out.note }, clock).state;
+
+        expect(after.notice).toBe(out.notice);
+        expect(after.openNote).toBe(out.note);
+        expect({ ...after, notice: null, openNote: null }).toEqual({
+          ...before,
+          notice: null,
+          openNote: null,
+        });
+        expect(after.document).toBe(before.document);
+        expect(after.declaration).toBe(before.declaration);
       }),
       { numRuns: runs() },
     );
