@@ -47,7 +47,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Export `CourtGroupView`, `OrderStats` and the functions from `index.ts`
     - _Requirements: 2.2, 3.1, 3.2, 3.3, 3.4, 6.6_
 
-  - [-] 3.3 Write property test for the filter
+  - [x] 3.3 Write property test for the filter
     - **Property 1: The filter selects exactly the entries the rule names**
     - **Validates: Requirements 6.4, 6.8, 16.11, 16.12, 16.13**
     - Create `packages/export/test/support/arb-order-filter.ts` with `arbOrderEntries` and `arbFilterState(entries)` (cleared state, substring queries, case/punctuation/spacing variants, empty and punctuation-only queries, queries that match nothing, all five kinds and "all", boolean checkbox)
