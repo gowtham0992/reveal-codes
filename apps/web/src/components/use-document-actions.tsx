@@ -103,35 +103,48 @@ function saveCopyOrNotice(svc: AppServices, store: Store): void {
   if (!saveDraftCopy(svc)) store.dispatch({ type: "notice", text: SAVE_COPY_FAILED });
 }
 
-/** New and Load demo motion: both confirm first (Load demo only when the draft is non-empty). */
-export function useDocumentActions(deps: Deps) {
-  const { store, svc, gate, doc } = deps;
-  const { pending, setPending, opener, ask } = useDialogOpener();
-  const open = useOpenDraft(store, svc);
-  const confirm = (): void => {
-    setPending(null);
-    if (pending !== null) runPending(pending, deps);
+type Ask = (kind: Pending) => void;
+function loadHandlers(deps: Deps, ask: Ask) {
+  const loadOrAsk = (key: SampleKey): void => {
+    if (deps.doc.text.length === 0) runPending(key, deps);
+    else ask(key);
   };
   return {
+    onLoadDemo: (): void => {
+      loadOrAsk("demo");
+    },
+    onLoadSample: loadOrAsk,
+  };
+}
+function newHandlers(deps: Deps, ask: Ask) {
+  return {
     onNew: (): void => {
-      ask(gate.blocked() ? "newBlocked" : "new");
+      ask(deps.gate.blocked() ? "newBlocked" : "new");
     },
     onStartNewDraft: (): void => {
       ask("newBlocked");
     },
     onSaveDraftCopy: (): void => {
-      saveCopyOrNotice(svc, store);
+      saveCopyOrNotice(deps.svc, deps.store);
     },
-    /** `openDraft(file)` is the one function the Picker and the drop (task 8.4) both call. */
+  };
+}
+/** New and Load demo motion: both confirm first (Load demo only when the draft is non-empty). */
+export function useDocumentActions(deps: Deps) {
+  const { pending, setPending, opener, ask } = useDialogOpener();
+  const open = useOpenDraft(deps.store, deps.svc);
+  const confirm = (): void => {
+    setPending(null);
+    if (pending !== null) runPending(pending, deps);
+  };
+  const cancel = (): void => {
+    setPending(null);
+  };
+  return {
+    ...newHandlers(deps, ask),
+    /** `openDraft(file)` is the one function the Picker and the drop both call. */
     ...open.api,
-    onLoadDemo: (): void => {
-      if (doc.text.length === 0) runPending("demo", deps);
-      else ask("demo");
-    },
-    onLoadSample: (key: SampleKey): void => {
-      if (doc.text.length === 0) runPending(key, deps);
-      else ask(key);
-    },
+    ...loadHandlers(deps, ask),
     dialog:
       open.dialog ??
       (pending === null ? null : (
@@ -139,7 +152,7 @@ export function useDocumentActions(deps: Deps) {
           {...COPY[pending]}
           restoreFocus={opener}
           onConfirm={confirm}
-          onCancel={() => { setPending(null); }}
+          onCancel={cancel}
         />
       )),
   };

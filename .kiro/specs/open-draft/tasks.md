@@ -114,7 +114,7 @@ Conventions that apply to every task:
 - [~] 5. Checkpoint - `docxSafe` and the export refusal
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Limits, Store changes and the Next_Step gap
+- [x] 6. Limits, Store changes and the Next_Step gap
   - [x] 6.1 Move `MAX_TEXT_CHARS` to `apps/web/src/limits.ts`
     - Create `apps/web/src/limits.ts` with the one definition (`200_000`, no imports). `apps/web/src/server/verify-route.ts` imports it and re-exports the name so `test/verify-route.test.ts` is unchanged. Add `limits.ts` to the browser-bundle check in `apps/web/test/static/boundaries.test.ts` only if the rule table needs it.
     - Run `pnpm --filter @reveal-codes/web test -- test/static/boundaries.test.ts` with the real files in place and record that it passes (and that `forbidden.test.ts`, `package-json.test.ts` and `env-and-size.test.ts` still pass).
@@ -144,7 +144,7 @@ Conventions that apply to every task:
     - **Property 6: Outside the gap the Next_Step is unchanged**
     - Same file as 6.6. For any input with `needsCheckDate` false, `nextStep` equals an expected value read from a separate table written in the test, not a second copy of the function. Update `apps/web/test/static/inventory.test.ts` with the new `// Property 6` comment in this task.
     - **Validates: Requirements 13.14, 8.4**
-  - [~] 6.8 Write property test for red codes blocking while the Next_Step is Verify
+  - [x] 6.8 Write property test for red codes blocking while the Next_Step is Verify
     - **Property 7: Red codes still block export while the Next_Step is Verify**
     - Same file as 6.6. For any Document with a red code and no override, any court and any `verifiedAt`, `canExport` is false whether `nextStep` returns `verify` or `export`, and `canExport` is the same before and after the Next_Step input changes; a restored override still counts. Update `apps/web/test/static/inventory.test.ts` with the new `// Property 7` comment in this task.
     - **Validates: Requirements 13.12, 9.7**
@@ -171,7 +171,7 @@ Conventions that apply to every task:
     - `components/toolbar.tsx` and `shell-toolbar.tsx`: a button labelled "Open" after New and before Load demo motion, no `data-primary`, enabled while a Verify run is in flight; the confirm dialog uses title "Open a draft", message "Discard the current draft and open <file name>?", confirm label "Discard and open", focus on Cancel, through the existing confirm dialog.
     - `components/editor-surface.tsx`: while `document.text` is empty, the placeholder "Type or paste your filing here, or open a draft." and under it three plain links in the order "Open a draft" (opens the Picker, navigates nowhere), "Load demo motion", "Load the Avianca citations"; none while the Document has a character. The old placeholder text no longer appears. Link style `var(--oxblood)`, no icon, in the component's CSS module.
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 4.2, 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7_
-  - [~] 8.4 Drop and wiring
+  - [-] 8.4 Drop and wiring
     - `components/use-file-drop.ts`: capture-phase `dragover` and `drop` listeners on `document` that act only when `dataTransfer.types` includes `"Files"`; they call `preventDefault` and `stopPropagation` so ProseMirror inserts nothing and the browser navigates nowhere. Exactly one file goes to the same `openFile` as the Picker; more than one dispatches the Open_Note "Open one file at a time. Drop a single file." and the Toolbar notice "Open one file at a time." and opens none; a drag with no file is left to the existing drop behaviour (`PST`). No overlay, outline or animation.
     - Wire `use-open`, `use-file-drop` and the confirm dialog into `components/app-shell.tsx`.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 14.8_
@@ -206,7 +206,7 @@ Conventions that apply to every task:
   - [~] 8.13 Write empty-page, Toolbar, network and static examples
     - File `apps/web/test/open-empty-page.test.ts`. The empty-page placeholder and the three links in order, their absence once the Document has a character, the old placeholder gone, "Open a draft" opening the Picker; the Open button directly after New and before Load demo motion, with no `data-primary`; zero `fetch`, `XMLHttpRequest`, `sendBeacon` and form-post calls during an open; no route under `apps/web/app/api` for opening; static scan that the Open flow holds no discarding `try`/`catch`; `test/static/boundaries.test.ts` and the docs scan of Requirement 17 criterion 4 still pass.
     - _Requirements: 2.1, 2.6, 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7, 17.1, 17.2, 17.4, 21.8, 19.10_
-  - [~] 8.14 Write Open text-safety examples
+  - [-] 8.14 Write Open text-safety examples
     - File `apps/web/test/open-text-safety.test.ts`. The Open_Message for `removed` 0, 1 and more than 1, with the sentences in the order opened sentence, removed sentence, notes sentence; a file that holds only control characters is refused as empty; a restore of a record that holds an unsafe character is not changed.
     - _Requirements: 7.7, 22.3, 22.4, 22.5, 19.15_
 

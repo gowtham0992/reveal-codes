@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { pastedDocument } from "../client/pasted-document";
 import { openFile } from "../client/open-file";
+import { severalFilesOutcome } from "../client/open-outcome";
 import type { OpenInput } from "../client/open-file";
 import type { OpenOutcome } from "../client/open-outcome";
 import type { AppServices } from "../services";
 import type { Store } from "../store-runtime";
 import { ConfirmDialog } from "./confirm-dialog";
+import { useFileDrop } from "./use-file-drop";
 import { useOpen } from "./use-open";
 
 type Installable = Exclude<OpenOutcome, { kind: "refused" }>;
@@ -60,6 +62,14 @@ async function runOpen(
   else askOpen({ name: file.name, outcome });
 }
 
+/** A drop of several files: the refusal path of Requirement 14 criterion 8, opening none. */
+function refuseSeveral(store: Store): void {
+  const refused = severalFilesOutcome();
+  if (refused.kind !== "refused") return;
+  store.dispatch({ type: "openNote", text: null });
+  store.dispatch({ type: "notice", text: refused.notice });
+  store.dispatch({ type: "openNote", text: refused.note });
+}
 /**
  * Open: the Picker, the confirm dialog and `openDraft(file)`, the one function a drop also calls.
  * Installs through `replace` like Load demo motion, so the Draft_Gate behaviour is the same.
@@ -73,6 +83,12 @@ export function useOpenDraft(store: Store, svc: AppServices) {
     void runOpen(store, svc, file, setPending);
   };
   const picker = useOpen(openDraft);
+  useFileDrop({
+    onFile: openDraft,
+    onSeveral: () => {
+      refuseSeveral(store);
+    },
+  });
   const close = (): void => {
     setPending(null);
   };

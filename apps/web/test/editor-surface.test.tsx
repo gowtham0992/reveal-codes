@@ -38,9 +38,7 @@ describe("EditorSurface _Requirements: 6.5, 6.6, 10.3_", () => {
     await mount();
     const placeholder = screen.getByText(EDITOR_PLACEHOLDER);
     expect(placeholder.getAttribute("aria-hidden")).toBe("true");
-    expect(EDITOR_PLACEHOLDER).toBe(
-      "Type or paste your filing here, or open a draft.",
-    );
+    expect(EDITOR_PLACEHOLDER).toBe("Type or paste your filing here, or open a draft.");
   });
 
   it("hides the placeholder after typing", async () => {
