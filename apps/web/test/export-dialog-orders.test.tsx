@@ -5,6 +5,7 @@ import type { OrderEntry, OrderSet } from "@reveal-codes/export";
 import { useSyncExternalStore } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { createAutosave } from "../src/autosave";
+import { createDraftGate } from "../src/draft-gate";
 import { Toolbar } from "../src/components/toolbar";
 import { useExport } from "../src/components/use-export";
 import { CONFIDENTIALITY_LABEL, curlyQuoted, quoted } from "../src/order-copy";
@@ -95,7 +96,15 @@ function mount(document: Document, storage = createMemoryStorage()): Rig {
       () => store.getState().notice,
       () => store.getState().notice,
     );
-    const x = useExport({ svc, store, autosave, doc, notice, onGo: () => undefined });
+    const x = useExport({
+      svc,
+      store,
+      autosave,
+      gate: createDraftGate(),
+      doc,
+      notice,
+      onGo: () => undefined,
+    });
     return (
       <>
         <Toolbar notice={null} step="none" paneOpen={false} verifyDisabled={false} {...x.toolbar} />

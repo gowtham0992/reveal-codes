@@ -7,7 +7,8 @@ import type { OrderContext } from "@reveal-codes/export";
 import { useEffect, useMemo, useState } from "react";
 import type { Autosave } from "../autosave";
 import { exportDocx } from "../client/export-docx";
-import { PRINT_FAILED } from "../notices";
+import type { DraftGate } from "../draft-gate";
+import { PRINT_BLOCKED, PRINT_FAILED } from "../notices";
 import { createOrderSelectionStore } from "../order-selection";
 import type { AppServices } from "../services";
 import type { Store } from "../store-runtime";
@@ -17,6 +18,7 @@ export type UseExportArgs = Readonly<{
   svc: AppServices;
   store: Store;
   autosave: Autosave;
+  gate: DraftGate;
   /** The live Document from the Store slice; the gate is recomputed from it each render. */
   doc: Document;
   notice: string | null;
@@ -25,7 +27,11 @@ export type UseExportArgs = Readonly<{
 }>;
 
 /** Print: schedule, flush, then open; either failing keeps the dialog open (Req 2.11). */
-function printFlow(svc: AppServices, store: Store, autosave: Autosave): void {
+function printFlow(svc: AppServices, store: Store, autosave: Autosave, gate: DraftGate): void {
+  if (gate.blocked()) {
+    store.dispatch({ type: "notice", text: PRINT_BLOCKED });
+    return;
+  }
   const { document, runLog, verifiedAt } = store.getState();
   autosave.schedule(document, runLog, verifiedAt);
   if (!autosave.flush() || !svc.openPrint()) {
@@ -78,7 +84,7 @@ function useOpenState() {
 }
 
 /** Owns open, opener and busy for the Export_Dialog; the toolbar button is disabled while the Document is only whitespace. */
-export function useExport({ svc, store, autosave, doc, notice, onGo }: UseExportArgs) {
+export function useExport({ svc, store, autosave, gate, doc, notice, onGo }: UseExportArgs) {
   const { open, opener, close, show } = useOpenState();
   const [busy, setBusy] = useState(false);
   const orderStore = useMemo(() => createOrderSelectionStore(svc.storage, ORDERS), [svc.storage]);
@@ -110,7 +116,7 @@ export function useExport({ svc, store, autosave, doc, notice, onGo }: UseExport
           startDownload(svc, store, setBusy, close, context);
         }}
         onPrint={() => {
-          printFlow(svc, store, autosave);
+          printFlow(svc, store, autosave, gate);
         }}
         onClose={close}
       />

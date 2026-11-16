@@ -497,7 +497,7 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - If the builder of any kind returns `undefined` for every Document you can construct, stop and report that kind. Do not drop it, lower the assertion or change the builder without the author's decision (Requirement 22, criterion 14).
     - _Requirements: 22.2, 22.14_
 
-  - [~] 22.4 Rewrite the reachability tests
+  - [x] 22.4 Rewrite the reachability tests
     - In `packages/engine/test/arb-codes.test.ts` keep the two random rejection properties and remove the `seen`, `kinds` and `multi` set assertions from them. Add `it.each(TAMPER_KINDS)` that asserts `arbTamperOfKind(k, TAMPER_WITNESSES[k])` is defined and, over `fc.assert` with `runs()`, that every value has `kind` `k` and that `parse` rejects with the recorded `index` and `rule`. Add `it.each(SYNTAX_FAULT_KINDS)` over `arbSyntaxFaultOf(..., [kind], { maxFaults: 1 })` asserting that every injected fault has that kind and that `parse` rejects with the recorded `index` and `rule`. Add the multi-fault test (`minFaults: 2` on the fixed Document, at least two injected faults).
     - Add the test that `Object.keys(TAMPER_WITNESSES)` equals `TAMPER_KINDS` as sorted lists, and an example test that `missingWitnesses` names a kind removed from a copy of the table.
     - Replace the seeded `ref_payload` test with the per-kind case for `ref_payload` (rule `bad_field`, text starting `[REF{k=k0}]` at the index), and replace the seeded reachability test in `packages/engine/test/codes.properties.test.ts` (line near 202) with a reference to the per-kind test. Do not weaken any assertion: every member of both exported lists must still be shown reachable.
@@ -533,7 +533,7 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - In `app-shell.tsx` read the gate with `useSyncExternalStore` and pass `draft` through `IssuesSlot`.
     - _Requirements: 23.6, 23.7, 23.8, 23.22_
 
-  - [~] 23.5 Start a new document, Toolbar New and the print guard
+  - [x] 23.5 Start a new document, Toolbar New and the print guard
     - In `use-document-actions.tsx` add the pending kind `"newBlocked"` with the confirm copy of Requirement 23, criterion 12. `onNew` asks `"newBlocked"` when the gate is blocked. A confirmed `"newBlocked"` runs `startNew` and releases the gate only when `autosave.clear()` returned `true`; otherwise the gate stays blocked. Return `onStartNewDraft` and `onSaveDraftCopy` (dispatching `SAVE_COPY_FAILED` when `saveDraftCopy` returns `false`) and wire them to the Draft_Notice in `app-shell.tsx`. Sample loads do not touch the gate.
     - In `use-export.tsx`, `printFlow` checks the gate first and dispatches `PRINT_BLOCKED` without calling `autosave` or `openPrint`.
     - _Requirements: 23.10, 23.12, 23.13, 23.14, 23.15, 23.16, 23.17, 23.18_

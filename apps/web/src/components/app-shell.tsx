@@ -5,6 +5,7 @@ import type { Document } from "@reveal-codes/engine";
 import { createAutosave } from "../autosave";
 import type { Autosave } from "../autosave";
 import { createDraftGate } from "../draft-gate";
+import type { DraftGate } from "../draft-gate";
 import { useEditorBinding } from "../editor/use-editor-binding";
 import { NARROW_WIDTH, SHELL_MIN_WIDTH, defaultServices } from "../services";
 import { SmallScreenPage } from "./small-screen-page";
@@ -108,15 +109,16 @@ type FlowsArgs = Readonly<{
   svc: AppServices;
   store: Store;
   autosave: Autosave;
+  gate: DraftGate;
   doc: Document;
   notice: string | null;
   onGo: (offset: number) => void;
 }>;
 
 /** Export, New/Load and Verify wiring for the toolbar. */
-function useShellFlows({ svc, store, autosave, doc, notice, onGo }: FlowsArgs) {
-  const exportGate = useExport({ svc, store, autosave, doc, notice, onGo });
-  const actions = useDocumentActions({ store, svc, autosave, doc });
+function useShellFlows({ svc, store, autosave, gate, doc, notice, onGo }: FlowsArgs) {
+  const exportGate = useExport({ svc, store, autosave, gate, doc, notice, onGo });
+  const actions = useDocumentActions({ store, svc, autosave, gate, doc });
   const verify = useVerify(svc, store);
   return { exportGate, actions, verify };
 }
@@ -159,8 +161,6 @@ function IssuesSlot({
   );
 }
 
-function noop(): void {}
-
 function useShellState(svc: AppServices) {
   const { store, autosave, gate } = useShellParts(svc);
   const blocked = useSyncExternalStore(gate.subscribe, gate.blocked, () => false);
@@ -176,12 +176,16 @@ function useShellState(svc: AppServices) {
     svc,
     store,
     autosave,
+    gate,
     doc,
     notice,
     onGo,
   });
-  // The button handlers are wired in task 23.5 (use-document-actions).
-  const draft: DraftNotice = { blocked, onSaveCopy: noop, onStartNew: noop };
+  const draft: DraftNotice = {
+    blocked,
+    onSaveCopy: actions.onSaveDraftCopy,
+    onStartNew: actions.onStartNewDraft,
+  };
   return {
     slot,
     binding,

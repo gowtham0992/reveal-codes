@@ -4,7 +4,6 @@ import { parse, render, strip, stripPositions } from "../src/codes";
 import { escapeText } from "../src/codes/syntax";
 import { structuralEqual } from "../src/equal";
 import {
-  TAMPER_KINDS,
   arbAnyString,
   arbDocument,
   arbExpressionDocument,
@@ -198,8 +197,6 @@ describe("Property 41: Semantically tampered renderings are rejected with the vi
     );
   });
 
-  it("every tamper kind is reachable from arbTamperDocument (example, not a property)", () => {
-    const seen = new Set(fc.sample(arbTamper41, { numRuns: 1500, seed: 41 }).map((t) => t.kind));
-    expect([...seen].sort()).toEqual([...TAMPER_KINDS].sort());
-  });
+  // Reachability of every tamper kind is shown per kind, without a seed, in
+  // test/arb-codes.test.ts (it.each(TAMPER_KINDS) over TAMPER_WITNESSES).
 });

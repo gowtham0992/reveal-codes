@@ -4,7 +4,9 @@ import { apply, createDocument } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
 import { useState } from "react";
 import type { Autosave } from "../autosave";
-import { noticeForError } from "../notices";
+import type { DraftGate } from "../draft-gate";
+import { SAVE_COPY_FAILED, noticeForError } from "../notices";
+import { saveDraftCopy } from "../saved-draft";
 import type { AppServices } from "../services";
 import type { Store } from "../store-runtime";
 import { ConfirmDialog } from "./confirm-dialog";
@@ -15,7 +17,7 @@ export const AVIANCA_FAILED =
   "The Avianca citations could not be loaded. Your document is unchanged.";
 
 export type SampleKey = "demo" | "avianca";
-type Pending = "new" | SampleKey;
+type Pending = "new" | "newBlocked" | SampleKey;
 
 /** One PST insert over an empty Document; the whole text is a single span (Requirement 20). */
 function pastedDocument(text: string, iso: string): Document | string {
@@ -48,13 +50,36 @@ function startNew(store: Store, svc: AppServices, autosave: Autosave): void {
   autosave.clear();
 }
 
-type Deps = Readonly<{ store: Store; svc: AppServices; autosave: Autosave; doc: Document }>;
+/** Start a new document over an unreadable draft: the gate opens only when the stored value was removed. */
+function startNewBlocked(
+  store: Store,
+  svc: AppServices,
+  autosave: Autosave,
+  gate: DraftGate,
+): void {
+  installDocument(store, svc, "");
+  if (autosave.clear()) gate.release();
+}
+
+type Deps = Readonly<{
+  store: Store;
+  svc: AppServices;
+  autosave: Autosave;
+  gate: DraftGate;
+  doc: Document;
+}>;
 
 const COPY = {
   new: {
     title: "New document",
     message: "Discard the current draft and start a new document?",
     confirmLabel: "Discard and start new",
+  },
+  newBlocked: {
+    title: "Start a new document",
+    message:
+      "Delete the saved draft that could not be read and start a new document? Anything on the page is discarded too.",
+    confirmLabel: "Delete and start new",
   },
   demo: {
     title: "Load demo motion",
@@ -79,28 +104,41 @@ function useDialogOpener() {
   return { pending, setPending, opener, ask };
 }
 
+function runPending(kind: Pending, d: Deps): void {
+  if (kind === "new") startNew(d.store, d.svc, d.autosave);
+  else if (kind === "newBlocked") startNewBlocked(d.store, d.svc, d.autosave, d.gate);
+  else void loadSample(d.store, d.svc, kind);
+}
+
+function saveCopyOrNotice(svc: AppServices, store: Store): void {
+  if (!saveDraftCopy(svc)) store.dispatch({ type: "notice", text: SAVE_COPY_FAILED });
+}
+
 /** New and Load demo motion: both confirm first (Load demo only when the draft is non-empty). */
-export function useDocumentActions({ store, svc, autosave, doc }: Deps) {
+export function useDocumentActions(deps: Deps) {
+  const { store, svc, gate, doc } = deps;
   const { pending, setPending, opener, ask } = useDialogOpener();
-  const run = (kind: Pending): void => {
-    if (kind === "new") startNew(store, svc, autosave);
-    else void loadSample(store, svc, kind);
-  };
   const confirm = (): void => {
     const kind = pending;
     setPending(null);
-    if (kind !== null) run(kind);
+    if (kind !== null) runPending(kind, deps);
   };
   return {
     onNew: (): void => {
-      ask("new");
+      ask(gate.blocked() ? "newBlocked" : "new");
+    },
+    onStartNewDraft: (): void => {
+      ask("newBlocked");
+    },
+    onSaveDraftCopy: (): void => {
+      saveCopyOrNotice(svc, store);
     },
     onLoadDemo: (): void => {
-      if (doc.text.length === 0) run("demo");
+      if (doc.text.length === 0) runPending("demo", deps);
       else ask("demo");
     },
     onLoadSample: (key: SampleKey): void => {
-      if (doc.text.length === 0) run(key);
+      if (doc.text.length === 0) runPending(key, deps);
       else ask(key);
     },
     dialog:
