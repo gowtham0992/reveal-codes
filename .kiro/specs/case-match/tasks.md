@@ -566,7 +566,7 @@ Tasks 1 to 21 are complete and keep their checkboxes. The tasks below are new an
     - No exclamation mark and no marketing text.
     - _Requirements: 22.10, 22.11, 22.13, 23.24, 24.4_
 
-- [~] 25. Final checkpoint
+- [x] 25. Final checkpoint
   - Run `pnpm lint`, `pnpm typecheck`, `pnpm test` three times in a row and report each result (the three runs show that the reachability tests are stable), `pnpm test:pbt`, `pnpm --filter @reveal-codes/web build` (the clean-checkout web build) and `pnpm kiro:check`. Fix any failure in the code, never in a test's meaning.
   - State in the report that the push and the check of CI are left to the author. Do not push.
   - Ensure all tests pass, ask the user if questions arise.

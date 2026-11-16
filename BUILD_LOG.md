@@ -609,7 +609,15 @@ The author walked the app in a browser and found four things. Requirement 9.8 wa
 ### The audit of unseeded draws (task 22.5)
 
 - Seeded and left alone: `arb-edit.test.ts` (seeds 42, 7, 3 and 11, 13), `arbitraries.test.ts` (seed 1), `arb-citation.test.ts`, `arb-segment-inputs.test.ts`, `arb-text-citations.test.ts`, `arb-api.test.ts`, `incremental.test.ts`, `rate-limit.properties.test.ts`.
-- Unseeded and safe, with the probability that a random run misses: tests whose draw covers each member with a probability high enough that the miss probability is negligible, for example the 8 syntax faults above (3.5e-41).
+- Unseeded and safe, with the probability that a random run misses: tests whose draw covers each member with a probability high enough that the miss probability is negligible, for example the 8 syntax faults above (3.5e-41). The other figures measured in task 22.5:
+  - Property 4: 76.3% of draws.
+  - Property 5: at least 0.5.
+  - Property 6: about 1/6.
+  - Property 7: kept versus dropped, 20.2%.
+  - Property 8: always.
+  - Property 2: a one-third mix.
+  - Property 19: 61.8%.
+  - `arb-state` wrong_case: 5.72% of draws over 400 runs, so a run misses it with probability about 5.6e-11.
 - Fixed, two: the engine `case-match.properties.test.ts` Property 7 `wrongToWrong` guard (a wrong_case to wrong_case rewrite with a different name drew 5.15% of runs, so at 200 runs about 2.5e-5 of runs missed it) and the export `case-match.properties.test.ts` Property 14 `wrongCaseSeen` guard (5.7% of draws, about 7.5e-6 at 200 runs). Both now carry fixed examples run first. fast-check counts examples inside `numRuns`, so `numRuns` is raised by their number to keep the random runs.
 
 ### The unreadable draft (Requirement 23)
