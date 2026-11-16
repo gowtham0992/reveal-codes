@@ -162,7 +162,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Add the declaration step in the order: Export, choose the court (N.D. Tex.), make the declaration with Declaration_Choice_AI and a named tool, resolve or override, Download. State that the statement then prints the Requirement 2 criterion 6 sentence and that the first-page heading appears. Keep the demo within the ninety-second budget.
     - _Requirements: 10.3, 10.4, 10.6_
 
-- [ ] 11. Property tests (one file per module, `// Property N` comment, `_Requirements_` in the describe title)
+- [x] 11. Property tests (one file per module, `// Property N` comment, `_Requirements_` in the describe title)
   - [x] 11.1 Write the property test for the Statement text
     - `packages/export/test/statement-declaration.properties.test.ts`, `// Property 1`, `describe("... _Requirements: 1.3, 1.4, 1.5, 1.6, 2.5, 2.6, 2.7, 2.8, 2.10, 2.11, 7.18, 11.2_")`.
     - **Property 1: The Statement asserts no AI-free claim the author did not make**
@@ -175,7 +175,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Over Documents with no blocking issues, assert `canExport` is `false` exactly when the entry kind is `prohibition` and (the spans hold an `AI` or `AI>HUM` span or the applicable Declaration is `declared_ai`). Compute the expected value from spans and text, not from `usedAi`. Include a Declaration of the wrong subject. Assert that changing Declared_AI to None on a Document with no Assistant_Text makes `canExport` true.
     - **Validates: Requirements 6.2, 6.3, 6.4, 6.9, 6.10**
 
-  - [-] 11.3 Write the property test for the record round trip
+  - [x] 11.3 Write the property test for the record round trip
     - `crew/sentinel/test/recorded-declaration.properties.test.ts`, `// Property 3`, `_Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.7, 8.8, 8.12, 11.4_` in the describe title.
     - **Property 3: The Declaration survives the record**
     - Assert `parseRecord(renderRecord(document, declaration, "full").text)` returns an equal Document and Declaration for both subjects and Tool_Names with brackets, parentheses, quotation marks, commas, semicolons, equals signs, backslashes and non-ASCII; the display form contains no declaration text; a rendering with no Declaration equals `render(document, "full")`; no Statement_Text paragraph equals a `STATEMENT_TITLES` member other than its own title; and the Declaration survives DOCX export, `readDocx`, `splitExport` and `recordedRecord` with the verifier `fetch` stubbed.
