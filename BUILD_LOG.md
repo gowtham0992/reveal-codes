@@ -664,7 +664,9 @@ The author walked the app in a browser and found four things. Requirement 9.8 wa
 - `packages/export/test/statement-declaration.properties.test.ts` failed `pnpm typecheck` with TS2367 (a comparison between types with no overlap). It was fixed in the test file, and the property's intent is unchanged.
 - Duplicate Property numbering shows up in the static inventory tests: `crew/sentinel/test/static/boundaries.test.ts` and `apps/web/test/static/inventory.test.ts` currently fail. They are handled at the final checkpoint and are not changed here.
 - The static test `packages/export/test/static/ai-use-definition.test.ts` lists the removed sentences as forbidden strings. This entry paraphrases them for that reason.
+
 ### Final checks (pasted-text-declaration, task 14)
+
 - `pnpm install`: passed (lockfile unchanged).
 - `pnpm lint`: passed (eslint and prettier check).
 - `pnpm typecheck`: passed.
@@ -674,3 +676,18 @@ The author walked the app in a browser and found four things. Requirement 9.8 wa
 - Clean checkout: the working tree was copied with rsync (excluding node_modules, .next, .git, .pnpm-store) to a temp directory outside the repo. `pnpm install --frozen-lockfile` and `pnpm --filter @reveal-codes/web build` both passed there. The temp directory was deleted.
 - `pnpm kiro:check`: passed (48 rows in docs/KIRO_USAGE.md).
 - No test was changed or weakened in this task. Nothing was committed or pushed.
+
+## 2026-11-15: pasted-text-declaration follow-up, three review fixes
+
+### Lint failed at HEAD
+
+- `pnpm lint` failed at HEAD because BUILD_LOG.md was edited after the last checkpoint and was not formatted. The "Final checks" list had been appended after the checks ran, which is the mistake: nothing may be edited after the checks start. Edits now finish first, then prettier runs on the file, then the checks run once, and no file changes after that.
+
+### A property that asserted the wrong thing
+
+- 15.3: P3 in crew/sentinel/test/recorded-declaration.properties.test.ts failed on seed -723012165 because it asserted display text does not contain the generated Tool_Name "a[", which occurs by chance in "alpha[PST]". Kiro wrote a substring-absence check where the requirement states a structural relationship. Fixed by asserting renderRecord(document, declaration, "display").text equals renderRecord(document, null, "display").text, and pinned the case as a named regression example; no other test in the spec had the shape.
+
+### The tool_name element repeated paragraph 2
+
+- For a typed-only filing under Judge Love's order, the tool_name element repeated what paragraph 2 already says. It now prints only when there is a tool to name.
+- Updated to match: requirements 7.7 and 7.8, design interpretation 3, the wording table, CERTIFICATION.md, and the tests.

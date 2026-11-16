@@ -255,11 +255,11 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Search every test added by this spec for the same shape (`not.toContain` / `not.toMatch` / `not.toBe` of a generated string against text that could contain it by chance) and fix each the same way. Report the list found.
     - _Requirements: 8.3, 8.4, 11.4_
 
-  - [~] 15.4 Format `BUILD_LOG.md` and record the follow-up
+  - [x] 15.4 Format `BUILD_LOG.md` and record the follow-up
     - Run Prettier on `BUILD_LOG.md`. Add a dated follow-up entry covering the three fixes. This is the last edit of the group.
     - _Requirements: 13.5_
 
-  - [~] 15.5 Final checkpoint after the last edit
+  - [-] 15.5 Final checkpoint after the last edit
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt` three times, `pnpm test:pbt` once with `FC_NUM_RUNS=500`, the web build on a clean copy after a fresh install, and `pnpm kiro:check`. Change no file after the checks start; if a check forces an edit, rerun every check. Record the results in `BUILD_LOG.md` only before the first check, as a placeholder-free summary written afterwards is an edit: report results in the reply instead.
     - Do not push and do not commit.
     - _Requirements: 14.2, 14.3, 14.4_
