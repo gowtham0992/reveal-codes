@@ -1,5 +1,10 @@
 {
-  "pbtResults": {},
+  "pbtResults": {
+    "2.6 Write property test for the Word text round trip": {
+      "status": "passed",
+      "lastRunTimestamp": 1794862166093
+    }
+  },
   "executionHistory": {
     "1.1 Move the reader, split and appendix parse into `packages/export`": [
       {
@@ -91,6 +96,16 @@
         "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
         "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
         "timestamp": 1794861515561
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794862107351
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794862249140
       }
     ],
     "2.5 Restore helpers": [
@@ -105,6 +120,16 @@
         "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
         "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
         "timestamp": 1794861515605
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794862107401
+      },
+      {
+        "executionId": "07ef930c-bca4-43f2-be43-8f77327d04c3",
+        "chatSessionId": "sess_59fa72df-2df7-4bcd-97a9-d0bc4338711b",
+        "timestamp": 1794862249178
       }
     ],
     "2.7 Write property test for reader totality": [

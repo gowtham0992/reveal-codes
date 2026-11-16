@@ -45,3 +45,14 @@ export function splitExport(paragraphs: readonly string[]): Result<ExportParts, 
     appendix: paragraphs.slice(a + 1 + INTRO_LENGTH),
   });
 }
+
+/**
+ * The export date line: the paragraph just before the last Appendix title, when it has the
+ * shape YYYY-MM-DD, else null. Nothing else is checked.
+ */
+export function exportDate(paragraphs: readonly string[]): string | null {
+  const a = paragraphs.lastIndexOf(APPENDIX_TITLE);
+  if (a < 1) return null;
+  const line = paragraphs[a - 1] ?? "";
+  return /^\d{4}-\d{2}-\d{2}$/.test(line) ? line : null;
+}

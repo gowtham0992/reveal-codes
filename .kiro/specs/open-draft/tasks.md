@@ -45,14 +45,14 @@ Conventions that apply to every task:
     - New `packages/export/src/docx-signature.ts`: `isCompoundFile(bytes)` (the eight bytes `D0 CF 11 E0 A1 B1 1A E1`) and `holdsEncryptedPackage(bytes)` (compound file that also holds the UTF-16LE bytes of `EncryptedPackage`).
     - In `docx-read.ts` add `readDocxWithNotes(bytes, { maxPartBytes })` beside `readDocx`, sharing one internal `unpack`. It first runs `unzipSync` with a `filter` that records each entry's `originalSize` and returns `false`, so nothing is inflated; a wanted part larger than `maxPartBytes` gives `{ kind: "part_too_large" }`. Both functions are total: any failure becomes a value. The result carries the paragraphs and the notes. Export the new functions from `index.ts`.
     - _Requirements: 1.6, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.8, 14.2, 14.10_
-  - [~] 2.4 `exportDate` and `readWordDraft`
+  - [x] 2.4 `exportDate` and `readWordDraft`
     - In `export-split.ts` add `exportDate(paragraphs)`: the paragraph at `lastIndexOf(APPENDIX_TITLE) - 1` when it matches `/^\d{4}-\d{2}-\d{2}$/`, else `null`.
     - New `packages/export/src/word-draft.ts` with `WordLimits`, `WordDraft` (`plain | restored | changed | refused`) and `readWordDraft(bytes, limits)` as the design gives: encrypted and compound-file checks first (`refused / encrypted`, `refused / damaged`); `readDocxWithNotes` (`not_docx` and `part_too_large` give `refused / damaged`); no Appendix title gives `plain` with `paragraphs.join("\n") + notesBlock(notes)`; otherwise `splitExport` (`refused / no_filing_end` when it fails), `bodyText = body.join("\n") + notesBlock(notes)`, `recordedRecord(appendix)`; a parse whose `document.text === bodyText` gives `restored` with `exportedOn`, anything else gives `changed` with `text = bodyText`. It calls no `docxSafe`. Normalise `\r\n` and lone `\r` to `\n` in the returned text. Export from `index.ts`.
     - _Requirements: 1.10, 6.1, 6.7, 7.1, 9.1, 9.2, 9.6, 9.9, 10.1, 10.6, 10.8, 11.1, 11.2, 11.3, 11.4, 14.1, 14.2, 14.9, 14.10_
   - [~] 2.5 Restore helpers
     - In `packages/export/test/support/`, helpers that export a Document (`buildStatement`, `buildDocx`), reopen the bytes with `readWordDraft` and compare by `structuralEqual`, so that Properties 2, 3 and 4 and the restore examples share one path. Add a self-test: the helper restores a small fixed Document and reports equality, and reports inequality for a one-character change.
     - _Requirements: 9.10, 18.4, 18.5_
-  - [~] 2.6 Write property test for the Word text round trip
+  - [x] 2.6 Write property test for the Word text round trip
     - **Property 1: Word text round trip**
     - File `packages/export/test/docx-read.properties.test.ts`. Build with `filingParagraph` over `arbParagraphs`, read with `readDocx`, assert equality with the paragraphs joined by `\n`.
     - **Validates: Requirements 6.2, 6.3, 6.8, 6.9, 18.2, 18.3**
