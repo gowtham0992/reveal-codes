@@ -25,16 +25,16 @@ export const typedOnlySentence =
 export type TypedAndPastedFigures = Readonly<{
   total: number;
   typed: number;
-  typedPct: number;
+  typedPct: string;
   pasted: number;
-  pastedPct: number;
+  pastedPct: string;
 }>;
 
 export function typedAndPastedSentence(f: TypedAndPastedFigures): string {
   return (
     `The record shows that the editor's assistant was not used. ` +
-    `Of the ${n(f.total)} characters of this filing, ${n(f.typed)} (${n(f.typedPct)}%) were typed in the editor ` +
-    `and ${n(f.pasted)} (${n(f.pastedPct)}%) were pasted or imported; ` +
+    `Of the ${n(f.total)} characters of this filing, ${n(f.typed)} (${f.typedPct}%) were typed in the editor ` +
+    `and ${n(f.pasted)} (${f.pastedPct}%) were pasted or imported; ` +
     `the tool did not record the origin of the pasted or imported text.`
   );
 }
@@ -42,11 +42,11 @@ export function typedAndPastedSentence(f: TypedAndPastedFigures): string {
 export type PastedAfterAssistantFigures = Readonly<{
   total: number;
   pasted: number;
-  pastedPct: number;
+  pastedPct: string;
 }>;
 
 export function pastedAfterAssistantSentence(f: PastedAfterAssistantFigures): string {
-  return `${n(f.pasted)} of ${n(f.total)} characters (${n(f.pastedPct)}%) were pasted or imported; the tool did not record their origin.`;
+  return `${n(f.pasted)} of ${n(f.total)} characters (${f.pastedPct}%) were pasted or imported; the tool did not record their origin.`;
 }
 
 export const NO_PROGRAM_RECORD =

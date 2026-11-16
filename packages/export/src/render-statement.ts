@@ -1,4 +1,5 @@
-import { citingParagraph, orderSentences, signatureLine } from "./render-order.js";
+import { paragraphTwo } from "./paragraph-two.js";
+import { citingParagraph, signatureLine } from "./render-order.js";
 import { statementTitle } from "./statement-order.js";
 import { ellipsize } from "./text.js";
 import type { Statement, StatementBlock } from "./types.js";
@@ -9,11 +10,9 @@ import {
   OVERRIDES_INTRO,
   OVERRIDE_COLUMNS,
   PARAGRAPH_1,
-  PARAGRAPH_NO_AI,
   QUOTE_CODES,
   QUOTE_COLUMNS,
   RESPONSIBILITY,
-  aiParagraph,
   citationParagraph,
   citationStatusCell,
   quoteParagraph,
@@ -21,34 +20,8 @@ import {
 
 const QUOTATION_MAX = 80;
 
-/** a / t * 100 rounded half up to one decimal, in integer arithmetic; "0.0" when t is 0. */
-function percent(a: number, t: number): string {
-  if (t === 0) return "0.0";
-  const tenths = Math.floor((2000 * a + t) / (2 * t));
-  return `${String(Math.floor(tenths / 10))}.${String(tenths % 10)}`;
-}
-
 function paragraph(number: number, text: string): StatementBlock {
   return { kind: "paragraph", number, text };
-}
-
-function aiText(s: Statement): string {
-  if (!s.aiUsed) return PARAGRAPH_NO_AI;
-  const c = s.characters;
-  const ai = c.AI + c["AI>HUM"];
-  const total = c.HUM + c.PST + c.AI + c["AI>HUM"];
-  return aiParagraph({
-    tools: s.tools,
-    ai,
-    total,
-    percent: percent(ai, total),
-    edited: c["AI>HUM"],
-  });
-}
-
-/** The AI (or no-AI) paragraph with the order's sentences appended, one space apart. */
-function aiParagraphText(s: Statement): string {
-  return [aiText(s), ...orderSentences(s)].join(" ");
 }
 
 function countOf(items: readonly { status: string }[], status: string): number {
@@ -94,7 +67,7 @@ export function renderStatement(statement: Statement): readonly StatementBlock[]
     { kind: "title", text: statementTitle(statement) },
     ...(order === null ? [] : [paragraph(1, citingParagraph(order))]),
     paragraph(1 + n, PARAGRAPH_1),
-    paragraph(2 + n, aiParagraphText(statement)),
+    paragraph(2 + n, paragraphTwo(statement)),
     ...citationBlocks(statement, 3 + n),
     ...quoteBlocks(statement, 4 + n),
     ...(hasOverrides ? overrideBlocks(statement, 5 + n) : []),

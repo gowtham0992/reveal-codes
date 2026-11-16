@@ -1,4 +1,10 @@
-import type { IssueCode, Origin, QuoteCheckResult, VerificationResult } from "@reveal-codes/engine";
+import type {
+  Declaration,
+  IssueCode,
+  Origin,
+  QuoteCheckResult,
+  VerificationResult,
+} from "@reveal-codes/engine";
 import type { AiPassage } from "./ai-paragraphs.js";
 import type { OrderCaption, OrderElement, OrderKind } from "./orders-types.js";
 
@@ -61,7 +67,12 @@ export type Statement = Readonly<{
   /** runLog.length; the run count and the prompt count of the order sentences. */
   runCount: number;
   confidentialityCertified: boolean;
+  /** Used_AI: assistant text, or an applicable Declaration of AI use. */
   aiUsed: boolean;
+  /** True when some span has origin AI or AI>HUM. */
+  assistantText: boolean;
+  /** The Applicable_Declaration, trimmed and valid; null when none applies. */
+  declaration: Declaration | null;
   tools: readonly StatementTool[];
   characters: OriginCounts;
   sentences: Readonly<{ total: number; byDominantOrigin: OriginCounts }>;

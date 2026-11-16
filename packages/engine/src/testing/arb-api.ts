@@ -12,16 +12,24 @@ import fc from "fast-check";
 import {
   apply,
   blockingIssues,
+  checkToolName,
   createDocument,
+  declareAi,
+  declareNone,
   extract,
   format,
+  holdsSubstantivePasted,
+  insertsPasted,
+  isDeclaration,
   issues,
   normalise,
   normaliseSpans,
   overrides,
   parse,
+  parseRecord,
   recordOverride,
   render,
+  renderRecord,
   segment,
   setQuoteCheck,
   setVerification,
@@ -29,8 +37,10 @@ import {
   stripPositions,
   verificationOf,
 } from "../index.js";
+import type { Declaration, DeclarationSubject } from "../declaration.js";
 import type { CodePosition, Document, EngineConfig, Operation, RenderMode } from "../types.js";
 import { arbBadTimestamp } from "./arb-bad-timestamp.js";
+import { arbBadToolName, arbDeclaration, arbToolName } from "./arb-declaration.js";
 import { arbCitation } from "./arb-citation.js";
 import { arbValueCorruption } from "./arb-citation-corrupt.js";
 import { arbSyntaxFault, arbSemanticTamper } from "./arb-codes.js";
@@ -67,6 +77,14 @@ export const API_NAMES = [
   "parse",
   "strip",
   "stripPositions",
+  "checkToolName",
+  "declareNone",
+  "declareAi",
+  "isDeclaration",
+  "holdsSubstantivePasted",
+  "insertsPasted",
+  "renderRecord",
+  "parseRecord",
 ] as const;
 
 export type ApiName = (typeof API_NAMES)[number];
@@ -111,6 +129,15 @@ export const RUNNERS: Readonly<Record<ApiName, (a: Args) => unknown>> = {
   parse: (a) => parse(a[0] as string),
   strip: (a) => strip(a[0] as string),
   stripPositions: (a) => stripPositions(a[0] as readonly CodePosition[]),
+  checkToolName: (a) => checkToolName(a[0] as string),
+  declareNone: (a) => declareNone(a[0] as DeclarationSubject),
+  declareAi: (a) => declareAi(a[0] as DeclarationSubject, a[1] as string),
+  isDeclaration: (a) => isDeclaration(a[0]),
+  holdsSubstantivePasted: (a) => holdsSubstantivePasted(a[0] as Document),
+  insertsPasted: (a) => insertsPasted(a[0] as Operation),
+  renderRecord: (a) =>
+    renderRecord(a[0] as Document, a[1] as Declaration | null, a[2] as RenderMode),
+  parseRecord: (a) => parseRecord(a[0] as string),
 };
 
 const docOnly = (d: Document): fc.Arbitrary<Args> => fc.constant([d]);
@@ -211,6 +238,9 @@ const arbPositions = (d: Document): fc.Arbitrary<readonly CodePosition[]> =>
     }),
   );
 
+/** A call with one of the document's operations, or an Inverse from `apply`. */
+const arbPastedOpArgs = (d: Document): fc.Arbitrary<Args> =>
+  arbApplyArgs(d).map((a): Args => [a[1]]);
 /** Argument generators, one per exported function. */
 const ARGS: Readonly<Record<ApiName, (d: Document) => fc.Arbitrary<Args>>> = {
   createDocument: arbCreateArgs,
@@ -231,8 +261,31 @@ const ARGS: Readonly<Record<ApiName, (d: Document) => fc.Arbitrary<Args>>> = {
   parse: (d) => fc.tuple(arbCodesText(d)),
   strip: (d) => fc.tuple(fc.oneof(arbCodesText(d), arbAnyString)),
   stripPositions: (d) => fc.tuple(arbPositions(d)),
+  checkToolName: () => fc.tuple(arbAnyToolName),
+  declareNone: () => fc.tuple(arbSubject),
+  declareAi: () => fc.tuple(arbSubject, arbAnyToolName),
+  isDeclaration: () => fc.tuple(arbDeclarationLike),
+  holdsSubstantivePasted: docOnly,
+  insertsPasted: arbPastedOpArgs,
+  renderRecord: (d) =>
+    fc.tuple(
+      fc.constant(d),
+      fc.oneof(fc.constant(null), arbDeclaration()),
+      fc.constantFrom<RenderMode>("full", "display"),
+    ),
+  parseRecord: (d) => fc.tuple(arbCodesText(d)),
 };
 
+const arbSubject = fc.constantFrom<DeclarationSubject>("pasted_text", "this_filing");
+const arbAnyToolName = fc.oneof(arbToolName, arbBadToolName, arbAnyString);
+/** A stored Declaration, a malformed look-alike, or something that is not an object. */
+const arbDeclarationLike: fc.Arbitrary<unknown> = fc.oneof(
+  arbDeclaration(),
+  fc.record({ subject: arbSubject, choice: fc.constant("none"), toolName: arbToolName }),
+  fc.record({ subject: arbAnyString, choice: fc.constant("declared_ai"), toolName: arbToolName }),
+  fc.record({ subject: arbSubject, choice: fc.constant("declared_ai"), toolName: arbAnyToolName }),
+  fc.constantFrom(null, undefined, 3, "none"),
+);
 /** The generator of calls to `name` against `d`. */
 export const arbApiCallTo = (name: ApiName, d: Document): fc.Arbitrary<ApiCall> =>
   ARGS[name](d).map((args): ApiCall => ({ name, args, run: RUNNERS[name] }));

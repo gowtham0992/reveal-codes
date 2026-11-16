@@ -74,6 +74,16 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800255175
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800560561
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800706432
       }
     ],
     "3.1 Add `packages/export/src/declaration.ts`": [
@@ -115,6 +125,16 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800255240
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800560622
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800706543
       }
     ],
     "3.4 Change the gate, confidentiality condition and prohibition notice": [
@@ -122,6 +142,16 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800255258
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800560663
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800706570
       }
     ],
     "3.5 Carry the Declaration into the Appendix, the DOCX and the first-page heading": [
@@ -178,6 +208,11 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800255417
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800561376
       }
     ],
     "7.1 Wire the gates into the dialog and the flows": [
@@ -199,6 +234,11 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800255471
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800561857
       }
     ],
     "8.2 Update existing Sentinel tests and fixtures": [
@@ -332,6 +372,13 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800273249
+      }
+    ],
+    "2. Engine: Declaration type, validation, predicates and the `[DOC]` field": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800706469
       }
     ]
   }

@@ -25,7 +25,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Do not touch any file under `packages/engine` in this task.
     - _Requirements: 8.11, 14.5_
 
-- [ ] 2. Engine: Declaration type, validation, predicates and the `[DOC]` field
+- [x] 2. Engine: Declaration type, validation, predicates and the `[DOC]` field
   - [x] 2.1 Add `packages/engine/src/declaration.ts` and export it from `packages/engine/src/index.ts`
     - Types `DeclarationSubject`, `Declaration`, `ToolNameFault`; constants `TOOL_NAME_MIN` (2) and `TOOL_NAME_MAX` (100).
     - `checkToolName(raw)`: trim, then fault order `too_short`, `too_long`, `control_character` (`/[\p{Cc}\u2028\u2029]/u`), `unpaired_surrogate` (reuse `firstUnpairedSurrogate` from `validate.ts`). Returns the trimmed name in a `Result`.
@@ -47,7 +47,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - If `arbOrderChoice` would make the engine import from the export package, place it in `packages/export/test/support/arbitraries.ts` instead and keep the other five in the engine.
     - _Requirements: 11.6_
 
-  - [~] 2.4 Write example tests for the Engine pieces
+  - [x] 2.4 Write example tests for the Engine pieces
     - `packages/engine/test/declaration.test.ts`: `checkToolName` at 1, 2, 100 and 101 characters after trimming, whitespace only, a line break, parentheses and brackets; `holdsSubstantivePasted` for whitespace-only versus substantive `PST` spans including U+0085 and U+FEFF; `insertsPasted` for each operation kind and for an Inverse that restores `PST` and one that restores `HUM`.
     - `packages/engine/test/doc-declaration.test.ts`: `[DOC]` lexing for a duplicate `d`, an unknown subject, `declared_ai` without a name, `none` with a name, and an old file with no `d` (parses with `declaration: null`); `renderRecord` with no Declaration equals `render(document, "full")`; display mode omits the Declaration.
     - _Requirements: 3.3, 3.4, 3.5, 8.3, 8.4, 8.8, 8.9, 8.10_
@@ -65,7 +65,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - The Tool_Name is inserted as given after trimming, with nothing added around it.
     - _Requirements: 1.2, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 3.1, 3.3, 4.2, 6.7, 7.5, 7.6, 7.7, 7.8, 7.10, 7.12, 7.14_
 
-  - [~] 3.3 Rebuild the Statement and paragraph 2
+  - [x] 3.3 Rebuild the Statement and paragraph 2
     - `statement-parts.ts`: delete the old `usedAi(document)`. `wording.ts`: delete `PARAGRAPH_NO_AI` and `NO_PROGRAM_SENTENCE`.
     - `Statement` gains `aiUsed` (now Used_AI), `assistantText` and `declaration` (the trimmed Applicable_Declaration or `null`).
     - `buildStatement(document, runLog, meta, orderContext = null, declaration = null)` returns `Result<Statement, StatementError>`: after `meta` and segmentation, return `declaration_required` when `declarationRequired`, then `invalid_tool_name` from `checkToolName` on the Applicable_Declaration.
@@ -74,7 +74,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Every sentence is a Record_Sentence or an Author_Sentence. No paragraph equals a `STATEMENT_TITLES` member other than its own title.
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.12, 2.13, 2.14, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 7.10, 7.11, 7.12, 7.13, 7.14, 7.15, 7.16, 7.17, 7.19, 8.7_
 
-  - [~] 3.4 Change the gate, confidentiality condition and prohibition notice
+  - [x] 3.4 Change the gate, confidentiality condition and prohibition notice
     - `gate.ts`: `canExport(document, order, declaration)` returns `false` when `order.kind === "prohibition"` and `usedAi(...)`, otherwise `blockingIssues(document).length === 0`. It does not look at a pending Declaration (design D4).
     - `order-rules.ts`: `needsConfidentiality(document, entry, declaration)` uses `usedAi`. `prohibitionNotice(document, entry, declaration)` is non-null when the entry prohibits and `usedAi`. Branch on `holdsAssistantText`: existing line plus " The author also declared that generative AI was used to prepare <subject>." when the Applicable_Declaration is `declared_ai`; otherwise `prohibitionDeclaredLine`. Factor `prohibitionSubject` out of `prohibitionLine`.
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.10, 4.9, 4.10_
@@ -121,7 +121,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - The view renders one block with the line "The statement is not shown until you state whether generative AI was used to prepare <subject>. Make that statement in the Export dialog." and a link to `/` with the text "Back to the editor". The block's class hides it in `@media print`. No declaration control in the Print view. When the Declaration is applicable and Used_AI holds, render the first-page heading lines as the DOCX does.
     - _Requirements: 4.3, 4.4, 4.5, 4.8, 4.13, 7.1_
 
-  - [~] 6.3 Change the Legend entry in `apps/web/src/pane/pane-header.tsx`
+  - [-] 6.3 Change the Legend entry in `apps/web/src/pane/pane-header.tsx`
     - Change the `[PST]` entry's words from "pasted" to "pasted, origin not recorded". Change no other entry, colour, code or style.
     - _Requirements: 9.1, 9.2, 9.3_
 
@@ -140,7 +140,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - _Requirements: 1.3, 6.1_
 
 - [ ] 8. Sentinel: read the Declaration
-  - [~] 8.1 Add `recordedRecord` to `crew/sentinel/src/recorded.ts`
+  - [-] 8.1 Add `recordedRecord` to `crew/sentinel/src/recorded.ts`
     - `recordedRecord(appendix): Result<{ document: Document; declaration: Declaration | null }, SentinelError>` via `parseRecord`. `recordedDocument` stays and returns the Document of `recordedRecord`, so `analyse.ts`, `deriveFindings` and `splitExport` are unchanged and the Declaration is an input to no Finding.
     - This task must land before task 7.1. A file exported before this feature reads with `declaration: null` and no Finding.
     - _Requirements: 8.6, 8.9_

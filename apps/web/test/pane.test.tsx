@@ -72,7 +72,7 @@ describe("Pane structure _Requirements: 12.1, 12.7, 12.8, 12.9_", () => {
 describe("Pane_Header and Legend _Requirements: 2.1, 2.3, 2.4, 2.5, 2.6, 2.8, 2.9, 2.10_", () => {
   const WORDS = [
     ["[HUM]", "typed"],
-    ["[PST]", "pasted"],
+    ["[PST]", "pasted, origin not recorded"],
     ["[AI]", "assistant"],
     ["[AI>HUM]", "assistant, edited"],
     ["[CIT ✓]", "found"],

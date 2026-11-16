@@ -1,6 +1,14 @@
-import { err, ok, segment } from "@reveal-codes/engine";
-import type { Document, EngineError, Result } from "@reveal-codes/engine";
+import { checkToolName, err, ok, segment } from "@reveal-codes/engine";
+import type { Declaration, Document, EngineError, Result } from "@reveal-codes/engine";
 import { aiPassages } from "./ai-paragraphs.js";
+import {
+  applicableDeclaration,
+  declarationRequired,
+  declarationSubject,
+  holdsAssistantText,
+  usedAi,
+} from "./declaration.js";
+import type { StatementError } from "./statement-error.js";
 import {
   citationsOf,
   countCharacters,
@@ -8,7 +16,6 @@ import {
   overridesOf,
   quotesOf,
   toolsOf,
-  usedAi,
 } from "./statement-parts.js";
 import { needsConfidentiality } from "./order-rules.js";
 import type { OrderContext } from "./orders-types.js";
@@ -35,9 +42,23 @@ function validMeta(meta: Meta): Result<null, EngineError> {
   return ok(null);
 }
 
-/** The author's tick counts only when the order asks for it and AI text is present. */
-function certified(document: Document, ctx: OrderContext): boolean {
-  return ctx !== null && ctx.confidentialityCertified && needsConfidentiality(document, ctx.entry);
+/** The author's tick counts only when the order asks for it and AI was used. */
+function certified(document: Document, ctx: OrderContext, stored: Declaration | null): boolean {
+  return (
+    ctx !== null &&
+    ctx.confidentialityCertified &&
+    needsConfidentiality(document, ctx.entry, stored)
+  );
+}
+
+/** The Applicable_Declaration with its Tool_Name trimmed, or the fault of an invalid name. */
+function trimmedDeclaration(
+  applicable: Declaration | null,
+): Result<Declaration | null, StatementError> {
+  if (applicable === null || applicable.choice === "none") return ok(applicable);
+  const name = checkToolName(applicable.toolName);
+  if (!name.ok) return err({ kind: "invalid_tool_name", fault: name.error });
+  return ok({ subject: applicable.subject, choice: "declared_ai", toolName: name.value });
 }
 
 /**
@@ -49,17 +70,27 @@ export function buildStatement(
   runLog: readonly RunInfo[],
   meta: Meta,
   orderContext: OrderContext = null,
-): Result<Statement, EngineError> {
+  stored: Declaration | null = null,
+): Result<Statement, StatementError> {
   const checked = validMeta(meta);
   if (!checked.ok) return checked;
   const sentences = segment(document.text, document.spans);
   if (!sentences.ok) return sentences;
+  const entry = orderContext === null ? null : orderContext.entry;
+  if (declarationRequired(document, entry, stored)) {
+    const subject = declarationSubject(document, entry);
+    if (subject !== "none") return err({ kind: "declaration_required", subject });
+  }
+  const declared = trimmedDeclaration(applicableDeclaration(document, entry, stored));
+  if (!declared.ok) return declared;
   return ok({
     order: orderOf(orderContext),
     aiPassages: aiPassages(document),
     runCount: runLog.length,
-    confidentialityCertified: certified(document, orderContext),
-    aiUsed: usedAi(document),
+    confidentialityCertified: certified(document, orderContext, stored),
+    aiUsed: usedAi(document, entry, stored),
+    assistantText: holdsAssistantText(document),
+    declaration: declared.value,
     tools: toolsOf(document, runLog),
     characters: countCharacters(document),
     sentences: countSentences(sentences.value),

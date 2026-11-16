@@ -17,8 +17,6 @@ export const APPENDIX_INTRO_2 =
 
 export const PARAGRAPH_1 =
   "This filing was prepared with the drafting tool Reveal Codes, which records the origin of every character.";
-export const PARAGRAPH_NO_AI =
-  "No generative artificial intelligence was used in preparing this filing.";
 export const OVERRIDES_INTRO =
   "The author chose to file despite the following unresolved items, for the reasons stated:";
 export const RESPONSIBILITY =
@@ -125,7 +123,6 @@ export function quoteParagraph(matched: number, mismatched: number, unchecked: n
 
 // ---- court-orders wording (court-orders Requirements 4, 5.5, 7.3) ----
 
-export const NO_PROGRAM_SENTENCE = "No program was used.";
 export const CONFIDENTIALITY_SENTENCE =
   "The author certifies that no confidential or business proprietary information was entered into the program.";
 export const ALL_DRAFTERS_SUFFIX = " (all contributors to the drafting)";
@@ -214,9 +211,15 @@ export type ProhibitionParts = Readonly<{
   passages: readonly AiPassage[];
 }>;
 
+/** The order's subject in a prohibition line: "Judge <surname>'s order" or the instrument. */
+export function prohibitionSubject(
+  p: Pick<ProhibitionParts, "judgeSurname" | "instrument">,
+): string {
+  return p.judgeSurname === null ? p.instrument : `Judge ${p.judgeSurname}'s order`;
+}
+
 export function prohibitionLine(p: ProhibitionParts): string {
-  const subject = p.judgeSurname === null ? p.instrument : `Judge ${p.judgeSurname}'s order`;
-  const head = `${subject} prohibits AI-drafted text.`;
+  const head = `${prohibitionSubject(p)} prohibits AI-drafted text.`;
   const first = p.passages[0];
   if (first === undefined) return `${head} AI-origin text remains, consisting of line breaks only.`;
   const n = p.passages.length;
