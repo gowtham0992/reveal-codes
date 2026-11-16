@@ -95,7 +95,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Controls absent before mount and present after; initial state; checkbox ticked from a hash naming a superseded id; Count_Line text and `role="status"`; empty-result sentence; empty groups omitted; Court_Group and instrument order on the rendered page equals the order from `courtGroups`
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 5.4, 6.1, 6.3, 6.6, 6.7, 6.9, 16.4_
 
-- [ ] 6. Order_Parameter and links into the editor
+- [x] 6. Order_Parameter and links into the editor
   - [x] 6.1 Implement the Order_Parameter
     - Create `apps/web/src/components/use-order-parameter.ts` with pure `classifyOrderParameter(orders, raw)` (`none`, `ignored`, `applied`) using `orderById`, and the hook `useOrderParameter` that runs once after mount in `AppShell`, stores a Selectable_Instrument through the shared `OrderSelectionStore`, and removes the parameter with `window.history.replaceState` (keeping other parameters and the hash; catch only `DOMException`)
     - `AppShell` creates the store with `useMemo(() => createOrderSelectionStore(svc.storage, ORDERS), [svc.storage])` and passes it to `Shell` (replacing the store created in `use-export.tsx`) and to `SmallScreenPage`
@@ -110,7 +110,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - `SmallScreenPage`: links row always renders, "See all court rules" first and in the same tab, video and repository links each conditional on their own value (remove the both-null guard)
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
-  - [-] 6.3 Write Order_Parameter and link tests in `apps/web/test/`
+  - [x] 6.3 Write Order_Parameter and link tests in `apps/web/test/`
     - Valid, unknown and superseded ids at 1280px: store contents, notice text, parameter removed through `replaceState` with history length unchanged
     - At 600px: store set, no notice, parameter removed, Selection_Line text with abbreviation and `optionText`; unknown, superseded and absent each leave no Selection_Line; an earlier dialog selection gives no line; one example for the `DOMException` path
     - Court_Rules_Link: Export dialog (target, rel, beside the Picker), Small_Screen_Page (target, first, present with both public addresses unset), Toolbar (last, an `a`, no `data-primary`)
