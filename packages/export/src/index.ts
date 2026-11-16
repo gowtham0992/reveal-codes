@@ -48,9 +48,12 @@ export type {
   OrderSet,
 } from "./orders-types.js";
 export { decodeEntities, paragraphsOf } from "./xml-text.js";
-export { readDocx } from "./docx-read.js";
+export { readDocx, readDocxWithNotes } from "./docx-read.js";
+export { notesBlock, notesOf } from "./docx-notes.js";
+export type { NoteKind } from "./docx-notes.js";
+export { holdsEncryptedPackage, isCompoundFile } from "./docx-signature.js";
 export { splitExport } from "./export-split.js";
 export type { SplitError } from "./export-split.js";
 export { recordedRecord, recordedDocument } from "./appendix-parse.js";
 export type { AppendixParseError, RecordedError, RecordedRecord } from "./appendix-parse.js";
-export type { DocxReadError, DocxText, ExportParts } from "./read-types.js";
+export type { DocxReadError, DocxText, DocxWithNotes, ExportParts } from "./read-types.js";

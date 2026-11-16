@@ -32,15 +32,15 @@ Conventions that apply to every task:
     - _Requirements: 1.7, 1.8, 19.11_
 
 - [ ] 2. Reader group in `packages/export`: helpers, additions, `readWordDraft` and their tests
-  - [~] 2.1 Fixture builder and endnotes helper, each with its self-test
+  - [x] 2.1 Fixture builder and endnotes helper, each with its self-test
     - In `packages/export/test/support/`, a deterministic helper that builds `.docx` bytes with the `docx` library (paragraphs, a table, a tracked insertion and deletion, two footnotes) with every date and zip timestamp fixed. A second helper, the endnotes helper, post-processes the bytes with `fflate` to add `word/endnotes.xml` with its content-type and relationship entries (the `docx` library writes none) and Word's separator and continuation-separator notes.
     - Fixtures also built by it: a password-protected stand-in (compound-file header with an `EncryptedPackage` stream name), a truncated zip, a zip without `word/document.xml`, a zip whose central directory declares a small part but whose stream is larger, and an export edited by one character. Add a `README` line under `packages/export/fixtures/` for any committed fixture file (source and date).
     - Self-tests, landing with the helpers and before any other test imports them: the builder's output bytes are identical on two runs; the endnotes helper's output holds `word/endnotes.xml` with its content-type and relationship entries and the separator notes.
     - _Requirements: 19.3, 19.12, 19.13_
-  - [~] 2.2 Shared arbitraries `arbParagraphs` and `arbBodyEdit`
+  - [x] 2.2 Shared arbitraries `arbParagraphs` and `arbBodyEdit`
     - In `packages/export/test/support/arbitraries.ts` add `arbParagraphs` (paragraph lists with leading and trailing spaces, tabs, quotation marks, `&`, `<`, `>`, non-ASCII characters and empty paragraphs, no `\n` and no character XML 1.0 cannot carry) and `arbBodyEdit` (one single-character change to a body paragraph). `arbDocument`, `arbText` and `arbRunLog` are not changed.
     - _Requirements: 18.2, 18.5, 22.7_
-  - [~] 2.3 Notes, part-size limit and signature check
+  - [-] 2.3 Notes, part-size limit and signature check
     - New `packages/export/src/docx-notes.ts`: `notesOf(xml, kind)` reads `word/footnotes.xml` or `word/endnotes.xml`, skips every Separator_Note (`w:id` -1 or 0, or `w:type` of `separator` or `continuationSeparator`), joins the paragraphs of one note with a single space, turns a line break or tab inside a note into a space and leaves out an empty note; `notesBlock(notes)` returns a blank line, the line `Footnotes`, then `<n>. <text>` numbered 1..N with no gap, footnotes first then endnotes, or `""` when no note has text.
     - New `packages/export/src/docx-signature.ts`: `isCompoundFile(bytes)` (the eight bytes `D0 CF 11 E0 A1 B1 1A E1`) and `holdsEncryptedPackage(bytes)` (compound file that also holds the UTF-16LE bytes of `EncryptedPackage`).
     - In `docx-read.ts` add `readDocxWithNotes(bytes, { maxPartBytes })` beside `readDocx`, sharing one internal `unpack`. It first runs `unzipSync` with a `filter` that records each entry's `originalSize` and returns `false`, so nothing is inflated; a wanted part larger than `maxPartBytes` gives `{ kind: "part_too_large" }`. Both functions are total: any failure becomes a value. The result carries the paragraphs and the notes. Export the new functions from `index.ts`.

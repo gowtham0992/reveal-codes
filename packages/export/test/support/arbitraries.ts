@@ -153,3 +153,92 @@ export const arbOrderChoice: fc.Arbitrary<OrderEntry | null> = fc.oneof(
   fc.constant(null),
   ...CHOICE_GROUPS.map((g) => fc.constantFrom(...g)),
 );
+
+/**
+ * Characters for Word paragraph text: letters, digits, spaces, tabs, quotation marks, `&`, `<`, `>`,
+ * and non-ASCII characters (BMP and astral). None is `\n` or a character XML 1.0 cannot carry.
+ */
+const PARAGRAPH_CHARS: readonly string[] = [
+  ..."abcXYZ019.,;:'()-".split(""),
+  " ",
+  " ",
+  "\t",
+  '"',
+  "&",
+  "<",
+  ">",
+  "\u201C",
+  "\u201D",
+  "\u00E9",
+  "\u00DF",
+  "\u2014",
+  "\u00A7",
+  "\u65E5",
+  "\u{1F600}",
+];
+
+/** One paragraph: possibly empty, possibly with leading and trailing spaces or tabs. */
+const arbParagraph: fc.Arbitrary<string> = fc
+  .array(fc.constantFrom(...PARAGRAPH_CHARS), { maxLength: 24 })
+  .map((chars) => chars.join(""));
+
+/** Paragraph lists (one to six paragraphs) with no `\n` and no character XML 1.0 cannot carry. */
+export const arbParagraphs: fc.Arbitrary<string[]> = fc.array(
+  fc.oneof({ weight: 1, arbitrary: fc.constant("") }, { weight: 5, arbitrary: arbParagraph }),
+  { minLength: 1, maxLength: 6 },
+);
+
+/** One single-character change to a body paragraph; `at` is a code point index. */
+export type BodyEdit = Readonly<{
+  paragraph: number;
+  at: number;
+  kind: "insert" | "replace" | "delete";
+  char: string;
+}>;
+
+/**
+ * A single-character change to one paragraph of `paragraphs` (which must hold at least one).
+ * `replace` always picks a character different from the old one; `replace` and `delete` need a
+ * non-empty paragraph, so an all-empty list gets only `insert`.
+ */
+export function arbBodyEdit(paragraphs: readonly string[]): fc.Arbitrary<BodyEdit> {
+  const nonEmpty = paragraphs.flatMap((p, i) => (p.length > 0 ? [i] : []));
+  const arbInsert = fc
+    .tuple(fc.nat({ max: paragraphs.length - 1 }), fc.constantFrom(...PARAGRAPH_CHARS), fc.nat())
+    .map(([paragraph, char, n]): BodyEdit => {
+      const length = Array.from(paragraphs[paragraph] ?? "").length;
+      return { paragraph, at: n % (length + 1), kind: "insert", char };
+    });
+  if (nonEmpty.length === 0) return arbInsert;
+  const arbInside = fc
+    .tuple(fc.constantFrom(...nonEmpty), fc.nat(), fc.constantFrom(...PARAGRAPH_CHARS))
+    .map(([paragraph, n, char]) => {
+      const chars = Array.from(paragraphs[paragraph] ?? "");
+      return { paragraph, at: n % chars.length, char, old: chars[n % chars.length] ?? "" };
+    });
+  const arbReplace = arbInside.map(({ paragraph, at, char, old }): BodyEdit => ({
+    paragraph,
+    at,
+    kind: "replace",
+    char: char === old ? (old === "x" ? "y" : "x") : char,
+  }));
+  const arbDelete = arbInside.map(({ paragraph, at }): BodyEdit => ({
+    paragraph,
+    at,
+    kind: "delete",
+    char: "",
+  }));
+  return fc.oneof(arbInsert, arbReplace, arbDelete);
+}
+
+/** `paragraphs` with `edit` applied; the result differs from the input in exactly one character. */
+export function applyBodyEdit(paragraphs: readonly string[], edit: BodyEdit): string[] {
+  return paragraphs.map((p, i) => {
+    if (i !== edit.paragraph) return p;
+    const chars = Array.from(p);
+    if (edit.kind === "insert") chars.splice(edit.at, 0, edit.char);
+    else if (edit.kind === "replace") chars.splice(edit.at, 1, edit.char);
+    else chars.splice(edit.at, 1);
+    return chars.join("");
+  });
+}
