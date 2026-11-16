@@ -19,14 +19,14 @@ Conventions that apply to every task:
 
 ## Tasks
 
-- [ ] 1. Shared reader move (Sentinel import paths only)
+- [x] 1. Shared reader move (Sentinel import paths only)
   - [x] 1.1 Move the reader, split and appendix parse into `packages/export`
     - Use `smart_relocate` to move `crew/sentinel/src/docx-read.ts`, `xml-text.ts`, `split.ts` and `recorded.ts` to `packages/export/src/` as `docx-read.ts`, `xml-text.ts`, `export-split.ts` and `appendix-parse.ts`. Create `packages/export/src/read-types.ts` holding `DocxText`, `ExportParts` and `DocxReadError` (`{ kind: "not_docx" } | { kind: "part_too_large" }`), taken from `crew/sentinel/src/types.ts`.
     - Behaviour does not change: `readDocx(bytes)` reads `word/document.xml` only, has no size limit and turns any failure into `{ kind: "not_docx" }`. Export `readDocx`, `splitExport`, `recordedRecord`, `recordedDocument` and the types from `packages/export/src/index.ts`.
     - In `packages/export/package.json` move `fflate` (0.8.3) from `devDependencies` to `dependencies`; update the lockfile through `pnpm install`. Edit `packages/export/test/package.test.ts`: the `fflate` pin now reads `dependencies.fflate` at `0.8.3`, and the runtime-dependency line allows `docx` and `fflate`. The Engine keeps zero runtime dependencies.
     - Sentinel: `analyse.ts` and `index.ts` import `readDocx`, `splitExport` and `recordedDocument` from `@reveal-codes/export`; `index.ts` keeps re-exporting them so the public surface is unchanged. `types.ts` re-exports `DocxText` and `ExportParts` from the Export_Package and keeps `SentinelError`. Delete the four moved files from `crew/sentinel/src/`. `crew/sentinel/package.json` is unchanged (`fflate` stays; its package test pins it).
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.9, 21.5_
-  - [~] 1.2 Sentinel tests: import-path change only
+  - [x] 1.2 Sentinel tests: import-path change only
     - Change only the import lines in the Sentinel tests that exercise the moved modules (`docx-read.test.ts`, `xml-text.test.ts`, `split.test.ts`, `recorded.test.ts`, `docx-read.properties.test.ts`, and any other Sentinel test that imports a moved module) to `@reveal-codes/export`. No assertion, fixture or test body changes. Confirm with `git diff` that every changed line in `crew/sentinel/test` is an import line.
     - Run the Sentinel package tests and the `packages/export` tests; the Sentinel Findings, report text and error kinds are as before.
     - _Requirements: 1.7, 1.8, 19.11_

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { decodeEntities, paragraphsOf } from "../../../packages/export/src/xml-text.js";
+import { decodeEntities, paragraphsOf } from "@reveal-codes/export";
 
 const p = (inner: string): string => `<w:p>${inner}</w:p>`;
 const t = (text: string): string => `<w:r><w:t>${text}</w:t></w:r>`;
