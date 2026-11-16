@@ -439,7 +439,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - In `packages/verifier/src/name-expansion.ts` add `plaintiff, plaintiffs, defendant, defendants, appellant, appellants, appellee, appellees, petitioner, petitioners, respondent, respondents, individually, deceased, no` to `DROPPED_WORDS`. Change no other word and no `NAME_EXPANSION_TABLE` entry.
     - _Requirements: 20.1, 20.2, 20.3_
 
-  - [-] 19.2 Mirror the words in the engine arbitraries
+  - [x] 19.2 Mirror the words in the engine arbitraries
     - In `packages/engine/src/testing/arb-case-match.ts` add the same fifteen words to `DROPPED`, export it, and keep the existing exclusion of initialisms equal to a Dropped_Word or table key (design D10) so Property 1's generator stays clear of the new words. Do not edit Property 1.
     - _Requirements: 20.4, 20.5_
 
