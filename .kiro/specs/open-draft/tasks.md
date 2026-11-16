@@ -178,7 +178,7 @@ Conventions that apply to every task:
   - [x] 8.5 Open_Note in the Issues region
     - `components/issues-region.tsx` (and its CSS module): show `openNote` as text above the Issues list and below the Draft_Gate notice, in a `role="status"` element, in the existing region style, with no icon and no colour as the only signal. `components/use-verify.ts` dispatches `openNote: null` when a run starts.
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_
-  - [~] 8.6 Write property test for UTF-8 text decoding
+  - [-] 8.6 Write property test for UTF-8 text decoding
     - **Property 10: UTF-8 text round trip**
     - File `apps/web/test/open-file.properties.test.ts`. `decodeTextFile` over UTF-8 encodings with and without a byte-order mark, with and without `\r\n` and lone `\r`. Update `apps/web/test/static/inventory.test.ts` with the new `// Property 10` comment in this task.
     - **Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.6**
@@ -197,13 +197,13 @@ Conventions that apply to every task:
   - [x] 8.10 Write refusal and text-file examples
     - File `apps/web/test/open-refusals.test.ts`. Each refusal of Requirement 14 (not Word or damaged, password-protected, over 5 MB with no read, over the Character_Limit, empty and whitespace-only, wrong kind, not UTF-8 and UTF-16, several files, no filing end, oversize part): exact message text, Document, stored draft and history unchanged, no confirm dialog opened; the refusal order of criterion 12 with files failing two checks; a text file with a byte-order mark and Windows endings and a lone `\r` reading as `\n` text with no U+FEFF; the Toolbar message "Could not open <file name>."
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.7, 14.8, 14.9, 14.10, 14.11, 14.12, 14.13, 19.1, 19.2_
-  - [~] 8.11 Write Picker, drop, confirm and message examples
+  - [-] 8.11 Write Picker, drop, confirm and message examples
     - File `apps/web/test/open-flow.test.ts`. The Picker and a drop reach the same `openFile` and produce the same Document for the same bytes; choosing the same file twice opens it twice; cancelling the Picker changes nothing; a drag with no file keeps the `PST` drop behaviour; confirm-before-replace (dialog with the exact title, message and labels for a non-empty draft, none for an empty one, Cancel changes nothing, Confirm replaces); the three Toolbar messages, with and without the export date; opening clears a stored Declaration, a restore installs the recorded one and a body-only import installs none; Next_Step after opening text is the value `nextStep` already gives.
     - _Requirements: 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5, 3.7, 4.1, 4.2, 4.3, 4.4, 4.5, 8.3, 8.4, 8.5, 9.5, 9.6, 10.3, 12.1, 12.2, 12.4, 12.5, 19.4, 19.5, 19.6, 19.9_
   - [x] 8.12 Write Open_Note and restore-install examples
     - File `apps/web/test/open-note.test.ts`. The changed-export Open_Note in the Issues region and its clearing by New, Load demo motion, Load the Avianca citations, the next open and the start of a Verify run; it is not persisted and sits in a `role="status"` element; the Open_Note of each of the three cases of Requirement 13 criterion 4, each with its exact wording including the added sentence "Run Verify to check the citations again and record the date." in the two cases that hold a Verification_Result and none in the AI-runs-only case, and no note for criterion 5; `replace` with `runLog: []` and `verifiedAt: null` for a Document with AI spans is accepted by `reduceReplace` and `buildStatement` builds, printing "not recorded", no check date and no sentence about prompt records (Requirement 19 criterion 16); after a restore that holds results the Next_Step is `verify`, and after a completed Verify run it is `export`; no court, judge or confidentiality tick after a restore; recorded span and override timestamps kept.
     - _Requirements: 9.7, 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 13.7, 13.8, 13.9, 13.11, 13.13, 15.1, 15.2, 15.3, 15.4, 15.5, 15.6, 19.7, 19.16_
-  - [~] 8.13 Write empty-page, Toolbar, network and static examples
+  - [-] 8.13 Write empty-page, Toolbar, network and static examples
     - File `apps/web/test/open-empty-page.test.ts`. The empty-page placeholder and the three links in order, their absence once the Document has a character, the old placeholder gone, "Open a draft" opening the Picker; the Open button directly after New and before Load demo motion, with no `data-primary`; zero `fetch`, `XMLHttpRequest`, `sendBeacon` and form-post calls during an open; no route under `apps/web/app/api` for opening; static scan that the Open flow holds no discarding `try`/`catch`; `test/static/boundaries.test.ts` and the docs scan of Requirement 17 criterion 4 still pass.
     - _Requirements: 2.1, 2.6, 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7, 17.1, 17.2, 17.4, 21.8, 19.10_
   - [x] 8.14 Write Open text-safety examples
@@ -211,13 +211,13 @@ Conventions that apply to every task:
     - _Requirements: 7.7, 22.3, 22.4, 22.5, 19.15_
 
 - [ ] 9. Documentation
-  - [~] 9.1 README
+  - [x] 9.1 README
     - Add one line to "What it does" (a draft can be opened from a `.docx`, `.txt` or `.md` file, and an exported `.docx` reopens with its record), one line to "Demo path" naming Open as the other way in beside Load demo motion, and one sentence to "What leaves your machine": opening a file reads it in your browser; the file is not uploaded. No exclamation mark; the words "opened", "reopened", "record", "pasted" and "changed after it was exported"; no "detected" or "inferred" about authorship. `apps/web/test/static/docs.test.ts` stays green.
     - _Requirements: 17.3, 17.4, 20.1, 20.2, 20.3, 20.9_
   - [~] 9.2 `docs/KIRO_USAGE.md` rows
     - Add a row for this spec listing `.config.kiro`, `requirements.md`, `design.md`, `tasks.md` and `tasks.meta.json`, and a row for each steering file this spec edits (`ui.md`, `structure.md`, `tech.md` when it changes). Run `pnpm kiro:check` and the inventory static test.
     - _Requirements: 20.4_
-  - [~] 9.3 `.kiro/steering/ui.md`
+  - [x] 9.3 `.kiro/steering/ui.md`
     - Describe the Open button after New in "Layout", the empty-page placeholder and three links in "Copy", and the Open_Note in the Issues region. In "Controls", add to the primary-button rule that Verify is also the Next_Step when the Document holds a Verification_Result, has no check date and holds a full citation (Requirement 13 criterion 11 is the only change to the Next_Step rules). Add no Token, no icon and no animation.
     - _Requirements: 13.11, 20.6, 20.9_
   - [~] 9.4 `.kiro/steering/structure.md` and `tech.md`

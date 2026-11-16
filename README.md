@@ -22,6 +22,8 @@ WordPerfect 5.1 for DOS, in 1989, had a key that split the screen and showed eve
 
 **Alt-F3 shows everything.** The codes pane opens under the page and prints the same text with every code inline. The margin numbers are the document's line numbers, the same ones the status line and the Sentinel use.
 
+**A draft can be opened from a file.** A draft can be opened from a `.docx`, `.txt` or `.md` file, and an exported `.docx` is reopened with its record; a file changed after it was exported is opened as pasted text.
+
 **Export is gated.** A filing with red codes will not export until each one is fixed or overridden with a written reason, and the reason is printed. The .docx carries the filing, an AI-Use and Verification Statement, and a Provenance Appendix that can be read back by machine.
 
 <img src="docs/images/statement.png" alt="The AI-Use and Verification Statement in the print view: the court's rule cited, a table of citations with their status, a table of quotations, and the override reasons">
@@ -43,6 +45,8 @@ On the hosted site citations are checked live. Locally, with no token set, the a
 5. Select Export. Choose a court, for example N.D. Tex. The dialog says how many blocking items remain and keeps Download .docx disabled.
 6. Make the declaration about the pasted text: choose Declaration_Choice_AI (generative AI was used to prepare some or all of it) and type a named tool in the tool field.
 7. Select Override… on an item and write a reason, or correct the text and Verify again. When nothing blocks, Download .docx produces the filing with its statement and appendix. The statement prints the declaration as the author's statement, with the tool you named.
+
+Open is the other way in beside Load demo motion: choose Open to start from a `.docx`, `.txt` or `.md` file of your own.
 
 To see the case-name check, select Load the Avianca citations on the empty page instead of the demo motion, then Verify.
 
@@ -85,6 +89,7 @@ The Kiro Crew app that schedules the Sentinel lives in a separate repository: ht
 - Verify sends only citation records to this app's own server, and each record includes the case name written before the citation; from there only citation strings go to CourtListener. The rest of your draft text is not sent.
 - Quotation text is checked in the browser against the opinion and is never sent anywhere.
 - Draft, the assistant, sends the prompt and the paragraph at the cursor to the configured LLM provider. Nothing is sent to a provider unless you use Draft. The provider is Amazon Bedrock when `AWS_REGION` and `BEDROCK_MODEL_ID` are set, otherwise Anthropic when `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL` are set.
+- Opening a file reads it in your browser; the file is not uploaded.
 - Exporting to DOCX and printing send nothing anywhere; both happen in your browser.
 - There is no telemetry.
 - A CourtListener token is required for live lookups, because the citation-lookup endpoint answers anonymous requests with 401. Without `COURTLISTENER_TOKEN` the app runs in demo mode on recorded responses and says so in the interface.

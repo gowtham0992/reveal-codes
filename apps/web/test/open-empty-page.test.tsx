@@ -1,0 +1,220 @@
+// @vitest-environment jsdom
+//
+// The empty page, the Open button and the no-network guarantee of open-draft.
+// _Requirements: 2.1, 2.6, 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7, 17.1, 17.2, 19.10_
+import { createDocument } from "@reveal-codes/engine";
+import { buildDocx, buildStatement } from "@reveal-codes/export";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { AppShell } from "../src/components/app-shell";
+import { EDITOR_PLACEHOLDER } from "../src/components/editor-surface";
+import type { ApiClient } from "../src/client/api";
+import type { AppServices } from "../src/services";
+import { PANE_KEY, encodePreference } from "../src/pane-preference";
+import { createManualTimers } from "./support/clock";
+import { EXPORT_NOW, EXPORT_VERIFIED_AT, pastedAiDeclaration } from "./support/export-fixtures";
+import { createMemoryStorage } from "./support/memory-storage";
+import { modeApi } from "./support/mode-fetch";
+import type { ModeApi } from "./support/mode-fetch";
+import { act, fireEvent, renderUi, screen, within } from "./support/render";
+import { createFakeViewport } from "./support/viewport";
+
+const OLD_PLACEHOLDER = "Type or paste your filing here. Load demo motion to see a worked example.";
+const NEW_PLACEHOLDER = "Type or paste your filing here, or open a draft.";
+
+type Calls = { api: number };
+
+/** The shell's services over the fixture routes, with a counter on every Api method. */
+function services(calls: Calls, mode: ModeApi): AppServices {
+  const timers = createManualTimers();
+  const storage = createMemoryStorage();
+  storage.setItem(PANE_KEY, encodePreference(false));
+  const base = mode.api;
+  const count =
+    <A extends unknown[], R>(fn: (...a: A) => R) =>
+    (...a: A): R => {
+      calls.api += 1;
+      return fn(...a);
+    };
+  const api: ApiClient = {
+    verify: count(base.verify),
+    opinion: count(base.opinion),
+    mode: base.mode,
+    demoMotion: count(base.demoMotion),
+    aviancaCitations: count(base.aviancaCitations),
+    draft: count(base.draft),
+  };
+  return {
+    api,
+    now: timers.clock.now,
+    setTimer: (fn, ms) => timers.setTimeout(fn, ms),
+    clearTimer: (h) => {
+      timers.clearTimeout(h as number);
+    },
+    storage,
+    download: () => undefined,
+    openPrint: () => true,
+    viewport: createFakeViewport(),
+  };
+}
+
+async function mount(
+  calls: Calls = { api: 0 },
+  mode: ModeApi = modeApi("fixtures"),
+): Promise<void> {
+  await act(async () => {
+    renderUi(<AppShell services={services(calls, mode)} />);
+    await new Promise((r) => setTimeout(r, 30));
+  });
+}
+
+const toolbar = (): HTMLElement => screen.getByRole("toolbar");
+const names = (): (string | null)[] =>
+  within(toolbar())
+    .getAllByRole("button")
+    .map((b) => b.textContent);
+const fileInput = (): HTMLInputElement => {
+  const el = document.querySelector('input[type="file"]');
+  if (!(el instanceof HTMLInputElement)) throw new Error("no file input");
+  return el;
+};
+
+/** Gives the hidden input one file; jsdom's File has no `arrayBuffer`, so the file is a plain object. */
+async function pick(name: string, bytes: Uint8Array): Promise<void> {
+  const copy = bytes.slice().buffer;
+  const file = { name, size: bytes.length, arrayBuffer: () => Promise.resolve(copy) };
+  const input = fileInput();
+  Object.defineProperty(input, "files", { value: [file], configurable: true });
+  await act(async () => {
+    fireEvent.change(input);
+    await new Promise((r) => setTimeout(r, 30));
+  });
+}
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe("empty page _Requirements: 16.1, 16.2, 16.3, 16.4, 16.5, 16.7_", () => {
+  it("shows the new placeholder and the three links in order, and not the old placeholder", async () => {
+    await mount();
+    expect(EDITOR_PLACEHOLDER).toBe(NEW_PLACEHOLDER);
+    expect(screen.getByText(NEW_PLACEHOLDER)).toBeTruthy();
+    expect(document.body.textContent).not.toContain(OLD_PLACEHOLDER);
+    const links = screen.getAllByRole("link");
+    expect(links.map((a) => a.textContent)).toEqual([
+      "Open a draft",
+      "Load demo motion",
+      "Load the Avianca citations",
+    ]);
+    const list = links[0]?.closest("ul");
+    expect(list?.querySelectorAll("a")).toHaveLength(3);
+    expect(list?.querySelector("button, img, svg")).toBeNull();
+  });
+
+  it("removes the links once the Document has text", async () => {
+    await mount();
+    await pick("a.txt", new TextEncoder().encode("A filing."));
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.queryByText(NEW_PLACEHOLDER)).toBeNull();
+  });
+
+  it("opens the Picker from the Open a draft link and navigates nowhere", async () => {
+    await mount();
+    const click = vi.spyOn(fileInput(), "click");
+    const link = screen.getByRole("link", { name: "Open a draft" });
+    expect(fireEvent.mouseDown(link)).toBe(false);
+    expect(fireEvent.click(link)).toBe(false);
+    expect(click).toHaveBeenCalledTimes(1);
+  });
+
+  it("still loads the demo motion from its link", async () => {
+    await mount();
+    await act(async () => {
+      fireEvent.click(screen.getByRole("link", { name: "Load demo motion" }));
+      await new Promise((r) => setTimeout(r, 30));
+    });
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(document.body.textContent).toContain("Dana Whitfield");
+  });
+});
+
+describe("Toolbar Open button _Requirements: 2.1, 2.6_", () => {
+  it("sits after New and before Load demo motion, with no data-primary", async () => {
+    await mount();
+    const all = names();
+    expect(all.indexOf("Open")).toBe(all.indexOf("New") + 1);
+    expect(all.indexOf("Load demo motion")).toBe(all.indexOf("Open") + 1);
+    const open = within(toolbar()).getByRole("button", { name: "Open" });
+    expect(open.hasAttribute("data-primary")).toBe(false);
+  });
+
+  it("opens the Picker and stays enabled while Verify runs", async () => {
+    const mode = modeApi("fixtures");
+    let release: () => void = () => undefined;
+    mode.gate.current = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await mount({ api: 0 }, mode);
+    const open = within(toolbar()).getByRole("button", { name: "Open" });
+    const click = vi.spyOn(fileInput(), "click");
+    fireEvent.click(open);
+    expect(click).toHaveBeenCalledTimes(1);
+    await pick("a.txt", new TextEncoder().encode("See 410 U.S. 113 (1973)."));
+    const verify = within(toolbar()).getByRole("button", { name: "Verify" });
+    act(() => {
+      fireEvent.click(verify);
+    });
+    const busy = within(toolbar()).getByRole("button", { name: "Verifying…" });
+    expect(busy).toHaveProperty("disabled", true);
+    expect(within(toolbar()).getByRole("button", { name: "Open" })).toHaveProperty(
+      "disabled",
+      false,
+    );
+    release();
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 30));
+    });
+  });
+});
+
+function spyNetwork() {
+  const fetchSpy = vi.fn<typeof fetch>(() => Promise.reject(new Error("no network expected")));
+  vi.stubGlobal("fetch", fetchSpy);
+  const xhr = vi.spyOn(XMLHttpRequest.prototype, "open");
+  const submit = vi.spyOn(HTMLFormElement.prototype, "submit").mockImplementation(() => undefined);
+  const beacon = vi.fn(() => true);
+  Object.defineProperty(navigator, "sendBeacon", { value: beacon, configurable: true });
+  return { fetchSpy, xhr, submit, beacon };
+}
+
+async function restoredBytes(): Promise<Uint8Array> {
+  const created = createDocument("A filing about 410 U.S. 113.", EXPORT_VERIFIED_AT);
+  if (!created.ok) throw new Error("document rejected");
+  const doc = created.value;
+  const meta = { now: EXPORT_NOW, verifiedAt: EXPORT_VERIFIED_AT };
+  const built = buildStatement(doc, [], meta, null, pastedAiDeclaration());
+  if (!built.ok) throw new Error("statement rejected");
+  return buildDocx(doc, built.value);
+}
+
+describe("opening makes no request _Requirements: 17.1, 17.2, 19.10_", () => {
+  const files: readonly (readonly [string, () => Promise<Uint8Array>])[] = [
+    ["a text file", () => Promise.resolve(new TextEncoder().encode("A filing, 410 U.S. 113."))],
+    ["a restored Word file", restoredBytes],
+  ];
+  for (const [label, bytes] of files) {
+    it(`sends nothing when ${label} is opened`, async () => {
+      const calls: Calls = { api: 0 };
+      await mount(calls);
+      const spies = spyNetwork();
+      const apiBefore = calls.api;
+      await pick(label === "a text file" ? "a.txt" : "a.docx", await bytes());
+      expect(screen.queryByRole("link")).toBeNull();
+      expect(spies.fetchSpy).not.toHaveBeenCalled();
+      expect(spies.xhr).not.toHaveBeenCalled();
+      expect(spies.submit).not.toHaveBeenCalled();
+      expect(spies.beacon).not.toHaveBeenCalled();
+      expect(calls.api).toBe(apiBefore);
+    });
+  }
+});

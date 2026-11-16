@@ -64,7 +64,7 @@ Sizes and line heights:
 ## Controls
 
 - Buttons are square: 1px `--ink` border, transparent fill, `--ink` text. Heights: 30px in the Toolbar and by default, 32px in dialogs, 24px in Issue rows, the Unchecked row and the Export dialog's issue list.
-- Primary (`data-primary="true"`): `--oxblood` fill and border, `--white` text, weight 600. One primary button on the Toolbar at most. It names the next step, by the first rule that matches: nothing while a Verify run is in flight; Load demo motion when the text is empty; Verify when a full citation is unchecked; otherwise Export.
+- Primary (`data-primary="true"`): `--oxblood` fill and border, `--white` text, weight 600. One primary button on the Toolbar at most. It names the next step, by the first rule that matches: nothing while a Verify run is in flight; Load demo motion when the text is empty; Verify when a full citation is unchecked, or when the Document holds a Verification_Result and has no check date (a restored Document); otherwise Export. Open is never primary and carries no `data-primary`. The Next_Step is not an input to the export gate: red codes without an override still block export while Verify is primary.
 - Disabled: dashed 1px `--disabled-border`, `--disabled-fill` fill, `--muted` text, `cursor: not-allowed`. A disabled primary keeps its `data-primary`.
 - Hover is a fill change only: `--rule`, and `--ink` for the primary. No transition.
 - Focus is a 2px `--oxblood` outline with a 2px offset on every focusable control.
@@ -76,7 +76,7 @@ Sizes and line heights:
 
 ## Layout
 
-- Toolbar 52px, `--panel`, 3px double `--ink` bottom rule.
+- Toolbar 52px, `--panel`, 3px double `--ink` bottom rule. The Open button comes directly after New, in the same square style, and is enabled while a Verify run is in flight.
 - Status_Bar 26px, under the editor while the Pane is closed and at the bottom of the Pane while it is open.
 - Assistant strip 32px while collapsed; assistant panel 260px while expanded.
 - Issues region 300px, with a 1px `--rule` left edge.
@@ -97,6 +97,9 @@ Sizes and line heights:
 - Short and plain. No exclamation marks, no "Oops", no "Let's", no sparkle characters, no marketing text.
 - No empty-state illustrations and no toasts. State is shown as text in the Toolbar, the Status_Bar, or the Pane status line.
 - The result of Verify is also shown as text in the Issues region.
+- The Open_Note is plain text in the Issues region. It explains a refused file, a changed export, or what a restore did not bring back. It is not persisted and has no icon.
+- A file dragged over the page shows no overlay, outline or animation. A dropped file opens through the same function as the Open button.
+- The empty page shows the placeholder "Type or paste your filing here, or open a draft." and, under it, three plain links in this order: "Open a draft", "Load demo motion", "Load the Avianca citations". Both disappear when the Document has one character. The links use the link style above, with no icon.
 - Severity is shown by words in the Issues list ("blocking", "not found") and by the code text in its chip, never by colour alone.
 
 ## Document text
