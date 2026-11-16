@@ -55,11 +55,7 @@ export function reduceEdit(
   if (applied.inverses.length === 0) return result(state);
   const undo = pushEdit(state.undo, applied.inverses, ops, nowMs);
   const runLog = run === undefined ? state.runLog : withRun(state.runLog, run);
-  const declaration = declarationAfter(
-    state.declaration,
-    applied.document,
-    insertedPasted(ops),
-  );
+  const declaration = declarationAfter(state.declaration, applied.document, insertedPasted(ops));
   const next = {
     ...state,
     document: applied.document,

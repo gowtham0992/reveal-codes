@@ -308,11 +308,22 @@ describe("sentinel boundaries _Requirements: 1.8, 1.9, 1.10, 1.11, 1.12_", () =>
 
   it("exactly three Property comments, 1, 2 and 3, each above one fc.assert", () => {
     // case-match.properties.test.ts is checked by the aggregate case-match-inventory.test.ts (task 13.6).
-    const files = TESTS.filter(
+    // recorded-declaration.properties.test.ts holds Property 3 of the pasted-text-declaration spec,
+    // whose numbering is its own; it is checked on its own below.
+    const all = TESTS.filter(
       (f) =>
         f.path.endsWith(".properties.test.ts") && !f.path.endsWith("case-match.properties.test.ts"),
     );
+    const isOtherSpec = (f: Source) => f.path.endsWith("recorded-declaration.properties.test.ts");
+    const files = all.filter((f) => !isOtherSpec(f));
     expect(format(files.flatMap(propertyViolations))).toEqual([]);
     expect(allNumbers(files).sort()).toEqual([1, 2, 3]);
+  });
+
+  it("recorded-declaration.properties.test.ts carries exactly Property 3 of pasted-text-declaration", () => {
+    const other = TESTS.filter((f) => f.path.endsWith("recorded-declaration.properties.test.ts"));
+    expect(other).toHaveLength(1);
+    expect(format(other.flatMap(propertyViolations))).toEqual([]);
+    expect(allNumbers(other)).toEqual([3]);
   });
 });

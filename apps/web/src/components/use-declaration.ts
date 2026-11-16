@@ -36,7 +36,11 @@ function faultOf(choice: DeclarationChoice | null, text: string): ToolNameFault 
  * Applicable_Declaration only: no default, nothing derived from the text. Mount the controls
  * with key={subject} so a change of subject starts again.
  */
-export function useDeclaration({ subject, applicable, onDeclare }: UseDeclarationInput): DeclarationView {
+export function useDeclaration({
+  subject,
+  applicable,
+  onDeclare,
+}: UseDeclarationInput): DeclarationView {
   const [choice, setChoiceState] = useState<DeclarationChoice | null>(applicable?.choice ?? null);
   const [toolText, setToolTextState] = useState(
     applicable?.choice === "declared_ai" ? applicable.toolName : "",

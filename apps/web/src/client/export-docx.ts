@@ -88,7 +88,13 @@ export async function exportDocx(store: ExportStore, deps: ExportDeps): Promise<
   const { document, runLog, verifiedAt, declaration } = store.getState();
   if (orderBlocks(document, deps.orderContext, declaration)) return { status: "blocked" };
   const now = deps.now();
-  const built = buildStatement(document, runLog, { now, verifiedAt }, deps.orderContext, declaration);
+  const built = buildStatement(
+    document,
+    runLog,
+    { now, verifiedAt },
+    deps.orderContext,
+    declaration,
+  );
   if (!built.ok || !appendixParses(document, built.value.declaration)) return fail(store);
   const bytes = await pack(document, built.value);
   if (bytes instanceof Error) return fail(store);

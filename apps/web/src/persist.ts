@@ -104,7 +104,10 @@ export function deserialise(raw: string | null): Result<Restored, PersistError> 
   }
   const parsed = parse(codes);
   if (!parsed.ok) return err({ kind: "bad_codes" });
-  return ok({ document: parsed.value, runLog, verifiedAt: stamp ?? null,
+  return ok({
+    document: parsed.value,
+    runLog,
+    verifiedAt: stamp ?? null,
     declaration: readDeclaration(value["declaration"]),
   });
 }

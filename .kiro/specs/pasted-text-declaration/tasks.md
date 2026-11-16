@@ -90,7 +90,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Rewrite assertions of "No generative artificial intelligence was used in preparing this filing." and "No program was used." to the Requirement 2 and 7 wording. Update `canExport`, `needsConfidentiality` and `prohibitionNotice` callers.
     - _Requirements: 1.3, 2.13, 14.2_
 
-- [~] 4. Checkpoint - Engine and Export compile and pass
+- [x] 4. Checkpoint - Engine and Export compile and pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 5. Web: Store, clearing rule and persistence

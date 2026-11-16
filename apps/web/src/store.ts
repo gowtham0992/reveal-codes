@@ -107,7 +107,13 @@ export function reduce(state: StoreState, action: StoreAction, now: () => Date):
     case "override":
       return reduceOverride(state, action);
     case "replace":
-      return reduceReplace(state, action.document, action.runLog, action.verifiedAt, action.declaration);
+      return reduceReplace(
+        state,
+        action.document,
+        action.runLog,
+        action.verifiedAt,
+        action.declaration,
+      );
     case "declaration":
       return reduceDeclaration(state, action.declaration);
     case "verified":
