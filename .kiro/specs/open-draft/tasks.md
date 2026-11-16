@@ -206,7 +206,7 @@ Conventions that apply to every task:
   - [~] 8.13 Write empty-page, Toolbar, network and static examples
     - File `apps/web/test/open-empty-page.test.ts`. The empty-page placeholder and the three links in order, their absence once the Document has a character, the old placeholder gone, "Open a draft" opening the Picker; the Open button directly after New and before Load demo motion, with no `data-primary`; zero `fetch`, `XMLHttpRequest`, `sendBeacon` and form-post calls during an open; no route under `apps/web/app/api` for opening; static scan that the Open flow holds no discarding `try`/`catch`; `test/static/boundaries.test.ts` and the docs scan of Requirement 17 criterion 4 still pass.
     - _Requirements: 2.1, 2.6, 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7, 17.1, 17.2, 17.4, 21.8, 19.10_
-  - [-] 8.14 Write Open text-safety examples
+  - [x] 8.14 Write Open text-safety examples
     - File `apps/web/test/open-text-safety.test.ts`. The Open_Message for `removed` 0, 1 and more than 1, with the sentences in the order opened sentence, removed sentence, notes sentence; a file that holds only control characters is refused as empty; a restore of a record that holds an unsafe character is not changed.
     - _Requirements: 7.7, 22.3, 22.4, 22.5, 19.15_
 
