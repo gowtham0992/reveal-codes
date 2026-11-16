@@ -43,7 +43,7 @@ These are the places where the approved requirements are silent or two criteria 
 
 1. **Requirement 2 criterion 14** says to print `<T>` as the count of typed characters when `<P>` and `<A>` are 0. The exact wording of criterion 3 for that case contains no number, and the interpretation note says wording in quotation marks is exact. The design keeps the criterion 3 sentence as is, adds no count to it, and treats criterion 14 as satisfied by "no pasted count is printed". For the Assistant_Text case with no Pasted_Text, `<T>` is already printed by the existing AI sentence and no pasted sentence is added.
 2. **Requirement 4 criterion 4** says the notice is "in place of the Statement_Text". Showing the filing and the Appendix without the Statement would let a user print a filing with no statement. The Print view therefore shows only the notice and the link (the same shape as the `blocked` view), and because the block is hidden in `@media print`, printing in that state prints a blank page. If the owner wants the filing shown, that is a change to `print-model.ts` and one view component only.
-3. **Requirement 7 criteria 8 and 16** both describe the sentence "The author states that no program was used to prepare <subject>." An order can carry `tool_name` and `negative_certification_when_unused` together. The sentence is rendered once.
+3. **Requirement 7 criteria 7, 8 and 16.** The sentence "The author states that no program was used to prepare <subject>." is not rendered at all. When the author chose None, the only author no-AI sentence is the Declaration sentence of Requirement 2 criterion 5 ("The author states that no generative AI was used to prepare <subject>."), in paragraph 2. The `tool_name` element, when Used_AI is false, adds only the Record_Sentence "The record shows that no generative artificial intelligence program was used in the editor." The `negative_certification_when_unused` element adds no sentence. An order can carry both elements together; the Declaration sentence still appears exactly once.
 4. **Requirement 7 criterion 5** reads "<recorded tools>". When the run log yields no tool, the existing tools sentence says "is not recorded". The combined sentence then reads "The generative artificial intelligence program used is not recorded; the author names <tools> for the pasted text."
 5. **Requirement 7 criterion 11** (and 13) render the existing sentence only when the run count is greater than 0. Today `how_used` prints "in 0 runs" for assistant text with no run. That is a deliberate behaviour change.
 6. **Tool_Name length** is counted in UTF-16 code units after trimming, the same unit the Engine uses for every other count. "Control character" means Unicode category Cc plus U+2028 and U+2029, and an unpaired surrogate is also rejected so the JSON draft and the DOCX stay well formed.
@@ -351,7 +351,7 @@ Record sentences:
 | `typedOnlySentence` | "The record shows that every character was typed in the editor and that the editor's assistant was not used." |
 | `typedAndPastedSentence({ total, typed, typedPct, pasted, pastedPct })` | "The record shows that the editor's assistant was not used. Of the `<T>` characters of this filing, `<H>` (`<pct>`%) were typed in the editor and `<P>` (`<pct>`%) were pasted or imported; the tool did not record the origin of the pasted or imported text." |
 | `pastedAfterAssistantSentence({ total, pasted, pastedPct })` | "`<P>` of `<T>` characters (`<pct>`%) were pasted or imported; the tool did not record their origin." |
-| `NO_PROGRAM_RECORD` | "The record shows that no program was used in the editor." |
+| `NO_PROGRAM_RECORD` | "The record shows that no generative artificial intelligence program was used in the editor." |
 
 Author sentences:
 
@@ -360,7 +360,6 @@ Author sentences:
 | `declarationNone(s)` | "The author states that no generative AI was used to prepare `<subject>`." |
 | `declarationAi(s, tool)`, subject `pasted_text` | "The author states that generative AI was used to prepare some or all of the pasted text, and names the tool as `<tool>`. The tool did not record which pasted passages." |
 | `declarationAi(s, tool)`, subject `this_filing` | "The author states that generative AI was used to prepare some or all of this filing, and names the tool as `<tool>`. The tool did not record which passages." |
-| `noProgramAuthor(s)` | "The author states that no program was used to prepare `<subject>`." |
 | `portionsDeclared(s)` | "The author states that generative AI was used to prepare some or all of `<subject>`; the tool did not record which passages." |
 | `programWithAuthor(tools, tool)` | "The generative artificial intelligence program used was `<recorded tools>`; the author names `<tool>` for the pasted text." (with no recorded tool: "The generative artificial intelligence program used is not recorded; the author names `<tool>` for the pasted text.") |
 | `programAsNamed(tool)` | "The generative artificial intelligence program used was `<tool>`, as named by the author." |
@@ -372,7 +371,7 @@ Record sentences about the author's declaration (`The tool did not record how...
 | `howUsedDeclared(s)` | "The tool did not record how generative AI was used to prepare `<subject>`." |
 | `promptRecordsDeclared(s)` | "The tool holds no prompt records for `<subject>`." |
 
-`<tool>` is inserted as given by `checkToolName` (trimmed), with nothing added around it. The only sentence in this feature that does not start "The author states that" and is an Author_Sentence is `programAsNamed`, which ends "as named by the author" (Requirement 1 criterion 2). `programWithAuthor` mixes a record clause and an author clause by the wording the requirements fix; it begins "The generative artificial intelligence program used" and ends "the author names ... for the pasted text", and the design treats it the same way as `programAsNamed`, an attributed Author_Sentence. The two constants `PARAGRAPH_NO_AI` and `NO_PROGRAM_SENTENCE` are deleted from `wording.ts`.
+`<tool>` is inserted as given by `checkToolName` (trimmed), with nothing added around it. The only sentence in this feature that does not start "The author states that" and is an Author_Sentence is `programAsNamed`, which ends "as named by the author" (Requirement 1 criterion 2). `programWithAuthor` mixes a record clause and an author clause by the wording the requirements fix; it begins "The generative artificial intelligence program used" and ends "the author names ... for the pasted text", and the design treats it the same way as `programAsNamed`, an attributed Author_Sentence. The two constants `PARAGRAPH_NO_AI` and `NO_PROGRAM_SENTENCE` are deleted from `wording.ts`, and no builder renders "The author states that no program was used to prepare <subject>.".
 
 ### Export: paragraph 2 (`paragraph-two.ts`)
 
@@ -404,8 +403,8 @@ export function paragraphTwo(s: Statement): string {
 | `tool_name` | `A` and not `D` | existing `toolsSentence(s.tools)` (criterion 4) |
 | `tool_name` | `A` and `D` | `programWithAuthor` (criterion 5) |
 | `tool_name` | not `A` and `D` | `programAsNamed` (criterion 6) |
-| `tool_name` | not `aiUsed` | `NO_PROGRAM_RECORD`, then `noProgramAuthor` when `N` (criteria 7, 8) |
-| `negative_certification_when_unused` | not `A` and `N` | `noProgramAuthor`, once (criteria 16; interpretation 3) |
+| `tool_name` | not `aiUsed` | `NO_PROGRAM_RECORD` only; nothing follows it, whether `N` or Pending (criteria 7, 8; interpretation 3) |
+| `negative_certification_when_unused` | any | no sentence (criterion 16; interpretation 3). The Declaration sentence in paragraph 2 is the only author no-AI sentence. |
 | `portions` | `A` and passages exist | existing `portionsSentence` |
 | `portions` | `D` | `portionsDeclared` (criterion 10) |
 | `how_used` | `A` and `runCount > 0` | existing `howUsedSentence` |
@@ -653,7 +652,7 @@ As listed under "Export: Statement data" and "Export: statement errors". No exis
 
 ### Property 1: The Statement asserts no AI-free claim the author did not make
 
-For any Document over all four origins (including whitespace-only `PST` text), any Order_Entry of any kind or no order, and any stored Declaration (Pending, or None or Declared_AI with a valid Tool_Name, for either subject) for which `buildStatement` returns a Statement, the Statement_Text never contains "No generative artificial intelligence was used in preparing this filing."; every sentence that says no generative AI or no program was used either begins "The author states that" or is the Record_Sentence "The record shows that no program was used in the editor." or the typed-only Record_Sentence; the Author_Sentence "The author states that no generative AI was used to prepare <subject>." appears exactly once when the Applicable_Declaration is None and not otherwise; no Declaration sentence appears when the Declaration_Subject is `none`; a Declared_AI Tool_Name appears verbatim, trimmed, and unwrapped; and building twice from the same inputs gives the same Statement_Text.
+For any Document over all four origins (including whitespace-only `PST` text), any Order_Entry of any kind or no order, and any stored Declaration (Pending, or None or Declared_AI with a valid Tool_Name, for either subject) for which `buildStatement` returns a Statement, the Statement_Text never contains "No generative artificial intelligence was used in preparing this filing."; every sentence that says no generative AI or no program was used either begins "The author states that" or is the Record_Sentence "The record shows that no generative artificial intelligence program was used in the editor." or the typed-only Record_Sentence; the sentence "The author states that no program was used to prepare <subject>." never appears; the Author_Sentence "The author states that no generative AI was used to prepare <subject>." appears exactly once when the Applicable_Declaration is None and not otherwise; no Declaration sentence appears when the Declaration_Subject is `none`; a Declared_AI Tool_Name appears verbatim, trimmed, and unwrapped; and building twice from the same inputs gives the same Statement_Text.
 
 **Validates: Requirements 1.3, 1.4, 1.5, 1.6, 2.5, 2.6, 2.7, 2.8, 2.10, 2.11, 7.18**
 
@@ -712,7 +711,7 @@ Redundancy check: the criteria for "no unsupported sentence" (1.3, 1.4, 1.5, 2.5
 | 3 | `crew/sentinel/test/recorded-declaration.properties.test.ts` | sentinel (needs engine, export, `docx-read`) |
 | 4 | `apps/web/test/declaration-clearing.properties.test.ts` | web |
 
-- Property 1 oracle: sentence splitting uses the fixed builder strings, not a language heuristic. A "no AI" sentence is any sentence matching `/\bno (generative (artificial intelligence|AI)|program) was used\b/i`. Each must start "The author states that" or equal one of the two fixed Record_Sentences. The expected count of the None sentence is 1 when the test's own applicability calculation says None applies, else 0.
+- Property 1 oracle: sentence splitting uses the fixed builder strings, not a language heuristic. A "no AI" sentence is any sentence matching `/\bno (generative (artificial intelligence( program)?|AI)|program) was used\b/i`. Each must start "The author states that" and be the None Declaration sentence, or equal one of the two fixed Record_Sentences; the "no program" author sentence matches the pattern and so fails the oracle. The expected count of the None sentence is 1 when the test's own applicability calculation says None applies, else 0.
 - Property 2 oracle: spans and text are inspected directly in the test. The Declaration generator includes the wrong-subject case.
 - Property 3 is one assertion over the whole chain and its generators cover both subjects. The Sentinel read uses `analyseFile` with a stubbed `fetch` for the "No drift." check of Requirement 12 criterion 9 in the example tests and `recordedRecord` for the equality check here.
 - Property 4 reference model: an array of `{ id, origin }` per character. `edit` applies the operation to the array (new ids for inserted characters, removed ids for deleted ones); a stack of snapshots follows undo and redo. "Inserted PST" is "the after-array has a PST id the before-array lacks". The model is independent of `insertsPasted` and of Inverse snapshots.
@@ -728,7 +727,7 @@ Redundancy check: the criteria for "no unsupported sentence" (1.3, 1.4, 1.5, 2.5
 
 ### Static scans
 
-- New scan in `packages/export/test/static/`: `usedAi` is defined once; `isAiSpan`-based use is not read outside `declaration.ts` and `ai-paragraphs.ts`; the strings "No generative artificial intelligence was used" and "No program was used." appear nowhere under `packages/*/src`, `apps/web/src` or `docs/`.
+- New scan in `packages/export/test/static/`: `usedAi` is defined once; `isAiSpan`-based use is not read outside `declaration.ts` and `ai-paragraphs.ts`; the strings "No generative artificial intelligence was used", "No program was used." and "states that no program was used" appear nowhere under `packages/*/src`, `apps/web/src` or `docs/`.
 - Existing scans in `apps/web/test/static` (css-rules, copy-rules, limits, forbidden) apply to the new component, CSS module and copy: no icon, no emoji, no exclamation mark, colours only as `var(--token)`, functions under 40 lines, modules under 300.
 
 ### Existing tests that change

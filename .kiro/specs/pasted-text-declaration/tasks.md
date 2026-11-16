@@ -59,8 +59,9 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - _Requirements: 4.8, 5.8, 5.9, 6.1_
 
   - [ ] 3.2 Add `packages/export/src/declaration-wording.ts` and `packages/export/src/statement-error.ts`
-    - Builders with the exact strings of the design: `subjectPhrase`, `choiceNoneLabel`, `choiceAiLabel`, `TOOL_NAME_LINE`, `requiredLine`, `typedOnlySentence`, `typedAndPastedSentence`, `pastedAfterAssistantSentence`, `NO_PROGRAM_RECORD`, `declarationNone`, `declarationAi` (both subjects), `noProgramAuthor`, `portionsDeclared`, `programWithAuthor` (with the "is not recorded" variant), `programAsNamed`, `howUsedDeclared`, `promptRecordsDeclared`, `prohibitionDeclaredLine`.
+    - Builders with the exact strings of the design: `subjectPhrase`, `choiceNoneLabel`, `choiceAiLabel`, `TOOL_NAME_LINE`, `requiredLine`, `typedOnlySentence`, `typedAndPastedSentence`, `pastedAfterAssistantSentence`, `NO_PROGRAM_RECORD` (the constant "The record shows that no generative artificial intelligence program was used in the editor."), `declarationNone`, `declarationAi` (both subjects), `portionsDeclared`, `programWithAuthor` (with the "is not recorded" variant), `programAsNamed`, `howUsedDeclared`, `promptRecordsDeclared`, `prohibitionDeclaredLine`.
     - `StatementError = EngineError | { kind: "declaration_required"; subject } | { kind: "invalid_tool_name"; fault }`.
+    - No builder renders "The author states that no program was used to prepare <subject>."; the Declaration None sentence of `declarationNone` is the only author no-AI sentence.
     - The Tool_Name is inserted as given after trimming, with nothing added around it.
     - _Requirements: 1.2, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 3.1, 3.3, 4.2, 6.7, 7.5, 7.6, 7.7, 7.8, 7.10, 7.12, 7.14_
 
@@ -69,7 +70,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - `Statement` gains `aiUsed` (now Used_AI), `assistantText` and `declaration` (the trimmed Applicable_Declaration or `null`).
     - `buildStatement(document, runLog, meta, orderContext = null, declaration = null)` returns `Result<Statement, StatementError>`: after `meta` and segmentation, return `declaration_required` when `declarationRequired`, then `invalid_tool_name` from `checkToolName` on the Applicable_Declaration.
     - New `paragraph-two.ts`: record sentences by `(assistantText, P > 0)`, then the Declaration sentence (none when `declaration === null`), then order sentences. Move `percent` to `text.ts` if importing it from `render-statement.ts` would be circular.
-    - `render-order.ts`: apply the design's order-sentence table (tool name, negative certification once, portions, how used only when run count is above 0, confidentiality on `aiUsed`, prompt records). Leave `accuracy_certification`, `citations_verified`, `human_review` and `signed_by_all_drafters` unchanged.
+    - `render-order.ts`: apply the design's order-sentence table (`tool_name` renders `NO_PROGRAM_RECORD` alone when not Used_AI, whether the Declaration is None or Pending; `negative_certification_when_unused` adds no sentence, so the Declaration None sentence in paragraph 2 appears exactly once; portions, how used only when run count is above 0, confidentiality on `aiUsed`, prompt records). Leave `accuracy_certification`, `citations_verified`, `human_review` and `signed_by_all_drafters` unchanged.
     - Every sentence is a Record_Sentence or an Author_Sentence. No paragraph equals a `STATEMENT_TITLES` member other than its own title.
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.12, 2.13, 2.14, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 7.10, 7.11, 7.12, 7.13, 7.14, 7.15, 7.16, 7.17, 7.19, 8.7_
 
@@ -135,7 +136,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - _Requirements: 3.8, 4.1, 4.2, 4.6, 4.7, 4.9, 4.10, 4.11, 4.12, 4.13, 6.5, 6.8_
 
   - [ ] 7.2 Add the static scan for the single definition of AI use
-    - New file in `packages/export/test/static/`: `usedAi` is defined once; `isAiSpan` is not read outside `declaration.ts` and `ai-paragraphs.ts`; the strings "No generative artificial intelligence was used" and "No program was used." appear nowhere under `packages/*/src`, `apps/web/src` or `docs/`.
+    - New file in `packages/export/test/static/`: `usedAi` is defined once; `isAiSpan` is not read outside `declaration.ts` and `ai-paragraphs.ts`; the strings "No generative artificial intelligence was used", "No program was used." and "states that no program was used" appear nowhere under `packages/*/src`, `apps/web/src` or `docs/`.
     - _Requirements: 1.3, 6.1_
 
 - [ ] 8. Sentinel: read the Declaration
@@ -165,7 +166,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
   - [ ] 11.1 Write the property test for the Statement text
     - `packages/export/test/statement-declaration.properties.test.ts`, `// Property 1`, `describe("... _Requirements: 1.3, 1.4, 1.5, 1.6, 2.5, 2.6, 2.7, 2.8, 2.10, 2.11, 7.18, 11.2_")`.
     - **Property 1: The Statement asserts no AI-free claim the author did not make**
-    - Generate `arbMixedOriginDocument`, `arbOrderChoice` and Pending, None or Declared_AI Declarations of either subject. Assert the old sentence never appears; every sentence matching `/\bno (generative (artificial intelligence|AI)|program) was used\b/i` begins "The author states that" or equals one of the two fixed Record_Sentences; the None Author_Sentence appears exactly once when the test's own applicability calculation says None applies and otherwise zero times; no Declaration sentence when the subject is `none`; the Tool_Name appears verbatim; building twice gives the same text.
+    - Generate `arbMixedOriginDocument`, `arbOrderChoice` and Pending, None or Declared_AI Declarations of either subject. Assert the old sentence never appears; every sentence matching `/\bno (generative (artificial intelligence|AI)|program) was used\b/i` is either the None Declaration sentence ("The author states that no generative AI was used to prepare <subject>.") or equals one of the two fixed Record_Sentences (so "The author states that no program was used to prepare <subject>." fails the oracle and "states that no program was used" never appears); the None Declaration sentence appears exactly once when the test's own applicability calculation says None applies and otherwise zero times, including under an order with `negative_certification_when_unused` or `certification_every_filing`; no Declaration sentence when the subject is `none`; the Tool_Name appears verbatim; building twice gives the same text.
     - **Validates: Requirements 1.3, 1.4, 1.5, 1.6, 2.5, 2.6, 2.7, 2.8, 2.10, 2.11, 7.18**
 
   - [ ] 11.2 Write the property test for the gate

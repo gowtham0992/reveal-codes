@@ -61,7 +61,7 @@ Interpretation notes, so that the criteria below are testable:
 2. THE Export_Package SHALL begin every Author_Sentence with the words "The author states that", except the sentence of Requirement 7 criterion 3, which begins "The generative artificial intelligence program used was" and ends with the words "as named by the author".
 3. THE Export_Package SHALL remove the sentence "No generative artificial intelligence was used in preparing this filing." from every Statement_Text.
 4. THE Export_Package SHALL render no sentence that asserts, without attribution to the author, that no generative AI was used.
-5. THE Export_Package SHALL render an Author_Sentence that says no generative AI was used only on the first choice (the Applicable_Declaration is None).
+5. THE Export_Package SHALL render an Author_Sentence that says no generative AI was used exactly once on the first choice (the Applicable_Declaration is None) and not at all otherwise.
 6. THE Export_Package SHALL render the same Statement_Text for the same Document, run log, meta, order context and Declaration.
 
 ### Requirement 2: Paragraph 2 by case
@@ -169,8 +169,8 @@ Interpretation notes, so that the criteria below are testable:
 4. WHERE the Order_Entry includes `tool_name` and the Document holds Assistant_Text only, THE Export_Package SHALL render the existing tools sentence.
 5. WHERE the Order_Entry includes `tool_name`, the Document holds Assistant_Text and the Applicable_Declaration is Declared_AI, THE Export_Package SHALL render "The generative artificial intelligence program used was <recorded tools>; the author names <tools> for the pasted text."
 6. WHERE the Order_Entry includes `tool_name`, the Document holds no Assistant_Text and the Applicable_Declaration is Declared_AI, THE Export_Package SHALL render "The generative artificial intelligence program used was <tools>, as named by the author."
-7. WHERE the Order_Entry includes `tool_name` and Used_AI is false, THE Export_Package SHALL render the Record_Sentence "The record shows that no program was used in the editor."
-8. WHERE the Order_Entry includes `tool_name`, Used_AI is false and the Applicable_Declaration is None, THE Export_Package SHALL render after the sentence of criterion 7 the sentence "The author states that no program was used to prepare <subject>."
+7. WHERE the Order_Entry includes `tool_name` and Used_AI is false, THE Export_Package SHALL render the Record_Sentence "The record shows that no generative artificial intelligence program was used in the editor."
+8. WHERE the Order_Entry includes `tool_name`, Used_AI is false and the Applicable_Declaration is None, THE Export_Package SHALL add no sentence beyond the Record_Sentence of criterion 7 and the Declaration sentence of Requirement 2 criterion 5, so that the author's no-AI statement appears once.
 9. WHERE the Order_Entry includes `portions` and Used_AI is true, THE Export_Package SHALL render the existing passages sentence WHEN the Document holds Assistant_Text.
 10. WHERE the Order_Entry includes `portions` and the Applicable_Declaration is Declared_AI, THE Export_Package SHALL render "The author states that generative AI was used to prepare some or all of <subject>; the tool did not record which passages."
 11. WHERE the Order_Entry includes `how_used` and Used_AI is true, THE Export_Package SHALL render the existing sentence WHEN the run count is greater than 0.
@@ -178,9 +178,9 @@ Interpretation notes, so that the criteria below are testable:
 13. WHERE the Order_Entry includes `prompt_records` and Used_AI is true, THE Export_Package SHALL render the existing sentence WHEN the run count is greater than 0.
 14. WHERE the Order_Entry includes `prompt_records` and the Applicable_Declaration is Declared_AI, THE Export_Package SHALL render "The tool holds no prompt records for <subject>."
 15. WHERE the Order_Entry includes `confidentiality`, Used_AI is true and the author ticked the Confidentiality_Checkbox, THE Export_Package SHALL render the existing confidentiality sentence.
-16. WHERE the Order_Entry includes `negative_certification_when_unused`, THE Export_Package SHALL render a "no AI" sentence only WHEN the Document holds no Assistant_Text and the Applicable_Declaration is None, and SHALL render it as the sentence of criterion 8.
+16. WHERE the Order_Entry includes `negative_certification_when_unused`, THE Export_Package SHALL add no sentence of its own, so that the only "no AI" Author_Sentence is the Declaration sentence of Requirement 2 criterion 5, which appears WHEN the Applicable_Declaration is None.
 17. THE Export_Package SHALL leave the sentences for `accuracy_certification`, `citations_verified`, `human_review` and `signed_by_all_drafters` unchanged.
-18. FOR ALL Documents, Orders and Declarations, the Statement_Text SHALL contain no tool-asserted "no AI" sentence, and SHALL contain an Author_Sentence that says no AI was used only when the Applicable_Declaration is None, under either Declaration_Subject (Property 1).
+18. FOR ALL Documents, Orders and Declarations, the Statement_Text SHALL contain no tool-asserted "no AI" sentence, and SHALL contain the Author_Sentence that says no AI was used exactly once WHEN the Applicable_Declaration is None and zero times otherwise, under either Declaration_Subject, whatever tool_name or negative-certification element the Order_Entry holds (Property 1).
 19. FOR EACH Order_Entry kind (`certification_every_filing`, `disclosure_when_used`, `prohibition`, `verification_only`, `guidance`), THE Export_Package SHALL render the sentences of this requirement identically for the same Used_AI value, Declaration_Subject and element list.
 
 ### Requirement 8: The record keeps the declaration
@@ -232,7 +232,7 @@ Interpretation notes, so that the criteria below are testable:
 #### Acceptance Criteria
 
 1. THE tests SHALL contain, in `<module>.properties.test.ts` files with `// Property N` comments, one `fc.assert(fc.property(...))` for each of Properties 1 to 4, run with `numRuns` of 200 locally and 500 in CI.
-2. Property 1 SHALL generate Documents over all four origins including whitespace-only `PST` text, every Declaration that `buildStatement` accepts for both subjects (None, and Declared_AI with valid Tool_Names including bracket, parenthesis and quote characters), and every Order_Entry kind and the no-order case, and SHALL assert that the rendered Statement_Text never contains the old sentence "No generative artificial intelligence was used in preparing this filing.", never contains an unattributed "no AI" sentence, and contains an Author_Sentence "no AI" only when the Applicable_Declaration is None.
+2. Property 1 SHALL generate Documents over all four origins including whitespace-only `PST` text, every Declaration that `buildStatement` accepts for both subjects (None, and Declared_AI with valid Tool_Names including bracket, parenthesis and quote characters), and every Order_Entry kind and the no-order case, and SHALL assert that the rendered Statement_Text never contains the old sentence "No generative artificial intelligence was used in preparing this filing.", never contains an unattributed "no AI" sentence other than the Record_Sentence of Requirement 7 criterion 7, never contains the old sentence "The author states that no program was used to prepare <subject>.", and contains the author's no-AI statement "The author states that no generative AI was used to prepare <subject>." exactly once when the first choice (the Applicable_Declaration is None) is made and zero times otherwise.
 3. Property 2 SHALL assert that `canExport` refuses without an override exactly when the Order_Entry has kind `prohibition` and Used_AI (Assistant_Text or an Applicable_Declaration of Declared_AI, under either subject) is true, over Documents with no blocking issues.
 4. Property 3 SHALL assert the round trip of Requirement 8 criterion 5 for both subjects, and SHALL include the Sentinel read path with the verifier fetch stubbed.
 5. Property 4 SHALL assert Requirement 5 criterion 12.
