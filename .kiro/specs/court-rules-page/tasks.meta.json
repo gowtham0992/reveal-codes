@@ -57,6 +57,16 @@
         "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
         "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
         "timestamp": 1794868667897
+      },
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794869146179
+      },
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794869280546
       }
     ],
     "3.1 Implement `filterOrders` in `packages/export/src/order-filter.ts`": [
@@ -64,6 +74,16 @@
         "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
         "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
         "timestamp": 1794868667918
+      },
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794869146774
+      },
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794869280592
       }
     ],
     "3.2 Implement `courtGroups`, `compareAbbreviations` and `orderStats` in `packages/export/src/order-groups.ts`": [
@@ -168,6 +188,11 @@
         "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
         "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
         "timestamp": 1794868668203
+      },
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794869147811
       }
     ],
     "6.3 Write Order_Parameter and link tests in `apps/web/test/`": [
@@ -233,6 +258,11 @@
         "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
         "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
         "timestamp": 1794868668302
+      },
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794869148011
       }
     ],
     "8.1 Extend the static scans in `apps/web/test/static/`": [
@@ -261,6 +291,13 @@
         "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
         "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
         "timestamp": 1794868762270
+      }
+    ],
+    "2. Loader returns `compiled` and `vocabulary`; dataset wording": [
+      {
+        "executionId": "e452c7c3-5e1c-4740-bce3-fe1a5a70b141",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794869280566
       }
     ]
   }

@@ -1,5 +1,6 @@
 import type { OrderEntry } from "@reveal-codes/export";
 import { optionText } from "../order-copy";
+import { COURT_RULES_LONG, COURT_RULES_PATH } from "../courts/links";
 import { NO_LINKS } from "../public-links";
 import type { PublicLinks } from "../public-links";
 import { Mark } from "./mark";
@@ -40,12 +41,11 @@ export function SmallScreenPage({
       {selection === null ? null : (
         <p>{`Selected: ${selection.court.abbreviation}, ${optionText(selection)}. Open this page on a wider screen to draft under it.`}</p>
       )}
-      {links.video === null && links.repo === null ? null : (
-        <div className={styles["links"]}>
-          {links.video === null ? null : <Link href={links.video} text={VIDEO_LINK_TEXT} />}
-          {links.repo === null ? null : <Link href={links.repo} text={REPO_LINK_TEXT} />}
-        </div>
-      )}
+      <div className={styles["links"]}>
+        <a href={COURT_RULES_PATH}>{COURT_RULES_LONG}</a>
+        {links.video === null ? null : <Link href={links.video} text={VIDEO_LINK_TEXT} />}
+        {links.repo === null ? null : <Link href={links.repo} text={REPO_LINK_TEXT} />}
+      </div>
     </main>
   );
 }

@@ -2,6 +2,7 @@
 import type { Declaration } from "@reveal-codes/engine";
 import { ConfidentialityCheckbox } from "./confidentiality-checkbox";
 import { DeclarationControls } from "./declaration-controls";
+import { COURT_RULES_LONG, COURT_RULES_PATH } from "../courts/links";
 import styles from "./export-order.module.css";
 import { OrderPicker, OrderSummary } from "./order-picker";
 import type { OrderGate } from "./use-order-gate";
@@ -18,7 +19,12 @@ export function ExportOrder({ gate, onDeclare }: ExportOrderProps) {
   const { subject } = gate;
   return (
     <div className={styles["order"]}>
-      <OrderPicker selection={gate.selection} onSelect={gate.select} />
+      <div className={styles["pick"]}>
+        <OrderPicker selection={gate.selection} onSelect={gate.select} />
+        <a href={COURT_RULES_PATH} target="_blank" rel="noreferrer" className={styles["rules"]}>
+          {COURT_RULES_LONG}
+        </a>
+      </div>
       <OrderSummary entry={gate.entry} />
       {gate.notice === null ? null : (
         <div className={styles["prohibition"]}>

@@ -13,7 +13,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Do not push, do not stage any other file, do not modify code
     - _Requirements: 17.3_
 
-- [ ] 2. Loader returns `compiled` and `vocabulary`; dataset wording
+- [x] 2. Loader returns `compiled` and `vocabulary`; dataset wording
   - [x] 2.1 Add `OrderVocabulary` and `OrderDataset` to `packages/export`
     - In `orders-types.ts` add `OrderVocabulary` and `OrderDataset = OrderSet & { compiled; vocabulary }`
     - In `orders-parse.ts` read `compiled` (string, else `orders: "compiled" is missing or malformed`) and add `readVocabulary(raw)` that fails the load when a member of an enumerated list is absent from its group or is not a string
@@ -26,7 +26,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Run `pnpm power:build` so `powers/citation-check/skills/court-ai-rules/references/standing-orders.json` equals the dataset
     - _Requirements: 15.1, 15.2, 15.3_
 
-  - [~] 2.3 Write loader and dataset tests in `packages/export/test/`
+  - [x] 2.3 Write loader and dataset tests in `packages/export/test/`
     - `loadOrders` returns `compiled` and a complete `vocabulary`
     - A dataset missing one status word fails with `orders: vocabulary "status" lacks "<word>"`
     - The new sentence is present; the entries array equals the entries of `git show HEAD:data/standing-orders.json` compared through `JSON.stringify`
@@ -34,7 +34,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - _Requirements: 1.6, 15.2, 15.3, 15.4_
 
 - [ ] 3. Pure filter, grouping and stats
-  - [~] 3.1 Implement `filterOrders` in `packages/export/src/order-filter.ts`
+  - [x] 3.1 Implement `filterOrders` in `packages/export/src/order-filter.ts`
     - Export `KindChoice`, `FilterState`, `CLEARED_FILTER`, `normaliseText` (`toLowerCase().replace(/[^\p{L}\p{N}]/gu, "")`) and `filterOrders` exactly as the design specifies; input order preserved; a query that normalises to empty matches everything
     - No `node:` or DOM import; plain data only
     - Export all of them from `packages/export/src/index.ts`
@@ -104,7 +104,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Route `/` stays static; the parameter is read only in a client effect
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9, 8.10, 8.11, 8.12_
 
-  - [~] 6.2 Add the Court_Rules_Link in three places
+  - [-] 6.2 Add the Court_Rules_Link in three places
     - `components/toolbar.tsx`: last child, an `<a href="/courts" target="_blank" rel="noreferrer">Court rules</a>`, no `data-primary`, Toolbar height and button groups unchanged (adjust `toolbar.module.css` only if needed)
     - `ExportDialog`: "See all court rules" link beside the Picker, `target="_blank" rel="noreferrer"`; `OrderPicker` is not changed
     - `SmallScreenPage`: links row always renders, "See all court rules" first and in the same tab, video and repository links each conditional on their own value (remove the both-null guard)
@@ -132,7 +132,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Remove no tracked file other than any stray untracked `.d.ts`; do not delete `apps/web/src/css-modules.d.ts`
     - _Requirements: 14.1, 14.2, 14.3_
 
-  - [~] 7.4 Write repair tests
+  - [-] 7.4 Write repair tests
     - Stylesheet test on `print-view.module.css` that fails on the old file: `.overrides th` has both declarations and the two `min-width` values, and the body-cell `overflow-wrap: anywhere` rule is still present
     - Open test: open a refused file, then a valid second file with a non-empty draft; neither the Toolbar_Notice nor the Open_Note holds "Could not open <name>." while the confirm dialog is open
     - Repository test: `git ls-files` lists no `.d.ts` other than `apps/web/src/css-modules.d.ts`

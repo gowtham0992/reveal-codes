@@ -63,3 +63,5 @@ export { docxSafe, holdsDocxUnsafe } from "./docx-text.js";
 export type { DocxSafe } from "./docx-text.js";
 export { readWordDraft } from "./word-draft.js";
 export type { WordDraft, WordLimits } from "./word-draft.js";
+export { CLEARED_FILTER, filterOrders, normaliseText } from "./order-filter.js";
+export type { FilterState, KindChoice } from "./order-filter.js";

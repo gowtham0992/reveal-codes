@@ -1,3 +1,4 @@
+import { COURT_RULES_PATH, COURT_RULES_SHORT } from "../courts/links";
 import { Mark } from "./mark";
 import styles from "./toolbar.module.css";
 import type { NextStep } from "./next-step";
@@ -95,6 +96,9 @@ export function Toolbar(props: ToolbarProps) {
       <div role="status" aria-live="polite" className={styles["notice"]}>
         {props.notice}
       </div>
+      <a href={COURT_RULES_PATH} target="_blank" rel="noreferrer" className={styles["link"]}>
+        {COURT_RULES_SHORT}
+      </a>
     </div>
   );
 }
