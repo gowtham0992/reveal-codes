@@ -239,7 +239,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
   - Ensure all tests pass, ask the user if questions arise.
   - _Requirements: 14.2, 14.3, 14.4_
 
-- [ ] 15. Follow-up: review fixes (lint, chance-collision assertions, redundant tool_name sentence)
+- [x] 15. Follow-up: review fixes (lint, chance-collision assertions, redundant tool_name sentence)
 
   - [x] 15.1 Spec first: remove the tool_name record sentence for filings that did not use AI
     - Update `requirements.md` (the Requirement 2 and 7 criteria and any example that prints `NO_PROGRAM_RECORD`), `design.md` (the order-sentence table and wording table) so that an order's `tool_name` element prints a sentence only when there is a tool to name (Used_AI holds). When the filing did not use AI, paragraph 2 already says the editor's assistant was not used, so nothing is added.
@@ -259,7 +259,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Run Prettier on `BUILD_LOG.md`. Add a dated follow-up entry covering the three fixes. This is the last edit of the group.
     - _Requirements: 13.5_
 
-  - [-] 15.5 Final checkpoint after the last edit
+  - [x] 15.5 Final checkpoint after the last edit
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt` three times, `pnpm test:pbt` once with `FC_NUM_RUNS=500`, the web build on a clean copy after a fresh install, and `pnpm kiro:check`. Change no file after the checks start; if a check forces an edit, rerun every check. Record the results in `BUILD_LOG.md` only before the first check, as a placeholder-free summary written afterwards is an edit: report results in the reply instead.
     - Do not push and do not commit.
     - _Requirements: 14.2, 14.3, 14.4_
