@@ -1,5 +1,5 @@
-import { render } from "@reveal-codes/engine";
-import type { Document } from "@reveal-codes/engine";
+import { declareAi, declareNone, render } from "@reveal-codes/engine";
+import type { Declaration, Document } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import { AUTOSAVE_KEY, deserialise, serialise } from "../src/persist";
 import type { RunLogEntry } from "../src/store";
@@ -23,8 +23,9 @@ function roundTrip(
   document: Document,
   runLog: readonly RunLogEntry[] = [],
   verifiedAt: string | null = null,
+  declaration: Declaration | null = null,
 ) {
-  const back = deserialise(serialise(document, runLog, verifiedAt));
+  const back = deserialise(serialise(document, runLog, verifiedAt, declaration));
   if (!back.ok) throw new Error(`round trip failed: ${back.error.kind}`);
   return back.value;
 }
@@ -32,7 +33,7 @@ function roundTrip(
 describe("serialise _Requirements: 9.2, 9.7_", () => {
   it("writes version, the full-mode codes and the run log, and nothing else", () => {
     const doc = editedDocument();
-    const json: unknown = JSON.parse(serialise(doc, [RUN], STAMP));
+    const json: unknown = JSON.parse(serialise(doc, [RUN], STAMP, null));
     expect(json).toEqual({
       version: 1,
       codes: render(doc, "full").text,
@@ -109,5 +110,42 @@ describe("round trip _Requirements: 9.8_", () => {
     expect(doc.quotes.map((q) => q.result.status)).toContain("match");
     expect(doc.quotes.map((q) => q.result.status)).toContain("mismatch");
     expect(roundTrip(doc).document).toEqual(doc);
+  });
+});
+
+function declared(): Declaration {
+  const made = declareAi("pasted_text", "ChatGPT (GPT-4o)");
+  if (!made.ok) throw new Error("declareAi failed");
+  return made.value;
+}
+
+describe("declaration _Requirements: 5.1, 5.9, 5.10, 5.11_", () => {
+  it("writes the key only when non-null and keeps version 1", () => {
+    const doc = freshDocument();
+    const without = JSON.parse(serialise(doc, [], null, null)) as Record<string, unknown>;
+    expect("declaration" in without).toBe(false);
+    const withIt = JSON.parse(serialise(doc, [], null, declared())) as Record<string, unknown>;
+    expect(withIt["version"]).toBe(1);
+    expect(withIt["declaration"]).toEqual(declared());
+  });
+
+  it("round-trips both choices", () => {
+    const doc = editedDocument();
+    expect(roundTrip(doc, [], null, declared()).declaration).toEqual(declared());
+    const none = declareNone("this_filing");
+    expect(roundTrip(doc, [], null, none).declaration).toEqual(none);
+    expect(roundTrip(doc).declaration).toBeNull();
+  });
+
+  it("an unreadable declaration loads as null and the draft loads unchanged", () => {
+    const doc = editedDocument();
+    const base = JSON.parse(serialise(doc, [RUN], STAMP, null)) as Record<string, unknown>;
+    for (const bad of [5, "x", [], { subject: "pasted_text", choice: "declared_ai" }]) {
+      const r = deserialise(JSON.stringify({ ...base, declaration: bad }));
+      if (!r.ok) throw new Error(`load failed: ${r.error.kind}`);
+      expect(r.value.declaration).toBeNull();
+      expect(r.value.document).toEqual(doc);
+      expect(r.value.runLog).toEqual([RUN]);
+    }
   });
 });

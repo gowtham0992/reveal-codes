@@ -5,6 +5,7 @@ import { buildStatement, renderStatement } from "../src/index.js";
 import type { StatementBlock } from "../src/index.js";
 import { arbExportCase, runs } from "./support/arbitraries.js";
 import type { ExportCase } from "./support/arbitraries.js";
+import { declarationFor } from "./support/declarations.js";
 
 type Status = "verified" | "wrong_case" | "not_found" | "ambiguous" | "unchecked";
 
@@ -44,7 +45,13 @@ function paragraphs(blocks: readonly StatementBlock[]): readonly string[] {
 }
 
 function check(c: ExportCase): number {
-  const built = buildStatement(c.document, c.runLog, c.meta);
+  const built = buildStatement(
+    c.document,
+    c.runLog,
+    c.meta,
+    null,
+    declarationFor(c.document, null),
+  );
   expect(built.ok).toBe(true);
   if (!built.ok) return 0;
   const blocks = renderStatement(built.value);

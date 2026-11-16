@@ -10,10 +10,10 @@ describe("gate _Requirements: 1.1, 1.2, 1.6_", () => {
     fc.assert(
       fc.property(arbGateDocument, ({ doc, clear }) => {
         const before = structuredClone(doc);
-        const first = canExport(doc, null);
+        const first = canExport(doc, null, null);
         expect(first).toBe(blockingIssues(doc).length === 0);
         if (clear) expect(first).toBe(true);
-        expect(canExport(doc, null)).toBe(first);
+        expect(canExport(doc, null, null)).toBe(first);
         expect(doc).toEqual(before);
       }),
       { numRuns: runs() },

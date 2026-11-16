@@ -52,7 +52,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - `packages/engine/test/doc-declaration.test.ts`: `[DOC]` lexing for a duplicate `d`, an unknown subject, `declared_ai` without a name, `none` with a name, and an old file with no `d` (parses with `declaration: null`); `renderRecord` with no Declaration equals `render(document, "full")`; display mode omits the Declaration.
     - _Requirements: 3.3, 3.4, 3.5, 8.3, 8.4, 8.8, 8.9, 8.10_
 
-- [ ] 3. Export package: subject, wording, statement, gate, appendix
+- [x] 3. Export package: subject, wording, statement, gate, appendix
   - [x] 3.1 Add `packages/export/src/declaration.ts`
     - `holdsAssistantText`, `orderRequiresStatement`, `declarationSubject`, `applicableDeclaration`, `declarationRequired`, and the single `usedAi(document, entry, stored)`, as defined in the design. Subject order: `pasted_text` when substantive pasted text, else `this_filing` when no assistant text and the order requires a statement, else `none`.
     - Export them from the package index. `isAiSpan` stays in `statement-parts.ts` for `aiPassages` only.
@@ -85,7 +85,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Title and declaration-clause placements render as today for every Used_AI value.
     - _Requirements: 7.1, 7.2, 7.3, 8.1, 8.2, 8.5_
 
-  - [~] 3.6 Update existing Export package tests and fixtures
+  - [x] 3.6 Update existing Export package tests and fixtures
     - `packages/export/test/support/demo-statement.ts` and any test that builds a Statement from a pasted Document: pass a Declaration or use a typed-only Document.
     - Rewrite assertions of "No generative artificial intelligence was used in preparing this filing." and "No program was used." to the Requirement 2 and 7 wording. Update `canExport`, `needsConfidentiality` and `prohibitionNotice` callers.
     - _Requirements: 1.3, 2.13, 14.2_
@@ -100,7 +100,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Keep each function under 40 lines and each module under 300; put new reducers in `declaration-state.ts` if `store-actions.ts` would grow too large.
     - _Requirements: 5.3, 5.4, 5.5, 5.6, 5.7, 5.12_
 
-  - [~] 5.2 Persist the Declaration in `apps/web/src/persist.ts` and `apps/web/src/autosave.ts`
+  - [-] 5.2 Persist the Declaration in `apps/web/src/persist.ts` and `apps/web/src/autosave.ts`
     - `PersistedValue.declaration?: Declaration`, version stays 1. `serialise(document, runLog, verifiedAt, declaration)` writes the key only when non-null. `Restored.declaration`.
     - `deserialise`: absent key gives `null`; a key that fails `isDeclaration` gives `null`; the draft always loads unchanged and the Declaration never makes `deserialise` return an error.
     - `createAutosave.schedule` takes the Declaration as a required parameter. `startAutosave` also schedules when `declaration` changes. The mount-time load dispatches `replace` with the restored Declaration. Persist the raw stored Declaration, not the applicable one.
@@ -108,7 +108,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - _Requirements: 5.1, 5.9, 5.10, 5.11_
 
 - [ ] 6. Web: Export dialog, Print view and Legend
-  - [~] 6.1 Add the declaration controls
+  - [-] 6.1 Add the declaration controls
     - New `components/use-declaration.ts` (`DeclarationView`: subject, required, choice, toolText, toolFault, setChoice, setToolText), `components/declaration-controls.tsx` and `components/declaration-controls.module.css`.
     - Initial state is read from `applicableDeclaration`; with none, no radio is selected. No default, nothing derived from the text. Mount with `key={subject}`.
     - `<fieldset>` with `<legend>` "Generative AI", two native radios labelled with `choiceNoneLabel(subject)` and `choiceAiLabel(subject)`, and a labelled text input for the Tool_Name shown on the second choice. `TOOL_NAME_LINE` shows for an empty or faulty name and is tied by `aria-describedby`. The input has no `maxLength`.
@@ -181,7 +181,7 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Assert `parseRecord(renderRecord(document, declaration, "full").text)` returns an equal Document and Declaration for both subjects and Tool_Names with brackets, parentheses, quotation marks, commas, semicolons, equals signs, backslashes and non-ASCII; the display form contains no declaration text; a rendering with no Declaration equals `render(document, "full")`; no Statement_Text paragraph equals a `STATEMENT_TITLES` member other than its own title; and the Declaration survives DOCX export, `readDocx`, `splitExport` and `recordedRecord` with the verifier `fetch` stubbed.
     - **Validates: Requirements 8.1, 8.2, 8.3, 8.4, 8.5, 8.7, 8.8, 8.12**
 
-  - [~] 11.4 Write the property test for the clearing rule
+  - [x] 11.4 Write the property test for the clearing rule
     - `apps/web/test/declaration-clearing.properties.test.ts`, `// Property 4`, `_Requirements: 5.3, 5.6, 5.7, 5.12, 11.5_` in the describe title.
     - **Property 4: A stored Declaration is cleared exactly when pasted text is added or none remains**
     - Drive the Store with `arbEditSequence` (insert, delete, replace over `HUM`, `PST` and `AI`; undo; redo). Use an independent reference model with a unique id per character and a snapshot stack for undo and redo; do not call `insertsPasted`. After each action assert `null` when a `PST` id is new, `null` when the subject is `pasted_text` and no non-whitespace `PST` character remains, and otherwise the unchanged value.

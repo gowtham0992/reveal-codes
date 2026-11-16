@@ -16,7 +16,7 @@ describe("order gate _Requirements: 5.2, 5.3, 5.4, 5.12, 10.3_", () => {
   it("P2 canExport is false exactly for a prohibition with AI-origin text on a gate-clear document", () => {
     fc.assert(
       fc.property(arbGateClearAiDocument, arbAnyEntry, (document, entry) => {
-        expect(canExport(document, entry)).toBe(
+        expect(canExport(document, entry, null)).toBe(
           !(entry.kind === "prohibition" && hasAiOrigin(document)),
         );
       }),

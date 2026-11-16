@@ -32,8 +32,8 @@ function printFlow(svc: AppServices, store: Store, autosave: Autosave, gate: Dra
     store.dispatch({ type: "notice", text: PRINT_BLOCKED });
     return;
   }
-  const { document, runLog, verifiedAt } = store.getState();
-  autosave.schedule(document, runLog, verifiedAt);
+  const { document, runLog, verifiedAt, declaration } = store.getState();
+  autosave.schedule(document, runLog, verifiedAt, declaration);
   if (!autosave.flush() || !svc.openPrint()) {
     store.dispatch({ type: "notice", text: PRINT_FAILED });
   }

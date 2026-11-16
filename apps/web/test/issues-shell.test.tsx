@@ -26,7 +26,7 @@ type Mounted = Readonly<{ verifyRequests: () => number }>;
 async function mount(verifiedAt: string | null = ISO): Promise<Mounted> {
   const timers = createManualTimers();
   const storage = createMemoryStorage();
-  storage.setItem(AUTOSAVE_KEY, serialise(stored(), [], verifiedAt));
+  storage.setItem(AUTOSAVE_KEY, serialise(stored(), [], verifiedAt, null));
   const mode = modeApi("fixtures");
   const services: AppServices = {
     api: mode.api,

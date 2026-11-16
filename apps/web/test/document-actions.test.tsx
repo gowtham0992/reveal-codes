@@ -62,7 +62,7 @@ async function mount(
   const timers = createManualTimers();
   const storage = createMemoryStorage();
   if (pane !== null) storage.setItem(PANE_KEY, encodePreference(pane));
-  if (stored !== null) storage.setItem(AUTOSAVE_KEY, serialise(stored, [], null));
+  if (stored !== null) storage.setItem(AUTOSAVE_KEY, serialise(stored, [], null, null));
   const mode = modeApi("fixtures");
   const services: AppServices = {
     api: apiWithDemo(mode.api, reply),

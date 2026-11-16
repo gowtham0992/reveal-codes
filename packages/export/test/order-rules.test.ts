@@ -49,58 +49,58 @@ const COURT_WIDE: OrderEntry = { ...NEWMAN, judge: null, instrument: "General Or
 
 describe("prohibitionNotice _Requirements: 5.5, 5.12, 9.12_", () => {
   it("names the judge's surname for a Judge_Entry with one passage", () => {
-    expect(prohibitionNotice(ONE_SPAN, NEWMAN)).toEqual({
+    expect(prohibitionNotice(ONE_SPAN, NEWMAN, null)).toEqual({
       line: 'Judge Newman\'s order prohibits AI-drafted text. 1 AI-origin passage remains: paragraph 2, beginning "two\u2026".',
       keyLanguage: NEWMAN.key_language,
     });
   });
 
   it("names the judge's surname for a Judge_Entry with two passages", () => {
-    expect(prohibitionNotice(TWO_SPANS, NEWMAN)).toEqual({
+    expect(prohibitionNotice(TWO_SPANS, NEWMAN, null)).toEqual({
       line: 'Judge Newman\'s order prohibits AI-drafted text. 2 AI-origin passages remain, the first at paragraph 1, beginning "one\u2026".',
       keyLanguage: NEWMAN.key_language,
     });
   });
 
   it("names the instrument for a Court_Wide_Entry", () => {
-    expect(prohibitionNotice(ONE_SPAN, COURT_WIDE)?.line).toBe(
+    expect(prohibitionNotice(ONE_SPAN, COURT_WIDE, null)?.line).toBe(
       'General Order 99-1 prohibits AI-drafted text. 1 AI-origin passage remains: paragraph 2, beginning "two\u2026".',
     );
-    expect(prohibitionNotice(TWO_SPANS, COURT_WIDE)?.line).toBe(
+    expect(prohibitionNotice(TWO_SPANS, COURT_WIDE, null)?.line).toBe(
       'General Order 99-1 prohibits AI-drafted text. 2 AI-origin passages remain, the first at paragraph 1, beginning "one\u2026".',
     );
   });
 
   it("counts one passage when adjacent AI spans touch", () => {
     const doc = withAi(TEXT, [[0, 13]]);
-    expect(prohibitionNotice(doc, NEWMAN)?.line).toBe(
+    expect(prohibitionNotice(doc, NEWMAN, null)?.line).toBe(
       'Judge Newman\'s order prohibits AI-drafted text. 1 AI-origin passage remains: paragraph 1, beginning "one two three\u2026".',
     );
   });
 
   it("says line breaks only when no AI run holds a word", () => {
     const doc = withAi("a\n\nb", [[1, 3]]);
-    expect(prohibitionNotice(doc, NEWMAN)?.line).toBe(
+    expect(prohibitionNotice(doc, NEWMAN, null)?.line).toBe(
       "Judge Newman's order prohibits AI-drafted text. AI-origin text remains, consisting of line breaks only.",
     );
   });
 
   it("never writes the word lines or span", () => {
     for (const doc of [ONE_SPAN, TWO_SPANS]) {
-      const line = prohibitionNotice(doc, NEWMAN)?.line ?? "";
+      const line = prohibitionNotice(doc, NEWMAN, null)?.line ?? "";
       expect(line).toContain("paragraph");
       expect(line).not.toMatch(/\blines?\b|\bspans?\b/i);
     }
   });
 
   it("is null when the document has no AI-origin span", () => {
-    expect(prohibitionNotice(NO_AI, NEWMAN)).toBeNull();
-    expect(prohibitionNotice(NO_AI, COURT_WIDE)).toBeNull();
+    expect(prohibitionNotice(NO_AI, NEWMAN, null)).toBeNull();
+    expect(prohibitionNotice(NO_AI, COURT_WIDE, null)).toBeNull();
   });
 
   it("is null for no entry and for an entry that does not prohibit", () => {
-    expect(prohibitionNotice(ONE_SPAN, null)).toBeNull();
-    expect(prohibitionNotice(ONE_SPAN, entry("edtex-love-2025"))).toBeNull();
+    expect(prohibitionNotice(ONE_SPAN, null, null)).toBeNull();
+    expect(prohibitionNotice(ONE_SPAN, entry("edtex-love-2025"), null)).toBeNull();
   });
 });
 
@@ -117,6 +117,6 @@ describe("needsConfidentiality _Requirements: 6.1, 6.6_", () => {
   ];
 
   it.each(table)("%s", (_name, doc, order, expected) => {
-    expect(needsConfidentiality(doc, order)).toBe(expected);
+    expect(needsConfidentiality(doc, order, null)).toBe(expected);
   });
 });

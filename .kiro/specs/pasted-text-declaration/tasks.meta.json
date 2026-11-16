@@ -181,6 +181,16 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800255303
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800926732
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794801377464
       }
     ],
     "4. Checkpoint - Engine and Export compile and pass": [
@@ -212,6 +222,11 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800255361
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800926766
       }
     ],
     "6.1 Add the declaration controls": [
@@ -219,6 +234,11 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800255379
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800926797
       }
     ],
     "6.2 Add the `declaration_pending` Print view": [
@@ -360,6 +380,16 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800255624
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794800927176
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794801377407
       }
     ],
     "12.1 Export package example tests": [
@@ -444,6 +474,13 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800706469
+      }
+    ],
+    "3. Export package: subject, wording, statement, gate, appendix": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794801377499
       }
     ]
   }

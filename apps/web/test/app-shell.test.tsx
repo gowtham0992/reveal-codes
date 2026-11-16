@@ -116,7 +116,7 @@ describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () =
 
   it("installs a stored Document on mount and hides the placeholder", async () => {
     const storage = createMemoryStorage();
-    storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Stored draft."), [], null));
+    storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Stored draft."), [], null, null));
     await mount(fixture(storage));
     expect(screen.queryByText(/Type or paste your filing here/)).toBeNull();
     expect(screen.getByRole("textbox", { name: "Document" }).textContent).toBe("Stored draft.");
@@ -248,7 +248,7 @@ describe("AppShell Pane wiring _Requirements: 6.7, 13.3, 13.5, 13.6, 14.1, 14.2,
 
   it("moves the Editor selection when a Pane item is clicked", async () => {
     const storage = createMemoryStorage();
-    storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Stored draft."), [], null));
+    storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Stored draft."), [], null, null));
     await mount(fixture(storage));
     pressKey(document.body, "F3", { altKey: true });
     const item = paneRegion()?.querySelector('span[aria-hidden="true"][data-offset="7"]');
@@ -263,7 +263,7 @@ describe("AppShell Pane wiring _Requirements: 6.7, 13.3, 13.5, 13.6, 14.1, 14.2,
 
   it("shows the divergence words for a mismatched quote under the cursor and updates them on edit", async () => {
     const storage = createMemoryStorage();
-    storage.setItem(AUTOSAVE_KEY, serialise(mismatchedDocument(), [], null));
+    storage.setItem(AUTOSAVE_KEY, serialise(mismatchedDocument(), [], null, null));
     await mount(fixture(storage));
     pressKey(document.body, "F3", { altKey: true });
     const at = QUOTE_TEXT.indexOf("quick") + 1;
@@ -293,7 +293,7 @@ const STORED = encodePreference;
 
 function draftStorage(pane: boolean | null): MemoryStorage {
   const storage = pane === null ? createMemoryStorage() : storageWithPane(pane);
-  storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Stored draft."), [], null));
+  storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Stored draft."), [], null, null));
   return storage;
 }
 
@@ -371,7 +371,7 @@ const CITING = "See Roe v. Wade, 410 U.S. 113 (1973).";
 
 function citingStorage(): MemoryStorage {
   const storage = createMemoryStorage();
-  storage.setItem(AUTOSAVE_KEY, serialise(storedDocument(CITING), [], null));
+  storage.setItem(AUTOSAVE_KEY, serialise(storedDocument(CITING), [], null, null));
   return storage;
 }
 
@@ -540,7 +540,7 @@ describe("AppShell small screen _Requirements: 10.4, 10.5, 10.6, 10.8, 10.9, 10.
 
   it("mounts the Shell and loads the saved draft when the width reaches 800", async () => {
     const storage = storageWithPane(false);
-    storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Saved Motion\nBody."), [], null));
+    storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Saved Motion\nBody."), [], null, null));
     const f = narrowFixture(799, storage);
     await mount(f);
     expect(titleElement()).toBe("Reveal Codes");
@@ -562,7 +562,7 @@ describe("AppShell Window_Title _Requirements: 10.1, 10.2, 10.3, 10.4, 14.4_", (
     ["a first line over 60 characters", LONG, `${"A".repeat(60)} \u2014 Reveal Codes`],
   ])("sets the title for %s", async (_name, text, expected) => {
     const storage = createMemoryStorage();
-    if (text !== "") storage.setItem(AUTOSAVE_KEY, serialise(storedDocument(text), [], null));
+    if (text !== "") storage.setItem(AUTOSAVE_KEY, serialise(storedDocument(text), [], null, null));
     await mount(fixture(storage));
     expect(titleElement()).toBe(expected);
     expect(document.head.querySelectorAll("title")).toHaveLength(1);
@@ -570,7 +570,7 @@ describe("AppShell Window_Title _Requirements: 10.1, 10.2, 10.3, 10.4, 14.4_", (
 
   it("yields the Caption title for a saved Document loaded from storage on mount", async () => {
     const storage = createMemoryStorage();
-    storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Saved Motion\nBody."), [], null));
+    storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Saved Motion\nBody."), [], null, null));
     await mount(fixture(storage));
     expect(titleElement()).toBe("Saved Motion \u2014 Reveal Codes");
   });

@@ -200,13 +200,11 @@ describe("package boundaries _Requirements: 9.1, 10.9_", () => {
   });
 
   it("self-test: a planted statement sentence outside wording.ts is reported", () => {
-    const planted = src(`const a = 1;\nconst s = "${wording.PARAGRAPH_NO_AI}";\n`, "other.ts");
+    const planted = src(`const a = 1;\nconst s = "${wording.PARAGRAPH_1}";\n`, "other.ts");
     const found = format(wordingViolations(planted));
     expect(found.length).toBeGreaterThan(0);
     expect(found[0]).toMatch(/^other\.ts:2 statement sentence outside wording\.ts/);
-    expect(wordingViolations(src(`const s = "${wording.PARAGRAPH_NO_AI}";`, "wording.ts"))).toEqual(
-      [],
-    );
+    expect(wordingViolations(src(`const s = "${wording.PARAGRAPH_1}";`, "wording.ts"))).toEqual([]);
   });
 
   it("statement sentences appear only in wording.ts", () => {
@@ -244,7 +242,7 @@ describe("package boundaries _Requirements: 9.1, 10.9_", () => {
 });
 
 type PropertyFile = {
-  readonly spec: "export-certification" | "court-orders";
+  readonly spec: "export-certification" | "court-orders" | "pasted-text-declaration";
   readonly file: string;
   readonly number: number;
 };
@@ -255,10 +253,14 @@ const PROPERTY_FILES: readonly PropertyFile[] = [
   { spec: "export-certification", file: "docx.properties.test.ts", number: 4 },
   { spec: "court-orders", file: "order-citation.properties.test.ts", number: 1 },
   { spec: "court-orders", file: "order-gate.properties.test.ts", number: 2 },
+  { spec: "pasted-text-declaration", file: "statement-declaration.properties.test.ts", number: 1 },
+  { spec: "pasted-text-declaration", file: "declaration-gate.properties.test.ts", number: 2 },
 ];
 const EXPECTED_NUMBERS: Readonly<Record<PropertyFile["spec"], readonly number[]>> = {
   "export-certification": [1, 2, 3, 4],
   "court-orders": [1, 2],
+  // Properties 3 and 4 of this spec live in crew/sentinel and apps/web.
+  "pasted-text-declaration": [1, 2],
 };
 
 /** Each `// Property N` comment must be followed by exactly one `fc.assert` before the next one. */

@@ -24,7 +24,7 @@ import { fireEvent, renderUi, screen } from "./support/render";
 
 function seeded(document: Document, entryId: string | null): MemoryStorage {
   const storage = createMemoryStorage();
-  storage.setItem(AUTOSAVE_KEY, serialise(document, [], EXPORT_VERIFIED_AT));
+  storage.setItem(AUTOSAVE_KEY, serialise(document, [], EXPORT_VERIFIED_AT, null));
   if (entryId !== null) {
     storage.setItem(ORDER_KEY, JSON.stringify({ version: 1, entryId }));
   }

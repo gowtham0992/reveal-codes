@@ -30,7 +30,7 @@ function expectedStatement(document: Document, id: string | null, certified: boo
 describe("printModel with an order _Requirements: 3.12, 5.11, 6.8, 6.9, 7.6_", () => {
   it("ready carries the heading and no certified blocks for a first-page-header order", () => {
     const doc = printAiDocument();
-    const raw = serialise(doc, [], EXPORT_VERIFIED_AT);
+    const raw = serialise(doc, [], EXPORT_VERIFIED_AT, null);
     const model = ready(printModel(raw, EXPORT_NOW, printEntry("ndtex-lr-7-2-f")));
     const expected = expectedStatement(doc, "ndtex-lr-7-2-f", false);
     expect(model.heading).not.toBeNull();
@@ -40,7 +40,7 @@ describe("printModel with an order _Requirements: 3.12, 5.11, 6.8, 6.9, 7.6_", (
   });
 
   it("ready has no heading when the document has no AI text", () => {
-    const raw = serialise(printHumanDocument(), [], EXPORT_VERIFIED_AT);
+    const raw = serialise(printHumanDocument(), [], EXPORT_VERIFIED_AT, null);
     const model = ready(printModel(raw, EXPORT_NOW, printEntry("ndtex-lr-7-2-f")));
     expect(model.heading).toBeNull();
     expect(model.certifiedBlocks).toBeNull();
@@ -48,7 +48,7 @@ describe("printModel with an order _Requirements: 3.12, 5.11, 6.8, 6.9, 7.6_", (
 
   it("ready carries both block lists when the order needs the confidentiality tick", () => {
     const doc = printAiDocument();
-    const raw = serialise(doc, [], EXPORT_VERIFIED_AT);
+    const raw = serialise(doc, [], EXPORT_VERIFIED_AT, null);
     const model = ready(printModel(raw, EXPORT_NOW, printEntry("cit-choe-groves-2025")));
     const plain = renderStatement(expectedStatement(doc, "cit-choe-groves-2025", false));
     const certified = renderStatement(expectedStatement(doc, "cit-choe-groves-2025", true));
@@ -58,13 +58,13 @@ describe("printModel with an order _Requirements: 3.12, 5.11, 6.8, 6.9, 7.6_", (
   });
 
   it("certifiedBlocks is null for the same order when no AI text is present", () => {
-    const raw = serialise(printHumanDocument(), [], EXPORT_VERIFIED_AT);
+    const raw = serialise(printHumanDocument(), [], EXPORT_VERIFIED_AT, null);
     const model = ready(printModel(raw, EXPORT_NOW, printEntry("cit-choe-groves-2025")));
     expect(model.certifiedBlocks).toBeNull();
   });
 
   it("returns prohibited for sdohio-newman with AI text", () => {
-    const raw = serialise(printAiDocument(), [], EXPORT_VERIFIED_AT);
+    const raw = serialise(printAiDocument(), [], EXPORT_VERIFIED_AT, null);
     const entry = printEntry("sdohio-newman");
     const model = printModel(raw, EXPORT_NOW, entry);
     if (model.kind !== "prohibited") throw new Error(`expected prohibited, got ${model.kind}`);
@@ -77,12 +77,12 @@ describe("printModel with an order _Requirements: 3.12, 5.11, 6.8, 6.9, 7.6_", (
   });
 
   it("is ready for sdohio-newman when the document has no AI text", () => {
-    const raw = serialise(printHumanDocument(), [], EXPORT_VERIFIED_AT);
+    const raw = serialise(printHumanDocument(), [], EXPORT_VERIFIED_AT, null);
     expect(printModel(raw, EXPORT_NOW, printEntry("sdohio-newman")).kind).toBe("ready");
   });
 
   it("keeps the blocked shape for an unresolved citation under any order", () => {
-    const raw = serialise(printBlockedDocument(), [], EXPORT_VERIFIED_AT);
+    const raw = serialise(printBlockedDocument(), [], EXPORT_VERIFIED_AT, null);
     const model = printModel(raw, EXPORT_NOW, printEntry("sdohio-newman"));
     expect(model.kind).toBe("blocked");
     expect(Object.keys(model).sort()).toEqual(["blocking", "kind"]);
@@ -93,7 +93,7 @@ describe("printModel with an order _Requirements: 3.12, 5.11, 6.8, 6.9, 7.6_", (
 describe("printModel with no order _Requirements: 3.12, 9.8_", () => {
   it("gives today's model plus heading null and certifiedBlocks null", () => {
     const doc = printAiDocument();
-    const raw = serialise(doc, [], EXPORT_VERIFIED_AT);
+    const raw = serialise(doc, [], EXPORT_VERIFIED_AT, null);
     const model = ready(printModel(raw, EXPORT_NOW, null));
     const expected = expectedStatement(doc, null, false);
     expect(model.heading).toBeNull();

@@ -1,5 +1,5 @@
-import { err, ok, parse, render } from "@reveal-codes/engine";
-import type { Document, Result } from "@reveal-codes/engine";
+import { err, isDeclaration, ok, parse, render } from "@reveal-codes/engine";
+import type { Declaration, Document, Result } from "@reveal-codes/engine";
 import type { RunLogEntry } from "./store";
 
 export const AUTOSAVE_KEY = "reveal-codes:document:v1";
@@ -9,6 +9,8 @@ export type PersistedValue = Readonly<{
   codes: string;
   runLog: readonly RunLogEntry[];
   verifiedAt: string | null;
+  /** Absent when the author has made no declaration. Version stays 1. */
+  declaration?: Declaration;
 }>;
 
 export type PersistError = Readonly<{ kind: "absent" | "not_json" | "bad_shape" | "bad_codes" }>;
@@ -17,6 +19,7 @@ export type Restored = Readonly<{
   document: Document;
   runLog: readonly RunLogEntry[];
   verifiedAt: string | null;
+  declaration: Declaration | null;
 }>;
 
 /** The Persisted_Value as JSON. Undo and Redo stacks and Notices are not inputs (Req 9.7). */
@@ -24,12 +27,14 @@ export function serialise(
   document: Document,
   runLog: readonly RunLogEntry[],
   verifiedAt: string | null,
+  declaration: Declaration | null,
 ): string {
   const value: PersistedValue = {
     version: 1,
     codes: render(document, "full").text,
     runLog,
     verifiedAt,
+    ...(declaration === null ? {} : { declaration }),
   };
   return JSON.stringify(value);
 }
@@ -78,6 +83,11 @@ export function readRaw(storage: Pick<Storage, "getItem">, key: string): Stored 
   }
 }
 
+/** An absent or unreadable Declaration is `null`; it never fails the load. */
+function readDeclaration(value: unknown): Declaration | null {
+  return isDeclaration(value) ? value : null;
+}
+
 /** Validates the JSON shape, then the Engine's `parse`; any fault is an `Err` (Req 9.4). */
 export function deserialise(raw: string | null): Result<Restored, PersistError> {
   if (raw === null) return err({ kind: "absent" });
@@ -94,7 +104,9 @@ export function deserialise(raw: string | null): Result<Restored, PersistError> 
   }
   const parsed = parse(codes);
   if (!parsed.ok) return err({ kind: "bad_codes" });
-  return ok({ document: parsed.value, runLog, verifiedAt: stamp ?? null });
+  return ok({ document: parsed.value, runLog, verifiedAt: stamp ?? null,
+    declaration: readDeclaration(value["declaration"]),
+  });
 }
 
 /** True only when the stored draft restores to a Document whose text is not empty. */

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { STATEMENT_TITLE, buildStatement, renderStatement } from "../src/index.js";
 import type { StatementBlock } from "../src/index.js";
 import { arbExportCase, arbOrderContext, runs } from "./support/arbitraries.js";
+import { declarationFor } from "./support/declarations.js";
 
 /** Every block's text, joined with newlines. */
 function joinedText(blocks: readonly StatementBlock[]): string {
@@ -21,7 +22,13 @@ describe("Order citation is total  _Requirements: 4.5, 4.6, 4.7, 10.2_", () => {
   it("P1 the Statement_Text cites the instrument, court and source, and titles by caption placement", () => {
     fc.assert(
       fc.property(arbExportCase, arbOrderContext, (c, context) => {
-        const built = buildStatement(c.document, c.runLog, c.meta, context);
+        const built = buildStatement(
+          c.document,
+          c.runLog,
+          c.meta,
+          context,
+          declarationFor(c.document, context === null ? null : context.entry),
+        );
         if (!built.ok) throw new Error(`buildStatement failed: ${built.error.kind}`);
         const blocks = renderStatement(built.value);
         const title = blocks[0];

@@ -27,7 +27,7 @@ function citingStorage() {
   if (!applied.ok) throw new Error("fixture rejected");
   const storage = createMemoryStorage();
   storage.setItem(PANE_KEY, encodePreference(false));
-  storage.setItem(AUTOSAVE_KEY, serialise(applied.value.document, [], null));
+  storage.setItem(AUTOSAVE_KEY, serialise(applied.value.document, [], null, null));
   return storage;
 }
 function services(api: ApiClient): AppServices {

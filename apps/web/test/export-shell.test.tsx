@@ -30,7 +30,7 @@ type MountOptions = Readonly<{
 async function mount(text: string, options: MountOptions = {}) {
   const timers = createManualTimers();
   const storage = createMemoryStorage();
-  storage.setItem(AUTOSAVE_KEY, serialise(docOf(text), [], "2026-11-02T12:00:00.000Z"));
+  storage.setItem(AUTOSAVE_KEY, serialise(docOf(text), [], "2026-11-02T12:00:00.000Z", null));
   let failWrites = false;
   const services: AppServices = {
     api: modeApi("fixtures").api,

@@ -6,6 +6,7 @@ import { buildStatement } from "../src/index.js";
 import type { Statement } from "../src/index.js";
 import { arbExportCase, runs } from "./support/arbitraries.js";
 import type { ExportCase } from "./support/arbitraries.js";
+import { declarationFor } from "./support/declarations.js";
 
 const ORIGINS: readonly Origin[] = ["HUM", "PST", "AI", "AI>HUM"];
 
@@ -119,14 +120,15 @@ describe("statement data _Requirements: 3.2, 3.5, 3.6, 3.7, 3.8, 3.9, 3.11, 3.13
   it("P2 buildStatement reports the Document's origins, records, overrides, tools and dates", () => {
     fc.assert(
       fc.property(arbExportCase, (c) => {
-        const first = buildStatement(c.document, c.runLog, c.meta);
+        const declaration = declarationFor(c.document, null);
+        const first = buildStatement(c.document, c.runLog, c.meta, null, declaration);
         expect(first.ok).toBe(true);
         if (!first.ok) return;
         checkCounts(c, first.value);
         checkRecords(c, first.value);
         checkOverridesAndTools(c, first.value);
         checkMeta(c, first.value);
-        expect(buildStatement(c.document, c.runLog, c.meta)).toEqual(first);
+        expect(buildStatement(c.document, c.runLog, c.meta, null, declaration)).toEqual(first);
       }),
       { numRuns: runs() },
     );

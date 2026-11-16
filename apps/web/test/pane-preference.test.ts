@@ -77,7 +77,7 @@ describe(`Pane_Preference ${REQ}`, () => {
 describe(`initialPaneOpen ${REQ}`, () => {
   it("opens for a stored true, even with a draft", () => {
     const storage = withPane(encodePreference(true));
-    storage.setItem(AUTOSAVE_KEY, serialise(editedDocument(), [], null));
+    storage.setItem(AUTOSAVE_KEY, serialise(editedDocument(), [], null, null));
     expect(initialPaneOpen(storage)).toBe(true);
   });
 
@@ -91,13 +91,13 @@ describe(`initialPaneOpen ${REQ}`, () => {
 
   it("starts closed on first visit with a saved draft", () => {
     const storage = createMemoryStorage();
-    storage.setItem(AUTOSAVE_KEY, serialise(editedDocument(), [], null));
+    storage.setItem(AUTOSAVE_KEY, serialise(editedDocument(), [], null, null));
     expect(initialPaneOpen(storage)).toBe(false);
   });
 
   it("opens when the draft restores to empty text", () => {
     const storage = createMemoryStorage();
-    storage.setItem(AUTOSAVE_KEY, serialise(freshDocument(), [], null));
+    storage.setItem(AUTOSAVE_KEY, serialise(freshDocument(), [], null, null));
     expect(initialPaneOpen(storage)).toBe(true);
   });
 

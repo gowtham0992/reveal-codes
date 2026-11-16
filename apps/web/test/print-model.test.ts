@@ -43,10 +43,10 @@ describe("printModel _Requirements: 8.1, 8.6, 8.7, 8.8_", () => {
   });
 
   it("returns unreadable when the statement cannot be built", () => {
-    const raw = serialise(clean("Plain text."), [], "not a date");
+    const raw = serialise(clean("Plain text."), [], "not a date", null);
     expect(printModel(raw, EXPORT_NOW, null)).toEqual({ kind: "unreadable" });
     expect(
-      printModel(serialise(clean("Plain text."), [], null), new Date(Number.NaN), null),
+      printModel(serialise(clean("Plain text."), [], null, null), new Date(Number.NaN), null),
     ).toEqual({
       kind: "unreadable",
     });
@@ -58,14 +58,14 @@ describe("printModel _Requirements: 8.1, 8.6, 8.7, 8.8_", () => {
       code: i.code,
       text: doc.text.slice(i.start, i.end),
     }));
-    const model = printModel(serialise(doc, [], EXPORT_VERIFIED_AT), EXPORT_NOW, null);
+    const model = printModel(serialise(doc, [], EXPORT_VERIFIED_AT, null), EXPORT_NOW, null);
     expect(model).toEqual({ kind: "blocked", blocking: expected });
     expect(expected.length).toBe(4);
   });
 
   it("returns ready with filing paragraphs, titles and local dates", async () => {
     const doc = await gateClearDocument();
-    const model = printModel(serialise(doc, [], EXPORT_VERIFIED_AT), EXPORT_NOW, null);
+    const model = printModel(serialise(doc, [], EXPORT_VERIFIED_AT, null), EXPORT_NOW, null);
     if (model.kind !== "ready") throw new Error(`expected ready, got ${model.kind}`);
     expect(model.paragraphs).toEqual(doc.text.split("\n"));
     const first = model.blocks[0];

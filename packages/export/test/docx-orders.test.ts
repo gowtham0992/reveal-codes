@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { ORDERS, buildDocx, buildStatement, orderById } from "../src/index.js";
 import type { OrderContext, Statement } from "../src/index.js";
 import { DEMO_NOW, buildDemoDocument } from "./support/demo-document.js";
+import { noneFor } from "./support/declarations.js";
 import { buildDemoDocumentStatement } from "./support/demo-statement.js";
 import { readDocxParagraphs, readDocxPart } from "./support/docx-text.js";
 
@@ -31,7 +32,13 @@ function plainDocument(): Document {
 }
 
 function noAiStatement(order: OrderContext): Statement {
-  const r = buildStatement(plainDocument(), [], { now: DEMO_NOW, verifiedAt: null }, order);
+  const r = buildStatement(
+    plainDocument(),
+    [],
+    { now: DEMO_NOW, verifiedAt: null },
+    order,
+    noneFor("pasted_text"),
+  );
   if (!r.ok) throw new Error(r.error.kind);
   return r.value;
 }

@@ -2,6 +2,7 @@ import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { buildDocx, buildStatement } from "../src/index.js";
 import { arbExportCase } from "./support/arbitraries.js";
+import { declarationFor } from "./support/declarations.js";
 import { readDocxParagraphs } from "./support/docx-text.js";
 
 const INTRO =
@@ -13,7 +14,7 @@ describe("docx content _Requirements: 6.3, 6.4, 6.9, 6.10_", () => {
     // numRuns is low because packing a docx file is slow.
     await fc.assert(
       fc.asyncProperty(arbExportCase, async ({ document, runLog, meta }) => {
-        const built = buildStatement(document, runLog, meta);
+        const built = buildStatement(document, runLog, meta, null, declarationFor(document, null));
         expect(built.ok).toBe(true);
         if (!built.ok) return;
         const paras = readDocxParagraphs(await buildDocx(document, built.value));

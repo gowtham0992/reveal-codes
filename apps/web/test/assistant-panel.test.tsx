@@ -41,7 +41,7 @@ function seeded(text: string): MemoryStorage {
     text,
     provenance: { origin: "HUM", timestamp: ISO },
   });
-  if (applied.ok) storage.setItem(AUTOSAVE_KEY, serialise(applied.value.document, [], null));
+  if (applied.ok) storage.setItem(AUTOSAVE_KEY, serialise(applied.value.document, [], null, null));
   return storage;
 }
 

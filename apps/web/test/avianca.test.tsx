@@ -58,7 +58,7 @@ async function mount(stored: Document | null, reply: "fixture" | "fail" = "fixtu
   const timers = createManualTimers();
   const storage = createMemoryStorage();
   storage.setItem(PANE_KEY, encodePreference(false));
-  if (stored !== null) storage.setItem(AUTOSAVE_KEY, serialise(stored, [], null));
+  if (stored !== null) storage.setItem(AUTOSAVE_KEY, serialise(stored, [], null, null));
   const services: AppServices = {
     api: withSamples(modeApi("fixtures").api, reply),
     now: timers.clock.now,

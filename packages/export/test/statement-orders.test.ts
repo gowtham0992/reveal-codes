@@ -18,12 +18,17 @@ import type {
   Statement,
   StatementBlock,
 } from "../src/index.js";
+import { declarationFor } from "./support/declarations.js";
+import {
+  NO_PROGRAM_RECORD,
+  declarationNone,
+  typedOnlySentence,
+} from "../src/declaration-wording.js";
 import { ORDER_ELEMENTS } from "../src/orders-types.js";
 import {
   ALL_DRAFTERS_SUFFIX,
   CONFIDENTIALITY_SENTENCE,
   DEMO_RESPONSE_WORDS,
-  PARAGRAPH_NO_AI,
   RESPONSIBILITY,
   SIGNATURE_LINE,
 } from "../src/wording.js";
@@ -54,8 +59,17 @@ function withElements(id: string, elements: readonly OrderElement[]): OrderEntry
   return { ...entry(id), elements };
 }
 
+/** Typed text only: every character is HUM, so no Declaration is asked about pasted text. */
 function plain(text: string): Document {
-  return must(createDocument(text, T0));
+  const empty = must(createDocument("", T0));
+  return must(
+    apply(empty, {
+      kind: "insert",
+      at: 0,
+      text,
+      provenance: { origin: "HUM", timestamp: T0 },
+    }),
+  ).document;
 }
 
 /** Typed text, then one real AI insertion for each run id. */
@@ -102,7 +116,8 @@ function ctx(e: OrderEntry | null, tick = false): OrderContext {
 }
 
 function stmt(doc: Document, log: readonly RunInfo[], order: OrderContext = null): Statement {
-  return must(buildStatement(doc, log, META, order));
+  const entry = order === null ? null : order.entry;
+  return must(buildStatement(doc, log, META, order, declarationFor(doc, entry)));
 }
 
 function paragraphs(blocks: readonly StatementBlock[]): { number: number; text: string }[] {
@@ -302,7 +317,9 @@ describe("tool sentence under edtex-love-2025 _Requirements: 4.9, 4.10, 9.5_", (
 
   it("adds the no-program sentence to the no-AI paragraph", () => {
     const s = stmt(plain("No AI."), [], ctx(love));
-    expect(para(s, 3)).toBe(`${PARAGRAPH_NO_AI} No program was used.`);
+    expect(para(s, 3)).toBe(
+      `${typedOnlySentence} ${declarationNone("this_filing")} ${NO_PROGRAM_RECORD}`,
+    );
   });
 });
 
@@ -312,7 +329,7 @@ describe("no AI under dcolo-wang-2025 _Requirements: 4.16, 4.17, 9.6_", () => {
   it("renders the no-AI sentence and the all-drafters signature line", () => {
     const blocks = renderStatement(stmt(plain("No AI."), [], ctx(wang)));
     expect(paragraphs(blocks)[2]?.text).toBe(
-      "No generative artificial intelligence was used in preparing this filing.",
+      `${typedOnlySentence} ${declarationNone("this_filing")}`,
     );
     const sig = blocks.at(-1);
     expect(sig).toMatchObject({
@@ -348,18 +365,24 @@ describe("element sentences and run counts _Requirements: 4.11, 4.12, 4.15_", ()
     const e = withElements("edtex-love-2025", ["how_used"]);
     const base = para(stmt(aiDoc(), logOf(n)), 2);
     const s = stmt(aiDoc(), logOf(n), ctx(e));
-    expect(para(s, 3)).toBe(
-      `${base} The program was used to draft text inserted at the author's request in ${String(n)} ${noun}; each prompt is recorded in the run log.`,
-    );
+    // With no run in the log there is nothing to say about how the program was used.
+    const added =
+      n === 0
+        ? ""
+        : ` The program was used to draft text inserted at the author's request in ${String(n)} ${noun}; each prompt is recorded in the run log.`;
+    expect(para(s, 3)).toBe(`${base}${added}`);
   });
 
   it.each(RUN_NOUN)("prompt_records with %i run(s)", (n, _run, prompts) => {
     const e = withElements("edtex-love-2025", ["prompt_records"]);
     const base = para(stmt(aiDoc(), logOf(n)), 2);
     const s = stmt(aiDoc(), logOf(n), ctx(e));
-    expect(para(s, 3)).toBe(
-      `${base} Prompt records are retained in the document's run log (${String(n)} ${prompts}).`,
-    );
+    // With no run in the log there are no prompt records to retain.
+    const added =
+      n === 0
+        ? ""
+        : ` Prompt records are retained in the document's run log (${String(n)} ${prompts}).`;
+    expect(para(s, 3)).toBe(`${base}${added}`);
   });
 
   it("portions names the passage by paragraph number and opening words", () => {
@@ -378,7 +401,9 @@ describe("element sentences and run counts _Requirements: 4.11, 4.12, 4.15_", ()
       "confidentiality",
       "prompt_records",
     ]);
-    expect(para(stmt(plain("No AI."), logOf(3), ctx(e, true)), 3)).toBe(PARAGRAPH_NO_AI);
+    expect(para(stmt(plain("No AI."), logOf(3), ctx(e, true)), 3)).toBe(
+      `${typedOnlySentence} ${declarationNone("this_filing")}`,
+    );
   });
 
   it("never writes the word lines in the AI paragraph, for any entry", () => {

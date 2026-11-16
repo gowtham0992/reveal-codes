@@ -77,7 +77,7 @@ const KEYS: readonly string[] = [AUTOSAVE_KEY, PANE_KEY];
 describe("narrow guard _Requirements: 10.7, 10.8, 12.9_", () => {
   it("at width 799 neither the Autosave_Key nor the Pane_Key is read or written", async () => {
     const rec = recordingStorage();
-    rec.storage.setItem(AUTOSAVE_KEY, serialise(docWith("saved"), [], null));
+    rec.storage.setItem(AUTOSAVE_KEY, serialise(docWith("saved"), [], null, null));
     rec.writes.length = 0;
     await act(async () => {
       renderUi(<AppShell services={servicesFor(rec.storage, 799)} />);
@@ -89,7 +89,7 @@ describe("narrow guard _Requirements: 10.7, 10.8, 12.9_", () => {
 
   it("at width 800 the saved draft is read from the Autosave_Key", async () => {
     const rec = recordingStorage();
-    rec.storage.setItem(AUTOSAVE_KEY, serialise(docWith("saved"), [], null));
+    rec.storage.setItem(AUTOSAVE_KEY, serialise(docWith("saved"), [], null, null));
     await act(async () => {
       renderUi(<AppShell services={servicesFor(rec.storage, 800)} />);
       await Promise.resolve();

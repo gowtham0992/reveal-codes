@@ -1,5 +1,5 @@
 import { apply, createDocument, issues } from "@reveal-codes/engine";
-import type { Document } from "@reveal-codes/engine";
+import type { Declaration, Document } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import { buildStatement } from "../src/index.js";
 import type { Meta, RunInfo } from "../src/index.js";
@@ -10,6 +10,7 @@ import {
   DEMO_VERIFIED_AT,
   buildDemoDocument,
 } from "./support/demo-document.js";
+import { declarationFor } from "./support/declarations.js";
 
 const T0 = "2026-01-01T00:00:00.000Z";
 const META: Meta = { now: DEMO_NOW, verifiedAt: DEMO_VERIFIED_AT };
@@ -19,8 +20,17 @@ function must<T>(r: { ok: true; value: T } | { ok: false; error: unknown }): T {
   return r.value;
 }
 
+/** Typed text only: every character is HUM, so no Declaration is asked about pasted text. */
 function plain(text: string): Document {
-  return must(createDocument(text, T0));
+  const empty = must(createDocument("", T0));
+  return must(
+    apply(empty, {
+      kind: "insert",
+      at: 0,
+      text,
+      provenance: { origin: "HUM", timestamp: T0 },
+    }),
+  ).document;
 }
 
 /** A document whose text is typed, then one assistant insertion for each run id. */
@@ -40,8 +50,13 @@ function withRuns(runIds: readonly string[]): Document {
   return doc;
 }
 
-function ok(doc: Document, log: readonly RunInfo[], meta: Meta = META) {
-  return must(buildStatement(doc, log, meta));
+function ok(
+  doc: Document,
+  log: readonly RunInfo[],
+  meta: Meta = META,
+  declaration: Declaration | null = declarationFor(doc, null),
+) {
+  return must(buildStatement(doc, log, meta, null, declaration));
 }
 
 describe("buildStatement tools", () => {
@@ -88,9 +103,9 @@ describe("buildStatement counts and caption", () => {
   it("counts characters per origin and sets the caption from the first non-empty line", () => {
     const doc = withRuns(["a"]);
     const s = ok(doc, []);
-    // createDocument records initial text as PST (origin unknown).
-    expect(s.characters.PST).toBe("Typed text.".length);
-    expect(s.characters.HUM).toBe(0);
+    // The helper types the initial text, so it counts as HUM.
+    expect(s.characters.HUM).toBe("Typed text.".length);
+    expect(s.characters.PST).toBe(0);
     expect(s.characters.AI).toBe(" Added by a.".length);
     expect(s.caption).toBe("Typed text. Added by a.");
   });

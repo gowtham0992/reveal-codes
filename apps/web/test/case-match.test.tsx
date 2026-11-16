@@ -107,7 +107,7 @@ describe("Wrong case row after a reload _Requirements: 7.7_", () => {
   it("shows the stored name, year and a link from the stored cluster id with no Verify_Run", async () => {
     const timers = createManualTimers();
     const storage = createMemoryStorage();
-    storage.setItem(AUTOSAVE_KEY, serialise(withResults(TEXT, [WRONG]), [], ISO));
+    storage.setItem(AUTOSAVE_KEY, serialise(withResults(TEXT, [WRONG]), [], ISO, null));
     const mode = modeApi("fixtures");
     const services: AppServices = {
       api: mode.api,
@@ -232,7 +232,7 @@ describe("Print view with a wrong case citation _Requirements: 8.1, 8.4, 8.7_", 
   it("prints the new paragraph, the Status cell and the Override row", () => {
     const doc = overridden(withResults(TEXT, [WRONG]));
     const storage = createMemoryStorage();
-    storage.setItem(AUTOSAVE_KEY, serialise(doc, [], EXPORT_VERIFIED_AT));
+    storage.setItem(AUTOSAVE_KEY, serialise(doc, [], EXPORT_VERIFIED_AT, null));
     const { container } = renderUi(<PrintView services={{ now: () => EXPORT_NOW, storage }} />);
     const statement = container.querySelectorAll("section")[1];
     expect(statement?.textContent).toContain("1 resolved to a different case than the one named, ");

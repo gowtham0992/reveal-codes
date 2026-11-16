@@ -24,6 +24,7 @@ export function loadAutosave(services: AppServices, store: Store, gate?: DraftGa
     document: restored.value.document,
     runLog: restored.value.runLog,
     verifiedAt: restored.value.verifiedAt,
+    declaration: restored.value.declaration,
   });
 }
 
@@ -44,8 +45,9 @@ export function startAutosave(
     const changed =
       next.document !== last.document ||
       next.runLog !== last.runLog ||
-      next.verifiedAt !== last.verifiedAt;
-    if (changed) autosave.schedule(next.document, next.runLog, next.verifiedAt);
+      next.verifiedAt !== last.verifiedAt ||
+      next.declaration !== last.declaration;
+    if (changed) autosave.schedule(next.document, next.runLog, next.verifiedAt, next.declaration);
     last = next;
   });
   const onVisibility = (): void => {

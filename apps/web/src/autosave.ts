@@ -1,4 +1,4 @@
-import type { Document } from "@reveal-codes/engine";
+import type { Declaration, Document } from "@reveal-codes/engine";
 import type { DraftGate } from "./draft-gate";
 import { AUTOSAVE_KEY, serialise } from "./persist";
 import type { RunLogEntry } from "./store";
@@ -19,7 +19,12 @@ export type AutosaveDeps = Readonly<{
 
 export type Autosave = Readonly<{
   /** Debounced write of the latest value (300 ms). */
-  schedule(document: Document, runLog: readonly RunLogEntry[], verifiedAt: string | null): void;
+  schedule(
+    document: Document,
+    runLog: readonly RunLogEntry[],
+    verifiedAt: string | null,
+    declaration: Declaration | null,
+  ): void;
   /** Writes a pending value now. True when nothing was pending or the write succeeded. */
   flush(): boolean;
   /** Cancels a pending write and removes the stored key. True when the key was removed; false after `onError`. */
@@ -30,6 +35,7 @@ type Pending = Readonly<{
   document: Document;
   runLog: readonly RunLogEntry[];
   verifiedAt: string | null;
+  declaration: Declaration | null;
 }>;
 
 type Failure = Readonly<{ thrown: unknown }>;
@@ -64,7 +70,7 @@ function createTimerSlot(deps: AutosaveDeps): TimerSlot {
 
 /** Writes one job; reports failure through `onError` and the return value. */
 function writeJob(deps: AutosaveDeps, job: Pending): boolean {
-  const text = serialise(job.document, job.runLog, job.verifiedAt);
+  const text = serialise(job.document, job.runLog, job.verifiedAt, job.declaration);
   const failure = storageFailure(() => {
     deps.storage.setItem(AUTOSAVE_KEY, text);
   });
@@ -87,13 +93,13 @@ export function createAutosave(deps: AutosaveDeps): Autosave {
   };
 
   return {
-    schedule(document, runLog, verifiedAt) {
+    schedule(document, runLog, verifiedAt, declaration) {
       if (deps.gate?.blocked() === true) {
         cancelTimer();
         pending = null;
         return;
       }
-      pending = { document, runLog, verifiedAt };
+      pending = { document, runLog, verifiedAt, declaration };
       cancelTimer();
       slot.start(() => {
         write();

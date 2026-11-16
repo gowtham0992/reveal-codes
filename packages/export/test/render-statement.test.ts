@@ -9,6 +9,8 @@ const REASON = "Authority is cited for background only and will be removed.";
 function base(over: Partial<Statement> = {}): Statement {
   return {
     aiUsed: false,
+    assistantText: false,
+    declaration: null,
     tools: [],
     characters: ZERO,
     sentences: { total: 0, byDominantOrigin: ZERO },
@@ -39,6 +41,7 @@ function paragraphs(blocks: readonly StatementBlock[]): string[] {
 function aiParagraph(ai: number, edited: number, total: number): string {
   const s = base({
     aiUsed: true,
+    assistantText: true,
     tools: [{ provider: "p", model: null }],
     characters: { HUM: total - ai - edited, PST: 0, AI: ai, "AI>HUM": edited },
   });
@@ -60,7 +63,7 @@ describe("renderStatement on the Demo_Document", () => {
       {
         kind: "paragraph",
         number: 2,
-        text: "Generative artificial intelligence was used in preparing this filing. Tools: a recorded demonstration response (no model was called). Text inserted by the tool accounts for 48 of 2622 characters (1.8%); of that, 0 characters were subsequently edited by the author.",
+        text: "Generative artificial intelligence was used in preparing this filing. Tools: a recorded demonstration response (no model was called). Text inserted by the tool accounts for 48 of 2622 characters (1.8%); of that, 0 characters were subsequently edited by the author. 2574 of 2622 characters (98.2%) were pasted or imported; the tool did not record their origin. The author states that generative AI was used to prepare some or all of the pasted text, and names the tool as ChatGPT (GPT-4o). The tool did not record which pasted passages.",
       },
       {
         kind: "paragraph",
@@ -143,7 +146,7 @@ describe("renderStatement structure", () => {
     expect(blocks[0]).toEqual({ kind: "title", text: "AI-Use and Verification Statement" });
     expect(paragraphs(blocks)).toEqual([
       "1. This filing was prepared with the drafting tool Reveal Codes, which records the origin of every character.",
-      "2. No generative artificial intelligence was used in preparing this filing.",
+      "2. The record shows that every character was typed in the editor and that the editor's assistant was not used.",
       "3. This filing contains no legal citations.",
       "4. This filing contains no quotations attributed to a cited decision.",
       "5. The author has read the filing in full and takes responsibility for its contents.",
@@ -210,7 +213,7 @@ describe("renderStatement structure", () => {
   });
 
   it("reads Tools: not recorded when the tool list is empty", () => {
-    const s = base({ aiUsed: true, characters: { ...ZERO, AI: 1, HUM: 1 } });
+    const s = base({ aiUsed: true, assistantText: true, characters: { ...ZERO, AI: 1, HUM: 1 } });
     expect(paragraphs(renderStatement(s))[1]).toBe(
       "2. Generative artificial intelligence was used in preparing this filing. Tools: not recorded. Text inserted by the tool accounts for 1 of 2 characters (50.0%); of that, 0 characters were subsequently edited by the author.",
     );

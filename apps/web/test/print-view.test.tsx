@@ -60,7 +60,7 @@ describe("PrintView non-ready states _Requirements: 8.6, 8.7, 8.8, 8.9_", () => 
   });
 
   it("shows only the count sentence and the code and text list when blocked", () => {
-    const { container } = view(serialise(blockedDocument(), [], EXPORT_VERIFIED_AT));
+    const { container } = view(serialise(blockedDocument(), [], EXPORT_VERIFIED_AT, null));
     const message = container.querySelector("p");
     expect(message?.textContent).toBe("This filing cannot be exported: 1 unresolved items remain.");
     const items = container.querySelectorAll("li");
@@ -76,7 +76,7 @@ describe("PrintView non-ready states _Requirements: 8.6, 8.7, 8.8, 8.9_", () => 
 
 describe("PrintView ready state _Requirements: 8.2, 8.3, 8.4, 8.5, 8.9_", () => {
   function ready() {
-    return view(serialise(overriddenDocument(), [], EXPORT_VERIFIED_AT));
+    return view(serialise(overriddenDocument(), [], EXPORT_VERIFIED_AT, null));
   }
 
   it("renders filing, statement and appendix sections with titles first", () => {
@@ -96,7 +96,7 @@ describe("PrintView ready state _Requirements: 8.2, 8.3, 8.4, 8.5, 8.9_", () => 
   it("prints the plain sentences and no table for a filing with no citation or quotation", () => {
     const created = createDocument("Notice of appearance.", ISO);
     if (!created.ok) throw new Error("fixture rejected");
-    const { container } = view(serialise(created.value, [], EXPORT_VERIFIED_AT));
+    const { container } = view(serialise(created.value, [], EXPORT_VERIFIED_AT, null));
     const statement = container.querySelectorAll("section")[1];
     expect(statement?.textContent).toContain("3. This filing contains no legal citations.");
     expect(statement?.textContent).toContain(

@@ -4,11 +4,14 @@ import { describe, expect, it } from "vitest";
 import { buildDocx, buildStatement, renderStatement } from "../src/index.js";
 import type { StatementBlock } from "../src/index.js";
 import { DEMO_NOW } from "./support/demo-document.js";
+import { noneFor } from "./support/declarations.js";
 import { readDocxParagraphs } from "./support/docx-text.js";
 
 const AT = "2026-11-20T18:25:00.000Z";
 const OVERRIDE_AT = "2026-11-20T18:26:00.000Z";
 const REASON = "The case name was a drafting slip; the reporter cite is correct.";
+/** The text is pasted, so the author declares that no AI was used. */
+const DECLARATION = noneFor("pasted_text");
 const META = { now: DEMO_NOW, verifiedAt: AT };
 const TEXT = "See Henderson v. Pacific Housing Authority, 556 U.S. 662, 678 (2009).";
 
@@ -41,7 +44,7 @@ function wrongCaseDoc(result: VerificationResult, override: boolean): Document {
 }
 
 function blocksOf(doc: Document): readonly StatementBlock[] {
-  return renderStatement(must(buildStatement(doc, [], META)));
+  return renderStatement(must(buildStatement(doc, [], META, null, DECLARATION)));
 }
 
 function citationRows(blocks: readonly StatementBlock[]): readonly (readonly string[])[] {
@@ -57,7 +60,7 @@ describe("Statement wrong_case blocks _Requirements: 8.1, 8.4, 8.5, 8.7_", () =>
     const p = paras.find((t) => t.startsWith("Every legal citation"));
     expect(p).toBe(
       "Every legal citation in this filing was checked against the CourtListener database on " +
-        `${String(must(buildStatement(wrongCaseDoc(WITH_YEAR, false), [], META)).verifiedDate)}. ` +
+        `${String(must(buildStatement(wrongCaseDoc(WITH_YEAR, false), [], META, null, DECLARATION)).verifiedDate)}. ` +
         "0 resolved to a single reported decision, 1 resolved to a different case than the one named, " +
         "0 could not be found, 0 matched more than one decision, and 0 were not checked.",
     );
@@ -92,7 +95,7 @@ describe("Statement wrong_case blocks _Requirements: 8.1, 8.4, 8.5, 8.7_", () =>
 describe("DOCX wrong_case blocks _Requirements: 8.7_", () => {
   it("carries the new paragraph, Status cell and Overrides row", async () => {
     const doc = wrongCaseDoc(WITH_YEAR, true);
-    const statement = must(buildStatement(doc, [], META));
+    const statement = must(buildStatement(doc, [], META, null, DECLARATION));
     const text = readDocxParagraphs(await buildDocx(doc, statement)).join("\n");
     expect(text).toContain("1 resolved to a different case than the one named");
     expect(text).toContain("CIT ≠ (Ashcroft v. Iqbal, 2009)");

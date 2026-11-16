@@ -28,8 +28,8 @@ describe("canExport under sdohio-newman on the Demo_Document _Requirements: 5.2,
   it("is false although the document has no blocking issue", async () => {
     const doc = await buildDemoDocument();
     expect(aiSpans(doc)).toHaveLength(1);
-    expect(canExport(doc, null)).toBe(true);
-    expect(canExport(doc, NEWMAN)).toBe(false);
+    expect(canExport(doc, null, null)).toBe(true);
+    expect(canExport(doc, NEWMAN, null)).toBe(false);
   });
 
   it("stays false after an edit beyond the relabel threshold makes the span AI>HUM", async () => {
@@ -52,7 +52,7 @@ describe("canExport under sdohio-newman on the Demo_Document _Requirements: 5.2,
     const after = aiSpans(edited);
     expect(after.length).toBeGreaterThan(0);
     expect(after.every((s) => s.provenance.origin === "AI>HUM")).toBe(true);
-    expect(canExport(edited, NEWMAN)).toBe(false);
+    expect(canExport(edited, NEWMAN, null)).toBe(false);
   });
 
   it("becomes true only when the AI text is deleted", async () => {
@@ -64,12 +64,12 @@ describe("canExport under sdohio-newman on the Demo_Document _Requirements: 5.2,
       apply(doc, { kind: "delete", from: ai.start, to: ai.end - 1, actor: "HUM" }),
     ).document;
     expect(aiSpans(partial).length).toBeGreaterThan(0);
-    expect(canExport(partial, NEWMAN)).toBe(false);
+    expect(canExport(partial, NEWMAN, null)).toBe(false);
 
     const deleted = must(
       apply(doc, { kind: "delete", from: ai.start, to: ai.end, actor: "HUM" }),
     ).document;
     expect(aiSpans(deleted)).toHaveLength(0);
-    expect(canExport(deleted, NEWMAN)).toBe(true);
+    expect(canExport(deleted, NEWMAN, null)).toBe(true);
   });
 });

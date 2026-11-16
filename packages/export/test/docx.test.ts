@@ -6,18 +6,21 @@ import { buildAppendix } from "../src/appendix.js";
 import { buildStatement } from "../src/statement.js";
 import type { Statement } from "../src/types.js";
 import { DEMO_NOW } from "./support/demo-document.js";
-import { buildDemoDocumentStatement } from "./support/demo-statement.js";
+import { DEMO_DECLARATION, buildDemoDocumentStatement } from "./support/demo-statement.js";
 import { buildDemoDocument } from "./support/demo-document.js";
 import { readDocxParagraphs, readDocxPart } from "./support/docx-text.js";
+import { noneFor } from "./support/declarations.js";
 
 const AT = "2026-11-20T18:25:00.000Z";
+/** Every Document here is pasted text, so the author declares that no AI was used. */
+const DECLARATION = noneFor("pasted_text");
 function doc(text: string): Document {
   const r = createDocument(text, AT);
   if (!r.ok) throw new Error(r.error.kind);
   return r.value;
 }
 function statementOf(d: Document): Statement {
-  const r = buildStatement(d, [], { now: DEMO_NOW, verifiedAt: null });
+  const r = buildStatement(d, [], { now: DEMO_NOW, verifiedAt: null }, null, DECLARATION);
   if (!r.ok) throw new Error(r.error.kind);
   return r.value;
 }
@@ -106,7 +109,7 @@ describe("buildDocx", () => {
     const paras = readDocxParagraphs(await build(d));
     const first = paras.indexOf("\f");
     expect(paras.slice(0, first)).toEqual(d.text.split("\n"));
-    const lines = buildAppendix(d).lines;
+    const lines = buildAppendix(d, DECLARATION).lines;
     expect(paras.slice(paras.length - lines.length)).toEqual(lines);
   });
 
@@ -129,7 +132,7 @@ describe("buildDocx", () => {
       const { statement } = await buildDemoDocumentStatement();
       const d = await buildDemoDocument();
       const paras = readDocxParagraphs(await buildDocx(d, statement));
-      const lines = buildAppendix(d).lines;
+      const lines = buildAppendix(d, DEMO_DECLARATION).lines;
       expect(paras.slice(paras.length - lines.length)).toEqual(lines);
       expect(paras.filter((p) => p === "\f")).toHaveLength(2);
       expect(fetchSpy).not.toHaveBeenCalled();
@@ -145,7 +148,9 @@ describe("buildDocx", () => {
     const xml = readDocxPart(bytes, "word/document.xml");
     expect(xml).toContain("2026-11-20 10:25");
     expect(xml).toMatch(/…<\/w:t>/);
-    const appendix = readDocxParagraphs(bytes).slice(-buildAppendix(d).lines.length);
+    const appendix = readDocxParagraphs(bytes).slice(
+      -buildAppendix(d, DEMO_DECLARATION).lines.length,
+    );
     expect(appendix.some((l) => l.includes("2026-11-20T18:25"))).toBe(true);
   });
 });

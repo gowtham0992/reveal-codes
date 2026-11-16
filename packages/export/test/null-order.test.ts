@@ -20,7 +20,7 @@ const EXPECTED: readonly StatementBlock[] = [
   {
     kind: "paragraph",
     number: 2,
-    text: "Generative artificial intelligence was used in preparing this filing. Tools: a recorded demonstration response (no model was called). Text inserted by the tool accounts for 48 of 2622 characters (1.8%); of that, 0 characters were subsequently edited by the author.",
+    text: "Generative artificial intelligence was used in preparing this filing. Tools: a recorded demonstration response (no model was called). Text inserted by the tool accounts for 48 of 2622 characters (1.8%); of that, 0 characters were subsequently edited by the author. 2574 of 2622 characters (98.2%) were pasted or imported; the tool did not record their origin. The author states that generative AI was used to prepare some or all of the pasted text, and names the tool as ChatGPT (GPT-4o). The tool did not record which pasted passages.",
   },
   {
     kind: "paragraph",
