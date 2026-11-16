@@ -152,7 +152,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - `.kiro/steering/ui.md`: state that the 1150px minimum applies to the Shell only and `/courts` is one column from 320px, and list the text input, checkbox and quotation rules
     - _Requirements: 10.9, 17.1, 17.2, 17.3, 17.4, 17.5_
 
-- [~] 9. Final checkpoint - Run the full verification
+- [x] 9. Final checkpoint - Run the full verification
   - Run each of these and fix failures: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, `pnpm --filter @reveal-codes/web build` (clean-checkout build), and `pnpm kiro:check`
   - Do not push; ask the user if questions arise.
 
