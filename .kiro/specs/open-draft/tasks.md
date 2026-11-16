@@ -152,7 +152,7 @@ Conventions that apply to every task:
     - In `apps/web/test/next-step.test.ts` and `verify-flow.test.ts`: a gap with no unchecked item gives `verify`; the same state while a run is in flight gives `none`; an empty Document gives `load-demo`; a Document not in the gap gives what it gave before; a restored Store (results held, `verifiedAt` null, nothing unchecked) after `runVerifyFlow` against the fake API has a `verifiedAt` that is not null, the already-verified results re-checked, and `export` as the Next_Step; a restored Document with a `CIT ✘` and no override has `verify` as the Next_Step and the export gate still blocks; the Flag 4 edge case (a quote result with no full citation) gives `export`, not `verify`; `hasVerificationResult` ignores a short form.
     - _Requirements: 13.11, 13.12, 13.13, 13.14, 19.16_
 
-- [~] 7. Checkpoint - limits, Store and Next_Step gap
+- [x] 7. Checkpoint - limits, Store and Next_Step gap
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 8. The Open flow in the app: Toolbar, drop, empty page, Issues note
