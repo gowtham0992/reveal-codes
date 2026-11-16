@@ -175,7 +175,7 @@ Conventions that apply to every task:
     - `components/use-file-drop.ts`: capture-phase `dragover` and `drop` listeners on `document` that act only when `dataTransfer.types` includes `"Files"`; they call `preventDefault` and `stopPropagation` so ProseMirror inserts nothing and the browser navigates nowhere. Exactly one file goes to the same `openFile` as the Picker; more than one dispatches the Open_Note "Open one file at a time. Drop a single file." and the Toolbar notice "Open one file at a time." and opens none; a drag with no file is left to the existing drop behaviour (`PST`). No overlay, outline or animation.
     - Wire `use-open`, `use-file-drop` and the confirm dialog into `components/app-shell.tsx`.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 14.8_
-  - [-] 8.5 Open_Note in the Issues region
+  - [x] 8.5 Open_Note in the Issues region
     - `components/issues-region.tsx` (and its CSS module): show `openNote` as text above the Issues list and below the Draft_Gate notice, in a `role="status"` element, in the existing region style, with no icon and no colour as the only signal. `components/use-verify.ts` dispatches `openNote: null` when a run starts.
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_
   - [~] 8.6 Write property test for UTF-8 text decoding
