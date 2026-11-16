@@ -4,12 +4,11 @@ import { blockingIssues } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
 import { ORDERS, declarationRequired, orderById } from "@reveal-codes/export";
 import type { OrderContext, OrderEntry } from "@reveal-codes/export";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Autosave } from "../autosave";
 import { exportDocx } from "../client/export-docx";
 import type { DraftGate } from "../draft-gate";
 import { PRINT_BLOCKED, PRINT_FAILED } from "../notices";
-import { createOrderSelectionStore } from "../order-selection";
 import type { OrderSelectionStore } from "../order-selection";
 import type { AppServices } from "../services";
 import type { Store } from "../store-runtime";
@@ -23,6 +22,8 @@ export type UseExportArgs = Readonly<{
   /** The live Document from the Store slice; the gate is recomputed from it each render. */
   doc: Document;
   notice: string | null;
+  /** The one selection store, shared with the Order_Parameter and the Small_Screen_Page. */
+  orderStore: OrderSelectionStore;
   /** Select the Offset and focus the Editor. */
   onGo: (offset: number) => void;
 }>;
@@ -95,10 +96,18 @@ function useOpenState() {
 }
 
 /** Owns open, opener and busy for the Export_Dialog; the toolbar button is disabled while the Document is only whitespace. */
-export function useExport({ svc, store, autosave, gate, doc, notice, onGo }: UseExportArgs) {
+export function useExport({
+  svc,
+  store,
+  autosave,
+  gate,
+  doc,
+  notice,
+  orderStore,
+  onGo,
+}: UseExportArgs) {
   const { open, opener, close, show } = useOpenState();
   const [busy, setBusy] = useState(false);
-  const orderStore = useMemo(() => createOrderSelectionStore(svc.storage, ORDERS), [svc.storage]);
   const setGoTo = useDeferredGo(open, onGo);
   const clearNotice = (): void => {
     store.dispatch({ type: "notice", text: null });

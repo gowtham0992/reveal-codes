@@ -53,6 +53,7 @@ async function runOpen(
   file: OpenInput,
   askOpen: (value: OpenPending) => void,
 ): Promise<void> {
+  store.dispatch({ type: "notice", text: null });
   store.dispatch({ type: "openNote", text: null });
   const outcome = await openFile(file);
   if (outcome.kind === "refused") {
@@ -66,6 +67,7 @@ async function runOpen(
 function refuseSeveral(store: Store): void {
   const refused = severalFilesOutcome();
   if (refused.kind !== "refused") return;
+  store.dispatch({ type: "notice", text: null });
   store.dispatch({ type: "openNote", text: null });
   store.dispatch({ type: "notice", text: refused.notice });
   store.dispatch({ type: "openNote", text: refused.note });

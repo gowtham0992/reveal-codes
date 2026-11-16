@@ -1,7 +1,9 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { Document } from "@reveal-codes/engine";
+import { ORDERS } from "@reveal-codes/export";
+import type { OrderEntry } from "@reveal-codes/export";
 import { createAutosave } from "../autosave";
 import type { Autosave } from "../autosave";
 import { createDraftGate } from "../draft-gate";
@@ -10,6 +12,8 @@ import { useEditorBinding } from "../editor/use-editor-binding";
 import { NARROW_WIDTH, SHELL_MIN_WIDTH, defaultServices } from "../services";
 import { SmallScreenPage } from "./small-screen-page";
 import type { AppServices } from "../services";
+import { createOrderSelectionStore } from "../order-selection";
+import type { OrderSelectionStore } from "../order-selection";
 import { createStore } from "../store-runtime";
 import type { Store } from "../store-runtime";
 import { EditorSurface } from "./editor-surface";
@@ -24,6 +28,7 @@ import { ShellToolbar } from "./shell-toolbar";
 import { useVerify } from "./use-verify";
 import { useAutosave } from "./use-autosave";
 import { useExport } from "./use-export";
+import { orderNoticeText, useOrderParameter } from "./use-order-parameter";
 import { useDocumentActions } from "./use-document-actions";
 import { composeStatus, positionText, usePaneControl } from "./use-pane";
 import { lnPos } from "../pane/layout";
@@ -112,12 +117,14 @@ type FlowsArgs = Readonly<{
   gate: DraftGate;
   doc: Document;
   notice: string | null;
+  orderStore: OrderSelectionStore;
   onGo: (offset: number) => void;
 }>;
 
 /** Export, New/Load and Verify wiring for the toolbar. */
-function useShellFlows({ svc, store, autosave, gate, doc, notice, onGo }: FlowsArgs) {
-  const exportGate = useExport({ svc, store, autosave, gate, doc, notice, onGo });
+function useShellFlows(a: FlowsArgs) {
+  const { svc, store, autosave, gate, doc } = a;
+  const exportGate = useExport(a);
   const actions = useDocumentActions({ store, svc, autosave, gate, doc });
   const verify = useVerify(svc, store);
   return { exportGate, actions, verify };
@@ -161,8 +168,26 @@ function IssuesSlot({
   );
 }
 
-function useShellState(svc: AppServices) {
+type ShellProps = Readonly<{
+  svc: AppServices;
+  orderStore: OrderSelectionStore;
+  /** Set once when this load applied an Order_Parameter while the Shell could be shown. */
+  pendingNotice: string | null;
+  onNoticeShown: () => void;
+}>;
+
+/** Dispatches the Toolbar_Notice for an applied Order_Parameter, once. */
+function usePendingNotice(store: Store, text: string | null, shown: () => void): void {
+  useEffect(() => {
+    if (text === null) return;
+    store.dispatch({ type: "notice", text });
+    shown();
+  }, [store, text, shown]);
+}
+
+function useShellState({ svc, orderStore, pendingNotice, onNoticeShown }: ShellProps) {
   const { store, autosave, gate } = useShellParts(svc);
+  usePendingNotice(store, pendingNotice, onNoticeShown);
   const blocked = useSyncExternalStore(gate.subscribe, gate.blocked, () => false);
   const { cursor, onCaret, getCaret } = useCaretRef();
   const binding = useEditorBinding({ store, now: svc.now, onCaret });
@@ -179,6 +204,7 @@ function useShellState(svc: AppServices) {
     gate,
     doc,
     notice,
+    orderStore,
     onGo,
   });
   const draft: DraftNotice = {
@@ -199,8 +225,8 @@ function useShellState(svc: AppServices) {
 }
 
 /** Mounted fresh when the width reaches NARROW_WIDTH; unmounted (and flushed) below it. */
-function Shell({ svc }: Readonly<{ svc: AppServices }>) {
-  const s = useShellState(svc);
+function Shell(props: ShellProps) {
+  const s = useShellState(props);
   return (
     <div
       className="app"
@@ -225,13 +251,39 @@ function Shell({ svc }: Readonly<{ svc: AppServices }>) {
   );
 }
 
+type Applied = Readonly<{ entry: OrderEntry; notice: string | null }>;
+
+/** The shared selection store, and what this load's Order_Parameter applied. */
+function useAppliedOrder(svc: AppServices) {
+  const orderStore = useMemo(() => createOrderSelectionStore(svc.storage, ORDERS), [svc.storage]);
+  const [applied, setApplied] = useState<Applied | null>(null);
+  useOrderParameter(svc, orderStore, ORDERS, (entry, notify) => {
+    setApplied({ entry, notice: notify ? orderNoticeText(entry) : null });
+  });
+  const onNoticeShown = (): void => {
+    setApplied((a) => (a === null ? a : { ...a, notice: null }));
+  };
+  return { orderStore, applied, onNoticeShown };
+}
+
 /** The thin root: the Small_Screen_Page below NARROW_WIDTH, the Shell otherwise. */
 export function AppShell({ services, links = NO_LINKS }: AppShellProps) {
   const [svc] = useState<AppServices>(() => services ?? defaultServices());
+  const { orderStore, applied, onNoticeShown } = useAppliedOrder(svc);
   const width = useSyncExternalStore(
     svc.viewport.subscribe,
     svc.viewport.width,
     () => SHELL_MIN_WIDTH,
   );
-  return width < NARROW_WIDTH ? <SmallScreenPage links={links} /> : <Shell svc={svc} />;
+  if (width < NARROW_WIDTH) {
+    return <SmallScreenPage links={links} selection={applied === null ? null : applied.entry} />;
+  }
+  return (
+    <Shell
+      svc={svc}
+      orderStore={orderStore}
+      pendingNotice={applied === null ? null : applied.notice}
+      onNoticeShown={onNoticeShown}
+    />
+  );
 }

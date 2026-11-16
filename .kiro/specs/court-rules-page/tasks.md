@@ -96,7 +96,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 5.4, 6.1, 6.3, 6.6, 6.7, 6.9, 16.4_
 
 - [ ] 6. Order_Parameter and links into the editor
-  - [~] 6.1 Implement the Order_Parameter
+  - [x] 6.1 Implement the Order_Parameter
     - Create `apps/web/src/components/use-order-parameter.ts` with pure `classifyOrderParameter(orders, raw)` (`none`, `ignored`, `applied`) using `orderById`, and the hook `useOrderParameter` that runs once after mount in `AppShell`, stores a Selectable_Instrument through the shared `OrderSelectionStore`, and removes the parameter with `window.history.replaceState` (keeping other parameters and the hash; catch only `DOMException`)
     - `AppShell` creates the store with `useMemo(() => createOrderSelectionStore(svc.storage, ORDERS), [svc.storage])` and passes it to `Shell` (replacing the store created in `use-export.tsx`) and to `SmallScreenPage`
     - At 800px and wider dispatch the notice `Court rule selected: <abbreviation>, <optionText>.`; below 800px dispatch nothing
@@ -122,7 +122,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - In `print-view.module.css` add `.overrides th { overflow-wrap: normal; word-break: keep-all; }` and `min-width` rules for the Code (10ch) and Timestamp columns, sized from the longest value plus padding; leave body-cell `overflow-wrap: anywhere` as it is
     - _Requirements: 12.1, 12.2, 12.3_
 
-  - [~] 7.2 Clear the old message when an Open starts
+  - [-] 7.2 Clear the old message when an Open starts
     - In `runOpen` of `use-open-draft.tsx` dispatch `{ type: "notice", text: null }` and `{ type: "openNote", text: null }` before `await openFile(file)`; give `refuseSeveral` the same `notice` reset
     - _Requirements: 13.1, 13.2_
 

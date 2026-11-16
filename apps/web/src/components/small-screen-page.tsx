@@ -1,3 +1,5 @@
+import type { OrderEntry } from "@reveal-codes/export";
+import { optionText } from "../order-copy";
 import { NO_LINKS } from "../public-links";
 import type { PublicLinks } from "../public-links";
 import { Mark } from "./mark";
@@ -21,7 +23,10 @@ function Link({ href, text }: Readonly<{ href: string; text: string }>) {
 }
 
 /** Shown instead of the shell below NARROW_WIDTH: text, and the two links when they are set. */
-export function SmallScreenPage({ links = NO_LINKS }: Readonly<{ links?: PublicLinks }>) {
+export function SmallScreenPage({
+  links = NO_LINKS,
+  selection = null,
+}: Readonly<{ links?: PublicLinks; selection?: OrderEntry | null }>) {
   return (
     <main className={styles["page"]}>
       <title>Reveal Codes</title>
@@ -32,6 +37,9 @@ export function SmallScreenPage({ links = NO_LINKS }: Readonly<{ links?: PublicL
       {SMALL_SCREEN_SENTENCES.map((sentence) => (
         <p key={sentence}>{sentence}</p>
       ))}
+      {selection === null ? null : (
+        <p>{`Selected: ${selection.court.abbreviation}, ${optionText(selection)}. Open this page on a wider screen to draft under it.`}</p>
+      )}
       {links.video === null && links.repo === null ? null : (
         <div className={styles["links"]}>
           {links.video === null ? null : <Link href={links.video} text={VIDEO_LINK_TEXT} />}

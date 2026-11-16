@@ -1,15 +1,16 @@
 // @vitest-environment jsdom
 import { blockingIssues } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
+import { ORDERS } from "@reveal-codes/export";
 import type { OrderEntry, OrderSet } from "@reveal-codes/export";
-import { useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { createAutosave } from "../src/autosave";
 import { createDraftGate } from "../src/draft-gate";
 import { Toolbar } from "../src/components/toolbar";
 import { useExport } from "../src/components/use-export";
 import { CONFIDENTIALITY_LABEL, curlyQuoted, quoted } from "../src/order-copy";
-import { ORDER_KEY } from "../src/order-selection";
+import { ORDER_KEY, createOrderSelectionStore } from "../src/order-selection";
 import type { AppServices } from "../src/services";
 import type { Store } from "../src/store-runtime";
 import { createManualTimers } from "./support/clock";
@@ -96,6 +97,7 @@ function mount(document: Document, storage = createMemoryStorage()): Rig {
       () => store.getState().notice,
       () => store.getState().notice,
     );
+    const orderStore = useMemo(() => createOrderSelectionStore(storage, ORDERS), []);
     const x = useExport({
       svc,
       store,
@@ -103,6 +105,7 @@ function mount(document: Document, storage = createMemoryStorage()): Rig {
       gate: createDraftGate(),
       doc,
       notice,
+      orderStore,
       onGo: () => undefined,
     });
     return (
