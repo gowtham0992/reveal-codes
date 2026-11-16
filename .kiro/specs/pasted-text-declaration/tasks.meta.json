@@ -290,6 +290,16 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794800255436
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794801622252
+      },
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794801901241
       }
     ],
     "7.2 Add the static scan for the single definition of AI use": [
@@ -569,6 +579,13 @@
         "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
         "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
         "timestamp": 1794801620203
+      }
+    ],
+    "7. Web gates at the moment of export": [
+      {
+        "executionId": "6727d37b-9016-4796-b667-ceba012dbb7e",
+        "chatSessionId": "sess_1067384c-48ed-4bcd-871a-23884141221b",
+        "timestamp": 1794801901272
       }
     ]
   }

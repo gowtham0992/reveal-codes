@@ -1,5 +1,5 @@
-import { blockingIssues, recordOverride } from "@reveal-codes/engine";
-import type { Document } from "@reveal-codes/engine";
+import { blockingIssues, declareAi, recordOverride } from "@reveal-codes/engine";
+import type { Declaration, Document } from "@reveal-codes/engine";
 import { createStore } from "../../src/store-runtime";
 import type { Store } from "../../src/store-runtime";
 import { ISO, verifiedDemoDocument } from "./persist-fixtures";
@@ -19,9 +19,22 @@ export async function gateClearDocument(): Promise<Document> {
   return doc;
 }
 
-/** A Store holding `document`, with a run log entry and a Verify time. */
-export function storeWith(document: Document, verifiedAt: string | null): Store {
+/** The author's answer for pasted text: generative AI was used, with a named tool. */
+export function pastedAiDeclaration(): Declaration {
+  const made = declareAi("pasted_text", "ChatGPT");
+  if (!made.ok) throw new Error(`declaration rejected: ${made.error}`);
+  return made.value;
+}
+/**
+ * A Store holding `document` and a Verify time. The stored Declaration answers for pasted
+ * text by default; it is ignored by every gate when the Document holds no substantive pasted text.
+ */
+export function storeWith(
+  document: Document,
+  verifiedAt: string | null,
+  declaration: Declaration | null = pastedAiDeclaration(),
+): Store {
   const store = createStore(() => EXPORT_NOW);
-  store.dispatch({ type: "replace", document, verifiedAt });
+  store.dispatch({ type: "replace", document, verifiedAt, declaration });
   return store;
 }

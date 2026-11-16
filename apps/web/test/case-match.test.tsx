@@ -12,7 +12,7 @@ import { AUTOSAVE_KEY, serialise } from "../src/persist";
 import type { AppServices } from "../src/services";
 import { createStore } from "../src/store-runtime";
 import { createManualTimers } from "./support/clock";
-import { EXPORT_NOW, EXPORT_VERIFIED_AT } from "./support/export-fixtures";
+import { EXPORT_NOW, EXPORT_VERIFIED_AT, pastedAiDeclaration } from "./support/export-fixtures";
 import { createMemoryStorage } from "./support/memory-storage";
 import { modeApi } from "./support/mode-fetch";
 import { act, renderUi, screen, within } from "./support/render";
@@ -232,7 +232,7 @@ describe("Print view with a wrong case citation _Requirements: 8.1, 8.4, 8.7_", 
   it("prints the new paragraph, the Status cell and the Override row", () => {
     const doc = overridden(withResults(TEXT, [WRONG]));
     const storage = createMemoryStorage();
-    storage.setItem(AUTOSAVE_KEY, serialise(doc, [], EXPORT_VERIFIED_AT, null));
+    storage.setItem(AUTOSAVE_KEY, serialise(doc, [], EXPORT_VERIFIED_AT, pastedAiDeclaration()));
     const { container } = renderUi(<PrintView services={{ now: () => EXPORT_NOW, storage }} />);
     const statement = container.querySelectorAll("section")[1];
     expect(statement?.textContent).toContain("1 resolved to a different case than the one named, ");

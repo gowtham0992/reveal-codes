@@ -2,14 +2,15 @@
 
 import { blockingIssues } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
-import { ORDERS } from "@reveal-codes/export";
-import type { OrderContext } from "@reveal-codes/export";
+import { ORDERS, declarationRequired, orderById } from "@reveal-codes/export";
+import type { OrderContext, OrderEntry } from "@reveal-codes/export";
 import { useEffect, useMemo, useState } from "react";
 import type { Autosave } from "../autosave";
 import { exportDocx } from "../client/export-docx";
 import type { DraftGate } from "../draft-gate";
 import { PRINT_BLOCKED, PRINT_FAILED } from "../notices";
 import { createOrderSelectionStore } from "../order-selection";
+import type { OrderSelectionStore } from "../order-selection";
 import type { AppServices } from "../services";
 import type { Store } from "../store-runtime";
 import { ExportDialog, hasExportableText } from "./export-dialog";
@@ -27,18 +28,28 @@ export type UseExportArgs = Readonly<{
 }>;
 
 /** Print: schedule, flush, then open; either failing keeps the dialog open (Req 2.11). */
-function printFlow(svc: AppServices, store: Store, autosave: Autosave, gate: DraftGate): void {
-  if (gate.blocked()) {
+function printFlow(
+  svc: AppServices,
+  store: Store,
+  autosave: Autosave,
+  gate: DraftGate,
+  entry: OrderEntry | null,
+): void {
+  const { document, runLog, verifiedAt, declaration } = store.getState();
+  if (gate.blocked() || declarationRequired(document, entry, declaration)) {
     store.dispatch({ type: "notice", text: PRINT_BLOCKED });
     return;
   }
-  const { document, runLog, verifiedAt, declaration } = store.getState();
   autosave.schedule(document, runLog, verifiedAt, declaration);
   if (!autosave.flush() || !svc.openPrint()) {
     store.dispatch({ type: "notice", text: PRINT_FAILED });
   }
 }
 
+function selectedEntry(orderStore: OrderSelectionStore): OrderEntry | null {
+  const selection = orderStore.get();
+  return selection === null ? null : orderById(ORDERS, selection.entryId);
+}
 /** Download: busy while packing; the dialog closes only when the file was handed over. */
 function startDownload(
   svc: AppServices,
@@ -116,7 +127,7 @@ export function useExport({ svc, store, autosave, gate, doc, notice, onGo }: Use
           startDownload(svc, store, setBusy, close, context);
         }}
         onPrint={() => {
-          printFlow(svc, store, autosave, gate);
+          printFlow(svc, store, autosave, gate, selectedEntry(orderStore));
         }}
         onClose={close}
       />

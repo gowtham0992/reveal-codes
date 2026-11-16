@@ -10,6 +10,7 @@ import { ExportIssues } from "../src/components/export-issues";
 import { createOrderSelectionStore } from "../src/order-selection";
 import { createStore } from "../src/store-runtime";
 import type { Store } from "../src/store-runtime";
+import { pastedAiDeclaration } from "./support/export-fixtures";
 import { createMemoryStorage } from "./support/memory-storage";
 import { act, fireEvent, renderUi, screen } from "./support/render";
 
@@ -28,6 +29,8 @@ const dialogText = (): string => screen.getByRole("dialog", { name: "Export" }).
 
 function props(document: Document, extra: Partial<ExportDialogProps> = {}): ExportDialogProps {
   const store = createStore(() => new Date(ISO));
+  // The fixture documents are pasted text, so the author has already made the declaration.
+  store.dispatch({ type: "declaration", declaration: pastedAiDeclaration() });
   return {
     document,
     store,
@@ -235,7 +238,12 @@ describe("ExportDialog actions _Requirements: 2.4, 2.5_", () => {
   it("moves focus into the dialog when the override removes the opener row", () => {
     const doc = docOf(ONE);
     const store = createStore(() => new Date(ISO));
-    store.dispatch({ type: "replace", document: doc, runLog: [] });
+    store.dispatch({
+      type: "replace",
+      document: doc,
+      runLog: [],
+      declaration: pastedAiDeclaration(),
+    });
     function Live() {
       const d = useStoreDoc(store);
       return <ExportDialog {...props(d, { store })} />;

@@ -72,6 +72,20 @@ function overrideAllInDialog(): void {
     });
   }
 }
+/** The demo motion is pasted text, so the dialog asks; answer with a declared tool. */
+function declareToolInDialog(): void {
+  const dialog = screen.getByRole("dialog", { name: "Export" });
+  expect(within(dialog).getByRole("button", { name: "Download .docx" })).toHaveProperty(
+    "disabled",
+    true,
+  );
+  act(() => {
+    fireEvent.click(within(dialog).getByLabelText(/^Generative AI was used to prepare/u));
+  });
+  act(() => {
+    fireEvent.change(within(dialog).getByLabelText("Tool name"), { target: { value: "ChatGPT" } });
+  });
+}
 function expectBlockedDialog(): void {
   act(() => {
     button(/^Export/).focus();
@@ -144,6 +158,7 @@ describe("Export flow end to end _Requirements: 2.2, 2.4, 6.1, 7.1, 10.3_", () =
     await loadAndVerify();
     expectBlockedDialog();
     overrideAllInDialog();
+    declareToolInDialog();
     const file = await downloadFromClearDialog(downloads);
     expect(file.fileName).toMatch(/^united-states-district-court-\d{4}-\d{2}-\d{2}\.docx$/);
     expectStatementWording(statementOf(file.bytes));

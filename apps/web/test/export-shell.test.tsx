@@ -6,6 +6,7 @@ import { AppShell } from "../src/components/app-shell";
 import { AUTOSAVE_KEY, serialise } from "../src/persist";
 import type { AppServices } from "../src/services";
 import { createManualTimers } from "./support/clock";
+import { pastedAiDeclaration } from "./support/export-fixtures";
 import { createMemoryStorage } from "./support/memory-storage";
 import { createFakeViewport } from "./support/viewport";
 import { modeApi } from "./support/mode-fetch";
@@ -30,7 +31,7 @@ type MountOptions = Readonly<{
 async function mount(text: string, options: MountOptions = {}) {
   const timers = createManualTimers();
   const storage = createMemoryStorage();
-  storage.setItem(AUTOSAVE_KEY, serialise(docOf(text), [], "2026-11-02T12:00:00.000Z", null));
+  storage.setItem(AUTOSAVE_KEY, serialise(docOf(text), [], "2026-11-02T12:00:00.000Z", pastedAiDeclaration()));
   let failWrites = false;
   const services: AppServices = {
     api: modeApi("fixtures").api,

@@ -125,8 +125,8 @@ Ordering note on the Sentinel: an older Sentinel cannot read a file that carries
     - Change the `[PST]` entry's words from "pasted" to "pasted, origin not recorded". Change no other entry, colour, code or style.
     - _Requirements: 9.1, 9.2, 9.3_
 
-- [ ] 7. Web gates at the moment of export
-  - [~] 7.1 Wire the gates into the dialog and the flows
+- [x] 7. Web gates at the moment of export
+  - [x] 7.1 Wire the gates into the dialog and the flows
     - Move `ExportOrder` and its block into `components/export-order.tsx`. Order of elements: Picker, Order_Summary, prohibition block, declaration controls, Confidentiality_Checkbox. The prohibition line shows before any declaration control and the controls stay available while `required` holds.
     - `useOrderGate` takes the stored Declaration and returns `required`: `clear = canExport(...) && !required && (!needsTick || ticked)`. It clears the Confidentiality_Checkbox tick and the export notice when the Declaration value changes (skip the first run) and when the order changes. The status area shows `requiredLine(subject)` while `required` holds.
     - "Download .docx" and "Open print view" are disabled while `required` holds and enabled when `clear` is true. No Confidentiality_Checkbox appears unless Used_AI holds and the entry includes `confidentiality`. No override is offered when the gate refuses for a prohibition.

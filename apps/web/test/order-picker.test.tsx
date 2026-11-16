@@ -16,7 +16,7 @@ import { fireEvent, renderUi, screen, within } from "./support/render";
 const PICKER_NAME = "Court or judge";
 
 function Connected({ store }: { store: ReturnType<typeof createOrderSelectionStore> }) {
-  const gate = useOrderGate(humanDocument(), store);
+  const gate = useOrderGate(humanDocument(), store, null);
   return (
     <>
       <OrderPicker selection={gate.selection} onSelect={gate.select} />

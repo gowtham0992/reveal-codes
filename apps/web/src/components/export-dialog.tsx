@@ -1,18 +1,18 @@
 "use client";
 
 import { blockingIssues } from "@reveal-codes/engine";
-import type { Document, Issue } from "@reveal-codes/engine";
+import type { Declaration, Document, Issue } from "@reveal-codes/engine";
+import { requiredLine } from "@reveal-codes/export";
 import type { OrderContext } from "@reveal-codes/export";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { overrideMismatch } from "../client/mismatch";
 import type { OrderSelectionStore } from "../order-selection";
 import type { Store } from "../store-runtime";
-import { ConfidentialityCheckbox } from "./confidentiality-checkbox";
 import styles from "./export-dialog.module.css";
 import { ExportIssues } from "./export-issues";
+import { ExportOrder } from "./export-order";
 import { issueText } from "./issues-list";
 import { Modal, ModalActions } from "./modal";
-import { OrderPicker, OrderSummary } from "./order-picker";
 import { OverrideDialog } from "./override-dialog";
 import { useOrderGate } from "./use-order-gate";
 import type { OrderGate } from "./use-order-gate";
@@ -120,26 +120,6 @@ function OverrideTarget({ document, target, store, now, onClose }: OverrideTarge
   );
 }
 
-type OrderProps = Readonly<{ gate: OrderGate }>;
-
-/** Picker, summary, confidentiality checkbox and prohibition notice (no override control). */
-function ExportOrder({ gate }: OrderProps) {
-  return (
-    <div className={styles["order"]}>
-      <OrderPicker selection={gate.selection} onSelect={gate.select} />
-      <OrderSummary entry={gate.entry} />
-      {gate.needsTick ? (
-        <ConfidentialityCheckbox checked={gate.ticked} onChange={gate.setTicked} />
-      ) : null}
-      {gate.notice === null ? null : (
-        <div className={styles["prohibition"]}>
-          <p className={styles["text"]}>{gate.notice.line}</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
 type ActionsProps = Readonly<{
   gate: OrderGate;
   /** The Document has no character other than whitespace. */
@@ -191,23 +171,38 @@ function ExportActions(props: ActionsProps) {
   );
 }
 
+/** The stored Declaration (read from the Store) with the order gate built on it. */
+function useStoredDeclaration(
+  store: Store,
+  document: Document,
+  orderStore: OrderSelectionStore,
+  clearNotice: () => void,
+) {
+  const read = (): Declaration | null => store.getState().declaration;
+  const declaration = useSyncExternalStore(store.subscribe, read, read);
+  const gate = useOrderGate(document, orderStore, declaration, clearNotice);
+  const onDeclare = (next: Declaration | null): void => {
+    store.dispatch({ type: "declaration", declaration: next });
+  };
+  return { gate, onDeclare };
+}
 /** Export_Dialog (Requirements 2, 3, 5, 6): the gate is recomputed on every render. */
 export function ExportDialog(props: ExportDialogProps) {
   const { document, store, orderStore, now, notice, busy, restoreFocus, onClose } = props;
   const [target, setTarget] = useState<Target | null>(null);
   const root = useRef<HTMLDivElement | null>(null);
   useReclaimFocus(root, target);
-  const gate = useOrderGate(document, orderStore, props.clearNotice);
+  const { gate, onDeclare } = useStoredDeclaration(store, document, orderStore, props.clearNotice);
   const blocking = blockingIssues(document);
   return (
     <>
       <Modal title="Export" onClose={onClose} restoreFocus={restoreFocus}>
         <div ref={root} className={styles["body"]}>
-          <ExportOrder gate={gate} />
+          <ExportOrder gate={gate} onDeclare={onDeclare} />
           <ExportBody {...props} blocking={blocking} onOverride={setTarget} />
         </div>
         <p role="status" className={styles["status"]}>
-          {notice}
+          {gate.required && gate.subject !== "none" ? requiredLine(gate.subject) : notice}
         </p>
         <ExportActions
           gate={gate}
