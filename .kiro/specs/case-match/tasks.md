@@ -372,7 +372,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - State in a comment what the test cannot prove (that the browser applies the rules).
     - _Requirements: 17.6, 17.7_
 
-  - [-] 15.3 Add the structure and event tests
+  - [x] 15.3 Add the structure and event tests
     - In a new `apps/web/test/editor-surface-links.test.tsx` render `EditorSurface` (with the stub editor the existing editor-surface tests use) and assert: the list is not a descendant of the editor content element; it follows the editor content element in DOM order (`compareDocumentPosition`); it renders only while `empty` is true and `onLoadSample` is given; the two links are `a` elements named `Load demo motion` and `Load the Avianca citations` in that order.
     - Assert `fireEvent.mouseDown` on each link is default-prevented and `document.activeElement` is unchanged; a `click` and a keyboard activation each call `onLoadSample` with `"demo"` and `"avianca"`.
     - Add a comment that jsdom does no layout, so these tests cannot prove paint order, hit testing or a real browser's focus handling.
