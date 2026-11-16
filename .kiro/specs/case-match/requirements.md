@@ -31,6 +31,8 @@ Interpretation notes, so that the criteria below are testable:
 
 Follow-up (Requirements 17 to 21). The author walked the finished feature in a browser on 2026-11-12 and reported four findings: the two empty-page links cannot be clicked with a pointer (Requirement 17); a page range such as `371-72` ends the citation inside the range and leaves the court-and-year parenthetical outside it (Requirement 18); the rows and dialogs where the author decides do not say which name the filing gave (Requirement 19); and role words in a long `case_name_full` make a chance match easier (Requirement 20). Requirement 21 holds the process rules. Criterion 8 of Requirement 9 is reworded as the author asked. The original Requirements 1 to 16 are otherwise unchanged. The earlier instruction to leave page ranges alone (the interpretation note on `371-72`) is withdrawn by Requirement 18.
 
+Second follow-up (Requirements 22 to 24). CI failed on commit aef6d70 in `packages/engine/test/arb-codes.test.ts`: the test "arbSemanticTamper … is rejected with the recorded rule and index, and every kind is reachable" saw 21 of the tamper kinds in 1,500 runs. The test draws with a random seed and this spec added kinds, so reaching every kind in one run had become a matter of luck (Requirement 22). The author also decided that a saved draft that cannot be read must never be silently replaced: the editor opens empty, the stored value stays, autosave does not write, and the Issues region says so and offers two actions (Requirement 23). Requirement 24 holds the process rules. Requirement 21, criterion 3 is reworded: the aggregate inventory test requires twenty properties, 1 to 20.
+
 ## Glossary
 
 - **Engine**: `packages/engine`. Pure functions over plain data; no runtime dependency, no `node:` import, no DOM.
@@ -78,6 +80,17 @@ Follow-up (Requirements 17 to 21). The author walked the finished feature in a b
 - **Expected_Outcomes**: the table of Requirement 12.
 - **Reveal_Codes_Form**: `render(document, "full")` and `render(document, "display")`, and `parse`.
 - **Result**: the Engine's `Result<T, E>`.
+- **Tamper_Kind**: a member of `TAMPER_KINDS` in `packages/engine/src/testing/arb-codes.ts`, the kinds of `arbSemanticTamper`.
+- **Syntax_Fault_Kind**: a member of `SYNTAX_FAULT_KINDS` in `packages/engine/src/testing/arb-codes-syntax.ts`, the kinds of `arbSyntaxFault`.
+- **Witness_Document**: a fixed Document, held in a test support module, to which the builder of one Tamper_Kind applies.
+- **Reachability_Test**: a test that shows every member of a kind list can be produced by its arbitrary.
+- **Rare_Kind**: the Tamper_Kind with the lowest measured frequency in `arbTamperDocument.chain(arbSemanticTamper)`.
+- **Stored_Draft**: the string stored in `localStorage` under `AUTOSAVE_KEY`.
+- **Unreadable_Draft**: a Stored_Draft for which `deserialise` returns an error other than `absent` (`not_json`, `bad_shape` or `bad_codes`).
+- **Draft_Gate**: the in-memory value of the Web_App that is `blocked` from the load of an Unreadable_Draft until the author starts a new document, and `open` otherwise. It is not part of the Document, the Store state or any stored value.
+- **Draft_Notice**: the text `A saved draft could not be read, so it was not loaded. It is still stored in this browser. Nothing you type is saved until you choose.` with its two actions, shown in the Issues_Region while the Draft_Gate is blocked.
+- **Save_Copy_Action**: the button `Save a copy` of the Draft_Notice.
+- **Start_New_Action**: the button `Start a new document` of the Draft_Notice, and the Toolbar's New button while the Draft_Gate is blocked.
 
 ## Requirements
 
@@ -456,3 +469,70 @@ Follow-up (Requirements 17 to 21). The author walked the finished feature in a b
 4. THE follow-up SHALL change every existing test whose expected outcome changes because of Requirements 17 to 20, and the BUILD_LOG entry SHALL list each such test.
 5. THE `citations.md` steering file SHALL state the Pincite_Expression rule and the Role_Words, and the BUILD_LOG entry SHALL state what the follow-up changed and why.
 6. THE final checkpoint task SHALL run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, the clean-checkout web build `pnpm --filter @reveal-codes/web build`, and `pnpm kiro:check`, and SHALL state that the browser check and the push are left to the author.
+
+### Requirement 22: Reachability tests do not depend on a seed
+
+**User Story:** As a maintainer, I want the test that every fault and tamper kind can be produced to give the same answer on every run, so that adding a kind cannot turn CI red by chance.
+
+#### Acceptance Criteria
+
+1. THE Engine tests SHALL show each Tamper_Kind reachable by drawing from an arbitrary that produces only that kind, over a Witness_Document, and SHALL NOT infer reachability from the kinds collected over a random run of `arbTamperDocument.chain(arbSemanticTamper)`.
+2. THE Engine tests SHALL hold one Witness_Document for each Tamper_Kind in a table typed `Record<TamperKind, Document>`, so that `pnpm typecheck` fails when a Tamper_Kind has no witness, and a test SHALL fail when the keys of the table differ from `TAMPER_KINDS`.
+3. FOR EACH Tamper_Kind, THE Reachability_Test SHALL assert that the per-kind arbitrary is defined for the Witness_Document, and FOR ALL values it draws, SHALL assert that `kind` equals that Tamper_Kind and that `parse` of `text` returns `{ kind: "malformed_codes", index, rule }` with the recorded `index` and `rule` (Property 41 of the provenance-engine design, per kind).
+4. THE rejection property over `arbTamperDocument.chain(arbSemanticTamper)` SHALL stay random, SHALL keep its assertion that `parse` rejects with the recorded rule and index, and SHALL assert nothing about which kinds were drawn.
+5. FOR EACH Syntax_Fault_Kind, THE Engine tests SHALL draw faults of that kind alone over generated Documents, and FOR ALL values SHALL assert that every injected fault has that kind and that `parse` rejects with the recorded `index` and `rule`.
+6. THE Engine tests SHALL assert that faults drawn with at least two faults over a fixed Witness_Document hold at least two injected faults, in place of the counter `multi` of the random run.
+7. THE Reachability_Test SHALL still cover every member of `TAMPER_KINDS` and `SYNTAX_FAULT_KINDS`, and the lists compared SHALL be the exported lists, so that a kind added later without a generator or a witness fails a test.
+8. THE Engine tests SHALL NOT use a fixed seed as the only guard of a reachability claim; the seeded `fc.sample` reachability checks of the tamper arbitraries in `packages/engine/test/codes.properties.test.ts` and `packages/engine/test/arb-codes.test.ts` SHALL be replaced by the per-kind test.
+9. THE change SHALL leave the weights of `arbTamperDocument`, the choice of `arbSemanticTamper` and the draws of `arbSyntaxFault` with its existing arguments unchanged in distribution, and every existing property SHALL pass unedited.
+10. WHEN the task has changed no code, THE task SHALL draw 100,000 values of `arbTamperDocument.chain(arbSemanticTamper)` in a throwaway script, SHALL count each Tamper_Kind, and SHALL report the Rare_Kind, its count and its rate, the number of Tamper_Kinds in the tree (the author counted 22 in the failing run), and the probability that 1,500 independent draws miss the Rare_Kind.
+11. THE task SHALL state in the BUILD_LOG that the figure of 1,500 is a fixed `numRuns` of the test and does not come from `FC_NUM_RUNS`, that the Syntax_Fault test used `max(runs().numRuns, 400)`, and which Tamper_Kind was the Rare_Kind and how rare it was.
+12. THE throwaway script SHALL be deleted before the task ends and SHALL NOT be committed.
+13. THE task SHALL search all packages, `apps/web` and `crew/sentinel` for other tests that collect kinds over random runs and compare them with a kind list; it SHALL convert every such test whose draw is not seeded, SHALL list every seeded one that it leaves, with its seed and the reason, and SHALL list the result in the BUILD_LOG.
+14. IF the builder of a Tamper_Kind returns no arbitrary for every Witness_Document the task can construct, THEN THE task SHALL stop and report that kind, and SHALL NOT drop the kind from the list, lower the assertion or make the builder total without the author's decision.
+15. THE test suite SHALL pass in three consecutive runs of `pnpm test`.
+
+### Requirement 23: An unreadable saved draft is never silently replaced
+
+**User Story:** As a filer whose saved draft cannot be read, I want the editor to keep the stored draft, say so, and let me save a copy or start over, so that autosave never overwrites my work without my choice.
+
+#### Acceptance Criteria
+
+1. WHEN the Web_App mounts at a width of at least `NARROW_WIDTH` and the Stored_Draft is an Unreadable_Draft, THE Web_App SHALL open the editor with the empty Document, SHALL leave the Stored_Draft unchanged, and SHALL set the Draft_Gate to blocked.
+2. WHEN the Stored_Draft is absent, or the read of `localStorage` throws, THE Web_App SHALL leave the Draft_Gate open.
+3. THE Web_App SHALL treat each of `not_json`, `bad_shape` and `bad_codes` as an Unreadable_Draft, so that the rule covers every unreadable autosave and not only the old pincite form.
+4. WHILE the Draft_Gate is blocked, THE Autosave SHALL write nothing to `AUTOSAVE_KEY` on a scheduled save, on `flush`, on `visibilitychange` to hidden, on `pagehide`, on unmount and on the print flow.
+5. WHILE the Draft_Gate is blocked, THE Web_App SHALL allow typing, undo, redo, Verify and DOCX export as when it is open.
+6. WHILE the Draft_Gate is blocked, THE Issues_Region SHALL show the Draft_Notice, above the Verify result lines, with the notice text in one paragraph and the two buttons `Save a copy` and `Start a new document` in that order.
+7. THE notice paragraph SHALL sit in a polite status region that holds the paragraph only, and the two buttons SHALL be `button` elements of type `button` outside that region, at the 24px height of an Issue row, with no icon.
+8. THE Draft_Notice SHALL NOT change the blocking count, the Issues heading, the Export button, the Next_Step or the line `No issues.`.
+9. WHEN the author activates the Save_Copy_Action, THE Web_App SHALL read the Stored_Draft from `localStorage` at that moment and pass it, encoded as UTF-8 and otherwise unchanged, to `AppServices.download` with the file name `reveal-codes-saved-draft.txt` and the media type `text/plain;charset=utf-8`.
+10. WHEN the Save_Copy_Action has run, THE Web_App SHALL leave the Stored_Draft and the Draft_Gate as they were.
+11. IF the Stored_Draft cannot be read at the moment of the Save_Copy_Action, or `AppServices.download` throws, THEN THE Web_App SHALL show the notice `The saved draft could not be copied. It is still stored in this browser.` and SHALL leave the Stored_Draft and the Draft_Gate as they were.
+12. WHEN the author activates the Start_New_Action, THE Web_App SHALL open the existing confirm dialog with the title `Start a new document`, the message `Delete the saved draft that could not be read and start a new document? Anything on the page is discarded too.` and the confirm label `Delete and start new`.
+13. WHEN the author confirms the Start_New_Action, THE Web_App SHALL remove the Stored_Draft, replace the Document with an empty one, set the Draft_Gate to open and resume autosave, so that the next change is saved after 300 ms.
+14. WHEN the author cancels the Start_New_Action, THE Web_App SHALL change nothing.
+15. IF the removal of the Stored_Draft throws, THEN THE Web_App SHALL keep the Draft_Gate blocked and SHALL show `Autosave failed. Your draft is kept in this tab only.`.
+16. WHILE the Draft_Gate is blocked, THE Toolbar's New button SHALL open the same dialog as the Start_New_Action and SHALL have the same effect.
+17. WHILE the Draft_Gate is blocked, THE Web_App SHALL load a sample (demo motion or Avianca citations) as it does when the Draft_Gate is open, and SHALL leave the Draft_Gate blocked and the Stored_Draft unchanged.
+18. WHILE the Draft_Gate is blocked, WHEN the author activates Open print view, THE Web_App SHALL show the notice `Choose Save a copy or Start a new document before opening the print view.` and SHALL NOT open the print tab.
+19. WHEN the Web_App mounts below `NARROW_WIDTH`, THE Web_App SHALL NOT read the Stored_Draft and SHALL NOT set the Draft_Gate.
+20. THE Web_App SHALL NOT store the Draft_Gate in the Document, in the Store state, in the autosaved value or in any other stored value.
+21. THE sentences of the Draft_Notice, the copy-failed notice and the print notice SHALL live in `apps/web/src/notices.ts`, and the button labels and the confirm copy SHALL live beside the components that show them, as the existing confirm copy does.
+22. THE Draft_Notice, the confirm copy, the new notices and the button labels SHALL contain no exclamation mark, no icon and no emoji, and the stylesheet of the Draft_Notice SHALL add no colour literal and no Token.
+23. FOR ALL stored strings that `deserialise` rejects with an error other than `absent` (text that is not JSON, JSON of the wrong shape or version, and a well-formed value whose codes do not parse), the sequence of a mount-time load, any number of edits of the Document, an advance of the clock by at least 300 ms, a flush, a hidden visibility change and an unmount SHALL leave the Stored_Draft equal to the string that was stored and SHALL make no call to `setItem` (Property 20).
+24. THE README `Limits` list SHALL no longer say that an old draft is silently overwritten, and the BUILD_LOG SHALL keep its record of the old behaviour and add one entry for this change.
+25. THE tests SHALL include example tests for: the Stored_Draft surviving a load, typing and a 300 ms wait; the Draft_Notice text and its buttons; the bytes of the Save_Copy_Action for an ASCII value, a non-ASCII value and the old pincite draft; the Start_New_Action (confirm, cancel, removal failure) clearing the Stored_Draft and resuming autosave; the Toolbar's New button while blocked; a sample load while blocked; the print notice; each of `not_json`, `bad_shape` and `bad_codes`; a mount below `NARROW_WIDTH`; and no effect on the blocking count, the Export button and the Next_Step.
+
+### Requirement 24: Process and final checkpoint for the second follow-up
+
+**User Story:** As the author, I want the work grouped and checked at the end, and the stability of the reachability test shown, so that I can check CI after the push.
+
+#### Acceptance Criteria
+
+1. THE spec phases of the second follow-up SHALL make no code change and SHALL NOT commit.
+2. THE second follow-up tasks SHALL group the work in this order: the measurement before any change, the reachability tests (Requirement 22), the unreadable draft (Requirement 23), the aggregate inventory test and the documentation, and one final checkpoint.
+3. THE aggregate inventory test `apps/web/test/static/case-match-inventory.test.ts` SHALL require twenty properties, numbered 1 to 20, with Property 20 in `apps/web/test/case-match.properties.test.ts`.
+4. THE second follow-up SHALL change every existing test whose expected outcome changes because of Requirements 22 and 23, and the BUILD_LOG entry SHALL list each of them.
+5. THE final checkpoint task SHALL run `pnpm lint`, `pnpm typecheck`, `pnpm test` three times in a row, `pnpm test:pbt`, the clean-checkout web build `pnpm --filter @reveal-codes/web build`, and `pnpm kiro:check`, SHALL report the result of each of the three `pnpm test` runs, and SHALL state that the push and the check of CI are left to the author.
+6. THE task SHALL NOT push.

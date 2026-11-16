@@ -45,6 +45,19 @@ Each decision below resolves a point where the requirements leave room or two do
 | D18 | The two mismatch lines are written without a trailing full stop: `Cited as <caseName>` and `This citation is <foundName> (<foundYear>)`. | The existing Requirement 7 line has none, existing tests match it, and a name that ends in `Co.` would otherwise read `Co..`. The full stop in the author's request is read as punctuation of the sentence that lists the lines. |
 | D19 | The fifteen Role_Words join `DROPPED_WORDS`. No other table changes. | Requirement 20. A dropped word can only remove shared words, so no `wrong_case` outcome of the worked tables can become `verified`. |
 | D20 | Reveal Codes written before the pincite change that close a citation code inside a Pincite_Expression fail `parse` with `extractor_mismatch`. No migration is written. | Requirement 18, criterion 16. The code check compares code ranges with Extractor ranges, which is its job. The product is unreleased; the one affected value is the author's own draft. |
+| D21 | Reachability of a kind is shown by drawing from an arbitrary that produces only that kind, over a fixed Witness_Document, never by collecting kinds over a random run. `arb-codes.ts` exports `arbTamperOfKind(kind, doc)`, which returns the builder's arbitrary or `undefined`. The weights of `arbTamperDocument` and the choice in `arbSemanticTamper` do not change. | Requirement 22. The old test needed every kind to turn up in 1,500 draws; the chance of missing the rarest kind is a fixed number, not zero, and it grows with every kind added. A per-kind draw cannot miss. |
+| D22 | The Witness_Documents live in `packages/engine/test/support/tamper-witnesses.ts` as a table typed `Record<TamperKind, Document>`, built from fixed texts with `createDocument` and fixed state writes. | A kind added without a witness fails `typecheck`. The table is test support, so `src/testing` stays free of fixed texts. |
+| D23 | `arb-codes-syntax.ts` exports `arbSyntaxFaultOf(rendering, kinds, { minFaults, maxFaults })`. `arbSyntaxFault(rendering, maxFaults)` becomes a call of it with all kinds and `minFaults` 1, so existing callers (`arb-api.ts`, `codes.properties.test.ts`) are untouched. | Requirement 22, criteria 5 and 6. The kind and the count of faults become arguments instead of luck. |
+| D24 | Seeded `fc.sample` reachability checks elsewhere (`arb-edit`, `arbitraries`, `arb-citation`, `arb-segment-inputs`, `arb-text-citations`, `rate-limit`) are left as they are and are listed in the BUILD_LOG. The tamper ones in `codes.properties.test.ts` and `arb-codes.test.ts` are replaced. | A seeded draw gives the same result on every machine, so it cannot be red in CI and green locally; a change to its arbitrary shows locally first. The tamper checks are replaced because they are the same family as the failing test and their seed hides how rare a kind is. |
+| D25 | The Draft_Gate is a small observable in `apps/web/src/draft-gate.ts` (`blocked()`, `block()`, `release()`, `subscribe`), created beside the Store in `useShellParts` and read with `useSyncExternalStore`. It is not a field of `StoreState`. | `StoreState` is replaced, undone and checked by properties that enumerate its fields and actions, and the gate must not be undone, replaced by New or persisted (Requirement 23, criterion 20). |
+| D26 | The gate is set only for `not_json`, `bad_shape` and `bad_codes`. `absent` and a throwing `getItem` leave it open. | An absent value has nothing to protect. A throwing read means storage is disabled, so the claim "still stored in this browser" would be false, and the existing `AUTOSAVE_FAILED` notice already covers the write. |
+| D27 | Only the Start_New_Action opens the gate. Save a copy leaves it blocked, and a sample load leaves it blocked. | Requirement 23, criteria 10 and 17. Save a copy changes nothing about the stored value, and the author may still want it. A sample load is not a decision about the stored draft. |
+| D28 | Save a copy reads the stored value again at click time, encodes it with `TextEncoder` (UTF-8), and calls `services.download(bytes, "reveal-codes-saved-draft.txt", "text/plain;charset=utf-8")`. `browserDownload` and `AppServices.download` gain an optional third argument for the media type, defaulting to the DOCX type, so existing callers and test doubles are unchanged. | Reading at click time means the file is what is stored now, with no copy held in memory. A value this app wrote is well-formed JSON text, so UTF-8 is exact. A value written by something else could hold a lone surrogate, which UTF-8 cannot carry and which becomes U+FFFD; the BUILD_LOG records this limit. |
+| D29 | While the gate is blocked, the Toolbar's New button opens the Start_New_Action dialog (the copy of Requirement 23, criterion 12), and a confirmed New runs `startNew` and releases the gate. | The ordinary New copy says "Discard the current draft", which is untrue here, because the stored draft is deleted too. One action, one copy. |
+| D30 | The Draft_Notice is a block at the top of the Issues region body: a paragraph in a `role="status"` element, then two `button`s outside it. They are buttons because they act and do not navigate. It is not an Issue, so no count, heading or Next_Step reads it. | `ui.md`: state is shown as text, with 24px buttons in an Issue row. A live region that holds buttons announces them awkwardly, so only the sentence is live. |
+| D31 | `printFlow` in `use-export.tsx` checks `gate.blocked()` first and shows `PRINT_BLOCKED` without calling `autosave` or `openPrint`. | The print view reads the stored draft, so opening it would show only "The saved document could not be read." and the flow writes the stored key before opening it, which the gate forbids. |
+| D32 | The subscription and the page-hide listeners of `useAutosave` move into a plain function `startAutosave(services, store, autosave, gate)` that returns its stop function, and the hook calls it from its effect. `loadAutosave(services, store, gate?)` gains an optional third argument. | Property 20 then runs the real wiring with no React and no DOM, and `autosave-old-pincite.test.ts` keeps calling `loadAutosave` with two arguments. |
+| D33 | `Autosave.clear()` returns `boolean` (true when the key was removed) and `createAutosave` takes an optional `gate`; with no `gate` it behaves as before. The gate is released only after `clear()` returned true. | Requirement 23, criterion 15. A failed removal must not resume saving over the unreadable value. An optional dependency leaves every existing `createAutosave` call in the tests unedited. |
 
 ## Architecture
 
@@ -806,6 +819,94 @@ A small component `components/mismatch-lines.tsx` renders the lines as `p` eleme
 | Sentinel examples | `crew/sentinel/test/` (tests only) | 9.8 |
 | Docs | `BUILD_LOG.md`, `.kiro/steering/citations.md`, `docs/KIRO_USAGE.md` | 21 |
 
+## Second follow-up: reachability and the unreadable draft (Requirements 22 to 24)
+
+### Reachability tests without a seed (Requirement 22)
+
+**Cause.** `arbSemanticTamper(doc)` picks one kind with `fc.constantFrom` over the kinds whose builder applies to `doc`. The Document comes from `arbTamperDocument`, which draws `arbDocument` with weight 4 and three targeted Documents with weights 1, 1 and 2. A kind that applies only to a targeted Document (the unlisted LEXIS citation, the Other_Reference) is drawn with probability about `(1/8) × 1/(kinds that apply to it)` per run. The test asserted that all kinds appeared in 1,500 fixed-size runs of a random seed. With p the rate of the rarest kind, the chance of missing it is `(1 − p)^1500`, which is small but not zero, and every kind added lowers the rate of the others. A run in CI missed one kind. The 1,500 is a literal `numRuns`, not `FC_NUM_RUNS`; the syntax-fault test uses `max(runs().numRuns, 400)`. The tree has 23 `TamperKind` members; the author counted 22 in the failing run, so task 22.1 reports the count it finds.
+
+**Shape of the fix.**
+
+```mermaid
+flowchart LR
+  K["TAMPER_KINDS (exported list)"] --> T["for each kind"]
+  W["TAMPER_WITNESSES: Record of TamperKind to Document"] --> T
+  T --> A["arbTamperOfKind(kind, witness) defined?"]
+  A --> D["fc.assert over that arbitrary, runs()"]
+  D --> R["kind equals k and parse rejects with recorded rule and index"]
+```
+
+- `arb-codes.ts` exports `arbTamperOfKind(kind: TamperKind, doc: Document): Arbitrary<SemanticTamper> | undefined`, which is `BUILDERS[kind]({ doc, s: scanRendering(render(doc, "full").text) })`. `arbSemanticTamper` is rewritten to call it for each kind in `TAMPER_KINDS`, so there is one construction path, and its draws keep the same distribution (Requirement 22, criterion 9).
+- `packages/engine/test/support/tamper-witnesses.ts` exports `TAMPER_WITNESSES: Readonly<Record<TamperKind, Document>>`. Task 22.3 reads each builder in `arb-codes-tampers.ts`, `arb-codes-citations.ts` and `arb-codes-extractor.ts`, picks the smallest fixed Document on which it returns an arbitrary, and builds it with `createDocument` and fixed state writes (`applyStateWrites` with fixed writes, not drawn ones). Many kinds share one Document. Where a builder needs a state (a Short_Form in a given state, an Override), the Document is built with `setVerification` and `recordOverride` directly.
+- The Reachability_Test is one `it` per kind (`it.each(TAMPER_KINDS)`), so a failure names the kind. Each case asserts `arbTamperOfKind(k, TAMPER_WITNESSES[k]) !== undefined`, then `fc.assert(fc.property(arb, (t) => { expect(t.kind).toBe(k); parse rejects with { kind: "malformed_codes", index: t.index, rule: t.rule } }), runs())`. The assertion that `kind` equals `k` is true by construction of the builders and guards a builder that returns a tamper of another kind.
+- One test compares `Object.keys(TAMPER_WITNESSES).sort()` with `[...TAMPER_KINDS].sort()`. `TAMPER_KINDS` is derived from the builder table (`Object.keys(BUILDERS)`), and `BUILDERS` is typed `Record<TamperKind, Builder>`, so a kind added to the union without a builder fails `typecheck`, and one without a witness fails the table's type. One pure helper `missingWitnesses(kinds, witnesses)` returns the kinds without a witness, and an example test calls it with one key removed to show it reports that key.
+- The random rejection property stays as it is, minus the set assertion and the `seen` collection. The seeded `ref_payload` test and the seeded test in `codes.properties.test.ts` are replaced by the per-kind test for `ref_payload` (which asserts `rule` `bad_field` and that the text starts with `[REF{k=k0}]` at `index`) and by the loop over all kinds.
+
+**Syntax faults.** `arbSyntaxFaultOf(rendering, kinds, { minFaults = 1, maxFaults = 3 })` draws the array of kinds from `kinds` with the given length bounds and otherwise follows the code of `arbSyntaxFault`. Its `fc.array(fc.constantFrom(...kinds), { minLength: minFaults, maxLength: maxFaults })` replaces the fixed `{ minLength: 1, maxLength: maxFaults }`. `arbSyntaxFault(rendering, maxFaults = 3)` returns `arbSyntaxFaultOf(rendering, SYNTAX_FAULT_KINDS, { minFaults: 1, maxFaults })`; the draw sequence of the kinds is the same. The Reachability_Test runs `it.each(SYNTAX_FAULT_KINDS)` over `arbDocument.chain((d) => arbSyntaxFaultOf(render(d, "full").text, [kind], { maxFaults: 1 }))` and asserts `f.injected.every((i) => i.rule === kind)` and that `parse` rejects with `{ index: f.index, rule: f.rule }`. The multi-fault claim is one test over a fixed Witness_Document with at least three cut points, using `minFaults: 2`, asserting `f.injected.length >= 2` for every draw. A `missing_doc` fault records index 0 and replaces the `[DOC]` code; the existing property already proves the rejection for every mixture, so the per-kind test adds the guarantee that each kind is drawn.
+
+**What is not changed.** Kind frequencies, the weights of `arbTamperDocument` and the random properties stay as they are, so the measurement of task 22.1 describes the arbitrary that the rejection property still draws from. Seeded `fc.sample` checks are listed in D24 and left.
+
+**Measurement (task 22.1).** Before any change, a throwaway script under `packages/engine/` (not committed, deleted at the end of the task) draws 100,000 values of `arbTamperDocument.chain(arbSemanticTamper)` with `fc.sample`, counts `t.kind`, prints the table sorted by count, and prints `(1 − p)^1500` for the lowest. It also prints the number of `TAMPER_KINDS`. If 100,000 draws take too long, the script runs 20,000 and says so. The BUILD_LOG entry gives the Rare_Kind, its rate, the miss probability and the count, and says that the rate comes from document applicability (which Documents the builder applies to) rather than from the choice among kinds.
+
+### The unreadable draft (Requirement 23)
+
+**State and flow.**
+
+```mermaid
+stateDiagram-v2
+  [*] --> Open : mount, value absent or readable or read throws
+  [*] --> Blocked : mount, Unreadable_Draft
+  Blocked --> Blocked : typing, undo, Verify, DOCX export, sample load
+  Blocked --> Blocked : Save a copy
+  Blocked --> Blocked : Start a new document cancelled or removal throws
+  Blocked --> Open : Start a new document confirmed and removal succeeded
+  Open --> Open : autosave writes after 300 ms
+```
+
+**Modules.**
+
+| File | Change |
+| ---- | ------ |
+| `apps/web/src/draft-gate.ts` (new) | `type DraftGate = Readonly<{ blocked: () => boolean; block: () => void; release: () => void; subscribe: (fn: () => void) => () => void }>` and `createDraftGate()`. It notifies only when the value changes. |
+| `apps/web/src/autosave.ts` | `AutosaveDeps` gains `gate?: DraftGate`. `schedule` starts no timer and keeps no pending job while the gate is blocked; `write` drops any pending job while the gate is blocked; `clear()` returns `boolean`. With no `gate` the behaviour is as before (D33). |
+| `apps/web/src/components/use-autosave.ts` | `loadAutosave(services, store, gate?)`: when `readRaw` returns a value and `deserialise` fails with a kind other than `absent`, call `gate?.block()`. The subscription and listeners move to `startAutosave(services, store, autosave, gate)`, which loads, subscribes, adds the page-hide listeners and returns the stop function (flush, unsubscribe, remove listeners). `useAutosave(store, services, autosave, gate)` calls it from its effect. Below `NARROW_WIDTH` nothing runs (Requirement 23, criterion 19). |
+| `apps/web/src/components/app-shell.tsx` | `useShellParts` creates the gate, passes it to `createAutosave` and `useAutosave`, and returns it. The shell reads it with `useSyncExternalStore` and passes `draft` props to `IssuesSlot` and the gate to `useShellFlows`. |
+| `apps/web/src/saved-draft.ts` (new) | `saveDraftCopy(svc: Pick<AppServices, "storage" | "download">): boolean`: reads `AUTOSAVE_KEY` with `readRaw`; returns `false` for a thrown read or a `null` value; otherwise calls `svc.download(new TextEncoder().encode(raw), SAVED_DRAFT_FILE, SAVED_DRAFT_MIME)` and returns `true`. The thrown download is caught at the boundary and turned into `false` as `use-export` does for its download. |
+| `apps/web/src/client/download.ts`, `services.ts` | `browserDownload(bytes, fileName, mime = DOCX_MIME)` and `AppServices["download"]` take an optional `mime`. |
+| `apps/web/src/notices.ts` | `UNREADABLE_DRAFT`, `SAVE_COPY_FAILED`, `PRINT_BLOCKED`. |
+| `apps/web/src/components/unreadable-draft.tsx` and its CSS module (new) | The Draft_Notice. Props: `onSaveCopy`, `onStartNew`. It renders a wrapper, a `p role="status"` with `UNREADABLE_DRAFT`, and two `button type="button"`: `Save a copy` and `Start a new document`. The module uses existing Tokens only, 24px buttons, the spacing of the `note` class of the Issues region. |
+| `apps/web/src/components/issues-region.tsx` | New optional prop `draft: Readonly<{ blocked: boolean; onSaveCopy: () => void; onStartNew: () => void }> | undefined`; when `blocked`, renders the Draft_Notice first in the body. It does not affect `issuesHeading`. |
+| `apps/web/src/components/use-document-actions.tsx` | `Pending` gains `"newBlocked"` with the copy of Requirement 23, criterion 12. `onNew` asks `"newBlocked"` when the gate is blocked, and `"new"` otherwise. A confirmed `newBlocked` runs `startNew` and then `gate.release()` only when `autosave.clear()` returned `true`. The hook returns `onStartNewDraft` (`ask("newBlocked")`) and `onSaveDraftCopy` (calls `saveDraftCopy`, dispatching `SAVE_COPY_FAILED` on `false`). `loadSample` is unchanged and never touches the gate. |
+| `apps/web/src/components/use-export.tsx` | `printFlow` first checks `gate.blocked()`, and then dispatches `PRINT_BLOCKED` and returns before `autosave.schedule`. |
+
+**Why the gate cannot be bypassed.** The only writer of `AUTOSAVE_KEY` is `writeJob` in `autosave.ts`, reached from `schedule` (timer), `flush` (visibility, pagehide, unmount, print) and no other path; `clear` removes it and is reached only from `startNew`. All of them check the gate (`clear` is the Start_New_Action by definition). A test scans `apps/web/src` for `setItem(`/`removeItem(` on `AUTOSAVE_KEY` and expects exactly the two calls in `autosave.ts`, so a future writer fails it.
+
+**Copy.**
+
+| Item | Text | Where |
+| ---- | ---- | ----- |
+| Notice | `A saved draft could not be read, so it was not loaded. It is still stored in this browser. Nothing you type is saved until you choose.` | `notices.ts` |
+| Buttons | `Save a copy`, `Start a new document` | `unreadable-draft.tsx` |
+| Confirm | title `Start a new document`; message `Delete the saved draft that could not be read and start a new document? Anything on the page is discarded too.`; confirm `Delete and start new` | `COPY` in `use-document-actions.tsx` |
+| Copy failed | `The saved draft could not be copied. It is still stored in this browser.` | `notices.ts` |
+| Print blocked | `Choose Save a copy or Start a new document before opening the print view.` | `notices.ts` |
+
+**Edge cases decided.** A stored value that is valid JSON of a later version is `bad_shape` and is protected. A value removed by another tab between load and Save a copy gives `SAVE_COPY_FAILED`. Several tabs are out of scope. Reload while blocked shows the notice again and the typed text is gone, as the notice says. Save a copy does not release the gate: the author who saved a copy and wants to type on must choose Start a new document, which also clears the page, as the confirm says. The wording "until you choose" is the author's; it is accurate for Start a new document only (see the report to the author).
+
+**Stability of the old pincite draft.** `autosave-old-pincite.test.ts` keeps passing unedited: the load leaves the empty Document with no store notice and keeps the stored value; the Draft_Notice is not a store notice.
+
+**Existing tests that change.**
+
+| Test | Why it changes |
+| ---- | -------------- |
+| Tests that build `AppServices` with a `download` double, or call `Autosave.clear()` through a fake | The optional third argument and the boolean return are compatible; only a double typed with an exact signature changes. Task 23.6 lists any edit. |
+| `apps/web/test/document-actions.test.tsx` | The New dialog copy is unchanged when the gate is open. It gains no edit unless a fake `createAutosave` dependency is typed against the old `clear(): void`. |
+| `apps/web/test/static/case-match-inventory.test.ts` | Requires twenty properties (task 24.1). |
+
+### Correctness Property 20 (summary)
+
+Property 20 sits with the other web properties in `apps/web/test/case-match.properties.test.ts`. Its input is a stored string built by one of three arbitraries: text that is not JSON (a random string, checked to throw in `JSON.parse` by construction from a fixed set of prefixes such as `{`, `[1`, `v1:`), JSON of the wrong shape or version (`arbWrongShape`, built from `fc.jsonValue()` with `version` forced away from 1, a missing or non-string `codes`, or a bad `runLog`), and a well-formed envelope whose `codes` is a tampered rendering from `arbSemanticTamper` or `arbSyntaxFault` of the engine. The property runs `startAutosave` over `createMemoryStorage`, `createManualTimers`, and a `createDraftGate`, with edits drawn from `arbOpSequence`. It needs no filter: each construction yields a string that `deserialise` rejects, and the property asserts that first as a precondition check on the generator (`expect(deserialise(raw).ok).toBe(false)` inside the property, a relationship, not a filter).
+
 ## Correctness Properties
 
 *A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
@@ -936,6 +1037,12 @@ The numbers below are scoped to this spec. Each property lives in a file named `
 
 **Validates: Requirements 18.1, 18.2, 18.3, 18.4, 18.5, 18.14, 18.15**
 
+### Property 20: An unreadable stored draft is never changed by load, typing or saving
+
+*For any* stored string that `deserialise` rejects with an error other than `absent` (text that is not JSON, JSON of the wrong shape or version, or a well-formed envelope whose codes do not parse), and *for any* sequence of edits of the Document, the sequence of a mount-time load, those edits, an advance of the clock by at least 300 ms, a flush, a hidden visibility change and an unmount leaves the stored value equal to the string that was stored and makes no call to `setItem`.
+
+**Validates: Requirements 23.1, 23.3, 23.4, 23.23**
+
 ## Error Handling
 
 Errors are values in the Engine and the Verifier. Only the app boundary throws.
@@ -964,6 +1071,12 @@ Errors are values in the Engine and the Verifier. Only the app boundary throws.
 | Reveal Codes from before the pincite change that close a citation inside a range | `parse` returns `malformed_codes` with `extractor_mismatch`; `persist` returns `bad_codes`; the Sentinel reports `appendix_unparseable`. |
 | A `wrong_case` citation with no `caseName` | The `Cited as` line is left out; the `This citation is` line shows. |
 | A role word is the only word of a cited party | The party has no Normalised_Word and is skipped (Requirement 4, criterion 9). |
+| The Stored_Draft is not JSON, has the wrong shape or version, or its codes do not parse | The Draft_Gate is blocked, the editor opens empty, the stored value stays, and the Draft_Notice shows (Requirement 23). |
+| `getItem` throws on load | The gate stays open and the empty Document shows; a later write failure shows `AUTOSAVE_FAILED` as before. |
+| Save a copy cannot read the stored value, or `download` throws | `SAVE_COPY_FAILED`; the stored value and the gate are unchanged. |
+| Start a new document confirmed and `removeItem` throws | `AUTOSAVE_FAILED`; the gate stays blocked and nothing is written. |
+| Open print view while the gate is blocked | `PRINT_BLOCKED`; no write and no print tab. |
+| A tamper or fault kind has no witness or no arbitrary | The Reachability_Test or `typecheck` fails and names the kind (Requirement 22). |
 
 ## Testing Strategy
 
@@ -989,11 +1102,11 @@ This feature has pure functions with large input spaces (the name rule, the cite
 | `packages/verifier` | `test/case-match.properties.test.ts` | 1, 9, 10, 11, 12, 13, 18 |
 | `packages/export` | `test/case-match.properties.test.ts` | 14 |
 | `crew/sentinel` | `test/case-match.properties.test.ts` | 15 |
-| `apps/web` | `test/case-match.properties.test.ts` | 16, 17 |
+| `apps/web` | `test/case-match.properties.test.ts` | 16, 17, 20 |
 
 Property 13 sits with the verifier because `link.ts` lives there. Property 18 tests `trimEntry` and the script's writer through an injected `fetch` and an in-memory writer, so it makes no network call.
 
-**Inventory (D9).** This design lists exactly nineteen properties, numbered 1 to 19 once each; the table above assigns them as 8 (engine), 7 (verifier), 1 (export), 1 (Sentinel) and 2 (web), which sum to 19. The follow-up adds Property 19 and renumbers none; Requirements 17, 19 and 20 add no property (the prework found their criteria are examples or static rules, and the role words are covered by Property 1 and one example). The tolerant read extends Property 3, and `lookup` extends Property 9. The follow-up's aggregate test (task 20.2) requires 1 to 19 with 19 in the engine file. `packages/engine/test/inventory.test.ts` and `packages/verifier/test/inventory.test.ts` skip files named `case-match.properties.test.ts`. One aggregate inventory test, `apps/web/test/static/case-match-inventory.test.ts` (task 13.6), reads this file and the five property files above. It requires that this file holds exactly eighteen `### Property N` headings numbered 1 to 18, that all eighteen `// Property N` markers are present across the five files, each exactly once and in the package the table assigns it to, that each marker is followed by exactly one `fc.assert(fc.property(...))`, and that each describe title ends in `_Requirements: x.y_`. A missing marker fails the test, so skipping an optional property sub-task is caught at the final checkpoint. The two changed existing inventory tests are listed in the BUILD_LOG entry (Requirement 13, criterion 9).
+**Inventory (D9).** This design lists exactly twenty properties, numbered 1 to 20 once each; the table above assigns them as 8 (engine), 7 (verifier), 1 (export), 1 (Sentinel) and 3 (web), which sum to 20. The second follow-up adds Property 20 (the unreadable draft) to the web file and task 24.1 makes the aggregate test require twenty; the per-kind reachability tests of Requirement 22 are example-style tests over the shared arbitraries and are not numbered properties. The paragraph below describes the state after the first follow-up and is kept for its other rules. The follow-up adds Property 19 and renumbers none; Requirements 17, 19 and 20 add no property (the prework found their criteria are examples or static rules, and the role words are covered by Property 1 and one example). The tolerant read extends Property 3, and `lookup` extends Property 9. The follow-up's aggregate test (task 20.2) requires 1 to 19 with 19 in the engine file. `packages/engine/test/inventory.test.ts` and `packages/verifier/test/inventory.test.ts` skip files named `case-match.properties.test.ts`. One aggregate inventory test, `apps/web/test/static/case-match-inventory.test.ts` (task 13.6), reads this file and the five property files above. It requires that this file holds exactly eighteen `### Property N` headings numbered 1 to 18, that all eighteen `// Property N` markers are present across the five files, each exactly once and in the package the table assigns it to, that each marker is followed by exactly one `fc.assert(fc.property(...))`, and that each describe title ends in `_Requirements: x.y_`. A missing marker fails the test, so skipping an optional property sub-task is caught at the final checkpoint. The two changed existing inventory tests are listed in the BUILD_LOG entry (Requirement 13, criterion 9).
 
 **Arbitraries** (shared, in `packages/engine/src/testing/arbitraries.ts`, built from fast-check combinators so shrinking works):
 
