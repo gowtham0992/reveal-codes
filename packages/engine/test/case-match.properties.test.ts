@@ -23,11 +23,26 @@ import {
   checkShortFollows,
   checkWrongCaseBlocks,
 } from "./support/case-match-results";
+import { arbAfter, arbExpressionCite, checkPincite } from "./support/case-match-pincite";
 import {
   checkMalformed,
   checkOverrideSurvival,
   shortFormDocument,
 } from "./support/case-match-malformed";
+
+// Property 19
+describe("case-match a pincite expression extends the citation and leaves its value _Requirements: 18.15_", () => {
+  it("the extracted text is the whole written citation and the value equals the single-page value", () => {
+    let expressions = 0;
+    fc.assert(
+      fc.property(arbExpressionCite, arbAfter, (cite, after) => {
+        expressions += checkPincite(cite, after);
+      }),
+      runs(),
+    );
+    expect(expressions).toBeGreaterThan(0);
+  });
+});
 
 // Property 3
 describe("case-match cited name _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.13, 1.14, 1.15_", () => {

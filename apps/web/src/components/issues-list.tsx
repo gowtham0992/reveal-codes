@@ -46,10 +46,10 @@ export function issueText(document: Document, issue: Issue): string {
   return shorten(document.text.slice(issue.start, issue.end));
 }
 
-type WrongCase = Readonly<{ lines: readonly string[]; href: string | null }>;
+export type WrongCase = Readonly<{ lines: readonly string[]; href: string | null }>;
 
 /** The mismatch lines and link of a `wrong_case` Issue, from the Document and session Display_Info. */
-function wrongCaseFor(
+export function wrongCaseFor(
   document: Document,
   issue: Issue,
   info: ReadonlyMap<IssueKey, DisplayInfo> | undefined,

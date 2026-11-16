@@ -391,13 +391,13 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - Opt the round-trip property (Property 2's domain) and the incremental-equals-full property in to `"expression"`. List both edits for the BUILD_LOG. Confirm the other existing extraction properties pass unedited.
     - _Requirements: 18.10, 18.11, 18.14_
 
-  - [~]* 16.3 Write property test for the pincite expression
+  - [x]* 16.3 Write property test for the pincite expression
     - In `packages/engine/test/case-match.properties.test.ts` add `// Property 19` above one `fc.assert(fc.property(...))` and a describe title ending `_Requirements: 18.15_`.
     - **Property 19: A pincite expression extends the citation and leaves its value**
     - Generate a citation (reporter, parallel, database with a range, `Id.`, party Short_Form) with `arbPinciteExpression`, an optional parenthetical, and the single-page twin; assert equal citation counts, `c.text` equal to the whole written citation, and `c.value` structurally equal to the twin's value.
     - **Validates: Requirements 18.1, 18.2, 18.3, 18.4, 18.5, 18.14, 18.15**
 
-  - [~] 16.4 Write the pincite example tests
+  - [x] 16.4 Write the pincite example tests
     - In a new `packages/engine/test/pincite.test.ts`: Miller (`Miller v. United Airlines, Inc., 174 F.3d 366, 371-72 (2d Cir. 1999)` is one citation whose text is `174 F.3d 366, 371-72 (2d Cir. 1999)`, pincite 371, and `render(…, "display")` closes `[/CIT]` after `1999)`); `501 U.S. 32, 45-46 (1991)`; `516 U.S. 217, 220-21 (1996)`; an en dash with a full second number (`371–372`); a list (`678, 680-81`); `Id. at 678-79`; `Roe, 556 U.S. at 678-79`; a parallel citation with a range in two members; a list that stops before `, 93 S. Ct. 705` and before `, 2010 WL 123456`; `371-A`, `371-` and `371-72a` ending where they ended before the follow-up; a database `, at *5-6` read and `, at *5, 7` read as `, at *5` only; `normalised` recorded for a range; the incremental rescan equal to a full scan on a ranged text; the maximal four-member parallel citation with 40-code-unit reporters, five-item expressions and a parenthetical extracted whole and under 512 code units (if it is not, lower the 24 cap and report; do not raise `MAX_MATCH`).
     - Add a verifier example (`packages/verifier/test/lines.test.ts` or a new file) that `memberLines` of the ranged Miller text equals that of the single-page text.
     - Add an engine example that Reveal Codes written the old way (`[CIT ≠…]174 F.3d 366, 371[/CIT]-72 (2d Cir. 1999)`, with a valid `[DOC]` and spans) fail `parse` with `malformed_codes` and rule `extractor_mismatch`. Read the autosave load path from `persist.ts` onward and record in the BUILD_LOG what the author sees for a `bad_codes` draft.
@@ -419,7 +419,7 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - In `issues-list.tsx` replace the `wrongCaseFor` line with these, keep the `CourtListenerLink` and `courtListenerLink` use, and place the two lines directly under the citation text. Keep the buttons, the severity words and the `Overridden:` line.
     - _Requirements: 19.1, 19.4, 19.5, 19.6, 19.7, 19.8_
 
-  - [~] 18.2 Show the lines and the link in the Export dialog row
+  - [x] 18.2 Show the lines and the link in the Export dialog row
     - In `export-issues.tsx` render `MismatchLines` and the `CourtListenerLink` for a `wrong_case` row, after the severity words and before the actions. Add an optional `info` prop (the session's usable Display_Info) passed from `export-dialog.tsx` only if the dialog already has it; otherwise use the link built from `clusterId`. Add no new state.
     - Use the existing `text` class of `export-dialog.module.css`; add no colour literal.
     - _Requirements: 19.2, 19.7, 19.8_
@@ -443,11 +443,11 @@ Tasks 1 to 14 are complete and keep their checkboxes. The tasks below are new. T
     - In `packages/engine/src/testing/arb-case-match.ts` add the same fifteen words to `DROPPED`, export it, and keep the existing exclusion of initialisms equal to a Dropped_Word or table key (design D10) so Property 1's generator stays clear of the new words. Do not edit Property 1.
     - _Requirements: 20.4, 20.5_
 
-  - [~] 19.3 Add the list-drift test
+  - [-] 19.3 Add the list-drift test
     - In the verifier tests add a test that the exported engine `DROPPED` list and `DROPPED_WORDS` hold exactly the same words (import the engine testing module the way `packages/verifier/test/case-match.properties.test.ts` does), with a planted-difference case showing it fails.
     - _Requirements: 20.4_
 
-  - [~] 19.4 Write the role-word examples and re-run the worked outcomes
+  - [-] 19.4 Write the role-word examples and re-run the worked outcomes
     - In a new `packages/verifier/test/role-words.test.ts`: `namesMatch("Kowalski, Appellant v. Quimby, Defendants", [the three names of the recorded 174 F.3d 366 fixture])` is `false`; a `lookupWithInfo` over the recorded fixture for a record whose `caseName` the Extractor reads from `Kowalski Appellant v. Quimby Defendants, 174 F.3d 366 (3d Cir. 1999)` gives `wrong_case` with cluster 3011108 (if the Extractor reads no name for that text, pick a text it reads and report the change); a cited party made only of Role_Words is skipped and the other party decides; `No.` in a cited name is dropped.
     - Run `worked-outcomes.test.ts` and `case-match.properties.test.ts` of the verifier. Report in the BUILD_LOG that Henderson, Petersen and Miller stay `wrong_case` and Ashcroft v. Iqbal, Haines v. Kerner, Zicherman (516 U.S. 217) and Chambers stay `verified`, or report any outcome that changes and stop.
     - _Requirements: 20.2, 20.3, 20.6, 20.7_
