@@ -182,7 +182,7 @@ Conventions that apply to every task:
     - **Property 10: UTF-8 text round trip**
     - File `apps/web/test/open-file.properties.test.ts`. `decodeTextFile` over UTF-8 encodings with and without a byte-order mark, with and without `\r\n` and lone `\r`. Update `apps/web/test/static/inventory.test.ts` with the new `// Property 10` comment in this task.
     - **Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.6**
-  - [~] 8.7 Write property test for installed opened text
+  - [-] 8.7 Write property test for installed opened text
     - **Property 11: Opened text installs as one PST span**
     - Same file as 8.6. Any accepted text including Docx_Unsafe_Characters: one `PST` span over the text after `docxSafe`, Declaration `null`, empty run log, no verification time, no override or result, and the removed-character sentence exactly when `removed` is at least 1 with that count. Update `apps/web/test/static/inventory.test.ts` with the new `// Property 11` comment in this task.
     - **Validates: Requirements 8.1, 8.2, 8.6, 22.3, 22.5**
@@ -214,7 +214,7 @@ Conventions that apply to every task:
   - [x] 9.1 README
     - Add one line to "What it does" (a draft can be opened from a `.docx`, `.txt` or `.md` file, and an exported `.docx` reopens with its record), one line to "Demo path" naming Open as the other way in beside Load demo motion, and one sentence to "What leaves your machine": opening a file reads it in your browser; the file is not uploaded. No exclamation mark; the words "opened", "reopened", "record", "pasted" and "changed after it was exported"; no "detected" or "inferred" about authorship. `apps/web/test/static/docs.test.ts` stays green.
     - _Requirements: 17.3, 17.4, 20.1, 20.2, 20.3, 20.9_
-  - [~] 9.2 `docs/KIRO_USAGE.md` rows
+  - [x] 9.2 `docs/KIRO_USAGE.md` rows
     - Add a row for this spec listing `.config.kiro`, `requirements.md`, `design.md`, `tasks.md` and `tasks.meta.json`, and a row for each steering file this spec edits (`ui.md`, `structure.md`, `tech.md` when it changes). Run `pnpm kiro:check` and the inventory static test.
     - _Requirements: 20.4_
   - [x] 9.3 `.kiro/steering/ui.md`
