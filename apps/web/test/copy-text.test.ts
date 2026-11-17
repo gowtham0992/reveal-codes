@@ -7,7 +7,7 @@ const LINK = "https://www.courtlistener.com/opinion/1/roe-v-wade/";
 
 function row(over: Partial<CheckRow>): CheckRow {
   return {
-    key: "k" as CheckRow["key"],
+    key: "k",
     kind: "citation",
     start: 0,
     end: 1,

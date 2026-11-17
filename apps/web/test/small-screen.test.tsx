@@ -31,7 +31,7 @@ describe("SmallScreenPage _Requirements: 9.4, 9.5, 9.6, 9.7_", () => {
       />,
     );
     const nodes = [...container.querySelectorAll("main > p, main a")];
-    expect(nodes.map((n, i) => n.textContent?.slice(0, i === 6 ? 10 : 24))).toEqual([
+    expect(nodes.map((n, i) => n.textContent.slice(0, i === 6 ? 10 : 24))).toEqual([
       SMALL_SCREEN_INTRO.slice(0, 24),
       CHECK_LINK_TEXT.slice(0, 24),
       "See all court rules",

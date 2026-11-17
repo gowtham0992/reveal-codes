@@ -165,7 +165,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - A dated entry recording the Shared_Rows extraction, the `sessionStorage` Hand_Over choice (and the rejected `window.name` and `postMessage`), the `AppServices` additions, and what Kiro got wrong in the requirements pass, or "No Kiro errors".
     - _Requirements: 18.6_
 
-- [~] 11. Final checkpoint
+- [x] 11. Final checkpoint
   - Run, in order: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, the clean-checkout web build (`pnpm --filter @reveal-codes/web build` from a clean clone after `pnpm install`), and `pnpm kiro:check`. Fix any failure. Do not push. Ask the user if questions arise.
   - The author then walks `/check` at 375px and 1280px, on the demo server and then live. That step is manual and not a coding task.
   - _Requirements: 18.8, 18.9_

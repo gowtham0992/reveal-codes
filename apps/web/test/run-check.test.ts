@@ -4,11 +4,7 @@ import type { FetchFn } from "../src/client/api";
 import { FAILED_NOTICE } from "../src/client/verify-summary";
 import { MAX_TEXT_CHARS } from "../src/limits";
 import { CHECKS_BUSY, DOCUMENT_TOO_LONG } from "../src/notices";
-import {
-  BLANK_TEXT_SENTENCE,
-  NO_CITATIONS_SENTENCE,
-  runCheck,
-} from "../src/check/run-check";
+import { BLANK_TEXT_SENTENCE, NO_CITATIONS_SENTENCE, runCheck } from "../src/check/run-check";
 import { ISO, demoMotionText } from "./support/persist-fixtures";
 import { routeFetch } from "./support/route-fetch";
 
