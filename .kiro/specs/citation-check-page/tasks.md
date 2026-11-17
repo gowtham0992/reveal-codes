@@ -58,17 +58,17 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Implement `CheckState`, `CheckAction` and the pure `reduceCheck` with the rules of design section 4: an edit to different text bumps `generation` and sets `stale` when results exist, and `stale` survives a return to the checked text; `finish` for an older generation only clears `running`; a `done` finish clears `stale` and `message`; `clear` empties everything and bumps `generation`.
     - _Requirements: 9.1, 9.4, 9.5, 15.5_
 
-  - [ ]* 4.3 Write property test for the request surface
+  - [x]* 4.3 Write property test for the request surface
     - **Property 2: Nothing more is sent**
     - File `apps/web/test/check-request.properties.test.ts`, one `fc.assert(fc.property(...))`, `// Property 2`, `_Requirements: 11.3, 11.4_` in the `describe` title.
     - Run `runCheck` through a real `createApiClient` on a recording `fetch` (the only fake). Assert: only the four allowed URLs; no request for blank, too-long or citation-free text; otherwise exactly one `/api/verify` request whose body equals `JSON.stringify(buildVerifyBody(pastedDocument(docxSafe(text).text, iso)))`; opinion requests are body-less GETs on cluster ids taken from the verify response; a marker string in prose appears in no URL or body.
     - **Validates: Requirements 5.8, 11.3, 11.4**
 
-  - [ ]* 4.4 Write example tests for `runCheck`
+  - [x]* 4.4 Write example tests for `runCheck`
     - Each refusal makes no request; 429 returns `CHECKS_BUSY`; another failure returns `FAILED_NOTICE`; a discarded flow returns `discarded`; a completed run returns the Document, info and `checkedAt`.
     - _Requirements: 4.2, 4.3, 4.4, 5.5, 5.6_
 
-  - [ ]* 4.5 Write example tests for the reducer
+  - [x]* 4.5 Write example tests for the reducer
     - File `apps/web/test/check-state.test.ts`: every rule of section 4, including the stale flag after restoring the checked text, a dropped older `finish`, and `clear` during a run.
     - _Requirements: 9.1, 9.4, 9.5_
 
@@ -96,12 +96,12 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Export `installOutcome` from `use-open-draft.tsx`. `useHandover(store, svc, gate)` runs after `useAutosave`, calls `takeHandover` once on mount, builds `textOutcome("The draft from the checker", text, { notes: false, note: null })`, dispatches a refusal as the Open flow does, installs at once when the draft is empty, and otherwise opens `ConfirmDialog` with title "Open a draft", message "Discard the current draft and open the draft from the checker?" and confirm label "Discard and open". Cancel keeps the draft. Keep the result in state so a Strict Mode double effect shows one dialog.
     - _Requirements: 12.3, 12.4, 12.5, 12.6, 12.7_
 
-  - [ ]* 6.3 Write tests for the Hand_Over
+  - [-]* 6.3 Write tests for the Hand_Over
     - Files `apps/web/test/handover.test.ts` and `use-handover.test.tsx`: write then take returns the text and a second take returns null; a throwing store returns null or false; install at once on an empty draft as one PST span; the dialog wording on a non-empty draft; cancel keeps the draft and the key stays cleared; one dialog under Strict Mode.
     - _Requirements: 12.3, 12.4, 12.5, 12.6, 12.7_
 
 - [ ] 7. Build the Check_Page
-  - [~] 7.1 Create `apps/web/src/check/use-draft-input.ts`
+  - [-] 7.1 Create `apps/web/src/check/use-draft-input.ts`
     - Implement Open a file through `openFile` unchanged (refusal `notice` and `note` shown unchanged, text kept; success sentence from `checkOpenedMessage`, provenance record ignored), Load the Avianca citations through `api.aviancaCitations()` with `docxSafe` (`AVIANCA_FAILED` on failure), and Clear without a dialog. When the box holds text, Open (after the reader accepts) and the sample open the editor's `ConfirmDialog` with the editor's wording, imported and not retyped. Typing, pasting, Open and Clear make no request.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11_
 

@@ -1,5 +1,10 @@
 {
-  "pbtResults": {},
+  "pbtResults": {
+    "4.3 Write property test for the request surface": {
+      "status": "passed",
+      "lastRunTimestamp": 1794889653286
+    }
+  },
   "executionHistory": {
     "1.1 Create `apps/web/src/client/check-rows.ts` and re-point the editor at it": [
       {
@@ -176,6 +181,11 @@
         "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
         "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
         "timestamp": 1794888812256
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794889543105
       }
     ],
     "7.2 Create `apps/web/src/check/result-list.tsx`": [
@@ -353,6 +363,49 @@
         "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
         "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
         "timestamp": 1794889537992
+      }
+    ],
+    "4.3 Write property test for the request surface": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794889543196
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794889764364
+      }
+    ],
+    "4.4 Write example tests for `runCheck`": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794889543435
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794889764401
+      }
+    ],
+    "4.5 Write example tests for the reducer": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794889544022
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794889764467
+      }
+    ],
+    "6.3 Write tests for the Hand_Over": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794889544461
       }
     ]
   }

@@ -81,6 +81,7 @@ const COPY = {
     confirmLabel: "Replace draft",
   },
 } as const;
+export { COPY as DOCUMENT_CONFIRM_COPY };
 
 function useDialogOpener() {
   const [pending, setPending] = useState<Pending | null>(null);
