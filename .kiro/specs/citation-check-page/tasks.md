@@ -73,7 +73,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - _Requirements: 9.1, 9.4, 9.5_
 
 - [ ] 5. Add Open messages and Copy_Text
-  - [-] 5.1 Add the check-page Open sentence and the `hasNotes` field
+  - [x] 5.1 Add the check-page Open sentence and the `hasNotes` field
     - In `open-messages.ts` add `checkOpenedMessage(name, characters, removed, hasNotes, restored)` reusing `removedSentence` and `NOTES_SENTENCE`. Do not edit `openedMessage`.
     - In `open-outcome.ts` export the notes test and add a `hasNotes` boolean to the `text` outcome. Update existing open-outcome tests only where whole outcomes are compared with `toEqual`.
     - _Requirements: 3.4, 3.5_
