@@ -88,7 +88,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - _Requirements: 10.4, 10.5, 10.6, 10.7_
 
 - [ ] 6. Implement the Hand_Over
-  - [-] 6.1 Create `apps/web/src/handover.ts`
+  - [x] 6.1 Create `apps/web/src/handover.ts`
     - Export `HANDOVER_KEY` (`reveal-codes:check-handover:v1`), `writeHandover(session, text): boolean` (false when the write throws) and `takeHandover(session): string | null` (read, then remove; null for a missing, empty or throwing read; the value is still returned if only the remove throws). This is the only module that calls `setItem` or `removeItem` with the key. No React.
     - _Requirements: 12.3, 12.7, 12.8_
 
