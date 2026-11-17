@@ -153,7 +153,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - "What it does": one line about the Check_Page. "Demo path": one line, on a phone open `/check`. "What leaves your machine": one line consistent with Requirement 11.1. "Limits": reword the desktop-editor line to say the editor needs 1150 pixels and the Check_Page reads from 320px. No exclamation mark; `docs.test.ts` stays green.
     - _Requirements: 11.5, 13.7, 18.1, 18.2, 18.3, 18.4_
 
-  - [-] 10.2 Update `.kiro/steering/ui.md`
+  - [x] 10.2 Update `.kiro/steering/ui.md`
     - Describe `/courts` and `/check` together: the column, the header with the Mark, the links, the Status_Label on the dark ground (CodeLabel in `src/pane/`), and the absence of a width at-rule. Add no Token.
     - _Requirements: 15.3, 18.7_
 
