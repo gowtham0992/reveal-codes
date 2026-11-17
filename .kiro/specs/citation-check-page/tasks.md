@@ -223,7 +223,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - `check-editor-link.test.tsx`: load narrow, widen, the link and the extra clause appear; narrow again, both are gone; the same through the real `resize` event with `defaultServices().viewport`.
     - _Requirements: 22.4, 22.5, 22.9, 23.1, 23.2, 23.3, 23.5_
 
-  - [-] 12.12 Update the docs
+  - [x] 12.12 Update the docs
     - `README.md` "What leaves your machine": reword the `/check` line to say the draft is not stored and, on a screen 800 pixels or wider, that opening it in the editor stores it there; keep the other claims. No exclamation mark; `docs.test.ts` stays green. Requirement 2.4 and 11.1 are superseded by 22 as the requirements follow-up records; edit no earlier requirement text.
     - Run `pnpm kiro:check` for `docs/KIRO_USAGE.md` and add a row only if the inventory asks for one.
     - _Requirements: 22.7, 20.11_
