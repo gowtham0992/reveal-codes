@@ -135,7 +135,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - _Requirements: 13.6, 17.4_
 
 - [ ] 9. Static scans
-  - [-] 9.1 Move shared scan helpers and extend the boundaries scan
+  - [x] 9.1 Move shared scan helpers and extend the boundaries scan
     - Move `sheetViolations` from `static/courts.test.ts` into `static/page-css.ts`; `courts.test.ts` imports it and keeps its assertions, including `sheets` equal to the one Courts file.
     - In `static/boundaries.test.ts` change `COURTS_PAGE` to `/^app\/(?:courts|check)\//`, give `src/check/` `noServer`, `src/client/check-rows.ts` `noReact` and `noServer`, and `src/handover.ts` `noReact`.
     - Confirm the width at-rule count input list; the Check_Page sheets and `code-label.module.css` must contribute zero at-rules and the count of exactly one stays.
