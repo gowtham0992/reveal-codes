@@ -171,7 +171,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Add a test that `compiled` is not earlier than any entry's `retrieved`, with a planted-violation case
     - Add the step to `.kiro/agents/orders-curator.md` and `.kiro/skills/add-standing-order/SKILL.md`: adding or updating an entry sets `compiled` to the latest `retrieved` and runs `pnpm power:build`
     - _Requirements: 23.1, 23.2, 23.3, 23.4_
-  - [-] 10.4 Size the print override table to its content
+  - [x] 10.4 Size the print override table to its content
     - In `print-view.module.css` give the Code and Timestamp columns `white-space: nowrap; width: 1%` and drop the `26ch` and `10ch` min-widths; let Reason take the rest and wrap by word
     - Extend `apps/web/test/print-view-css.test.ts`: the new rules are present and the `26ch` rule fails the test
     - _Requirements: 24.1, 24.2, 24.3_
