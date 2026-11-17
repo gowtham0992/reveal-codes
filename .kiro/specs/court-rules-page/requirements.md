@@ -297,7 +297,7 @@ These requirements come from a walk of the finished build. They change the wordi
 
 1. FOR a Not_In_Force Instrument that has a `superseded_by` value whose Instrument exists, THE Courts_Page SHALL print `Not in force. Replaced by ` followed by a link to that Instrument_Anchor, titled with the replacing Instrument's title, followed by a full stop.
 2. FOR a Not_In_Force Instrument without a replacing Instrument, THE Courts_Page SHALL print the status sentence from the Dataset vocabulary only when that sentence names no field and contains no underscore; otherwise it SHALL print `Not in force.` alone. The Courts_Page SHALL never print the vocabulary sentence for a replaced Instrument.
-3. A test SHALL assert that no text shown on the Courts_Page, for the shipped Dataset, contains a Dataset field name (every key that appears in an entry, in `vocabulary`, and at the top of the file) as a whole word, or any word that contains an underscore. Link targets and attribute values are not shown text.
+3. A test SHALL assert that no text shown on the Courts_Page, for the shipped Dataset, contains a schema-shaped Dataset field name (every key that appears in an entry, in `vocabulary`, and at the top of the file, and that contains an underscore or an interior capital) as a whole word, or any word that contains an underscore. Keys that are ordinary English words (`court`, `text`, `instrument`, `compiled`) are page words and are not checked. Values the Dataset supplies as an entry's content, link targets and attribute values are not shown text.
 
 ### Requirement 19: Judge titles
 

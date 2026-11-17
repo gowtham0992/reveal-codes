@@ -8,7 +8,6 @@ export type CourtsModel = Readonly<{
   repoLinks: RepoLinks | null;
   inactiveIds: readonly string[];
   words: Readonly<{
-    status: OrderVocabulary["status"];
     elements: OrderVocabulary["elements"];
   }>;
   titles: Readonly<Record<string, string>>;
@@ -34,7 +33,6 @@ export function buildCourtsModel(dataset: OrderDataset, repoBase: string | null)
     repoLinks: buildRepoLinks(repoBase),
     inactiveIds: dataset.entries.filter((e) => e.status !== "current").map((e) => e.id),
     words: {
-      status: dataset.vocabulary.status,
       elements: dataset.vocabulary.elements,
     },
     titles,

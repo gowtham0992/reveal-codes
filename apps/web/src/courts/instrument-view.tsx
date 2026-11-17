@@ -1,6 +1,6 @@
 import type { OrderEntry } from "@reveal-codes/export";
 import styles from "../../app/courts/courts.module.css";
-import { appliesWords, curlyQuoted, kindWords, placementWords } from "../order-copy";
+import { appliesWords, curlyQuoted, judgeLine, kindWords, placementWords } from "../order-copy";
 import type { CourtsModel } from "./view-model";
 
 export type InstrumentViewProps = Readonly<{
@@ -14,18 +14,18 @@ function SupersededBy(props: Readonly<{ id: string; titles: CourtsModel["titles"
   if (title === undefined) return null;
   return (
     <>
-      {" "}
-      <a href={`#${props.id}`}>{title}</a>
+      {" Replaced by "}
+      <a href={`#${props.id}`}>{title}</a>.
     </>
   );
 }
 
 function NotInForce(props: InstrumentViewProps) {
-  const { entry, words, titles } = props;
+  const { entry, titles } = props;
   if (entry.status === "current") return null;
   return (
     <p className={styles["status"]}>
-      Not in force. {words.status[entry.status]}
+      Not in force.
       {entry.superseded_by === undefined ? null : (
         <SupersededBy id={entry.superseded_by} titles={titles} />
       )}
@@ -49,15 +49,12 @@ function Elements(props: InstrumentViewProps) {
 export function InstrumentView(props: InstrumentViewProps) {
   const { entry } = props;
   const title = entry.title === "" ? entry.instrument : entry.title;
+  const showInstrument = entry.title !== "" && entry.title !== entry.instrument;
   return (
     <article id={entry.id} className={styles["instrument"]}>
       <h3 className={styles["instrumentTitle"]}>{title}</h3>
-      <p className={styles["line"]}>{entry.instrument}</p>
-      {entry.judge === null ? null : (
-        <p className={styles["line"]}>
-          {entry.judge.name}, {entry.judge.role}
-        </p>
-      )}
+      {showInstrument ? <p className={styles["line"]}>{entry.instrument}</p> : null}
+      {entry.judge === null ? null : <p className={styles["line"]}>{judgeLine(entry.judge)}</p>}
       <p className={styles["line"]}>
         {kindWords[entry.kind]}. Applies to {appliesWords[entry.applies_to]}.
       </p>

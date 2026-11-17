@@ -64,6 +64,17 @@ describe("/courts page content _Requirements: 1.3, 2.2, 4.10, 4.11, 5.1, 5.2, 7.
     }
   });
 
+  it("says Not in force. and no vocabulary status sentence _Requirements: 18.1, 18.2_", () => {
+    const html = renderPage("");
+    for (const entry of ORDERS.entries.filter((e) => e.superseded_by !== undefined)) {
+      const target = escapeHtml(entry.superseded_by ?? "");
+      expect(html, entry.id).toContain(`Not in force.<!-- --> Replaced by <a href="#${target}">`);
+    }
+    for (const sentence of Object.values(ORDERS.vocabulary.status)) {
+      expect(html).not.toContain(escapeHtml(sentence));
+    }
+  });
+
   it("gives each in-force instrument its percent-encoded Order_Link and no other instrument one", () => {
     const html = renderPage("");
     for (const entry of IN_FORCE) {

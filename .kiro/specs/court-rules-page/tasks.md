@@ -175,7 +175,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - In `print-view.module.css` give the Code and Timestamp columns `white-space: nowrap; width: 1%` and drop the `26ch` and `10ch` min-widths; let Reason take the rest and wrap by word
     - Extend `apps/web/test/print-view-css.test.ts`: the new rules are present and the `26ch` rule fails the test
     - _Requirements: 24.1, 24.2, 24.3_
-  - [~] 10.5 Page wording and repeated title
+  - [x] 10.5 Page wording and repeated title
     - In `instrument-view.tsx` print `Not in force.` then `Replaced by <link>.` from the replacing title; stop printing the vocabulary sentence; print the judge with `judgeLine`; print the instrument line only when it differs from the title; remove `words.status` from the view model if nothing else reads it
     - Add tests: judge line of one entry per role and the Court of International Trade `district` judge; no two lines in an article repeat; no shown text on the page contains a dataset field name as a whole word or any word with an underscore (shipped Dataset, tags and attributes excluded); update `courts-page.test.tsx` for the new wording
     - _Requirements: 18.1, 18.2, 18.3, 19.1, 19.4, 20.1, 20.2_
