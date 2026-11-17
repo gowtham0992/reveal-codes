@@ -18,6 +18,7 @@ import { readDocxParagraphs } from "./support/docx-text";
 import { EXPORT_NOW, storeWith } from "./support/export-fixtures";
 import { createMemoryStorage } from "./support/memory-storage";
 import { createFakeViewport } from "./support/viewport";
+import { fakeBrowserServices } from "./support/browser-services";
 import type { MemoryStorage } from "./support/memory-storage";
 import { modeApi } from "./support/mode-fetch";
 import {
@@ -77,6 +78,7 @@ function services(storage: MemoryStorage, downloads: Downloaded[]): AppServices 
     },
     openPrint: () => true,
     viewport: createFakeViewport(),
+    ...fakeBrowserServices(),
   };
 }
 

@@ -18,6 +18,7 @@ import type { MemoryStorage } from "./support/memory-storage";
 import { modeApi } from "./support/mode-fetch";
 import { act, fireEvent, renderUi, screen, within } from "./support/render";
 import { createFakeViewport } from "./support/viewport";
+import { fakeBrowserServices } from "./support/browser-services";
 
 const ISO = "2026-11-02T12:00:00.000Z";
 const FIXTURE = resolve(__dirname, "../../../packages/engine/fixtures/avianca-citations.txt");
@@ -70,6 +71,7 @@ async function mount(stored: Document | null, reply: "fixture" | "fail" = "fixtu
     download: () => undefined,
     openPrint: () => true,
     viewport: createFakeViewport(),
+    ...fakeBrowserServices(),
   };
   await act(async () => {
     renderUi(<AppShell services={services} />);

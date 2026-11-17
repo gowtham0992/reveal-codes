@@ -52,6 +52,15 @@ export type AppServices = Readonly<{
   /** True when the print tab opened. */
   openPrint: () => boolean;
   viewport: Viewport;
+  /** Per-tab storage, used only for the checker's hand-over to the editor. */
+  session: StorageLike;
+  clipboard: Clipboard;
+}>;
+
+/** Clipboard access; `available` is false where the browser offers none. */
+export type Clipboard = Readonly<{
+  available: () => boolean;
+  write: (text: string) => Promise<void>;
 }>;
 
 /** No `noopener` feature: it makes `window.open` return null even on success. */
@@ -89,5 +98,18 @@ export function defaultServices(): AppServices {
     },
     openPrint: openPrintTab,
     viewport: browserViewport(),
+    session: {
+      getItem: (key) => window.sessionStorage.getItem(key),
+      setItem: (key, value) => {
+        window.sessionStorage.setItem(key, value);
+      },
+      removeItem: (key) => {
+        window.sessionStorage.removeItem(key);
+      },
+    },
+    clipboard: {
+      available: () => typeof navigator !== "undefined" && "clipboard" in navigator,
+      write: (text) => navigator.clipboard.writeText(text),
+    },
   };
 }

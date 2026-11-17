@@ -13,6 +13,7 @@ import { createMemoryStorage } from "./support/memory-storage";
 import { modeApi } from "./support/mode-fetch";
 import { act, fireEvent, renderUi, screen, within } from "./support/render";
 import { createFakeViewport } from "./support/viewport";
+import { fakeBrowserServices } from "./support/browser-services";
 const ISO = "2026-11-02T12:00:00.000Z";
 const CITING = "See Roe v. Wade, 410 U.S. 113 (1973).";
 function citingStorage() {
@@ -49,6 +50,7 @@ function servicesOf(timers: ManualTimers, api: ApiClient): AppServices {
     download: () => undefined,
     openPrint: () => true,
     viewport: createFakeViewport(),
+    ...fakeBrowserServices(),
   };
 }
 async function mountAndVerify(timers: ManualTimers, api: ApiClient): Promise<void> {

@@ -17,6 +17,7 @@ import type { MemoryStorage } from "./support/memory-storage";
 import { modeApi } from "./support/mode-fetch";
 import { act, fireEvent, renderUi, screen, within } from "./support/render";
 import { createFakeViewport } from "./support/viewport";
+import { fakeBrowserServices } from "./support/browser-services";
 
 const ISO = "2026-11-02T12:00:00.000Z";
 const FIXTURES = resolve(__dirname, "../../../packages/engine/fixtures");
@@ -67,6 +68,7 @@ async function mount(seed: Declaration | null): Promise<Mounted> {
     download: () => undefined,
     openPrint: () => true,
     viewport: createFakeViewport(),
+    ...fakeBrowserServices(),
   };
   await act(async () => {
     renderUi(<AppShell services={services} />);

@@ -13,6 +13,7 @@ import { createManualTimers } from "./support/clock";
 import { createMemoryStorage } from "./support/memory-storage";
 import type { MemoryStorage } from "./support/memory-storage";
 import { createFakeViewport } from "./support/viewport";
+import { fakeBrowserServices } from "./support/browser-services";
 import { modeApi } from "./support/mode-fetch";
 import { act, renderUi } from "./support/render";
 
@@ -69,6 +70,7 @@ function servicesFor(storage: MemoryStorage, width: number): AppServices {
     download: () => undefined,
     openPrint: () => true,
     viewport: createFakeViewport(width),
+    ...fakeBrowserServices(),
   };
 }
 

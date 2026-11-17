@@ -13,6 +13,7 @@ import { modeApi } from "./support/mode-fetch";
 import { ISO } from "./support/persist-fixtures";
 import { act, fireEvent, renderUi, screen, within } from "./support/render";
 import { createFakeViewport } from "./support/viewport";
+import { fakeBrowserServices } from "./support/browser-services";
 
 function services(storage: MemoryStorage): AppServices {
   const timers = createManualTimers();
@@ -27,6 +28,7 @@ function services(storage: MemoryStorage): AppServices {
     download: () => undefined,
     openPrint: () => true,
     viewport: createFakeViewport(),
+    ...fakeBrowserServices(),
   };
 }
 

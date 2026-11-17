@@ -7,6 +7,7 @@ import { createManualTimers } from "./support/clock";
 import { readDocxParagraphs } from "./support/docx-text";
 import { createMemoryStorage } from "./support/memory-storage";
 import { createFakeViewport } from "./support/viewport";
+import { fakeBrowserServices } from "./support/browser-services";
 import { modeApi } from "./support/mode-fetch";
 import { act, fireEvent, renderUi, screen, waitFor, within } from "./support/render";
 
@@ -34,6 +35,7 @@ async function mountDemo(downloads: Downloaded[]): Promise<void> {
     },
     openPrint: () => true,
     viewport: createFakeViewport(),
+    ...fakeBrowserServices(),
   };
   await act(async () => {
     renderUi(<AppShell services={services} />);

@@ -9,7 +9,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
 ## Tasks
 
 - [ ] 1. Extract Shared_Rows with the editor unchanged
-  - [ ] 1.1 Create `apps/web/src/client/check-rows.ts` and re-point the editor at it
+  - [x] 1.1 Create `apps/web/src/client/check-rows.ts` and re-point the editor at it
     - Move `SEVERITY` (as `STATUS_WORDS`, plus "found" and "match"), `shorten`, `MAX_ISSUE_TEXT`, `divergenceFor`, `WrongCase` and `wrongCaseFor` out of `issues-list.tsx`, and `foundText` out of `resolved.ts`. Move the tally words of `verify-summary.ts` into the shared word table.
     - Add `RowCode`, `CheckRow`, `NEXT_SENTENCES` (the six sentences of Decision 1, defined once), `checkRows(document, info)` and `displayFor(clusterId, info)`.
     - `checkRows` emits one row per full citation, per orphan short form and per quotation, sorted by `(start, kind)` with a citation before a quotation at an equal start. It calls `issues(document)` for the failing rows and adds the verified citations and matching quotes. It does not touch the Engine.
@@ -17,7 +17,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - The module has no React and no Store import. Run the existing `issues-list`, `resolved` and `verify-summary` tests and confirm they pass with no edit.
     - _Requirements: 6.11, 6.12, 7.3, 7.4, 8.4_
 
-  - [ ] 1.2 Add the shared arbitraries for check results
+  - [~] 1.2 Add the shared arbitraries for check results
     - Create `packages/engine/src/testing/arb-check-results.ts` with arbitraries for verification results per citation, quote results per quotation, and Display_Info per cluster. Export it from `packages/engine/src/testing/arbitraries.ts`.
     - Reuse `arb-document.ts`, `arb-text-citations.ts` and `arb-quote-groups.ts` for Documents and text. Add no arbitrary that duplicates them.
     - _Requirements: 17.8_
@@ -32,14 +32,14 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - `displayFor` returns info only when `info.clusterId` matches; `NEXT_SENTENCES` has six entries and none contains an exclamation mark; a linked short form yields no row; a wrong-case row carries `mismatch` lines and an `href`.
     - _Requirements: 6.6, 6.7, 7.3, 7.4_
 
-- [ ] 2. Extend AppServices with `session` and `clipboard`
-  - [ ] 2.1 Add the two service fields and fix every complete fake
+- [x] 2. Extend AppServices with `session` and `clipboard`
+  - [x] 2.1 Add the two service fields and fix every complete fake
     - In `apps/web/src/services.ts` add `session: StorageLike` and `clipboard: { available(): boolean; write(text): Promise<void> }` to `AppServices`. `defaultServices` builds both lazily, reading `window.sessionStorage` and `navigator.clipboard` only inside the methods, so server rendering never touches `window`.
     - Update the shared test helpers so every fake `AppServices` has an in-memory `session` (from `memory-storage.ts`) and a controllable clipboard. Run `pnpm typecheck` and fix each object it names.
     - _Requirements: 10.2, 12.7_
 
 - [ ] 3. Create the Status_Label component
-  - [ ] 3.1 Create `apps/web/src/pane/code-label.tsx` and `code-label.module.css`
+  - [-] 3.1 Create `apps/web/src/pane/code-label.tsx` and `code-label.module.css`
     - `CodeLabel({ code })` renders `<span>` with the code text unchanged. Family and failing flag come from `codeFamily` and `isFailingOpener`; the class from `codeClass`. The stylesheet adds only the `#0f2766` ground, the `--fail` ground with a 2px `--fail-ring` outline for failing codes, IBM Plex Mono at weight 600 (700 for failing), `display: inline-block` and `max-width: 100%`. No Token is added.
     - If the colour scan exempts `src/pane/` per file, add the new stylesheet to its list.
     - _Requirements: 6.5, 6.13, 15.3, 15.4_
@@ -49,12 +49,12 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - _Requirements: 6.5, 6.13_
 
 - [ ] 4. Implement Check_Run and the state machine
-  - [ ] 4.1 Create `apps/web/src/check/run-check.ts`
+  - [~] 4.1 Create `apps/web/src/check/run-check.ts`
     - Implement `runCheck({ text, api, now })` in the design's order: `docxSafe`; `MAX_TEXT_CHARS` check giving `DOCUMENT_TOO_LONG`; blank check giving "Add some text to check."; `pastedDocument` (a string result becomes the message); `hasFullRecord` false giving "No citations were found in this draft."; then a private `createStore(now)`, `replace`, and the unchanged `runVerifyFlow`.
     - Map `failed` to `{ kind: "message", text: outcome.failure }`, `discarded` to `{ kind: "discarded" }` and `completed` to `done` with the read-back Document, the info map and `checkedAt`. Export the two new sentences as constants. The function never rejects and has no `try/catch`.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 5.1, 5.5, 5.6, 5.9_
 
-  - [ ] 4.2 Create `apps/web/src/check/check-state.ts`
+  - [~] 4.2 Create `apps/web/src/check/check-state.ts`
     - Implement `CheckState`, `CheckAction` and the pure `reduceCheck` with the rules of design section 4: an edit to different text bumps `generation` and sets `stale` when results exist, and `stale` survives a return to the checked text; `finish` for an older generation only clears `running`; a `done` finish clears `stale` and `message`; `clear` empties everything and bumps `generation`.
     - _Requirements: 9.1, 9.4, 9.5, 15.5_
 
@@ -73,12 +73,12 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - _Requirements: 9.1, 9.4, 9.5_
 
 - [ ] 5. Add Open messages and Copy_Text
-  - [ ] 5.1 Add the check-page Open sentence and the `hasNotes` field
+  - [-] 5.1 Add the check-page Open sentence and the `hasNotes` field
     - In `open-messages.ts` add `checkOpenedMessage(name, characters, removed, hasNotes, restored)` reusing `removedSentence` and `NOTES_SENTENCE`. Do not edit `openedMessage`.
     - In `open-outcome.ts` export the notes test and add a `hasNotes` boolean to the `text` outcome. Update existing open-outcome tests only where whole outcomes are compared with `toEqual`.
     - _Requirements: 3.4, 3.5_
 
-  - [ ] 5.2 Create `apps/web/src/check/copy-text.ts` and add `localDate`
+  - [~] 5.2 Create `apps/web/src/check/copy-text.ts` and add `localDate`
     - Add `localDate(iso)` beside `localTime` in `verify-summary.ts` (local `YYYY-MM-DD`, null when unparseable).
     - Implement `copyText(rows, citationsLine, date)`: first line the Citations line; one line per row, "<Status words, capitalised>: <text as written>." plus " On record: <case, year>. <address>" where present (for a wrong-case row the case is taken from the last `mismatch` line); last line "Checked on <date> with Reveal Codes against CourtListener." (or the date-free form when `date` is null). No pipe character, no doubled period.
     - _Requirements: 10.3, 10.4, 10.5, 10.6, 10.7_
@@ -88,11 +88,11 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - _Requirements: 10.4, 10.5, 10.6, 10.7_
 
 - [ ] 6. Implement the Hand_Over
-  - [ ] 6.1 Create `apps/web/src/handover.ts`
+  - [-] 6.1 Create `apps/web/src/handover.ts`
     - Export `HANDOVER_KEY` (`reveal-codes:check-handover:v1`), `writeHandover(session, text): boolean` (false when the write throws) and `takeHandover(session): string | null` (read, then remove; null for a missing, empty or throwing read; the value is still returned if only the remove throws). This is the only module that calls `setItem` or `removeItem` with the key. No React.
     - _Requirements: 12.3, 12.7, 12.8_
 
-  - [ ] 6.2 Create `apps/web/src/components/use-handover.tsx` and wire it into the Shell
+  - [~] 6.2 Create `apps/web/src/components/use-handover.tsx` and wire it into the Shell
     - Export `installOutcome` from `use-open-draft.tsx`. `useHandover(store, svc, gate)` runs after `useAutosave`, calls `takeHandover` once on mount, builds `textOutcome("The draft from the checker", text, { notes: false, note: null })`, dispatches a refusal as the Open flow does, installs at once when the draft is empty, and otherwise opens `ConfirmDialog` with title "Open a draft", message "Discard the current draft and open the draft from the checker?" and confirm label "Discard and open". Cancel keeps the draft. Keep the result in state so a Strict Mode double effect shows one dialog.
     - _Requirements: 12.3, 12.4, 12.5, 12.6, 12.7_
 
@@ -101,15 +101,15 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - _Requirements: 12.3, 12.4, 12.5, 12.6, 12.7_
 
 - [ ] 7. Build the Check_Page
-  - [ ] 7.1 Create `apps/web/src/check/use-draft-input.ts`
+  - [~] 7.1 Create `apps/web/src/check/use-draft-input.ts`
     - Implement Open a file through `openFile` unchanged (refusal `notice` and `note` shown unchanged, text kept; success sentence from `checkOpenedMessage`, provenance record ignored), Load the Avianca citations through `api.aviancaCitations()` with `docxSafe` (`AVIANCA_FAILED` on failure), and Clear without a dialog. When the box holds text, Open (after the reader accepts) and the sample open the editor's `ConfirmDialog` with the editor's wording, imported and not retyped. Typing, pasting, Open and Clear make no request.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11_
 
-  - [ ] 7.2 Create `apps/web/src/check/result-list.tsx`
+  - [~] 7.2 Create `apps/web/src/check/result-list.tsx`
     - Map `checkRows` to `<li>` blocks: `CodeLabel`, `row.words`, `shorten(row.text)`, `row.found`, the existing `MismatchLines`, "Diverges at: " plus `row.divergence`, `CourtListenerLink` for `row.href`, and `row.next`. A passing row shows no Next_Sentence. No string literal duplicates an Editor_Sentence or a status word.
     - _Requirements: 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10, 7.1, 7.5, 8.3_
 
-  - [ ] 7.3 Create the route, the page and its stylesheet
+  - [~] 7.3 Create the route, the page and its stylesheet
     - Create `apps/web/app/check/page.tsx` (metadata title and description of Decision 12, imports only from `src/` and its own folder), `apps/web/app/check/check.module.css` (the Courts_Page structure, `.page { overflow-wrap: anywhere }`, `.group { max-width: 100% }`, wrapping action row, Tokens only, no width at-rule, no fixed width beyond `100%`, `auto`, `min-content`, `max-content`, `0`) and `apps/web/src/check/check-page.tsx`.
     - `CheckPage` uses `useReducer(reduceCheck, ...)` and `useState(defaultServices)`. Render, in order: header with the Mark and wordmark, the single `h1`, the what-it-does sentence, the privacy sentence, the not-stored sentence, the labelled Draft_Box, the actions (Check citations as the only `data-primary`), the single `role="status"` region, and the links to `/courts` and `/`.
     - The status region holds "Verifying…", `WAITING_TEXT` after `WAITING_AFTER_MS` through `svc.setTimer` (cleared on finish, unmount and clear), the refusal or failure message, `DEMO_MODE_LINE` from `useModeResult`, the Summary_Line from `summaryLines` and `furtherLine`, and the results, rendered in one commit. While stale it shows the out-of-date sentence, "Check again" and an "Earlier results" label, and withholds Copy results and the Editor_Link. The Draft_Box stays editable during a run.
@@ -125,23 +125,23 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - _Requirements: 12.1, 12.2, 12.3, 12.8, 17.4_
 
 - [ ] 8. Small-screen page and other ways in
-  - [ ] 8.1 Change the Small_Screen_Page and the Courts_Page
+  - [~] 8.1 Change the Small_Screen_Page and the Courts_Page
     - Replace `SMALL_SCREEN_SENTENCES` with `SMALL_SCREEN_INTRO` and `SMALL_SCREEN_EDITOR_NOTE`. Order: intro sentence; `/check` link "Check the citations in a draft" (plain, not `data-primary`); `COURT_RULES_LONG`; video and source links when set; the editor note; the Selection_Line when set.
     - Add `<a href="/check">Check the citations in a draft</a>` beside "Open the editor" on the Courts_Page. Change nothing in the Toolbar.
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 14.1, 14.2, 14.4_
 
-  - [ ] 8.2 Update the tests that name the old sentences
+  - [~] 8.2 Update the tests that name the old sentences
     - Update `small-screen.test.tsx`, `app-shell.test.tsx` and the Courts_Page test to the new order and wording, and add a Small_Screen_Page order example.
     - _Requirements: 13.6, 17.4_
 
 - [ ] 9. Static scans
-  - [ ] 9.1 Move shared scan helpers and extend the boundaries scan
+  - [~] 9.1 Move shared scan helpers and extend the boundaries scan
     - Move `sheetViolations` from `static/courts.test.ts` into `static/page-css.ts`; `courts.test.ts` imports it and keeps its assertions, including `sheets` equal to the one Courts file.
     - In `static/boundaries.test.ts` change `COURTS_PAGE` to `/^app\/(?:courts|check)\//`, give `src/check/` `noServer`, `src/client/check-rows.ts` `noReact` and `noServer`, and `src/handover.ts` `noReact`.
     - Confirm the width at-rule count input list; the Check_Page sheets and `code-label.module.css` must contribute zero at-rules and the count of exactly one stays.
     - _Requirements: 16.1, 16.3, 16.4_
 
-  - [ ] 9.2 Add the Check_Page scans
+  - [~] 9.2 Add the Check_Page scans
     - Create `static/check.test.ts`: scan `app/check/*.css` and `src/check/*.css` with `sheetViolations` and `colourViolations`; assert `.page { overflow-wrap: anywhere }`, `.group { max-width: 100% }`, the desk and paper column, 34px links and the text-area focus border; fail on a width at-rule or `px` width; scan `app/check/` and `src/check/` sources for `<img`, `<svg`, Extended_Pictographic characters, `localStorage`, `sessionStorage`, `document.cookie` and `indexedDB`.
     - Create `static/check-literals.test.ts`: no literal in `app/check/` or `src/check/` equals or contains an Editor_Sentence or a `STATUS_WORDS` value, and the sources import the owning modules; include a planted-violation example.
     - Extend `static/draft-storage-writes.test.ts` so `HANDOVER_KEY` and its `setItem` and `removeItem` calls appear only in `src/handover.ts` and its tests, with a planted-violation example.
@@ -149,23 +149,23 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - _Requirements: 3.10, 8.3, 16.1, 16.2, 16.4, 16.5, 17.5_
 
 - [ ] 10. Documentation
-  - [ ] 10.1 Update `README.md`
+  - [~] 10.1 Update `README.md`
     - "What it does": one line about the Check_Page. "Demo path": one line, on a phone open `/check`. "What leaves your machine": one line consistent with Requirement 11.1. "Limits": reword the desktop-editor line to say the editor needs 1150 pixels and the Check_Page reads from 320px. No exclamation mark; `docs.test.ts` stays green.
     - _Requirements: 11.5, 13.7, 18.1, 18.2, 18.3, 18.4_
 
-  - [ ] 10.2 Update `.kiro/steering/ui.md`
+  - [~] 10.2 Update `.kiro/steering/ui.md`
     - Describe `/courts` and `/check` together: the column, the header with the Mark, the links, the Status_Label on the dark ground (CodeLabel in `src/pane/`), and the absence of a width at-rule. Add no Token.
     - _Requirements: 15.3, 18.7_
 
-  - [ ] 10.3 Update `docs/KIRO_USAGE.md`
+  - [~] 10.3 Update `docs/KIRO_USAGE.md`
     - Add a row for this spec listing `.config.kiro`, `requirements.md`, `design.md`, `tasks.md` and `tasks.meta.json`, and a row for `ui.md`. Run `pnpm kiro:check` for the inventory.
     - _Requirements: 18.5_
 
-  - [ ] 10.4 Add the `BUILD_LOG.md` entry
+  - [~] 10.4 Add the `BUILD_LOG.md` entry
     - A dated entry recording the Shared_Rows extraction, the `sessionStorage` Hand_Over choice (and the rejected `window.name` and `postMessage`), the `AppServices` additions, and what Kiro got wrong in the requirements pass, or "No Kiro errors".
     - _Requirements: 18.6_
 
-- [ ] 11. Final checkpoint
+- [~] 11. Final checkpoint
   - Run, in order: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, the clean-checkout web build (`pnpm --filter @reveal-codes/web build` from a clean clone after `pnpm install`), and `pnpm kiro:check`. Fix any failure. Do not push. Ask the user if questions arise.
   - The author then walks `/check` at 375px and 1280px, on the demo server and then live. That step is manual and not a coding task.
   - _Requirements: 18.8, 18.9_

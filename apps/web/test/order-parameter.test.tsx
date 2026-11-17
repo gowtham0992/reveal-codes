@@ -12,6 +12,7 @@ import { modeApi } from "./support/mode-fetch";
 import { entryOf } from "./support/order-fixtures";
 import { act, renderUi, screen, within } from "./support/render";
 import { createFakeViewport } from "./support/viewport";
+import { fakeBrowserServices } from "./support/browser-services";
 import { ORDERS } from "@reveal-codes/export";
 
 const VALID = "sdohio-newman";
@@ -31,6 +32,7 @@ function services(storage: MemoryStorage, width: number): AppServices {
     download: () => undefined,
     openPrint: () => true,
     viewport: createFakeViewport(width),
+    ...fakeBrowserServices(),
   };
 }
 

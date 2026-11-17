@@ -15,6 +15,7 @@ import { createManualTimers } from "./support/clock";
 import type { ManualTimers } from "./support/clock";
 import { createMemoryStorage } from "./support/memory-storage";
 import { createFakeViewport } from "./support/viewport";
+import { fakeBrowserServices } from "./support/browser-services";
 import type { MemoryStorage } from "./support/memory-storage";
 import { offsetToPos } from "../src/editor/offsets";
 import { act, fireEvent, renderUi, screen, within } from "./support/render";
@@ -59,6 +60,7 @@ function fixture(
     download: () => undefined,
     openPrint: () => true,
     viewport: createFakeViewport(),
+    ...fakeBrowserServices(),
   };
   return { services, storage, timers };
 }

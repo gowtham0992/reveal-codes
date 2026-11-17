@@ -16,6 +16,7 @@ import { modeApi } from "./support/mode-fetch";
 import { humanDocument } from "./support/order-fixtures";
 import { act, fireEvent, renderUi, screen } from "./support/render";
 import { createFakeViewport } from "./support/viewport";
+import { fakeBrowserServices } from "./support/browser-services";
 
 function useHarnessServices() {
   const storage = useMemo(() => createMemoryStorage(), []);
@@ -31,6 +32,7 @@ function useHarnessServices() {
     download: () => undefined,
     openPrint: () => true,
     viewport: createFakeViewport(),
+    ...fakeBrowserServices(),
   };
   return { storage, svc };
 }

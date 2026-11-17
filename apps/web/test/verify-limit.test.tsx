@@ -11,6 +11,7 @@ import { createMemoryStorage } from "./support/memory-storage";
 import { modeApi } from "./support/mode-fetch";
 import { act, fireEvent, renderUi, screen, within } from "./support/render";
 import { createFakeViewport } from "./support/viewport";
+import { fakeBrowserServices } from "./support/browser-services";
 
 const ISO = "2026-11-02T12:00:00.000Z";
 const SENTENCE = "Too many checks from this address. Try again in a moment.";
@@ -43,6 +44,7 @@ function services(api: ApiClient): AppServices {
     download: () => undefined,
     openPrint: () => true,
     viewport: createFakeViewport(),
+    ...fakeBrowserServices(),
   };
 }
 async function settle(): Promise<void> {

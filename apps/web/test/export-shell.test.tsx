@@ -9,6 +9,7 @@ import { createManualTimers } from "./support/clock";
 import { pastedAiDeclaration } from "./support/export-fixtures";
 import { createMemoryStorage } from "./support/memory-storage";
 import { createFakeViewport } from "./support/viewport";
+import { fakeBrowserServices } from "./support/browser-services";
 import { modeApi } from "./support/mode-fetch";
 import { act, fireEvent, renderUi, screen, within } from "./support/render";
 
@@ -56,6 +57,7 @@ async function mount(text: string, options: MountOptions = {}) {
     download: options.download ?? (() => undefined),
     openPrint: options.openPrint ?? (() => true),
     viewport: createFakeViewport(),
+    ...fakeBrowserServices(),
   };
   await act(async () => {
     renderUi(<AppShell services={services} />);

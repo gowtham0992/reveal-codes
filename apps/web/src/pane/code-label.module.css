@@ -1,0 +1,13 @@
+.label {
+  background: #0f2766;
+  display: inline-block;
+  font-family: var(--font-pane);
+  font-weight: 600;
+  max-width: 100%;
+}
+
+.fail {
+  background: var(--fail);
+  font-weight: 700;
+  outline: 2px solid var(--fail-ring);
+}

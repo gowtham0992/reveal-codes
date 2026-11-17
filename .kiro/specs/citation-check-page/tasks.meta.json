@@ -1,0 +1,201 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Create `apps/web/src/client/check-rows.ts` and re-point the editor at it": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888811865
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888817105
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794889009641
+      }
+    ],
+    "1.2 Add the shared arbitraries for check results": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888811924
+      }
+    ],
+    "2.1 Add the two service fields and fix every complete fake": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812007
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888817136
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794889009680
+      }
+    ],
+    "3.1 Create `apps/web/src/pane/code-label.tsx` and `code-label.module.css`": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812033
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888817796
+      }
+    ],
+    "4.1 Create `apps/web/src/check/run-check.ts`": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812060
+      }
+    ],
+    "4.2 Create `apps/web/src/check/check-state.ts`": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812088
+      }
+    ],
+    "5.1 Add the check-page Open sentence and the `hasNotes` field": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812120
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888818646
+      }
+    ],
+    "5.2 Create `apps/web/src/check/copy-text.ts` and add `localDate`": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812149
+      }
+    ],
+    "6.1 Create `apps/web/src/handover.ts`": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812181
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888818877
+      }
+    ],
+    "6.2 Create `apps/web/src/components/use-handover.tsx` and wire it into the Shell": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812234
+      }
+    ],
+    "7.1 Create `apps/web/src/check/use-draft-input.ts`": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812256
+      }
+    ],
+    "7.2 Create `apps/web/src/check/result-list.tsx`": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812275
+      }
+    ],
+    "7.3 Create the route, the page and its stylesheet": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812306
+      }
+    ],
+    "8.1 Change the Small_Screen_Page and the Courts_Page": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812332
+      }
+    ],
+    "8.2 Update the tests that name the old sentences": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812357
+      }
+    ],
+    "9.1 Move shared scan helpers and extend the boundaries scan": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812378
+      }
+    ],
+    "9.2 Add the Check_Page scans": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812401
+      }
+    ],
+    "10.1 Update `README.md`": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812423
+      }
+    ],
+    "10.2 Update `.kiro/steering/ui.md`": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812445
+      }
+    ],
+    "10.3 Update `docs/KIRO_USAGE.md`": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812489
+      }
+    ],
+    "10.4 Add the `BUILD_LOG.md` entry": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812510
+      }
+    ],
+    "11. Final checkpoint": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794888812531
+      }
+    ],
+    "2. Extend AppServices with `session` and `clipboard`": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794889009712
+      }
+    ]
+  }
+}

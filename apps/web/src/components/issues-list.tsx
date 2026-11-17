@@ -1,65 +1,31 @@
 import { blockingIssues, issues } from "@reveal-codes/engine";
 import type { Document, Issue, IssueCode, IssueKey } from "@reveal-codes/engine";
-import { courtListenerLink } from "@reveal-codes/verifier/link";
 import type { DisplayInfo } from "@reveal-codes/verifier/link";
-import { divergenceWords } from "../client/divergence";
-import { mismatchLines, mismatchOf } from "../client/mismatch";
+import {
+  MAX_ISSUE_TEXT,
+  STATUS_WORDS,
+  divergenceFor,
+  shorten,
+  wrongCaseFor,
+} from "../client/check-rows";
+import type { WrongCase } from "../client/check-rows";
 import { isFailingOpener } from "../pane/failing";
 import { CourtListenerLink } from "./courtlistener-link";
 import { MismatchLines } from "./mismatch-lines";
 import styles from "./issues-list.module.css";
 
-export const MAX_ISSUE_TEXT = 80;
+export { MAX_ISSUE_TEXT, shorten, wrongCaseFor };
+export type { WrongCase };
 export const EMPTY_LINE = "No issues.";
-
-const SEVERITY: Readonly<Record<IssueCode, string>> = {
-  "CIT ✘": "not found",
-  "CIT ≠": "wrong case",
-  "CIT ?": "ambiguous",
-  "CIT …": "unchecked",
-  "QUO ✘": "quote not found in opinion",
-  "QUO …": "quote unchecked",
-};
 
 /** The words under a row's chip: `blocking, wrong case` or `overridden, wrong case`. */
 export function issueWords(code: IssueCode, blocking: boolean): string {
-  return `${blocking ? "blocking" : "overridden"}, ${SEVERITY[code]}`;
-}
-
-/** Text shortened to at most 80 characters (code points), the last being an ellipsis. */
-export function shorten(text: string): string {
-  const points = Array.from(text);
-  if (points.length <= MAX_ISSUE_TEXT) return text;
-  return `${points.slice(0, MAX_ISSUE_TEXT - 1).join("")}…`;
-}
-
-/** Divergence_Words for a `QUO ✘` row, computed here from the current Document (Req 18.11). */
-function divergenceFor(document: Document, issue: Issue): string | null {
-  if (issue.code !== "QUO ✘") return null;
-  const rec = document.quotes.find((q) => q.key === issue.key);
-  if (rec === undefined || rec.result.status !== "mismatch") return null;
-  return divergenceWords(document.text.slice(issue.start, issue.end), rec.result.prefixLength);
+  return `${blocking ? "blocking" : "overridden"}, ${STATUS_WORDS[code]}`;
 }
 
 /** Issue text shortened to at most 80 characters (Requirement 6, 8). */
 export function issueText(document: Document, issue: Issue): string {
   return shorten(document.text.slice(issue.start, issue.end));
-}
-
-export type WrongCase = Readonly<{ lines: readonly string[]; href: string | null }>;
-
-/** The mismatch lines and link of a `wrong_case` Issue, from the Document and session Display_Info. */
-export function wrongCaseFor(
-  document: Document,
-  issue: Issue,
-  info: ReadonlyMap<IssueKey, DisplayInfo> | undefined,
-): WrongCase | null {
-  if (issue.code !== "CIT ≠") return null;
-  const m = mismatchOf(document, issue.key);
-  if (m === null) return null;
-  const shown = info?.get(issue.key);
-  const url = shown?.clusterId === m.clusterId ? shown.absoluteUrl : undefined;
-  return { lines: mismatchLines(m), href: courtListenerLink(m.clusterId, url) };
 }
 
 export type VerifyAction = Readonly<{ start: () => void; disabled: boolean }>;

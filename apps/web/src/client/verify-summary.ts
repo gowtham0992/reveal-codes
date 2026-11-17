@@ -1,5 +1,6 @@
 import type { Document } from "@reveal-codes/engine";
 import { CHECKS_BUSY } from "../notices";
+import { TALLY_WORDS as W } from "./check-rows";
 import type { VerifyOutcome } from "./verify-flow";
 
 export const FAILED_NOTICE = "Verification could not be completed. Your citations are unchanged.";
@@ -48,16 +49,16 @@ export function summaryLines(
   const time = localTime(checkedAt);
   const lines = [
     line("Citations", [
-      [c.verified, "found"],
-      [c.wrong_case, "wrong case"],
-      [c.not_found, "not found"],
-      [c.ambiguous, "ambiguous"],
-      [c.unchecked, "not checked"],
+      [c.verified, W.found],
+      [c.wrong_case, W.wrongCase],
+      [c.not_found, W.notFound],
+      [c.ambiguous, W.ambiguous],
+      [c.unchecked, W.notChecked],
     ]),
     line("Quotations", [
-      [q.match, "match"],
-      [q.mismatch, "not in the opinion"],
-      [q.unchecked, "not checked"],
+      [q.match, W.match],
+      [q.mismatch, W.notInOpinion],
+      [q.unchecked, W.notChecked],
     ]),
     time === null ? null : `Checked ${time}`,
     further,

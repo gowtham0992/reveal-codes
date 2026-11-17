@@ -35,6 +35,8 @@ export type OpenOutcome =
       /** Docx_Unsafe_Characters removed (also stated in `notice`). */
       removed: number;
       notice: string;
+      /** The text holds a footnotes block (the notes sentence is part of `notice`). */
+      hasNotes: boolean;
       /** CHANGED_EXPORT_NOTE for a changed export, else null. */
       note: string | null;
     }>
@@ -67,7 +69,7 @@ function limitNote(name: string, text: string): string | null {
   return /^\s*$/.test(text) ? emptyMessage(name) : null;
 }
 
-const NOTES_BLOCK = /\n\nFootnotes\n1\. /;
+export const NOTES_BLOCK = /\n\nFootnotes\n1\. /;
 
 /** Text from a Text_File (`notes` false) or a Word file: docxSafe, then the text limits. */
 export function textOutcome(
@@ -83,6 +85,7 @@ export function textOutcome(
     text: safe.text,
     removed: safe.removed,
     notice: openedMessage(name, safe.text.length, safe.removed, extra.notes),
+    hasNotes: extra.notes,
     note: extra.note,
   };
 }

@@ -17,6 +17,7 @@ import { createMemoryStorage } from "./support/memory-storage";
 import { modeApi } from "./support/mode-fetch";
 import { act, renderUi, screen, within } from "./support/render";
 import { createFakeViewport } from "./support/viewport";
+import { fakeBrowserServices } from "./support/browser-services";
 
 import {
   ISO,
@@ -120,6 +121,7 @@ describe("Wrong case row after a reload _Requirements: 7.7_", () => {
       download: () => undefined,
       openPrint: () => true,
       viewport: createFakeViewport(),
+      ...fakeBrowserServices(),
     };
     await act(async () => {
       renderUi(<AppShell services={services} />);

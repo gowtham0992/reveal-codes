@@ -13,6 +13,7 @@ import { createManualTimers } from "./clock";
 import { createMemoryStorage } from "./memory-storage";
 import { modeApi } from "./mode-fetch";
 import { createFakeViewport } from "./viewport";
+import { fakeBrowserServices } from "./browser-services";
 
 export type UnreadableRun = Readonly<{ start: Document; ops: readonly CallerOperation[] }>;
 
@@ -41,6 +42,7 @@ function buildRig(raw: string): Rig {
     download: () => undefined,
     openPrint: () => true,
     viewport: createFakeViewport(1280),
+    ...fakeBrowserServices(),
   };
   return { storage, timers, services };
 }

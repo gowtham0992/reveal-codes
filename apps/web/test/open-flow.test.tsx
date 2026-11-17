@@ -25,6 +25,7 @@ import { modeApi } from "./support/mode-fetch";
 import { ISO } from "./support/persist-fixtures";
 import { act, fireEvent, renderUi, screen, waitFor, within } from "./support/render";
 import { createFakeViewport } from "./support/viewport";
+import { fakeBrowserServices } from "./support/browser-services";
 
 const utf8 = (s: string): Uint8Array => new TextEncoder().encode(s);
 
@@ -56,6 +57,7 @@ function services(storage: MemoryStorage = createMemoryStorage()): AppServices {
     download: () => undefined,
     openPrint: () => true,
     viewport: createFakeViewport(),
+    ...fakeBrowserServices(),
   };
 }
 

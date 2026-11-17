@@ -1,4 +1,5 @@
 import type { Document, IssueKey } from "@reveal-codes/engine";
+import { displayFor, foundText } from "./check-rows";
 import { courtListenerLink } from "@reveal-codes/verifier/link";
 import type { DisplayInfo } from "@reveal-codes/verifier/link";
 
@@ -17,12 +18,6 @@ export type ResolvedRow = Readonly<{
   href: string | null;
 }>;
 
-function foundText(info: DisplayInfo): string {
-  return info.foundYear === undefined
-    ? info.foundName
-    : `${info.foundName} (${String(info.foundYear)})`;
-}
-
 /**
  * The Resolved_List rows: null when no Verify_Run has completed this session, otherwise one row per
  * `verified` Full_Citation in document order (empty when there is none).
@@ -38,14 +33,13 @@ export function resolvedRows(
     if (c.kind !== "full" || c.result.status !== "verified") continue;
     const clusterId = c.result.clusterId;
     const info = session.info.get(c.key);
-    const usable =
-      session.epoch === currentEpoch && info !== undefined && info.clusterId === clusterId;
+    const shown = session.epoch === currentEpoch ? displayFor(clusterId, info) : undefined;
     rows.push({
       key: c.key,
       text: doc.text.slice(c.citation.start, c.citation.end),
       clusterId,
-      found: usable ? foundText(info) : null,
-      href: courtListenerLink(clusterId, usable ? info.absoluteUrl : undefined),
+      found: shown === undefined ? null : foundText(shown),
+      href: courtListenerLink(clusterId, shown?.absoluteUrl),
     });
   }
   return rows;

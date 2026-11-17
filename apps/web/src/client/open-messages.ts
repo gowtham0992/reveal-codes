@@ -62,6 +62,21 @@ export function openedMessage(
   return opened + removedSentence(removed) + (hasNotes ? NOTES_SENTENCE : "");
 }
 
+/** Opened sentence of the check page, which keeps no provenance record. */
+export function checkOpenedMessage(
+  name: string,
+  characters: number,
+  removed: number,
+  hasNotes: boolean,
+  restored: boolean,
+): string {
+  if (restored) {
+    return `Opened ${name}: ${String(characters)} characters. Its provenance record was not used.`;
+  }
+  const opened = `Opened ${name}: ${String(characters)} characters.`;
+  return opened + removedSentence(removed) + (hasNotes ? NOTES_SENTENCE : "");
+}
+
 /** `exportedOn` is a YYYY-MM-DD string, or null to drop the parenthetical. */
 export function reopenedMessage(name: string, exportedOn: string | null): string {
   const base = `Reopened ${name} with its provenance record`;

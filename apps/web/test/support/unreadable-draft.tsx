@@ -9,6 +9,7 @@ import { createMemoryStorage } from "./memory-storage";
 import { modeApi } from "./mode-fetch";
 import { act, fireEvent, renderUi, screen, within } from "./render";
 import { createFakeViewport } from "./viewport";
+import { fakeBrowserServices } from "./browser-services";
 
 const ISO = "2026-11-02T12:00:00.000Z";
 export const AUTOSAVE_FAILED = "Autosave failed. Your draft is kept in this tab only.";
@@ -83,6 +84,7 @@ export async function mount(o: Options = {}) {
     download: o.download ?? (() => undefined),
     openPrint,
     viewport: createFakeViewport(o.width ?? 1280),
+    ...fakeBrowserServices(),
   };
   await act(async () => {
     renderUi(<AppShell services={services} />);
