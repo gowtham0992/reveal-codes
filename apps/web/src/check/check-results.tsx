@@ -24,7 +24,7 @@ function CopyButton({
   );
   if (!canCopy) return null;
   const onCopy = (): void => {
-    const rows = checkRows(results.document, results.info);
+    const rows = checkRows(results.document, results.info, { caseNames: true });
     const further = furtherLine(results.outcome, results.document);
     const lines = summaryLines(results.document, results.checkedAt, further);
     const text = copyText(rows, lines[0] ?? "", localDate(results.checkedAt));

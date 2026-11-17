@@ -138,16 +138,44 @@ function checkNext(rows: readonly CheckRow[]): void {
   }
 }
 
-describe("check-rows properties _Requirements: 8.1, 8.2_", () => {
+/** Clauses 7 and 8: the Case_Name_Option adds the cited name and changes nothing else. */
+function checkCaseNames(
+  doc: Document,
+  caseNames: boolean,
+  withOption: readonly CheckRow[],
+  without: readonly CheckRow[],
+): void {
+  if (!caseNames) {
+    expect(withOption).toEqual(without);
+    for (const row of withOption) expect("caseName" in row).toBe(false);
+    return;
+  }
+  expect(withOption.length).toBe(without.length);
+  withOption.forEach((row, i) => {
+    const base = without[i] as CheckRow;
+    const rec = doc.citations.find((c) => c.kind === "full" && c.key === row.key);
+    const expected = row.kind === "citation" && rec?.kind === "full" ? rec.citation.caseName : undefined;
+    if (expected === undefined) expect("caseName" in row).toBe(false);
+    else expect(row.caseName).toBe(expected);
+    const { caseName: _added, ...rest } = row;
+    expect(rest).toEqual(base);
+  });
+}
+
+describe("check-rows properties _Requirements: 8.1, 8.2, 19.13_", () => {
   // Property 1
   it("P1 one answer: rows agree with the Issues region and the Resolved list", () => {
     fc.assert(
-      fc.property(arbCheckedDocument, ({ document, info }) => {
-        const rows = checkRows(document, info);
-        checkShape(document, rows);
-        checkCodes(document, rows);
-        checkPayload(document, info, rows);
-        checkNext(rows);
+      fc.property(arbCheckedDocument, fc.boolean(), ({ document, info }, caseNames) => {
+        const without = checkRows(document, info);
+        const withOption = checkRows(document, info, { caseNames });
+        for (const rows of [without, withOption]) {
+          checkShape(document, rows);
+          checkCodes(document, rows);
+          checkPayload(document, info, rows);
+          checkNext(rows);
+        }
+        checkCaseNames(document, caseNames, withOption, without);
       }),
       { numRuns: runs() },
     );

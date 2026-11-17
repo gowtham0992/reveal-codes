@@ -2,6 +2,7 @@ import type { Document, IssueKey } from "@reveal-codes/engine";
 import type { DisplayInfo } from "@reveal-codes/verifier/link";
 import { checkRows, shorten } from "../client/check-rows";
 import type { CheckRow } from "../client/check-rows";
+import { citedAsLine } from "../client/mismatch";
 import { CourtListenerLink } from "../components/courtlistener-link";
 import { MismatchLines } from "../components/mismatch-lines";
 import { CodeLabel } from "../pane/code-label";
@@ -22,6 +23,9 @@ function ResultItem({
       <p className={classes.head}>
         <CodeLabel code={row.code} /> <span className={classes.words}>{row.words}</span>
       </p>
+      {row.caseName === undefined || row.mismatch.length > 0 ? null : (
+        <p className={classes.line}>{citedAsLine(row.caseName)}</p>
+      )}
       <p className={classes.text}>{shorten(row.text)}</p>
       {row.found === null ? null : <p className={classes.line}>{row.found}</p>}
       <MismatchLines lines={row.mismatch} className={classes.line} />
@@ -44,7 +48,7 @@ export function ResultList({
   info: ReadonlyMap<IssueKey, DisplayInfo> | undefined;
   classes?: ResultListClasses;
 }>): React.JSX.Element {
-  const rows = checkRows(document, info);
+  const rows = checkRows(document, info, { caseNames: true });
   return (
     <ul className={classes.list}>
       {rows.map((row) => (

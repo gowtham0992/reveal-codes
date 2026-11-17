@@ -19,7 +19,8 @@ function onRecord(row: CheckRow): string | null {
 }
 
 function rowLine(row: CheckRow): string {
-  const head = `${capitalised(row.words)}: ${row.text.replace(/\.+$/, "")}.`;
+  const name = row.caseName === undefined ? "" : `${row.caseName}, `;
+  const head = `${capitalised(row.words)}: ${name}${row.text.replace(/\.+$/, "")}.`;
   const record = onRecord(row);
   return (record === null ? head : `${head} ${record}`).replaceAll("|", "/");
 }

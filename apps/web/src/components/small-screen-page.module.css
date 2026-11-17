@@ -34,3 +34,11 @@
   font-size: 18px;
   line-height: 29px;
 }
+
+@media (pointer: coarse) {
+  .links a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}

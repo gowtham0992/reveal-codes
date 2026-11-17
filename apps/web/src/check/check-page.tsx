@@ -16,8 +16,9 @@ import type { CheckState } from "./check-state";
 import {
   CHECK_TITLE,
   HANDOVER_FAILED,
-  NOT_STORED_SENTENCE,
   PRIVACY_SENTENCE,
+  STORAGE_STATEMENT,
+  STORAGE_STATEMENT_WIDE,
   VERIFYING_TEXT,
   WHAT_IT_DOES,
 } from "./check-text";
@@ -40,7 +41,7 @@ function EditorLink({
   wide: boolean;
   onFail: (message: string) => void;
 }>) {
-  if (!wide) return null;
+  if (!wide || text === "") return null;
   const onClick = (e: MouseEvent<HTMLAnchorElement>): void => {
     if (writeHandover(svc.session, docxSafe(text).text)) return;
     e.preventDefault();
@@ -62,7 +63,7 @@ function statusText(running: null | Readonly<{ waiting: boolean }>): React.JSX.E
 
 type Actions = ReturnType<typeof useDraftInput>;
 
-function PageTop({ styles }: Readonly<{ styles: Styles }>): React.JSX.Element {
+function PageTop({ styles, wide }: Readonly<{ styles: Styles; wide: boolean }>): React.JSX.Element {
   return (
     <>
       <header className={styles["header"]}>
@@ -74,11 +75,19 @@ function PageTop({ styles }: Readonly<{ styles: Styles }>): React.JSX.Element {
       <h1 className={styles["title"]}>{CHECK_TITLE}</h1>
       <p>{WHAT_IT_DOES}</p>
       <p>{PRIVACY_SENTENCE}</p>
-      <p>{NOT_STORED_SENTENCE}</p>
+      <p>{wide ? STORAGE_STATEMENT_WIDE : STORAGE_STATEMENT}</p>
     </>
   );
 }
 
+function PageLinks({ styles }: Readonly<{ styles: Styles }>): React.JSX.Element {
+  return (
+    <p className={styles["links"]}>
+      <a href="/courts">{COURT_RULES_LONG}</a>
+      <a href="/">Open the editor</a>
+    </p>
+  );
+}
 function DraftBox({
   text,
   styles,
@@ -195,7 +204,7 @@ export function CheckPage({
   return (
     <div className={styles["desk"]}>
       <main className={styles["page"]}>
-        <PageTop styles={styles} />
+        <PageTop styles={styles} wide={wide} />
         <DraftBox text={state.text} styles={styles} onEdit={page.onEdit} />
         <ActionRow
           busy={state.running !== null}
@@ -211,19 +220,14 @@ export function CheckPage({
           messages={page.messages}
           onAgain={run.onCheck}
         />
-        {state.stale || state.text === "" ? null : (
-          <EditorLink
-            svc={svc}
-            text={state.text}
-            styles={styles}
-            wide={wide}
-            onFail={page.setNotice}
-          />
-        )}
-        <p className={styles["links"]}>
-          <a href="/courts">{COURT_RULES_LONG}</a>
-          <a href="/">Open the editor</a>
-        </p>
+        <EditorLink
+          svc={svc}
+          text={state.text}
+          styles={styles}
+          wide={wide && !state.stale}
+          onFail={page.setNotice}
+        />
+        <PageLinks styles={styles} />
         {input.dialog}
       </main>
     </div>

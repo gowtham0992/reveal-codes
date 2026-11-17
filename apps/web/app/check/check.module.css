@@ -66,6 +66,8 @@
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
+  font-size: 16px;
+  line-height: 22px;
 }
 .actions {
   display: flex;
@@ -138,4 +140,16 @@
   font-weight: 500;
   line-height: 18px;
   color: var(--muted);
+}
+@media (pointer: coarse) {
+  .page button {
+    height: 44px;
+  }
+  .page a,
+  .page .brand,
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
 }

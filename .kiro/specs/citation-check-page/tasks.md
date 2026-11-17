@@ -176,11 +176,11 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Do not edit `issues-list.tsx`, `resolved.ts` or their tests. Run the existing `issues-list`, `resolved`, `verify-summary` and `check-rows` tests and confirm they pass with no edit.
     - _Requirements: 19.1, 19.2, 19.3, 19.4, 19.5, 19.9, 19.10_
 
-  - [~] 12.2 Show the case name on `/check` and in Copy_Text
+  - [x] 12.2 Show the case name on `/check` and in Copy_Text
     - `result-list.tsx` and `CopyButton` call `checkRows(document, info, { caseNames: true })`. `ResultItem` shows `citedAsLine(row.caseName)` under the status line when `caseName` is set and `mismatch` is empty. `copy-text.ts` writes `<Status words>: <caseName>, <text>.` when `caseName` is set, for wrong-case rows too.
     - _Requirements: 19.5, 19.6, 19.7, 19.8, 19.11, 19.12_
 
-  - [ ]* 12.3 Extend Property 1 for the option
+  - [x]* 12.3 Extend Property 1 for the option
     - **Property 1: One answer** (extended). In `apps/web/test/check-rows.properties.test.ts` keep one `fc.assert(fc.property(...))` and `// Property 1`, add `fc.boolean()` for `caseNames`, and add clauses 7 and 8 of design F2. Add 19.13 to the `describe` title and to **Validates**. Expected names are read from `document.citations`, never from the rows.
     - **Validates: Requirements 8.1, 8.2, 19.13**
 
@@ -195,7 +195,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - `static/page-css.ts` and `static/css-rules.test.ts`: allow only `@media (pointer: coarse)` as a non-width media query, fail on any other, keep the exactly-one-width-at-rule count, and allow `font-size: 16px` only on `.draft` or `textarea`. Add the planted-violation examples of design F3.
     - _Requirements: 20.6, 20.8, 20.9, 20.10, 20.11_
 
-  - [~] 12.6 Apply the touch rules to the stylesheets
+  - [x] 12.6 Apply the touch rules to the stylesheets
     - `app/check/check.module.css`: `.draft` at 16px / 22px; `@media (pointer: coarse)` block for `.page button` (44px height) and `.page a` (inline-flex, 44px min-height). `src/components/small-screen-page.module.css` and `app/courts/courts.module.css` (`.links a`): `@media (pointer: coarse)` blocks with a 44px minimum. Keep every existing desktop rule outside the query unchanged. Do not touch the shared confirm dialog.
     - _Requirements: 20.1, 20.2, 20.3, 20.4, 20.5, 20.6, 20.7, 20.12_
 
@@ -213,7 +213,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Move the width read into `src/check/use-wide.ts` (`useWide`, design F5) and use it in `CheckPage` for both the Editor_Link and the Storage_Statement.
     - _Requirements: 23.1, 23.2, 23.3, 23.4, 23.6_
 
-  - [~] 12.10 Make one Storage_Statement
+  - [-] 12.10 Make one Storage_Statement
     - In `check-text.ts` drop the last sentence of `PRIVACY_SENTENCE`, replace `NOT_STORED_SENTENCE` with `STORAGE_STATEMENT` and `STORAGE_STATEMENT_WIDE`, and render one of them in `PageTop` from `useWide`. Below 800px the page and the server HTML must not mention the editor link or storing in the editor. No exclamation mark.
     - Update the existing tests that name the two old sentences. Run `copy-rules` and `check-literals` scans.
     - _Requirements: 22.1, 22.2, 22.3, 22.4, 22.5, 22.6, 22.8_

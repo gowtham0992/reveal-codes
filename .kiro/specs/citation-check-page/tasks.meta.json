@@ -3,6 +3,10 @@
     "4.3 Write property test for the request surface": {
       "status": "passed",
       "lastRunTimestamp": 1794889653286
+    },
+    "12.3 Extend Property 1 for the option": {
+      "status": "passed",
+      "lastRunTimestamp": 1794892636534
     }
   },
   "executionHistory": {
@@ -592,6 +596,16 @@
         "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
         "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
         "timestamp": 1794892133802
+      },
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892537972
+      },
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892683073
       }
     ],
     "12.5 Record the touch rule and extend the scans": [
@@ -616,6 +630,16 @@
         "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
         "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
         "timestamp": 1794892133866
+      },
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892539187
+      },
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892683185
       }
     ],
     "12.8 Fix the Hand_Over notice case": [
@@ -657,6 +681,11 @@
         "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
         "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
         "timestamp": 1794892133929
+      },
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892539632
       }
     ],
     "12.12 Update the docs": [
@@ -678,6 +707,18 @@
         "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
         "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
         "timestamp": 1794892134001
+      }
+    ],
+    "12.3 Extend Property 1 for the option": [
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892538694
+      },
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892683114
       }
     ]
   }
