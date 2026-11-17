@@ -333,3 +333,98 @@ The twelve open questions were answered "agreed", with the changes to 8 and 9 re
 11. **Clear (Requirement 3).** Clear does not ask first, because the text is in memory only. Open a file and Load the Avianca citations ask when the box holds text, as the editor does.
 
 12. **Title and description (Requirement 1).** Title "Check the citations in a draft — Reveal Codes". Description "Paste a draft or open a file and see which citations and quotations can be found on CourtListener and which cannot. Nothing is saved."
+
+## Follow-up: findings from the 375px, 320px and 1280px walk
+
+The author walked `/check` at 375px, 320px and 1280px. Everything works. Five findings came out of the walk and are Requirements 19 to 23 below. They add to Requirements 1 to 18 and rewrite none of them. Where a follow-up requirement changes what an earlier criterion says, the follow-up criterion names the earlier one and wins: Requirement 22 replaces the last clause of criterion 11.1 ("nothing is saved unless you open the draft in the editor") and the sentence of criterion 2.4 with the single statement of Requirement 22.
+
+Scope: `apps/web` (`src/client/check-rows.ts`, `src/client/mismatch.ts`, `src/check/`, `src/components/use-handover.tsx`, `src/components/small-screen-page.module.css`, `app/check/check.module.css`, `app/courts/courts.module.css`, the static scans), `README.md`, `BUILD_LOG.md` and `.kiro/steering/ui.md`. The Engine, the Verifier, the routes and the Toolbar are not changed. The editor's Issues region and Resolved list are not changed. No dependency, environment variable or route is added.
+
+### Follow-up glossary
+
+- **Case_Name_Option**: the optional third argument of `checkRows`, `{ caseNames: boolean }`, default off.
+- **Cited_As_Line**: the line "Cited as <name>" that shows the `caseName` the extractor read before a citation. `mismatchLines` already builds it for a wrong-case row.
+- **Touch_Device**: a device whose primary pointer is coarse, matched by the media feature `(pointer: coarse)`. This is not a width at-rule.
+- **Touch_Target**: a button or link on `/check`, on the Small_Screen_Page, or one of the two links under a rule on `/courts`.
+- **Wide_Viewport**: a viewport whose width is `NARROW_WIDTH` (800px) or more, read through `svc.viewport`.
+- **Storage_Statement**: the one statement on the Check_Page about whether the draft is stored (Requirement 22).
+- **Hand_Over_Name**: the name `use-handover.tsx` passes to `textOutcome` for the text received from the checker.
+
+### Requirement 19: Each row names the case it is about
+
+**User Story:** As a self-represented litigant reading the results, I want each row to say which case my draft called it, so that I can tell the rows apart without finding the citation in my own text.
+
+#### Acceptance Criteria
+
+1. THE `checkRows` function SHALL accept the Case_Name_Option as an optional third argument and SHALL treat an absent argument as `{ caseNames: false }`.
+2. WHERE the Case_Name_Option is off, THE `checkRows` function SHALL return rows equal to the rows it returned before this follow-up, with no added field.
+3. WHERE the Case_Name_Option is on and the Full_Citation of a citation row has a `caseName`, THE row SHALL carry that `caseName` unchanged.
+4. WHERE the Case_Name_Option is on and the Full_Citation of a citation row has no `caseName`, THE row SHALL carry no case name and THE Check_Page SHALL show nothing extra for that row.
+5. THE Check_Page SHALL call `checkRows` with the Case_Name_Option on, and THE Issues region and THE Resolved list SHALL call it with the option off, so that their tests pass unchanged.
+6. WHERE a Result_Item is a citation with a case name and its status is found or not found, THE Check_Page SHALL show the Cited_As_Line under the Status_Words.
+7. WHERE a Result_Item is a citation with a case name and its status is ambiguous or unchecked, THE Check_Page SHALL show the Cited_As_Line under the Status_Words.
+8. WHERE a Result_Item is a wrong-case citation, THE Check_Page SHALL show the Cited_As_Line once, as the line `mismatchLines` returns, and SHALL NOT add a second Cited_As_Line.
+9. THE Cited_As_Line wording SHALL be defined once, in one exported function of `src/client/mismatch.ts`, which `mismatchLines` and the Check_Page both use.
+10. WHERE a Result_Item is a quotation or a short form with no target, THE Check_Page SHALL show no Cited_As_Line and the row SHALL carry no case name.
+11. WHERE a citation row carries a case name, THE Copy_Text line for that row SHALL place the case name and a comma and a space before the citation text, so that a not-found line reads "Not found: Varghese v. China Southern Airlines Co., Ltd., 925 F.3d 1339 (11th Cir. 2019)."
+12. THE Copy_Text line of a wrong-case row with a case name SHALL place the case name before the citation text in the same way, and its "On record" part SHALL stay as Requirement 10.6 defines it.
+13. FOR ALL Documents, verification results, quote results and Display_Info, WHERE the Case_Name_Option is on, EACH citation row whose Full_Citation has a `caseName` SHALL carry that `caseName`, and WHERE the option is off, THE rows SHALL equal the rows built without the argument (Property 1, extended).
+
+### Requirement 20: Touch use
+
+**User Story:** As a filer on a phone, I want text that does not make the screen zoom and buttons and links I can hit with a thumb, so that I can use the page without pinching.
+
+#### Acceptance Criteria
+
+1. THE Draft_Box text SHALL be 16px at every width and on every device.
+2. WHILE the device is a Touch_Device, THE Check_Page SHALL give every button a height of at least 44px.
+3. WHILE the device is a Touch_Device, THE Check_Page SHALL give every link a height of at least 44px, including the header link, the links under the results, the View on CourtListener links and the Editor_Link.
+4. WHILE the device is a Touch_Device, THE Small_Screen_Page SHALL give every link a height of at least 44px.
+5. WHILE the device is a Touch_Device, THE Courts_Page SHALL give the two links under each rule ("Read the court's text" and "Draft under this rule") a height of at least 44px.
+6. THE touch rules SHALL be written in the stylesheets of those pages inside the media query `@media (pointer: coarse)` and SHALL NOT use a width at-rule.
+7. WHILE the device is not a Touch_Device, THE Check_Page, THE Small_Screen_Page and THE Courts_Page SHALL show the button heights, the link heights and the layout they show before this follow-up, so that the desktop look is unchanged.
+8. THE Static_Scans SHALL accept `@media (pointer: coarse)` as the only at-rule in a page or component stylesheet that is not a width at-rule, and SHALL fail on any other media query that is not the one width at-rule the Shell already holds.
+9. THE Static_Scans SHALL continue to assert that exactly one width at-rule exists in the Shell's stylesheets, and SHALL NOT count `@media (pointer: coarse)` toward it.
+10. THE Static_Scans SHALL accept a `font-size` of 16px on the Draft_Box and on no other selector, and SHALL fail on 16px elsewhere and on any other size outside the allowed list.
+11. THE UI_Rules SHALL record the touch rule, the 16px text-entry size and the statement that the desktop look is unchanged.
+12. THE confirm dialog opened from the Check_Page is shared with the editor and is not changed by this requirement.
+
+### Requirement 21: The hand-over notice reads as one sentence
+
+**User Story:** As a filer who carried a draft into the editor, I want the notice to read as plain English, so that the page does not look careless.
+
+#### Acceptance Criteria
+
+1. WHEN the editor installs a Hand_Over, THE editor SHALL show the notice "Opened the draft from the checker: <n> characters, marked as pasted." with a lower-case "the" after "Opened".
+2. THE Hand_Over_Name SHALL be chosen so that the success notice of criterion 1 reads correctly, and THE `openedMessage` function and the other `open-messages.ts` sentences SHALL stay unchanged.
+3. IF a Hand_Over is refused by the limits of `textOutcome`, THEN THE editor SHALL show a refusal sentence that begins with a capital letter.
+4. WHEN a file is opened with the Open flow, THE editor SHALL show the file name exactly as before, with its own case.
+
+### Requirement 22: One statement about storing the draft
+
+**User Story:** As a filer reading the top of the page, I want one clear statement about whether my draft is kept, so that I am not told the same thing twice in different words.
+
+#### Acceptance Criteria
+
+1. THE Check_Page SHALL carry exactly one Storage_Statement and SHALL remove the two overlapping sentences "Nothing is saved unless you open the draft in the editor." and "Your draft is not stored. It is gone when you reload this page." as separate sentences.
+2. THE Storage_Statement SHALL say, at every width, that the draft is not stored and is gone when the page is reloaded.
+3. WHILE the viewport is a Wide_Viewport, THE Storage_Statement SHALL also say that opening the draft in the editor stores it there.
+4. WHILE the viewport is narrower than `NARROW_WIDTH`, THE Check_Page SHALL NOT mention the editor link or storing the draft in the editor, and the server-rendered HTML SHALL NOT contain that clause.
+5. THE Check_Page SHALL decide criterion 3 and criterion 4 from the same Wide_Viewport value that decides the Editor_Link, read through `svc.viewport` and updated live.
+6. THE privacy sentence SHALL keep the claims of Requirement 11.1 other than the storage clause: only the citations and the case names written before them are sent, to this site and from there to CourtListener, and the rest of the draft stays in the browser.
+7. THE README line under "What leaves your machine" for the Check_Page SHALL agree with criteria 2, 3 and 6.
+8. THE Check_Page text SHALL hold no exclamation mark, so that the docs scan and `copy-rules.test.ts` pass.
+9. THE tests SHALL show the Storage_Statement at a viewport of 375px and at 1280px, and the server HTML at the narrow default.
+
+### Requirement 23: The Editor_Link follows the viewport width
+
+**User Story:** As a filer who widens the window or turns a tablet, I want the page to offer the editor link when it fits, so that I do not need to reload.
+
+#### Acceptance Criteria
+
+1. WHEN the page is loaded at a narrow width and the viewport then becomes a Wide_Viewport, THE Check_Page SHALL show the Editor_Link without a reload, provided the Draft_Box holds text and the results are not out of date.
+2. WHEN the viewport becomes a Wide_Viewport, THE Check_Page SHALL show the extra clause of the Storage_Statement together with the Editor_Link.
+3. WHEN the viewport becomes narrower than `NARROW_WIDTH` again, THE Check_Page SHALL remove the Editor_Link and the extra clause.
+4. THE Check_Page SHALL read the width through `svc.viewport.width` and `svc.viewport.subscribe`, as the Shell does, and SHALL hold no copy of the width that is decided once at load.
+5. THE test suite SHALL contain example tests for: load narrow then widen; widen then narrow; and the same two steps driven through the browser's real `resize` event, so that the production `browserViewport` is covered and not only a fake.
+6. THE design follow-up SHALL state the root cause of the frozen link, found by a failing test before the fix.

@@ -521,3 +521,102 @@ Property-based testing applies to the two pure paths: row building and the reque
 - `static/*`: the extensions in "Static-scan extensions", each with a planted-violation example proving the scan fires.
 
 **Verification order.** Task 1 extracts Shared_Rows with the editor's tests green before any page code. The `AppServices` change follows, then CodeLabel, `runCheck` and the reducer, then the page, the Hand_Over and the small-screen changes, then the scans and docs. The final checkpoint is the one in Requirement 18.9.
+
+## Follow-up
+
+This section covers Requirements 19 to 23. It changes no earlier section. Where it extends one (Property 1, the privacy and not-stored sentences, the Hand_Over name), it says so.
+
+### F1. Case name on every citation row (Requirement 19)
+
+`checkRows(document, info, options?)` takes `options: Readonly<{ caseNames: boolean }>`, default `{ caseNames: false }`. `CheckRow` gains one optional field, `caseName?: string`. The field is set only when the option is on and the row is a full citation whose `Full_Citation.caseName` is defined. With the option off the field is absent, so the rows are structurally equal to today's and the editor's tests (which compare rows or build the Issues and Resolved text from them) pass unchanged. There is one builder: `failingRow` and `citationRow` read the record they already hold and add the field through one helper, `withCaseName(row, record, options)`.
+
+Display: `ResultItem` renders `citedAsLine(row.caseName)` as a `line` paragraph under the status line when `row.caseName` is set and `row.mismatch` is empty. A wrong-case row has `mismatch` lines, whose first line is already "Cited as <name>", so nothing is shown twice. `citedAsLine(name)` is a new exported function of `src/client/mismatch.ts` and `mismatchLines` calls it, so the wording exists once (`check-literals.test.ts` forbids a second literal).
+
+Copy_Text: `rowLine` writes `<Status words>: <caseName>, <text>.` when `row.caseName` is set, for every status including wrong case (the "On record" part is unchanged). The Check_Page passes `{ caseNames: true }` in `result-list.tsx` and in `CopyButton`; the Issues region and Resolved list call `checkRows` with no third argument or do not call it at all.
+
+Rows for quotations and orphan short forms never get the field.
+
+### F2. Property 1, extended
+
+Property 1 stays one `fc.assert(fc.property(...))` in `check-rows.properties.test.ts`, with `// Property 1` above it. The property gains one input: `caseNames` from `fc.boolean()`. It builds `with = checkRows(doc, info, { caseNames })` and `without = checkRows(doc, info)`, and adds two clauses to the list in "Property 1: One answer":
+
+7. WHEN `caseNames` is false, `with` equals `without` and no row has a `caseName` field.
+8. WHEN `caseNames` is true, each row for a full citation whose Full_Citation has a `caseName` carries `row.caseName` equal to it; each row for a full citation without a `caseName`, each orphan row and each quotation row has no `caseName`; and every other field of every row equals the same field of `without` at the same index.
+
+Clause 8 is a metamorphic relation between the two calls, and the expected names are read from `document.citations`, not from the rows. Clauses 1 to 6 are asserted on `with` as well as on `without`, so the option cannot change the status, order or Next_Sentences. Requirements 19.13 is added to `**Validates:**` and to the `describe` title (`_Requirements: 8.1, 8.2, 19.13_`).
+
+### F3. Touch rules (Requirement 20)
+
+The check of the rules, done before this design was written:
+
+- `ui.md` has no rule against a media query that is not a width at-rule. It says "no width at-rule" for `/courts` and `/check` and "exactly one width at-rule" in the Shell, and its button heights (30px default, 34px links) describe the desktop. It does fix the allowed font sizes (10.5 to 26px) and so does not allow 16px today.
+- The scans test width at-rules by the words `min-width` or `max-width`: `WIDTH_QUERY` in `css-rules.test.ts`, the `queries` filter in `page-css.ts`, and `/width/` in `check.test.ts` and `courts.test.ts`. `@media (pointer: coarse)` contains none of those words, so it is allowed today and is not counted toward the one Shell width at-rule. `bannedViolations` rejects only `@keyframes` and `prefers-color-scheme`.
+- The font-size scans in `css-rules.test.ts` (`SIZES`) and `page-css.ts` (`SIZES`) reject 16px, so the Draft_Box 16px needs a scan change, which Requirement 20.10 asks for. No scan holds a min-height list for buttons, and `check.test.ts` and `courts.test.ts` assert only the 34px link rule outside any at-rule.
+
+Result: `(pointer: coarse)` is allowed and nothing forbids building it. The 16px size is allowed only after the scan change below.
+
+Stylesheet changes:
+
+- `check.module.css`: `.draft { font-size: 16px; line-height: 22px; }` at every width (this is the one size outside the list). A block `@media (pointer: coarse) { .page button { height: 44px; } .page a { display: inline-flex; align-items: center; min-height: 44px; } }`. The `.page button` selector is more specific than the global `button { height: var(--control-h) }`, so the global rule and the Toolbar are untouched. The desktop rules (`.links a` 34px, `.brand` 34px) stay outside the query.
+- `small-screen-page.module.css`: `@media (pointer: coarse) { .links a { min-height: 44px; display: flex; align-items: center; } }`. The links are `display: block` with `line-height: 29px` today; the query adds the 44px floor.
+- `courts.module.css`: `@media (pointer: coarse) { .links a { min-height: 44px; } }` for the two links under each rule. Other `/courts` links are not in the finding and are left as they are.
+
+Scan changes:
+
+- `page-css.ts` `sheetViolations` and `css-rules.test.ts` `bannedViolations` gain one rule: an `@media` whose prelude is not exactly `@media (pointer: coarse)` and is not a width at-rule fails with `media query <prelude> is not allowed`. The existing single-width-at-rule count in `shellWidthViolations` is untouched.
+- The 16px size is allowed through one extra clause: `font-size: 16px` passes only when the declaration's selector is `.draft` or `textarea`. Any other 16px fails, as does 17px.
+- Planted-violation examples: `@media (hover: none)`, `@media (pointer: fine)`, `@media (min-width: 600px)` in a `/check` sheet each fail; `@media (pointer: coarse)` passes and is not counted as a width at-rule; `font-size: 16px` on `.a` fails and on `.draft` passes.
+- `check.test.ts` asserts the 44px rules sit inside `@media (pointer: coarse)` (by `atRules` on the declaration) and the 34px rules stay outside it, so the desktop look is pinned. `courts.test.ts` does the same for its two links.
+
+Not covered: the confirm dialog (shared Modal sheet, 32px buttons) is not changed, because a coarse rule there would also change the editor's dialogs on touch tablets at 800px or more. It is listed under "Left out" in the BUILD_LOG entry.
+
+A jsdom test cannot evaluate a media query, so the tests read the stylesheet text, as the existing scans do. The author checks the real effect by hand at 375px on a touch emulation.
+
+### F4. Hand_Over name (Requirement 21)
+
+The sentence is `Opened ${name}: ...` with `name` meant to be a file name. The page passed the sentence "The draft from the checker", whose capital T is correct at the start of a sentence and wrong after "Opened". The same `name` also starts the refusal sentences (`${name} is empty.`), where the capital is needed. The root cause is one string serving as a file name and as a sentence.
+
+Fix in `use-handover.tsx`: `HANDOVER_NAME = "the draft from the checker"` for the success notice, and a small `sentenceStart(text)` applied only to the refusal notice and note of a refused Hand_Over, so "The draft from the checker is empty." still starts with a capital. `textOutcome`, `openedMessage` and the file-name path are not changed, so a file such as `Motion.docx` reads as before.
+
+### F5. One Storage_Statement and the shared `useWide` (Requirements 22 and 23)
+
+`check-text.ts` replaces `PRIVACY_SENTENCE`'s last sentence and `NOT_STORED_SENTENCE` with:
+
+- `PRIVACY_SENTENCE`: "Only the citations and the case names written before them are sent, to this site and from there to CourtListener. The rest of your draft stays in your browser."
+- `STORAGE_STATEMENT`: "Your draft is not stored. It is gone when you reload this page."
+- `STORAGE_STATEMENT_WIDE`: `STORAGE_STATEMENT` followed by " Opening it in the editor stores it there."
+
+`PageTop` renders `PRIVACY_SENTENCE` and one `<p>` that holds `STORAGE_STATEMENT_WIDE` when `wide` is true and `STORAGE_STATEMENT` otherwise. The statement therefore says "stored" once and states no storing below 800px. The wide clause depends on the viewport width only, not on whether the box has text or the results are current, so the sentence does not flicker while the author types. The Editor_Link keeps its extra conditions (text present, results current).
+
+`wide` comes from one hook, `useWide(svc)` in `src/check/use-wide.ts`:
+
+```ts
+export function useWide(svc: Pick<AppServices, "viewport">): boolean {
+  return useSyncExternalStore(
+    svc.viewport.subscribe,
+    () => svc.viewport.width() >= NARROW_WIDTH,
+    () => false,
+  );
+}
+```
+
+`CheckPage` calls it once and passes `wide` to `PageTop` and `EditorLink`; `EditorLink` no longer subscribes. The server snapshot is `false`, so the server HTML holds the narrow statement and no link. The `README` line, the Requirement 11.1 clause and the criterion 2.4 sentence are replaced by Requirement 22 as the requirements follow-up says.
+
+### F6. Root cause of the frozen Editor_Link (Requirement 23)
+
+What reading and two probes established, before any fix:
+
+1. `EditorLink` already subscribes with `useSyncExternalStore(svc.viewport.subscribe, () => width >= 800, () => false)`. The `subscribe` function is stable, the snapshot is a boolean, and the server snapshot is `false`. This matches the Shell's pattern in `app-shell.tsx`, which passes `svc.viewport.width` with a server snapshot of `SHELL_MIN_WIDTH`. There is no snapshot-identity or subscribe-identity misuse in the call.
+2. A probe test (load at 375, type, then widen) passed with the fake viewport. A second probe passed through the production `browserViewport()`: `window.innerWidth` set to 375, the page mounted with `defaultServices().viewport`, text typed, then `innerWidth` set to 1280 and a `resize` event dispatched. In both, the link appeared. Both probes were deleted; they are not part of the suite.
+3. The suite's existing test covers only narrowing ("disappears when the viewport narrows"), and only through the fake.
+
+So the root cause is not shown by the code or by jsdom. The remaining differences between jsdom and the author's walk are the hydrated page, the real window and the devtools device emulation. Task 12.9 therefore starts with a failing test that reproduces the walk as closely as the test environment allows (server render with `renderToString`, then `hydrateRoot`, then widen), and, if no test fails, a manual reproduction with a logged `resize` count in a browser. The cause found is written here in this section before the fix lands. The candidates to check, in order: (a) the link is mounted after hydration in a render pass whose subscription React does not re-evaluate until a later event; (b) the device emulation changes `innerWidth` without a `resize` event on `window`; (c) `EditorLink` is unmounted by the `state.stale || state.text === ""` guard when the walk widened. If (b) holds, `useWide` also subscribes to `matchMedia("(min-width: 800px)")` change events inside `browserViewport`, which is a script query and not a stylesheet at-rule. This paragraph is the one that task 12.9 replaces with the confirmed cause.
+
+### F7. Test plan for the follow-up
+
+- `check-rows.properties.test.ts`: Property 1 extended as in F2.
+- `check-rows.test.ts`: option off equals today's rows; option on carries the name on found, not-found, ambiguous and unchecked rows; not shown twice on a wrong-case row (one "Cited as" line); a citation with no `caseName` gets nothing; a quotation never does.
+- `check-page.test.tsx`: the Varghese not-found row shows "Cited as Varghese v. China Southern Airlines Co., Ltd."; the Copy results line reads "Not found: Varghese v. China Southern Airlines Co., Ltd., 925 F.3d 1339 (11th Cir. 2019)."; the Issues region and Resolved list tests are not edited.
+- `use-handover.test.tsx`: notice reads "Opened the draft from the checker: 807 characters, marked as pasted."; a refused hand-over starts with a capital; an opened file keeps its name case (`open-messages` test).
+- `check-page.test.tsx` and `check-editor-link.test.tsx`: Storage_Statement at 375px and 1280px, server HTML at the narrow default, no mention of the editor below 800px, no second storage sentence; load narrow then widen shows the link and the clause; narrow again removes both; the same through the real `resize` event.
+- `static/*`: the scans of F3, with their planted violations.
