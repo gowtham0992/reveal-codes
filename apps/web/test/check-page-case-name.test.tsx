@@ -22,7 +22,7 @@ const SAMPLE = readFileSync(
 const VARGHESE = "Varghese v. China Southern Airlines Co., Ltd.";
 const VARGHESE_LINE = `Not found: ${VARGHESE}, 925 F.3d 1339 (11th Cir. 2019).`;
 
-async function mountAndCheck() {
+function buildServices(clipboard: ReturnType<typeof createFakeClipboard>): AppServices {
   const routes = routeFetch();
   const fetchFn: FetchFn = (url, init) => {
     if (url === "/api/mode") {
@@ -32,8 +32,7 @@ async function mountAndCheck() {
     return routes.fetch(url, init);
   };
   const timers = createManualTimers();
-  const clipboard = createFakeClipboard();
-  const svc: AppServices = {
+  return {
     api: createApiClient(fetchFn),
     now: timers.clock.now,
     setTimer: (fn, ms) => timers.setTimeout(fn, ms),
@@ -47,6 +46,10 @@ async function mountAndCheck() {
     session: createMemoryStorage(),
     clipboard,
   };
+}
+async function mountAndCheck() {
+  const clipboard = createFakeClipboard();
+  const svc = buildServices(clipboard);
   await act(async () => {
     renderUi(<CheckPage services={svc} styles={{}} />);
     await Promise.resolve();

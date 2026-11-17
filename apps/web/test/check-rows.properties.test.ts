@@ -154,10 +154,11 @@ function checkCaseNames(
   withOption.forEach((row, i) => {
     const base = without[i] as CheckRow;
     const rec = doc.citations.find((c) => c.kind === "full" && c.key === row.key);
-    const expected = row.kind === "citation" && rec?.kind === "full" ? rec.citation.caseName : undefined;
+    const expected =
+      row.kind === "citation" && rec?.kind === "full" ? rec.citation.caseName : undefined;
     if (expected === undefined) expect("caseName" in row).toBe(false);
     else expect(row.caseName).toBe(expected);
-    const { caseName: _added, ...rest } = row;
+    const rest = Object.fromEntries(Object.entries(row).filter(([key]) => key !== "caseName"));
     expect(rest).toEqual(base);
   });
 }

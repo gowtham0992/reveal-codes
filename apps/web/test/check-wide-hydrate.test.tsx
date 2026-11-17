@@ -36,7 +36,10 @@ async function hydrateAt(width: number): Promise<void> {
   container.innerHTML = html;
   document.body.appendChild(container);
   await act(async () => {
-    hydrateRoot(container as HTMLElement, <CheckPage services={productionServices()} styles={{}} />);
+    hydrateRoot(
+      container as HTMLElement,
+      <CheckPage services={productionServices()} styles={{}} />,
+    );
     await Promise.resolve();
   });
 }
@@ -59,7 +62,7 @@ type Listener = (e: Event) => void;
 /** A matchMedia whose "(min-width: 800px)" query follows window.innerWidth and reports changes on demand. */
 function installMatchMedia(): () => void {
   const listeners = new Set<Listener>();
-  const original = window.matchMedia;
+  const saved = Object.getOwnPropertyDescriptor(window, "matchMedia");
   window.matchMedia = ((query: string) => ({
     media: query,
     get matches() {
@@ -74,7 +77,8 @@ function installMatchMedia(): () => void {
   window.addEventListener("__mq", fire);
   return () => {
     window.removeEventListener("__mq", fire);
-    window.matchMedia = original;
+    if (saved === undefined) Reflect.deleteProperty(window, "matchMedia");
+    else Object.defineProperty(window, "matchMedia", saved);
   };
 }
 

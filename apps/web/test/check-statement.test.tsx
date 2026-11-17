@@ -30,12 +30,13 @@ function services(width: number): AppServices {
 }
 
 async function mountAt(width: number): Promise<HTMLElement> {
-  let container: HTMLElement | null = null;
+  const mounted: HTMLElement[] = [];
   await act(async () => {
-    container = renderUi(<CheckPage services={services(width)} styles={{}} />).container;
+    mounted.push(renderUi(<CheckPage services={services(width)} styles={{}} />).container);
     await Promise.resolve();
   });
-  if (container === null) throw new Error("not mounted");
+  const container = mounted[0];
+  if (container === undefined) throw new Error("not mounted");
   return container;
 }
 

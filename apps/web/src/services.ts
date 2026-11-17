@@ -36,7 +36,8 @@ function browserViewport(): Viewport {
       window.addEventListener("resize", onChange);
       // Some device emulation and orientation changes report the crossing only
       // through the media query. A script query, not a stylesheet at-rule.
-      const query = typeof window.matchMedia === "function" ? window.matchMedia(NARROW_QUERY) : null;
+      const query =
+        typeof window.matchMedia === "function" ? window.matchMedia(NARROW_QUERY) : null;
       query?.addEventListener("change", onChange);
       return () => {
         window.removeEventListener("resize", onChange);

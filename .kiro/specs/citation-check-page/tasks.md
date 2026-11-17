@@ -232,7 +232,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Under the citation-check-page entry, in "What Kiro got wrong, and what fixed it", add plain, third-person lines for what the walk at 375px, 320px and 1280px found: no case name on a row, because the page had no document beside the row; the 13px draft box and the 30px buttons and 29px links, never checked on a phone; the capital "The" from reusing a sentence as a file name; the two sentences saying the draft is not stored; and the Editor_Link frozen at load, with the root cause found in 12.9. Add the confirm dialog to a "Left out" line. Make no first-person claim as the user.
     - _Requirements: 18.6_
 
-- [~] 13. Final checkpoint
+- [x] 13. Final checkpoint
   - After the last edit, run in order: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, the clean-checkout web build (`pnpm --filter @reveal-codes/web build` from a clean clone after `pnpm install`) and `pnpm kiro:check`. Fix any failure and rerun all of them.
   - Confirm `git status` shows a clean working tree with everything committed. Do not push. Ask the user if questions arise.
   - _Requirements: 18.8, 18.9_
