@@ -218,7 +218,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Update the existing tests that name the two old sentences. Run `copy-rules` and `check-literals` scans.
     - _Requirements: 22.1, 22.2, 22.3, 22.4, 22.5, 22.6, 22.8_
 
-  - [-]* 12.11 Write tests for the statement and the live width
+  - [x]* 12.11 Write tests for the statement and the live width
     - `check-page.test.tsx`: the Storage_Statement text at a viewport of 375px and at 1280px; the server HTML at the narrow default holds the narrow statement and no editor mention; one storage sentence only.
     - `check-editor-link.test.tsx`: load narrow, widen, the link and the extra clause appear; narrow again, both are gone; the same through the real `resize` event with `defaultServices().viewport`.
     - _Requirements: 22.4, 22.5, 22.9, 23.1, 23.2, 23.3, 23.5_
