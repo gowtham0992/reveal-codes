@@ -6,7 +6,20 @@ import { colourViolations } from "./css-colours";
 const COURTS = /^(?:app|src)\/courts\//;
 const sheets = readSources(["app", "src"], /\.css$/).filter((s) => COURTS.test(s.path));
 const sources = readSources(["app", "src"]).filter((s) => COURTS.test(s.path));
-const SIZES = new Set(["12px", "13px", "14px", "20px", "26px", "inherit"]);
+const SIZES = new Set([
+  "10.5px",
+  "11px",
+  "12px",
+  "12.5px",
+  "13px",
+  "13.5px",
+  "14px",
+  "15px",
+  "18px",
+  "20px",
+  "26px",
+  "inherit",
+]);
 const WEIGHTS = /^(?:400|500|600|700)$/;
 const BANNED =
   /^(?:box-shadow|text-shadow|backdrop-filter|transition(?:-.+)?|animation(?:-.+)?|border(?:-[a-z]+)*-radius)$/;
@@ -42,6 +55,23 @@ describe("static: Courts page stylesheet _Requirements: 10.2, 10.3, 10.4_", () =
     expect(value(".page", "overflow-wrap")).toBe("anywhere");
     expect(value(".group", "max-width")).toBe("100%");
   });
+  it("sets the desk wrapper, the paper column and 34px links _Requirements: 21.1, 21.7, 21.9_", () => {
+    const css = parseCss(sheets[0]?.text ?? "");
+    const value = (selector: string, prop: string): string | undefined =>
+      css.declarations.find((d) => d.selector.trim() === selector && d.prop === prop)?.value.trim();
+    expect(value(".desk", "min-height")).toBe("100vh");
+    expect(value(".desk", "background")).toBe("var(--desk)");
+    expect(value(".page", "max-width")).toBe("var(--page-max)");
+    expect(value(".page", "min-height")).toBe("100vh");
+    expect(value(".page", "margin")).toBe("0 auto");
+    expect(value(".page", "background")).toBe("var(--paper)");
+    expect(value(".page", "box-sizing")).toBe("border-box");
+    expect(css.atRules.filter((r) => /width/.test(r.prelude))).toEqual([]);
+    expect(value(".links a", "min-height")).toBe("34px");
+    expect(value(".links a", "display")).toBe("inline-flex");
+    expect(value(".links a", "align-items")).toBe("center");
+  });
+
   it("reports a planted fixed width, width query, shadow and off-list size", () => {
     const text =
       ".a {\n  width: 400px;\n  box-shadow: none;\n  font-size: 17px;\n}\n@media (min-width: 600px) {\n}\n";

@@ -5,7 +5,7 @@ import type { OrderEntry, OrderRole } from "@reveal-codes/export";
 import Page from "../app/courts/page";
 import { InstrumentView } from "../src/courts/instrument-view";
 import { buildCourtsModel } from "../src/courts/view-model";
-import { judgeLine } from "../src/order-copy";
+import { judgeLine, placementWords } from "../src/order-copy";
 
 const model = buildCourtsModel(ORDERS, null);
 
@@ -98,6 +98,49 @@ describe("no repeated line _Requirements: 20.1, 20.2_", () => {
     for (const entry of ORDERS.entries) {
       const texts = blockTexts(articleHtml(entry));
       expect(new Set(texts).size, entry.id).toBe(texts.length);
+    }
+  });
+});
+
+describe("look of the page _Requirements: 21.2, 21.3, 21.4, 21.5, 21.6_", () => {
+  it("has one header link to / holding the aria-hidden Mark and the wordmark, and one h1", () => {
+    const html = renderToString(<Page />);
+    const header = /<header[^>]*>(.*?)<\/header>/s.exec(html)?.[1] ?? "";
+    expect(header).toMatch(/^<a href="\/"[^>]*>/);
+    expect(header).not.toContain("target=");
+    expect(header).toContain('<img src="/icon.svg" alt="" aria-hidden="true"');
+    expect(header).toContain("Reveal Codes</span>");
+    expect(html.match(/<h1\b/g)).toHaveLength(1);
+  });
+
+  it("shows the Requires label only for entries with elements", () => {
+    for (const entry of ORDERS.entries) {
+      const html = articleHtml(entry);
+      expect(html.includes(">Requires</p>"), entry.id).toBe(entry.elements.length > 0);
+    }
+    expect(ORDERS.entries.some((e) => e.elements.length === 0)).toBe(true);
+  });
+
+  it("prints the required heading with curly quotes and a lower-case placement", () => {
+    const withCaption = ORDERS.entries.filter((e) => e.caption !== null);
+    expect(withCaption.length).toBeGreaterThan(0);
+    for (const entry of withCaption) {
+      const text = blockTexts(articleHtml(entry));
+      const caption = entry.caption as NonNullable<OrderEntry["caption"]>;
+      const placement = placementWords[caption.placement].toLowerCase();
+      expect(text, entry.id).toContain(
+        `Required heading: \u201C${caption.text}\u201D (${placement})`,
+      );
+      expect(text.join("\n")).not.toContain("Caption:");
+    }
+  });
+
+  it("puts Not in force. first after the title for every entry that is not in force", () => {
+    const replaced = ORDERS.entries.filter((e) => e.status !== "current");
+    expect(replaced.length).toBeGreaterThan(0);
+    for (const entry of replaced) {
+      const html = articleHtml(entry);
+      expect(html, entry.id).toMatch(/<\/h3><p class="[^"]*">Not in force\./);
     }
   });
 });

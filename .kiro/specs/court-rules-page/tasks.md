@@ -179,7 +179,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - In `instrument-view.tsx` print `Not in force.` then `Replaced by <link>.` from the replacing title; stop printing the vocabulary sentence; print the judge with `judgeLine`; print the instrument line only when it differs from the title; remove `words.status` from the view model if nothing else reads it
     - Add tests: judge line of one entry per role and the Court of International Trade `district` judge; no two lines in an article repeat; no shown text on the page contains a dataset field name as a whole word or any word with an underscore (shipped Dataset, tags and attributes excluded); update `courts-page.test.tsx` for the new wording
     - _Requirements: 18.1, 18.2, 18.3, 19.1, 19.4, 20.1, 20.2_
-  - [~] 10.6 The look of the page
+  - [x] 10.6 The look of the page
     - Wrap `courts/page.tsx` in a `--desk` wrapper holding a `--paper` column with `max-width: var(--page-max)`, centred, `min-height: 100vh`, fluid padding, no width at-rule; add the header link to `/` with the Mark (24px, 10px gap, `aria-hidden`) and the REVEAL CODES wordmark in the Small_Screen_Page style
     - Restructure `InstrumentView` into title, `.meta` block and `.asks` block per the design table; `Not in force.` bold under the title; label `Requires` (Small label style) over the requirements; `Required heading: “<text>” (<placement lower case>)`; both links `min-height: 34px`, `display: inline-flex`, `align-items: center`, look unchanged
     - Use only allowed sizes, weights and Tokens; add no Token and no scan exemption

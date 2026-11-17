@@ -33,26 +33,11 @@ function NotInForce(props: InstrumentViewProps) {
   );
 }
 
-function Elements(props: InstrumentViewProps) {
-  const { entry, words } = props;
-  if (entry.elements.length === 0) return null;
-  return (
-    <ul className={styles["elements"]}>
-      {entry.elements.map((element) => (
-        <li key={element}>{words.elements[element]}</li>
-      ))}
-    </ul>
-  );
-}
-
-/** One instrument as the dataset records it. No hooks, so server and client render alike. */
-export function InstrumentView(props: InstrumentViewProps) {
+function Meta(props: Readonly<{ entry: OrderEntry }>) {
   const { entry } = props;
-  const title = entry.title === "" ? entry.instrument : entry.title;
   const showInstrument = entry.title !== "" && entry.title !== entry.instrument;
   return (
-    <article id={entry.id} className={styles["instrument"]}>
-      <h3 className={styles["instrumentTitle"]}>{title}</h3>
+    <div className={styles["meta"]}>
       {showInstrument ? <p className={styles["line"]}>{entry.instrument}</p> : null}
       {entry.judge === null ? null : <p className={styles["line"]}>{judgeLine(entry.judge)}</p>}
       <p className={styles["line"]}>
@@ -62,14 +47,58 @@ export function InstrumentView(props: InstrumentViewProps) {
         {entry.date}
         {entry.date_note === undefined ? "" : ` ${entry.date_note}`}
       </p>
-      <NotInForce {...props} />
+    </div>
+  );
+}
+
+function Elements(props: InstrumentViewProps) {
+  const { entry, words } = props;
+  if (entry.elements.length === 0) return null;
+  return (
+    <>
+      <p className={styles["label"]}>Requires</p>
+      <ul className={styles["elements"]}>
+        {entry.elements.map((element) => (
+          <li key={element}>{words.elements[element]}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+function RequiredHeading(props: Readonly<{ entry: OrderEntry }>) {
+  const { caption } = props.entry;
+  if (caption === null) return null;
+  const placement = placementWords[caption.placement].toLowerCase();
+  return (
+    <p className={styles["line"]}>
+      Required heading: {curlyQuoted(caption.text)} ({placement})
+    </p>
+  );
+}
+
+function Asks(props: InstrumentViewProps) {
+  return (
+    <div className={styles["asks"]}>
       <Elements {...props} />
-      {entry.caption === null ? null : (
-        <p className={styles["line"]}>
-          Caption: {entry.caption.text} ({placementWords[entry.caption.placement]})
-        </p>
-      )}
-      <blockquote className={styles["quotation"]}>{curlyQuoted(entry.key_language)}</blockquote>
+      <RequiredHeading entry={props.entry} />
+      <blockquote className={styles["quotation"]}>
+        {curlyQuoted(props.entry.key_language)}
+      </blockquote>
+    </div>
+  );
+}
+
+/** One instrument as the dataset records it. No hooks, so server and client render alike. */
+export function InstrumentView(props: InstrumentViewProps) {
+  const { entry } = props;
+  const title = entry.title === "" ? entry.instrument : entry.title;
+  return (
+    <article id={entry.id} className={styles["instrument"]}>
+      <h3 className={styles["instrumentTitle"]}>{title}</h3>
+      <NotInForce {...props} />
+      <Meta entry={entry} />
+      <Asks {...props} />
       <p className={styles["links"]}>
         <a href={entry.source_url} target="_blank" rel="noreferrer">
           Read the court&apos;s text
