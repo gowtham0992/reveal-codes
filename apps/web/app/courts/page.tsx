@@ -38,8 +38,8 @@ export default function Page() {
           )}
         </p>
         <p>
-          This page is a snapshot and is not legal advice. Read the court&apos;s own text before
-          you file.
+          This page is a snapshot and is not legal advice. Read the court&apos;s own text before you
+          file.
         </p>
         <p>
           <a href="/">Open the editor</a>

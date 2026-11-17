@@ -183,14 +183,29 @@ function appChecks(file: SourceText): Violation[] {
   ];
 }
 
-describe("static: forbidden constructs _Requirements: 2.5, 2.6, 3.12, 7.7, 19.4, 24.3, 25.7_", () => {
-  it("finds none in src and app", () => {
-    expect(formatViolations(readSources(["src", "app"]).flatMap(appChecks))).toEqual([]);
-  });
+/**
+ * These two tests read and scan every source file synchronously. Alone that takes about 0.3 s,
+ * but the full run starts one worker per test file and the scan can pass the 5 s default on a
+ * loaded machine. The longer limit changes no assertion.
+ */
+const SCAN_TIMEOUT_MS = 30_000;
 
-  it("never mocks the Engine or the Verifier in tests", () => {
-    expect(formatViolations(readSources(["test"]).flatMap(mockViolations))).toEqual([]);
-  });
+describe("static: forbidden constructs _Requirements: 2.5, 2.6, 3.12, 7.7, 19.4, 24.3, 25.7_", () => {
+  it(
+    "finds none in src and app",
+    () => {
+      expect(formatViolations(readSources(["src", "app"]).flatMap(appChecks))).toEqual([]);
+    },
+    SCAN_TIMEOUT_MS,
+  );
+
+  it(
+    "never mocks the Engine or the Verifier in tests",
+    () => {
+      expect(formatViolations(readSources(["test"]).flatMap(mockViolations))).toEqual([]);
+    },
+    SCAN_TIMEOUT_MS,
+  );
 });
 
 function reported(check: (f: SourceText) => Violation[], path: string, text: string): string[] {

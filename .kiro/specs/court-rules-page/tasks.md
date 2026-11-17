@@ -189,7 +189,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - `.kiro/steering/ui.md`: record the Courts_Page type assignments of the design table and the column, header and 34px link rules
     - `BUILD_LOG.md`: under "What Kiro got wrong" add, in plain words, what the walk found: a field name printed as copy, bare role words, a title printed twice, a full-width page on the desk colour with one weight for every line, a space sorting before a letter, a compiled date older than an entry, an override table whose Timestamp column was wider than its content and whose Reason column was squeezed
     - _Requirements: 21.8, 25.1_
-- [~] 11. Final verification after the follow-up
+- [x] 11. Final verification after the follow-up
   - Run each of these after the last edit and fix failures: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, `pnpm --filter @reveal-codes/web build` (clean-checkout build), and `pnpm kiro:check`
   - Do not push
   - _Requirements: 25.2_

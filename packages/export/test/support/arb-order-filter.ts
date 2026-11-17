@@ -22,7 +22,7 @@ const arbJudge = fc.oneof(
   { weight: 1, arbitrary: fc.constant(null) },
   {
     weight: 2,
-    arbitrary: fc.constantFrom(...JUDGES).map((name) => ({ name, role: "district" as OrderRole })),
+    arbitrary: fc.constantFrom(...JUDGES).map((name) => ({ name, role: "district" as const })),
   },
 );
 
