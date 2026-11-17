@@ -170,7 +170,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
   - The author then walks `/check` at 375px and 1280px, on the demo server and then live. That step is manual and not a coding task.
   - _Requirements: 18.8, 18.9_
 
-- [ ] 12. Follow-up: findings from the 375px, 320px and 1280px walk
+- [x] 12. Follow-up: findings from the 375px, 320px and 1280px walk
   - [x] 12.1 Add the Case_Name_Option to `checkRows`
     - In `src/client/mismatch.ts` export `citedAsLine(name)` and make `mismatchLines` call it. In `src/client/check-rows.ts` add the optional `caseName` field to `CheckRow` and the third argument `{ caseNames: boolean }` (default off) to `checkRows`, set through one helper on the citation and failing-row builders. With the option off no field is added. Quotation and orphan rows never get it.
     - Do not edit `issues-list.tsx`, `resolved.ts` or their tests. Run the existing `issues-list`, `resolved`, `verify-summary` and `check-rows` tests and confirm they pass with no edit.
@@ -228,7 +228,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Run `pnpm kiro:check` for `docs/KIRO_USAGE.md` and add a row only if the inventory asks for one.
     - _Requirements: 22.7, 20.11_
 
-  - [~] 12.13 Add the walk findings to `BUILD_LOG.md`
+  - [x] 12.13 Add the walk findings to `BUILD_LOG.md`
     - Under the citation-check-page entry, in "What Kiro got wrong, and what fixed it", add plain, third-person lines for what the walk at 375px, 320px and 1280px found: no case name on a row, because the page had no document beside the row; the 13px draft box and the 30px buttons and 29px links, never checked on a phone; the capital "The" from reusing a sentence as a file name; the two sentences saying the draft is not stored; and the Editor_Link frozen at load, with the root cause found in 12.9. Add the confirm dialog to a "Left out" line. Make no first-person claim as the user.
     - _Requirements: 18.6_
 
