@@ -37,6 +37,19 @@ describe("static: Courts page stylesheet _Requirements: 10.2, 10.3, 10.4_", () =
     expect(value(".links a", "align-items")).toBe("center");
   });
 
+  it("puts the 44px link height under the touch query and 34px outside it _Requirements: 20.5, 20.7, 20.8_", () => {
+    const css = parseCss(sheets[0]?.text ?? "");
+    const links = css.declarations.filter(
+      (d) => d.selector.trim() === ".links a" && d.prop === "min-height",
+    );
+    const coarse = links.filter((d) => d.atRules.includes("@media (pointer: coarse)"));
+    const desktop = links.filter((d) => d.atRules.length === 0);
+    expect(coarse.map((d) => d.value.trim())).toEqual(["44px"]);
+    expect(desktop.map((d) => d.value.trim())).toEqual(["34px"]);
+    expect(css.atRules.filter((r) => /width/.test(r.prelude))).toEqual([]);
+    expect(css.atRules.map((r) => r.prelude)).toEqual(["@media (pointer: coarse)"]);
+  });
+
   it("reports a planted fixed width, width query, shadow and off-list size", () => {
     const text =
       ".a {\n  width: 400px;\n  box-shadow: none;\n  font-size: 17px;\n}\n@media (min-width: 600px) {\n}\n";

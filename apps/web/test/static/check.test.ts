@@ -88,6 +88,38 @@ describe("static: Check_Page stylesheet _Requirements: 16.1, 16.2, 17.5_", () =>
     expect(own.filter((d) => /^(?:border|outline|padding)/.test(d.prop))).toEqual([]);
   });
 
+  it("puts the 44px rules under the touch query and the 34px rule outside it _Requirements: 20.1, 20.2, 20.3, 20.4, 20.5, 20.7_", () => {
+    const decls = parseCss(sheets[0]?.text ?? "").declarations;
+    const at = (selector: string, prop: string, coarse: boolean): string[] =>
+      decls
+        .filter(
+          (d) =>
+            d.selector.split(",").some((s) => s.trim() === selector) &&
+            d.prop === prop &&
+            d.atRules.includes("@media (pointer: coarse)") === coarse,
+        )
+        .map((d) => d.value.trim());
+    expect(at(".page button", "height", true)).toEqual(["44px"]);
+    expect(at(".page a", "min-height", true)).toEqual(["44px"]);
+    expect(at(".page a", "display", true)).toEqual(["inline-flex"]);
+    expect(at(".links a", "min-height", false)).toEqual(["34px"]);
+    expect(at(".links a", "min-height", true)).toEqual(["44px"]);
+    expect(decls.filter((d) => d.value.trim() === "44px" && d.atRules.length === 0)).toEqual([]);
+    expect(decls.filter((d) => d.atRules.length > 0).every((d) => d.atRules.length === 1)).toBe(
+      true,
+    );
+  });
+
+  it("sets the Draft_Box text at 16px / 22px outside any query _Requirements: 20.7, 20.10_", () => {
+    const value = lookup(sheets[0]?.text ?? "");
+    expect(value(".draft", "font-size")).toBe("16px");
+    expect(value(".draft", "line-height")).toBe("22px");
+    const sixteen = parseCss(sheets[0]?.text ?? "").declarations.filter(
+      (d) => d.prop === "font-size" && d.value.trim() === "16px",
+    );
+    expect(sixteen.map((d) => d.selector.trim())).toEqual([".draft"]);
+  });
+
   it("allows only the touch query as a non-width media query, and 16px only on .draft or textarea", () => {
     const scan = (text: string): string[] =>
       formatViolations(sheetViolations("app/check/x.module.css", text));

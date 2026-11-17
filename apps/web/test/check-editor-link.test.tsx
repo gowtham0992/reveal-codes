@@ -3,7 +3,12 @@ import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { HANDOVER_KEY } from "../src/handover";
 import { CheckPage } from "../src/check/check-page";
-import { HANDOVER_FAILED } from "../src/check/check-text";
+import {
+  HANDOVER_FAILED,
+  STORAGE_STATEMENT,
+  STORAGE_STATEMENT_WIDE,
+} from "../src/check/check-text";
+import { defaultServices } from "../src/services";
 import type { AppServices } from "../src/services";
 import { createFakeClipboard } from "./support/browser-services";
 import { createManualTimers } from "./support/clock";
@@ -96,6 +101,58 @@ describe("Editor_Link _Requirements: 12.1, 12.2, 12.3, 12.8, 17.4_", () => {
       f.viewport.setWidth(500);
     });
     expect(link()).toBeNull();
+  });
+
+  it("shows the link and the extra clause after widening, and drops both on narrowing", async () => {
+    const f = fixture(375);
+    await mount(f);
+    type(DRAFT);
+    expect(link()).toBeNull();
+    expect(screen.queryByText(STORAGE_STATEMENT)).not.toBeNull();
+    act(() => {
+      f.viewport.setWidth(1280);
+    });
+    expect(link()).not.toBeNull();
+    expect(screen.queryByText(STORAGE_STATEMENT_WIDE)).not.toBeNull();
+    expect(screen.queryByText(STORAGE_STATEMENT)).toBeNull();
+    act(() => {
+      f.viewport.setWidth(375);
+    });
+    expect(link()).toBeNull();
+    expect(screen.queryByText(STORAGE_STATEMENT_WIDE)).toBeNull();
+    expect(screen.queryByText(STORAGE_STATEMENT)).not.toBeNull();
+  });
+
+  it("does the same through the real resize event of defaultServices().viewport", async () => {
+    const original = window.innerWidth;
+    const setInner = (w: number): void => {
+      Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: w });
+    };
+    setInner(375);
+    try {
+      const svc: AppServices = { ...fixture(375).svc, viewport: defaultServices().viewport };
+      await act(async () => {
+        renderUi(<CheckPage services={svc} styles={{}} />);
+        await Promise.resolve();
+      });
+      type(DRAFT);
+      expect(link()).toBeNull();
+      expect(screen.queryByText(STORAGE_STATEMENT)).not.toBeNull();
+      act(() => {
+        setInner(1280);
+        window.dispatchEvent(new Event("resize"));
+      });
+      expect(link()).not.toBeNull();
+      expect(screen.queryByText(STORAGE_STATEMENT_WIDE)).not.toBeNull();
+      act(() => {
+        setInner(375);
+        window.dispatchEvent(new Event("resize"));
+      });
+      expect(link()).toBeNull();
+      expect(screen.queryByText(STORAGE_STATEMENT)).not.toBeNull();
+    } finally {
+      setInner(original);
+    }
   });
 
   it("is absent while the results are out of date", async () => {

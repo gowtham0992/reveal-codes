@@ -62,6 +62,26 @@ describe("copyText", () => {
     expect(lines[1]).toBe(`Wrong case: 598 F.3d 1. On record: Doe v. Roe, 2010. ${LINK}`);
   });
 
+  it("writes the case name before the citation on a not-found row (Varghese)", () => {
+    const varghese = row({
+      code: "CIT ✘",
+      words: "not found",
+      text: "925 F.3d 1339 (11th Cir. 2019)",
+      caseName: "Varghese v. China Southern Airlines Co., Ltd.",
+    });
+    const lines = copyText([varghese], CITATIONS, "2026-11-07").split("\n");
+    expect(lines[1]).toBe(
+      "Not found: Varghese v. China Southern Airlines Co., Ltd., 925 F.3d 1339 (11th Cir. 2019).",
+    );
+  });
+
+  it("carries the case name once, before the citation, on a wrong-case line", () => {
+    const named = row({ ...wrong, caseName: "Smith v. Jones" });
+    const line = copyText([named], CITATIONS, "2026-11-07").split("\n")[1] ?? "";
+    expect(line.startsWith("Wrong case: Smith v. Jones, 598 F.3d 1.")).toBe(true);
+    expect(line.split("Smith v. Jones")).toHaveLength(2);
+  });
+
   it("ends a quotation line after the first sentence, with no address", () => {
     const lines = copyText([quote], CITATIONS, "2026-11-07").split("\n");
     expect(lines[1]).toBe("Quote not found in opinion: \u201Cthe right to be let alone\u201D.");

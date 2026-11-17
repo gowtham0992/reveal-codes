@@ -184,7 +184,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - **Property 1: One answer** (extended). In `apps/web/test/check-rows.properties.test.ts` keep one `fc.assert(fc.property(...))` and `// Property 1`, add `fc.boolean()` for `caseNames`, and add clauses 7 and 8 of design F2. Add 19.13 to the `describe` title and to **Validates**. Expected names are read from `document.citations`, never from the rows.
     - **Validates: Requirements 8.1, 8.2, 19.13**
 
-  - [ ]* 12.4 Write example tests for the case name
+  - [x]* 12.4 Write example tests for the case name
     - `check-rows.test.ts`: option off equals rows without the argument; option on on found, not-found, ambiguous and unchecked rows; one "Cited as" line on a wrong-case row; no extra text with no `caseName`; no field on a quotation or orphan row.
     - `check-page.test.tsx` and `copy-text.test.ts`: the Varghese not-found row shows "Cited as Varghese v. China Southern Airlines Co., Ltd."; the Copy results line reads "Not found: Varghese v. China Southern Airlines Co., Ltd., 925 F.3d 1339 (11th Cir. 2019)."; a wrong-case copy line carries the name once before the citation.
     - _Requirements: 19.2, 19.3, 19.4, 19.6, 19.8, 19.10, 19.11, 19.12_
@@ -199,7 +199,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - `app/check/check.module.css`: `.draft` at 16px / 22px; `@media (pointer: coarse)` block for `.page button` (44px height) and `.page a` (inline-flex, 44px min-height). `src/components/small-screen-page.module.css` and `app/courts/courts.module.css` (`.links a`): `@media (pointer: coarse)` blocks with a 44px minimum. Keep every existing desktop rule outside the query unchanged. Do not touch the shared confirm dialog.
     - _Requirements: 20.1, 20.2, 20.3, 20.4, 20.5, 20.6, 20.7, 20.12_
 
-  - [ ]* 12.7 Write tests for the touch rules
+  - [x]* 12.7 Write tests for the touch rules
     - In `static/check.test.ts` and `static/courts.test.ts` and a small-screen sheet test: the 44px declarations sit under `@media (pointer: coarse)` and the 34px and 30px desktop declarations sit outside it; `.draft` is 16px; the query is not counted as a width at-rule; the planted violations of 12.5 fail as expected.
     - _Requirements: 20.1, 20.2, 20.3, 20.4, 20.5, 20.7, 20.8, 20.9, 20.10_
 
@@ -218,12 +218,12 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Update the existing tests that name the two old sentences. Run `copy-rules` and `check-literals` scans.
     - _Requirements: 22.1, 22.2, 22.3, 22.4, 22.5, 22.6, 22.8_
 
-  - [ ]* 12.11 Write tests for the statement and the live width
+  - [-]* 12.11 Write tests for the statement and the live width
     - `check-page.test.tsx`: the Storage_Statement text at a viewport of 375px and at 1280px; the server HTML at the narrow default holds the narrow statement and no editor mention; one storage sentence only.
     - `check-editor-link.test.tsx`: load narrow, widen, the link and the extra clause appear; narrow again, both are gone; the same through the real `resize` event with `defaultServices().viewport`.
     - _Requirements: 22.4, 22.5, 22.9, 23.1, 23.2, 23.3, 23.5_
 
-  - [~] 12.12 Update the docs
+  - [-] 12.12 Update the docs
     - `README.md` "What leaves your machine": reword the `/check` line to say the draft is not stored and, on a screen 800 pixels or wider, that opening it in the editor stores it there; keep the other claims. No exclamation mark; `docs.test.ts` stays green. Requirement 2.4 and 11.1 are superseded by 22 as the requirements follow-up records; edit no earlier requirement text.
     - Run `pnpm kiro:check` for `docs/KIRO_USAGE.md` and add a row only if the inventory asks for one.
     - _Requirements: 22.7, 20.11_

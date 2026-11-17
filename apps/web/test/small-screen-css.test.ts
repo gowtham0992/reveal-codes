@@ -32,6 +32,15 @@ describe("Small-screen stylesheet _Requirements: 9.4, 9.5, 9.6, 9.7, 13.10_", ()
     expect(value(".page p", "line-height")).toBe("29px");
   });
 
+  it("sets the 44px link height only under the touch query, which is not a width at-rule _Requirements: 20.4, 20.7_", () => {
+    const heights = css.declarations.filter((d) => d.prop === "min-height" && d.value === "44px");
+    expect(heights.map((d) => [d.selector, d.atRules])).toEqual([
+      [".links a", ["@media (pointer: coarse)"]],
+    ]);
+    expect(css.atRules.map((r) => r.prelude)).toEqual(["@media (pointer: coarse)"]);
+    expect(css.atRules.filter((r) => /width/.test(r.prelude))).toEqual([]);
+  });
+
   it("uses none of the removed aliases", () => {
     expect(text).not.toMatch(/--ui-bg|--accent|--size-/);
   });
