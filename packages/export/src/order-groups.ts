@@ -12,9 +12,17 @@ export type OrderStats = Readonly<{
   compiled: string;
 }>;
 
-/** Court order: numeric-aware, so "5th Cir." sorts before "10th Cir. BAP". */
+function stripSpacesAndStops(text: string): string {
+  return text.replace(/[\s.]/g, "");
+}
+
+/**
+ * Court order: ignores spaces and full stops and is numeric-aware, so
+ * "5th Cir." sorts before "10th Cir. BAP" and "D.N.M." falls between
+ * "D. Neb." and "D. Wyo.".
+ */
 export function compareAbbreviations(a: string, b: string): number {
-  return a.localeCompare(b, "en", { numeric: true });
+  return stripSpacesAndStops(a).localeCompare(stripSpacesAndStops(b), "en", { numeric: true });
 }
 
 function rank(entry: OrderEntry): number {

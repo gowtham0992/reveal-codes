@@ -7,9 +7,10 @@ import {
   CAPTION_PLACEMENTS,
   ORDER_ELEMENTS,
   ORDER_KINDS,
+  ORDER_ROLES,
   ORDER_STATUSES,
 } from "./orders-types.js";
-import type { OrderCourt, OrderJudge, OrderVocabulary } from "./orders-types.js";
+import type { OrderCourt, OrderJudge, OrderRole, OrderVocabulary } from "./orders-types.js";
 
 export type RawCaption = Readonly<{ placement: string; text: string }>;
 
@@ -124,12 +125,17 @@ function readCourt(value: unknown): OrderCourt | null {
   return { name, abbreviation, level };
 }
 
-function readJudge(value: unknown): OrderJudge | null | undefined {
+function isRole(value: string): value is OrderRole {
+  return (ORDER_ROLES as readonly string[]).includes(value);
+}
+
+function readJudge(value: unknown): OrderJudge | null | undefined | string {
   if (value === null) return null;
   if (!isRec(value)) return undefined;
   const name = str(value, "name");
   const role = str(value, "role");
-  return name !== null && role !== null ? { name, role } : undefined;
+  if (name === null || role === null) return undefined;
+  return isRole(role) ? { name, role } : role;
 }
 
 function readCaption(value: unknown): RawCaption | null | undefined {
@@ -162,6 +168,7 @@ export function parseEntry(value: unknown, index: number): Result<RawEntry, stri
   if (court === null) return malformed(who, "court.name");
   const judge = readJudge(value["judge"]);
   if (judge === undefined) return malformed(who, "judge");
+  if (typeof judge === "string") return err(`${who}: "judge.role" has unknown value "${judge}"`);
   const elements = readStrings(value["elements"]);
   if (elements === null) return malformed(who, "elements");
   const caption = readCaption(value["caption"]);

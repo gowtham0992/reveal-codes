@@ -34,6 +34,9 @@ export const ORDER_STATUSES = [
   "proposed",
 ] as const;
 
+export const ORDER_ROLES = ["district", "magistrate", "senior", "chief"] as const;
+
+export type OrderRole = (typeof ORDER_ROLES)[number];
 export type OrderKind = (typeof ORDER_KINDS)[number];
 export type AppliesTo = (typeof APPLIES_TO)[number];
 export type OrderElement = (typeof ORDER_ELEMENTS)[number];
@@ -41,7 +44,7 @@ export type CaptionPlacement = (typeof CAPTION_PLACEMENTS)[number];
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 export type OrderCourt = Readonly<{ name: string; abbreviation: string; level: string }>;
-export type OrderJudge = Readonly<{ name: string; role: string }>;
+export type OrderJudge = Readonly<{ name: string; role: OrderRole }>;
 export type OrderCaption = Readonly<{ placement: CaptionPlacement; text: string }>;
 
 export type OrderEntry = Readonly<{

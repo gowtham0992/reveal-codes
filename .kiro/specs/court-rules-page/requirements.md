@@ -284,3 +284,92 @@ The eventual task list has one property test (the filter, Property 1) and exampl
 3. THE `BUILD_LOG.md` file SHALL contain a dated entry for this work that states what was built, what Kiro got wrong, and what fixed it.
 4. THE `.env.example` comment for `NEXT_PUBLIC_REPO_URL` SHALL also say that the Courts_Page uses it for the links to the Dataset and its README.
 5. THE UI_Rules SHALL list the Courts_Page's text input, checkbox and quotation rules of Requirement 10.
+
+## Follow-up group: page wording, look, order, compiled date and print table
+
+These requirements come from a walk of the finished build. They change the wording and look of the Courts_Page and repair four smaller defects. The numbering continues from Requirement 17.
+
+### Requirement 18: The page uses its own words
+
+**User Story:** As a visitor, I want every sentence on the page written for me, so that I never read a name from the data file.
+
+#### Acceptance Criteria
+
+1. FOR a Not_In_Force Instrument that has a `superseded_by` value whose Instrument exists, THE Courts_Page SHALL print `Not in force. Replaced by ` followed by a link to that Instrument_Anchor, titled with the replacing Instrument's title, followed by a full stop.
+2. FOR a Not_In_Force Instrument without a replacing Instrument, THE Courts_Page SHALL print the status sentence from the Dataset vocabulary only when that sentence names no field and contains no underscore; otherwise it SHALL print `Not in force.` alone. The Courts_Page SHALL never print the vocabulary sentence for a replaced Instrument.
+3. A test SHALL assert that no text shown on the Courts_Page, for the shipped Dataset, contains a Dataset field name (every key that appears in an entry, in `vocabulary`, and at the top of the file) as a whole word, or any word that contains an underscore. Link targets and attribute values are not shown text.
+
+### Requirement 19: Judge titles
+
+**User Story:** As a visitor, I want a judge named with a title, so that I do not read a data word after a name.
+
+#### Acceptance Criteria
+
+1. THE Courts_Page SHALL print the judge line as the title, then the name: `Magistrate Judge <name>` for `magistrate`, `Senior Judge <name>` for `senior`, `Chief Judge <name>` for `chief` and `Judge <name>` for `district`. It SHALL never print `District Judge`.
+2. THE Dataset loader SHALL type the judge role as a closed union of those four values and SHALL fail the load, with a message that names the entry and the value, when an entry carries another role.
+3. THE words for the roles SHALL be a `Record` typed over that union, so that a new role fails to compile until it has words.
+4. A test SHALL assert the judge line of one Instrument of each role, and that the line of a Court of International Trade `district` judge reads `Judge <name>`.
+
+### Requirement 20: No repeated title
+
+**User Story:** As a visitor, I want a line printed once, so that the page does not read as a mistake.
+
+#### Acceptance Criteria
+
+1. THE Courts_Page SHALL print an Instrument's instrument name as its own line only when it differs from the title printed above it. When the title is empty and the instrument name stands in as the title, the instrument line SHALL NOT be printed.
+2. A test SHALL assert, for every Instrument of the shipped Dataset, that no two paragraphs or headings inside its article have the same text.
+
+### Requirement 21: The look of the page
+
+**User Story:** As a visitor on a phone or a laptop, I want the page to look like part of the product, so that I can read it and tell its parts apart.
+
+#### Acceptance Criteria
+
+1. THE Courts_Page SHALL be a `--paper` column on a `--desk` background, as the Sheet is: the column SHALL have `max-width: var(--page-max)`, SHALL be centred, SHALL be at least as tall as the window, and SHALL take the whole width when the window is narrower. No width at-rule SHALL be used.
+2. THE top of the page SHALL carry the Mark and the wordmark REVEAL CODES, styled as on the Small_Screen_Page, as one link to `/` in the same tab. The Mark SHALL be 24px, 10px before the wordmark, with `aria-hidden`.
+3. EACH Instrument SHALL read in three levels: (a) its title; (b) a secondary block holding the judge line, the kind and applies-to words, and the date, in `--font-ui` and `--muted`; (c) what it asks for, being the status line when the Instrument is Not_In_Force, a list of requirements under a short label, the required heading, and the key language.
+4. THE list of requirements SHALL have the label `Requires`, in the Small label style of the UI_Rules, and SHALL be omitted with its label when the list is empty.
+5. THE required heading SHALL be printed as `Required heading: “<text>” (<placement in lower case>)`, replacing `Caption: …`. The placement words are the Placement_Words with their first letter in lower case.
+6. A Not_In_Force Instrument SHALL show `Not in force.` in weight 700 on its own line directly under the title, so that it stands out by words and weight, not by colour alone.
+7. THE links "Read the court's text" and "Draft under this rule" SHALL each be at least 34px high, with no change to their colour, size or underline.
+8. THE sizes, weights and families SHALL come only from the allowed lists of the UI_Rules, and the assignment of each to a level SHALL be recorded in `.kiro/steering/ui.md`. No Token, size, weight or scan exemption SHALL be added.
+9. THE static scans of Requirement 10 and Requirement 16 SHALL stay green without a new exemption, and the stylesheet test SHALL assert the column rules of criterion 1.
+
+### Requirement 22: Court order ignores spaces and full stops
+
+**User Story:** As a visitor, I want `D.N.M.` between `D. Neb.` and `D. Wyo.` where the alphabet puts it, so that the list is easy to scan.
+
+#### Acceptance Criteria
+
+1. THE comparison of court abbreviations SHALL ignore spaces and full stops and SHALL keep numeric collation, so that `5th Cir.` sorts before `10th Cir. BAP`, and `D. Neb.`, `D.N.M.`, `D. Wyo.` come in that order (stripped: `dneb`, `dnm`, `dwyo`).
+2. THE ordering tests SHALL include a case with `D. Neb.`, `D. Wyo.` and `D.N.M.` and SHALL assert the order of the stripped text.
+
+### Requirement 23: The compiled date
+
+**User Story:** As a reader, I want the compiled date to be no earlier than the newest entry, so that the page does not contradict itself.
+
+#### Acceptance Criteria
+
+1. THE `compiled` value of `data/standing-orders.json` SHALL equal the latest `retrieved` date of any entry in the file.
+2. A test SHALL assert that `compiled` is never earlier than the `retrieved` date of any entry, and SHALL fail on a Dataset whose `compiled` is earlier than one.
+3. THE `orders-curator` agent and the `add-standing-order` skill SHALL state, as a step, that adding or updating an entry sets `compiled` to the latest `retrieved` date and runs `pnpm power:build`.
+4. THE Power's copy of the Dataset SHALL equal the Dataset byte for byte after `pnpm power:build`, and the Dataset README SHALL state the same date as `compiled`.
+
+### Requirement 24: Override table columns in the print view
+
+**User Story:** As a filer, I want the override table to use its width where it is needed, so that a reason reads in few lines.
+
+#### Acceptance Criteria
+
+1. THE Code and Timestamp columns of the Override_Table SHALL be as wide as their content, with no wrapping: `white-space: nowrap` and `width: 1%` on those columns, with no `min-width` wider than the longest content.
+2. THE Reason column SHALL take the remaining width and wrap by word.
+3. THE stylesheet test SHALL assert criteria 1 and 2 and SHALL fail on the previous `min-width: 26ch` rule.
+
+### Requirement 25: Record and verify
+
+**User Story:** As the maintainer, I want the walk recorded and the build green, so that the follow-up can be trusted.
+
+#### Acceptance Criteria
+
+1. THE `BUILD_LOG.md` entry of this work SHALL list, under "What Kiro got wrong", what the walk found, in plain words.
+2. AFTER the last edit, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, the clean-checkout `pnpm --filter @reveal-codes/web build` and `pnpm kiro:check` SHALL all pass. Nothing SHALL be pushed.

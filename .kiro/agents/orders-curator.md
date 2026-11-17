@@ -16,4 +16,5 @@ Rules:
 - Never take a fact from a tracker or from memory. Every field comes from the court's own text.
 - Never change another entry. The one exception is the `supersedes` / `superseded_by` link on the entry the new one replaces, when the skill calls for it.
 - Before saving, show the new entry and the quoted sentence with the page it came from. Then save.
-- After saving, run the orders tests in the export project (`pnpm vitest run --project export orders`) and report the result.
+- After saving, set `compiled` in `data/standing-orders.json` to the latest `retrieved` date of any entry, update the same date in `data/README.md`, and run `pnpm power:build`.
+- Then run the orders tests in the export project (`pnpm vitest run --project export orders`) and report the result.

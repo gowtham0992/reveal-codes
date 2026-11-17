@@ -28,7 +28,8 @@ Add or update one entry in `data/standing-orders.json`. Work as a careful person
 7. If the new entry replaces an older one, set `supersedes` on the new entry and `superseded_by` on the old one, and set the old entry's `status` to `superseded`. Change nothing else on the old entry.
 8. Show the new entry and the quoted sentence with the page it came from. Then save.
 9. Update the counts in `data/README.md`: the total entries, the number of courts, the per-kind counts, the number of entries whose status is not `current`, and the sentence about entries no longer in force (it must list each of them). Update the same counts in `README.md` wherever it states them.
-10. Run the orders tests: `pnpm vitest run --project export orders`. Report the result. If they fail, fix the entry, not the test. The exception: a test that asserts the total number of entries (`packages/export/test/orders.test.ts`) is updated to the new total.
+10. Set `compiled` in `data/standing-orders.json` to the latest `retrieved` date of any entry (after adding or updating an entry this is normally today's date), set the same date where `data/README.md` says "as they stood on", and run `pnpm power:build` so the Power's copy of the dataset is byte-equal.
+11. Run the orders tests: `pnpm vitest run --project export orders`. Report the result. If they fail, fix the entry, not the test. The exception: a test that asserts the total number of entries (`packages/export/test/orders.test.ts`) is updated to the new total.
 
 ## Out of scope
 

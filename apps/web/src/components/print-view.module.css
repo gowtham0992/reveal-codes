@@ -96,13 +96,15 @@
 }
 
 .overrides th:nth-child(1),
-.overrides td:nth-child(1) {
-  min-width: 10ch;
-}
-
+.overrides td:nth-child(1),
 .overrides th:nth-child(4),
 .overrides td:nth-child(4) {
-  min-width: 26ch;
+  white-space: nowrap;
+  width: 1%;
+}
+
+.overrides td:nth-child(3) {
+  overflow-wrap: break-word;
 }
 
 .signature {

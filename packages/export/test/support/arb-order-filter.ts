@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
 import { ORDER_KINDS, ORDER_STATUSES } from "../../src/orders-types.js";
-import type { OrderEntry } from "../../src/orders-types.js";
+import type { OrderEntry, OrderRole } from "../../src/orders-types.js";
 import type { FilterState, KindChoice } from "../../src/order-filter.js";
 
 const COURT_NAMES = [
@@ -22,7 +22,7 @@ const arbJudge = fc.oneof(
   { weight: 1, arbitrary: fc.constant(null) },
   {
     weight: 2,
-    arbitrary: fc.constantFrom(...JUDGES).map((name) => ({ name, role: "judge" })),
+    arbitrary: fc.constantFrom(...JUDGES).map((name) => ({ name, role: "district" as OrderRole })),
   },
 );
 
@@ -31,7 +31,7 @@ function entryAt(
   parts: Readonly<{
     court: string;
     abbreviation: string;
-    judge: { name: string; role: string } | null;
+    judge: { name: string; role: OrderRole } | null;
     kind: OrderEntry["kind"];
     status: OrderEntry["status"];
   }>,

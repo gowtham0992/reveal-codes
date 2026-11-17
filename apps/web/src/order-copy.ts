@@ -1,5 +1,5 @@
 import { ellipsize, judgeSurname } from "@reveal-codes/export";
-import type { OrderEntry, OrderKind } from "@reveal-codes/export";
+import type { OrderEntry, OrderKind, OrderRole } from "@reveal-codes/export";
 
 /** Where a court's caption sits; derived because the package index does not export the type. */
 type CaptionPlacement = NonNullable<OrderEntry["caption"]>["placement"];
@@ -33,6 +33,19 @@ export const placementWords: Record<CaptionPlacement, string> = {
   statement_title: "Title of the statement",
   separate_declaration: "Separate declaration",
 };
+
+/** Typed over every role, so a new role fails to compile until it has words. */
+export const roleWords: Record<OrderRole, string> = {
+  district: "Judge",
+  magistrate: "Magistrate Judge",
+  senior: "Senior Judge",
+  chief: "Chief Judge",
+};
+
+/** The judge line: the title, then the name. */
+export function judgeLine(judge: { name: string; role: OrderRole }): string {
+  return `${roleWords[judge.role]} ${judge.name}`;
+}
 
 /** Longest title or instrument shown in an option; the year stays visible after it. */
 export const OPTION_TEXT_MAX = 80;

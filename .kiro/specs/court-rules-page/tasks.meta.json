@@ -479,6 +479,92 @@
         "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
         "timestamp": 1794869811639
       }
+    ],
+    "10.1 Order courts ignoring spaces and full stops": [
+      {
+        "executionId": "bdcd6d50-dc51-47fb-8bd1-31ecbb1188be",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794881605751
+      },
+      {
+        "executionId": "bdcd6d50-dc51-47fb-8bd1-31ecbb1188be",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794881611242
+      },
+      {
+        "executionId": "bdcd6d50-dc51-47fb-8bd1-31ecbb1188be",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794882253797
+      }
+    ],
+    "10.2 Type the judge role": [
+      {
+        "executionId": "bdcd6d50-dc51-47fb-8bd1-31ecbb1188be",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794881605778
+      },
+      {
+        "executionId": "bdcd6d50-dc51-47fb-8bd1-31ecbb1188be",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794881611635
+      },
+      {
+        "executionId": "bdcd6d50-dc51-47fb-8bd1-31ecbb1188be",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794882253829
+      }
+    ],
+    "10.3 Set compiled to the latest retrieved date": [
+      {
+        "executionId": "bdcd6d50-dc51-47fb-8bd1-31ecbb1188be",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794881605800
+      },
+      {
+        "executionId": "bdcd6d50-dc51-47fb-8bd1-31ecbb1188be",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794881612432
+      }
+    ],
+    "10.4 Size the print override table to its content": [
+      {
+        "executionId": "bdcd6d50-dc51-47fb-8bd1-31ecbb1188be",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794881605829
+      },
+      {
+        "executionId": "bdcd6d50-dc51-47fb-8bd1-31ecbb1188be",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794881612813
+      }
+    ],
+    "10.5 Page wording and repeated title": [
+      {
+        "executionId": "bdcd6d50-dc51-47fb-8bd1-31ecbb1188be",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794881605864
+      }
+    ],
+    "10.6 The look of the page": [
+      {
+        "executionId": "bdcd6d50-dc51-47fb-8bd1-31ecbb1188be",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794881605885
+      }
+    ],
+    "10.7 Record the type assignments and the walk": [
+      {
+        "executionId": "bdcd6d50-dc51-47fb-8bd1-31ecbb1188be",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794881605907
+      }
+    ],
+    "11. Final verification after the follow-up": [
+      {
+        "executionId": "bdcd6d50-dc51-47fb-8bd1-31ecbb1188be",
+        "chatSessionId": "sess_f645407c-14be-4303-b072-a366bff32b3e",
+        "timestamp": 1794881605927
+      }
     ]
   }
 }

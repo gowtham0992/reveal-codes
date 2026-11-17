@@ -12,7 +12,7 @@ function entry(
   return {
     id,
     court: { name: `Court ${abbreviation}`, abbreviation, level: "appeals" },
-    judge: overrides.judge === true ? { name: "Pat Example", role: "Judge" } : null,
+    judge: overrides.judge === true ? { name: "Pat Example", role: "district" } : null,
     instrument: "Standing order",
     title: "",
     date: overrides.date ?? "2024-01-01",
@@ -33,6 +33,22 @@ describe("compareAbbreviations (Requirements 2.2, 3.2)", () => {
     expect(compareAbbreviations("5th Cir.", "10th Cir. BAP")).toBeLessThan(0);
     expect(compareAbbreviations("10th Cir. BAP", "5th Cir.")).toBeGreaterThan(0);
     expect(compareAbbreviations("5th Cir.", "5th Cir.")).toBe(0);
+  });
+
+  it("ignores spaces and full stops: D. Neb., D.N.M., D. Wyo. (Requirement 22)", () => {
+    const sorted = ["D. Wyo.", "D.N.M.", "D. Neb."].sort(compareAbbreviations);
+    expect(sorted).toEqual(["D. Neb.", "D.N.M.", "D. Wyo."]);
+    const stripped = sorted.map((s) => s.replace(/[\s.]/g, ""));
+    expect(stripped).toEqual(["DNeb", "DNM", "DWyo"]);
+  });
+
+  it("orders court groups D. Neb., D.N.M., D. Wyo.", () => {
+    const groups = courtGroups([
+      entry("w", "D. Wyo."),
+      entry("m", "D.N.M."),
+      entry("n", "D. Neb."),
+    ]);
+    expect(groups.map((g) => g.court.abbreviation)).toEqual(["D. Neb.", "D.N.M.", "D. Wyo."]);
   });
 });
 

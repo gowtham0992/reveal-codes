@@ -297,3 +297,26 @@ Width at 320px (R10.2) cannot be measured in jsdom. The tests assert its causes:
 6. Scans, docs, `docs/KIRO_USAGE.md` and `BUILD_LOG.md` (R16.10, R17).
 
 Each step lands its tests before the next begins. Nothing is committed or pushed by this spec.
+
+## Follow-up design (Requirements 18 to 25)
+
+- **R18 wording.** `NotInForce` in `instrument-view.tsx` prints `Not in force.` then, when the replacing title is known, `Replaced by <a>title</a>.`. It no longer reads `vocabulary.status`. The `words.status` field may stay in the model only if another reader uses it; otherwise it is removed from `view-model.ts`. The field-name test renders the page to text (tags stripped, attribute values excluded) and checks it against the set of keys collected from the shipped file.
+- **R19 roles.** `orders-types.ts` gains `ORDER_ROLES = ["district","magistrate","senior","chief"] as const` and `OrderRole`; `OrderJudge.role` is `OrderRole`; `orders-parse.ts` rejects any other value as `orders: entry <id>: "role" has unknown value "<value>"`. `order-copy.ts` gains `roleWords: Record<OrderRole, string>` (`Judge`, `Magistrate Judge`, `Senior Judge`, `Chief Judge`) and `judgeLine(judge)`. Both are exported from the package index and the web copy.
+- **R20.** `InstrumentView` prints the instrument line only when `entry.title !== "" && entry.title !== entry.instrument`.
+- **R21 layout.** `courts/page.tsx` renders `<div className={styles.desk}><main className={styles.page}>…`. `.desk` is `min-height: 100vh; background: var(--desk)` and `.page` is `max-width: var(--page-max); min-height: 100vh; margin: 0 auto; background: var(--paper)` with fluid padding from `clamp` or `max` (no at-rule). The header reuses `Mark` and the wordmark style of `small-screen-page.module.css`, as one `<a href="/">`. Each article has the title (`h3`), a `.meta` block (`--font-ui`, `--muted`), then a `.asks` block.
+- **R21 type assignments (all from the allowed lists):**
+
+| Level | Family | Size / line | Weight | Colour |
+| ----- | ------ | ----------- | ------ | ------ |
+| Page title (`h1`) | Libre Caslon Text | 26 / 32 | 400 | `--ink` |
+| Court heading (`h2`) | Libre Caslon Text | 20 / 26 | 400 | `--ink` |
+| Instrument title (`h3`) | Libre Caslon Text | 18 / 26 | 400 | `--ink` |
+| Not in force line | Public Sans | 13 / 18 | 700 | `--ink` |
+| Judge, kind, date (`.meta`) | Public Sans | 13 / 18 | 500 | `--muted` |
+| `Requires` label | Public Sans | 10.5 / 16, uppercase, 0.1em | 700 | `--muted` |
+| Requirements, required heading, key language | Libre Caslon Text | 14 / 22 | 400 | `--ink` |
+| Links | as today | as today | as today | `--oxblood`; `min-height: 34px`, `display: inline-flex`, `align-items: center` |
+
+- **R22.** `compareAbbreviations` strips `/[\s.]/g` from both sides, then calls `localeCompare(…, "en", { numeric: true })`. The page test and the ordering test use the same function.
+- **R23.** `compiled` is a value in the file; the test reads the file and compares with the maximum `retrieved`. The curator agent and skill gain the step. `data/README.md` and `README.md` dates are updated if they state the compile date.
+- **R24.** `.overrides` Code and Timestamp columns get `white-space: nowrap; width: 1%`; the Reason column is left at `width: auto` and wraps by word (`overflow-wrap: break-word`, not `anywhere`, for that column).

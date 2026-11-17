@@ -156,6 +156,43 @@ Implementation follows the design's task order: commit the spec, extend the load
   - Run each of these and fix failures: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, `pnpm --filter @reveal-codes/web build` (clean-checkout build), and `pnpm kiro:check`
   - Do not push; ask the user if questions arise.
 
+- [ ] 10. Follow-up from the walk
+  - [x] 10.1 Order courts ignoring spaces and full stops
+    - In `order-groups.ts` make `compareAbbreviations` strip spaces and full stops from both sides, then keep `localeCompare(..., "en", { numeric: true })`
+    - Extend `packages/export/test/order-groups.test.ts` with `D. Neb.`, `D. Wyo.`, `D.N.M.` (order Neb., N.M., Wyo.) and keep the `5th Cir.` before `10th Cir. BAP` case; update the page ordering tests that use the old comparison
+    - _Requirements: 22.1, 22.2_
+  - [x] 10.2 Type the judge role
+    - Add `ORDER_ROLES` and `OrderRole` to `orders-types.ts`, type `OrderJudge.role`, reject other values in `orders-parse.ts` with a message naming the entry and the value, export both from the package index
+    - Add `roleWords: Record<OrderRole, string>` and `judgeLine(judge)` to `apps/web/src/order-copy.ts` (`Judge`, `Magistrate Judge`, `Senior Judge`, `Chief Judge`; never `District Judge`)
+    - Add loader tests: every shipped role is accepted; an unknown role fails the load
+    - _Requirements: 19.2, 19.3_
+  - [-] 10.3 Set compiled to the latest retrieved date
+    - Set `compiled` in `data/standing-orders.json` to the latest `retrieved` of any entry (2026-11-15 today); change no entry; update `data/README.md` and `README.md` where they state the compile date; run `pnpm power:build` and confirm the Power copy is byte-equal
+    - Add a test that `compiled` is not earlier than any entry's `retrieved`, with a planted-violation case
+    - Add the step to `.kiro/agents/orders-curator.md` and `.kiro/skills/add-standing-order/SKILL.md`: adding or updating an entry sets `compiled` to the latest `retrieved` and runs `pnpm power:build`
+    - _Requirements: 23.1, 23.2, 23.3, 23.4_
+  - [-] 10.4 Size the print override table to its content
+    - In `print-view.module.css` give the Code and Timestamp columns `white-space: nowrap; width: 1%` and drop the `26ch` and `10ch` min-widths; let Reason take the rest and wrap by word
+    - Extend `apps/web/test/print-view-css.test.ts`: the new rules are present and the `26ch` rule fails the test
+    - _Requirements: 24.1, 24.2, 24.3_
+  - [~] 10.5 Page wording and repeated title
+    - In `instrument-view.tsx` print `Not in force.` then `Replaced by <link>.` from the replacing title; stop printing the vocabulary sentence; print the judge with `judgeLine`; print the instrument line only when it differs from the title; remove `words.status` from the view model if nothing else reads it
+    - Add tests: judge line of one entry per role and the Court of International Trade `district` judge; no two lines in an article repeat; no shown text on the page contains a dataset field name as a whole word or any word with an underscore (shipped Dataset, tags and attributes excluded); update `courts-page.test.tsx` for the new wording
+    - _Requirements: 18.1, 18.2, 18.3, 19.1, 19.4, 20.1, 20.2_
+  - [~] 10.6 The look of the page
+    - Wrap `courts/page.tsx` in a `--desk` wrapper holding a `--paper` column with `max-width: var(--page-max)`, centred, `min-height: 100vh`, fluid padding, no width at-rule; add the header link to `/` with the Mark (24px, 10px gap, `aria-hidden`) and the REVEAL CODES wordmark in the Small_Screen_Page style
+    - Restructure `InstrumentView` into title, `.meta` block and `.asks` block per the design table; `Not in force.` bold under the title; label `Requires` (Small label style) over the requirements; `Required heading: “<text>” (<placement lower case>)`; both links `min-height: 34px`, `display: inline-flex`, `align-items: center`, look unchanged
+    - Use only allowed sizes, weights and Tokens; add no Token and no scan exemption
+    - Extend `apps/web/test/static/courts.test.ts` and the page tests: column rules, header link, label, required heading text, link heights
+    - _Requirements: 21.1, 21.2, 21.3, 21.4, 21.5, 21.6, 21.7, 21.9_
+  - [~] 10.7 Record the type assignments and the walk
+    - `.kiro/steering/ui.md`: record the Courts_Page type assignments of the design table and the column, header and 34px link rules
+    - `BUILD_LOG.md`: under "What Kiro got wrong" add, in plain words, what the walk found: a field name printed as copy, bare role words, a title printed twice, a full-width page on the desk colour with one weight for every line, a space sorting before a letter, a compiled date older than an entry, an override table whose Timestamp column was wider than its content and whose Reason column was squeezed
+    - _Requirements: 21.8, 25.1_
+- [~] 11. Final verification after the follow-up
+  - Run each of these after the last edit and fix failures: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, `pnpm --filter @reveal-codes/web build` (clean-checkout build), and `pnpm kiro:check`
+  - Do not push
+  - _Requirements: 25.2_
 ## Notes
 
 - Tasks marked with `*` are optional test sub-tasks and can be skipped for a faster MVP
@@ -177,7 +214,12 @@ Implementation follows the design's task order: commit the spec, extend the load
     { "id": 5, "tasks": ["5.3"] },
     { "id": 6, "tasks": ["5.4"] },
     { "id": 7, "tasks": ["5.5", "5.6"] },
-    { "id": 8, "tasks": ["8.1", "8.2"] }
+    { "id": 8, "tasks": ["8.1", "8.2"] },
+    { "id": 9, "tasks": ["10.1", "10.2", "10.3", "10.4"] },
+    { "id": 10, "tasks": ["10.5"] },
+    { "id": 11, "tasks": ["10.6"] },
+    { "id": 12, "tasks": ["10.7"] },
+    { "id": 13, "tasks": ["11"] }
   ]
 }
 ```

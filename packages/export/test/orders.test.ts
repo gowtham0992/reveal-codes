@@ -476,7 +476,8 @@ describe("loadOrders reports the first failing check _Requirements: 1.11_", () =
 const BASE: OrderEntry = ORDERS.entries[0] as OrderEntry;
 
 function make(id: string, court: string, judgeName: string | null): OrderEntry {
-  const judge: OrderJudge | null = judgeName === null ? null : { name: judgeName, role: "Judge" };
+  const judge: OrderJudge | null =
+    judgeName === null ? null : { name: judgeName, role: "district" };
   return { ...BASE, id, court: { ...BASE.court, abbreviation: court }, judge, status: "current" };
 }
 
@@ -590,7 +591,7 @@ describe("selectableOrders on synthetic sets _Requirements: 2.7, 2.8_", () => {
 });
 
 describe("judgeSurname _Requirements: 2.8_", () => {
-  const judge = (name: string): OrderJudge => ({ name, role: "Judge" });
+  const judge = (name: string): OrderJudge => ({ name, role: "district" });
 
   it.each([
     ["Michael J. Newman", "Newman"],

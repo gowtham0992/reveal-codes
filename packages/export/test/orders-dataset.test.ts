@@ -11,6 +11,7 @@ import {
   CAPTION_PLACEMENTS,
   ORDER_ELEMENTS,
   ORDER_KINDS,
+  ORDER_ROLES,
   ORDER_STATUSES,
 } from "../src/orders-types.js";
 
@@ -74,6 +75,37 @@ describe("loadOrders result (_Requirements: 1.6_)", () => {
       const loaded = loadOrders(root);
       expect(loaded).toEqual({ ok: false, error: `orders: vocabulary "status" lacks "${word}"` });
     }
+  });
+});
+
+describe("judge role (_Requirements: 19.2_)", () => {
+  function withRole(role: string): Rec {
+    const root = fresh();
+    const entries = entriesOf(root);
+    if (!Array.isArray(entries)) throw new Error("entries is not an array");
+    const index = (entries as unknown[]).findIndex((e) => isRec(e) && isRec(e["judge"]));
+    const entry = (entries as unknown[])[index];
+    if (!isRec(entry) || !isRec(entry["judge"])) throw new Error("no judge entry");
+    entry["judge"]["role"] = role;
+    return root;
+  }
+
+  it("accepts every shipped role", () => {
+    const loaded = loadOrders(fresh());
+    if (!loaded.ok) throw new Error(loaded.error);
+    const roles = new Set(loaded.value.entries.flatMap((e) => (e.judge ? [e.judge.role] : [])));
+    expect([...roles].sort()).toEqual([...ORDER_ROLES].sort());
+  });
+
+  it.each([...ORDER_ROLES])("accepts %s", (role) => {
+    expect(loadOrders(withRole(role)).ok).toBe(true);
+  });
+
+  it("fails the load naming the entry and the value for an unknown role", () => {
+    const loaded = loadOrders(withRole("District Judge"));
+    expect(loaded.ok).toBe(false);
+    if (loaded.ok) return;
+    expect(loaded.error).toMatch(/^entry \S+: "judge\.role" has unknown value "District Judge"$/);
   });
 });
 

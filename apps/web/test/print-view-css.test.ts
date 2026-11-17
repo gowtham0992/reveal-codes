@@ -14,13 +14,24 @@ describe("Print view override table headers _Requirements: 12.4_", () => {
     expect(value(".overrides th", "word-break")).toBe("keep-all");
   });
 
-  it("gives the Code and Timestamp columns their minimum widths", () => {
-    expect(value(".overrides th:nth-child(1), .overrides td:nth-child(1)", "min-width")).toBe(
-      "10ch",
+  it("sizes the Code and Timestamp columns to their content _Requirements: 24.1_", () => {
+    const sel =
+      ".overrides th:nth-child(1), .overrides td:nth-child(1), .overrides th:nth-child(4), .overrides td:nth-child(4)";
+    expect(value(sel, "white-space")).toBe("nowrap");
+    expect(value(sel, "width")).toBe("1%");
+  });
+
+  it("leaves no min-width on the override columns _Requirements: 24.1, 24.3_", () => {
+    const mins = css.declarations.filter(
+      (d) => d.selector.includes(".overrides") && d.prop === "min-width",
     );
-    expect(value(".overrides th:nth-child(4), .overrides td:nth-child(4)", "min-width")).toBe(
-      "26ch",
-    );
+    expect(mins).toEqual([]);
+    expect(css.declarations.some((d) => d.value === "26ch")).toBe(false);
+  });
+
+  it("wraps the Reason column by word _Requirements: 24.2_", () => {
+    expect(value(".overrides td:nth-child(3)", "overflow-wrap")).toBe("break-word");
+    expect(value(".overrides th", "overflow-wrap")).toBe("normal");
   });
 
   it("still lets body cells break anywhere", () => {

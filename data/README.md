@@ -1,6 +1,6 @@
 # Federal court instruments on generative AI in filings
 
-`standing-orders.json` is a compiled dataset of United States federal court standing orders, local rules, general orders and published guidance on the use of generative artificial intelligence in court filings, as they stood on 2026-11-08. Reveal Codes uses it to shape the AI-Use and Verification Statement to the court the filing is going to. It is published here so anyone else can use it too.
+`standing-orders.json` is a compiled dataset of United States federal court standing orders, local rules, general orders and published guidance on the use of generative artificial intelligence in court filings, as they stood on 2026-11-15. Reveal Codes uses it to shape the AI-Use and Verification Statement to the court the filing is going to. It is published here so anyone else can use it too.
 
 ## What is in it
 
