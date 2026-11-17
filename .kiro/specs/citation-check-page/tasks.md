@@ -213,7 +213,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Move the width read into `src/check/use-wide.ts` (`useWide`, design F5) and use it in `CheckPage` for both the Editor_Link and the Storage_Statement.
     - _Requirements: 23.1, 23.2, 23.3, 23.4, 23.6_
 
-  - [-] 12.10 Make one Storage_Statement
+  - [x] 12.10 Make one Storage_Statement
     - In `check-text.ts` drop the last sentence of `PRIVACY_SENTENCE`, replace `NOT_STORED_SENTENCE` with `STORAGE_STATEMENT` and `STORAGE_STATEMENT_WIDE`, and render one of them in `PageTop` from `useWide`. Below 800px the page and the server HTML must not mention the editor link or storing in the editor. No exclamation mark.
     - Update the existing tests that name the two old sentences. Run `copy-rules` and `check-literals` scans.
     - _Requirements: 22.1, 22.2, 22.3, 22.4, 22.5, 22.6, 22.8_
