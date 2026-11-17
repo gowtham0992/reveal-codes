@@ -41,8 +41,9 @@ export default function Page() {
           This page is a snapshot and is not legal advice. Read the court&apos;s own text before you
           file.
         </p>
-        <p>
+        <p className={styles["links"]}>
           <a href="/">Open the editor</a>
+          <a href="/check">Check the citations in a draft</a>
         </p>
         <CourtsBrowser entries={ORDERS.entries} model={model} />
       </main>

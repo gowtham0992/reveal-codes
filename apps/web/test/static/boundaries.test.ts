@@ -89,12 +89,14 @@ const routeImports: Check = (ref, file) => {
   return "anything but server/ and next/server";
 };
 
-const COURTS_PAGE = /^app\/courts\//;
+const COURTS_PAGE = /^app\/(?:courts|check)\//;
 /** Requirements 16.10, 16.14: the Courts page imports only from `src/`, its own folder or packages. */
 const courtsPageImports: Check = (ref, file) => {
   const t = target(file, ref);
-  if (t === null || t.startsWith("src/") || t.startsWith("app/courts/")) return null;
-  return "anything but src/, app/courts/ and packages";
+  if (t === null || t.startsWith("src/")) return null;
+  const own = /^app\/(?:courts|check)\//.exec(file.path)?.[0] ?? "";
+  if (own !== "" && t.startsWith(own)) return null;
+  return "anything but src/, app/<own folder>/ and packages";
 };
 function checksFor(path: string): Check[] {
   const checks: Check[] = [];
@@ -104,11 +106,13 @@ function checksFor(path: string): Check[] {
   if (LAYOUT_MODULE.test(path)) checks.push(noReact, noTiptap, noServer);
   if (EDITOR_PURE.test(path)) checks.push(noReact, noServer);
   if (path.startsWith("src/client/")) checks.push(verifierSubpathOnly, noServer);
+  if (path === "src/client/check-rows.ts") checks.push(noReact, noServer);
+  if (path === "src/handover.ts") checks.push(noReact);
   if (path.startsWith("src/server/")) checks.push(noReact, noTiptap, noClientSide);
   if (/^src\/(?:components|editor)\//.test(path)) checks.push(noServer);
   if (ROUTE_FILE.test(path)) checks.push(routeImports);
   if (COURTS_PAGE.test(path)) checks.push(courtsPageImports);
-  if (path.startsWith("src/courts/")) checks.push(noServer);
+  if (path.startsWith("src/courts/") || path.startsWith("src/check/")) checks.push(noServer);
   return checks;
 }
 
@@ -204,12 +208,29 @@ describe("static: boundaries self-test (planted violations)", () => {
     const page =
       'import { x } from "../api/verify/route";\nimport { y } from "../../src/courts/hash";\n';
     expect(reported("app/courts/page.tsx", page)).toEqual([
-      "app/courts/page.tsx:1 imports ../api/verify/route: not allowed (anything but src/, app/courts/ and packages)",
+      "app/courts/page.tsx:1 imports ../api/verify/route: not allowed (anything but src/, app/<own folder>/ and packages)",
     ]);
     expect(reported("src/courts/x.ts", 'import { d } from "../server/deps";\n')).toEqual([
       "src/courts/x.ts:1 imports ../server/deps: not allowed (server/)",
     ]);
   });
+  it("reports a Check page import from outside src/ and its folder, and the check modules' own rules", () => {
+    const page =
+      'import { x } from "../courts/page";\nimport { y } from "./check.module.css";\nimport { z } from "../../src/check/check-page";\n';
+    expect(reported("app/check/page.tsx", page)).toEqual([
+      "app/check/page.tsx:1 imports ../courts/page: not allowed (anything but src/, app/<own folder>/ and packages)",
+    ]);
+    expect(reported("src/check/x.ts", 'import { d } from "../server/deps";\n')).toEqual([
+      "src/check/x.ts:1 imports ../server/deps: not allowed (server/)",
+    ]);
+    expect(reported("src/client/check-rows.ts", 'import { u } from "react";\n')).toEqual([
+      "src/client/check-rows.ts:1 imports react: not allowed (React or Next)",
+    ]);
+    expect(reported("src/handover.ts", 'import { u } from "react";\n')).toEqual([
+      "src/handover.ts:1 imports react: not allowed (React or Next)",
+    ]);
+  });
+
   it("reports TipTap in pane/layout.ts and server modules importing client-side code", () => {
     expect(reported("src/pane/layout.ts", 'import { Editor } from "@tiptap/core";\n')).toHaveLength(
       1,

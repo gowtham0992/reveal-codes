@@ -116,16 +116,16 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Copy results renders only after mount when `svc.clipboard.available()` (via `useSyncExternalStore` with a false server snapshot), writes `copyText`, and shows "The results could not be copied." on rejection. The Editor_Link is a plain `<a href="/">` rendered only at `NARROW_WIDTH` or more, with text, and not stale; its click writes `writeHandover(svc.session, docxSafe text)` and cancels with the proposed sentence if the write fails. Put the privacy sentence's wording from Requirement 11.1 and Decision 2 in one constant.
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 5.2, 5.3, 5.4, 5.7, 6.1, 9.1, 9.2, 9.3, 10.1, 10.2, 10.8, 10.9, 11.1, 11.6, 12.1, 12.2, 12.9, 15.1, 15.2, 15.3, 15.5_
 
-  - [ ]* 7.4 Write example tests for the page
+  - [x]* 7.4 Write example tests for the page
     - File `apps/web/test/check-page.test.tsx`, mocking only `fetch`, the clipboard service and the timer service: typing and pasting; Open for `.docx`, `.txt` and `.md`; each Open refusal; Load the Avianca citations and its failure; Clear; the replace confirm; the Avianca end-to-end run on recorded responses (two found, two wrong case, two not found, each with the case on record); a quotation not in the opinion; 429; failed run; demo mode; waiting text at 5000 ms; the too-long and blank and no-citation refusals; staleness on edit including restored text; an edit during a run; no request on typing, opening and clearing; Copy results present, absent without a clipboard and absent from server HTML; write failure sentence; no request on copy.
     - _Requirements: 17.1, 17.2, 17.3, 17.4_
 
-  - [ ]* 7.5 Write example tests for the Editor_Link
+  - [x]* 7.5 Write example tests for the Editor_Link
     - File `apps/web/test/check-editor-link.test.tsx`: absent from server HTML, absent below 800px, present at 800px or more with text, absent while stale, gone after the viewport narrows; the address never holds text; a failed write cancels the click and shows the sentence.
     - _Requirements: 12.1, 12.2, 12.3, 12.8, 17.4_
 
 - [ ] 8. Small-screen page and other ways in
-  - [~] 8.1 Change the Small_Screen_Page and the Courts_Page
+  - [-] 8.1 Change the Small_Screen_Page and the Courts_Page
     - Replace `SMALL_SCREEN_SENTENCES` with `SMALL_SCREEN_INTRO` and `SMALL_SCREEN_EDITOR_NOTE`. Order: intro sentence; `/check` link "Check the citations in a draft" (plain, not `data-primary`); `COURT_RULES_LONG`; video and source links when set; the editor note; the Selection_Line when set.
     - Add `<a href="/check">Check the citations in a draft</a>` beside "Open the editor" on the Courts_Page. Change nothing in the Toolbar.
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 14.1, 14.2, 14.4_
@@ -135,7 +135,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - _Requirements: 13.6, 17.4_
 
 - [ ] 9. Static scans
-  - [~] 9.1 Move shared scan helpers and extend the boundaries scan
+  - [-] 9.1 Move shared scan helpers and extend the boundaries scan
     - Move `sheetViolations` from `static/courts.test.ts` into `static/page-css.ts`; `courts.test.ts` imports it and keeps its assertions, including `sheets` equal to the one Courts file.
     - In `static/boundaries.test.ts` change `COURTS_PAGE` to `/^app\/(?:courts|check)\//`, give `src/check/` `noServer`, `src/client/check-rows.ts` `noReact` and `noServer`, and `src/handover.ts` `noReact`.
     - Confirm the width at-rule count input list; the Check_Page sheets and `code-label.module.css` must contribute zero at-rules and the count of exactly one stays.

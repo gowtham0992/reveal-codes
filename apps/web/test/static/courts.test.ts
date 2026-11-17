@@ -1,47 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { parseCss } from "../support/css";
-import { formatViolations, readSources, violation, type Violation } from "../support/scan";
+import { formatViolations, readSources, violation } from "../support/scan";
 import { colourViolations } from "./css-colours";
+import { sheetViolations } from "./page-css";
 /** Requirements 10.2, 10.3, 10.4, 16.10, 16.14: the Courts page sources sit inside the static scans. */
 const COURTS = /^(?:app|src)\/courts\//;
 const sheets = readSources(["app", "src"], /\.css$/).filter((s) => COURTS.test(s.path));
 const sources = readSources(["app", "src"]).filter((s) => COURTS.test(s.path));
-const SIZES = new Set([
-  "10.5px",
-  "11px",
-  "12px",
-  "12.5px",
-  "13px",
-  "13.5px",
-  "14px",
-  "15px",
-  "18px",
-  "20px",
-  "26px",
-  "inherit",
-]);
-const WEIGHTS = /^(?:400|500|600|700)$/;
-const BANNED =
-  /^(?:box-shadow|text-shadow|backdrop-filter|transition(?:-.+)?|animation(?:-.+)?|border(?:-[a-z]+)*-radius)$/;
-const FIXED_WIDTH = /^(?:min-)?width$/;
-function sheetViolations(path: string, text: string): Violation[] {
-  const css = parseCss(text);
-  const found = css.declarations.flatMap((d) => {
-    const v = d.value.trim();
-    const out: string[] = [];
-    if (BANNED.test(d.prop)) out.push(`${d.prop} is not allowed`);
-    if (/gradient\s*\(/i.test(v)) out.push("gradient");
-    if (d.prop === "font-size" && !SIZES.has(v)) out.push(`font-size ${v}`);
-    if (d.prop === "font-weight" && !WEIGHTS.test(v)) out.push(`font-weight ${v}`);
-    if (FIXED_WIDTH.test(d.prop) && !/^(?:100%|auto|min-content|max-content|0)$/.test(v))
-      out.push(`${d.prop} ${v} is a fixed width`);
-    return out.map((m) => violation(path, d.line, m));
-  });
-  const queries = css.atRules
-    .filter((r) => /\b(?:min|max)-width\b/.test(r.prelude))
-    .map((r) => violation(path, r.line, `width query ${r.prelude}`));
-  return [...found, ...queries];
-}
 describe("static: Courts page stylesheet _Requirements: 10.2, 10.3, 10.4_", () => {
   it("is scanned, and uses Tokens, allowed sizes and weights, and no width query or effect", () => {
     expect(sheets.map((s) => s.path)).toEqual(["app/courts/courts.module.css"]);
