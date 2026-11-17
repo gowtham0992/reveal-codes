@@ -115,10 +115,13 @@ describe("inventory: properties _Requirements: 25.1, 25.2, 25.3, 25.4, 25.5, 25.
   // in next-step.properties.test.ts, and the deploy-readiness limiter property is Property 1 in
   // rate-limit.properties.test.ts, and legal-record-ui adds its Property 1 in
   // css-tokens.properties.test.ts, and open-draft adds its Properties 5, 6 and 7 in
-  // next-step-gap.properties.test.ts, and Properties 10, 11, 13 and 14 in open-file.properties.test.ts.
-  it("has exactly fifteen properties: editor-app 1 to 5, first-run-and-flow 1, the limiter 1, legal-record-ui 1 and open-draft 5, 6, 7, 10, 11, 13 and 14", () => {
+  // next-step-gap.properties.test.ts, and Properties 10, 11, 13 and 14 in open-file.properties.test.ts,
+  // and citation-check-page adds Property 1 in check-rows.properties.test.ts and Property 2 in
+  // check-request.properties.test.ts.
+  it("has exactly seventeen properties: editor-app 1 to 5, first-run-and-flow 1, the limiter 1, legal-record-ui 1, open-draft 5, 6, 7, 10, 11, 13 and 14, and citation-check-page 1 and 2", () => {
     const numbers = texts.flatMap((t) => [...t.matchAll(/^\s*\/\/ Property (\d+)$/gm)]);
     expect(numbers.map((m) => m[1]).sort()).toEqual([
+      "1",
       "1",
       "1",
       "1",
@@ -127,6 +130,7 @@ describe("inventory: properties _Requirements: 25.1, 25.2, 25.3, 25.4, 25.5, 25.
       "11",
       "13",
       "14",
+      "2",
       "2",
       "3",
       "4",
@@ -140,6 +144,8 @@ describe("inventory: properties _Requirements: 25.1, 25.2, 25.3, 25.4, 25.5, 25.
     expect(files.some((f) => f.endsWith("css-tokens.properties.test.ts"))).toBe(true);
     expect(files.some((f) => f.endsWith("next-step-gap.properties.test.ts"))).toBe(true);
     expect(files.some((f) => f.endsWith("open-file.properties.test.ts"))).toBe(true);
+    expect(files.some((f) => f.endsWith("check-rows.properties.test.ts"))).toBe(true);
+    expect(files.some((f) => f.endsWith("check-request.properties.test.ts"))).toBe(true);
   });
 
   it("has exactly one fc.assert per property, using runs()", () => {

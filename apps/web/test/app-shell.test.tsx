@@ -5,6 +5,7 @@ import type { Editor } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 import { AppShell } from "../src/components/app-shell";
 import { EDITOR_PLACEHOLDER } from "../src/components/editor-surface";
+import { SMALL_SCREEN_EDITOR_NOTE } from "../src/components/small-screen-page";
 import { AUTOSAVE_KEY, serialise } from "../src/persist";
 import { PANE_KEY, encodePreference } from "../src/pane-preference";
 import type { AppServices } from "../src/services";
@@ -514,12 +515,13 @@ function narrowFixture(width: number, storage: MemoryStorage = storageWithPane(f
 }
 
 describe("AppShell small screen _Requirements: 10.4, 10.5, 10.6, 10.8, 10.9, 10.10, 12.9_", () => {
-  it("shows the page with three sentences and no button, link or icon, only the hidden mark, at 799", async () => {
+  it("shows the page with two sentences, the Check and court rules links, no button or icon, only the hidden mark, at 799", async () => {
     await mount(narrowFixture(799));
     expect(document.querySelector(".app")).toBeNull();
-    expect(document.querySelectorAll("main p")).toHaveLength(3);
+    expect(document.querySelectorAll("main p")).toHaveLength(2);
     expect(document.querySelectorAll("button, svg")).toHaveLength(0);
     expect([...document.querySelectorAll("a")].map((a) => a.getAttribute("href"))).toEqual([
+      "/check",
       "/courts",
     ]);
     const pictures = [...document.querySelectorAll("img")];
@@ -530,7 +532,7 @@ describe("AppShell small screen _Requirements: 10.4, 10.5, 10.6, 10.8, 10.9, 10.
   it("shows the Shell at 800", async () => {
     await mount(narrowFixture(800));
     expect(document.querySelector(".app")).not.toBeNull();
-    expect(screen.queryByText("It is a desktop editor.")).toBeNull();
+    expect(screen.queryByText(SMALL_SCREEN_EDITOR_NOTE)).toBeNull();
   });
 
   it("replaces the Shell when the width falls below 800", async () => {
@@ -541,7 +543,7 @@ describe("AppShell small screen _Requirements: 10.4, 10.5, 10.6, 10.8, 10.9, 10.
       f.viewport.setWidth(799);
     });
     expect(document.querySelector(".app")).toBeNull();
-    expect(screen.getByText("It is a desktop editor.")).not.toBeNull();
+    expect(screen.getByText(SMALL_SCREEN_EDITOR_NOTE)).not.toBeNull();
   });
 
   it("mounts the Shell and loads the saved draft when the width reaches 800", async () => {

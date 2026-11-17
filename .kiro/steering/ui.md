@@ -90,9 +90,11 @@ Sizes and line heights:
   | Filter labels and checkbox label | Public Sans | 13 / 16 | 500 | `--ink` |
   | Count line and empty-result sentence | Public Sans | 13 / 18 | 500 | `--ink` |
 
-- `/courts` column: a `--desk` wrapper (`min-height: 100vh`) holds one `--paper` column with `max-width: var(--page-max)`, `min-height: 100vh`, `margin: 0 auto` and fluid padding (`16px max(16px, 6vw) 48px`). The column is centred on the desk and fills it below `--page-max`. There is no width at-rule.
-- `/courts` header: the first element in the column. One link to `/` holds the Mark (24px, 10px before the wordmark, `aria-hidden`) and the REVEAL CODES wordmark, `--ink`, no underline, with a 3px double `--ink` rule under the header. The link is `inline-flex`, `align-items: center`, `min-height: 34px`.
-- `/courts` links: the "Read the court's text" and "Draft under this rule" links are `--oxblood`, `display: inline-flex`, `align-items: center`, `min-height: 34px`, side by side with a 16px gap that wraps. Their look is otherwise the link style above.
+- One-column pages (`/courts` and `/check`) share the rules below. `/check` has its own stylesheet, `apps/web/app/check/check.module.css`, and uses the same type sizes and weights as the table above for the same elements. It adds no Token.
+- One-column page column: a `--desk` wrapper (`min-height: 100vh`) holds one `--paper` column with `max-width: var(--page-max)`, `min-height: 100vh`, `margin: 0 auto` and fluid padding (`16px max(16px, 6vw) 48px`). The column is centred on the desk and fills it below `--page-max`. There is no width at-rule on either page. The column sets `overflow-wrap: anywhere` and every control group sets `max-width: 100%`, so the page shows no sideways scroll at 320px.
+- One-column page header: the first element in the column. One link to `/` holds the Mark (24px, 10px before the wordmark, `aria-hidden`) and the REVEAL CODES wordmark, `--ink`, no underline, with a 3px double `--ink` rule under the header. The link is `inline-flex`, `align-items: center`, `min-height: 34px`.
+- One-column page links: on `/courts`, the "Read the court's text" and "Draft under this rule" links; on `/check`, its links (View on CourtListener, the Editor_Link). They are `--oxblood`, `display: inline-flex`, `align-items: center`, `min-height: 34px`, side by side with a gap that wraps (16px between links). Their look is otherwise the link style above.
+- Status_Label on `/check`: a Result_Item shows its code with the `CodeLabel` component (`apps/web/src/pane/code-label.tsx` and `code-label.module.css`). It uses the Pane's colours on the Pane's dark ground (`--pane-body`), so a code looks on `/check` as it does in the Pane. The label text is the code, so status is never shown by colour alone. A failing code is the Failing_Block: `--white` on `--fail`, weight 700, 2px `--fail-ring`. `check.module.css` holds no colour literal and no Pane colour; the Pane colours stay in `src/pane/`.
 - Control rules live in `globals.css` and the shared Modal styles. Component stylesheets set only heights.
 
 ## Layout
@@ -103,7 +105,7 @@ Sizes and line heights:
 - Issues region 300px, with a 1px `--rule` left edge.
 - The Sheet is 816px wide (8.5in), with padding 96px 96px 96px 104px, on the `--desk` background. It takes 100% of the column when the column is narrower.
 - Dialogs are `min(600px, 100vw - 32px)` wide.
-- The Shell is at least 1150px wide. Between 800px and 1150px the page scrolls sideways. Below 800px a plain page replaces it. The 1150px minimum applies to the Shell only: `/courts` is a one-column page that reads from 320px up, uses no width at-rule, and never scrolls sideways.
+- The Shell is at least 1150px wide. Between 800px and 1150px the page scrolls sideways. Below 800px a plain page replaces it. The 1150px minimum applies to the Shell only: `/courts` and `/check` are one-column pages that read from 320px up, use no width at-rule, and never scroll sideways.
 - Pane 40% of the viewport height when open.
 
 ## Pane

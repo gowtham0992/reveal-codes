@@ -43,6 +43,15 @@ describe("/courts page content _Requirements: 1.3, 2.2, 4.10, 4.11, 5.1, 5.2, 7.
     }
   });
 
+  it("links the Check page beside Open the editor _Requirements: 14.1_", () => {
+    const html = renderPage("");
+    expect(html).toContain('<a href="/">Open the editor</a>');
+    expect(html).toContain('<a href="/check">Check the citations in a draft</a>');
+    expect(html.indexOf('<a href="/">Open the editor</a>')).toBeLessThan(
+      html.indexOf('<a href="/check">'),
+    );
+  });
+
   it("states the figures that orderStats returns", () => {
     const html = renderPage("");
     const stats = orderStats(ORDERS);

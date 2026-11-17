@@ -53,7 +53,7 @@ const ALLOWED = (url: string): boolean =>
   url.startsWith("/api/opinion/");
 
 describe("check page request surface  _Requirements: 11.3, 11.4_", () => {
-  // Property 2: nothing more is sent
+  // Property 2
   it("P2 only the verify body and cluster-id GETs leave the page", async () => {
     await fc.assert(
       fc.asyncProperty(arbDraft, async (text) => {

@@ -101,21 +101,25 @@ describe("Court_Rules_Link on the Small_Screen_Page _Requirements: 9.2, 9.3, 16.
   it("is present, same tab, with both public addresses unset", () => {
     const { container } = renderUi(<SmallScreenPage links={{ video: null, repo: null }} />);
     const anchors = [...container.querySelectorAll("a")];
-    expect(anchors.map((a) => a.textContent)).toEqual(["See all court rules"]);
-    expect(anchors[0]?.getAttribute("href")).toBe("/courts");
-    expect(anchors[0]?.hasAttribute("target")).toBe(false);
+    expect(anchors.map((a) => a.textContent)).toEqual([
+      "Check the citations in a draft",
+      "See all court rules",
+    ]);
+    expect(anchors[1]?.getAttribute("href")).toBe("/courts");
+    expect(anchors[1]?.hasAttribute("target")).toBe(false);
   });
-  it("comes first, before the video and repository links", () => {
+  it("comes after the Check link and before the video and repository links", () => {
     const { container } = renderUi(
       <SmallScreenPage links={{ video: "https://example.org/v", repo: "https://example.org/r" }} />,
     );
     const anchors = [...container.querySelectorAll("a")];
     expect(anchors.map((a) => a.getAttribute("href"))).toEqual([
+      "/check",
       "/courts",
       "https://example.org/v",
       "https://example.org/r",
     ]);
-    expect(anchors[0]?.hasAttribute("target")).toBe(false);
+    expect(anchors[1]?.hasAttribute("target")).toBe(false);
   });
 });
 

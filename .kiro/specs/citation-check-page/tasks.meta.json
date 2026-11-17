@@ -249,6 +249,16 @@
         "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
         "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
         "timestamp": 1794888812357
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794890233891
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794890647927
       }
     ],
     "9.1 Move shared scan helpers and extend the boundaries scan": [
@@ -273,6 +283,16 @@
         "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
         "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
         "timestamp": 1794888812401
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794890234839
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794890648035
       }
     ],
     "10.1 Update `README.md`": [
@@ -280,6 +300,11 @@
         "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
         "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
         "timestamp": 1794888812423
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794890235487
       }
     ],
     "10.2 Update `.kiro/steering/ui.md`": [
@@ -287,6 +312,11 @@
         "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
         "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
         "timestamp": 1794888812445
+      },
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794890235943
       }
     ],
     "10.3 Update `docs/KIRO_USAGE.md`": [
@@ -477,6 +507,20 @@
         "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
         "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
         "timestamp": 1794890231762
+      }
+    ],
+    "8. Small-screen page and other ways in": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794890648000
+      }
+    ],
+    "9. Static scans": [
+      {
+        "executionId": "f476e361-88f1-4444-87e3-1d79d4641ceb",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794890648064
       }
     ]
   }

@@ -124,24 +124,24 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - File `apps/web/test/check-editor-link.test.tsx`: absent from server HTML, absent below 800px, present at 800px or more with text, absent while stale, gone after the viewport narrows; the address never holds text; a failed write cancels the click and shows the sentence.
     - _Requirements: 12.1, 12.2, 12.3, 12.8, 17.4_
 
-- [ ] 8. Small-screen page and other ways in
+- [x] 8. Small-screen page and other ways in
   - [x] 8.1 Change the Small_Screen_Page and the Courts_Page
     - Replace `SMALL_SCREEN_SENTENCES` with `SMALL_SCREEN_INTRO` and `SMALL_SCREEN_EDITOR_NOTE`. Order: intro sentence; `/check` link "Check the citations in a draft" (plain, not `data-primary`); `COURT_RULES_LONG`; video and source links when set; the editor note; the Selection_Line when set.
     - Add `<a href="/check">Check the citations in a draft</a>` beside "Open the editor" on the Courts_Page. Change nothing in the Toolbar.
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 14.1, 14.2, 14.4_
 
-  - [~] 8.2 Update the tests that name the old sentences
+  - [x] 8.2 Update the tests that name the old sentences
     - Update `small-screen.test.tsx`, `app-shell.test.tsx` and the Courts_Page test to the new order and wording, and add a Small_Screen_Page order example.
     - _Requirements: 13.6, 17.4_
 
-- [ ] 9. Static scans
+- [x] 9. Static scans
   - [x] 9.1 Move shared scan helpers and extend the boundaries scan
     - Move `sheetViolations` from `static/courts.test.ts` into `static/page-css.ts`; `courts.test.ts` imports it and keeps its assertions, including `sheets` equal to the one Courts file.
     - In `static/boundaries.test.ts` change `COURTS_PAGE` to `/^app\/(?:courts|check)\//`, give `src/check/` `noServer`, `src/client/check-rows.ts` `noReact` and `noServer`, and `src/handover.ts` `noReact`.
     - Confirm the width at-rule count input list; the Check_Page sheets and `code-label.module.css` must contribute zero at-rules and the count of exactly one stays.
     - _Requirements: 16.1, 16.3, 16.4_
 
-  - [~] 9.2 Add the Check_Page scans
+  - [x] 9.2 Add the Check_Page scans
     - Create `static/check.test.ts`: scan `app/check/*.css` and `src/check/*.css` with `sheetViolations` and `colourViolations`; assert `.page { overflow-wrap: anywhere }`, `.group { max-width: 100% }`, the desk and paper column, 34px links and the text-area focus border; fail on a width at-rule or `px` width; scan `app/check/` and `src/check/` sources for `<img`, `<svg`, Extended_Pictographic characters, `localStorage`, `sessionStorage`, `document.cookie` and `indexedDB`.
     - Create `static/check-literals.test.ts`: no literal in `app/check/` or `src/check/` equals or contains an Editor_Sentence or a `STATUS_WORDS` value, and the sources import the owning modules; include a planted-violation example.
     - Extend `static/draft-storage-writes.test.ts` so `HANDOVER_KEY` and its `setItem` and `removeItem` calls appear only in `src/handover.ts` and its tests, with a planted-violation example.
@@ -149,11 +149,11 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - _Requirements: 3.10, 8.3, 16.1, 16.2, 16.4, 16.5, 17.5_
 
 - [ ] 10. Documentation
-  - [~] 10.1 Update `README.md`
+  - [-] 10.1 Update `README.md`
     - "What it does": one line about the Check_Page. "Demo path": one line, on a phone open `/check`. "What leaves your machine": one line consistent with Requirement 11.1. "Limits": reword the desktop-editor line to say the editor needs 1150 pixels and the Check_Page reads from 320px. No exclamation mark; `docs.test.ts` stays green.
     - _Requirements: 11.5, 13.7, 18.1, 18.2, 18.3, 18.4_
 
-  - [~] 10.2 Update `.kiro/steering/ui.md`
+  - [-] 10.2 Update `.kiro/steering/ui.md`
     - Describe `/courts` and `/check` together: the column, the header with the Mark, the links, the Status_Label on the dark ground (CodeLabel in `src/pane/`), and the absence of a width at-rule. Add no Token.
     - _Requirements: 15.3, 18.7_
 
