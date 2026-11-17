@@ -27,6 +27,7 @@ import type { DraftNotice } from "./issues-region";
 import { ShellToolbar } from "./shell-toolbar";
 import { useVerify } from "./use-verify";
 import { useAutosave } from "./use-autosave";
+import { useHandover } from "./use-handover";
 import { useExport } from "./use-export";
 import { orderNoticeText, useOrderParameter } from "./use-order-parameter";
 import { useDocumentActions } from "./use-document-actions";
@@ -68,7 +69,8 @@ function useShellParts(svc: AppServices) {
     }),
   );
   useAutosave(store, svc, autosave, gate);
-  return { svc, store, autosave, gate };
+  const handoverDialog = useHandover(store, svc);
+  return { svc, store, autosave, gate, handoverDialog };
 }
 
 /** The caret Offset as a ref, so a draft that ends later inserts where the caret is then. */
@@ -186,7 +188,7 @@ function usePendingNotice(store: Store, text: string | null, shown: () => void):
 }
 
 function useShellState({ svc, orderStore, pendingNotice, onNoticeShown }: ShellProps) {
-  const { store, autosave, gate } = useShellParts(svc);
+  const { store, autosave, gate, handoverDialog } = useShellParts(svc);
   usePendingNotice(store, pendingNotice, onNoticeShown);
   const blocked = useSyncExternalStore(gate.subscribe, gate.blocked, () => false);
   const { cursor, onCaret, getCaret } = useCaretRef();
@@ -213,6 +215,7 @@ function useShellState({ svc, orderStore, pendingNotice, onNoticeShown }: ShellP
     onStartNew: actions.onStartNewDraft,
   };
   return {
+    handoverDialog,
     slot,
     binding,
     doc,
@@ -246,6 +249,7 @@ function Shell(props: ShellProps) {
       <IssuesSlot {...s.issues} />
       {s.exportGate.dialog}
       {s.actions.dialog}
+      {s.handoverDialog}
       <ShellBottom {...s.bottom} />
     </div>
   );

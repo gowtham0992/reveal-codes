@@ -8,7 +8,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
 
 ## Tasks
 
-- [ ] 1. Extract Shared_Rows with the editor unchanged
+- [x] 1. Extract Shared_Rows with the editor unchanged
   - [x] 1.1 Create `apps/web/src/client/check-rows.ts` and re-point the editor at it
     - Move `SEVERITY` (as `STATUS_WORDS`, plus "found" and "match"), `shorten`, `MAX_ISSUE_TEXT`, `divergenceFor`, `WrongCase` and `wrongCaseFor` out of `issues-list.tsx`, and `foundText` out of `resolved.ts`. Move the tally words of `verify-summary.ts` into the shared word table.
     - Add `RowCode`, `CheckRow`, `NEXT_SENTENCES` (the six sentences of Decision 1, defined once), `checkRows(document, info)` and `displayFor(clusterId, info)`.
@@ -17,7 +17,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - The module has no React and no Store import. Run the existing `issues-list`, `resolved` and `verify-summary` tests and confirm they pass with no edit.
     - _Requirements: 6.11, 6.12, 7.3, 7.4, 8.4_
 
-  - [~] 1.2 Add the shared arbitraries for check results
+  - [x] 1.2 Add the shared arbitraries for check results
     - Create `packages/engine/src/testing/arb-check-results.ts` with arbitraries for verification results per citation, quote results per quotation, and Display_Info per cluster. Export it from `packages/engine/src/testing/arbitraries.ts`.
     - Reuse `arb-document.ts`, `arb-text-citations.ts` and `arb-quote-groups.ts` for Documents and text. Add no arbitrary that duplicates them.
     - _Requirements: 17.8_
@@ -44,12 +44,12 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - If the colour scan exempts `src/pane/` per file, add the new stylesheet to its list.
     - _Requirements: 6.5, 6.13, 15.3, 15.4_
 
-  - [ ]* 3.2 Write tests for CodeLabel
+  - [-]* 3.2 Write tests for CodeLabel
     - File `apps/web/test/code-label.test.tsx`: each of the eight codes renders its characters unchanged, and the four failing codes carry the failing class and the others do not.
     - _Requirements: 6.5, 6.13_
 
 - [ ] 4. Implement Check_Run and the state machine
-  - [~] 4.1 Create `apps/web/src/check/run-check.ts`
+  - [-] 4.1 Create `apps/web/src/check/run-check.ts`
     - Implement `runCheck({ text, api, now })` in the design's order: `docxSafe`; `MAX_TEXT_CHARS` check giving `DOCUMENT_TOO_LONG`; blank check giving "Add some text to check."; `pastedDocument` (a string result becomes the message); `hasFullRecord` false giving "No citations were found in this draft."; then a private `createStore(now)`, `replace`, and the unchanged `runVerifyFlow`.
     - Map `failed` to `{ kind: "message", text: outcome.failure }`, `discarded` to `{ kind: "discarded" }` and `completed` to `done` with the read-back Document, the info map and `checkedAt`. Export the two new sentences as constants. The function never rejects and has no `try/catch`.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 5.1, 5.5, 5.6, 5.9_
@@ -78,7 +78,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - In `open-outcome.ts` export the notes test and add a `hasNotes` boolean to the `text` outcome. Update existing open-outcome tests only where whole outcomes are compared with `toEqual`.
     - _Requirements: 3.4, 3.5_
 
-  - [~] 5.2 Create `apps/web/src/check/copy-text.ts` and add `localDate`
+  - [-] 5.2 Create `apps/web/src/check/copy-text.ts` and add `localDate`
     - Add `localDate(iso)` beside `localTime` in `verify-summary.ts` (local `YYYY-MM-DD`, null when unparseable).
     - Implement `copyText(rows, citationsLine, date)`: first line the Citations line; one line per row, "<Status words, capitalised>: <text as written>." plus " On record: <case, year>. <address>" where present (for a wrong-case row the case is taken from the last `mismatch` line); last line "Checked on <date> with Reveal Codes against CourtListener." (or the date-free form when `date` is null). No pipe character, no doubled period.
     - _Requirements: 10.3, 10.4, 10.5, 10.6, 10.7_
@@ -87,12 +87,12 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - File `apps/web/test/copy-text.test.ts`: first line, one line per row in order, no pipe, the On record part, quotation lines without an address, the last line, the date from `localDate`, no doubled period.
     - _Requirements: 10.4, 10.5, 10.6, 10.7_
 
-- [ ] 6. Implement the Hand_Over
+- [x] 6. Implement the Hand_Over
   - [x] 6.1 Create `apps/web/src/handover.ts`
     - Export `HANDOVER_KEY` (`reveal-codes:check-handover:v1`), `writeHandover(session, text): boolean` (false when the write throws) and `takeHandover(session): string | null` (read, then remove; null for a missing, empty or throwing read; the value is still returned if only the remove throws). This is the only module that calls `setItem` or `removeItem` with the key. No React.
     - _Requirements: 12.3, 12.7, 12.8_
 
-  - [~] 6.2 Create `apps/web/src/components/use-handover.tsx` and wire it into the Shell
+  - [x] 6.2 Create `apps/web/src/components/use-handover.tsx` and wire it into the Shell
     - Export `installOutcome` from `use-open-draft.tsx`. `useHandover(store, svc, gate)` runs after `useAutosave`, calls `takeHandover` once on mount, builds `textOutcome("The draft from the checker", text, { notes: false, note: null })`, dispatches a refusal as the Open flow does, installs at once when the draft is empty, and otherwise opens `ConfirmDialog` with title "Open a draft", message "Discard the current draft and open the draft from the checker?" and confirm label "Discard and open". Cancel keeps the draft. Keep the result in state so a Strict Mode double effect shows one dialog.
     - _Requirements: 12.3, 12.4, 12.5, 12.6, 12.7_
 

@@ -34,6 +34,13 @@ export function localTime(iso: string): string | null {
   return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+/** Local "YYYY-MM-DD" of an ISO timestamp; null when it does not parse. */
+export function localDate(iso: string): string | null {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return `${String(date.getFullYear())}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
 function line(label: string, terms: readonly (readonly [number, string])[]): string | null {
   const parts = terms.filter(([n]) => n > 0).map(([n, text]) => `${String(n)} ${text}`);
   return parts.length === 0 ? null : `${label}: ${parts.join(" · ")}`;

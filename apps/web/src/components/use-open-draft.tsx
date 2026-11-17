@@ -12,11 +12,11 @@ import { ConfirmDialog } from "./confirm-dialog";
 import { useFileDrop } from "./use-file-drop";
 import { useOpen } from "./use-open";
 
-type Installable = Exclude<OpenOutcome, { kind: "refused" }>;
+export type Installable = Exclude<OpenOutcome, { kind: "refused" }>;
 type OpenPending = Readonly<{ name: string; outcome: Installable }>;
 
 /** Installs an Open outcome: `replace` first, then `notice` and `openNote`. Same gate behaviour as Load demo. */
-function installOutcome(store: Store, svc: AppServices, outcome: Installable): void {
+export function installOutcome(store: Store, svc: AppServices, outcome: Installable): void {
   if (outcome.kind === "restored") {
     store.dispatch({
       type: "replace",

@@ -27,3 +27,4 @@ export * from "./arb-state-seq.js";
 export * from "./arb-codes.js";
 export * from "./arb-api.js";
 export * from "./arb-declaration.js";
+export * from "./arb-check-results.js";
