@@ -96,7 +96,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Export `installOutcome` from `use-open-draft.tsx`. `useHandover(store, svc, gate)` runs after `useAutosave`, calls `takeHandover` once on mount, builds `textOutcome("The draft from the checker", text, { notes: false, note: null })`, dispatches a refusal as the Open flow does, installs at once when the draft is empty, and otherwise opens `ConfirmDialog` with title "Open a draft", message "Discard the current draft and open the draft from the checker?" and confirm label "Discard and open". Cancel keeps the draft. Keep the result in state so a Strict Mode double effect shows one dialog.
     - _Requirements: 12.3, 12.4, 12.5, 12.6, 12.7_
 
-  - [-]* 6.3 Write tests for the Hand_Over
+  - [x]* 6.3 Write tests for the Hand_Over
     - Files `apps/web/test/handover.test.ts` and `use-handover.test.tsx`: write then take returns the text and a second take returns null; a throwing store returns null or false; install at once on an empty draft as one PST span; the dialog wording on a non-empty draft; cancel keeps the draft and the key stays cleared; one dialog under Strict Mode.
     - _Requirements: 12.3, 12.4, 12.5, 12.6, 12.7_
 
