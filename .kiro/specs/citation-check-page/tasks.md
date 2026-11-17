@@ -105,7 +105,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Implement Open a file through `openFile` unchanged (refusal `notice` and `note` shown unchanged, text kept; success sentence from `checkOpenedMessage`, provenance record ignored), Load the Avianca citations through `api.aviancaCitations()` with `docxSafe` (`AVIANCA_FAILED` on failure), and Clear without a dialog. When the box holds text, Open (after the reader accepts) and the sample open the editor's `ConfirmDialog` with the editor's wording, imported and not retyped. Typing, pasting, Open and Clear make no request.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11_
 
-  - [-] 7.2 Create `apps/web/src/check/result-list.tsx`
+  - [x] 7.2 Create `apps/web/src/check/result-list.tsx`
     - Map `checkRows` to `<li>` blocks: `CodeLabel`, `row.words`, `shorten(row.text)`, `row.found`, the existing `MismatchLines`, "Diverges at: " plus `row.divergence`, `CourtListenerLink` for `row.href`, and `row.next`. A passing row shows no Next_Sentence. No string literal duplicates an Editor_Sentence or a status word.
     - _Requirements: 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10, 7.1, 7.5, 8.3_
 
