@@ -83,7 +83,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Implement `copyText(rows, citationsLine, date)`: first line the Citations line; one line per row, "<Status words, capitalised>: <text as written>." plus " On record: <case, year>. <address>" where present (for a wrong-case row the case is taken from the last `mismatch` line); last line "Checked on <date> with Reveal Codes against CourtListener." (or the date-free form when `date` is null). No pipe character, no doubled period.
     - _Requirements: 10.3, 10.4, 10.5, 10.6, 10.7_
 
-  - [-]* 5.3 Write example tests for Copy_Text
+  - [x]* 5.3 Write example tests for Copy_Text
     - File `apps/web/test/copy-text.test.ts`: first line, one line per row in order, no pipe, the On record part, quotation lines without an address, the last line, the date from `localDate`, no doubled period.
     - _Requirements: 10.4, 10.5, 10.6, 10.7_
 
