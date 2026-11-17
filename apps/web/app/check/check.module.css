@@ -1,0 +1,141 @@
+/* Check page: one column from 320px. Heights and layout only; control rules are in globals.css. */
+.desk {
+  min-height: 100vh;
+  background: var(--desk);
+}
+.page {
+  display: block;
+  box-sizing: border-box;
+  max-width: var(--page-max);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 16px max(16px, 6vw) 48px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-editor);
+  font-size: 14px;
+  line-height: 22px;
+  overflow-wrap: anywhere;
+}
+.page p,
+.page li,
+.page h1 {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.title {
+  margin: 0 0 12px;
+  font-family: var(--font-editor);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 32px;
+}
+.header {
+  margin: 0 0 24px;
+  padding-bottom: 12px;
+  border-bottom: 3px double var(--ink);
+}
+.page .brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.wordmark {
+  font-family: var(--font-editor);
+  font-size: 15px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+.group {
+  max-width: 100%;
+}
+.fieldLabel {
+  display: block;
+  margin: 12px 0 4px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--ink);
+}
+.draft {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+.page a {
+  color: var(--oxblood);
+}
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+}
+.links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+}
+.label {
+  margin: 8px 0 0;
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+.list {
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
+.item {
+  max-width: 100%;
+  margin: 0;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule-light);
+}
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin: 0 0 4px;
+}
+.words {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 18px;
+  color: var(--ink);
+}
+.text {
+  margin: 0 0 4px;
+}
+.line {
+  margin: 0;
+}
+.diverges {
+  margin: 0;
+}
+.next {
+  margin: 4px 0 0;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  color: var(--muted);
+}

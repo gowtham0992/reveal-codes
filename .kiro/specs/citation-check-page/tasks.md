@@ -100,7 +100,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Files `apps/web/test/handover.test.ts` and `use-handover.test.tsx`: write then take returns the text and a second take returns null; a throwing store returns null or false; install at once on an empty draft as one PST span; the dialog wording on a non-empty draft; cancel keeps the draft and the key stays cleared; one dialog under Strict Mode.
     - _Requirements: 12.3, 12.4, 12.5, 12.6, 12.7_
 
-- [ ] 7. Build the Check_Page
+- [x] 7. Build the Check_Page
   - [x] 7.1 Create `apps/web/src/check/use-draft-input.ts`
     - Implement Open a file through `openFile` unchanged (refusal `notice` and `note` shown unchanged, text kept; success sentence from `checkOpenedMessage`, provenance record ignored), Load the Avianca citations through `api.aviancaCitations()` with `docxSafe` (`AVIANCA_FAILED` on failure), and Clear without a dialog. When the box holds text, Open (after the reader accepts) and the sample open the editor's `ConfirmDialog` with the editor's wording, imported and not retyped. Typing, pasting, Open and Clear make no request.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11_
@@ -109,7 +109,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Map `checkRows` to `<li>` blocks: `CodeLabel`, `row.words`, `shorten(row.text)`, `row.found`, the existing `MismatchLines`, "Diverges at: " plus `row.divergence`, `CourtListenerLink` for `row.href`, and `row.next`. A passing row shows no Next_Sentence. No string literal duplicates an Editor_Sentence or a status word.
     - _Requirements: 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10, 7.1, 7.5, 8.3_
 
-  - [~] 7.3 Create the route, the page and its stylesheet
+  - [x] 7.3 Create the route, the page and its stylesheet
     - Create `apps/web/app/check/page.tsx` (metadata title and description of Decision 12, imports only from `src/` and its own folder), `apps/web/app/check/check.module.css` (the Courts_Page structure, `.page { overflow-wrap: anywhere }`, `.group { max-width: 100% }`, wrapping action row, Tokens only, no width at-rule, no fixed width beyond `100%`, `auto`, `min-content`, `max-content`, `0`) and `apps/web/src/check/check-page.tsx`.
     - `CheckPage` uses `useReducer(reduceCheck, ...)` and `useState(defaultServices)`. Render, in order: header with the Mark and wordmark, the single `h1`, the what-it-does sentence, the privacy sentence, the not-stored sentence, the labelled Draft_Box, the actions (Check citations as the only `data-primary`), the single `role="status"` region, and the links to `/courts` and `/`.
     - The status region holds "Verifying…", `WAITING_TEXT` after `WAITING_AFTER_MS` through `svc.setTimer` (cleared on finish, unmount and clear), the refusal or failure message, `DEMO_MODE_LINE` from `useModeResult`, the Summary_Line from `summaryLines` and `furtherLine`, and the results, rendered in one commit. While stale it shows the out-of-date sentence, "Check again" and an "Earlier results" label, and withholds Copy results and the Editor_Link. The Draft_Box stays editable during a run.

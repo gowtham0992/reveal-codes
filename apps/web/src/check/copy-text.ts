@@ -10,7 +10,9 @@ function onRecord(row: CheckRow): string | null {
   const wrong = row.mismatch[row.mismatch.length - 1];
   const found =
     row.found ??
-    (wrong !== undefined && wrong.startsWith(FOUND_PREFIX) ? wrong.slice(FOUND_PREFIX.length) : null);
+    (wrong !== undefined && wrong.startsWith(FOUND_PREFIX)
+      ? wrong.slice(FOUND_PREFIX.length)
+      : null);
   if (found === null) return null;
   const sentence = `On record: ${found.replace(/\.+$/, "")}.`;
   return row.href === null ? sentence : `${sentence} ${row.href}`;
