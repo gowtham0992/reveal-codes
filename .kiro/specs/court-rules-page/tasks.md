@@ -166,7 +166,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Add `roleWords: Record<OrderRole, string>` and `judgeLine(judge)` to `apps/web/src/order-copy.ts` (`Judge`, `Magistrate Judge`, `Senior Judge`, `Chief Judge`; never `District Judge`)
     - Add loader tests: every shipped role is accepted; an unknown role fails the load
     - _Requirements: 19.2, 19.3_
-  - [-] 10.3 Set compiled to the latest retrieved date
+  - [x] 10.3 Set compiled to the latest retrieved date
     - Set `compiled` in `data/standing-orders.json` to the latest `retrieved` of any entry (2026-11-15 today); change no entry; update `data/README.md` and `README.md` where they state the compile date; run `pnpm power:build` and confirm the Power copy is byte-equal
     - Add a test that `compiled` is not earlier than any entry's `retrieved`, with a planted-violation case
     - Add the step to `.kiro/agents/orders-curator.md` and `.kiro/skills/add-standing-order/SKILL.md`: adding or updating an entry sets `compiled` to the latest `retrieved` and runs `pnpm power:build`
