@@ -38,8 +38,8 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Update the shared test helpers so every fake `AppServices` has an in-memory `session` (from `memory-storage.ts`) and a controllable clipboard. Run `pnpm typecheck` and fix each object it names.
     - _Requirements: 10.2, 12.7_
 
-- [ ] 3. Create the Status_Label component
-  - [-] 3.1 Create `apps/web/src/pane/code-label.tsx` and `code-label.module.css`
+- [x] 3. Create the Status_Label component
+  - [x] 3.1 Create `apps/web/src/pane/code-label.tsx` and `code-label.module.css`
     - `CodeLabel({ code })` renders `<span>` with the code text unchanged. Family and failing flag come from `codeFamily` and `isFailingOpener`; the class from `codeClass`. The stylesheet adds only the `#0f2766` ground, the `--fail` ground with a 2px `--fail-ring` outline for failing codes, IBM Plex Mono at weight 600 (700 for failing), `display: inline-block` and `max-width: 100%`. No Token is added.
     - If the colour scan exempts `src/pane/` per file, add the new stylesheet to its list.
     - _Requirements: 6.5, 6.13, 15.3, 15.4_
