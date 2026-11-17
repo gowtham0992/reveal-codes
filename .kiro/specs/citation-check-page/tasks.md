@@ -44,7 +44,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - If the colour scan exempts `src/pane/` per file, add the new stylesheet to its list.
     - _Requirements: 6.5, 6.13, 15.3, 15.4_
 
-  - [-]* 3.2 Write tests for CodeLabel
+  - [x]* 3.2 Write tests for CodeLabel
     - File `apps/web/test/code-label.test.tsx`: each of the eight codes renders its characters unchanged, and the four failing codes carry the failing class and the others do not.
     - _Requirements: 6.5, 6.13_
 
