@@ -22,13 +22,13 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Reuse `arb-document.ts`, `arb-text-citations.ts` and `arb-quote-groups.ts` for Documents and text. Add no arbitrary that duplicates them.
     - _Requirements: 17.8_
 
-  - [ ]* 1.3 Write property test for Shared_Rows
+  - [x]* 1.3 Write property test for Shared_Rows
     - **Property 1: One answer**
     - File `apps/web/test/check-rows.properties.test.ts`, one `fc.assert(fc.property(...))`, `// Property 1`, `_Requirements: 8.1, 8.2_` in the `describe` title, `numRuns` 200 locally and 500 in CI.
     - Assert, against independently derived values (`issues(document)`, `render(document, "display")`, `issueWords`, `mismatchLines(mismatchOf(...))`, the Resolved list's row text): one row per item and none for a linked short form; distinct keys in increasing `(start, kind)` order; failing rows equal `issues(document)` in order; `code` and `words` agree with the display rendering and `STATUS_WORDS`; `next` is non-null exactly for the six failing codes and equals `NEXT_SENTENCES[code]`, with no `!`, "fake", "fabricated" or "does not exist".
     - **Validates: Requirements 6.2, 6.3, 6.4, 6.6, 6.7, 6.8, 6.9, 6.10, 7.1, 7.5, 8.1, 8.2**
 
-  - [ ]* 1.4 Write example tests for Shared_Rows
+  - [x]* 1.4 Write example tests for Shared_Rows
     - `displayFor` returns info only when `info.clusterId` matches; `NEXT_SENTENCES` has six entries and none contains an exclamation mark; a linked short form yields no row; a wrong-case row carries `mismatch` lines and an `href`.
     - _Requirements: 6.6, 6.7, 7.3, 7.4_
 
@@ -54,7 +54,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Map `failed` to `{ kind: "message", text: outcome.failure }`, `discarded` to `{ kind: "discarded" }` and `completed` to `done` with the read-back Document, the info map and `checkedAt`. Export the two new sentences as constants. The function never rejects and has no `try/catch`.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 5.1, 5.5, 5.6, 5.9_
 
-  - [~] 4.2 Create `apps/web/src/check/check-state.ts`
+  - [-] 4.2 Create `apps/web/src/check/check-state.ts`
     - Implement `CheckState`, `CheckAction` and the pure `reduceCheck` with the rules of design section 4: an edit to different text bumps `generation` and sets `stale` when results exist, and `stale` survives a return to the checked text; `finish` for an older generation only clears `running`; a `done` finish clears `stale` and `message`; `clear` empties everything and bumps `generation`.
     - _Requirements: 9.1, 9.4, 9.5, 15.5_
 
@@ -83,7 +83,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Implement `copyText(rows, citationsLine, date)`: first line the Citations line; one line per row, "<Status words, capitalised>: <text as written>." plus " On record: <case, year>. <address>" where present (for a wrong-case row the case is taken from the last `mismatch` line); last line "Checked on <date> with Reveal Codes against CourtListener." (or the date-free form when `date` is null). No pipe character, no doubled period.
     - _Requirements: 10.3, 10.4, 10.5, 10.6, 10.7_
 
-  - [ ]* 5.3 Write example tests for Copy_Text
+  - [-]* 5.3 Write example tests for Copy_Text
     - File `apps/web/test/copy-text.test.ts`: first line, one line per row in order, no pipe, the On record part, quotation lines without an address, the last line, the date from `localDate`, no doubled period.
     - _Requirements: 10.4, 10.5, 10.6, 10.7_
 
@@ -105,7 +105,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Implement Open a file through `openFile` unchanged (refusal `notice` and `note` shown unchanged, text kept; success sentence from `checkOpenedMessage`, provenance record ignored), Load the Avianca citations through `api.aviancaCitations()` with `docxSafe` (`AVIANCA_FAILED` on failure), and Clear without a dialog. When the box holds text, Open (after the reader accepts) and the sample open the editor's `ConfirmDialog` with the editor's wording, imported and not retyped. Typing, pasting, Open and Clear make no request.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11_
 
-  - [~] 7.2 Create `apps/web/src/check/result-list.tsx`
+  - [-] 7.2 Create `apps/web/src/check/result-list.tsx`
     - Map `checkRows` to `<li>` blocks: `CodeLabel`, `row.words`, `shorten(row.text)`, `row.found`, the existing `MismatchLines`, "Diverges at: " plus `row.divergence`, `CourtListenerLink` for `row.href`, and `row.next`. A passing row shows no Next_Sentence. No string literal duplicates an Editor_Sentence or a status word.
     - _Requirements: 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10, 7.1, 7.5, 8.3_
 
