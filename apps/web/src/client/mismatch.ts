@@ -11,10 +11,15 @@ export function mismatchOf(document: Document, key: IssueKey): Mismatch | null {
   return { cited: rec.citation.caseName ?? null, found: `${foundName}${year}`, clusterId };
 }
 
+/** The Cited_As_Line: `Cited as <name>`. */
+export function citedAsLine(name: string): string {
+  return `Cited as ${name}`;
+}
+
 /** The lines in order: `Cited as <cited>` when `cited` is not null, then `This citation is <found>`. */
 export function mismatchLines(m: Mismatch): readonly string[] {
   const found = `This citation is ${m.found}`;
-  return m.cited === null ? [found] : [`Cited as ${m.cited}`, found];
+  return m.cited === null ? [found] : [citedAsLine(m.cited), found];
 }
 
 /** The Override_Dialog lines of `issue`: only for a `CIT ≠` issue whose record is wrong_case, else null. */

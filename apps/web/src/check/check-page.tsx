@@ -1,6 +1,6 @@
 "use client";
 import { docxSafe } from "@reveal-codes/export";
-import { useReducer, useState, useSyncExternalStore } from "react";
+import { useReducer, useState } from "react";
 import type { MouseEvent } from "react";
 import { DEMO_MODE_LINE } from "../components/issues-region";
 import { Mark } from "../components/mark";
@@ -8,7 +8,7 @@ import { useModeResult } from "../components/use-server-mode";
 import { WAITING_TEXT } from "../components/use-verify";
 import { COURT_RULES_LONG } from "../courts/links";
 import { writeHandover } from "../handover";
-import { NARROW_WIDTH, defaultServices } from "../services";
+import { defaultServices } from "../services";
 import type { AppServices } from "../services";
 import { CheckResults } from "./check-results";
 import { INITIAL_CHECK_STATE, reduceCheck } from "./check-state";
@@ -23,6 +23,7 @@ import {
 } from "./check-text";
 import { useCheckRun } from "./use-check-run";
 import { useDraftInput } from "./use-draft-input";
+import { useWide } from "./use-wide";
 
 type Styles = Readonly<Record<string, string>>;
 
@@ -30,19 +31,15 @@ function EditorLink({
   svc,
   text,
   styles,
+  wide,
   onFail,
 }: Readonly<{
   svc: AppServices;
   text: string;
   styles: Styles;
+  wide: boolean;
   onFail: (message: string) => void;
 }>) {
-  // False on the server, so the link is never in the server HTML.
-  const wide = useSyncExternalStore(
-    svc.viewport.subscribe,
-    () => svc.viewport.width() >= NARROW_WIDTH,
-    () => false,
-  );
   if (!wide) return null;
   const onClick = (e: MouseEvent<HTMLAnchorElement>): void => {
     if (writeHandover(svc.session, docxSafe(text).text)) return;
@@ -194,6 +191,7 @@ export function CheckPage({
 }: Readonly<{ services?: AppServices; styles: Styles }>): React.JSX.Element {
   const page = useCheckPage(services);
   const { svc, state, input, run } = page;
+  const wide = useWide(svc);
   return (
     <div className={styles["desk"]}>
       <main className={styles["page"]}>
@@ -214,7 +212,13 @@ export function CheckPage({
           onAgain={run.onCheck}
         />
         {state.stale || state.text === "" ? null : (
-          <EditorLink svc={svc} text={state.text} styles={styles} onFail={page.setNotice} />
+          <EditorLink
+            svc={svc}
+            text={state.text}
+            styles={styles}
+            wide={wide}
+            onFail={page.setNotice}
+          />
         )}
         <p className={styles["links"]}>
           <a href="/courts">{COURT_RULES_LONG}</a>

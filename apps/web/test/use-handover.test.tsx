@@ -2,6 +2,7 @@
 import { createDocument } from "@reveal-codes/engine";
 import { StrictMode } from "react";
 import { describe, expect, it } from "vitest";
+import { textOutcome } from "../src/client/open-outcome";
 import { useHandover } from "../src/components/use-handover";
 import { HANDOVER_KEY, writeHandover } from "../src/handover";
 import type { AppServices } from "../src/services";
@@ -138,6 +139,35 @@ describe("useHandover", () => {
     await mount(store, svc, true);
     expect(store.getState().document.text).toBe(CHECKED);
     expect(dialogs()).toHaveLength(0);
+  });
+
+  it("shows the success notice with a lower-case 'the' after 'Opened'", async () => {
+    const svc = services();
+    writeHandover(svc.session, "a".repeat(807));
+    const store = storeWithDraft(null);
+    await mount(store, svc);
+    expect(store.getState().notice).toBe(
+      "Opened the draft from the checker: 807 characters, marked as pasted.",
+    );
+  });
+
+  it("starts a refusal's notice and note with a capital letter", async () => {
+    const svc = services();
+    svc.session.setItem(HANDOVER_KEY, "   \n  ");
+    const store = storeWithDraft("My own draft.");
+    await mount(store, svc);
+    const { notice, openNote } = store.getState();
+    expect(notice).toBe("Could not open the draft from the checker.");
+    expect(openNote?.startsWith("The draft from the checker is empty.")).toBe(true);
+  });
+
+  it("keeps the case of a file name opened through the Open flow", () => {
+    const outcome = textOutcome("Motion.docx", "Some text.", { notes: false, note: null });
+    expect(outcome.kind === "text" ? outcome.notice : null).toBe(
+      "Opened Motion.docx: 10 characters, marked as pasted.",
+    );
+    const refused = textOutcome("Motion.docx", "  ", { notes: false, note: null });
+    expect(refused.kind === "refused" ? refused.notice : null).toBe("Could not open Motion.docx.");
   });
 
   it("refuses a blank hand-over with the Open flow's refusal and leaves the draft", async () => {

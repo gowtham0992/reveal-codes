@@ -569,6 +569,116 @@
         "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
         "timestamp": 1794890728322
       }
+    ],
+    "12.1 Add the Case_Name_Option to `checkRows`": [
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892133767
+      },
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892140632
+      },
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892537325
+      }
+    ],
+    "12.2 Show the case name on `/check` and in Copy_Text": [
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892133802
+      }
+    ],
+    "12.5 Record the touch rule and extend the scans": [
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892133828
+      },
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892141242
+      },
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892537374
+      }
+    ],
+    "12.6 Apply the touch rules to the stylesheets": [
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892133866
+      }
+    ],
+    "12.8 Fix the Hand_Over notice case": [
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892133886
+      },
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892141994
+      },
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892537409
+      }
+    ],
+    "12.9 Diagnose and fix the frozen Editor_Link": [
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892133908
+      },
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892142317
+      },
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892537463
+      }
+    ],
+    "12.10 Make one Storage_Statement": [
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892133929
+      }
+    ],
+    "12.12 Update the docs": [
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892133949
+      }
+    ],
+    "12.13 Add the walk findings to `BUILD_LOG.md`": [
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892133975
+      }
+    ],
+    "13. Final checkpoint": [
+      {
+        "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794892134001
+      }
     ]
   }
 }

@@ -113,14 +113,34 @@ export type CheckRow = Readonly<{
   href: string | null;
   /** The Next_Sentence of a failing row; null otherwise. */
   next: string | null;
+  /** The case name the draft gave before a full citation; present only with the Case_Name_Option on. */
+  caseName?: string;
 }>;
+
+/** The Case_Name_Option: `caseNames` adds the cited case name to citation rows. Default off. */
+export type CheckRowsOptions = Readonly<{ caseNames: boolean }>;
+
+const NO_CASE_NAMES: CheckRowsOptions = { caseNames: false };
+
+/** `row` with the `caseName` of its full-citation record added, when the option is on and the name is defined. */
+function withCaseName(row: CheckRow, document: Document, options: CheckRowsOptions): CheckRow {
+  if (!options.caseNames || row.kind !== "citation") return row;
+  const rec = document.citations.find((c) => c.kind === "full" && c.key === row.key);
+  const name = rec?.kind === "full" ? rec.citation.caseName : undefined;
+  return name === undefined ? row : { ...row, caseName: name };
+}
 
 function failingRow(
   document: Document,
   issue: Issue,
   info: ReadonlyMap<IssueKey, DisplayInfo> | undefined,
+  options: CheckRowsOptions,
 ): CheckRow {
   const wrong = wrongCaseFor(document, issue, info);
+  return withCaseName(failingBase(document, issue, wrong), document, options);
+}
+
+function failingBase(document: Document, issue: Issue, wrong: WrongCase | null): CheckRow {
   return {
     key: issue.key,
     kind: issue.kind,
@@ -142,8 +162,18 @@ function citationRow(
   c: Extract<Document["citations"][number], { kind: "full" }>,
   clusterId: string,
   info: ReadonlyMap<IssueKey, DisplayInfo> | undefined,
+  options: CheckRowsOptions,
 ): CheckRow {
   const shown = displayFor(clusterId, info?.get(c.key));
+  return withCaseName(citationBase(document, c, clusterId, shown), document, options);
+}
+
+function citationBase(
+  document: Document,
+  c: Extract<Document["citations"][number], { kind: "full" }>,
+  clusterId: string,
+  shown: DisplayInfo | undefined,
+): CheckRow {
   return {
     key: c.key,
     kind: "citation",
@@ -180,11 +210,12 @@ function quoteRow(document: Document, q: Document["quotes"][number]): CheckRow {
 function passingRows(
   document: Document,
   info: ReadonlyMap<IssueKey, DisplayInfo> | undefined,
+  options: CheckRowsOptions,
 ): CheckRow[] {
   const rows: CheckRow[] = [];
   for (const c of document.citations) {
     if (c.kind === "full" && c.result.status === "verified")
-      rows.push(citationRow(document, c, c.result.clusterId, info));
+      rows.push(citationRow(document, c, c.result.clusterId, info, options));
   }
   for (const q of document.quotes)
     if (q.result.status === "match") rows.push(quoteRow(document, q));
@@ -198,10 +229,11 @@ function passingRows(
 export function checkRows(
   document: Document,
   info: ReadonlyMap<IssueKey, DisplayInfo> | undefined,
+  options: CheckRowsOptions = NO_CASE_NAMES,
 ): readonly CheckRow[] {
-  const failing = issues(document).map((i) => failingRow(document, i, info));
+  const failing = issues(document).map((i) => failingRow(document, i, info, options));
   const rank = (r: CheckRow): number => (r.kind === "quote" ? 1 : 0);
-  return [...failing, ...passingRows(document, info)].sort(
+  return [...failing, ...passingRows(document, info, options)].sort(
     (a, b) => a.start - b.start || rank(a) - rank(b),
   );
 }

@@ -47,6 +47,8 @@ const FOCUS_OUTLINE = /^2px solid var\(--oxblood\)$/;
 const EDITOR_CONTENT_FOCUS =
   /^(?:\.content :global\(\.ProseMirror\)|textarea|input\[type="text"\]):focus(?:-visible)?$/;
 
+/** Requirement 20.10: 16px is allowed for the Draft_Box text only. */
+const DRAFT_SELECTOR = /^(?:\.draft|textarea)$/;
 const norm = (v: string): string =>
   v
     .trim()
@@ -59,6 +61,12 @@ const at = (path: string, d: CssDeclaration, message: string): Violation =>
 
 const BANNED_PROP =
   /^(?:box-shadow|text-shadow|backdrop-filter|transition(?:-.+)?|animation(?:-.+)?|border(?:-[a-z]+)*-radius)$/;
+
+/**
+ * Requirement 20.8: a width at-rule (counted separately), the touch query, and the print view's
+ * existing `@media print`. Any other media query fails.
+ */
+const MEDIA_ALLOWED = /^@media (?:\(pointer: coarse\)|print|.*\b(?:min|max)-width\b.*)$/;
 
 function bannedViolations(path: string, css: ReturnType<typeof parseCss>): Violation[] {
   const found: Violation[] = [];
@@ -79,6 +87,9 @@ function bannedViolations(path: string, css: ReturnType<typeof parseCss>): Viola
     }
     if (/prefers-color-scheme/.test(rule.prelude)) {
       found.push(violation(path, rule.line, "prefers-color-scheme is not allowed"));
+    }
+    if (rule.name === "@media" && !MEDIA_ALLOWED.test(rule.prelude)) {
+      found.push(violation(path, rule.line, `media query ${rule.prelude} is not allowed`));
     }
   }
   return found;
@@ -102,7 +113,8 @@ function typeViolations(path: string, decls: CssDeclaration[]): Violation[] {
     if (d.prop === "font-weight" && !WEIGHTS.test(value)) {
       found.push(at(path, d, "font-weight must be 400, 500, 600 or 700"));
     }
-    if (d.prop === "font-size" && !SIZES.has(value))
+    const draft16 = value === "16px" && DRAFT_SELECTOR.test(d.selector.trim());
+    if (d.prop === "font-size" && !SIZES.has(value) && !draft16)
       found.push(at(path, d, `font-size must be one of ${[...SIZES].join(", ")}`));
   }
   return found;
@@ -428,6 +440,32 @@ describe("static: stylesheet self-test (planted violations)", () => {
     expect(ui(primary)).toEqual([]);
     expect(ui("a:hover {\n  color: var(--ink);\n}\n")).toEqual([
       "src/components/x.module.css:2 hover may change only the background",
+    ]);
+  });
+
+  it("allows the touch query and 16px on .draft or textarea, and rejects other media queries and 16px", () => {
+    const touch = "@media (pointer: coarse) {\n  .page button {\n    height: 44px;\n  }\n}\n";
+    expect(ui(touch)).toEqual([]);
+    expect(ui(".draft {\n  font-size: 16px;\n}\ntextarea {\n  font-size: 16px;\n}\n")).toEqual([]);
+    expect(ui(".a {\n  font-size: 16px;\n}\n")).toEqual([
+      `src/components/x.module.css:2 ${SIZE_MESSAGE}`,
+    ]);
+    expect(ui(".draft {\n  font-size: 17px;\n}\n")).toEqual([
+      `src/components/x.module.css:2 ${SIZE_MESSAGE}`,
+    ]);
+    for (const q of ["(hover: none)", "(pointer: fine)"]) {
+      expect(ui(`@media ${q} {\n}\n`)).toEqual([
+        `src/components/x.module.css:1 media query @media ${q} is not allowed`,
+      ]);
+    }
+  });
+
+  it("does not count the touch query as a width at-rule", () => {
+    const text = "@media (pointer: coarse) {\n  .a {\n    color: var(--ink);\n  }\n}\n";
+    expect(shellWidthViolations([{ path: "app/globals.css", text }])).toEqual([
+      "expected exactly one width at-rule, found 0",
+      "globals.css needs exactly one @media (max-width: 799px)",
+      "the 799px rule must set display: none on .app",
     ]);
   });
 

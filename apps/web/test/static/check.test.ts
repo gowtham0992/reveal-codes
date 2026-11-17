@@ -88,6 +88,23 @@ describe("static: Check_Page stylesheet _Requirements: 16.1, 16.2, 17.5_", () =>
     expect(own.filter((d) => /^(?:border|outline|padding)/.test(d.prop))).toEqual([]);
   });
 
+  it("allows only the touch query as a non-width media query, and 16px only on .draft or textarea", () => {
+    const scan = (text: string): string[] =>
+      formatViolations(sheetViolations("app/check/x.module.css", text));
+    for (const q of ["(hover: none)", "(pointer: fine)"]) {
+      expect(scan(`@media ${q} {\n}\n`)).toEqual([
+        `app/check/x.module.css:1 media query @media ${q} is not allowed`,
+      ]);
+    }
+    const touch = "@media (pointer: coarse) {\n  .page button {\n    height: 44px;\n  }\n}\n";
+    expect(scan(touch)).toEqual([]);
+    expect(widthAtRules({ path: "app/check/x.module.css", text: touch })).toEqual([]);
+    expect(scan(".draft {\n  font-size: 16px;\n}\n")).toEqual([]);
+    expect(scan(".a {\n  font-size: 16px;\n}\n")).toEqual([
+      "app/check/x.module.css:2 font-size 16px",
+    ]);
+  });
+
   it("reports a planted width query, fixed width and width at-rule", () => {
     const text = ".a {\n  width: 320px;\n}\n@media (min-width: 600px) {\n}\n";
     expect(formatViolations(sheetViolations("app/check/x.module.css", text))).toEqual([

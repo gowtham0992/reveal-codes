@@ -9,14 +9,18 @@ import { ConfirmDialog } from "./confirm-dialog";
 import { installOutcome } from "./use-open-draft";
 import type { Installable } from "./use-open-draft";
 
-const HANDOVER_NAME = "The draft from the checker";
+const HANDOVER_NAME = "the draft from the checker";
+
+function capitalise(sentence: string): string {
+  return sentence.charAt(0).toUpperCase() + sentence.slice(1);
+}
 
 /** Installs a taken hand-over, or returns the outcome to confirm when the draft is not empty. */
 function receive(store: Store, svc: AppServices, text: string): Installable | null {
   const outcome = textOutcome(HANDOVER_NAME, text, { notes: false, note: null });
   if (outcome.kind === "refused") {
-    store.dispatch({ type: "notice", text: outcome.notice });
-    store.dispatch({ type: "openNote", text: outcome.note });
+    store.dispatch({ type: "notice", text: capitalise(outcome.notice) });
+    store.dispatch({ type: "openNote", text: capitalise(outcome.note) });
     return null;
   }
   if (store.getState().document.text.length === 0) {

@@ -171,12 +171,12 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
   - _Requirements: 18.8, 18.9_
 
 - [ ] 12. Follow-up: findings from the 375px, 320px and 1280px walk
-  - [ ] 12.1 Add the Case_Name_Option to `checkRows`
+  - [x] 12.1 Add the Case_Name_Option to `checkRows`
     - In `src/client/mismatch.ts` export `citedAsLine(name)` and make `mismatchLines` call it. In `src/client/check-rows.ts` add the optional `caseName` field to `CheckRow` and the third argument `{ caseNames: boolean }` (default off) to `checkRows`, set through one helper on the citation and failing-row builders. With the option off no field is added. Quotation and orphan rows never get it.
     - Do not edit `issues-list.tsx`, `resolved.ts` or their tests. Run the existing `issues-list`, `resolved`, `verify-summary` and `check-rows` tests and confirm they pass with no edit.
     - _Requirements: 19.1, 19.2, 19.3, 19.4, 19.5, 19.9, 19.10_
 
-  - [ ] 12.2 Show the case name on `/check` and in Copy_Text
+  - [~] 12.2 Show the case name on `/check` and in Copy_Text
     - `result-list.tsx` and `CopyButton` call `checkRows(document, info, { caseNames: true })`. `ResultItem` shows `citedAsLine(row.caseName)` under the status line when `caseName` is set and `mismatch` is empty. `copy-text.ts` writes `<Status words>: <caseName>, <text>.` when `caseName` is set, for wrong-case rows too.
     - _Requirements: 19.5, 19.6, 19.7, 19.8, 19.11, 19.12_
 
@@ -189,13 +189,13 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - `check-page.test.tsx` and `copy-text.test.ts`: the Varghese not-found row shows "Cited as Varghese v. China Southern Airlines Co., Ltd."; the Copy results line reads "Not found: Varghese v. China Southern Airlines Co., Ltd., 925 F.3d 1339 (11th Cir. 2019)."; a wrong-case copy line carries the name once before the citation.
     - _Requirements: 19.2, 19.3, 19.4, 19.6, 19.8, 19.10, 19.11, 19.12_
 
-  - [ ] 12.5 Record the touch rule and extend the scans
+  - [x] 12.5 Record the touch rule and extend the scans
     - Before any stylesheet change, confirm against `ui.md` and the scans what design F3 states: `@media (pointer: coarse)` is allowed (no scan counts it as a width at-rule) and 16px is not in the allowed sizes. If a rule or scan turns out to forbid the query, stop and write the finding and a proposal under a heading "Open question" in `requirements.md` instead of building it.
     - `ui.md`: add the touch rule (44px buttons and links inside `@media (pointer: coarse)` on `/check`, the Small_Screen_Page and the two `/courts` rule links), that the desktop look is unchanged, and 16px for the Draft_Box text only.
     - `static/page-css.ts` and `static/css-rules.test.ts`: allow only `@media (pointer: coarse)` as a non-width media query, fail on any other, keep the exactly-one-width-at-rule count, and allow `font-size: 16px` only on `.draft` or `textarea`. Add the planted-violation examples of design F3.
     - _Requirements: 20.6, 20.8, 20.9, 20.10, 20.11_
 
-  - [ ] 12.6 Apply the touch rules to the stylesheets
+  - [~] 12.6 Apply the touch rules to the stylesheets
     - `app/check/check.module.css`: `.draft` at 16px / 22px; `@media (pointer: coarse)` block for `.page button` (44px height) and `.page a` (inline-flex, 44px min-height). `src/components/small-screen-page.module.css` and `app/courts/courts.module.css` (`.links a`): `@media (pointer: coarse)` blocks with a 44px minimum. Keep every existing desktop rule outside the query unchanged. Do not touch the shared confirm dialog.
     - _Requirements: 20.1, 20.2, 20.3, 20.4, 20.5, 20.6, 20.7, 20.12_
 
@@ -203,17 +203,17 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - In `static/check.test.ts` and `static/courts.test.ts` and a small-screen sheet test: the 44px declarations sit under `@media (pointer: coarse)` and the 34px and 30px desktop declarations sit outside it; `.draft` is 16px; the query is not counted as a width at-rule; the planted violations of 12.5 fail as expected.
     - _Requirements: 20.1, 20.2, 20.3, 20.4, 20.5, 20.7, 20.8, 20.9, 20.10_
 
-  - [ ] 12.8 Fix the Hand_Over notice case
+  - [x] 12.8 Fix the Hand_Over notice case
     - In `use-handover.tsx` set `HANDOVER_NAME` to "the draft from the checker" and capitalise the first letter of a refused hand-over's notice and note. Leave `textOutcome`, `openedMessage` and the file-name path unchanged.
     - Add example tests to `use-handover.test.tsx`: the notice reads "Opened the draft from the checker: 807 characters, marked as pasted."; a refusal starts with a capital letter; opening a file named `Motion.docx` through the Open flow keeps its name unchanged.
     - _Requirements: 21.1, 21.2, 21.3, 21.4_
 
-  - [ ] 12.9 Diagnose and fix the frozen Editor_Link
+  - [x] 12.9 Diagnose and fix the frozen Editor_Link
     - First write a failing test that reproduces the walk: `renderToString` at the narrow default, `hydrateRoot` at 375px, type text, then widen through the real `resize` event on `window` using `defaultServices().viewport`. If it passes, reproduce by hand in a browser at 375px then 1280px and log the `resize` events. Write the confirmed root cause into design section F6 in place of its last paragraph, then fix it. If the cause is a missing `resize` event, add a `matchMedia("(min-width: 800px)")` change subscription inside `browserViewport`.
     - Move the width read into `src/check/use-wide.ts` (`useWide`, design F5) and use it in `CheckPage` for both the Editor_Link and the Storage_Statement.
     - _Requirements: 23.1, 23.2, 23.3, 23.4, 23.6_
 
-  - [ ] 12.10 Make one Storage_Statement
+  - [~] 12.10 Make one Storage_Statement
     - In `check-text.ts` drop the last sentence of `PRIVACY_SENTENCE`, replace `NOT_STORED_SENTENCE` with `STORAGE_STATEMENT` and `STORAGE_STATEMENT_WIDE`, and render one of them in `PageTop` from `useWide`. Below 800px the page and the server HTML must not mention the editor link or storing in the editor. No exclamation mark.
     - Update the existing tests that name the two old sentences. Run `copy-rules` and `check-literals` scans.
     - _Requirements: 22.1, 22.2, 22.3, 22.4, 22.5, 22.6, 22.8_
@@ -223,16 +223,16 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - `check-editor-link.test.tsx`: load narrow, widen, the link and the extra clause appear; narrow again, both are gone; the same through the real `resize` event with `defaultServices().viewport`.
     - _Requirements: 22.4, 22.5, 22.9, 23.1, 23.2, 23.3, 23.5_
 
-  - [ ] 12.12 Update the docs
+  - [~] 12.12 Update the docs
     - `README.md` "What leaves your machine": reword the `/check` line to say the draft is not stored and, on a screen 800 pixels or wider, that opening it in the editor stores it there; keep the other claims. No exclamation mark; `docs.test.ts` stays green. Requirement 2.4 and 11.1 are superseded by 22 as the requirements follow-up records; edit no earlier requirement text.
     - Run `pnpm kiro:check` for `docs/KIRO_USAGE.md` and add a row only if the inventory asks for one.
     - _Requirements: 22.7, 20.11_
 
-  - [ ] 12.13 Add the walk findings to `BUILD_LOG.md`
+  - [~] 12.13 Add the walk findings to `BUILD_LOG.md`
     - Under the citation-check-page entry, in "What Kiro got wrong, and what fixed it", add plain, third-person lines for what the walk at 375px, 320px and 1280px found: no case name on a row, because the page had no document beside the row; the 13px draft box and the 30px buttons and 29px links, never checked on a phone; the capital "The" from reusing a sentence as a file name; the two sentences saying the draft is not stored; and the Editor_Link frozen at load, with the root cause found in 12.9. Add the confirm dialog to a "Left out" line. Make no first-person claim as the user.
     - _Requirements: 18.6_
 
-- [ ] 13. Final checkpoint
+- [~] 13. Final checkpoint
   - After the last edit, run in order: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, the clean-checkout web build (`pnpm --filter @reveal-codes/web build` from a clean clone after `pnpm install`) and `pnpm kiro:check`. Fix any failure and rerun all of them.
   - Confirm `git status` shows a clean working tree with everything committed. Do not push. Ask the user if questions arise.
   - _Requirements: 18.8, 18.9_
