@@ -72,13 +72,13 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - File `apps/web/test/check-state.test.ts`: every rule of section 4, including the stale flag after restoring the checked text, a dropped older `finish`, and `clear` during a run.
     - _Requirements: 9.1, 9.4, 9.5_
 
-- [ ] 5. Add Open messages and Copy_Text
+- [x] 5. Add Open messages and Copy_Text
   - [x] 5.1 Add the check-page Open sentence and the `hasNotes` field
     - In `open-messages.ts` add `checkOpenedMessage(name, characters, removed, hasNotes, restored)` reusing `removedSentence` and `NOTES_SENTENCE`. Do not edit `openedMessage`.
     - In `open-outcome.ts` export the notes test and add a `hasNotes` boolean to the `text` outcome. Update existing open-outcome tests only where whole outcomes are compared with `toEqual`.
     - _Requirements: 3.4, 3.5_
 
-  - [-] 5.2 Create `apps/web/src/check/copy-text.ts` and add `localDate`
+  - [x] 5.2 Create `apps/web/src/check/copy-text.ts` and add `localDate`
     - Add `localDate(iso)` beside `localTime` in `verify-summary.ts` (local `YYYY-MM-DD`, null when unparseable).
     - Implement `copyText(rows, citationsLine, date)`: first line the Citations line; one line per row, "<Status words, capitalised>: <text as written>." plus " On record: <case, year>. <address>" where present (for a wrong-case row the case is taken from the last `mismatch` line); last line "Checked on <date> with Reveal Codes against CourtListener." (or the date-free form when `date` is null). No pipe character, no doubled period.
     - _Requirements: 10.3, 10.4, 10.5, 10.6, 10.7_
