@@ -125,7 +125,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - _Requirements: 12.1, 12.2, 12.3, 12.8, 17.4_
 
 - [ ] 8. Small-screen page and other ways in
-  - [-] 8.1 Change the Small_Screen_Page and the Courts_Page
+  - [x] 8.1 Change the Small_Screen_Page and the Courts_Page
     - Replace `SMALL_SCREEN_SENTENCES` with `SMALL_SCREEN_INTRO` and `SMALL_SCREEN_EDITOR_NOTE`. Order: intro sentence; `/check` link "Check the citations in a draft" (plain, not `data-primary`); `COURT_RULES_LONG`; video and source links when set; the editor note; the Selection_Line when set.
     - Add `<a href="/check">Check the citations in a draft</a>` beside "Open the editor" on the Courts_Page. Change nothing in the Toolbar.
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 14.1, 14.2, 14.4_
