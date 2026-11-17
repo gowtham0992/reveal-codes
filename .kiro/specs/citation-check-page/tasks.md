@@ -49,7 +49,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - _Requirements: 6.5, 6.13_
 
 - [ ] 4. Implement Check_Run and the state machine
-  - [-] 4.1 Create `apps/web/src/check/run-check.ts`
+  - [x] 4.1 Create `apps/web/src/check/run-check.ts`
     - Implement `runCheck({ text, api, now })` in the design's order: `docxSafe`; `MAX_TEXT_CHARS` check giving `DOCUMENT_TOO_LONG`; blank check giving "Add some text to check."; `pastedDocument` (a string result becomes the message); `hasFullRecord` false giving "No citations were found in this draft."; then a private `createStore(now)`, `replace`, and the unchanged `runVerifyFlow`.
     - Map `failed` to `{ kind: "message", text: outcome.failure }`, `discarded` to `{ kind: "discarded" }` and `completed` to `done` with the read-back Document, the info map and `checkedAt`. Export the two new sentences as constants. The function never rejects and has no `try/catch`.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 5.1, 5.5, 5.6, 5.9_
