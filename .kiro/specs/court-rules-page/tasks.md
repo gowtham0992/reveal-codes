@@ -156,7 +156,7 @@ Implementation follows the design's task order: commit the spec, extend the load
   - Run each of these and fix failures: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, `pnpm --filter @reveal-codes/web build` (clean-checkout build), and `pnpm kiro:check`
   - Do not push; ask the user if questions arise.
 
-- [ ] 10. Follow-up from the walk
+- [x] 10. Follow-up from the walk
   - [x] 10.1 Order courts ignoring spaces and full stops
     - In `order-groups.ts` make `compareAbbreviations` strip spaces and full stops from both sides, then keep `localeCompare(..., "en", { numeric: true })`
     - Extend `packages/export/test/order-groups.test.ts` with `D. Neb.`, `D. Wyo.`, `D.N.M.` (order Neb., N.M., Wyo.) and keep the `5th Cir.` before `10th Cir. BAP` case; update the page ordering tests that use the old comparison
@@ -185,7 +185,7 @@ Implementation follows the design's task order: commit the spec, extend the load
     - Use only allowed sizes, weights and Tokens; add no Token and no scan exemption
     - Extend `apps/web/test/static/courts.test.ts` and the page tests: column rules, header link, label, required heading text, link heights
     - _Requirements: 21.1, 21.2, 21.3, 21.4, 21.5, 21.6, 21.7, 21.9_
-  - [~] 10.7 Record the type assignments and the walk
+  - [x] 10.7 Record the type assignments and the walk
     - `.kiro/steering/ui.md`: record the Courts_Page type assignments of the design table and the column, header and 34px link rules
     - `BUILD_LOG.md`: under "What Kiro got wrong" add, in plain words, what the walk found: a field name printed as copy, bare role words, a title printed twice, a full-width page on the desk colour with one weight for every line, a space sorting before a letter, a compiled date older than an entry, an override table whose Timestamp column was wider than its content and whose Reason column was squeezed
     - _Requirements: 21.8, 25.1_

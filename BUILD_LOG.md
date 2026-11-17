@@ -793,6 +793,15 @@ The court-rules-page spec adds a public page at `/courts` that lists the instrum
 
 - **Where the arbitraries live.** `tech.md` says shared arbitraries live in `packages/engine/src/testing/arbitraries.ts`. The Property 1 arbitraries (`arbOrderEntries`, `arbFilterState`) are in `packages/export/test/support/arb-order-filter.ts` instead, because the engine has zero dependencies and cannot import `OrderEntry` from the export package. The design recorded this before any code was written, next to the existing `arbOrderChoice`.
 - **Three defects the earlier browser walks found, which earlier specs had missed.** The print view broke "Code" and "Timestamp" mid-word because body-cell `overflow-wrap: anywhere` also applied to header cells; a stylesheet test that fails on the old file now guards the fix. A "Could not open <name>." message stayed on screen while the confirm dialog for the next file was open; `runOpen` now clears both messages first, with a test. The commit hook picked up generated `.d.ts` files; `.gitignore` now ignores them and a test fails if `git ls-files` lists any other than `css-modules.d.ts`.
+- **This list was incomplete.** The first version of this section held only the arbitraries note and the three earlier defects above. Reading the finished page in a browser found the following, none of which the tests had caught:
+  - A data field name was printed as page copy. The superseded sentence in the dataset vocabulary was written for people reading the JSON, and the page printed it as it stood.
+  - The judge role was printed as a bare data word after the name, such as `district`, instead of a title before it.
+  - A title was printed twice when it was the same as the instrument name.
+  - At 1280px the text ran the full width of the window, every line had the same size and weight, and the desk colour filled the rest of a short page.
+  - Courts were ordered so that a space sorted before a letter, which put `D.N.M.` last among the `D.` courts.
+  - The `compiled` date (2026-11-08) was older than an entry retrieved on 2026-11-15.
+  - In the override table the Timestamp column was 26ch wide for a value of 16 characters, and the Reason column was squeezed into five lines.
+- **Why the field-name test checks only some keys.** It looks for schema-shaped keys, meaning a key with an underscore or an interior capital. `court`, `text`, `instrument` and `compiled` are ordinary English words that the page prints on purpose, so a test on every key would fail on correct copy or force the page to avoid common words.
 
 ### Stray `.d.ts` files: emitting process not found
 

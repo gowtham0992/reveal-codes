@@ -75,6 +75,24 @@ Sizes and line heights:
 - Text inputs (`input[type="text"]`, used by the `/courts` filter) are 34px high with a 1px `--ink` border, a `--white` fill, no radius and Public Sans 13px / 16px weight 500. Focused, the border is 2px `--oxblood` with the padding reduced by 1px and no outline, so nothing shifts.
 - Checkboxes (`input[type="checkbox"]`) are 16px by 16px with no margin and `accent-color: var(--oxblood)`; they take the standard 2px `--oxblood` focus outline and always sit beside a text label.
 - A quotation on `/courts` is a `blockquote` in Libre Caslon Text roman, wrapped in real quotation marks, with a 1px `--rule` rule on its left edge. It is not italic, centred or indented beyond that rule's padding. A status is shown in words ("Not in force."), never by colour alone.
+- `/courts` type, as built in `apps/web/app/courts/courts.module.css`. Every size and weight is from the allowed lists above, and no Token is added:
+
+  | Element | Family | Size / line | Weight | Colour |
+  | ------- | ------ | ----------- | ------ | ------ |
+  | Page text, requirements, required heading, key language | Libre Caslon Text | 14 / 22 | 400 | `--ink` |
+  | Page title (`h1`) | Libre Caslon Text | 26 / 32 | 400 | `--ink` |
+  | Court heading (`h2`), with a 1px `--rule` underline | Libre Caslon Text | 20 / 26 | 400 | `--ink` |
+  | Instrument title (`h3`) | Libre Caslon Text | 18 / 26 | 400 | `--ink` |
+  | Wordmark in the header, uppercase, letter spacing 0.16em | Libre Caslon Text | 15 | 400 | `--ink` |
+  | Judge, kind and date line (`.meta`) | Public Sans | 13 / 18 | 500 | `--muted` |
+  | "Not in force." line | Public Sans | 13 / 18 | 700 | `--ink` |
+  | "Requires" label, uppercase, letter spacing 0.1em | Public Sans | 10.5 / 16 | 700 | `--muted` |
+  | Filter labels and checkbox label | Public Sans | 13 / 16 | 500 | `--ink` |
+  | Count line and empty-result sentence | Public Sans | 13 / 18 | 500 | `--ink` |
+
+- `/courts` column: a `--desk` wrapper (`min-height: 100vh`) holds one `--paper` column with `max-width: var(--page-max)`, `min-height: 100vh`, `margin: 0 auto` and fluid padding (`16px max(16px, 6vw) 48px`). The column is centred on the desk and fills it below `--page-max`. There is no width at-rule.
+- `/courts` header: the first element in the column. One link to `/` holds the Mark (24px, 10px before the wordmark, `aria-hidden`) and the REVEAL CODES wordmark, `--ink`, no underline, with a 3px double `--ink` rule under the header. The link is `inline-flex`, `align-items: center`, `min-height: 34px`.
+- `/courts` links: the "Read the court's text" and "Draft under this rule" links are `--oxblood`, `display: inline-flex`, `align-items: center`, `min-height: 34px`, side by side with a 16px gap that wraps. Their look is otherwise the link style above.
 - Control rules live in `globals.css` and the shared Modal styles. Component stylesheets set only heights.
 
 ## Layout
