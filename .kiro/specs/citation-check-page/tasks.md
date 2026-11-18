@@ -364,7 +364,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
   - _Requirements: 29.8, 29.9, 29.10_
 
 - [ ] 22. Third follow-up (a): sample buttons only while the draft is empty
-  - [~] 22.1 Show the Sample_Buttons only for an Empty_Draft
+  - [x] 22.1 Show the Sample_Buttons only for an Empty_Draft
     - Read `src/components/toolbar.tsx`, `toolbar.module.css`, `app-shell.tsx` and `editor-surface.tsx`. Define `empty = text.length === 0` once in the Shell and pass it to the Toolbar and to the Empty_Page links, replacing any second copy. The Toolbar renders "Load Mata v. Avianca" and "Load demo motion" after Open only when `empty` is true; with text they are not in the DOM. `nextStep`, `PRIMARY_LABEL`, `loadOrAsk` and `useDocumentActions` are not edited. Amendment note: this amends criterion 26.2; the earlier text of Requirement 26 stays.
     - _Requirements: 30.1, 30.2, 30.3, 30.4, 30.5, 30.6, 31.1_
 

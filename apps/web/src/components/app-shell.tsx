@@ -214,6 +214,7 @@ function useShellState({ svc, orderStore, pendingNotice, onNoticeShown }: ShellP
     orderStore,
     onGo,
   });
+  const empty = doc.text.length === 0;
   const draft: DraftNotice = {
     blocked,
     onSaveCopy: actions.onSaveDraftCopy,
@@ -228,7 +229,8 @@ function useShellState({ svc, orderStore, pendingNotice, onNoticeShown }: ShellP
     actions,
     issues: { doc, store, svc, binding, mode, verifiedAt, verify, draft },
     bottom: { paneControl, doc, cursor, mode, binding },
-    toolbar: { notice, doc, verifiedAt, verify, exportGate, pane: paneControl, actions },
+    empty,
+    toolbar: { notice, doc, empty, verifiedAt, verify, exportGate, pane: paneControl, actions },
   };
 }
 
@@ -246,7 +248,7 @@ function Shell(props: ShellProps) {
       {s.slot.node}
       <EditorSurface
         editor={s.binding.editor}
-        empty={s.doc.text.length === 0}
+        empty={s.empty}
         onLoadSample={s.actions.onLoadSample}
         onOpenDraft={s.actions.onOpen}
         openInput={s.actions.openInput}

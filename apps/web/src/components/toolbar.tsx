@@ -7,6 +7,8 @@ export type ToolbarProps = Readonly<{
   /** The button this step names carries data-primary; "none" marks no button. */
   step: NextStep;
   notice: string | null;
+  /** The Empty_Draft condition; the Sample_Buttons render only while true. */
+  empty: boolean;
   paneOpen: boolean;
   verifyDisabled: boolean;
   /** While true the Verify button reads "Verifying…". */
@@ -54,15 +56,9 @@ function ExportButton(props: ToolbarProps) {
     </button>
   );
 }
-function FileGroup(props: ToolbarProps) {
+function SampleButtons(props: ToolbarProps) {
   return (
-    <div role="group" className={styles["group"]}>
-      <button type="button" onClick={props.onNew}>
-        New
-      </button>
-      <button type="button" onClick={props.onOpen}>
-        Open
-      </button>
+    <>
       <button
         type="button"
         data-primary={primary(props.step, "load-avianca")}
@@ -73,6 +69,19 @@ function FileGroup(props: ToolbarProps) {
       <button type="button" onClick={props.onLoadDemo}>
         Load demo motion
       </button>
+    </>
+  );
+}
+function FileGroup(props: ToolbarProps) {
+  return (
+    <div role="group" className={styles["group"]}>
+      <button type="button" onClick={props.onNew}>
+        New
+      </button>
+      <button type="button" onClick={props.onOpen}>
+        Open
+      </button>
+      {props.empty ? <SampleButtons {...props} /> : null}
     </div>
   );
 }

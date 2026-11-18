@@ -14,6 +14,8 @@ import type { VerifyControl } from "./use-verify";
 export type ShellToolbarProps = Readonly<{
   notice: string | null;
   doc: Document;
+  /** The one Empty_Draft condition, computed in the Shell. */
+  empty: boolean;
   verifiedAt: string | null;
   verify: Pick<VerifyControl, "running" | "waiting" | "start" | "disabled">;
   exportGate: ReturnType<typeof useExport>;
@@ -22,9 +24,9 @@ export type ShellToolbarProps = Readonly<{
 }>;
 
 export function ShellToolbar(props: ShellToolbarProps) {
-  const { notice, doc, verifiedAt, exportGate, pane, actions, verify } = props;
+  const { notice, doc, empty, verifiedAt, exportGate, pane, actions, verify } = props;
   const step = nextStep({
-    empty: doc.text.length === 0,
+    empty,
     verifying: verify.running,
     verifiableUnchecked: countVerifiableUnchecked(doc),
     needsCheckDate: needsCheckDate(doc, verifiedAt),
@@ -34,6 +36,7 @@ export function ShellToolbar(props: ShellToolbarProps) {
     <Toolbar
       notice={verify.waiting ? WAITING_TEXT : notice}
       step={step}
+      empty={empty}
       onNew={actions.onNew}
       onOpen={actions.onOpen}
       onLoadAvianca={() => {
