@@ -41,7 +41,7 @@ WordPerfect 5.1 for DOS, in 1989, had a key that split the screen and showed eve
 On the hosted site citations are checked live. Locally, with no token set, the app runs on recorded responses.
 
 1. Open the site, or run `pnpm dev` and open http://localhost:3000.
-2. Select Load demo motion, the second sample button; the Avianca sample, Load Mata v. Avianca, is the first offered. The text enters as one `PST` span.
+2. On the empty page, select Load demo motion, the second sample button; the Avianca sample, Load Mata v. Avianca, is the first offered. The text enters as one `PST` span.
 3. The codes pane is already open on a first visit; Alt-F3 hides and shows it.
 4. Select Verify. Two citations are found. Three are not, and one quotation is not in its opinion: they turn red in the pane, are underlined on the page, and are listed under Issues. Go jumps to each.
 5. Select Export. Choose a court, for example N.D. Tex. The dialog says how many blocking items remain and keeps Download .docx disabled.
@@ -50,7 +50,7 @@ On the hosted site citations are checked live. Locally, with no token set, the a
 
 Open is the other way in beside Load demo motion: choose Open to start from a `.docx`, `.txt` or `.md` file of your own.
 
-To see the case-name check, select Load Mata v. Avianca, the first sample button, on the empty page instead of the demo motion, then Verify.
+To see the case-name check, select Load Mata v. Avianca, the first sample button, on the empty page instead of the demo motion, then Verify. The sample buttons appear only while the draft is empty. To switch samples, press New first.
 
 On a phone, open `/check`, paste or open your draft, and select Check citations.
 

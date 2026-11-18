@@ -363,7 +363,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
   - Confirm `git status` shows a clean working tree with everything committed. Do not push. Ask the user if questions arise.
   - _Requirements: 29.8, 29.9, 29.10_
 
-- [ ] 22. Third follow-up (a): sample buttons only while the draft is empty
+- [x] 22. Third follow-up (a): sample buttons only while the draft is empty
   - [x] 22.1 Show the Sample_Buttons only for an Empty_Draft
     - Read `src/components/toolbar.tsx`, `toolbar.module.css`, `app-shell.tsx` and `editor-surface.tsx`. Define `empty = text.length === 0` once in the Shell and pass it to the Toolbar and to the Empty_Page links, replacing any second copy. The Toolbar renders "Load Mata v. Avianca" and "Load demo motion" after Open only when `empty` is true; with text they are not in the DOM. `nextStep`, `PRIMARY_LABEL`, `loadOrAsk` and `useDocumentActions` are not edited. Amendment note: this amends criterion 26.2; the earlier text of Requirement 26 stays.
     - _Requirements: 30.1, 30.2, 30.3, 30.4, 30.5, 30.6, 31.1_
@@ -376,7 +376,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - In `toolbar.test.tsx` and the order and primary tests of `app-shell.test.tsx`, assert the Sample_Buttons only for an empty draft. Add: neither Sample_Button is in the Toolbar once the draft has text; New brings both back after the confirm (Shell test). Check that no other test clicks a Sample_Button with text in the draft, and fix any that does by calling the action as task 22.2 does.
     - _Requirements: 30.2, 30.5, 30.6, 31.4, 31.5_
 
-  - [-] 22.4 Update `ui.md`, the README Demo path and `docs/demo-script.md`
+  - [x] 22.4 Update `ui.md`, the README Demo path and `docs/demo-script.md`
     - `ui.md` Layout Toolbar sentence and Controls Primary rule: the two sample buttons are shown only while the draft is empty; the order of steps in the Primary rule is unchanged. README "Demo path" and `docs/demo-script.md`: check that neither tells a reader to select a sample button with a draft loaded, and add "To switch samples, press New first." where a reader could be in a loaded draft. Keep `docs.test.ts` green and the README free of exclamation marks.
     - _Requirements: 30.7, 30.8, 30.9_
 

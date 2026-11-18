@@ -191,6 +191,10 @@ function usePendingNotice(store: Store, text: string | null, shown: () => void):
   }, [store, text, shown]);
 }
 
+type FlowActions = ReturnType<typeof useShellFlows>["actions"];
+function draftNotice(blocked: boolean, a: FlowActions): DraftNotice {
+  return { blocked, onSaveCopy: a.onSaveDraftCopy, onStartNew: a.onStartNewDraft };
+}
 function useShellState({ svc, orderStore, pendingNotice, onNoticeShown }: ShellProps) {
   const { store, autosave, gate, holder, handoverDialog } = useShellParts(svc);
   usePendingNotice(store, pendingNotice, onNoticeShown);
@@ -215,11 +219,7 @@ function useShellState({ svc, orderStore, pendingNotice, onNoticeShown }: ShellP
     onGo,
   });
   const empty = doc.text.length === 0;
-  const draft: DraftNotice = {
-    blocked,
-    onSaveCopy: actions.onSaveDraftCopy,
-    onStartNew: actions.onStartNewDraft,
-  };
+  const draft = draftNotice(blocked, actions);
   return {
     handoverDialog,
     slot,
