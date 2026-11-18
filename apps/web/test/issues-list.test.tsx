@@ -16,6 +16,8 @@ import { act, fireEvent, renderUi, screen, within } from "./support/render";
 const ISO = "2026-11-02T12:00:00.000Z";
 const CITE = "Roe v. Wade, 410 U.S. 113, 120 (1973)";
 const QUOTE = "the quick brown fox jumps over the lazy dog";
+const DIVERGENCE =
+  'Matches the opinion up to "the", then differs: "quick brown fox jumps over the…"';
 const TEXT = `See ${CITE} ("${QUOTE}"). Also see 999 U.S. 999 (2001).`;
 
 function build(text: string): Document {
@@ -93,12 +95,14 @@ describe("IssuesList _Requirements: 10.17, 18.1, 18.3, 18.4, 18.10, 18.11_", () 
       );
     });
   });
-  it("puts the Diverges at: line after the text, in the style of the text", () => {
+  it("puts the divergence sentence alone after the text, in the style of the text", () => {
     renderUi(<IssuesList document={withMismatch(build(TEXT))} onGo={noop} onOverride={noop} />);
-    const row = screen.getByText(/^Diverges at: /).parentElement;
+    const row = screen.getByText(DIVERGENCE).parentElement;
     const kids = Array.from(row?.children ?? []);
     expect(kids).toHaveLength(4);
+    expect(kids[3]?.textContent).toBe(DIVERGENCE);
     expect(kids[3]?.className).toBe(kids[2]?.className);
+    expect(row?.textContent).not.toContain("Diverges at");
   });
   it("uses the failing chip for CIT ✘, CIT ? and QUO ✘ and the outline chip for CIT … and QUO …", () => {
     const failing = withMismatch(withCitationResults(build(TEXT)));
@@ -141,13 +145,14 @@ describe("IssuesList _Requirements: 10.17, 18.1, 18.3, 18.4, 18.10, 18.11_", () 
     ).toBeGreaterThan(0);
   });
 
-  it("shows divergence words only on the QUO ✘ row", () => {
+  it("shows the divergence sentence only on the QUO ✘ row", () => {
     renderUi(<IssuesList document={withMismatch(build(TEXT))} onGo={noop} onOverride={noop} />);
     const rows = screen.getAllByRole("listitem");
-    const diverging = rows.filter((r) => r.textContent.includes("Diverges at: "));
+    const diverging = rows.filter((r) => r.textContent.includes("Matches the opinion up to"));
     expect(diverging).toHaveLength(1);
     expect(diverging[0]?.textContent).toContain("QUO ✘");
-    expect(diverging[0]?.textContent).toContain("Diverges at: quick brown fox jumps over the…");
+    expect(diverging[0]?.textContent).toContain(DIVERGENCE);
+    expect(rows.some((r) => r.textContent.includes("Diverges at"))).toBe(false);
   });
 
   it("shows Overridden and the reason, with no Override… control, for an overridden issue", () => {

@@ -2,7 +2,7 @@ import { issues } from "@reveal-codes/engine";
 import type { Document, Issue, IssueCode, IssueKey } from "@reveal-codes/engine";
 import { courtListenerLink } from "@reveal-codes/verifier/link";
 import type { DisplayInfo } from "@reveal-codes/verifier/link";
-import { divergenceWords } from "./divergence";
+import { divergenceSentence } from "./divergence";
 import { mismatchLines, mismatchOf } from "./mismatch";
 
 export const MAX_ISSUE_TEXT = 80;
@@ -55,12 +55,16 @@ export function shorten(text: string): string {
   return `${points.slice(0, MAX_ISSUE_TEXT - 1).join("")}…`;
 }
 
-/** Divergence_Words for a `QUO ✘` row, computed from the current Document. */
+/** The divergence sentence for a `QUO ✘` row, or null when there is none to show. */
 export function divergenceFor(document: Document, issue: Issue): string | null {
   if (issue.code !== "QUO ✘") return null;
   const rec = document.quotes.find((q) => q.key === issue.key);
   if (rec === undefined || rec.result.status !== "mismatch") return null;
-  return divergenceWords(document.text.slice(issue.start, issue.end), rec.result.prefixLength);
+  const sentence = divergenceSentence(
+    document.text.slice(issue.start, issue.end),
+    rec.result.prefixLength,
+  );
+  return sentence === "" ? null : sentence;
 }
 
 export type WrongCase = Readonly<{ lines: readonly string[]; href: string | null }>;
@@ -108,7 +112,7 @@ export type CheckRow = Readonly<{
   found: string | null;
   /** Mismatch lines of a wrong-case citation; empty otherwise. */
   mismatch: readonly string[];
-  /** Divergence words of a quotation not in the opinion; null otherwise. */
+  /** Divergence sentence of a quotation not in the opinion; null otherwise. */
   divergence: string | null;
   href: string | null;
   /** The Next_Sentence of a failing row; null otherwise. */

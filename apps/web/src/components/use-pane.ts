@@ -1,7 +1,7 @@
 import type { Document } from "@reveal-codes/engine";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { divergenceWords, mismatchAt } from "../client/divergence";
+import { divergenceSentence, mismatchAt } from "../client/divergence";
 import { classifyKey } from "../editor/shortcuts";
 import { statusText } from "../pane/layout";
 import { initialPaneOpen, writePreference } from "../pane-preference";
@@ -25,8 +25,8 @@ export function composeStatus(doc: Document, cursor: number, f7: string | null):
   const rec = mismatchAt(doc, cursor);
   if (rec === null || rec.result.status !== "mismatch") return null;
   const quoteText = doc.text.slice(rec.quote.start, rec.quote.end);
-  const words = divergenceWords(quoteText, rec.result.prefixLength);
-  return `${statusText(doc.text, cursor)}  Diverges at: ${words}`;
+  const sentence = divergenceSentence(quoteText, rec.result.prefixLength);
+  return sentence === "" ? null : `${statusText(doc.text, cursor)}  ${sentence}`;
 }
 
 /** Position_Text: the position, plus the divergence words inside a mismatched quote. */

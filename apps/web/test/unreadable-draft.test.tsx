@@ -61,7 +61,7 @@ describe("the notice changes nothing else _Requirements: 23.8_", () => {
       within(toolbar()).getByRole<HTMLButtonElement>("button", { name: "Export" }).disabled,
     ).toBe(true);
     const primary = [...toolbar().querySelectorAll('[data-primary="true"]')];
-    expect(primary.map((b) => b.textContent)).toEqual(["Load demo motion"]);
+    expect(primary.map((b) => b.textContent)).toEqual(["Load Mata v. Avianca"]);
     expect(within(aside()).getByText("No issues.")).not.toBeNull();
     expect(toolbarNotice()).toBe("");
   });

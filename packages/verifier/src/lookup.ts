@@ -1,6 +1,6 @@
 import type { CitationRecord, IssueKey, VerificationResult } from "@reveal-codes/engine";
 import { acquire } from "./bucket";
-import { cacheGet, cacheSet, isCachedLine } from "./cache-access";
+import { cacheGet, cachePeek, cacheSet, isCachedLine } from "./cache-access";
 import { clusterDataByIndex } from "./clusters";
 import type { ClusterData } from "./clusters";
 import { judgeRecords } from "./judge";
@@ -170,6 +170,21 @@ export async function lookupWithInfo(
   }
   const combined = resultsForRecords(plan.index, lineResults, combineParallel);
   return judgeRecords(records, plan.index, combined, lineResults, clusters);
+}
+
+/**
+ * The Citation_Lines of `records` that `lookupWithInfo` would send to the service: those with
+ * no valid cached entry. Read-only: no cache write, no counter change, no `fetch`.
+ */
+export async function missingLines(
+  records: readonly CitationRecord[],
+  deps: Deps,
+): Promise<readonly string[]> {
+  const missing: string[] = [];
+  for (const line of planLookup(records).lines) {
+    if ((await cachePeek(deps, line, isCachedLine)) === undefined) missing.push(line);
+  }
+  return missing;
 }
 
 /** `lookupWithInfo` without the Display_Info; the comparison still applies. */

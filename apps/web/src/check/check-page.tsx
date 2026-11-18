@@ -32,16 +32,13 @@ function EditorLink({
   svc,
   text,
   styles,
-  wide,
   onFail,
 }: Readonly<{
   svc: AppServices;
   text: string;
   styles: Styles;
-  wide: boolean;
   onFail: (message: string) => void;
 }>) {
-  if (!wide || text === "") return null;
   const onClick = (e: MouseEvent<HTMLAnchorElement>): void => {
     if (writeHandover(svc.session, docxSafe(text).text)) return;
     e.preventDefault();
@@ -80,11 +77,14 @@ function PageTop({ styles, wide }: Readonly<{ styles: Styles; wide: boolean }>):
   );
 }
 
-function PageLinks({ styles }: Readonly<{ styles: Styles }>): React.JSX.Element {
+function PageLinks({
+  styles,
+  showEditor,
+}: Readonly<{ styles: Styles; showEditor: boolean }>): React.JSX.Element {
   return (
     <p className={styles["links"]}>
       <a href="/courts">{COURT_RULES_LONG}</a>
-      <a href="/">Open the editor</a>
+      {showEditor ? <a href="/">Open the editor</a> : null}
     </p>
   );
 }
@@ -201,6 +201,7 @@ export function CheckPage({
   const page = useCheckPage(services);
   const { svc, state, input, run } = page;
   const wide = useWide(svc);
+  const showEditorLink = wide && !state.stale && state.text !== "";
   return (
     <div className={styles["desk"]}>
       <main className={styles["page"]}>
@@ -220,14 +221,10 @@ export function CheckPage({
           messages={page.messages}
           onAgain={run.onCheck}
         />
-        <EditorLink
-          svc={svc}
-          text={state.text}
-          styles={styles}
-          wide={wide && !state.stale}
-          onFail={page.setNotice}
-        />
-        <PageLinks styles={styles} />
+        {showEditorLink ? (
+          <EditorLink svc={svc} text={state.text} styles={styles} onFail={page.setNotice} />
+        ) : null}
+        <PageLinks styles={styles} showEditor={!showEditorLink} />
         {input.dialog}
       </main>
     </div>

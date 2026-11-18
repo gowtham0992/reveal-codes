@@ -237,128 +237,128 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
   - Confirm `git status` shows a clean working tree with everything committed. Do not push. Ask the user if questions arise.
   - _Requirements: 18.8, 18.9_
 
-- [ ] 14. Second follow-up (a): read-only cache test in the Verifier
-  - [ ] 14.1 Add `cachePeek` and `missingLines`
+- [x] 14. Second follow-up (a): read-only cache test in the Verifier
+  - [x] 14.1 Add `cachePeek` and `missingLines`
     - Read `packages/verifier/src/cache-access.ts`, `lookup.ts` and `index.ts` first. In `cache-access.ts` add `cachePeek(deps, key, guard)`: it reads through the existing `readStore`, applies the guard and bumps no counter. In `lookup.ts` add `missingLines(records, deps): Promise<readonly string[]>`, which returns the Citation_Lines of `planLookup(records).lines` for which `cachePeek(deps, line, isCachedLine)` is `undefined`. It never calls `cacheGet` or `cacheSet`. Export `missingLines` from `index.ts`. Change no existing export, type or result; do not touch `packages/courtlistener-mcp`.
     - _Requirements: 24.7, 24.8, 24.9, 24.14_
 
-  - [ ]* 14.2 Write property test for missing lines
+  - [x]* 14.2 Write property test for missing lines
     - **Property 5: Missing lines agree with the lookup**
     - Create `packages/verifier/test/missing-lines.properties.test.ts` with one `fc.assert(fc.property(...))`, `// Property 5` above it and `_Requirements: 24.7, 24.8, 24.9, 24.14_` in the `describe` title. Build the records, the seeded memory cache (valid entries, entries that fail `isCachedLine`, absent lines) and the recording `fetch` with fast-check combinators in the verifier test support folder, not in the shared engine arbitraries. Assert the three clauses of design S7 (set equality with the lines `lookupWithInfo` sends and empty exactly when it sends none; store contents and `hits`, `misses` and `writes` unchanged; `lookupWithInfo` result equal whether or not `missingLines` ran first). Run `packages/verifier/test/inventory.test.ts` and keep it green; update it only if it lists files.
     - **Validates: Requirements 24.7, 24.8, 24.9, 24.14**
 
-  - [ ]* 14.3 Write example tests for `missingLines`
+  - [x]* 14.3 Write example tests for `missingLines`
     - In `packages/verifier/test/lookup.test.ts` or a new `missing-lines.test.ts`: all lines cached gives `[]`; a partly cached list gives only the missing lines; `{records: []}` and short-form-only records give `[]`; an `unchecked` line is never cached so it is listed; a store whose `get` rejects lists the line as missing; the file store gives the same answer as the memory store.
     - _Requirements: 24.7, 24.8, 24.14_
 
-- [ ] 15. Second follow-up (b): the verify route and its rate limit
-  - [ ] 15.1 Change `handleVerify` and the limiter
+- [x] 15. Second follow-up (b): the verify route and its rate limit
+  - [x] 15.1 Change `handleVerify` and the limiter
     - Read `src/server/rate-limit.ts`, `src/server/verify-route.ts` and `app/api/verify/route.ts` first. In `rate-limit.ts` export `VERIFY_LIMIT = 10` and `VERIFY_CEILING = 60`, each built with `createFixedWindowLimiter` and `routeGuard`, one limiter per constant; `OPINION_LIMIT` stays 30. In `handleVerify` follow design S1: method check; in live mode the ceiling before the body is read; the unchanged body, text, shape, record count and record checks; in live mode `missingLines`, and when it returns at least one line the Verify_Limit count once; then `lookupWithInfo`. Fixtures mode applies neither limit and reads no cache for limiting. The 429 sentence `CHECKS_BUSY` and the headers from `tooManyRequests` stay as they are. Update the comments in `rate-limit.ts` and `verify-route.ts` ("6 requests per address per minute", "429 before the body is read") to state the new rule.
     - _Requirements: 24.1, 24.2, 24.3, 24.4, 24.5, 24.6, 24.10, 24.11, 24.12, 24.13, 24.14, 24.15, 24.16, 24.17, 24.18, 24.19, 24.25_
 
-  - [ ]* 15.2 Write tests for the route and the limit
+  - [x]* 15.2 Write tests for the route and the limit
     - In `apps/web/test/route-limits.test.ts` replace the test "refuses before the body is read or any lookup is made" with tests of 24.3, 24.16 and 24.17, and rewrite the tests that call `handleVerify` six or seven times with `fixturesDeps()` so that they count Service_Requests. Add one example per row of the S1 table, built with a live guard, a memory cache and a recording `fetch`, a clock for the window and separate addresses: a cache that holds every line of a draft answers 200 on every repeat up to the ceiling and calls the service once (cached draft never trips the limit); uncached requests answer 200 up to 10 and 429 at the eleventh, 200 again in the next window, and each address counts alone; a partly cached request, `{"records":[]}`, an `unchecked` line that is never cached, and a request refused by the limit count as 24.13, 24.14, 24.12 and 24.3 say; the 61st request of any kind answers 429 before the body is read; a cache entry that vanishes between the two reads neither refuses nor double counts; a malformed or oversize body at the limit answers 400 or 413; the 429 sentence and headers equal the earlier tests; fixtures mode never limits; `/api/opinion/[clusterId]` still allows 30. Keep `apps/web/test/rate-limit.properties.test.ts` green with no edit unless it names the old constant.
     - _Requirements: 24.1, 24.2, 24.3, 24.4, 24.11, 24.12, 24.13, 24.14, 24.15, 24.16, 24.17, 24.18, 24.20, 24.21, 24.22, 24.23, 24.24_
 
-  - [ ] 15.3 Update `docs/DEVELOPMENT.md`
+  - [x] 15.3 Update `docs/DEVELOPMENT.md`
     - Replace "In live mode `/api/verify` allows 6 requests" with the new rule: 10 requests per client address per minute that reach the citation service, answered-from-cache requests not counted, and a ceiling of 60 requests of any kind per address per minute; `/api/opinion/[clusterId]` stays 30; demo mode is never limited. State the README line about request limits too if it gives the number.
     - _Requirements: 24.25_
 
-- [ ] 16. Second follow-up (c): the divergence sentence
-  - [ ] 16.1 Add `divergenceSentence`
+- [x] 16. Second follow-up (c): the divergence sentence
+  - [x] 16.1 Add `divergenceSentence`
     - Read `src/client/divergence.ts`. Add the export `divergenceSentence(quoteText, prefixLength)` as design S4 gives it, built on `divergenceWords`, `wordsOf` and `firstWordIndex`, which keep their signatures. It returns "" for a quotation with no word, `Differs from the opinion from the first word: "<words>"` when the divergence falls at the first word, and otherwise `Matches the opinion up to "<lead><tail>", then differs: "<words>"` with a leading "… " only when more than three words precede the tail. Straight `"`, U+2026, no exclamation mark.
     - _Requirements: 27.1, 27.4, 27.5, 27.6, 27.7, 27.8, 27.9, 27.10, 27.11, 27.12, 27.13_
 
-  - [ ] 16.2 Use it in every caller
+  - [x] 16.2 Use it in every caller
     - Read `src/client/check-rows.ts`, `issues-list.tsx`, `src/check/result-list.tsx`, `src/components/use-pane.ts` and the Status_Bar stylesheet in `src/pane/`. `divergenceFor` in `check-rows.ts` returns `divergenceSentence(...)` or `null` when it is empty. The Issues row and the result list show the sentence alone with no "Diverges at: " prefix. `composeStatus` in `use-pane.ts` shows `statusText`, two spaces, then the sentence, and calls no other function. Make sure the status element has `white-space: nowrap`, `overflow: hidden` and `text-overflow: ellipsis`, adding the missing ones in the Pane stylesheet. No caller builds any part of the sentence. The Export dialog, Copy_Text, Statement, Appendix and DOCX are not edited.
     - _Requirements: 27.2, 27.3, 27.11, 27.15, 27.16_
 
-  - [ ]* 16.3 Write property test for the divergence sentence
+  - [x]* 16.3 Write property test for the divergence sentence
     - **Property 4: Divergence sentence**
     - Create `apps/web/test/divergence.properties.test.ts` with one `fc.assert(fc.property(...))`, `// Property 4` and `_Requirements: 27.1, 27.4, 27.5, 27.6, 27.7, 27.8, 27.9, 27.10, 27.11, 27.12, 27.14_` in the `describe` title, `numRuns: runs()`. Compute the expected word index by scanning code units, independently of `wordsOf`. Assert clauses 1 to 5 of design S7 (empty for no words and the character set; the first-word form; the tail form with the leading ellipsis only above three words; at most three tail words and six differing words; adding words after the divergence or changing white space between words leaves the part before "then differs" unchanged). Add the quotation-text arbitrary (Unicode words, curly marks, runs of white space) to `packages/engine/src/testing/arbitraries.ts` through `arb-check-results.ts`.
     - In `apps/web/test/static/inventory.test.ts` add "4" to the expected sorted list, change the title and the count (eighteen), and add Property 4 of citation-check-page to the comment above it. The inventory scan lists numbers across all files by the `// Property N` marker, so a number may repeat across specs; keep the sorted list exact.
     - **Validates: Requirements 27.1, 27.4, 27.5, 27.6, 27.7, 27.8, 27.9, 27.10, 27.11, 27.12, 27.14**
 
-  - [ ]* 16.4 Update Property 1 for the sentence
+  - [x]* 16.4 Update Property 1 for the sentence
     - **Property 1: One answer** (updated). In `apps/web/test/check-rows.properties.test.ts` keep one `fc.assert(fc.property(...))` and `// Property 1`. Clause 5 now says that for each failing quotation row with a mismatch result, `row.divergence` equals `divergenceSentence(quote text, prefixLength)` and is `null` when that sentence is empty or the row is not a mismatch; `mismatch` and `href` as before. Add 27.16 to the `describe` title and to **Validates**. The expected sentence is computed from `document.quotations`, never from the rows. The inventory count does not change.
     - **Validates: Requirements 6.9 as replaced by 27.2 and 27.16, 8.1, 19.13**
 
-  - [ ]* 16.5 Write example tests for the sentence and its callers
+  - [x]* 16.5 Write example tests for the sentence and its callers
     - `divergence.test.ts`: examples for the first-word, short-quote (fewer than three words, no ellipsis), mid-word, no-word and long-quote (leading ellipsis) cases, and the demo motion quotation reading `Matches the opinion up to "a pro", then differs: "se plaintiff who alleges retaliation is…"`.
     - Update `issues-list.test.tsx`, `check-page.test.tsx`, `demo-path.test.tsx` and `app-shell.test.tsx` to the new text. Add a test that the Pane status text is `statusText`, two spaces and the sentence, and that the status element carries the three single-line declarations. Add a test that the DOCX, Statement, Appendix, full serialisation and Copy_Text of a document with a mismatch quotation are byte-equal to the values before this change.
     - _Requirements: 27.2, 27.3, 27.11, 27.15, 27.17_
 
-- [ ] 17. Second follow-up (d): saved display information
-  - [ ] 17.1 Add `storableInfo` and the `resolved` field to the Persisted_Value
+- [x] 17. Second follow-up (d): saved display information
+  - [x] 17.1 Add `storableInfo` and the `resolved` field to the Persisted_Value
     - Read `src/persist.ts`, `src/client/resolved.ts` and `src/client/link.ts`. In `resolved.ts` add `storableInfo(document, info)`, which keeps an entry only when the Document has a Full_Citation with that key whose result is `verified` or `wrong_case` and whose `clusterId` equals the entry's. In `persist.ts` add `SavedInfo` and the optional `resolved` field (version stays 1), give `serialise` a fifth argument `ReadonlyMap<IssueKey, DisplayInfo> | null` that writes the field in key order through `storableInfo` only when it is not empty, add `asResolved` that returns an empty map for an absent or non-array field and drops each invalid entry, and add `resolved` to `Restored`. `deserialise` gains no new `PersistError` kind.
     - _Requirements: 25.1, 25.2, 25.7, 25.8, 25.9, 25.10, 25.12, 25.15, 25.19_
 
-  - [ ] 17.2 Seed on restore, clear on edit and replacement, write on change
+  - [x] 17.2 Seed on restore, clear on edit and replacement, write on change
     - Read `src/autosave.ts`, `src/components/use-autosave.ts`, `src/components/use-verify.ts`, `src/client/verify-flow.ts`, `src/draft-gate.ts` and `src/saved-draft.ts`. The mount-time load returns `resolved` with the Document, and `use-verify.ts` seeds its session with the epoch of the store after the restore. New, Open, a sample, a Hand_Over and a restore bump the epoch as today, so only a restore seeds entries. Prune the session with `storableInfo` on each store change so an edit that clears a citation's result drops its entry in memory and in the same write. `use-autosave.ts` adds the session's info to the values that schedule the 300 ms write and passes it to `serialise`; while the Draft_Gate is blocked nothing is written. The Draft_Gate blocks for `not_json`, `bad_shape` and `bad_codes` only. Do not edit `saved-draft.ts`, the print view or the `/check` sources.
     - _Requirements: 25.3, 25.4, 25.5, 25.6, 25.11, 25.12, 25.13, 25.14, 25.17, 25.18_
 
-  - [ ]* 17.3 Write property test for the saved display information
+  - [x]* 17.3 Write property test for the saved display information
     - **Property 3: Saved display information round trip**
     - Create `apps/web/test/persist-resolved.properties.test.ts` with one `fc.assert(fc.property(...))`, `// Property 3` and `_Requirements: 25.1, 25.2, 25.7, 25.15, 25.16, 25.19_` in the `describe` title, `numRuns: runs()`. Use the existing document arbitraries and add a saved-entry list arbitrary (valid, stale `clusterId`, unknown key, wrong types) to `arb-check-results.ts`. Assert the three clauses of design S7: the round trip returns the Document and exactly the entries `storableInfo` keeps; the restored Document, its `render(..., "full")` text and a DOCX built with a fixed clock are byte-identical to those restored from `serialise(..., null)`; the string with `info` null has no `resolved` key and no draft text outside `codes` and the entries' own fields.
     - In `apps/web/test/static/inventory.test.ts` add "3" to the expected sorted list, set the count to nineteen, and update the title and comment.
     - **Validates: Requirements 25.1, 25.2, 25.7, 25.15, 25.16, 25.19**
 
-  - [ ]* 17.4 Write example tests for the stored information
+  - [x]* 17.4 Write example tests for the stored information
     - `persist.test.ts` and a new `resolved-restore.test.tsx`: verify, reload, the same Resolved_List rows and the same CourtListener addresses with no Verify_Run; edit a citation and its entry and its row go and the stored value no longer holds the entry; New, Open, a sample and a Hand_Over clear the entries; a value with no `resolved` field loads and shows no Resolved_List; a non-array field is ignored and leaves the Draft_Gate open; one bad entry is dropped and the others kept; a stale `clusterId` entry is ignored at use; no write while the Draft_Gate is blocked; a completed run writes after the 300 ms debounce. Add: the exported DOCX bytes are unchanged whether or not entries are stored; Save a copy downloads exactly the stored string, which includes the field; the print view ignores the field; the `/check` page writes nothing to storage (the existing static scan stays as it is).
     - _Requirements: 25.3, 25.4, 25.5, 25.6, 25.8, 25.9, 25.10, 25.11, 25.12, 25.13, 25.14, 25.16, 25.17, 25.18, 25.20_
 
-  - [ ] 17.5 Amend the earlier texts and comments
+  - [x] 17.5 Amend the earlier texts and comments
     - Change the comments in `link.ts`, `resolved.ts`, `use-verify.ts` and `verify-flow.ts` that call the Display_Info "memory only" to say it is kept in memory and stored with the saved draft, and never stored in the Document. Add one line, "Replaced by citation-check-page Requirement 25", at: `case-match` Requirement 7 criteria 5 and 6 and its design table "What is stored where" and the label "Display_Info, session only"; `editor-app` Requirement 9 criterion 2 and limitation L11. Edit no other words of those specs. Run the static scans that read comments.
     - _Requirements: 25.21, 25.23_
 
-- [ ] 18. Second follow-up (e): the Avianca sample comes first
-  - [ ] 18.1 Reorder the Toolbar, the Empty_Page links and `nextStep`
+- [x] 18. Second follow-up (e): the Avianca sample comes first
+  - [x] 18.1 Reorder the Toolbar, the Empty_Page links and `nextStep`
     - Read `src/components/toolbar.tsx`, `toolbar.module.css`, `next-step.ts`, `editor-surface.tsx` and the handler behind "Load the Avianca citations". `nextStep` returns `load-avianca` in place of `load-demo` while the text is empty and no run is in flight, and `PRIMARY_LABEL["load-avianca"]` is "Load Mata v. Avianca". The Toolbar shows, directly after Open, "Load Mata v. Avianca" (primary exactly when `nextStep` is `load-avianca`) and then "Load demo motion" (never primary, label, action and confirm unchanged). The Avianca button calls the existing handler, passed to `Toolbar` as a prop, so there is one implementation. The Empty_Page links read, in order, "Load the Avianca citations", "Load demo motion", "Open a draft", with the wording kept, no icon and no `data-primary`. The other `nextStep` rules and the Check_Page's action order are not touched.
     - _Requirements: 26.1, 26.2, 26.3, 26.4, 26.5, 26.6, 26.7, 26.11, 26.12, 26.17_
 
-  - [ ] 18.2 Update `ui.md`, the README Demo path and `docs/demo-script.md`
+  - [x] 18.2 Update `ui.md`, the README Demo path and `docs/demo-script.md`
     - `.kiro/steering/ui.md`: the Primary rule says "Load Mata v. Avianca when the text is empty" and the Empty_Page copy rule gives the order Avianca, demo motion, Open a draft. README "Demo path": step 2 names the Demo_Sample button as the second sample button and says the Avianca sample is the first offered. `docs/demo-script.md`: the row at 0:00 says to select **Load demo motion** (the second sample button) and the closing sentence about the Avianca sample says it is the first button. Keep `docs.test.ts` green and the README free of exclamation marks.
     - _Requirements: 26.13, 26.14, 26.15, 26.18_
 
-  - [ ]* 18.3 Update and add tests for the new order
+  - [x]* 18.3 Update and add tests for the new order
     - Update to the new order, primary and Next_Step value: `app-shell.test.tsx`, `unreadable-draft.test.tsx`, `open-empty-page.test.tsx`, `editor-surface-links.test.tsx`, `avianca.test.tsx`, `samples-declaration.test.tsx`, `next-step.test.ts`, `next-step.properties.test.ts` and `next-step-gap.properties.test.ts` (their `// Property N` markers and `fc.assert` counts stay as they are, so the inventory is unchanged). Add to `toolbar.test.tsx`: the Avianca button is first after Open and primary on empty text, the demo button is plain, labels are "Load Mata v. Avianca" and "Load demo motion", no primary while a run is in flight, the confirm on a non-empty draft, and `AVIANCA_FAILED` on a failed fetch.
     - _Requirements: 26.1, 26.2, 26.3, 26.4, 26.5, 26.6, 26.11, 26.12, 26.16_
 
-  - [ ] 18.4 Measure both Sample_Buttons at 1150px in a real browser
+  - [x] 18.4 Measure both Sample_Buttons at 1150px in a real browser
     - Start `pnpm dev` (as the user's terminal command, not as a blocking shell call) and run a throwaway Playwright (Chromium) probe, not committed and deleted afterwards, as design S3 lists: viewport 1150 by 800 with an empty draft and cleared `localStorage`; the same with an "Opened ...: n characters" notice and with a long notice such as `DOCUMENT_TOO_LONG`; for each of the two buttons `getBoundingClientRect` width and height, `scrollWidth` against `clientWidth` and height against 30px; for the Toolbar `scrollWidth` against `clientWidth`, the width of the notice area, and whether the Court rules link and the last Toolbar item are visible inside the Toolbar; the same readings at 1280px. Report every value in the task's result. If any button wraps, clips or the Toolbar overflows or hides the Court rules link, STOP, report which button, which width and by how much, and do not pick a remedy (shorter label, shorter Demo_Sample label or one load button are for the author to choose). Do not change the labels or the stylesheet in this task.
     - _Requirements: 26.8, 26.9, 26.10_
 
-- [ ] 19. Second follow-up (f): one link to the editor on `/check`
-  - [ ] 19.1 Render one editor link from one value
+- [x] 19. Second follow-up (f): one link to the editor on `/check`
+  - [x] 19.1 Render one editor link from one value
     - Read `src/check/check-page.tsx`. Compute `showEditorLink = wide && !stale && text !== ""` once, render `EditorLink` when it is true, and pass `showEditor={!showEditorLink}` to `PageLinks`, which renders "Open the editor" only when `showEditor` is true and always renders "See all court rules". The server snapshot of `wide` stays false, so the server HTML holds the footer link and no Editor_Link.
     - _Requirements: 28.1, 28.2, 28.3, 28.4, 28.5, 28.6_
 
-  - [ ]* 19.2 Write tests for the single link
+  - [x]* 19.2 Write tests for the single link
     - In `check-page.test.tsx` and `check-editor-link.test.tsx`: exactly one link to the editor at 375px with text (the footer link), at 1280px with text (the Editor_Link only), at 1280px with an empty box (the footer link), at 1280px with out-of-date results (the footer link); the swap on a live width change, on emptying and filling the Draft_Box, and when results go out of date, with no reload; "See all court rules" present in every case; the server HTML holds the footer link and no Editor_Link. Keep the `check-literals` and `check` scans green.
     - _Requirements: 28.1, 28.2, 28.3, 28.4, 28.5, 28.6, 28.7_
 
-- [ ] 20. Second follow-up (g): documents
-  - [ ] 20.1 Update `README.md`
+- [x] 20. Second follow-up (g): documents
+  - [x] 20.1 Update `README.md`
     - Make the README consistent with Requirements 24 to 28 and keep every assertion of `docs.test.ts` true, including no exclamation mark. "What leaves your machine": say that the saved draft in this browser also holds the case names found for verified citations and that nothing of this is sent anywhere. "Limits": state the request limits if the README gives a number. Check that "Demo path" still agrees with task 18.2.
     - _Requirements: 25.22, 29.5, 29.7_
 
-  - [ ] 20.2 Update `.kiro/steering/ui.md`
+  - [x] 20.2 Update `.kiro/steering/ui.md`
     - Check that the Primary rule, the Empty_Page rule and the Toolbar text agree with task 18.1, and add to the one-column pages rule that the checking page shows one link to the editor. Add no Token.
     - _Requirements: 26.13, 28.9, 29.5_
 
-  - [ ] 20.3 Check `docs/DEVELOPMENT.md`
+  - [x] 20.3 Check `docs/DEVELOPMENT.md`
     - Confirm the request-limits line written in 15.3 agrees with the code constants (`VERIFY_LIMIT` 10, `VERIFY_CEILING` 60, `OPINION_LIMIT` 30) and fix any difference.
     - _Requirements: 24.25, 29.5_
 
-  - [ ] 20.4 Update `docs/KIRO_USAGE.md`
+  - [x] 20.4 Update `docs/KIRO_USAGE.md`
     - Add a row for the `ui.md` edit of this follow-up. Keep the row for this spec listing `.config.kiro`, `requirements.md`, `design.md`, `tasks.md` and `tasks.meta.json`. Run `pnpm kiro:check` and add any row the inventory asks for.
     - _Requirements: 29.5, 29.6_
 
-  - [ ] 20.5 Add the `BUILD_LOG.md` entry
+  - [x] 20.5 Add the `BUILD_LOG.md` entry
     - Add a dated entry for the second follow-up with a section "What Kiro got wrong, and what fixed it". The agent that lands this task writes the sentences in plain words, in the third person, and states these six facts: all five findings were found by a reviewer using the live site cold and none by a test; the limit counted requests that were answered from the cache; the display information for found cases did not survive a reload; the empty page led with the demo motion while every instruction starts with the Avianca sample; "Diverges at" read as clipped text to two readers; and `/check` showed two links to the editor. Then name each finding with its requirement (24 to 28), the measured values the design used (10 and 60 per minute, 6 and 5 distinct Citation_Lines in the two samples, and the Toolbar widths measured in task 18.4), and the four earlier decisions it reverses (6 a minute counting every request, 429 before the body is read, memory-only Display_Info, the demo motion as the primary sample). Make no first-person claim as the user.
     - _Requirements: 29.1, 29.2, 29.3, 29.4_
 
-- [ ] 21. Final checkpoint
+- [x] 21. Final checkpoint
   - After the last edit, run in order: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, the clean-checkout web build (`pnpm --filter @reveal-codes/web build` from a clean clone after `pnpm install`) and `pnpm kiro:check`. Fix any failure and rerun all of them after the fix.
   - Confirm `git status` shows a clean working tree with everything committed. Do not push. Ask the user if questions arise.
   - _Requirements: 29.8, 29.9, 29.10_

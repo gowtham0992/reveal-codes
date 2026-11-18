@@ -75,7 +75,7 @@ flowchart LR
   J -->|"results and Display_Info"| R
   R --> F["verify flow in the browser"]
   F -->|"setVerification"| D
-  F -->|"Display_Info, session only"| S["useVerify session state"]
+  F -->|"Display_Info, session only (Replaced by citation-check-page Requirement 25)"| S["useVerify session state"]
   D --> P["Pane, page marks, Issues, Statement, Appendix"]
   S --> RL["Resolved citations list"]
   D --> RL
@@ -607,6 +607,8 @@ export type StatementCitation = Readonly<{
 ```
 
 What is stored where:
+
+Replaced by citation-check-page Requirement 25.
 
 | Datum | Document | Autosave | Appendix and Statement | Memory only |
 | ----- | -------- | -------- | ---------------------- | ----------- |

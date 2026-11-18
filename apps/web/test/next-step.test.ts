@@ -10,8 +10,8 @@ const BASE = {
 };
 
 describe("nextStep _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_", () => {
-  it("names Load demo motion for an empty document", () => {
-    expect(nextStep({ ...BASE, empty: true })).toBe("load-demo");
+  it("names Load Mata v. Avianca for an empty document", () => {
+    expect(nextStep({ ...BASE, empty: true })).toBe("load-avianca");
   });
 
   it("names Verify when something checkable is unchecked", () => {
@@ -21,7 +21,7 @@ describe("nextStep _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_", () => {
   it("names Verify for a check-date gap with nothing unchecked, but not while running or empty", () => {
     expect(nextStep({ ...BASE, needsCheckDate: true })).toBe("verify");
     expect(nextStep({ ...BASE, needsCheckDate: true, verifying: true })).toBe("none");
-    expect(nextStep({ ...BASE, needsCheckDate: true, empty: true })).toBe("load-demo");
+    expect(nextStep({ ...BASE, needsCheckDate: true, empty: true })).toBe("load-avianca");
   });
 
   it("names Export when nothing is left to verify, even with blocking items", () => {

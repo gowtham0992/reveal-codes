@@ -119,3 +119,131 @@ export const arbCheckedDocument: fc.Arbitrary<CheckedDocument> = arbDocument.cha
       return { document, info: infoFor(document, mismatched, infos) };
     });
 });
+
+/** A quotation text as its parts: words, the white space around them, and spare material for variants. */
+export type QuotationParts = Readonly<{
+  words: readonly string[];
+  /** `words.length + 1` gaps; the inner ones are never empty. */
+  gaps: readonly string[];
+  /** Another set of gaps of the same shape, for changing white space between words. */
+  otherGaps: readonly string[];
+  /** Words that may be added after the last word. */
+  extra: readonly string[];
+}>;
+
+const WORD_UNITS: readonly string[] = [
+  ..."abcdefghijklmnopqrstuvwxyz".split(""),
+  ..."ABCDEZ".split(""),
+  ..."0123".split(""),
+  "É",
+  "ß",
+  "ñ",
+  "ж",
+  "漢",
+  "'",
+  "’",
+  "‘",
+  "“",
+  "”",
+  "-",
+  ",",
+  ".",
+];
+
+const arbQuotationWord: fc.Arbitrary<string> = fc
+  .array(fc.constantFrom(...WORD_UNITS), { minLength: 1, maxLength: 8 })
+  .map((units) => units.join(""));
+
+const arbGap: fc.Arbitrary<string> = fc
+  .array(fc.constantFrom(" ", "\t", "\n", "\u2003"), { minLength: 1, maxLength: 4 })
+  .map((units) => units.join(""));
+
+function arbGaps(count: number): fc.Arbitrary<string[]> {
+  return fc
+    .tuple(
+      fc.array(arbGap, { minLength: count + 1, maxLength: count + 1 }),
+      fc.array(fc.boolean(), { minLength: 2, maxLength: 2 }),
+    )
+    .map(([gaps, trims]) =>
+      gaps.map((gap, i) =>
+        (i === 0 && trims[0] === true) || (i === count && trims[1] === true) ? "" : gap,
+      ),
+    );
+}
+
+/** Quotation text made of Unicode words, apostrophes and curly marks, separated by runs of white space. */
+export const arbQuotationParts: fc.Arbitrary<QuotationParts> = fc
+  .array(arbQuotationWord, { maxLength: 12 })
+  .chain((words) =>
+    fc.record({
+      words: fc.constant(words),
+      gaps: arbGaps(words.length),
+      otherGaps: arbGaps(words.length),
+      extra: fc.array(arbQuotationWord, { maxLength: 4 }),
+    }),
+  );
+
+/** The text of `words` with `gaps` between and around them. */
+export function joinQuotation(words: readonly string[], gaps: readonly string[]): string {
+  return words.map((w, i) => `${gaps[i] ?? ""}${w}`).join("") + (gaps[words.length] ?? "");
+}
+
+/** The saved entries of one draft: a Display_Info map to store, and stored entries a reader must drop. */
+export type SavedEntries = Readonly<{
+  /** Valid entries: matching `clusterId`, stale `clusterId`, and keys the Document does not have. */
+  info: ReadonlyMap<IssueKey, CheckDisplayInfo>;
+  /** Stored entries with wrong types, to be put in the stored `resolved` array. */
+  junk: readonly unknown[];
+}>;
+
+const arbJunkEntry: fc.Arbitrary<unknown> = fc.oneof(
+  fc.constant(null),
+  fc.string(),
+  fc.record({ key: fc.integer(), clusterId: arbClusterId, foundName: arbFoundName }),
+  fc.record({ key: fc.string({ minLength: 1 }), clusterId: fc.integer(), foundName: arbFoundName }),
+  fc.record({ key: fc.string({ minLength: 1 }), clusterId: arbClusterId }),
+  fc.record({
+    key: fc.string({ minLength: 1 }),
+    clusterId: arbClusterId,
+    foundName: arbFoundName,
+    foundYear: fc.string(),
+  }),
+  fc.record({
+    key: fc.string({ minLength: 1 }),
+    clusterId: arbClusterId,
+    foundName: arbFoundName,
+    absoluteUrl: fc.integer(),
+  }),
+);
+
+/**
+ * Saved-entry lists for `doc`: for each Full_Citation, an entry whose `clusterId` matches its
+ * result, differs from it, or is absent; entries under keys the Document lacks; and wrong-typed
+ * stored entries.
+ */
+export function arbSavedEntries(doc: Document): fc.Arbitrary<SavedEntries> {
+  const fulls = fullRecordsOf(doc);
+  const arbOwn = fc.tuple(
+    ...fulls.map((r) =>
+      fc.tuple(fc.constantFrom("match", "stale", "absent"), arbDisplayInfo).map(([how, i]) => {
+        const cluster = clusterOf(r.result);
+        if (how === "absent") return null;
+        const id = how === "match" && cluster !== null ? cluster : `${cluster ?? i.clusterId}7`;
+        return [r.key, { ...i, clusterId: id }] as const;
+      }),
+    ),
+  );
+  const arbForeign = fc.array(
+    fc
+      .tuple(fc.integer({ min: 0, max: 999 }), arbDisplayInfo)
+      .map(([n, i]) => [`unknown:${String(n)}`, i] as const),
+    { maxLength: 3 },
+  );
+  return fc
+    .tuple(arbOwn, arbForeign, fc.array(arbJunkEntry, { maxLength: 4 }))
+    .map(([own, foreign, junk]) => {
+      const entries: [IssueKey, CheckDisplayInfo][] = [];
+      for (const e of [...own, ...foreign]) if (e !== null) entries.push([e[0], e[1]]);
+      return { info: new Map(entries), junk };
+    });
+}

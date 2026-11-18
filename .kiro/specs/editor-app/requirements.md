@@ -205,7 +205,7 @@ Scope: `apps/web` only, plus one hook file, the root `vitest.config.ts` entry fo
 #### Acceptance Criteria
 
 1. WHEN the Document or the Run_Log changes, THE Web_App SHALL write the Persisted_Value to `localStorage` under the Autosave_Key after a 300 ms debounce, using an injected timer and an injected storage object.
-2. THE Persisted_Value SHALL be a JSON object `{ "version": 1, "codes": <string>, "runLog": <array> }` where `codes` is `render(document, "full").text`.
+2. THE Persisted_Value SHALL be a JSON object `{ "version": 1, "codes": <string>, "runLog": <array> }` where `codes` is `render(document, "full").text`. Replaced by citation-check-page Requirement 25.
 3. WHEN the page loads, THE Web_App SHALL read the Autosave_Key after mount, parse `codes` with the Engine's `parse`, and install the resulting Document through a `replace` action.
 4. IF the stored value is absent, is not valid JSON of the shape in criterion 2, or `parse` returns an error, THEN THE Web_App SHALL ignore the stored value and start with an empty Document.
 5. WHEN the page becomes hidden or is about to unload while a debounced write is pending, THE Web_App SHALL perform the write immediately.
@@ -491,7 +491,7 @@ Standing rule (carried over from the provenance-engine and citation-verifier spe
 - L8. Undo history is unbounded within a session (each Inverse retains the Document it expects), so a very long editing session on a long filing can use significant memory. New, Load demo motion, Verify, and Override empty the history.
 - L9. A quotation from a dissent or concurrence is checked only against the first opinion with text (citation-verifier L1), so a real quotation can show `QUO ✘`. The failure direction is safe.
 - L10. CourtListener throttles opinion fetches at 5 per minute (citation-verifier L3). A document whose verified citations span more than a few distinct clusters with quotes leaves later quotes `QUO …`; the Notice counts the unavailable opinions, and pressing Verify again later uses the cache.
-- L11. The Persisted_Value is stored unencrypted in `localStorage`; on a shared computer the author should use New to remove it. Two tabs on the same origin overwrite each other's autosave (last write wins).
+- L11. The Persisted_Value is stored unencrypted in `localStorage`; on a shared computer the author should use New to remove it. Two tabs on the same origin overwrite each other's autosave (last write wins). Replaced by citation-check-page Requirement 25.
 - L12. A paste, drop, or assistant text that contains an unpaired surrogate is rejected by the Engine (`split_surrogate`) and leaves the Document unchanged with a Notice.
 - L13. The Verify route has no per-client throttle; the shared Token_Bucket in the server's Verifier deps limits aggregate use. A public deployment should run in Fixtures_Mode.
 - L14. The Assistant_Panel sends only the current paragraph, so the model cannot see the rest of the filing, and markdown in a reply is inserted as plain text. (Tier 2)

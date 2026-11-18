@@ -17,6 +17,8 @@ export type ToolbarProps = Readonly<{
   exportDisabled?: boolean;
   onNew?: () => void;
   onOpen?: () => void;
+  /** The handler behind the Empty_Page "Load the Avianca citations" link. */
+  onLoadAvianca?: () => void;
   onLoadDemo?: () => void;
   onVerify?: () => void;
   onTogglePane?: () => void;
@@ -63,9 +65,12 @@ function FileGroup(props: ToolbarProps) {
       </button>
       <button
         type="button"
-        data-primary={primary(props.step, "load-demo")}
-        onClick={props.onLoadDemo}
+        data-primary={primary(props.step, "load-avianca")}
+        onClick={props.onLoadAvianca}
       >
+        Load Mata v. Avianca
+      </button>
+      <button type="button" onClick={props.onLoadDemo}>
         Load demo motion
       </button>
     </div>

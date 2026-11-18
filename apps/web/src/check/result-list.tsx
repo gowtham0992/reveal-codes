@@ -29,9 +29,7 @@ function ResultItem({
       <p className={classes.text}>{shorten(row.text)}</p>
       {row.found === null ? null : <p className={classes.line}>{row.found}</p>}
       <MismatchLines lines={row.mismatch} className={classes.line} />
-      {row.divergence === null ? null : (
-        <p className={classes.diverges}>{`Diverges at: ${row.divergence}`}</p>
-      )}
+      {row.divergence === null ? null : <p className={classes.diverges}>{row.divergence}</p>}
       <CourtListenerLink href={row.href} />
       {row.next === null ? null : <p className={classes.next}>{row.next}</p>}
     </li>

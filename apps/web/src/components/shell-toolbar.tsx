@@ -36,6 +36,9 @@ export function ShellToolbar(props: ShellToolbarProps) {
       step={step}
       onNew={actions.onNew}
       onOpen={actions.onOpen}
+      onLoadAvianca={() => {
+        actions.onLoadSample("avianca");
+      }}
       onLoadDemo={actions.onLoadDemo}
       paneOpen={pane.open}
       verifyDisabled={verify.disabled}

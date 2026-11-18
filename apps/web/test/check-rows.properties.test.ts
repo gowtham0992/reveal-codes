@@ -7,7 +7,7 @@ import type { DisplayInfo } from "@reveal-codes/verifier/link";
 import { arbCheckedDocument } from "../../../packages/engine/src/testing/arbitraries";
 import { NEXT_SENTENCES, STATUS_WORDS, checkRows, shorten } from "../src/client/check-rows";
 import type { CheckRow, RowCode } from "../src/client/check-rows";
-import { divergenceWords } from "../src/client/divergence";
+import { divergenceSentence } from "../src/client/divergence";
 import { mismatchLines, mismatchOf } from "../src/client/mismatch";
 import { resolvedRows } from "../src/client/resolved";
 import { issueWords } from "../src/components/issues-list";
@@ -114,11 +114,11 @@ function checkPayload(
     }
     if (row.code === "QUO ✘") {
       const q = doc.quotes.find((x) => x.key === row.key);
-      const diverges =
+      const sentence =
         q?.result.status === "mismatch"
-          ? divergenceWords(doc.text.slice(row.start, row.end), q.result.prefixLength)
-          : null;
-      expect(row.divergence).toBe(diverges);
+          ? divergenceSentence(doc.text.slice(row.start, row.end), q.result.prefixLength)
+          : "";
+      expect(row.divergence).toBe(sentence === "" ? null : sentence);
     } else {
       expect(row.divergence).toBeNull();
     }
@@ -163,7 +163,7 @@ function checkCaseNames(
   });
 }
 
-describe("check-rows properties _Requirements: 8.1, 8.2, 19.13_", () => {
+describe("check-rows properties _Requirements: 8.1, 8.2, 19.13, 27.16_", () => {
   // Property 1
   it("P1 one answer: rows agree with the Issues region and the Resolved list", () => {
     fc.assert(

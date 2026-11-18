@@ -1,4 +1,5 @@
-import type { Declaration, Document } from "@reveal-codes/engine";
+import type { Declaration, Document, IssueKey } from "@reveal-codes/engine";
+import type { DisplayInfo } from "@reveal-codes/verifier/link";
 import type { DraftGate } from "./draft-gate";
 import { AUTOSAVE_KEY, serialise } from "./persist";
 import type { RunLogEntry } from "./store";
@@ -24,6 +25,8 @@ export type Autosave = Readonly<{
     runLog: readonly RunLogEntry[],
     verifiedAt: string | null,
     declaration: Declaration | null,
+    /** Display_Info to store with the draft. Absent: keep the last value given (null at first). */
+    resolved?: ReadonlyMap<IssueKey, DisplayInfo> | null,
   ): void;
   /** Writes a pending value now. True when nothing was pending or the write succeeded. */
   flush(): boolean;
@@ -36,6 +39,7 @@ type Pending = Readonly<{
   runLog: readonly RunLogEntry[];
   verifiedAt: string | null;
   declaration: Declaration | null;
+  resolved: ReadonlyMap<IssueKey, DisplayInfo> | null;
 }>;
 
 type Failure = Readonly<{ thrown: unknown }>;
@@ -70,7 +74,7 @@ function createTimerSlot(deps: AutosaveDeps): TimerSlot {
 
 /** Writes one job; reports failure through `onError` and the return value. */
 function writeJob(deps: AutosaveDeps, job: Pending): boolean {
-  const text = serialise(job.document, job.runLog, job.verifiedAt, job.declaration);
+  const text = serialise(job.document, job.runLog, job.verifiedAt, job.declaration, job.resolved);
   const failure = storageFailure(() => {
     deps.storage.setItem(AUTOSAVE_KEY, text);
   });
@@ -81,6 +85,7 @@ function writeJob(deps: AutosaveDeps, job: Pending): boolean {
 
 export function createAutosave(deps: AutosaveDeps): Autosave {
   let pending: Pending | null = null;
+  let lastResolved: ReadonlyMap<IssueKey, DisplayInfo> | null = null;
   const slot = createTimerSlot(deps);
   const cancelTimer = slot.cancel;
 
@@ -93,13 +98,14 @@ export function createAutosave(deps: AutosaveDeps): Autosave {
   };
 
   return {
-    schedule(document, runLog, verifiedAt, declaration) {
+    schedule(document, runLog, verifiedAt, declaration, resolved) {
+      if (resolved !== undefined) lastResolved = resolved;
       if (deps.gate?.blocked() === true) {
         cancelTimer();
         pending = null;
         return;
       }
-      pending = { document, runLog, verifiedAt, declaration };
+      pending = { document, runLog, verifiedAt, declaration, resolved: lastResolved };
       cancelTimer();
       slot.start(() => {
         write();
@@ -109,12 +115,17 @@ export function createAutosave(deps: AutosaveDeps): Autosave {
     clear() {
       cancelTimer();
       pending = null;
-      const removal = storageFailure(() => {
-        deps.storage.removeItem(AUTOSAVE_KEY);
-      });
-      if (removal === null) return true;
-      deps.onError(AUTOSAVE_FAILED);
-      return false;
+      return removeStored(deps);
     },
   };
+}
+
+/** Removes the stored key; a failure goes to `onError` and gives false. */
+function removeStored(deps: AutosaveDeps): boolean {
+  const removal = storageFailure(() => {
+    deps.storage.removeItem(AUTOSAVE_KEY);
+  });
+  if (removal === null) return true;
+  deps.onError(AUTOSAVE_FAILED);
+  return false;
 }

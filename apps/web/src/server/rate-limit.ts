@@ -9,8 +9,15 @@ import { tooManyRequests } from "./http";
  */
 export const ASSISTANT_LIMIT = 10;
 export const ASSISTANT_WINDOW_MS = 10 * 60 * 1000;
-/** /api/verify: 6 requests per address per minute. */
-export const VERIFY_LIMIT = 6;
+/**
+ * /api/verify, live mode only, two counts per address per minute:
+ * VERIFY_CEILING (60) counts every request and is applied before the body is read;
+ * VERIFY_LIMIT (10) counts once each request that needs the citation service, that is,
+ * has at least one Citation_Line not already in the cache. Fully cached requests are
+ * not counted against VERIFY_LIMIT.
+ */
+export const VERIFY_LIMIT = 10;
+export const VERIFY_CEILING = 60;
 /** /api/opinion/[clusterId]: 30 requests per address per minute. */
 export const OPINION_LIMIT = 30;
 export const ROUTE_WINDOW_MS = 60 * 1000;
@@ -137,6 +144,11 @@ export const assistantLimiter: Limiter = allOf(
 );
 export const verifyLimiter: Limiter = createFixedWindowLimiter({
   limit: VERIFY_LIMIT,
+  windowMs: ROUTE_WINDOW_MS,
+  now: wallClock,
+});
+export const verifyCeilingLimiter: Limiter = createFixedWindowLimiter({
+  limit: VERIFY_CEILING,
   windowMs: ROUTE_WINDOW_MS,
   now: wallClock,
 });

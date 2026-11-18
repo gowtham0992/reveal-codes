@@ -28,7 +28,7 @@ const DEMO = readFileSync(
   "utf8",
 );
 const FAILED = "The Avianca citations could not be loaded. Your document is unchanged.";
-const LINK_NAMES = ["Open a draft", "Load demo motion", "Load the Avianca citations"];
+const LINK_NAMES = ["Load the Avianca citations", "Load demo motion", "Open a draft"];
 
 function typed(text: string): Document {
   const created = createDocument("", ISO);
@@ -202,5 +202,45 @@ describe("A failed Avianca fetch _Requirements: 10.13, 13.5_", () => {
     expect(noticeText()).toBe(FAILED);
     expect(editorText()).toBe("");
     expect(sampleLinks().map((l) => l.textContent)).toEqual(LINK_NAMES);
+  });
+});
+
+function toolbarButton(name: string): HTMLElement {
+  return within(screen.getByRole("toolbar")).getByRole("button", { name });
+}
+async function press(target: HTMLElement): Promise<void> {
+  await act(async () => {
+    fireEvent.click(target);
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+}
+describe("The Load Mata v. Avianca toolbar button _Requirements: 26.1, 26.2, 26.11, 26.12, 26.16_", () => {
+  it("is primary on an empty draft and loads the sample without a dialog", async () => {
+    await mount(null);
+    expect(toolbarButton("Load Mata v. Avianca").getAttribute("data-primary")).toBe("true");
+    expect(toolbarButton("Load demo motion").hasAttribute("data-primary")).toBe(false);
+    await press(toolbarButton("Load Mata v. Avianca"));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(editorText().length).toBeGreaterThan(100);
+    expect(editorText().startsWith(SAMPLE.slice(0, 20))).toBe(true);
+  });
+  it("confirms on a non-empty draft; cancel keeps it, confirm replaces it", async () => {
+    await mount(typed("My draft."));
+    expect(toolbarButton("Load Mata v. Avianca").hasAttribute("data-primary")).toBe(false);
+    await press(toolbarButton("Load Mata v. Avianca"));
+    expect(screen.getByRole("dialog", { name: "Load the Avianca citations" })).not.toBeNull();
+    await press(screen.getByRole("button", { name: "Cancel" }));
+    expect(editorText()).toBe("My draft.");
+    await press(toolbarButton("Load Mata v. Avianca"));
+    await press(screen.getByRole("button", { name: "Replace draft" }));
+    expect(editorText()).not.toContain("My draft.");
+    expect(editorText().length).toBeGreaterThan(100);
+  });
+  it("shows AVIANCA_FAILED and keeps the draft when the fetch fails", async () => {
+    await mount(null, "fail");
+    await press(toolbarButton("Load Mata v. Avianca"));
+    expect(noticeText()).toBe(FAILED);
+    expect(editorText()).toBe("");
   });
 });

@@ -13,7 +13,7 @@ export type VerifyOutcome = Readonly<{
   quotes: Readonly<{ match: number; mismatch: number; unchecked: number }>;
   skipped: number;
   unavailable: number;
-  /** Display_Info of the run's Resolved_Citations, by issue key. Memory only; never stored in the Document. */
+  /** Display_Info of the run's Resolved_Citations, by issue key. Kept in memory and stored with the saved draft; never stored in the Document. */
   info?: InfoPairs;
   /** A failed run: the sentence the Issues region shows for it. */
   failure?: string;

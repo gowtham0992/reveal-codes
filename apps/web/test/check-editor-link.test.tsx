@@ -68,6 +68,81 @@ async function settle(): Promise<void> {
   });
 }
 
+const FOOTER_TEXT = "Open the editor";
+const RULES_TEXT = "See all court rules";
+
+/** Names of every link to the editor, apart from the brand link. */
+const editorLinks = (): string[] =>
+  screen.queryAllByRole("link", { name: /editor/i }).map((a) => a.textContent);
+const rulesLink = (): HTMLElement | null => screen.queryByRole("link", { name: RULES_TEXT });
+
+describe("one link to the editor _Requirements: 28.1, 28.2, 28.3, 28.4, 28.5, 28.6, 28.7_", () => {
+  it("shows only the footer link at 375px with text", async () => {
+    const f = fixture(375);
+    await mount(f);
+    type(DRAFT);
+    expect(editorLinks()).toEqual([FOOTER_TEXT]);
+    expect(rulesLink()).not.toBeNull();
+  });
+
+  it("shows only the Editor_Link at 1280px with text", async () => {
+    const f = fixture(1280);
+    await mount(f);
+    type(DRAFT);
+    expect(editorLinks()).toEqual([LINK_TEXT]);
+    expect(rulesLink()).not.toBeNull();
+  });
+
+  it("shows only the footer link at 1280px with an empty box", async () => {
+    const f = fixture(1280);
+    await mount(f);
+    expect(editorLinks()).toEqual([FOOTER_TEXT]);
+    expect(rulesLink()).not.toBeNull();
+  });
+
+  it("shows only the footer link at 1280px with out-of-date results", async () => {
+    const f = fixture(1280);
+    await mount(f);
+    type(DRAFT);
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Check citations" }));
+    });
+    await settle();
+    expect(editorLinks()).toEqual([LINK_TEXT]);
+    type(`${DRAFT} More.`);
+    expect(screen.queryByText("Earlier results")).not.toBeNull();
+    expect(editorLinks()).toEqual([FOOTER_TEXT]);
+    expect(rulesLink()).not.toBeNull();
+  });
+
+  it("swaps on a live width change and on emptying and filling the box", async () => {
+    const f = fixture(375);
+    await mount(f);
+    type(DRAFT);
+    expect(editorLinks()).toEqual([FOOTER_TEXT]);
+    act(() => {
+      f.viewport.setWidth(1280);
+    });
+    expect(editorLinks()).toEqual([LINK_TEXT]);
+    type("");
+    expect(editorLinks()).toEqual([FOOTER_TEXT]);
+    type(DRAFT);
+    expect(editorLinks()).toEqual([LINK_TEXT]);
+    act(() => {
+      f.viewport.setWidth(375);
+    });
+    expect(editorLinks()).toEqual([FOOTER_TEXT]);
+    expect(rulesLink()).not.toBeNull();
+  });
+
+  it("holds the footer link and no Editor_Link in the server HTML", () => {
+    const html = renderToString(<CheckPage services={fixture(1280).svc} styles={{}} />);
+    expect(html).toContain(">Open the editor</a>");
+    expect(html).not.toContain(LINK_TEXT);
+    expect(html).toContain(RULES_TEXT);
+  });
+});
+
 describe("Editor_Link _Requirements: 12.1, 12.2, 12.3, 12.8, 17.4_", () => {
   it("is absent from the server HTML, which still holds the box and the actions", () => {
     const f = fixture(1280);

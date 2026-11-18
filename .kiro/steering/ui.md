@@ -64,7 +64,7 @@ Sizes and line heights:
 ## Controls
 
 - Buttons are square: 1px `--ink` border, transparent fill, `--ink` text. Heights: 30px in the Toolbar and by default, 32px in dialogs, 24px in Issue rows, the Unchecked row and the Export dialog's issue list.
-- Primary (`data-primary="true"`): `--oxblood` fill and border, `--white` text, weight 600. One primary button on the Toolbar at most. It names the next step, by the first rule that matches: nothing while a Verify run is in flight; Load demo motion when the text is empty; Verify when a full citation is unchecked, or when the Document holds a Verification_Result and has no check date (a restored Document); otherwise Export. Open is never primary and carries no `data-primary`. The Next_Step is not an input to the export gate: red codes without an override still block export while Verify is primary.
+- Primary (`data-primary="true"`): `--oxblood` fill and border, `--white` text, weight 600. One primary button on the Toolbar at most. It names the next step, by the first rule that matches: nothing while a Verify run is in flight; Load Mata v. Avianca when the text is empty (Load demo motion is a plain button beside it); Verify when a full citation is unchecked, or when the Document holds a Verification_Result and has no check date (a restored Document); otherwise Export. Open is never primary and carries no `data-primary`. The Next_Step is not an input to the export gate: red codes without an override still block export while Verify is primary.
 - Disabled: dashed 1px `--disabled-border`, `--disabled-fill` fill, `--muted` text, `cursor: not-allowed`. A disabled primary keeps its `data-primary`.
 - Hover is a fill change only: `--rule`, and `--ink` for the primary. No transition.
 - Focus is a 2px `--oxblood` outline with a 2px offset on every focusable control.
@@ -93,7 +93,7 @@ Sizes and line heights:
 - One-column pages (`/courts` and `/check`) share the rules below. `/check` has its own stylesheet, `apps/web/app/check/check.module.css`, and uses the same type sizes and weights as the table above for the same elements. It adds no Token.
 - One-column page column: a `--desk` wrapper (`min-height: 100vh`) holds one `--paper` column with `max-width: var(--page-max)`, `min-height: 100vh`, `margin: 0 auto` and fluid padding (`16px max(16px, 6vw) 48px`). The column is centred on the desk and fills it below `--page-max`. There is no width at-rule on either page. The column sets `overflow-wrap: anywhere` and every control group sets `max-width: 100%`, so the page shows no sideways scroll at 320px.
 - One-column page header: the first element in the column. One link to `/` holds the Mark (24px, 10px before the wordmark, `aria-hidden`) and the REVEAL CODES wordmark, `--ink`, no underline, with a 3px double `--ink` rule under the header. The link is `inline-flex`, `align-items: center`, `min-height: 34px`.
-- One-column page links: on `/courts`, the "Read the court's text" and "Draft under this rule" links; on `/check`, its links (View on CourtListener, the Editor_Link). They are `--oxblood`, `display: inline-flex`, `align-items: center`, `min-height: 34px`, side by side with a gap that wraps (16px between links). Their look is otherwise the link style above.
+- One-column page links: on `/courts`, the "Read the court's text" and "Draft under this rule" links; on `/check`, its links (View on CourtListener, the Editor_Link). The checking page shows one link to the editor at a time: the Editor_Link when the page is wide, the results are current and the Draft_Box holds text, otherwise the footer link "Open the editor". "See all court rules" is always shown. They are `--oxblood`, `display: inline-flex`, `align-items: center`, `min-height: 34px`, side by side with a gap that wraps (16px between links). Their look is otherwise the link style above.
 - Status_Label on `/check`: a Result_Item shows its code with the `CodeLabel` component (`apps/web/src/pane/code-label.tsx` and `code-label.module.css`). It uses the Pane's colours on the Pane's dark ground (`--pane-body`), so a code looks on `/check` as it does in the Pane. The label text is the code, so status is never shown by colour alone. A failing code is the Failing_Block: `--white` on `--fail`, weight 700, 2px `--fail-ring`. `check.module.css` holds no colour literal and no Pane colour; the Pane colours stay in `src/pane/`.
 - Touch rule: on a coarse pointer, buttons and links are 44px high. The rule sits inside `@media (pointer: coarse)` on `/check` (`.page button` at 44px height, `.page a` at `inline-flex` with a 44px minimum height), on the Small_Screen_Page links, and on the two links under each rule on `/courts`. `@media (pointer: coarse)` is the only media query besides the one Shell width at-rule (and `@media print` in the print view); it is not a width at-rule. Every desktop rule stays outside the query and the desktop look does not change. The shared dialog is not changed.
 - The Draft_Box text (`.draft`, the `/check` text area) is 16px / 22px at every width, so a phone browser does not zoom on focus. It is the one use of 16px: no other selector uses it, and it is not in the allowed sizes above.
@@ -101,7 +101,7 @@ Sizes and line heights:
 
 ## Layout
 
-- Toolbar 52px, `--panel`, 3px double `--ink` bottom rule. The Open button comes directly after New, in the same square style, and is enabled while a Verify run is in flight.
+- Toolbar 52px, `--panel`, 3px double `--ink` bottom rule. The Open button comes directly after New, in the same square style, and is enabled while a Verify run is in flight. Directly after Open come "Load Mata v. Avianca" (primary exactly when it is the Next_Step) and then "Load demo motion" (never primary).
 - Status_Bar 26px, under the editor while the Pane is closed and at the bottom of the Pane while it is open.
 - Assistant strip 32px while collapsed; assistant panel 260px while expanded.
 - Issues region 300px, with a 1px `--rule` left edge.
@@ -124,7 +124,7 @@ Sizes and line heights:
 - The result of Verify is also shown as text in the Issues region.
 - The Open_Note is plain text in the Issues region. It explains a refused file, a changed export, or what a restore did not bring back. It is not persisted and has no icon.
 - A file dragged over the page shows no overlay, outline or animation. A dropped file opens through the same function as the Open button.
-- The empty page shows the placeholder "Type or paste your filing here, or open a draft." and, under it, three plain links in this order: "Open a draft", "Load demo motion", "Load the Avianca citations". Both disappear when the Document has one character. The links use the link style above, with no icon.
+- The empty page shows the placeholder "Type or paste your filing here, or open a draft." and, under it, three plain links in this order: "Load the Avianca citations", "Load demo motion", "Open a draft". All three disappear when the Document has one character. The links use the link style above, with no icon.
 - Severity is shown by words in the Issues list ("blocking", "not found") and by the code text in its chip, never by colour alone.
 
 ## Document text

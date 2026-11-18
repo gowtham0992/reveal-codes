@@ -118,7 +118,7 @@ function LineView({ line, segments, head, endBlock, cursorRef }: LineProps) {
 function PaneStatus(props: { text: string; mode: string | null | undefined }) {
   return (
     <div className={statusBar["bar"]}>
-      <span>{props.text}</span>
+      <span className={statusBar["text"]}>{props.text}</span>
       {props.mode == null ? null : <span className={statusBar["mode"]}>{props.mode}</span>}
     </div>
   );

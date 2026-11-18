@@ -33,11 +33,13 @@ function all(): readonly Found[] {
 }
 
 describe("property inventory _Requirements: 15.1, 15.2_", () => {
-  it("has exactly the properties 1 to 12, once each", () => {
+  it("has exactly the properties 1 to 12, once each, and Property 5 of citation-check-page", () => {
+    // missing-lines.properties.test.ts holds Property 5 of the citation-check-page spec,
+    // a second "Property 5" beside the citation-verifier one in cache.properties.test.ts.
     const numbers = all()
       .map((f) => f.n)
       .sort((a, b) => a - b);
-    expect(numbers).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+    expect(numbers).toEqual([1, 2, 3, 4, 5, 5, 6, 7, 8, 9, 10, 11, 12]);
   });
 
   it("each marker is followed by exactly one fc.assert(fc.property(", () => {

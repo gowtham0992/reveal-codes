@@ -31,14 +31,14 @@ function primaryLabels(html: string): string[] {
 
 /** The ordered rule of Requirement 4, written as a table keyed by its outcome. */
 function expectedLabels(input: NextStepCase): string[] {
-  const table: Record<"none" | "load-demo" | "verify" | "export", string[]> = {
+  const table: Record<"none" | "load-avianca" | "verify" | "export", string[]> = {
     none: [],
-    "load-demo": ["Load demo motion"],
+    "load-avianca": ["Load Mata v. Avianca"],
     verify: ["Verify"],
     export: [exportLabel(input.blocking)],
   };
   if (input.verifying) return table.none;
-  if (input.empty) return table["load-demo"];
+  if (input.empty) return table["load-avianca"];
   if (input.uncheckedCitations + input.uncheckedQuotations > 0 || input.needsCheckDate) {
     return table.verify;
   }

@@ -1,4 +1,4 @@
-import { lookupWithInfo } from "@reveal-codes/verifier";
+import { lookupWithInfo, missingLines } from "@reveal-codes/verifier";
 import type { Deps } from "@reveal-codes/verifier";
 import type { CitationRecord } from "@reveal-codes/engine";
 import { readBodyCapped } from "./body";
@@ -88,19 +88,31 @@ export function parseVerifyBody(text: string): ParsedBody {
   return { ok: true, value: valid };
 }
 
-/** Over the limit: 429 before the body is read; `guard` is absent or off in demo mode. */
+/** The two live-mode guards on /api/verify; absent or off in demo (fixtures) mode. */
+export type VerifyGuards = Readonly<{ ceiling: RouteGuard; verify: RouteGuard }>;
+
+/**
+ * Order: the per-address ceiling (60 a minute, every request) answers 429 before the body
+ * is read. Then the body checks. Then, in live mode, `missingLines`: only a request with at
+ * least one uncached Citation_Line counts once against the Verify_Limit (10 a minute) and
+ * can be answered 429 by it. Fully cached requests are never limited by it.
+ */
 export async function handleVerify(
   request: Request,
   deps: Deps,
-  guard?: RouteGuard,
+  guards?: VerifyGuards,
 ): Promise<Response> {
-  const limited = overRouteLimit(guard, CHECKS_BUSY);
+  const limited = overRouteLimit(guards?.ceiling, CHECKS_BUSY);
   if (limited !== null) return limited;
   const body = await readBodyCapped(request, MAX_BODY_BYTES);
   if (!body.ok) return jsonResponse(413, { error: TOO_LARGE.message });
   if (body.text.length > MAX_TEXT_CHARS) return jsonResponse(413, { error: DOCUMENT_TOO_LONG });
   const parsed = parseVerifyBody(body.text);
   if (!parsed.ok) return jsonResponse(parsed.error.status, { error: parsed.error.message });
+  if (guards?.verify.live === true && (await missingLines(parsed.value, deps)).length > 0) {
+    const refused = overRouteLimit(guards.verify, CHECKS_BUSY);
+    if (refused !== null) return refused;
+  }
   const { results, info } = await lookupWithInfo(parsed.value, deps);
   return jsonResponse(200, { results: [...results], info: [...info] });
 }

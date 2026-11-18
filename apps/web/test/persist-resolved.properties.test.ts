@@ -1,0 +1,106 @@
+import * as fc from "fast-check";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { render } from "@reveal-codes/engine";
+import type { Document, IssueKey } from "@reveal-codes/engine";
+import { buildDocx, buildStatement } from "@reveal-codes/export";
+import type { DisplayInfo } from "@reveal-codes/verifier/link";
+import {
+  arbCheckedDocument,
+  arbSavedEntries,
+} from "../../../packages/engine/src/testing/arbitraries";
+import { storableInfo } from "../src/client/resolved";
+import { deserialise, serialise } from "../src/persist";
+import type { RunLogEntry } from "../src/store";
+import { runs } from "./support/fc";
+
+const NOW = new Date("2026-11-20T12:00:00.000Z");
+
+const arbRunLog: fc.Arbitrary<readonly RunLogEntry[]> = fc.array(
+  fc.record({
+    runId: fc.stringMatching(/^[a-z0-9]{1,6}$/),
+    provider: fc.constantFrom("fixture", "anthropic"),
+    modelId: fc.option(fc.constantFrom("m1", "m2"), { nil: null }),
+    prompt: fc.string({ maxLength: 20 }),
+    timestamp: fc.constant("2026-11-02T12:00:00.000Z"),
+  }),
+  { maxLength: 2 },
+);
+
+const arbCase = arbCheckedDocument.chain(({ document }) =>
+  fc.record({
+    document: fc.constant(document),
+    saved: arbSavedEntries(document),
+    runLog: arbRunLog,
+    verifiedAt: fc.option(fc.constant("2026-11-20T18:25:00.000Z"), { nil: null }),
+  }),
+);
+
+async function docxOf(document: Document, verifiedAt: string | null): Promise<string> {
+  const statement = buildStatement(document, [], { now: NOW, verifiedAt });
+  if (!statement.ok) return `statement:${statement.error.kind}`;
+  // The packer stamps the current time into the file; fix it so equal inputs give equal bytes.
+  vi.useFakeTimers({ toFake: ["Date"], now: NOW });
+  const bytes = await buildDocx(document, statement.value);
+  return Buffer.from(bytes).toString("base64");
+}
+
+function withJunk(stored: string, junk: readonly unknown[]): string {
+  const value = JSON.parse(stored) as { resolved?: unknown[] };
+  return JSON.stringify({ ...value, resolved: [...(value.resolved ?? []), ...junk] });
+}
+
+function restore(raw: string): {
+  document: Document;
+  resolved: ReadonlyMap<IssueKey, DisplayInfo>;
+} {
+  const r = deserialise(raw);
+  if (!r.ok) throw new Error(`restore failed: ${r.error.kind}`);
+  return r.value;
+}
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+describe("saved display information round trip _Requirements: 25.1, 25.2, 25.7, 25.15, 25.16, 25.19_", () => {
+  it("restores the Document and exactly the storable entries, never changes what is exported, and stores no draft text", async () => {
+    // Property 3
+    await fc.assert(
+      fc.asyncProperty(arbCase, async ({ document, saved, runLog, verifiedAt }) => {
+        const stored = serialise(document, runLog, verifiedAt, null, saved.info);
+        const bare = serialise(document, runLog, verifiedAt, null, null);
+
+        // Clause 1: the Document and exactly the entries storableInfo keeps, junk dropped.
+        const kept = storableInfo(document, saved.info);
+        const back = restore(withJunk(stored, saved.junk));
+        expect(back.document).toEqual(document);
+        expect([...back.resolved.entries()]).toEqual([...kept.entries()]);
+
+        // Clause 2: the Document, its full text and the DOCX do not depend on the entries.
+        const plain = restore(bare);
+        expect(back.document).toEqual(plain.document);
+        expect(render(back.document, "full").text).toBe(render(plain.document, "full").text);
+        expect(await docxOf(back.document, verifiedAt)).toBe(
+          await docxOf(plain.document, verifiedAt),
+        );
+
+        // Clause 3: no `resolved` key without info; entries add only their own fields.
+        expect(Object.keys(JSON.parse(bare) as object)).not.toContain("resolved");
+        const fields =
+          (JSON.parse(stored) as { resolved?: Record<string, unknown>[] }).resolved ?? [];
+        expect(fields).toHaveLength(kept.size);
+        for (const entry of fields) {
+          expect(
+            Object.keys(entry).every((k) =>
+              ["key", "clusterId", "foundName", "foundYear", "absoluteUrl"].includes(k),
+            ),
+          ).toBe(true);
+        }
+        const withoutField = { ...(JSON.parse(stored) as Record<string, unknown>) };
+        delete withoutField["resolved"];
+        expect(JSON.stringify(withoutField)).toBe(bare);
+      }),
+      { numRuns: runs() },
+    );
+  }, 240_000);
+});

@@ -20,8 +20,8 @@ function primaries(): string[] {
 
 describe("Toolbar primary button _Requirements: 4.6, 4.8, 4.10, 4.11_", () => {
   it("marks exactly the button the step names", () => {
-    const { rerender } = renderUi(<Toolbar {...BASE} step="load-demo" />);
-    expect(primaries()).toEqual(["Load demo motion"]);
+    const { rerender } = renderUi(<Toolbar {...BASE} step="load-avianca" />);
+    expect(primaries()).toEqual(["Load Mata v. Avianca"]);
     rerender(<Toolbar {...BASE} step="verify" />);
     expect(primaries()).toEqual(["Verify"]);
     rerender(<Toolbar {...BASE} step="export" blockingCount={2} />);
@@ -56,6 +56,7 @@ describe("Toolbar _Requirements: 10.1, 10.2, 10.6, 10.7_", () => {
     expect(names).toEqual([
       "New",
       "Open",
+      "Load Mata v. Avianca",
       "Load demo motion",
       "Verify",
       "Show codes (Alt-F3)",
@@ -76,7 +77,7 @@ describe("Toolbar _Requirements: 10.1, 10.2, 10.6, 10.7_", () => {
     const groups = within(bar).getAllByRole("group");
     expect(groups).toHaveLength(3);
     expect(groups.map((g) => [...g.querySelectorAll("button")].map((b) => b.textContent))).toEqual([
-      ["New", "Open", "Load demo motion"],
+      ["New", "Open", "Load Mata v. Avianca", "Load demo motion"],
       ["Verify"],
       ["Show codes (Alt-F3)", "Export"],
     ]);
@@ -144,5 +145,52 @@ describe("Toolbar Export button on a Document with nothing to export", () => {
     renderUi(<Toolbar {...BASE} step="export" exportDisabled={true} onExport={onExport} />);
     fireEvent.click(screen.getByRole("button", { name: "Export" }));
     expect(onExport).not.toHaveBeenCalled();
+  });
+});
+
+describe("Toolbar sample buttons _Requirements: 26.1, 26.2, 26.3, 26.4, 26.5, 26.6_", () => {
+  function labels(): (string | null)[] {
+    return within(screen.getByRole("toolbar"))
+      .getAllByRole("button")
+      .map((b) => b.textContent);
+  }
+  it("puts Load Mata v. Avianca directly after Open and Load demo motion after it", () => {
+    renderUi(<Toolbar {...BASE} />);
+    const all = labels();
+    expect(all.indexOf("Open")).toBe(1);
+    expect(all.indexOf("Load Mata v. Avianca")).toBe(all.indexOf("Open") + 1);
+    expect(all.indexOf("Load demo motion")).toBe(all.indexOf("Load Mata v. Avianca") + 1);
+  });
+  it("makes Avianca primary on empty text and leaves Load demo motion and Open plain", () => {
+    renderUi(<Toolbar {...BASE} step="load-avianca" />);
+    expect(primaries()).toEqual(["Load Mata v. Avianca"]);
+    expect(
+      screen.getByRole("button", { name: "Load demo motion" }).hasAttribute("data-primary"),
+    ).toBe(false);
+    expect(screen.getByRole("button", { name: "Open" }).hasAttribute("data-primary")).toBe(false);
+  });
+  it("keeps Load demo motion plain for every step", () => {
+    const { rerender } = renderUi(<Toolbar {...BASE} step="none" />);
+    for (const step of ["none", "load-avianca", "verify", "export"] as const) {
+      rerender(<Toolbar {...BASE} step={step} />);
+      const demo = screen.getByRole("button", { name: "Load demo motion" });
+      expect(demo.hasAttribute("data-primary")).toBe(false);
+    }
+  });
+  it("marks no Avianca primary while a run is in flight", () => {
+    renderUi(<Toolbar {...BASE} step="none" verifyRunning={true} verifyDisabled={true} />);
+    expect(primaries()).toEqual([]);
+    expect(
+      screen.getByRole("button", { name: "Load Mata v. Avianca" }).hasAttribute("data-primary"),
+    ).toBe(false);
+  });
+  it("calls onLoadAvianca and onLoadDemo from their own buttons", () => {
+    const onLoadAvianca = vi.fn();
+    const onLoadDemo = vi.fn();
+    renderUi(<Toolbar {...BASE} onLoadAvianca={onLoadAvianca} onLoadDemo={onLoadDemo} />);
+    fireEvent.click(screen.getByRole("button", { name: "Load Mata v. Avianca" }));
+    expect([onLoadAvianca.mock.calls.length, onLoadDemo.mock.calls.length]).toEqual([1, 0]);
+    fireEvent.click(screen.getByRole("button", { name: "Load demo motion" }));
+    expect([onLoadAvianca.mock.calls.length, onLoadDemo.mock.calls.length]).toEqual([1, 1]);
   });
 });

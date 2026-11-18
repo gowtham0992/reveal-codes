@@ -2,8 +2,15 @@ import type { Document, IssueKey } from "@reveal-codes/engine";
 import { displayFor, foundText } from "./check-rows";
 import { courtListenerLink } from "@reveal-codes/verifier/link";
 import type { DisplayInfo } from "@reveal-codes/verifier/link";
+import { storableInfo } from "../storable-info";
 
-/** Display_Info of the latest completed Verify_Run. Memory only; null until a run completes. */
+/** The write rule lives in `src/storable-info.ts` so `persist.ts` (a state module) can use it. */
+export { storableInfo };
+
+/**
+ * Display_Info of the latest completed Verify_Run. Kept in memory and stored with the saved draft
+ * (never in the Document); null until a run completes or a draft with saved entries is restored.
+ */
 export type ResolvedSession = Readonly<{
   epoch: number;
   info: ReadonlyMap<IssueKey, DisplayInfo>;

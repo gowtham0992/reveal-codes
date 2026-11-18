@@ -1,4 +1,4 @@
-/** Display data for one resolved citation. Held in memory by the app; never stored in the Document. */
+/** Display data for one resolved citation. Kept in memory and stored with the saved draft; never stored in the Document. */
 export type DisplayInfo = Readonly<{
   clusterId: string;
   foundName: string;

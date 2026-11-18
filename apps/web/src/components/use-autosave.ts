@@ -1,5 +1,9 @@
 import { useEffect } from "react";
+import type { IssueKey } from "@reveal-codes/engine";
+import type { DisplayInfo } from "@reveal-codes/verifier/link";
 import type { Autosave } from "../autosave";
+import type { ResolvedHolder } from "../resolved-holder";
+import { storableInfo } from "../storable-info";
 import type { DraftGate } from "../draft-gate";
 import { AUTOSAVE_KEY, deserialise, readRaw } from "../persist";
 import { NARROW_WIDTH } from "../services";
@@ -11,7 +15,12 @@ import type { Store } from "../store-runtime";
  * that is present but cannot be restored blocks the gate and leaves the Document empty; nothing is
  * written. A thrown read leaves the gate open (23.2).
  */
-export function loadAutosave(services: AppServices, store: Store, gate?: DraftGate): void {
+export function loadAutosave(
+  services: AppServices,
+  store: Store,
+  gate?: DraftGate,
+  holder?: ResolvedHolder,
+): void {
   const stored = readRaw(services.storage, AUTOSAVE_KEY);
   if (!("raw" in stored)) return;
   const restored = deserialise(stored.raw);
@@ -26,6 +35,34 @@ export function loadAutosave(services: AppServices, store: Store, gate?: DraftGa
     verifiedAt: restored.value.verifiedAt,
     declaration: restored.value.declaration,
   });
+  // Only a restore seeds the session, with the epoch of the store after the restore (25.3, 25.6).
+  const info = storableInfo(restored.value.document, restored.value.resolved);
+  if (holder !== undefined && info.size > 0) holder.set({ epoch: store.getState().epoch, info });
+}
+
+/** The session's info while it belongs to the current Document epoch, otherwise null. */
+function infoFor(
+  holder: ResolvedHolder | undefined,
+  epoch: number,
+): ReadonlyMap<IssueKey, DisplayInfo> | null {
+  const session = holder?.get() ?? null;
+  return session !== null && session.epoch === epoch ? session.info : null;
+}
+
+/**
+ * Drops entries whose result an edit cleared, and the whole session once the Document was replaced
+ * (25.5, 25.6). The next write carries the pruned map with the edit.
+ */
+function pruneSession(holder: ResolvedHolder, state: ReturnType<Store["getState"]>): void {
+  const session = holder.get();
+  if (session === null) return;
+  if (session.epoch !== state.epoch) {
+    holder.set(null);
+    return;
+  }
+  const kept = storableInfo(state.document, session.info);
+  if (kept.size === session.info.size) return;
+  holder.set(kept.size === 0 ? null : { epoch: session.epoch, info: kept });
 }
 
 /**
@@ -37,9 +74,13 @@ export function startAutosave(
   store: Store,
   autosave: Autosave,
   gate?: DraftGate,
+  holder?: ResolvedHolder,
 ): () => void {
-  loadAutosave(services, store, gate);
+  loadAutosave(services, store, gate, holder);
   let last = store.getState();
+  const save = (s: ReturnType<Store["getState"]>): void => {
+    autosave.schedule(s.document, s.runLog, s.verifiedAt, s.declaration, infoFor(holder, s.epoch));
+  };
   const unsubscribe = store.subscribe(() => {
     const next = store.getState();
     const changed =
@@ -47,9 +88,28 @@ export function startAutosave(
       next.runLog !== last.runLog ||
       next.verifiedAt !== last.verifiedAt ||
       next.declaration !== last.declaration;
-    if (changed) autosave.schedule(next.document, next.runLog, next.verifiedAt, next.declaration);
     last = next;
+    if (holder !== undefined) pruneSession(holder, next);
+    if (changed) save(next);
   });
+  // A completed Verify_Run changes only the session: it schedules a write with the same debounce.
+  const unsubscribeHolder =
+    holder === undefined
+      ? () => undefined
+      : holder.subscribe(() => {
+          save(store.getState());
+        });
+  const stopHideListeners = flushOnHide(autosave);
+  return () => {
+    autosave.flush();
+    unsubscribe();
+    unsubscribeHolder();
+    stopHideListeners();
+  };
+}
+
+/** Flushes when the page is hidden; returns the function that removes both listeners. */
+function flushOnHide(autosave: Autosave): () => void {
   const onVisibility = (): void => {
     if (document.visibilityState === "hidden") autosave.flush();
   };
@@ -59,8 +119,6 @@ export function startAutosave(
   document.addEventListener("visibilitychange", onVisibility);
   window.addEventListener("pagehide", onPageHide);
   return () => {
-    autosave.flush();
-    unsubscribe();
     document.removeEventListener("visibilitychange", onVisibility);
     window.removeEventListener("pagehide", onPageHide);
   };
@@ -72,9 +130,10 @@ export function useAutosave(
   services: AppServices,
   autosave: Autosave,
   gate?: DraftGate,
+  holder?: ResolvedHolder,
 ): void {
   useEffect(() => {
     if (services.viewport.width() < NARROW_WIDTH) return;
-    return startAutosave(services, store, autosave, gate);
-  }, [store, services, autosave, gate]);
+    return startAutosave(services, store, autosave, gate, holder);
+  }, [store, services, autosave, gate, holder]);
 }

@@ -7,6 +7,10 @@
     "12.3 Extend Property 1 for the option": {
       "status": "passed",
       "lastRunTimestamp": 1794892636534
+    },
+    "14.2 Write property test for missing lines": {
+      "status": "passed",
+      "lastRunTimestamp": 1794960981311
     }
   },
   "executionHistory": {
@@ -797,6 +801,481 @@
         "executionId": "1030acba-a9ff-4a9c-ba49-008f23915365",
         "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
         "timestamp": 1794893033451
+      }
+    ],
+    "14.1 Add `cachePeek` and `missingLines`": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610529
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960616609
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960826548
+      }
+    ],
+    "15.1 Change `handleVerify` and the limiter": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610562
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960828969
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961504394
+      }
+    ],
+    "15.3 Update `docs/DEVELOPMENT.md`": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610592
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961508049
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962094706
+      }
+    ],
+    "16.1 Add `divergenceSentence`": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610620
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960616653
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960826639
+      }
+    ],
+    "16.2 Use it in every caller": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610658
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960829460
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961504434
+      }
+    ],
+    "17.1 Add `storableInfo` and the `resolved` field to the Persisted_Value": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610684
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960617103
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960826676
+      }
+    ],
+    "17.2 Seed on restore, clear on edit and replacement, write on change": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610710
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960830814
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961504578
+      }
+    ],
+    "17.5 Amend the earlier texts and comments": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610737
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961510519
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962096788
+      }
+    ],
+    "18.1 Reorder the Toolbar, the Empty_Page links and `nextStep`": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610761
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960617598
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960826739
+      }
+    ],
+    "18.2 Update `ui.md`, the README Demo path and `docs/demo-script.md`": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610785
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960831616
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961504621
+      }
+    ],
+    "18.4 Measure both Sample_Buttons at 1150px in a real browser": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610811
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960832965
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961504712
+      }
+    ],
+    "19.1 Render one editor link from one value": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610837
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960618133
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960826838
+      }
+    ],
+    "20.1 Update `README.md`": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610862
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962231020
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962271793
+      }
+    ],
+    "20.2 Update `.kiro/steering/ui.md`": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610885
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962231078
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962272437
+      }
+    ],
+    "20.3 Check `docs/DEVELOPMENT.md`": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610921
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962231582
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962273300
+      }
+    ],
+    "20.4 Update `docs/KIRO_USAGE.md`": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610946
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962232053
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962274033
+      }
+    ],
+    "20.5 Add the `BUILD_LOG.md` entry": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610971
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962274789
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962316481
+      }
+    ],
+    "21. Final checkpoint": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960610995
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962319987
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962761044
+      }
+    ],
+    "14. Second follow-up (a): read-only cache test in the Verifier": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960826581
+      }
+    ],
+    "19. Second follow-up (f): one link to the editor on `/check`": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960826894
+      }
+    ],
+    "14.2 Write property test for missing lines": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960827612
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961504253
+      }
+    ],
+    "14.3 Write example tests for `missingLines`": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960828111
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961504363
+      }
+    ],
+    "16.3 Write property test for the divergence sentence": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960830028
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961504544
+      }
+    ],
+    "18.3 Update and add tests for the new order": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960832174
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961504661
+      }
+    ],
+    "19.2 Write tests for the single link": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794960833378
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961504834
+      }
+    ],
+    "16. Second follow-up (c): the divergence sentence": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961504500
+      }
+    ],
+    "18. Second follow-up (e): the Avianca sample comes first": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961504759
+      }
+    ],
+    "15.2 Write tests for the route and the limit": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961507223
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962094626
+      }
+    ],
+    "16.5 Write example tests for the sentence and its callers": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961508565
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962094829
+      }
+    ],
+    "17.3 Write property test for the saved display information": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961509433
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962095120
+      }
+    ],
+    "17.4 Write example tests for the stored information": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794961509930
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962095939
+      }
+    ],
+    "15. Second follow-up (b): the verify route and its rate limit": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962094766
+      }
+    ],
+    "17. Second follow-up (d): saved display information": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962096827
+      }
+    ],
+    "16.4 Update Property 1 for the sentence": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962097454
+      },
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962226686
+      }
+    ],
+    "20. Second follow-up (g): documents": [
+      {
+        "executionId": "14903907-421d-49a4-b6c9-64ba94a9f2da",
+        "chatSessionId": "sess_59d936b8-fd8b-4fd0-b0d0-1c2460697934",
+        "timestamp": 1794962316531
       }
     ]
   }

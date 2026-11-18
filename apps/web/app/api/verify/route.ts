@@ -1,6 +1,6 @@
 import { getServerContext } from "../../../src/server/deps";
 import { notAllowed } from "../../../src/server/http";
-import { routeGuard, verifyLimiter } from "../../../src/server/rate-limit";
+import { routeGuard, verifyCeilingLimiter, verifyLimiter } from "../../../src/server/rate-limit";
 import { handleVerify } from "../../../src/server/verify-route";
 
 export const runtime = "nodejs";
@@ -10,7 +10,11 @@ export const maxDuration = 60;
 
 export const POST = (request: Request): Promise<Response> => {
   const { config, deps } = getServerContext();
-  return handleVerify(request, deps, routeGuard(verifyLimiter, request, config.mode === "live"));
+  const live = config.mode === "live";
+  return handleVerify(request, deps, {
+    ceiling: routeGuard(verifyCeilingLimiter, request, live),
+    verify: routeGuard(verifyLimiter, request, live),
+  });
 };
 export const GET = notAllowed("POST");
 export const PUT = notAllowed("POST");

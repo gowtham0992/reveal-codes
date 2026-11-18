@@ -63,8 +63,8 @@ async function mount(empty: boolean, onLoadSample?: (key: Key) => void) {
 
 function links(): readonly HTMLElement[] {
   return [
-    screen.getByRole("link", { name: "Load demo motion" }),
     screen.getByRole("link", { name: "Load the Avianca citations" }),
+    screen.getByRole("link", { name: "Load demo motion" }),
   ];
 }
 
@@ -91,8 +91,8 @@ describe("EditorSurface empty-page links: structure _Requirements: 17.3, 17.7_",
     const found = links();
     expect(found.map((a) => a.tagName)).toEqual(["A", "A"]);
     expect(found.map((a) => a.textContent)).toEqual([
-      "Load demo motion",
       "Load the Avianca citations",
+      "Load demo motion",
     ]);
     expect(found[0]?.compareDocumentPosition(found[1] as Node)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
@@ -126,24 +126,24 @@ describe("EditorSurface empty-page links: events _Requirements: 17.4, 17.5_", ()
   it("calls onLoadSample with the key for a click on each link", async () => {
     const onLoadSample = vi.fn<(key: Key) => void>();
     await mount(true, onLoadSample);
-    const [demo, avianca] = links();
+    const [avianca, demo] = links();
     if (demo === undefined || avianca === undefined) throw new Error("links missing");
-    expect(fireEvent.click(demo)).toBe(false);
     expect(fireEvent.click(avianca)).toBe(false);
-    expect(onLoadSample.mock.calls).toEqual([["demo"], ["avianca"]]);
+    expect(fireEvent.click(demo)).toBe(false);
+    expect(onLoadSample.mock.calls).toEqual([["avianca"], ["demo"]]);
   });
 
   it("activates from the keyboard: each link takes focus and its Enter click loads", async () => {
     const onLoadSample = vi.fn<(key: Key) => void>();
     await mount(true, onLoadSample);
-    const [demo, avianca] = links();
+    const [avianca, demo] = links();
     if (demo === undefined || avianca === undefined) throw new Error("links missing");
-    for (const link of [demo, avianca]) {
+    for (const link of [avianca, demo]) {
       expect(link.getAttribute("href")).not.toBeNull();
       link.focus();
       expect(document.activeElement).toBe(link);
       link.click();
     }
-    expect(onLoadSample.mock.calls).toEqual([["demo"], ["avianca"]]);
+    expect(onLoadSample.mock.calls).toEqual([["avianca"], ["demo"]]);
   });
 });

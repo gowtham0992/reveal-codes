@@ -1,8 +1,20 @@
 import { err, isDeclaration, ok, parse, render } from "@reveal-codes/engine";
-import type { Declaration, Document, Result } from "@reveal-codes/engine";
+import type { Declaration, Document, IssueKey, Result } from "@reveal-codes/engine";
+import { isDisplayInfo } from "@reveal-codes/verifier/link";
+import type { DisplayInfo } from "@reveal-codes/verifier/link";
+import { storableInfo } from "./storable-info";
 import type { RunLogEntry } from "./store";
 
 export const AUTOSAVE_KEY = "reveal-codes:document:v1";
+
+/** One stored Display_Info entry: the issue key and the Display_Info fields, nothing else. */
+export type SavedInfo = Readonly<{
+  key: IssueKey;
+  clusterId: string;
+  foundName: string;
+  foundYear?: number;
+  absoluteUrl?: string;
+}>;
 
 export type PersistedValue = Readonly<{
   version: 1;
@@ -11,6 +23,8 @@ export type PersistedValue = Readonly<{
   verifiedAt: string | null;
   /** Absent when the author has made no declaration. Version stays 1. */
   declaration?: Declaration;
+  /** Absent when nothing is storable. Version stays 1. Holds no draft text. */
+  resolved?: readonly SavedInfo[];
 }>;
 
 export type PersistError = Readonly<{ kind: "absent" | "not_json" | "bad_shape" | "bad_codes" }>;
@@ -20,6 +34,8 @@ export type Restored = Readonly<{
   runLog: readonly RunLogEntry[];
   verifiedAt: string | null;
   declaration: Declaration | null;
+  /** Empty when the field is absent or unreadable. */
+  resolved: ReadonlyMap<IssueKey, DisplayInfo>;
 }>;
 
 /** The Persisted_Value as JSON. Undo and Redo stacks and Notices are not inputs (Req 9.7). */
@@ -28,15 +44,37 @@ export function serialise(
   runLog: readonly RunLogEntry[],
   verifiedAt: string | null,
   declaration: Declaration | null,
+  resolved: ReadonlyMap<IssueKey, DisplayInfo> | null = null,
 ): string {
+  const saved = savedInfo(document, resolved);
   const value: PersistedValue = {
     version: 1,
     codes: render(document, "full").text,
     runLog,
     verifiedAt,
     ...(declaration === null ? {} : { declaration }),
+    ...(saved.length === 0 ? {} : { resolved: saved }),
   };
   return JSON.stringify(value);
+}
+
+/** Entries that `storableInfo` keeps, as plain stored objects in key order. */
+function savedInfo(
+  document: Document,
+  resolved: ReadonlyMap<IssueKey, DisplayInfo> | null,
+): readonly SavedInfo[] {
+  if (resolved === null) return [];
+  const out: SavedInfo[] = [];
+  for (const [key, i] of storableInfo(document, resolved)) {
+    out.push({
+      key,
+      clusterId: i.clusterId,
+      foundName: i.foundName,
+      ...(i.foundYear === undefined ? {} : { foundYear: i.foundYear }),
+      ...(i.absoluteUrl === undefined ? {} : { absoluteUrl: i.absoluteUrl }),
+    });
+  }
+  return out;
 }
 
 function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
@@ -88,6 +126,25 @@ function readDeclaration(value: unknown): Declaration | null {
   return isDeclaration(value) ? value : null;
 }
 
+/** An absent or non-array field gives an empty map; an invalid entry is dropped. Never an error. */
+function asResolved(value: unknown): ReadonlyMap<IssueKey, DisplayInfo> {
+  const map = new Map<IssueKey, DisplayInfo>();
+  if (!Array.isArray(value)) return map;
+  for (const item of value as readonly unknown[]) {
+    if (!isRecord(item)) continue;
+    const key = item["key"];
+    if (typeof key !== "string" || !isDisplayInfo(item)) continue;
+    const { clusterId, foundName, foundYear, absoluteUrl } = item;
+    map.set(key, {
+      clusterId,
+      foundName,
+      ...(foundYear === undefined ? {} : { foundYear }),
+      ...(absoluteUrl === undefined ? {} : { absoluteUrl }),
+    });
+  }
+  return map;
+}
+
 /** Validates the JSON shape, then the Engine's `parse`; any fault is an `Err` (Req 9.4). */
 export function deserialise(raw: string | null): Result<Restored, PersistError> {
   if (raw === null) return err({ kind: "absent" });
@@ -109,6 +166,7 @@ export function deserialise(raw: string | null): Result<Restored, PersistError> 
     runLog,
     verifiedAt: stamp ?? null,
     declaration: readDeclaration(value["declaration"]),
+    resolved: asResolved(value["resolved"]),
   });
 }
 

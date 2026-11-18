@@ -96,7 +96,7 @@ function IssueRow({ document, issue, blocking, reason, info, onGo, onOverride }:
       <p className={`small-label ${styles["words"] ?? ""}`}>{issueWords(issue.code, blocking)}</p>
       <p className={styles["text"]}>{issueText(document, issue)}</p>
       <WrongCaseLines wrong={wrong} />
-      {words === null ? null : <p className={styles["text"]}>{`Diverges at: ${words}`}</p>}
+      {words === null ? null : <p className={styles["text"]}>{words}</p>}
       {reason === undefined ? null : <p className={styles["text"]}>{`Overridden: ${reason}`}</p>}
     </li>
   );

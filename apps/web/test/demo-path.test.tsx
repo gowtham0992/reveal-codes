@@ -136,11 +136,15 @@ function expectExportDialogLine(): void {
 function expectIssuesAndGo(): void {
   expect(rows()).toHaveLength(4);
   expect(rows().filter((r) => r.textContent.includes("not found"))).toHaveLength(4);
-  expect(rowWith("QUO ✘").textContent).toContain("Diverges at: ");
+  const sentence =
+    /(Matches the opinion up to "[^"]+", then differs|Differs from the opinion from the first word): "[^"]+"/u;
+  expect(rowWith("QUO ✘").textContent).toMatch(sentence);
+  expect(rowWith("QUO ✘").textContent).not.toContain("Diverges at");
   act(() => {
     fireEvent.click(within(rowWith("QUO ✘")).getByRole("button", { name: "Go" }));
   });
-  expect(statusLine()).toMatch(/Diverges at: \S/);
+  expect(statusLine()).toMatch(/ {2}(Matches the opinion up to|Differs from the opinion from)/u);
+  expect(statusLine()).not.toContain("Diverges at");
 }
 
 function overrideOne(): void {

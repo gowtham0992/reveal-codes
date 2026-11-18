@@ -1,4 +1,4 @@
-export type NextStep = "load-demo" | "verify" | "export" | "none";
+export type NextStep = "load-avianca" | "verify" | "export" | "none";
 
 export type NextStepInput = Readonly<{
   /** Document text has zero characters. */
@@ -16,13 +16,13 @@ export type NextStepInput = Readonly<{
 /** The first matching rule decides; blocking items never change the result. */
 export function nextStep(input: NextStepInput): NextStep {
   if (input.verifying) return "none";
-  if (input.empty) return "load-demo";
+  if (input.empty) return "load-avianca";
   if (input.verifiableUnchecked > 0 || input.needsCheckDate) return "verify";
   return "export";
 }
 
 export const PRIMARY_LABEL = {
-  "load-demo": "Load demo motion",
+  "load-avianca": "Load Mata v. Avianca",
   verify: "Verify",
   export: "Export",
 } as const;

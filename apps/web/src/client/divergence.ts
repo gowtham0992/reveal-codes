@@ -29,6 +29,24 @@ export function divergenceWords(quoteText: string, prefixLength: number): string
   return shown.join(" ") + (more ? "…" : "");
 }
 
+/**
+ * The sentence the Issues row, the Check_Page result list and the Pane status show for a quotation
+ * that differs from the opinion; "" when the quotation holds no word (Requirement 27, Decision 13).
+ */
+export function divergenceSentence(quoteText: string, prefixLength: number): string {
+  const words = wordsOf(quoteText);
+  if (words.length === 0) return "";
+  const first = firstWordIndex(words, prefixLength);
+  const differing = divergenceWords(quoteText, prefixLength);
+  if (first === 0) return `Differs from the opinion from the first word: "${differing}"`;
+  const tail = words
+    .slice(Math.max(0, first - 3), first)
+    .map((w) => w.text)
+    .join(" ");
+  const lead = first > 3 ? "… " : "";
+  return `Matches the opinion up to "${lead}${tail}", then differs: "${differing}"`;
+}
+
 /** The QuoteRecord whose [start, end) holds `offset` and whose result is a mismatch, else null. */
 export function mismatchAt(document: Document, offset: number): QuoteRecord | null {
   const found = document.quotes.find(

@@ -840,3 +840,49 @@ The citation-check-page spec adds a public page at `/check`. A person pastes a d
 
 - The footer "Open the editor" link still shows below 800px, where the Editor_Link in the page body and the Storage_Statement do not mention the editor.
 - The 32px buttons of the shared Modal (the confirm dialog) were left out of the `pointer: coarse` touch rule, so they stay below 44px on a phone.
+
+## 2026-11-16 citation-check-page second follow-up (live-site review)
+
+### What was built
+
+A reviewer used the live site cold, with no instructions, and reported five findings. The second follow-up of the citation-check-page spec answers them in Requirements 24 to 28. Task numbers refer to `.kiro/specs/citation-check-page/tasks.md`.
+
+- **Requirement 24: a check answered from the cache no longer uses up the limit.** The Verify_Limit counts only requests that reach the citation service, and it is 10 per address per minute, up from 6. A separate Request_Ceiling of 60 requests of any kind per address per minute is checked before the body is read. The Verify_Limit is checked after the body is read and the cache is consulted. The Verifier gained one read-only export for the cache decision.
+- **Requirement 25: a reload keeps the found case names.** The display information for found cases (case name, year and CourtListener link) is stored with the saved draft as an optional field, with the version unchanged.
+- **Requirement 26: the Avianca sample comes first.** The empty page and the Toolbar now offer Mata v. Avianca first and the demo motion second, and the Next_Step names the Avianca sample.
+- **Requirement 27: a divergence reads as a comparison.** The row shows how far the quotation matches the opinion before it differs, as one sentence built from the last three matching words. The label "Diverges at" is gone.
+- **Requirement 28: one link to the editor on the checking page.** The Footer_Editor_Link no longer shows when the body already carries the Editor_Link. "See all court rules" stays in every case.
+
+### What Kiro got wrong, and what fixed it
+
+All five findings came from a person using the live site cold. No test found any of them. The tests passed because each one checked the behaviour the earlier specs had written down, and the review showed that the written behaviour was the problem.
+
+- **The limit counted requests that were answered from the cache (Requirement 24).** The limiter ran before the body was read, so it could not know whether a request would reach the citation service. A reviewer who checked the same draft several times was told "Too many checks" for work that cost the citation service nothing. This reverses the earlier decision of 6 a minute counting every request, and the earlier decision to answer 429 before the body is read. The 429 before the body is read now applies only to the Request_Ceiling of 60 per minute. The test "refuses before the body is read or any lookup is made" was replaced.
+- **The display information for found cases did not survive a reload (Requirement 25).** After a reload, the Issues region lost the cases on record and their links until the draft was verified again. This reverses the case-match decision that the display information is kept in memory only.
+- **The empty page led with the demo motion, while every instruction starts with the Avianca sample (Requirement 26).** A reader who followed the written instructions found a different first sample on the page. This reverses the decision that the demo motion is the primary sample. The measured counts were 6 distinct Citation_Lines in the Avianca sample and 5 in the demo motion.
+- **"Diverges at" read as clipped text to two readers (Requirement 27).** The label was followed by the first words that differ, which two readers took for text cut off by the page. The sentence now starts from the words that match.
+- **`/check` showed two links to the editor (Requirement 28).** On a wide screen the page body and the footer both linked to the editor.
+
+### Measured values the design used
+
+- Verify_Limit: 10 per address per minute, for requests that reach the citation service. Request_Ceiling: 60 per address per minute, for requests of any kind.
+- Distinct Citation_Lines: 6 in the Avianca sample, 5 in the demo motion.
+- Toolbar widths, measured in task 18.4: the "Load Mata v. Avianca" button is 149.0px wide, and the "Load demo motion" button is 133.4px wide. Both are 30px high. Neither wraps or clips at 1150px or 1280px. The Toolbar did not overflow at either width, and the "Court rules" link stayed visible.
+
+### Open observation
+
+With a draft loaded, the notice area in the Toolbar at 1150px is about 24px wide. A notice such as "Opened small.txt: 47 characters, marked as pasted." needs 299px of text, so the area shows only an ellipsis. No remedy has been chosen.
+
+### Process notes
+
+- **Property 5 numbering collides with the verifier's Property 5.** The verifier inventory test counted properties by number and rejected a second 5. The verifier inventory list was changed to allow two 5s.
+- **`storableInfo` lives in `src/storable-info.ts`.** The boundaries scan bars `persist.ts` from importing `src/client`, so the function could not sit beside the code that uses it in the client folder.
+- **The Pane status line keeps two spaces.** The bar uses `white-space: pre` and the text inside it uses `nowrap`, so the double space survives without letting the line wrap.
+- **The DOCX bytes tests needed a fixed `Date` clock.** Without it, the exported bytes changed from run to run.
+- **The exported-bytes pin hashes were taken from current output, not from the old code.** They pin today's export. They do not show that the export is unchanged from before this work.
+- **The function-length scans tripped on two test files.** Both files were split until each function was under 40 lines.
+- **A test run under parallel load timed out once.** The run passed when repeated, and no timeout was raised.
+
+### Verification
+
+Nothing was pushed.

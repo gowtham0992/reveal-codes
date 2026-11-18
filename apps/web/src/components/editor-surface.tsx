@@ -17,8 +17,8 @@ export type EditorSurfaceProps = Readonly<{
 }>;
 
 const SAMPLE_LINKS = [
-  { key: "demo", label: "Load demo motion", href: "/demo-motion.txt" },
   { key: "avianca", label: "Load the Avianca citations", href: "/avianca-citations.txt" },
+  { key: "demo", label: "Load demo motion", href: "/demo-motion.txt" },
 ] as const;
 
 type SampleLinksProps = Readonly<{
@@ -29,22 +29,6 @@ type SampleLinksProps = Readonly<{
 function SampleLinks({ onLoadSample, onOpenDraft }: SampleLinksProps) {
   return (
     <ul className={styles["samples"]}>
-      {onOpenDraft === undefined ? null : (
-        <li>
-          <a
-            href="#open-draft"
-            onMouseDown={(e) => {
-              e.preventDefault();
-            }}
-            onClick={(e) => {
-              e.preventDefault();
-              onOpenDraft();
-            }}
-          >
-            Open a draft
-          </a>
-        </li>
-      )}
       {SAMPLE_LINKS.map((l) => (
         <li key={l.key}>
           <a
@@ -61,6 +45,22 @@ function SampleLinks({ onLoadSample, onOpenDraft }: SampleLinksProps) {
           </a>
         </li>
       ))}
+      {onOpenDraft === undefined ? null : (
+        <li>
+          <a
+            href="#open-draft"
+            onMouseDown={(e) => {
+              e.preventDefault();
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              onOpenDraft();
+            }}
+          >
+            Open a draft
+          </a>
+        </li>
+      )}
     </ul>
   );
 }

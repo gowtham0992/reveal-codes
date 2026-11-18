@@ -285,7 +285,10 @@ describe("check page: running a check _Requirements: 17.2, 17.3_", () => {
     await check();
     expect(countWith("QUO ✘")).toBeGreaterThan(0);
     const quo = items().find((i) => i.textContent.startsWith("QUO ✘"));
-    expect(quo?.textContent).toContain("Diverges at: ");
+    expect(quo?.textContent).toMatch(
+      /(Matches the opinion up to ".+", then differs: ".+"|Differs from the opinion from the first word: ".+")/u,
+    );
+    expect(quo?.textContent).not.toContain("Diverges at");
   });
 
   it("shows CHECKS_BUSY on 429 and FAILED_NOTICE on another failure, keeping the draft", async () => {

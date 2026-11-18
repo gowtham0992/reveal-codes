@@ -97,6 +97,7 @@ describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () =
     expect(buttons.map((b) => b.textContent)).toEqual([
       "New",
       "Open",
+      "Load Mata v. Avianca",
       "Load demo motion",
       "Verify",
       "Show codes (Alt-F3)",
@@ -107,7 +108,7 @@ describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () =
     ).toEqual(["Verify", "Export"]);
     expect(
       buttons.filter((b) => b.getAttribute("data-primary") === "true").map((b) => b.textContent),
-    ).toEqual(["Load demo motion"]);
+    ).toEqual(["Load Mata v. Avianca"]);
   });
 
   it("exposes the Document textbox and an empty, polite status area", async () => {
@@ -279,7 +280,10 @@ describe("AppShell Pane wiring _Requirements: 6.7, 13.3, 13.5, 13.6, 14.1, 14.2,
       fireEvent.click(item);
     });
     const first = statusLine();
-    expect(first).toMatch(/ {2}Diverges at: \S/);
+    expect(first).toMatch(
+      / {2}(Matches the opinion up to "[^"]+", then differs|Differs from the opinion from the first word): "/u,
+    );
+    expect(first).not.toContain("Diverges at");
     const ed = editorOf();
     const pos = offsetToPos(ed.state.doc, QUOTE_TEXT.indexOf("the quick"));
     act(() => {

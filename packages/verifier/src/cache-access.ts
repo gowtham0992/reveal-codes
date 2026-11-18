@@ -86,6 +86,19 @@ export async function cacheGet(
   return good ? value : undefined;
 }
 
+/**
+ * Reads `key` like `cacheGet` but bumps no counter and writes nothing. A value passing
+ * `guard` is returned; anything else (absent, wrong shape, store rejection) is `undefined`.
+ */
+export async function cachePeek<T>(
+  deps: Deps,
+  key: string,
+  guard: (v: unknown) => v is T,
+): Promise<T | undefined> {
+  const value = await readStore(deps, key);
+  return value !== undefined && guard(value) ? value : undefined;
+}
+
 function isUnchecked(v: unknown): boolean {
   return isRecord(v) && v["status"] === "unchecked";
 }

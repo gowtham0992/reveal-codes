@@ -41,7 +41,7 @@ WordPerfect 5.1 for DOS, in 1989, had a key that split the screen and showed eve
 On the hosted site citations are checked live. Locally, with no token set, the app runs on recorded responses.
 
 1. Open the site, or run `pnpm dev` and open http://localhost:3000.
-2. Select Load demo motion. The text enters as one `PST` span.
+2. Select Load demo motion, the second sample button; the Avianca sample, Load Mata v. Avianca, is the first offered. The text enters as one `PST` span.
 3. The codes pane is already open on a first visit; Alt-F3 hides and shows it.
 4. Select Verify. Two citations are found. Three are not, and one quotation is not in its opinion: they turn red in the pane, are underlined on the page, and are listed under Issues. Go jumps to each.
 5. Select Export. Choose a court, for example N.D. Tex. The dialog says how many blocking items remain and keeps Download .docx disabled.
@@ -50,7 +50,7 @@ On the hosted site citations are checked live. Locally, with no token set, the a
 
 Open is the other way in beside Load demo motion: choose Open to start from a `.docx`, `.txt` or `.md` file of your own.
 
-To see the case-name check, select Load the Avianca citations on the empty page instead of the demo motion, then Verify.
+To see the case-name check, select Load Mata v. Avianca, the first sample button, on the empty page instead of the demo motion, then Verify.
 
 On a phone, open `/check`, paste or open your draft, and select Check citations.
 
@@ -93,6 +93,7 @@ The Kiro Crew app that schedules the Sentinel lives in a separate repository: ht
 ## What leaves your machine
 
 - Verify sends only citation records to this app's own server, and each record includes the case name written before the citation; from there only citation strings go to CourtListener. The rest of your draft text is not sent.
+- The saved draft in this browser also holds the case names found for verified citations. Nothing of this is sent anywhere.
 - Quotation text is checked in the browser against the opinion and is never sent anywhere.
 - Draft, the assistant, sends the prompt and the paragraph at the cursor to the configured LLM provider. Nothing is sent to a provider unless you use Draft. The provider is Amazon Bedrock when `AWS_REGION` and `BEDROCK_MODEL_ID` are set, otherwise Anthropic when `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL` are set.
 - The checking page at `/check` sends only the citations and the case names written before them, to this site and from there to CourtListener. The rest of the draft stays in the browser. The page does not store the draft, and it is gone when you reload the page. On a screen 800 pixels or wider, opening the draft in the editor stores it there.
@@ -156,7 +157,7 @@ Working on the repository with Kiro:
 - Reveal Codes is not legal advice. It reports what a court's instrument says and what a database returned; read the source before you file.
 - The dataset covers federal instruments only and is a snapshot dated in each entry. Courts revise these often.
 - A citation that CourtListener does not hold reads as not found, even if the case exists.
-- The free CourtListener tier is rate-limited, and the hosted site limits requests per visitor. A second Verify within a minute can take up to a minute.
+- The free CourtListener tier is rate-limited, and the hosted site limits the checks per visitor that need CourtListener, and a check answered from the cache does not count. A second Verify within a minute can take up to a minute.
 - With no assistant provider configured, the assistant returns a recorded reply, and the statement says so.
 - The editor is plain text. It does not format captions, italics or indents.
 - The editor needs a screen at least 1150 pixels wide. The checking page at `/check` reads from 320px.

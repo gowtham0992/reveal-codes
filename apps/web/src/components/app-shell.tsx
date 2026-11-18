@@ -6,6 +6,8 @@ import { ORDERS } from "@reveal-codes/export";
 import type { OrderEntry } from "@reveal-codes/export";
 import { createAutosave } from "../autosave";
 import type { Autosave } from "../autosave";
+import { createResolvedHolder } from "../resolved-holder";
+import type { ResolvedHolder } from "../resolved-holder";
 import { createDraftGate } from "../draft-gate";
 import type { DraftGate } from "../draft-gate";
 import { useEditorBinding } from "../editor/use-editor-binding";
@@ -68,9 +70,10 @@ function useShellParts(svc: AppServices) {
       },
     }),
   );
-  useAutosave(store, svc, autosave, gate);
+  const [holder] = useState(() => createResolvedHolder());
+  useAutosave(store, svc, autosave, gate, holder);
   const handoverDialog = useHandover(store, svc);
-  return { svc, store, autosave, gate, handoverDialog };
+  return { svc, store, autosave, gate, holder, handoverDialog };
 }
 
 /** The caret Offset as a ref, so a draft that ends later inserts where the caret is then. */
@@ -117,6 +120,7 @@ type FlowsArgs = Readonly<{
   store: Store;
   autosave: Autosave;
   gate: DraftGate;
+  holder: ResolvedHolder;
   doc: Document;
   notice: string | null;
   orderStore: OrderSelectionStore;
@@ -128,7 +132,7 @@ function useShellFlows(a: FlowsArgs) {
   const { svc, store, autosave, gate, doc } = a;
   const exportGate = useExport(a);
   const actions = useDocumentActions({ store, svc, autosave, gate, doc });
-  const verify = useVerify(svc, store);
+  const verify = useVerify(svc, store, a.holder);
   return { exportGate, actions, verify };
 }
 
@@ -188,7 +192,7 @@ function usePendingNotice(store: Store, text: string | null, shown: () => void):
 }
 
 function useShellState({ svc, orderStore, pendingNotice, onNoticeShown }: ShellProps) {
-  const { store, autosave, gate, handoverDialog } = useShellParts(svc);
+  const { store, autosave, gate, holder, handoverDialog } = useShellParts(svc);
   usePendingNotice(store, pendingNotice, onNoticeShown);
   const blocked = useSyncExternalStore(gate.subscribe, gate.blocked, () => false);
   const { cursor, onCaret, getCaret } = useCaretRef();
@@ -204,6 +208,7 @@ function useShellState({ svc, orderStore, pendingNotice, onNoticeShown }: ShellP
     store,
     autosave,
     gate,
+    holder,
     doc,
     notice,
     orderStore,

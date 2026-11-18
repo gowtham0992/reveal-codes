@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createResolvedHolder } from "../resolved-holder";
+import type { ResolvedHolder } from "../resolved-holder";
 import type { AppServices } from "../services";
 import type { Store } from "../store-runtime";
 import { hasFullRecord, runVerifyFlow } from "../client/verify-flow";
@@ -21,7 +23,10 @@ export type VerifyControl = Readonly<{
   note: string | null;
   /** The sentence for a failed run, shown in the Issues region; null until one fails and after the next run starts. */
   failure: string | null;
-  /** Display_Info of the last completed run, memory only; null until a run completes this session. */
+  /**
+   * Display_Info of the last completed run, kept in memory and stored with the saved draft (never in
+   * the Document); null until a run completes or a draft with saved entries is restored.
+   */
   resolved: ResolvedSession;
 }>;
 
@@ -54,12 +59,14 @@ function useWaiting(
   return { waiting, arm, disarm };
 }
 /** Verify wiring (Requirement 17.1): one flow at a time; the flow reports through the Store. */
-export function useVerify(svc: AppServices, store: Store): VerifyControl {
+export function useVerify(svc: AppServices, store: Store, holder?: ResolvedHolder): VerifyControl {
+  const [own] = useState(() => createResolvedHolder());
+  const session = holder ?? own;
   const [running, setRunning] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const { waiting, arm, disarm } = useWaiting(svc);
-  const [resolved, setResolved] = useState<ResolvedSession>(null);
+  const resolved = useSyncExternalStore(session.subscribe, session.get, session.get);
   const start = (): void => {
     const epoch = store.getState().epoch;
     setRunning(true);
@@ -69,7 +76,7 @@ export function useVerify(svc: AppServices, store: Store): VerifyControl {
       setFailure(outcome.status === "failed" ? (outcome.failure ?? null) : null);
       if (outcome.status === "completed") {
         setNote(furtherLine(outcome, store.getState().document));
-        setResolved({ epoch, info: new Map(outcome.info ?? []) });
+        session.set({ epoch, info: new Map(outcome.info ?? []) });
       }
       disarm();
       setRunning(false);

@@ -5,7 +5,7 @@ export const PACKAGE_NAME: PackageName = "@reveal-codes/verifier";
 export { createDeps } from "./create-deps";
 export { createMemoryCacheStore } from "./cache-memory";
 export { createFileCacheStore } from "./cache-file";
-export { lookup, lookupWithInfo } from "./lookup";
+export { lookup, lookupWithInfo, missingLines } from "./lookup";
 export type { LookupInfo } from "./lookup";
 export { judgeRecords } from "./judge";
 export type { DisplayInfo, Judged } from "./judge";

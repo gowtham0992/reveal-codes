@@ -48,8 +48,8 @@ const OLD_RULE: Readonly<Record<string, Step>> = {
   "true,true,false": "none",
   "true,false,true": "none",
   "true,false,false": "none",
-  "false,true,true": "load-demo",
-  "false,true,false": "load-demo",
+  "false,true,true": "load-avianca",
+  "false,true,false": "load-avianca",
   "false,false,true": "verify",
   "false,false,false": "export",
 };
@@ -77,7 +77,7 @@ describe("Property 5: a missing check date makes Verify the next step _Requireme
       fc.asyncProperty(arbNextStepInput, arbGapDocument, fc.boolean(), async (input, c, dated) => {
         const gap = { ...input, needsCheckDate: true };
         if (input.verifying) expect(nextStep(gap)).toBe("none");
-        else if (input.empty) expect(nextStep(gap)).toBe("load-demo");
+        else if (input.empty) expect(nextStep(gap)).toBe("load-avianca");
         else expect(nextStep(gap)).toBe("verify");
 
         const store = restoredStore(c.document);

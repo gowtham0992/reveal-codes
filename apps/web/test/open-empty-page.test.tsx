@@ -104,12 +104,13 @@ describe("empty page _Requirements: 16.1, 16.2, 16.3, 16.4, 16.5, 16.7_", () => 
     expect(document.body.textContent).not.toContain(OLD_PLACEHOLDER);
     const links = screen.getAllByRole("link").filter((a) => a.textContent !== "Court rules");
     expect(links.map((a) => a.textContent)).toEqual([
-      "Open a draft",
-      "Load demo motion",
       "Load the Avianca citations",
+      "Load demo motion",
+      "Open a draft",
     ]);
     const list = links[0]?.closest("ul");
     expect(list?.querySelectorAll("a")).toHaveLength(3);
+    expect(list?.querySelector("[data-primary]")).toBeNull();
     expect(list?.querySelector("button, img, svg")).toBeNull();
   });
 
@@ -141,11 +142,12 @@ describe("empty page _Requirements: 16.1, 16.2, 16.3, 16.4, 16.5, 16.7_", () => 
 });
 
 describe("Toolbar Open button _Requirements: 2.1, 2.6_", () => {
-  it("sits after New and before Load demo motion, with no data-primary", async () => {
+  it("sits after New and before Load Mata v. Avianca, with no data-primary", async () => {
     await mount();
     const all = names();
     expect(all.indexOf("Open")).toBe(all.indexOf("New") + 1);
-    expect(all.indexOf("Load demo motion")).toBe(all.indexOf("Open") + 1);
+    expect(all.indexOf("Load Mata v. Avianca")).toBe(all.indexOf("Open") + 1);
+    expect(all.indexOf("Load demo motion")).toBe(all.indexOf("Open") + 2);
     const open = within(toolbar()).getByRole("button", { name: "Open" });
     expect(open.hasAttribute("data-primary")).toBe(false);
   });
