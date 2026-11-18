@@ -53,6 +53,7 @@ Three families, self-hosted from the `@fontsource` packages (exact versions), La
 Sizes and line heights:
 
 - Controls and labels: 13px / 16px, weight 500. Other running UI text: 13px / 18px, weight 500.
+- Toolbar notice: 13px / 16px, weight 500.
 - Small label: 10.5px, weight 700, uppercase, letter spacing 0.1em.
 - Region headings (Issues, Assistant): Libre Caslon Text 20px / 26px, weight 400.
 - Dialog titles: Libre Caslon Text 26px / 32px.
@@ -102,6 +103,7 @@ Sizes and line heights:
 ## Layout
 
 - Toolbar 52px, `--panel`, 3px double `--ink` bottom rule. The Open button comes directly after New, in the same square style, and is enabled while a Verify run is in flight. Directly after Open come "Load Mata v. Avianca" (primary exactly when it is the Next_Step) and then "Load demo motion" (never primary). These two sample buttons are shown only while the draft is empty; once the Document has text neither is rendered, and New brings them back.
+- The Toolbar notice wraps to at most two lines and then ends in an ellipsis. Its `title` holds the full text, and the text stays whole in the DOM, so a screen reader reads all of it. By decision, the one notice of about 150 characters (the Opened sentence, the removed-characters sentence and the footnotes sentence, with a short file name) loses its last word at 1280px. A very long file name is cut at any width.
 - Status_Bar 26px, under the editor while the Pane is closed and at the bottom of the Pane while it is open.
 - Assistant strip 32px while collapsed; assistant panel 260px while expanded.
 - Issues region 300px, with a 1px `--rule` left edge.
@@ -121,6 +123,7 @@ Sizes and line heights:
 
 - Short and plain. No exclamation marks, no "Oops", no "Let's", no sparkle characters, no marketing text.
 - No empty-state illustrations and no toasts. State is shown as text in the Toolbar, the Status_Bar, or the Pane status line.
+- A Toolbar notice is clamped to two lines with an ellipsis (see Layout). Its full text is in `title` and whole in the DOM.
 - The result of Verify is also shown as text in the Issues region.
 - The Open_Note is plain text in the Issues region. It explains a refused file, a changed export, or what a restore did not bring back. It is not persisted and has no icon.
 - A file dragged over the page shows no overlay, outline or animation. A dropped file opens through the same function as the Open button.

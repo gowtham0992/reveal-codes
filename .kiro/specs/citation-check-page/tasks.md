@@ -389,11 +389,11 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Only after 23.1 passes. Read `toolbar.module.css` first. Give `.notice` a two-line clamp (`display: -webkit-box`, `-webkit-box-orient: vertical`, `-webkit-line-clamp: 2`, `line-clamp: 2`, `overflow: hidden`, 13px / 16px, `overflow-wrap: anywhere`), keeping its other declarations. In `toolbar.tsx` set `title={props.notice ?? undefined}` on the `role="status"` element and keep the text child whole. Add no width at-rule, no animation and no colour literal. Confirm in Chromium, with the 23.1 script, that the Toolbar stays 52px high and that the longest notice shows in two lines at 1280px.
     - _Requirements: 32.1, 32.2, 32.3, 32.4_
 
-  - [~] 23.3 Add the notice tests
+  - [x] 23.3 Add the notice tests
     - Create `apps/web/test/toolbar-notice.test.tsx` (the whole text and the `title` are in the DOM; a notice of at least 200 characters keeps its whole text and its `title`; no notice gives no `title`) and a static scan for `toolbar.module.css` (two-line clamp and `overflow: hidden` on `.notice`; no width at-rule, no `animation`, no `transition`, no colour literal), added to the existing css-rules scan or as `static/toolbar-notice-css.test.ts` after reading that scan. No snapshot tests; no property test is added, so the inventory count stays.
     - _Requirements: 32.1, 32.2, 32.3, 32.4, 32.11_
 
-  - [~] 23.4 Update `ui.md` and `docs/KIRO_USAGE.md`
+  - [x] 23.4 Update `ui.md` and `docs/KIRO_USAGE.md`
     - `ui.md`: state the notice rule (at most two lines, ellipsis, full text in `title`, whole text in the DOM) in the Toolbar text and in Copy. `docs/KIRO_USAGE.md`: add a row for the `ui.md` edit if the inventory asks, and keep the row for this spec listing `.config.kiro`, `requirements.md`, `design.md`, `tasks.md` and `tasks.meta.json`. Keep `docs.test.ts` and `pnpm kiro:check` green.
     - _Requirements: 32.9_
 
