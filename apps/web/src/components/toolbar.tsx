@@ -107,7 +107,12 @@ export function Toolbar(props: ToolbarProps) {
         </button>
         <ExportButton {...props} />
       </div>
-      <div role="status" aria-live="polite" className={styles["notice"]}>
+      <div
+        role="status"
+        aria-live="polite"
+        className={styles["notice"]}
+        title={props.notice ?? undefined}
+      >
         {props.notice}
       </div>
       <a href={COURT_RULES_PATH} target="_blank" rel="noreferrer" className={styles["link"]}>

@@ -29,9 +29,9 @@ describe("Toolbar stylesheet _Requirements: 4.1, 4.2, 4.3, 4.5, 4.6_", () => {
     expect(value(".wordmark", "padding-right")).toBe("24px");
     expect(value(".wordmark", "border-right")).toBe("1px solid var(--rule)");
   });
-  it("draws the notice muted at 12.5px", () => {
+  it("draws the notice muted at 13px (Requirement 32.1)", () => {
     expect(value(".notice", "color")).toBe("var(--muted)");
-    expect(value(".notice", "font-size")).toBe("12.5px");
+    expect(value(".notice", "font-size")).toBe("13px");
   });
   it("uses no removed alias and keeps the 8px gaps", () => {
     const text = readFileSync(join(WEB_ROOT, "src/components/toolbar.module.css"), "utf8");
