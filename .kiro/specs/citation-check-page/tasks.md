@@ -381,7 +381,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - _Requirements: 30.7, 30.8, 30.9_
 
 - [ ] 23. Third follow-up (b): room for the notice
-  - [-] 23.1 Measure the notice in real Chromium, then stop or go on
+  - [x] 23.1 Measure the notice in real Chromium, then stop or go on
     - After 22.1, start `pnpm dev` as a background process and run Playwright scripts kept in `/tmp` (not committed); stop the server afterwards. Follow design T4: enumerate every string set into the Toolbar notice (`notices.ts`, `open-messages.ts`, any other module) and give the longest one's text and its width on one line; produce notices by real actions (open a file for "Opened" and "Could not open", export for `EXPORT_UNSAFE_CHARACTER` if feasible, otherwise render the notice through the store and say so); at 1150, 1280 and 1440px, with an Empty_Draft and with a loaded draft, report the Notice_Area width and exactly how much of the longest notice is visible at 1150, 1280 and 1440px. If the longest fixed notice does not fit in two lines at 1280px with a loaded draft, STOP, report the numbers and pick no remedy: do not run 23.2 to 23.5. A very long file name may still be cut and is not a reason to stop. Report the numbers in the task result.
     - _Requirements: 32.5, 32.6, 32.7, 32.8_
 
