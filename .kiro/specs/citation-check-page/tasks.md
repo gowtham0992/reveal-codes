@@ -363,6 +363,49 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
   - Confirm `git status` shows a clean working tree with everything committed. Do not push. Ask the user if questions arise.
   - _Requirements: 29.8, 29.9, 29.10_
 
+- [ ] 22. Third follow-up (a): sample buttons only while the draft is empty
+  - [~] 22.1 Show the Sample_Buttons only for an Empty_Draft
+    - Read `src/components/toolbar.tsx`, `toolbar.module.css`, `app-shell.tsx` and `editor-surface.tsx`. Define `empty = text.length === 0` once in the Shell and pass it to the Toolbar and to the Empty_Page links, replacing any second copy. The Toolbar renders "Load Mata v. Avianca" and "Load demo motion" after Open only when `empty` is true; with text they are not in the DOM. `nextStep`, `PRIMARY_LABEL`, `loadOrAsk` and `useDocumentActions` are not edited. Amendment note: this amends criterion 26.2; the earlier text of Requirement 26 stays.
+    - _Requirements: 30.1, 30.2, 30.3, 30.4, 30.5, 30.6, 31.1_
+
+  - [~] 22.2 Rewrite the five tests that reached the confirm through the buttons
+    - Create `apps/web/test/support/document-actions-harness.tsx`, a small harness that renders `useDocumentActions` over a store with non-empty text and returns `onLoadDemo` and `onLoadSample`. Rewrite to call `onLoadDemo()` or `onLoadSample("avianca")` inside `act`, with every assertion unchanged: `avianca.test.tsx` "confirms on a non-empty draft; cancel keeps it, confirm replaces it"; `document-actions.test.tsx` the three tests (replace via the dialog; failed load keeps the draft and shows "Could not load the demo motion."; replacing clears the Verify result); `samples-declaration.test.tsx` "Load demo motion clears a stored Declaration and the dialog asks". Do not edit `loadOrAsk` to make a test pass.
+    - _Requirements: 31.2, 31.3, 31.6_
+
+  - [~] 22.3 Update and add the Toolbar tests
+    - In `toolbar.test.tsx` and the order and primary tests of `app-shell.test.tsx`, assert the Sample_Buttons only for an empty draft. Add: neither Sample_Button is in the Toolbar once the draft has text; New brings both back after the confirm (Shell test). Check that no other test clicks a Sample_Button with text in the draft, and fix any that does by calling the action as task 22.2 does.
+    - _Requirements: 30.2, 30.5, 30.6, 31.4, 31.5_
+
+  - [~] 22.4 Update `ui.md`, the README Demo path and `docs/demo-script.md`
+    - `ui.md` Layout Toolbar sentence and Controls Primary rule: the two sample buttons are shown only while the draft is empty; the order of steps in the Primary rule is unchanged. README "Demo path" and `docs/demo-script.md`: check that neither tells a reader to select a sample button with a draft loaded, and add "To switch samples, press New first." where a reader could be in a loaded draft. Keep `docs.test.ts` green and the README free of exclamation marks.
+    - _Requirements: 30.7, 30.8, 30.9_
+
+- [ ] 23. Third follow-up (b): room for the notice
+  - [~] 23.1 Measure the notice in real Chromium, then stop or go on
+    - After 22.1, start `pnpm dev` as a background process and run Playwright scripts kept in `/tmp` (not committed); stop the server afterwards. Follow design T4: enumerate every string set into the Toolbar notice (`notices.ts`, `open-messages.ts`, any other module) and give the longest one's text and its width on one line; produce notices by real actions (open a file for "Opened" and "Could not open", export for `EXPORT_UNSAFE_CHARACTER` if feasible, otherwise render the notice through the store and say so); at 1150, 1280 and 1440px, with an Empty_Draft and with a loaded draft, report the Notice_Area width and exactly how much of the longest notice is visible at 1150, 1280 and 1440px. If the longest fixed notice does not fit in two lines at 1280px with a loaded draft, STOP, report the numbers and pick no remedy: do not run 23.2 to 23.5. A very long file name may still be cut and is not a reason to stop. Report the numbers in the task result.
+    - _Requirements: 32.5, 32.6, 32.7, 32.8_
+
+  - [~] 23.2 Clamp the notice to two lines and add `title`
+    - Only after 23.1 passes. Read `toolbar.module.css` first. Give `.notice` a two-line clamp (`display: -webkit-box`, `-webkit-box-orient: vertical`, `-webkit-line-clamp: 2`, `line-clamp: 2`, `overflow: hidden`, 13px / 16px, `overflow-wrap: anywhere`), keeping its other declarations. In `toolbar.tsx` set `title={props.notice ?? undefined}` on the `role="status"` element and keep the text child whole. Add no width at-rule, no animation and no colour literal. Confirm in Chromium, with the 23.1 script, that the Toolbar stays 52px high and that the longest notice shows in two lines at 1280px.
+    - _Requirements: 32.1, 32.2, 32.3, 32.4_
+
+  - [~] 23.3 Add the notice tests
+    - Create `apps/web/test/toolbar-notice.test.tsx` (the whole text and the `title` are in the DOM; a notice of at least 200 characters keeps its whole text and its `title`; no notice gives no `title`) and a static scan for `toolbar.module.css` (two-line clamp and `overflow: hidden` on `.notice`; no width at-rule, no `animation`, no `transition`, no colour literal), added to the existing css-rules scan or as `static/toolbar-notice-css.test.ts` after reading that scan. No snapshot tests; no property test is added, so the inventory count stays.
+    - _Requirements: 32.1, 32.2, 32.3, 32.4, 32.11_
+
+  - [~] 23.4 Update `ui.md` and `docs/KIRO_USAGE.md`
+    - `ui.md`: state the notice rule (at most two lines, ellipsis, full text in `title`, whole text in the DOM) in the Toolbar text and in Copy. `docs/KIRO_USAGE.md`: add a row for the `ui.md` edit if the inventory asks, and keep the row for this spec listing `.config.kiro`, `requirements.md`, `design.md`, `tasks.md` and `tasks.meta.json`. Keep `docs.test.ts` and `pnpm kiro:check` green.
+    - _Requirements: 32.9_
+
+  - [~] 23.5 Update `BUILD_LOG.md`
+    - In the second follow-up entry, replace the "Open observation" paragraph in place with the 23.1 numbers, in the third person and in plain words: the notice area width at 1150, 1280 and 1440px with and without a draft, the longest notice and its one-line width, and how much of it shows at each width. Add a short third follow-up entry: the author walked the build and found that the first fix took the notice's room; no test found it; the Sample_Buttons now show only while the draft is empty; the guard in `loadOrAsk` stays because a silent replacement of a draft would be the worst failure, though no control reaches it with text. Make no first-person claim as the user.
+    - _Requirements: 31.6, 32.5, 32.10_
+
+- [~] 24. Final checkpoint
+  - After the last edit, run in order: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, the clean-checkout web build (`pnpm --filter @reveal-codes/web build` from a clean clone after `pnpm install`) and `pnpm kiro:check`. Fix any failure and rerun all of them after the fix.
+  - Confirm `git status` shows a clean working tree with everything committed. Do not push. Ask the user if questions arise.
+  - _Requirements: 29.8, 29.9, 29.10_
+
 ## Notes
 
 - Tasks marked with `*` are optional test sub-tasks. Skipping them leaves Requirement 17 unmet, so run them before the final checkpoint unless the author decides otherwise.
@@ -416,6 +459,21 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     { "id": 4, "tasks": ["20.1", "20.2", "20.3", "20.4"] },
     { "id": 5, "tasks": ["20.5"] },
     { "id": 6, "tasks": ["21"] }
+  ]
+}
+```
+
+## Third Follow-up Task Dependency Graph
+
+```json
+{
+  "waves": [
+    { "id": 0, "tasks": ["22.1"] },
+    { "id": 1, "tasks": ["22.2", "22.3", "23.1"] },
+    { "id": 2, "tasks": ["22.4", "23.2"] },
+    { "id": 3, "tasks": ["23.3", "23.4"] },
+    { "id": 4, "tasks": ["23.5"] },
+    { "id": 5, "tasks": ["24"] }
   ]
 }
 ```

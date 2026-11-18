@@ -828,3 +828,84 @@ No new `try/catch` is added. `cachePeek` reuses `readStore`, which already turns
 - `check-page.test.tsx` and `check-editor-link.test.tsx`: one link to the editor at 375px with text, at 1280px with text, at 1280px with an empty box, at 1280px with out-of-date results, and the server HTML (28.7).
 - Static scans: `draft-storage-writes` and the `check` storage scan stay as they are. A new assertion in `docs.test.ts` or its neighbour is not added; the README edits keep the existing ones true.
 - The S3 browser probe is run once by the task that sets the label, and its numbers go in the `BUILD_LOG`; it is not committed.
+
+## Third follow-up
+
+The follow-up covers Requirements 30 to 32 and Decisions 1 to 3 (third follow-up). The earlier text of this design stays. Section S3 (Toolbar) is amended by T1 for the Toolbar buttons only. No property is added or changed, and no engine, verifier, route or token changes.
+
+### T1. Sample buttons only while empty (Requirement 30)
+
+The Shell computes one boolean, `empty = text.length === 0`, and passes it to both `Toolbar` and `EditorSurface`. The Empty_Page links already use that condition; the task replaces any second copy of it with the one value. In `toolbar.tsx` the two Sample_Buttons render only when `empty` is true, after Open and in the S3 order. With text they are absent from the DOM, not hidden. `data-primary` stays tied to `nextStep === "load-avianca"`, which `nextStep` returns only for empty text with no run in flight, so no rule changes. The Toolbar frees about 290px (149.0px and 133.4px, measured in task 18.4, plus the 8px gap) for the Notice_Area while a draft is loaded.
+
+New already confirms when the draft is non-empty and then empties the Document, so the Empty_Page links and both buttons come back with no new code (30.5).
+
+### T2. The guarded path and its tests (Requirement 31)
+
+`useDocumentActions` is not edited. `loadOrAsk` still asks the confirm before it replaces a non-empty draft. After T1 no control calls it with text, so a test can no longer click a Toolbar button to reach it. The rationale to keep the guard: a sample load that silently replaced a draft would be the worst failure, and the guard costs no room.
+
+The five tests call the actions through a small hook harness, `apps/web/test/support/document-actions-harness.tsx`. It renders `useDocumentActions` with the same fakes the tests use today and a store built with non-empty text, and returns `onLoadDemo` and `onLoadSample`. Each test calls `onLoadDemo()` or `onLoadSample("avianca")` inside `act`, then asserts exactly what it asserted through the button: the dialog text, cancel keeping the draft, confirm replacing it, the "Could not load the demo motion." notice with the draft kept, the Verify result cleared, the stored Declaration cleared and the dialog asking. No assertion is changed. The harness is the one place that knows how to build the hook's inputs, so each test file imports it instead of copying it.
+
+| Test file | Test | Reaches the confirm by |
+| --------- | ---- | ---------------------- |
+| `avianca.test.tsx` | confirms on a non-empty draft; cancel keeps it, confirm replaces it | `onLoadSample("avianca")` |
+| `document-actions.test.tsx` | replace via the dialog | `onLoadDemo()` |
+| `document-actions.test.tsx` | failed load keeps the draft and shows "Could not load the demo motion." | `onLoadDemo()` |
+| `document-actions.test.tsx` | replacing clears the Verify result | `onLoadDemo()` |
+| `samples-declaration.test.tsx` | Load demo motion clears a stored Declaration and the dialog asks | `onLoadDemo()` |
+
+Two Toolbar tests are added (`toolbar.test.tsx`, with the Shell for the New case in `app-shell.test.tsx`): with text, neither button is in the Toolbar; after New and its confirm, both are back. `toolbar.test.tsx` and the order and primary tests of `app-shell.test.tsx` assert the buttons only for an empty draft and assert their absence for a draft.
+
+### T3. The notice rule (Requirement 32)
+
+In `toolbar.module.css` the `.notice` rule keeps `flex: 1` and `min-width: 0` and gains a two-line clamp, written with the standard property and its prefixed form, because the prefixed box form is what Chromium, Safari and Firefox all support today:
+
+```css
+.notice {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  font: 500 13px / 16px var(--font-ui);
+  overflow-wrap: anywhere;
+}
+```
+
+The task reads the current rule first and keeps its existing declarations; the block above lists only what is added or confirmed. Two lines at 16px are 32px, which fits the 52px Toolbar with no change of height. `overflow-wrap: anywhere` lets a long file name break inside a line, so the clamp cuts at the second line and the name is not cut at the first. There is no width at-rule, no animation and no colour literal.
+
+In `toolbar.tsx` the element becomes `<div role="status" aria-live="polite" className={styles["notice"]} title={props.notice ?? undefined}>`. The text child is unchanged, so the DOM text is the whole notice and a screen reader reads all of it. CSS removes nothing from the accessibility tree. The `title` is the hover text only; it is not relied on for any other reader.
+
+### T4. Measurement (Requirement 32.5 to 32.7)
+
+The measurement task runs after T1 lands, because the Notice_Area width depends on it. It starts `pnpm dev` as a background process, runs Playwright scripts kept in `/tmp` (not committed), and stops the server afterwards.
+
+1. **Enumerate.** Search `notices.ts`, `open-messages.ts` and every other module that calls the store action that sets the Toolbar notice, and list every string and template. Mark each as fixed text or as text with a file name or number. The longest fixed text is expected to be `EXPORT_UNSAFE_CHARACTER` (128 characters); the file-name notices (`notWordMessage`, `passwordMessage`, `tooLongMessage`) are expected near 110 to 125 characters plus the file name. These are estimates and the list decides.
+2. **Produce.** For each notice that a real action produces, produce it by that action in Chromium: open a file for "Opened ..." and "Could not open ...", export a draft with an unsafe character for `EXPORT_UNSAFE_CHARACTER` if feasible. Where an action is not feasible, render the notice through the store and say so in the report.
+3. **Read.** At 1150, 1280 and 1440px wide (800px high), once with an Empty_Draft and once with a loaded draft: the Notice_Area `clientWidth`; for the longest notice its width on one line (measured by a probe `span` with `white-space: nowrap` in the same font) and the number of lines it takes, `scrollHeight` against `clientHeight`, and how much of the text is visible, counted by the last character whose range rectangle is inside the clamped box.
+4. **Report.** Give a table of those numbers, the text of the longest notice, and its visible part at each of the three widths with a loaded draft.
+5. **Stop rule.** If the longest fixed notice does not fit in two lines at 1280px with a loaded draft, the task reports and stops. It does not pick a remedy, edit the stylesheet or write the BUILD_LOG numbers. A long file name may still be cut and is not a reason to stop (32.8).
+
+T3 is implemented only after T4 passes. The T4 numbers go into the BUILD_LOG second follow-up entry in place of the "Open observation" paragraph.
+
+### T5. Documents
+
+- `ui.md`: Layout Toolbar sentence and the Primary rule (30.7); a notice rule in the Toolbar text and in Copy (32.9). No Token is added.
+- README "Demo path" and `docs/demo-script.md`: both start from an empty draft. The task checks that neither tells a reader to press a sample button with a draft loaded, and adds the one sentence "To switch samples, press New first." where a reader could be in a loaded draft (30.8). `docs.test.ts` stays true (30.9).
+- `docs/KIRO_USAGE.md`: a row for the `ui.md` edit if the inventory asks; the row for this spec still lists its five files. `pnpm kiro:check` stays green.
+- `BUILD_LOG.md`: the second follow-up entry's "Open observation" is replaced in place; a short third follow-up entry is added (32.10).
+
+### T6. Correctness properties and tests
+
+Property-based testing does not apply here. The changes are Toolbar markup, one stylesheet rule and documents, and the measurement reads a real browser. The `next-step` properties are unchanged, and the inventory scan's count does not change. The tests are examples and static scans:
+
+- `toolbar-notice.test.tsx`: the notice element has the whole text and `title`; a notice of at least 200 characters keeps its whole text in the DOM and its `title`; no notice gives no `title`.
+- `static/toolbar-notice-css.test.ts` (or an added case in the existing css-rules scan, which the task reads first): the `.notice` rule in `toolbar.module.css` has the two-line clamp, `overflow: hidden`, and the stylesheet has no width at-rule (`@media` with `width`), no `animation`, no `transition` and no colour literal.
+- The five rewritten tests and two new Toolbar tests of T2.
+
+| Situation | Behaviour | Source |
+| --------- | --------- | ------ |
+| Draft has text | No Sample_Button in the Toolbar | 30.2 |
+| New confirmed | Empty_Page links and both buttons shown | 30.5 |
+| Load with a non-empty draft by the action | Same confirm as today | 31.2 |
+| Notice longer than two lines | Ellipsis; `title` and DOM text whole | 32.1, 32.3, 32.4 |
+| Longest fixed notice over two lines at 1280px | Stop and report | 32.7 |

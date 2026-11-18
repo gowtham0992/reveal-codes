@@ -652,3 +652,70 @@ The author agreed to all fifteen proposals, with changes to 11 and 15 recorded b
 13. **Divergence wording.** `Matches the opinion up to "a pro", then differs: "se plaintiff who alleges retaliation is…"` with up to 3 matching words and up to 6 differing words. A leading "… " appears only when words were dropped before the Match_Tail. A quotation that differs at its first word reads `Differs from the opinion from the first word: "…"`. Straight quotation marks. One function, `divergenceSentence`.
 14. **Footer link swap.** Accepted. The Footer_Editor_Link is replaced by the Editor_Link whenever the Editor_Link is rendered.
 15. **BUILD_LOG sentences. Changed from the proposal.** The agent writes the sentences, not the author. The facts to record are: all five findings were found by a reviewer using the live site cold and none by a test; the limit counted requests that were answered from the cache; the display information for found cases did not survive a reload; the empty page led with the demo motion while every instruction starts with the Avianca sample; "Diverges at" read as clipped text to two readers; and `/check` showed two links to the editor.
+
+## Third follow-up: findings from the author's walk of the second follow-up
+
+The author walked the build at 1150px with a draft loaded. The Toolbar notice area was 24px wide (154px at 1280px, 314px at 1440px, measured), so the notice "Opened small.txt: 60 characters, marked as pasted." (299px on one line) showed one letter and an ellipsis. The two Sample_Buttons that Requirement 26 put in the Toolbar had taken the room, and they are useful only before a draft exists. The first fix took the notice's room. The author found that; no test did.
+
+Terms used below, in addition to the Glossary:
+
+- **Notice_Area**: the `role="status"` element in the Toolbar that holds the current notice text.
+- **Empty_Draft**: a Document whose text has length 0 (`text.length === 0`), the condition that already shows the Empty_Page links.
+- **Notice_Source**: any string that the app sets into the Toolbar notice, found in `notices.ts`, `open-messages.ts` and any other module that sets one.
+
+**Amendment note.** Requirement 30 amends criterion 26.2 ("THE Toolbar SHALL show the Sample_Buttons directly after Open"): the Sample_Buttons are shown only while the draft is empty. Criteria 26.1, 26.3, 26.4, 26.8 and 26.9 keep their text and apply while the draft is empty. The text of Requirement 26 stays as written.
+
+### Requirement 30: Sample buttons only while the draft is empty
+
+**User Story:** As an author with a draft loaded, I want the Toolbar to give its room to the notice, so that I can read what the app just told me.
+
+#### Acceptance Criteria
+
+1. WHILE the draft is an Empty_Draft, THE Toolbar SHALL show "Load Mata v. Avianca" and then "Load demo motion", directly after Open, with the labels, the order and the `data-primary` rule of Requirement 26.
+2. WHILE the Document has at least one character of text, THE Toolbar SHALL NOT render the "Load Mata v. Avianca" button or the "Load demo motion" button.
+3. THE Toolbar and the Empty_Page links SHALL decide from the one Empty_Draft condition, defined once and read by both.
+4. WHILE the draft is an Empty_Draft, THE Empty_Page SHALL show the links "Load the Avianca citations", "Load demo motion" and "Open a draft", in that order, with the wording and behaviour they have today.
+5. WHEN the author activates New and, where the draft is non-empty, confirms the dialog that New shows today, THE Editor SHALL show the Empty_Page links and both Sample_Buttons.
+6. THE `nextStep` function and the primary-button rule SHALL stay as they are, so that "Load Mata v. Avianca" carries `data-primary="true"` exactly when `nextStep` is `load-avianca`, which occurs only while the draft is an Empty_Draft.
+7. THE `.kiro/steering/ui.md` "Layout" Toolbar sentence and its "Controls" Primary rule SHALL say that the two sample buttons are shown only while the draft is empty, and SHALL keep the Primary rule's order of steps.
+8. THE README "Demo path" and `docs/demo-script.md` SHALL never tell a reader to select "Load demo motion" or "Load Mata v. Avianca" while a draft is loaded, and each SHALL say, where a reader could switch samples, that New comes first.
+9. THE assertions of `apps/web/test/static/docs.test.ts` SHALL stay true after the document edits.
+
+### Requirement 31: The guarded load path stays
+
+**User Story:** As an author, I want a sample load never to replace my draft without asking, so that no change to the Toolbar can cost me my text.
+
+#### Acceptance Criteria
+
+1. THE `loadOrAsk` function and its confirm in `useDocumentActions` SHALL keep their code and behaviour unchanged.
+2. WHEN `onLoadDemo()` or `onLoadSample("avianca")` is called while the draft is not an Empty_Draft, THE Document_Actions SHALL ask the same confirm as today, and SHALL keep the draft on cancel and replace it on confirm.
+3. THE tests that reach that confirm through the Toolbar buttons SHALL call the actions directly through a small hook harness over a non-empty store, and SHALL keep every assertion of the original test: `avianca.test.tsx` "confirms on a non-empty draft; cancel keeps it, confirm replaces it"; `document-actions.test.tsx` the three tests on replacing through the dialog, a failed load that keeps the draft and shows "Could not load the demo motion.", and a replacement that clears the Verify result; `samples-declaration.test.tsx` "Load demo motion clears a stored Declaration and the dialog asks".
+4. THE Toolbar tests SHALL show that neither Sample_Button is in the Toolbar once the draft has text, and that New brings both back after the confirm.
+5. THE other Toolbar tests (`toolbar.test.tsx`, and the order and primary tests of `app-shell.test.tsx`) SHALL assert the Sample_Buttons only for an Empty_Draft.
+6. THE design and the BUILD_LOG SHALL record the rationale: a sample load that silently replaced a draft would be the worst failure, so the guard stays although no control reaches it with text.
+
+### Requirement 32: Room for the notice
+
+**User Story:** As an author with a draft loaded, I want to read the notice the app shows, so that I know what the last action did.
+
+#### Acceptance Criteria
+
+1. WHILE a draft is loaded, THE Notice_Area SHALL wrap its text to at most two lines at 13px / 16px, inside the 52px Toolbar, and SHALL end the text with an ellipsis where the text needs more than two lines.
+2. THE Notice_Area SHALL cut its text by CSS only, with a line clamp or an equivalent that works in Chromium, Safari and Firefox, and SHALL use no width at-rule, no animation and no colour other than a Token.
+3. WHILE the Notice_Area holds a notice, THE Notice_Area SHALL carry the full notice text in a `title` attribute.
+4. THE `role="status"` element SHALL keep the whole notice text in its DOM text, so that a screen reader reads the whole notice whatever CSS shows.
+5. THE design SHALL give, from real Chromium through Playwright against `pnpm dev` at viewport widths 1150px, 1280px and 1440px, with an Empty_Draft and with a loaded draft: the Notice_Area width, the longest Notice_Source text and its width on one line, and how much of that text is visible, and THE BUILD_LOG SHALL state the measured values.
+6. THE measurement SHALL find the longest Notice_Source by enumerating every string set into the Toolbar notice, and SHALL produce notices by real actions where possible (open a file for "Opened" and "Could not open", export for `EXPORT_UNSAFE_CHARACTER` if feasible), and otherwise SHALL render the notice through the store.
+7. IF the longest Notice_Source whose text is fixed does not fit in two lines in the Notice_Area at 1280px with a loaded draft, THEN THE implementing agent SHALL stop and report the measured values, and SHALL NOT choose a remedy.
+8. WHERE a notice contains a file name, THE Notice_Area MAY cut a very long file name, because the file name has no bound.
+9. THE `.kiro/steering/ui.md` SHALL state the notice rule (two lines, ellipsis, `title`, whole text in the DOM) in its Toolbar text and its Copy text.
+10. THE BUILD_LOG second follow-up entry SHALL have its "Open observation" replaced in place, in the third person and in plain words, with the measured numbers, and THE BUILD_LOG SHALL gain a short third follow-up entry that records that the author found the problem by walking the build and that no test found it.
+11. THE tests SHALL include a static scan that finds the two-line clamp in the Toolbar stylesheet and no width at-rule, an example test that the `title` attribute and the whole text are in the DOM, and a component test with a notice of at least 200 characters.
+
+## Decisions (third follow-up)
+
+The author approved all three decisions below.
+
+1. **Sample buttons only while empty (Requirement 30). Approved.** "Load Mata v. Avianca" and "Load demo motion" are in the Toolbar only while `text.length === 0`. They stay on the Empty_Page as links, and New brings a person back to them. `nextStep` and the primary rule do not change.
+2. **Guarded path stays, Option A (Requirement 31). Approved.** `loadOrAsk` and its confirm stay as they are. The five tests that used the buttons to reach the confirm call the actions directly. A silent replacement of a draft would be the worst failure, so the guard stays although no control reaches it with text.
+3. **Notice room (Requirement 32). Approved.** The notice wraps to at most two lines, then ends with an ellipsis, with the full text in `title` and in the DOM. Widths are measured, not estimated. If the longest fixed notice does not fit in two lines at 1280px, work stops and the author chooses. Estimates, to be checked: about 6px per character; `EXPORT_UNSAFE_CHARACTER` has 128 characters (about 770px); the file-name notices (`notWordMessage`, `passwordMessage`, `tooLongMessage`) have 110 to 125 characters plus the file name.
