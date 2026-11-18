@@ -64,7 +64,7 @@ describe("Modal primary button _Requirements: 8.10, 8.11, 13.10_", () => {
   it("renders a dialog primary button last in DOM order, outside the Toolbar's single primary", () => {
     renderUi(
       <div>
-        <Toolbar notice={null} paneOpen={false} verifyDisabled={false} step="export" />
+        <Toolbar notice={null} empty={true} paneOpen={false} verifyDisabled={false} step="export" />
         <Modal title="Sample" onClose={() => undefined}>
           <ModalActions>
             <button type="button">Cancel</button>

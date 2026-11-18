@@ -112,7 +112,14 @@ function mount(document: Document, storage = createMemoryStorage()): Rig {
     });
     return (
       <>
-        <Toolbar notice={null} step="none" paneOpen={false} verifyDisabled={false} {...x.toolbar} />
+        <Toolbar
+          notice={null}
+          empty={true}
+          step="none"
+          paneOpen={false}
+          verifyDisabled={false}
+          {...x.toolbar}
+        />
         {x.dialog}
       </>
     );

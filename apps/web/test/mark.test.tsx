@@ -8,6 +8,7 @@ import { renderUi, screen } from "./support/render";
 
 const BASE: ToolbarProps = {
   notice: null,
+  empty: true,
   paneOpen: false,
   verifyDisabled: false,
   step: "none",

@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { apply, createDocument, declareAi } from "@reveal-codes/engine";
 import type { Declaration, Document } from "@reveal-codes/engine";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { ApiClient } from "../src/client/api";
 import { AppShell } from "../src/components/app-shell";
 import { PANE_KEY, encodePreference } from "../src/pane-preference";
@@ -15,7 +15,14 @@ import type { ManualTimers } from "./support/clock";
 import { createMemoryStorage } from "./support/memory-storage";
 import type { MemoryStorage } from "./support/memory-storage";
 import { modeApi } from "./support/mode-fetch";
+import { loadDemo } from "./support/document-actions-harness";
 import { act, fireEvent, renderUi, screen, within } from "./support/render";
+
+vi.mock("../src/components/shell-toolbar", async (original) =>
+  (await import("./support/document-actions-harness")).capturingToolbar(
+    await original<typeof import("../src/components/shell-toolbar")>(),
+  ),
+);
 import { createFakeViewport } from "./support/viewport";
 import { fakeBrowserServices } from "./support/browser-services";
 
@@ -124,7 +131,7 @@ async function expectDialogAsks(): Promise<void> {
 describe("Samples leave the Declaration Pending _Requirements: 10.1, 10.2_", () => {
   it("Load demo motion clears a stored Declaration and the dialog asks", async () => {
     const m = await mount(declared());
-    await click(named("Load demo motion"));
+    await loadDemo();
     await click(named("Replace draft"));
     await flush(m);
     expect(savedDeclaration(m)).toBeNull();

@@ -69,7 +69,14 @@ function ExportHarness() {
   });
   return (
     <>
-      <Toolbar notice={null} step="none" paneOpen={false} verifyDisabled={false} {...x.toolbar} />
+      <Toolbar
+        notice={null}
+        empty={true}
+        step="none"
+        paneOpen={false}
+        verifyDisabled={false}
+        {...x.toolbar}
+      />
       {x.dialog}
     </>
   );
@@ -125,7 +132,9 @@ describe("Court_Rules_Link on the Small_Screen_Page _Requirements: 9.2, 9.3, 16.
 
 describe("Court_Rules_Link in the Toolbar _Requirements: 9.4, 9.5, 16.8_", () => {
   it("is the last child, after the notice, a plain link without data-primary", () => {
-    renderUi(<Toolbar notice={null} step="verify" paneOpen={false} verifyDisabled={false} />);
+    renderUi(
+      <Toolbar notice={null} empty={true} step="verify" paneOpen={false} verifyDisabled={false} />,
+    );
     const toolbar = screen.getByRole("toolbar");
     const last = toolbar.lastElementChild;
     expect(last?.tagName).toBe("A");

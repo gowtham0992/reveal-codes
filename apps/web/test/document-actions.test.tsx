@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { apply, createDocument } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
 import { cleanup } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { ApiClient } from "../src/client/api";
 import { AppShell } from "../src/components/app-shell";
 import { PANE_KEY, encodePreference } from "../src/pane-preference";
@@ -17,7 +17,14 @@ import { createFakeViewport } from "./support/viewport";
 import { fakeBrowserServices } from "./support/browser-services";
 import type { MemoryStorage } from "./support/memory-storage";
 import { modeApi } from "./support/mode-fetch";
+import { loadDemo } from "./support/document-actions-harness";
 import { act, fireEvent, renderUi, screen, within } from "./support/render";
+
+vi.mock("../src/components/shell-toolbar", async (original) =>
+  (await import("./support/document-actions-harness")).capturingToolbar(
+    await original<typeof import("../src/components/shell-toolbar")>(),
+  ),
+);
 
 const ISO = "2026-11-02T12:00:00.000Z";
 
@@ -189,11 +196,11 @@ describe("Load demo motion _Requirements: 20.1, 20.2, 20.4, 20.5_", () => {
 
   it("confirms when the draft is non-empty; cancel keeps it, confirm replaces it", async () => {
     await mount(typed("My draft."));
-    await click("Load demo motion");
+    await loadDemo();
     expect(screen.getByRole("dialog", { name: "Load demo motion" })).not.toBeNull();
     await click("Cancel");
     expect(editorText()).toBe("My draft.");
-    await click("Load demo motion");
+    await loadDemo();
     await click("Replace draft");
     expect(editorText()).not.toContain("My draft.");
     expect(editorText().length).toBeGreaterThan(100);
@@ -201,7 +208,7 @@ describe("Load demo motion _Requirements: 20.1, 20.2, 20.4, 20.5_", () => {
 
   it("a failed fetch keeps the draft and sets a plain notice", async () => {
     await mount(typed("My draft."), "fail");
-    await click("Load demo motion");
+    await loadDemo();
     await click("Replace draft");
     expect(editorText()).toBe("My draft.");
     expect(noticeText()).toBe("Could not load the demo motion.");
@@ -242,7 +249,7 @@ describe("Verify_Summary lifecycle _Requirements: 5.2, 5.4, 5.5, 5.14, 5.15, 5.1
       await new Promise((r) => setTimeout(r, 30));
     });
     expect(verifyResult()).toContain("Citations:");
-    await click("Load demo motion");
+    await loadDemo();
     await click("Replace draft");
     expect(verifyResult()).toBe("");
     await click("Verify");

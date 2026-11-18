@@ -6,6 +6,7 @@ import { renderUi, screen, within, fireEvent } from "./support/render";
 
 const BASE: ToolbarProps = {
   notice: null,
+  empty: true,
   paneOpen: false,
   verifyDisabled: false,
   step: "none",
@@ -145,6 +146,18 @@ describe("Toolbar Export button on a Document with nothing to export", () => {
     renderUi(<Toolbar {...BASE} step="export" exportDisabled={true} onExport={onExport} />);
     fireEvent.click(screen.getByRole("button", { name: "Export" }));
     expect(onExport).not.toHaveBeenCalled();
+  });
+});
+
+describe("Toolbar sample buttons only for an empty draft _Requirements: 30.2, 31.5_", () => {
+  it("renders neither Sample_Button once the draft has text, and keeps New and Open", () => {
+    renderUi(<Toolbar {...BASE} empty={false} step="verify" />);
+    const names = within(screen.getByRole("toolbar"))
+      .getAllByRole("button")
+      .map((b) => b.textContent);
+    expect(names).toEqual(["New", "Open", "Verify", "Show codes (Alt-F3)", "Export"]);
+    expect(screen.queryByRole("button", { name: "Load Mata v. Avianca" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Load demo motion" })).toBeNull();
   });
 });
 

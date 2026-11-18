@@ -14,6 +14,7 @@ function toolbarHtml(step: NextStep, input: NextStepCase): string {
     createElement(Toolbar, {
       step,
       notice: null,
+      empty: input.empty,
       paneOpen: false,
       verifyDisabled: false,
       verifyRunning: input.verifying,

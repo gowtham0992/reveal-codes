@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { apply, createDocument } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ApiClient } from "../src/client/api";
 import { AppShell } from "../src/components/app-shell";
 import { PANE_KEY, encodePreference } from "../src/pane-preference";
@@ -16,7 +16,14 @@ import type { ManualTimers } from "./support/clock";
 import { createMemoryStorage } from "./support/memory-storage";
 import type { MemoryStorage } from "./support/memory-storage";
 import { modeApi } from "./support/mode-fetch";
+import { loadSample } from "./support/document-actions-harness";
 import { act, fireEvent, renderUi, screen, within } from "./support/render";
+
+vi.mock("../src/components/shell-toolbar", async (original) =>
+  (await import("./support/document-actions-harness")).capturingToolbar(
+    await original<typeof import("../src/components/shell-toolbar")>(),
+  ),
+);
 import { createFakeViewport } from "./support/viewport";
 import { fakeBrowserServices } from "./support/browser-services";
 
@@ -227,12 +234,11 @@ describe("The Load Mata v. Avianca toolbar button _Requirements: 26.1, 26.2, 26.
   });
   it("confirms on a non-empty draft; cancel keeps it, confirm replaces it", async () => {
     await mount(typed("My draft."));
-    expect(toolbarButton("Load Mata v. Avianca").hasAttribute("data-primary")).toBe(false);
-    await press(toolbarButton("Load Mata v. Avianca"));
+    await loadSample("avianca");
     expect(screen.getByRole("dialog", { name: "Load the Avianca citations" })).not.toBeNull();
     await press(screen.getByRole("button", { name: "Cancel" }));
     expect(editorText()).toBe("My draft.");
-    await press(toolbarButton("Load Mata v. Avianca"));
+    await loadSample("avianca");
     await press(screen.getByRole("button", { name: "Replace draft" }));
     expect(editorText()).not.toContain("My draft.");
     expect(editorText().length).toBeGreaterThan(100);

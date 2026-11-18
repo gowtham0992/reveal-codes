@@ -111,6 +111,25 @@ describe("AppShell _Requirements: 6.5, 6.6, 9.3, 10.1, 10.2, 10.15, 25.6_", () =
     ).toEqual(["Load Mata v. Avianca"]);
   });
 
+  it("shows neither Sample_Button with text in the draft; New brings both back after the confirm", async () => {
+    const storage = storageWithPane(false);
+    storage.setItem(AUTOSAVE_KEY, serialise(storedDocument("Stored draft."), [], null, null));
+    await mount(fixture(storage));
+    const bar = screen.getByRole("toolbar");
+    expect(within(bar).queryByRole("button", { name: "Load Mata v. Avianca" })).toBeNull();
+    expect(within(bar).queryByRole("button", { name: "Load demo motion" })).toBeNull();
+    await act(async () => {
+      fireEvent.click(within(bar).getByRole("button", { name: "New" }));
+      await Promise.resolve();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Discard and start new" }));
+      await Promise.resolve();
+    });
+    expect(within(bar).getByRole("button", { name: "Load Mata v. Avianca" })).not.toBeNull();
+    expect(within(bar).getByRole("button", { name: "Load demo motion" })).not.toBeNull();
+  });
+
   it("exposes the Document textbox and an empty, polite status area", async () => {
     await mount(fixture());
     expect(screen.getByRole("textbox", { name: "Document" })).not.toBeNull();

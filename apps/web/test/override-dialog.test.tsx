@@ -243,7 +243,7 @@ describe("OverrideDialog buttons _Requirements: 8.4, 8.10, 8.11_", () => {
     const { store, key } = seededStore();
     renderUi(
       <div>
-        <Toolbar notice={null} paneOpen={false} verifyDisabled={false} step="verify" />
+        <Toolbar notice={null} empty={true} paneOpen={false} verifyDisabled={false} step="verify" />
         <Harness store={store} issueKey={key} />
       </div>,
     );

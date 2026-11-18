@@ -368,20 +368,20 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - Read `src/components/toolbar.tsx`, `toolbar.module.css`, `app-shell.tsx` and `editor-surface.tsx`. Define `empty = text.length === 0` once in the Shell and pass it to the Toolbar and to the Empty_Page links, replacing any second copy. The Toolbar renders "Load Mata v. Avianca" and "Load demo motion" after Open only when `empty` is true; with text they are not in the DOM. `nextStep`, `PRIMARY_LABEL`, `loadOrAsk` and `useDocumentActions` are not edited. Amendment note: this amends criterion 26.2; the earlier text of Requirement 26 stays.
     - _Requirements: 30.1, 30.2, 30.3, 30.4, 30.5, 30.6, 31.1_
 
-  - [~] 22.2 Rewrite the five tests that reached the confirm through the buttons
+  - [x] 22.2 Rewrite the five tests that reached the confirm through the buttons
     - Create `apps/web/test/support/document-actions-harness.tsx`, a small harness that renders `useDocumentActions` over a store with non-empty text and returns `onLoadDemo` and `onLoadSample`. Rewrite to call `onLoadDemo()` or `onLoadSample("avianca")` inside `act`, with every assertion unchanged: `avianca.test.tsx` "confirms on a non-empty draft; cancel keeps it, confirm replaces it"; `document-actions.test.tsx` the three tests (replace via the dialog; failed load keeps the draft and shows "Could not load the demo motion."; replacing clears the Verify result); `samples-declaration.test.tsx` "Load demo motion clears a stored Declaration and the dialog asks". Do not edit `loadOrAsk` to make a test pass.
     - _Requirements: 31.2, 31.3, 31.6_
 
-  - [~] 22.3 Update and add the Toolbar tests
+  - [x] 22.3 Update and add the Toolbar tests
     - In `toolbar.test.tsx` and the order and primary tests of `app-shell.test.tsx`, assert the Sample_Buttons only for an empty draft. Add: neither Sample_Button is in the Toolbar once the draft has text; New brings both back after the confirm (Shell test). Check that no other test clicks a Sample_Button with text in the draft, and fix any that does by calling the action as task 22.2 does.
     - _Requirements: 30.2, 30.5, 30.6, 31.4, 31.5_
 
-  - [~] 22.4 Update `ui.md`, the README Demo path and `docs/demo-script.md`
+  - [-] 22.4 Update `ui.md`, the README Demo path and `docs/demo-script.md`
     - `ui.md` Layout Toolbar sentence and Controls Primary rule: the two sample buttons are shown only while the draft is empty; the order of steps in the Primary rule is unchanged. README "Demo path" and `docs/demo-script.md`: check that neither tells a reader to select a sample button with a draft loaded, and add "To switch samples, press New first." where a reader could be in a loaded draft. Keep `docs.test.ts` green and the README free of exclamation marks.
     - _Requirements: 30.7, 30.8, 30.9_
 
 - [ ] 23. Third follow-up (b): room for the notice
-  - [~] 23.1 Measure the notice in real Chromium, then stop or go on
+  - [-] 23.1 Measure the notice in real Chromium, then stop or go on
     - After 22.1, start `pnpm dev` as a background process and run Playwright scripts kept in `/tmp` (not committed); stop the server afterwards. Follow design T4: enumerate every string set into the Toolbar notice (`notices.ts`, `open-messages.ts`, any other module) and give the longest one's text and its width on one line; produce notices by real actions (open a file for "Opened" and "Could not open", export for `EXPORT_UNSAFE_CHARACTER` if feasible, otherwise render the notice through the store and say so); at 1150, 1280 and 1440px, with an Empty_Draft and with a loaded draft, report the Notice_Area width and exactly how much of the longest notice is visible at 1150, 1280 and 1440px. If the longest fixed notice does not fit in two lines at 1280px with a loaded draft, STOP, report the numbers and pick no remedy: do not run 23.2 to 23.5. A very long file name may still be cut and is not a reason to stop. Report the numbers in the task result.
     - _Requirements: 32.5, 32.6, 32.7, 32.8_
 
