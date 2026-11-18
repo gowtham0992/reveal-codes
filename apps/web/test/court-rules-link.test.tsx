@@ -37,10 +37,8 @@ function useHarnessServices() {
   return { storage, svc };
 }
 
-function ExportHarness() {
-  const { storage, svc } = useHarnessServices();
-  const store = useMemo(() => storeWith(humanDocument(), null), []);
-  const autosave = useMemo(
+function useHarnessAutosave(storage: AppServices["storage"], svc: AppServices) {
+  return useMemo(
     () =>
       createAutosave({
         storage,
@@ -50,6 +48,12 @@ function ExportHarness() {
       }),
     [],
   );
+}
+
+function ExportHarness() {
+  const { storage, svc } = useHarnessServices();
+  const store = useMemo(() => storeWith(humanDocument(), null), []);
+  const autosave = useHarnessAutosave(storage, svc);
   const orderStore = useMemo(() => createOrderSelectionStore(storage, ORDERS), [storage]);
   const doc = useSyncExternalStore(
     store.subscribe,

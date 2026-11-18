@@ -82,6 +82,47 @@ function services(storage: MemoryStorage, downloads: Downloaded[]): AppServices 
   };
 }
 
+type HarnessProps = Readonly<{
+  store: Store;
+  svc: AppServices;
+  storage: MemoryStorage;
+  autosave: ReturnType<typeof createAutosave>;
+}>;
+
+function Harness(props: HarnessProps) {
+  const { store, svc, storage, autosave } = props;
+  const doc = useDoc(store);
+  const notice = useSyncExternalStore(
+    store.subscribe,
+    () => store.getState().notice,
+    () => store.getState().notice,
+  );
+  const orderStore = useMemo(() => createOrderSelectionStore(storage, ORDERS), []);
+  const x = useExport({
+    svc,
+    store,
+    autosave,
+    gate: createDraftGate(),
+    doc,
+    notice,
+    orderStore,
+    onGo: () => undefined,
+  });
+  return (
+    <>
+      <Toolbar
+        notice={null}
+        empty={true}
+        step="none"
+        paneOpen={false}
+        verifyDisabled={false}
+        {...x.toolbar}
+      />
+      {x.dialog}
+    </>
+  );
+}
+
 function mount(document: Document, storage = createMemoryStorage()): Rig {
   const downloads: Downloaded[] = [];
   const svc = services(storage, downloads);
@@ -92,39 +133,7 @@ function mount(document: Document, storage = createMemoryStorage()): Rig {
     clearTimer: svc.clearTimer,
     onError: () => undefined,
   });
-  function Harness() {
-    const doc = useDoc(store);
-    const notice = useSyncExternalStore(
-      store.subscribe,
-      () => store.getState().notice,
-      () => store.getState().notice,
-    );
-    const orderStore = useMemo(() => createOrderSelectionStore(storage, ORDERS), []);
-    const x = useExport({
-      svc,
-      store,
-      autosave,
-      gate: createDraftGate(),
-      doc,
-      notice,
-      orderStore,
-      onGo: () => undefined,
-    });
-    return (
-      <>
-        <Toolbar
-          notice={null}
-          empty={true}
-          step="none"
-          paneOpen={false}
-          verifyDisabled={false}
-          {...x.toolbar}
-        />
-        {x.dialog}
-      </>
-    );
-  }
-  renderUi(<Harness />);
+  renderUi(<Harness store={store} svc={svc} storage={storage} autosave={autosave} />);
   return { storage, downloads, store };
 }
 
