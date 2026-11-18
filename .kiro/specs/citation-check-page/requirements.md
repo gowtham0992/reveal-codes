@@ -428,3 +428,227 @@ Scope: `apps/web` (`src/client/check-rows.ts`, `src/client/mismatch.ts`, `src/ch
 4. THE Check_Page SHALL read the width through `svc.viewport.width` and `svc.viewport.subscribe`, as the Shell does, and SHALL hold no copy of the width that is decided once at load.
 5. THE test suite SHALL contain example tests for: load narrow then widen; widen then narrow; and the same two steps driven through the browser's real `resize` event, so that the production `browserViewport` is covered and not only a fake.
 6. THE design follow-up SHALL state the root cause of the frozen link, found by a failing test before the fix.
+
+## Second follow-up: findings from a cold use of the live site
+
+An outside reviewer used the live site with no briefing, and the author reproduced each finding. Five findings are Requirements 24 to 28. Requirement 29 covers process and documents. They add to Requirements 1 to 23 and rewrite none. Where a criterion below changes what an earlier criterion says, the criterion below names the earlier one and wins, as the author approved in "Decisions (second follow-up)" at the end of this document.
+
+None of the five was found by a test. The suite was green, `pnpm kiro:check` passed and the author's own walk at 375px, 320px and 1280px found nothing here. Requirement 29 records that.
+
+Conflicts with earlier text, stated here so that none is hidden:
+
+- Requirement 24 changes `/api/verify` and adds one read-only export to the Verifier. The Introduction says "The Engine, the Verifier, the routes and the Toolbar are not changed", the out-of-scope line says "any change to the verifier or the routes", and criterion 5.8 says the Check_Page "SHALL add no route and change none". All three are contradicted for `/api/verify`. Decision 1 approves it.
+- Requirement 24 also moves the rate-limit decision after the body is read, which changes the documented behaviour "429 before the body is read" (the comment in `verify-route.ts`, the test "refuses before the body is read or any lookup is made" in `route-limits.test.ts`, and the BUILD_LOG entry of 2026-11-10). Decision 4 covers it.
+- Requirement 25 stores display information that `case-match` Requirement 7, criteria 5 and 6 say is kept in memory only and is not in "the autosaved value". Decision 9 lists every place to amend.
+- Requirement 26 changes the Toolbar, which the Introduction and the first follow-up's scope say is not changed.
+- Requirement 27 replaces criterion 6.9 and the "divergence words" in criteria 8.1 and 19.13 (Property 1), and the Pane status text of `editor-app` Requirement 13, criterion 6 and Requirement 18, criterion 11.
+- Requirement 28 amends criterion 2.5 and criterion 14.3.
+
+Scope: `apps/web` (`src/server/verify-route.ts`, `src/server/rate-limit.ts`, `src/persist.ts`, `src/autosave.ts`, `src/components/use-autosave.ts`, `src/components/use-verify.ts`, `src/client/resolved.ts`, `src/client/divergence.ts`, `src/client/check-rows.ts`, `src/components/toolbar.tsx`, `src/components/next-step.ts`, `src/components/editor-surface.tsx`, `src/components/use-pane.ts`, `src/components/issues-list.tsx`, `src/check/check-page.tsx`, `src/check/result-list.tsx`, the tests and the static scans), `packages/verifier` (one added read-only export, Requirement 24), `README.md`, `docs/DEVELOPMENT.md`, `docs/demo-script.md`, `docs/KIRO_USAGE.md`, `BUILD_LOG.md` and `.kiro/steering/ui.md`. The Engine, the exported DOCX, the Statement, the Appendix, the print view's output, the Sentinel and every route other than `/api/verify` are not changed. No dependency, environment variable or route is added.
+
+### Measurements taken from the code (second follow-up)
+
+These numbers are read from the sources named, and the requirements below use them.
+
+- Avianca sample (`apps/web/public/avianca-citations.txt`): 6 Full_Citations, which are 6 distinct Citation_Lines (`925 F.3d 1339`, `905 F. Supp. 2d 121`, `174 F.3d 366`, `516 F.3d 1237`, `516 U.S. 217`, `501 U.S. 32`). Nothing else in the file reaches the service.
+- Demo motion (`packages/engine/fixtures/demo-motion.txt`): 5 Full_Citations, which are 5 distinct Citation_Lines (`556 U.S. 662`, `404 U.S. 519`, `1047 F.3d 212`, `1012 F. Supp. 2d 88`, `912 F. 4th 33`). Two short forms (`Iqbal, 556 U.S. at 679` and `Id. at 221`) and one statute reference are never sent.
+- Verify limit today: `VERIFY_LIMIT` is 6 requests per address in a fixed window of `ROUTE_WINDOW_MS` (60,000 ms), in `rate-limit.ts`. Every request counts, answered from the cache or not. It is applied in `handleVerify` before the body is read. It is off when the server is in fixtures mode (`routeGuard(..., config.mode === "live")`).
+- Opinion limit today: `OPINION_LIMIT` is 30 per address per minute, on `/api/opinion/[clusterId]`, also counted before any work.
+- Verifier request bucket (`packages/verifier/src/bucket.ts`): `CAPACITY` 60 lines, one line refilled every `REFILL_MS` (1,000 ms), and a sliding window `WINDOW_MS` (60,000 ms) in which at most 60 lines may be dispatched. It is one bucket per server process, shared by every address. A request waits for it and, after three tries that do not advance the clock, leaves its lines `unchecked`.
+- Chunks: at most 60 lines and 64,000 characters per request to CourtListener (`chunk.ts`).
+- Cache: `CacheStore` inside the Verifier's `Deps`. The key is the Citation_Line (`<volume> <reporter> <page>`, pincite-free, from the Engine's `format`), so the case name the author wrote is not part of the key. The time to live is `CACHE_TTL_MS` (86,400,000 ms, 24 hours). A `verified`, `ambiguous` or `not_found` line is cached. An `unchecked` line is never cached. In fixtures mode the store is in memory (`createMemoryCacheStore`, a `Map` with no size bound); in live mode it is a directory of files (`createFileCacheStore`, default `~/.reveal-codes/cache`). The cache is per server instance, as the limiter is.
+- Today's order in `handleVerify`: the limiter (`overRouteLimit`, which counts) first; then `readBodyCapped` (at most `MAX_BODY_BYTES`, 262,144); then the 200,000 character check (`MAX_TEXT_CHARS`); then `parseVerifyBody`; then `lookupWithInfo`, which reads the cache inside `readCache` and only then dispatches. So the limiter runs before the Verifier and before anything is known about the cache.
+- Other protections on the route today: POST only (405 for other methods); 413 over 262,144 bytes; 413 over 200,000 characters (`DOCUMENT_TOO_LONG`); 400 for a body that is not JSON, has other keys than `records`, or holds a record that is not a well-formed Full_Record; 413 over `MAX_RECORDS` (500); `caseName` at most `MAX_CASE_NAME` (200) code units; the Verifier's bucket and chunking above; `maxDuration` 60 seconds; fixed messages that never echo input.
+- Toolbar (`toolbar.module.css`, `globals.css`): buttons are 13px Public Sans, weight 500, `padding: 0 10px`, 1px border, 8px gap; the Shell's minimum width is `--shell-min` 1150px. Widths below are estimates at about 7px a character, not browser measurements: "Load demo motion" about 130px, "Load the Avianca citations" about 195px, "Load Mata v. Avianca" about 150px (20 characters). The design measures these in a browser (Requirement 26, criterion 10). The notice area (`flex: 1`, `min-width: 0`) shrinks first and ends in an ellipsis.
+- Display_Info is held in `useVerify` as `ResolvedSession = { epoch, info: Map<IssueKey, DisplayInfo> } | null` (`use-verify.ts`, `client/resolved.ts`). It is set when a run completes, read only while `session.epoch === store.epoch` and the stored `clusterId` equals the citation's current `clusterId`, and it is lost on reload because `useState` starts at `null`. `DisplayInfo` is `{ clusterId, foundName, foundYear?, absoluteUrl? }`.
+- The Persisted_Value is `{ version: 1, codes, runLog, verifiedAt, declaration? }` under `localStorage` key `reveal-codes:document:v1` (`persist.ts`). `deserialise` ignores keys it does not know. The `declaration` field is the precedent for an optional field with the version unchanged.
+- A `wrong_case` result already stores `clusterId`, `foundName` and `foundYear` in the Document and in the codes. Only its `absoluteUrl` is lost on reload, which is why the link falls back to `/opinion/<id>/x/`. A `verified` result stores only `clusterId`, so its found name is lost.
+- Issue keys (`k<N>`) are carried in the full codes (`check-citations.ts` checks them), so a key saved with the draft names the same citation after reload.
+- The divergence text is built in one function, `divergenceWords` in `client/divergence.ts`, and shown in three places: the Issues row (`issues-list.tsx`, through `divergenceFor` in `check-rows.ts`), the Check_Page's result list (`result-list.tsx`, through the same `divergenceFor`), and the Pane's status text (`composeStatus` in `use-pane.ts`, which calls `divergenceWords` directly). The Export dialog (`export-issues.tsx`) and the Copy_Text show no divergence. The Statement carries `prefixLength` as data and does not print it. No exported text, no Appendix text outside the existing codes, and nothing the Sentinel parses holds the divergence words.
+- The Check_Page renders the Editor_Link when `wide && !stale && text !== ""` (`check-page.tsx`), and `PageLinks` always renders "Open the editor" beside "See all court rules".
+
+### Second follow-up glossary
+
+- **Verify_Route**: `handleVerify` in `apps/web/src/server/verify-route.ts` and the route file `app/api/verify/route.ts` that calls it.
+- **Verifier**: `packages/verifier`.
+- **Citation_Line**: the text `<volume> <reporter> <page>` that the Verifier builds from a Full_Record, the unit that is cached and sent to CourtListener.
+- **Cache_Answered_Request**: a request to the Verify_Route whose records need no Citation_Line that is missing from the Verifier's cache when the Verify_Route reads it. A request whose records yield no Citation_Line at all is a Cache_Answered_Request.
+- **Service_Request**: a request to the Verify_Route that is not a Cache_Answered_Request, so that its lookup would ask the citation service for at least one Citation_Line.
+- **Verify_Limit**: the number of Service_Requests one address may make in one `ROUTE_WINDOW_MS`.
+- **Request_Ceiling**: the number of requests of any kind, answered from the cache or not, that one address may make to the Verify_Route in one `ROUTE_WINDOW_MS`, checked before the body is read (Decision 4).
+- **Route_Protections**: the protections listed under "Other protections on the route today" in the measurements above, together with the Verifier's bucket and chunking.
+- **Saved_Display_Info**: the Display_Info of the latest completed Verify_Run, stored with the saved draft (Requirement 25).
+- **Draft_Value**: the Persisted_Value, the JSON stored under the Autosave_Key.
+- **Toolbar**, **Next_Step**, **Empty_Page**, **Persisted_Value**, **Draft_Gate**, **Issues_Region**, **Resolved_List**, **Display_Info**: as defined by the editor-app, first-run-and-flow, open-draft and case-match specs.
+- **Avianca_Sample** and **Demo_Sample**: the two samples the editor loads, `/avianca-citations.txt` and `/demo-motion.txt`.
+- **Sample_Buttons**: the two Toolbar buttons that load the Avianca_Sample and the Demo_Sample.
+- **Sample_Links**: the plain links under the placeholder on the Empty_Page.
+- **Match_Tail**: the last three whole words of the part of a quotation that matches the opinion, or fewer when fewer match.
+- **Divergence_Sentence**: the one sentence that says where a quotation stops matching the opinion, built from the Match_Tail and `divergenceWords` (Requirement 27).
+- **Footer_Editor_Link**: the link "Open the editor" in `PageLinks` at the foot of the Check_Page.
+
+### Requirement 24: A check answered from the cache does not use up the limit
+
+**User Story:** As a judge or filer who checks the same draft more than once, or who shares an address with others, I want repeat checks that cost the citation service nothing to be free, so that I am not told "Too many checks" for work that took 150 milliseconds.
+
+#### Acceptance Criteria
+
+1. WHEN the Verify_Route receives a Cache_Answered_Request from an address that is not in fixtures mode, THE Verify_Route SHALL leave that address's Verify_Limit count unchanged.
+2. WHEN the Verify_Route receives a Service_Request, THE Verify_Route SHALL count it once against the Verify_Limit of its address.
+3. IF a Service_Request arrives from an address whose Verify_Limit count has been reached in the current window, THEN THE Verify_Route SHALL answer 429 with the sentence `CHECKS_BUSY` and a `Retry-After` header, and SHALL make no lookup and no request to the citation service.
+4. THE Verify_Route SHALL answer 429 with the sentence "Too many checks from this address. Try again in a moment." (`CHECKS_BUSY`) and with the headers `tooManyRequests` sets today, with no change to either.
+5. THE Verify_Limit SHALL be 10 Service_Requests per address per `ROUTE_WINDOW_MS` (Decision 2).
+6. THE Verify_Route SHALL decide whether a request is a Cache_Answered_Request after the body has passed the size, text length, JSON, shape, record count and record checks, and before `lookupWithInfo` runs.
+7. THE Verifier SHALL export one read-only function that returns which Citation_Lines of a list of records are missing from the cache, using the same line building and the same cache guard as `lookupWithInfo`, so that the Verify_Route and `lookupWithInfo` cannot disagree about what is cached (Decision 3).
+8. THE added Verifier function SHALL write nothing to the cache and SHALL leave the `hits`, `misses` and `writes` counters of `verifierStatus` unchanged.
+9. THE Verifier SHALL change no existing exported function, type or result, and `lookupWithInfo` SHALL receive the same arguments and return the same value as before.
+10. WHEN a Cache_Answered_Request is answered, THE Verify_Route SHALL return the same status and the same body that `lookupWithInfo` returns for the same records today.
+11. IF a cache entry that was present when the Verify_Route decided is missing when `lookupWithInfo` reads it, THEN THE Verify_Route SHALL NOT refuse the request and SHALL NOT count it a second time.
+12. IF a Service_Request counted by the Verify_Route ends with every line `unchecked` because the citation service could not be reached, THEN THE Verify_Route SHALL keep that request counted.
+13. WHEN a request has partly cached records, THE Verify_Route SHALL treat it as a Service_Request and SHALL count it once, however many of its lines are missing.
+14. WHEN a request holds `{"records":[]}` or only records that yield no Citation_Line, THE Verify_Route SHALL treat it as a Cache_Answered_Request.
+15. WHEN the server is in fixtures mode, THE Verify_Route SHALL apply no Verify_Limit and no Request_Ceiling, as today, and SHALL read no cache for the purpose of limiting.
+16. THE Verify_Route SHALL refuse with 429 and `CHECKS_BUSY` any request from an address that has made 60 requests of any kind in the current window, before the body is read, and SHALL count every request it lets through.
+17. THE Verify_Route SHALL keep every one of the Route_Protections as it is, with the same limits, the same status codes and the same fixed messages.
+18. THE `/api/opinion/[clusterId]` route and its limit of 30 per address per minute SHALL stay as they are (Decision 5).
+19. THE Check_Page SHALL send the same requests as before (criterion 5.8, first half), so that the change is entirely on the server.
+20. THE test suite SHALL show that, with a live guard and a cache that holds every line of a draft, any number of repeated checks of that draft up to the Request_Ceiling answers 200 each time and makes no request to the citation service after the first.
+21. THE test suite SHALL show that Service_Requests from one address answer 200 up to the Verify_Limit, answer 429 after it, answer 200 again in the next window, and count each address on its own.
+22. THE test suite SHALL show that a partly cached request, an empty `records` list, a cache miss caused by an `unchecked` line, and a request refused by the limit each count as criteria 2, 14, 12 and 3 say.
+23. THE test suite SHALL show that the 429 sentence and headers equal those of the tests before this change, and that fixtures mode never limits.
+24. THE test "refuses before the body is read or any lookup is made" in `route-limits.test.ts` SHALL be replaced by tests of criteria 3, 16 and 17, and the tests that call `handleVerify` six or seven times with `fixturesDeps()` SHALL be rewritten so that they count Service_Requests.
+25. THE comments in `rate-limit.ts` ("/api/verify: 6 requests per address per minute") and `verify-route.ts` ("429 before the body is read"), the line in `docs/DEVELOPMENT.md` that says "`/api/verify` allows 6 requests", and the README line about request limits (if it states the number) SHALL state the new rule and the new number.
+26. THE Requirement 24 criteria SHALL replace, for `/api/verify` only, the Introduction's sentence "The Engine, the Verifier, the routes and the Toolbar are not changed" as it applies to the Verifier and the routes, the out-of-scope phrase "any change to the verifier or the routes", and the clause "and change none" in criterion 5.8, as Decision 1 approves.
+
+### Requirement 25: A reload keeps the found case names
+
+**User Story:** As a filer who verifies a draft, closes the tab and comes back, I want the Issues region to show the same cases on record and the same CourtListener links, so that I do not have to verify again to read them.
+
+#### Acceptance Criteria
+
+1. WHEN a Verify_Run completes, THE Web_App SHALL store the Saved_Display_Info in the Draft_Value, as one optional field with the Persisted_Value version unchanged (Decision 7).
+2. THE Saved_Display_Info SHALL hold, for each entry, the issue key and the Display_Info fields `clusterId`, `foundName`, `foundYear` and `absoluteUrl` where present, and nothing else, so that it holds no draft text.
+3. WHEN the page loads and the Draft_Value restores with Saved_Display_Info, THE Issues_Region SHALL show the same Resolved_List rows, the same found case names and the same CourtListener addresses as before the reload, with no Verify_Run.
+4. WHILE the Saved_Display_Info of a key is shown, THE Web_App SHALL use it only while the `clusterId` of the entry equals the `clusterId` of the citation's current result, as `case-match` Requirement 7, criterion 5 says today.
+5. WHEN a Full_Citation's verification result is cleared by an edit to that citation, THE Web_App SHALL remove that citation's Saved_Display_Info from memory and from the stored Draft_Value in the same write.
+6. WHEN the Document is replaced (New, Open, a sample, a Hand_Over, or a restore), THE Web_App SHALL remove all Saved_Display_Info of the earlier Document, and SHALL keep only the entries that come with a restored Draft_Value.
+7. THE Web_App SHALL write only entries whose key names a Full_Citation of the saved Document with a `verified` or `wrong_case` result whose `clusterId` equals the entry's `clusterId`, so that an entry never outlives the result it describes.
+8. WHEN a Draft_Value has no Saved_Display_Info field, THE Web_App SHALL load the Document as it does today and SHALL show no Resolved_List until a Verify_Run completes.
+9. IF the Saved_Display_Info field of a Draft_Value is not an array of valid entries, THEN THE Web_App SHALL ignore the field, SHALL load the Document, and SHALL NOT set the Draft_Gate.
+10. IF one entry of the field is not valid, THEN THE Web_App SHALL ignore that entry and keep the others.
+11. WHILE the Draft_Gate is blocked, THE Web_App SHALL write no Saved_Display_Info, as it writes nothing else.
+12. THE Draft_Gate SHALL block for exactly the faults it blocks for today (`not_json`, `bad_shape`, `bad_codes`), and a Saved_Display_Info fault SHALL NOT be one of them.
+13. WHEN the author chooses Save a copy, THE Web_App SHALL hand over the stored string unchanged, so that the downloaded text equals the stored Draft_Value and now includes the Saved_Display_Info when one is stored (Decision 10).
+14. THE print view SHALL read the Draft_Value and SHALL ignore the Saved_Display_Info.
+15. THE Saved_Display_Info SHALL NOT appear in the Document, in the Reveal Codes serialisation (`render(document, "full")`), in the Provenance_Appendix, in the Statement, in the DOCX, or in the Copy_Text.
+16. FOR ALL Documents and Display_Info, THE exported DOCX of a Document SHALL be byte-identical whether or not Saved_Display_Info is stored for it (Property 3).
+17. THE Check_Page SHALL keep its Display_Info in memory only and SHALL write nothing to storage, as criterion 3.10 says, and the Hand_Over SHALL carry the text only, as criterion 12.9 says.
+18. WHEN the Saved_Display_Info of a Document changes, THE autosave SHALL schedule a write with the same 300 ms debounce as a change to the Document.
+19. FOR ALL Documents and Display_Info maps, deserialising the Draft_Value that serialising them produces SHALL give the Document and exactly the entries that criterion 7 keeps, and entries that criterion 7 drops SHALL be absent (Property 3).
+20. THE test suite SHALL show: verify, reload, same rows and same addresses; edit a citation, its entry and its row go; New, Open, a sample and a Hand_Over clear the entries; an old value without the field loads; a malformed field is ignored and leaves the Draft_Gate open; Save a copy equals the stored string; the print view ignores the field; the `/check` page writes nothing.
+21. THE comments that call the Display_Info "memory only" (`link.ts`, `resolved.ts`, `use-verify.ts`, `verify-flow.ts`) SHALL say that it is kept in memory and stored with the saved draft, and never stored in the Document.
+22. THE README SHALL say, under "What leaves your machine" or where it describes the saved draft, that the saved draft in this browser also holds the case names found for verified citations, and that nothing of this is sent anywhere.
+23. THE criteria of Requirement 25 SHALL replace `case-match` Requirement 7, criterion 5 (the words "in memory only") and criterion 6 (the words "in the autosaved value") and the "Autosave" column of the table in `case-match` design for the found name and the `absoluteUrl`, as Decision 9 approves.
+
+### Requirement 26: The Avianca sample comes first
+
+**User Story:** As a visitor who opens the editor with no draft, I want the first thing offered to be the sample that shows the case-name check, so that I see the strongest result first.
+
+#### Acceptance Criteria
+
+1. WHILE the Document has no text and no Verify_Run is in flight, THE Next_Step SHALL name the Avianca_Sample, and THE Toolbar SHALL mark the Avianca button with `data-primary="true"` and no other button.
+2. THE Toolbar SHALL show the Sample_Buttons directly after Open, with the Avianca button first and the Demo_Sample button second.
+3. THE Demo_Sample button SHALL keep its label "Load demo motion", its action and its confirm when the draft is not empty, and SHALL carry no `data-primary`.
+4. THE Avianca button SHALL do what the Sample_Link "Load the Avianca citations" does today: fetch `/avianca-citations.txt`, ask the same confirm when the draft is not empty, install the text as pasted text, and show `AVIANCA_FAILED` on failure.
+5. THE Toolbar label of the Avianca button SHALL be "Load Mata v. Avianca", THE Demo_Sample button SHALL stay "Load demo motion", and THE Empty_Page link SHALL keep "Load the Avianca citations" (Decision 11).
+6. THE Sample_Links on the Empty_Page SHALL appear in this order: "Load the Avianca citations", "Load demo motion", "Open a draft" (Decision 12).
+7. THE Sample_Links SHALL keep the link style and the behaviour they have today, with no icon and no `data-primary`.
+8. THE Toolbar SHALL show every button label in full, without wrapping and without clipping, at the Shell's minimum width of 1150px.
+9. WHILE the viewport is 1150px wide and the text is empty, THE Toolbar SHALL keep its notice area, which may end in an ellipsis as it does today, and SHALL NOT hide the Court rules link.
+10. THE design SHALL include a measurement, in a real browser at a 1150px viewport, of the widths of both Sample_Buttons and of the remaining notice area, SHALL report any result in which the buttons do not fit, and THE BUILD_LOG SHALL state the measured values.
+11. THE `nextStep` function SHALL return a value that names the Avianca_Sample in place of `load-demo`, and `PRIMARY_LABEL` SHALL carry its label.
+12. THE other rules of the Next_Step (nothing while a run is in flight, Verify, Export) SHALL stay as they are.
+13. THE `.kiro/steering/ui.md` "Controls" rule "Primary" SHALL say "Load Mata v. Avianca when the text is empty" in place of "Load demo motion when the text is empty", and its Empty_Page rule SHALL give the new order of the Sample_Links.
+14. THE README "Demo path" SHALL keep step 2 true by naming the Demo_Sample button as the second sample button, and SHALL say that the Avianca_Sample is the first sample offered.
+15. THE `docs/demo-script.md` row at 0:00 SHALL say to select **Load demo motion** (the second sample button), and its closing sentence about the Avianca_Sample SHALL say that the Avianca_Sample is the first button.
+16. THE tests that name the old order or the old primary (`app-shell.test.tsx`, `unreadable-draft.test.tsx`, `open-empty-page.test.tsx`, `editor-surface-links.test.tsx`, `avianca.test.tsx`, `samples-declaration.test.tsx`, `next-step.test.ts`, `next-step.properties.test.ts`, `next-step-gap.properties.test.ts`) SHALL be updated to the new order, the new primary and the new Next_Step value.
+17. THE Check_Page's action order (criterion 2.2) SHALL stay as it is.
+18. THE criteria of Requirement 26 SHALL replace, for the Toolbar and the `ui.md` rules named above only, the Introduction's sentence that the Toolbar is not changed.
+
+### Requirement 27: A divergence reads as a comparison
+
+**User Story:** As a filer whose quotation is not in the opinion, I want the row to show how far the quotation matches before it differs, so that I do not take the shown words for clipped text.
+
+#### Acceptance Criteria
+
+1. THE Web_App SHALL build the Divergence_Sentence in one function, `divergenceSentence(quoteText, prefixLength)` in `src/client/divergence.ts`, which calls `divergenceWords` for the differing part and builds nothing twice.
+2. THE Issues row, the Check_Page's result list and the Pane's status text SHALL each show the string that `divergenceSentence` returns, and SHALL NOT build any part of it themselves.
+3. THE Issues row and the result list SHALL show the sentence alone, without the prefix "Diverges at: ", and the Pane's status text SHALL show `statusText` followed by two spaces and the sentence.
+4. WHEN one or more whole words of the quotation match the opinion before the first differing word, THE Divergence_Sentence SHALL read `Matches the opinion up to "<Match_Tail>", then differs: "<differing words>"`.
+5. THE Match_Tail SHALL be the last three whole words before the first differing word, or all of them when fewer than three precede it, joined by single spaces.
+6. WHERE words of the quotation precede the Match_Tail, THE Divergence_Sentence SHALL put "… " (the ellipsis character U+2026 and a space) before the Match_Tail inside the quotation marks, and WHERE the Match_Tail begins at the first word of the quotation, THE Divergence_Sentence SHALL put nothing before it (Decision 13).
+7. THE differing words SHALL be the string `divergenceWords` returns today: the word that holds the divergence, or the next word, and up to five more, with "…" after the last word when more words follow.
+8. WHEN the quotation differs at its first word, THE Divergence_Sentence SHALL read `Differs from the opinion from the first word: "<differing words>"`.
+9. WHEN the divergence falls inside a word, THE Divergence_Sentence SHALL put the whole word in the differing words and SHALL end the Match_Tail at the word before it.
+10. WHEN the quotation holds fewer than three words before the divergence, THE Divergence_Sentence SHALL show those words with no leading ellipsis.
+11. WHEN the quotation holds no word, THE Divergence_Sentence SHALL be the empty string, and THE Issues row and the result list SHALL show no divergence line.
+12. THE Divergence_Sentence SHALL use the straight double quotation mark `"` and the ellipsis character U+2026, SHALL be plain text with no icon, and SHALL contain no exclamation mark (Decision 13).
+13. THE Divergence_Sentence SHALL carry the words of the quotation as written in the Document, with no change to their apostrophes or quotation marks.
+14. FOR ALL quotation texts and prefix lengths within the text, THE text after "then differs: " (or after "from the first word: ") SHALL equal the quotation in quotation marks of the `divergenceWords` result, and the Match_Tail SHALL be a run of at most three words of the quotation that ends where the differing words begin (Property 4).
+15. THE change SHALL alter no byte of the exported DOCX, the Statement, the Appendix, the Reveal Codes serialisation or the Copy_Text, and no value the Sentinel reads, because none of them holds the divergence words today (see the measurements above).
+16. THE `row.divergence` value of `checkRows` SHALL carry the Divergence_Sentence, and Property 1 (and its extension in criterion 19.13) SHALL compare the sentence in place of "divergence words".
+17. THE tests that name the old text (`issues-list.test.tsx`, `check-page.test.tsx`, `demo-path.test.tsx`, `app-shell.test.tsx`) SHALL be updated, and `divergence.test.ts` SHALL gain examples for the first-word, short-quote, mid-word, no-word and long-quote cases.
+18. THE criteria of Requirement 27 SHALL replace criterion 6.9, the words "divergence words" in criteria 8.1 and 19.13, `editor-app` Requirement 13 criterion 6 and Requirement 18 criterion 11 (the label "Diverges at:"), and the "Divergence_Words" glossary entry's use at those places.
+
+### Requirement 28: One link to the editor on the checking page
+
+**User Story:** As a reader of the checking page on a wide screen, I want one link to the editor, so that I am not offered the same place twice.
+
+#### Acceptance Criteria
+
+1. WHILE the Editor_Link is rendered, THE Check_Page SHALL NOT render the Footer_Editor_Link.
+2. WHILE the Editor_Link is not rendered, THE Check_Page SHALL render the Footer_Editor_Link as it does today.
+3. THE Check_Page SHALL decide criteria 1 and 2 from the one condition that renders the Editor_Link (`wide`, results not out of date, and text in the Draft_Box), so that exactly one of the two links is present at any moment.
+4. THE server-rendered HTML SHALL contain the Footer_Editor_Link and SHALL NOT contain the Editor_Link, because the server's width is the narrow default.
+5. WHEN the viewport changes between narrower and wider than `NARROW_WIDTH`, or the Draft_Box becomes empty or non-empty, or results become out of date, THE Check_Page SHALL swap the two links without a reload.
+6. THE Check_Page SHALL keep "See all court rules" in `PageLinks` in every case.
+7. THE tests SHALL show one link to the editor at 375px with text, at 1280px with text, at 1280px with an empty box, and at 1280px with out-of-date results.
+8. THE criteria of Requirement 28 SHALL amend criterion 2.5 (the link "Open the editor" is shown only while the Editor_Link is not) and criterion 14.3 (the Check_Page links to `/` through whichever of the two is rendered).
+9. THE `.kiro/steering/ui.md` description of the one-column pages SHALL stay true, and SHALL say that the checking page shows one link to the editor.
+
+### Requirement 29: Process and documents for the second follow-up
+
+**User Story:** As the author and as a judge reading the repository, I want the record to say that these findings were found by a person using the live site, so that the account of what the tests did and did not catch is true.
+
+#### Acceptance Criteria
+
+1. THE `BUILD_LOG.md` SHALL gain a dated entry for the second follow-up with a section "What Kiro got wrong, and what fixed it" that records that all five findings were found by a reviewer using the live site cold and none by a test, that the limit counted requests answered from the cache, that the display information for found cases did not survive a reload, that the empty page led with the demo motion while every instruction starts with the Avianca sample, that "Diverges at" read as clipped text to two readers, and that `/check` showed two links to the editor.
+2. THE agent that edits `BUILD_LOG.md` SHALL write the sentences of criterion 1 (Decision 15).
+3. THE `BUILD_LOG.md` entry SHALL name each finding, the requirement that covers it, and the measured values that the design used (the Verify_Limit, the sample sizes, the Toolbar widths).
+4. THE `BUILD_LOG.md` entry SHALL record each earlier decision that the second follow-up reverses, namely the six-a-minute count of every request, the 429 before the body is read, the memory-only Display_Info, and the demo motion as the primary sample.
+5. THE README "What leaves your machine" and "Limits" lines, `docs/DEVELOPMENT.md` (the request limits line), `.kiro/steering/ui.md` (the Primary rule, the Empty_Page rule, the Toolbar, the one-column pages), `docs/demo-script.md` and the rows of `docs/KIRO_USAGE.md` SHALL be consistent with Requirements 24 to 28 when the last task ends.
+6. THE `docs/KIRO_USAGE.md` SHALL gain a row for the `ui.md` edit of this follow-up, and the row for this spec SHALL still list `.config.kiro`, `requirements.md`, `design.md`, `tasks.md` and `tasks.meta.json`.
+7. THE README SHALL keep every assertion of `apps/web/test/static/docs.test.ts` true, including that it holds no exclamation mark.
+8. THE spec SHALL be committed before any task of this follow-up starts, and no commit SHALL be pushed.
+9. THE final checkpoint SHALL run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, the clean-checkout web build (`pnpm --filter @reveal-codes/web build` from a clean clone after install) and `pnpm kiro:check`, every one of them after the last edit, and SHALL end with a clean working tree and every change committed.
+10. THE final checkpoint SHALL push nothing.
+
+## Decisions (second follow-up)
+
+The author agreed to all fifteen proposals, with changes to 11 and 15 recorded below. The requirements above carry the final wording.
+
+1. **Route change (Requirement 24). Approved.** `handleVerify` changes and the Verifier gains one read-only export. No route is added. The Introduction sentence, the out-of-scope phrase and the clause "and change none" in criterion 5.8 are replaced for `/api/verify` only (24.26). The Check_Page's own requests do not change.
+2. **Verify_Limit. 10 per address per minute** for requests that reach the citation service (Service_Requests), up from 6.
+3. **Cache test. A read-only Verifier function** (for example `missingLines(records, deps)`) built on `planLookup` and `isCachedLine`, writing nothing and leaving the counters alone. The route counts a request only when the function returns at least one missing line.
+4. **Request_Ceiling. 60 requests of any kind per address per minute**, checked before the body is read, with the same `CHECKS_BUSY` sentence and the same headers. The Verify_Limit is checked after the cache decision. An address at the Verify_Limit that sends a malformed body gets 400 or 413, as 24.6 states.
+5. **`/api/opinion/[clusterId]` unchanged**, with its limit of 30 per address per minute.
+6. **Fixtures (demo) mode unchanged.** No limit applies and no cache is read for limiting.
+7. **Storage shape.** One optional field `resolved` in the Persisted_Value, version still 1, written in the same `setItem` as `codes`.
+8. **Clearing rule.** An entry is written only while the Document holds a Full_Citation with that key whose result is `verified` or `wrong_case` and whose `clusterId` equals the entry's. The whole map is dropped when the Document is replaced.
+9. **Amendments for Requirement 25. Approved.** Each place gets a one-line note that Requirement 25 replaces its words: `case-match` Requirement 7 criterion 5 ("in memory only") and criterion 6 ("in the autosaved value"); the `case-match` design table "What is stored where" (the Autosave column for the found name and the `absoluteUrl`) and its "Display_Info, session only" label; `editor-app` Requirement 9 criterion 2 (the shape of the Persisted_Value) and limitation L11; the comments in `link.ts`, `resolved.ts`, `use-verify.ts` and `verify-flow.ts`; and the README line of criterion 25.22. The `/check` page stays memory only (25.17).
+10. **Save a copy.** The code does not change. The downloaded string gains the `resolved` field when one is stored.
+11. **Toolbar buttons. Changed from the proposal.** The Avianca button is labelled "Load Mata v. Avianca" and is primary while the text is empty. "Load demo motion" stays plain beside it. The Empty_Page link keeps its wording "Load the Avianca citations". The design measures both buttons at 1150px in a real browser (Playwright with Chromium against `pnpm dev`) and reports if they do not fit (26.10).
+12. **Empty_Page link order.** "Load the Avianca citations", "Load demo motion", "Open a draft".
+13. **Divergence wording.** `Matches the opinion up to "a pro", then differs: "se plaintiff who alleges retaliation is…"` with up to 3 matching words and up to 6 differing words. A leading "… " appears only when words were dropped before the Match_Tail. A quotation that differs at its first word reads `Differs from the opinion from the first word: "…"`. Straight quotation marks. One function, `divergenceSentence`.
+14. **Footer link swap.** Accepted. The Footer_Editor_Link is replaced by the Editor_Link whenever the Editor_Link is rendered.
+15. **BUILD_LOG sentences. Changed from the proposal.** The agent writes the sentences, not the author. The facts to record are: all five findings were found by a reviewer using the live site cold and none by a test; the limit counted requests that were answered from the cache; the display information for found cases did not survive a reload; the empty page led with the demo motion while every instruction starts with the Avianca sample; "Diverges at" read as clipped text to two readers; and `/check` showed two links to the editor.

@@ -620,3 +620,211 @@ Task 12.9 ran the walk in two places and neither reproduced a frozen link. (1) `
 - `use-handover.test.tsx`: notice reads "Opened the draft from the checker: 807 characters, marked as pasted."; a refused hand-over starts with a capital; an opened file keeps its name case (`open-messages` test).
 - `check-page.test.tsx` and `check-editor-link.test.tsx`: Storage_Statement at 375px and 1280px, server HTML at the narrow default, no mention of the editor below 800px, no second storage sentence; load narrow then widen shows the link and the clause; narrow again removes both; the same through the real `resize` event.
 - `static/*`: the scans of F3, with their planted violations.
+
+## Second follow-up
+
+This section covers Requirements 24 to 29 and the fifteen decisions at the end of `requirements.md`. It rewrites no earlier section. Where it changes earlier text (Property 1, the "429 before the body is read" behaviour, the memory-only Display_Info, the primary sample), it says so. Names that the sources show are used as they are; where a file has not been read yet, the task that edits it reads it first, and this section says so.
+
+### S1. The verify route (Requirement 24, Decisions 1 to 6)
+
+**Order in `handleVerify`, replacing the order in the requirements' measurements.** The route is live when `config.mode === "live"`. In fixtures mode steps 2 and 6 are skipped, as the guard is today.
+
+1. Method check: POST only (405 otherwise), as today.
+2. Request_Ceiling (live only): `ceiling.check(address)` against a fixed-window limiter of 60 per `ROUTE_WINDOW_MS`. This counts every request that reaches it, answered from the cache or not, and runs before the body is read. When the address is over, answer 429 with `CHECKS_BUSY` through `tooManyRequests`, with no body read and no lookup.
+3. `readBodyCapped`, the 200,000 character check, `parseVerifyBody`, the `MAX_RECORDS` and record checks, each with its present status and fixed message (24.17).
+4. `missing = await missingLines(records, deps)` (live only). This is the Cache_Answered_Request test.
+5. If `missing.length > 0` the request is a Service_Request: `verifyLimit.check(address)` against a second fixed-window limiter of 10 per `ROUTE_WINDOW_MS`. When over, answer 429 with `CHECKS_BUSY` and `Retry-After`, with no lookup.
+6. `lookupWithInfo(records, deps)` and the response, as today (24.10).
+
+`rate-limit.ts` gets two exports in place of the single `VERIFY_LIMIT = 6`: `VERIFY_LIMIT = 10` and `VERIFY_CEILING = 60`, each built with the existing `createFixedWindowLimiter` and `routeGuard` plumbing, one limiter per constant, so the two counts never share a window. `OPINION_LIMIT` stays 30 and `/api/opinion/[clusterId]` is not touched (Decision 5). The comments in `rate-limit.ts` and `verify-route.ts`, `docs/DEVELOPMENT.md` and the README are edited to say the new rule (24.25).
+
+**Why two counters and a check order.** The ceiling replaces the protection "429 before the body is read" for the case that matters, a flood from one address. The Verify_Limit needs the body, so an address at the Verify_Limit costs one body read, one parse and up to 500 cache reads before it is refused. That cost is bounded by the 262,144 byte cap, by `MAX_RECORDS`, and by the ceiling of 60 requests a minute. A refused request at the Verify_Limit is counted by the ceiling and not by the Verify_Limit a second time, because `verifyLimit.check` counts only when it allows.
+
+**Counting rules, each with its criterion.**
+
+| Request | Ceiling | Verify_Limit | Criteria |
+| ------- | ------- | ------------ | -------- |
+| Fully cached lines | counted | not counted | 24.1, 24.16 |
+| Any missing line, or partly cached | counted | counted once | 24.2, 24.13 |
+| `{"records":[]}` or no Citation_Line | counted | not counted | 24.14 |
+| Service_Request that ends all `unchecked` | counted | stays counted | 24.12 |
+| Cache entry disappears between the check and `lookupWithInfo` | counted | not counted a second time, request not refused | 24.11 |
+| Fixtures mode | not applied | not applied | 24.15 |
+| Over the ceiling | 429 before the body | n/a | 24.16 |
+| Over the Verify_Limit | counted | 429, no lookup | 24.3 |
+
+**The Verifier export (24.7 to 24.9).** In `packages/verifier/src/cache-access.ts`, `cachePeek(deps, key, guard)` reads the store with the existing `readStore` and applies the guard, and bumps no counter. In `lookup.ts`, `missingLines(records, deps): Promise<readonly string[]>` returns the Citation_Lines of `planLookup(records).lines` for which `cachePeek(deps, line, isCachedLine)` is `undefined`. It does not call `cacheGet` (which bumps `hits` and `misses`) and does not call `cacheSet`. It is exported from `packages/verifier/src/index.ts`, and `packages/courtlistener-mcp` does not use it. `lookupWithInfo`, `readCache` and every existing export keep their arguments and results (24.9). Because both functions use `planLookup` and `isCachedLine`, they cannot disagree about which lines are cached; Property 5 pins that.
+
+A request with no `full` record makes `planLookup(records).lines` empty and so gives an empty list, which is the Cache_Answered_Request case of 24.14. `lookupWithInfo` already returns empty maps for that case.
+
+**Cost.** The cache is read twice for a request that goes on: once in `missingLines` and once in `readCache`. With the file store that is up to 500 small reads more, bounded as above. The gap between the two reads is a few milliseconds; the table row for 24.11 says what happens in it.
+
+**What does not change.** The Check_Page's requests (24.19, Property 2 still holds), the 429 sentence and headers (24.4), `/api/opinion`, demo mode and `verifierStatus` counts for a Cache_Answered_Request, which still rise by `hits` through `lookupWithInfo` and not through `missingLines`.
+
+### S2. Saved display information (Requirement 25, Decisions 7 to 10)
+
+**Shape.** `PersistedValue` gains one optional field, written in the same `JSON.stringify` as `codes`:
+
+```ts
+type SavedInfo = Readonly<{
+  key: string;          // an issue key, "k<N>"
+  clusterId: string;
+  foundName: string;
+  foundYear?: number | string;   // exactly the type DisplayInfo gives it
+  absoluteUrl?: string;
+}>;
+// PersistedValue: ... declaration?: Declaration; resolved?: readonly SavedInfo[];
+```
+
+`version` stays 1. `serialise(document, runLog, verifiedAt, declaration, resolved)` takes a fifth argument, `ReadonlyMap<IssueKey, DisplayInfo> | null`, and writes the field only when `storableInfo(document, resolved)` is not empty, in key order. `Restored` gains `resolved: ReadonlyMap<IssueKey, DisplayInfo>`, empty when absent. The field holds no draft text (25.2).
+
+**One rule, written once.** `client/resolved.ts` gets `storableInfo(document, info)`, which keeps an entry only if the Document has a Full_Citation with that key whose result is `verified` or `wrong_case` and whose `clusterId` equals the entry's (25.7, Decision 8). It is the rule `usableInfo` and `displayFor` already apply when reading, moved to the write. `serialise` calls it, so no caller can write an entry for a result that is gone.
+
+**Reading is lenient and never blocks.** `asResolved(value)` in `persist.ts` returns an empty map when the field is absent (25.8) or is not an array (25.9), and drops each entry that lacks a string `key`, a string `clusterId`, a string `foundName`, or has a `foundYear` or `absoluteUrl` of the wrong type (25.10). It never returns an error value, so `deserialise` has no new `PersistError` kind and the Draft_Gate blocks for `not_json`, `bad_shape` and `bad_codes` only (25.12). An entry that no longer matches its citation is ignored at use by the existing `clusterId` equality check (25.4).
+
+**Memory and the epoch.** `ResolvedSession` is `{ epoch, info } | null`, read only while `session.epoch === store.epoch`. The mount-time load in `autosave.ts` now returns `resolved` with the Document, and `use-verify.ts` seeds the session with the epoch of the store after the restore. Task 1 of the implementation reads `use-autosave.ts`, `autosave.ts` and `use-verify.ts` and fixes the hand-off to one place. Replacement of the Document (New, Open, a sample, a Hand_Over) bumps the epoch as today, so the session and the entries of the earlier Document are gone; only a restore seeds a new session (25.6). An edit that clears a citation's result drops its entry from memory when the session is pruned with `storableInfo` on the store change, and from the stored value at the next write, which is the same write that records the edit (25.5).
+
+**Writes.** `use-autosave.ts` adds the session's `info` to the values that schedule the 300 ms debounced write, so a completed Verify_Run writes with the same debounce as a Document change (25.18). While the Draft_Gate is blocked the write is skipped as it is today, and `resolved` is skipped with it (25.11).
+
+**Compatibility.** A value from before this change has no field and loads as today, with no Resolved_List until a run (25.8). A value written now loads in an older build, because `deserialise` ignores keys it does not know; that build drops the field at its next write, which costs only the found names. A `verified` result stores only `clusterId` in the Document, which is why the found name is the new data; a `wrong_case` result already stores `foundName` and `foundYear` and only gains `absoluteUrl`.
+
+**Size.** One entry is about 100 to 200 bytes. A Document holds at most 500 Full_Citations to verify, so the field is at most about 100 KB, far under the `localStorage` quota. A failed `setItem` is handled as today.
+
+**Places that must not change or must ignore the field.**
+
+- Save a copy (`saved-draft.ts`) hands over the stored string unchanged, so its code is not edited and its downloaded string now includes the field (25.13, Decision 10).
+- The print view reads the value through `deserialise` and uses `Restored.document` only (25.14).
+- `render(document, "full")`, the Appendix, the Statement, the DOCX and the Copy_Text take the Document and never the map (25.15). Property 3 states this.
+- The `/check` page keeps its Display_Info in memory, writes nothing to storage, and its Hand_Over carries text only (25.17). The static scan that forbids `localStorage` and the other stores in `app/check/` and `src/check/` stays as it is. `storableInfo` lives in `client/resolved.ts`, which the Check_Page does not import for writing.
+
+**Amendments recorded (Decision 9).** Each amended place gets a one-line note that Requirement 25 of this spec replaces the words: `case-match` Requirement 7 criteria 5 and 6 and its design table "What is stored where" and the diagram label "Display_Info, session only"; `editor-app` Requirement 9 criterion 2 and limitation L11; the comments in `link.ts`, `resolved.ts`, `use-verify.ts` and `verify-flow.ts` (25.21); the README line (25.22). The `case-match` and `editor-app` files are edited by the task that lands the storage change, not by this step.
+
+### S3. Toolbar and Empty_Page (Requirement 26, Decisions 11 and 12)
+
+**Next_Step.** `nextStep` returns `load-avianca` in place of `load-demo` while the text is empty and no run is in flight. `PRIMARY_LABEL["load-avianca"]` is "Load Mata v. Avianca". The other rules (nothing while a run is in flight, Verify, Export) are untouched (26.11, 26.12).
+
+**Toolbar.** After Open, in this order: "Load Mata v. Avianca", then "Load demo motion". The first carries `data-primary="true"` exactly when `nextStep` is `load-avianca`; the second never carries it. Both call handlers that already exist: the Avianca button calls the handler behind the "Load the Avianca citations" link (fetch `/avianca-citations.txt`, the same confirm on a non-empty draft, install as pasted text, `AVIANCA_FAILED` on failure), passed to `Toolbar` as a prop, so there is one implementation (26.4). "Load demo motion" keeps its label, action and confirm (26.3). The Empty_Page links in `editor-surface.tsx` are reordered to "Load the Avianca citations", "Load demo motion", "Open a draft", with no icon and no `data-primary` (26.6, 26.7). The Check_Page's action order is not touched (26.17).
+
+**Measurement plan at 1150px (26.8 to 26.10).** The label "Load Mata v. Avianca" is 20 characters, so about 150px at the estimated 7px a character, against about 105px for the earlier "Load Avianca". Together the two buttons are about 280px plus an 8px gap. The estimate is not a result. Before the label is accepted, a throwaway Playwright probe (Chromium, run against `pnpm dev` as in F6, deleted afterwards like the F6 probes, not part of the suite) measures, in a real browser:
+
+1. Viewport 1150 by 800, empty draft (`localStorage` cleared), so the Avianca button is primary and the notice area is empty.
+2. Viewport 1150 by 800 with a notice showing: the "Opened ...: n characters" message after an Open, and a long notice such as `DOCUMENT_TOO_LONG`.
+3. For each of the two Sample_Buttons: `getBoundingClientRect().width` and `.height`, `scrollWidth` against `clientWidth` (clipping), and the height against the 30px button height (wrapping).
+4. For the Toolbar: `scrollWidth` against `clientWidth` (no overflow), the width of the notice area, and whether the Court rules link and the last Toolbar item are inside the Toolbar's box and visible.
+5. The same readings at 1280px, for the report.
+
+The probe passes when both labels show in full, each button is 30px high with `scrollWidth <= clientWidth`, the Toolbar does not overflow, and the Court rules link is visible (26.8, 26.9). The notice area may end in an ellipsis, and its measured width is reported. If any reading fails, the report states which button, which width and by how much, and does not pick a remedy. The remedies to put to the author then are a shorter label ("Load Avianca"), a shorter Demo_Sample label, or one load button that follows the Next_Step; the third needs a rule for a non-empty draft and is not proposed. The measured values go into the `BUILD_LOG` entry (29.3). The `ui.md`, README and `docs/demo-script.md` edits of 26.13 to 26.15 use "Load Mata v. Avianca" and "Load demo motion".
+
+### S4. The divergence sentence (Requirement 27, Decision 13)
+
+`client/divergence.ts` keeps `divergenceWords`, `wordsOf` and `firstWordIndex` and gains one export:
+
+```ts
+export function divergenceSentence(quoteText: string, prefixLength: number): string {
+  const words = wordsOf(quoteText);
+  if (words.length === 0) return "";
+  const first = firstWordIndex(words, prefixLength);
+  const differing = divergenceWords(quoteText, prefixLength);
+  if (first === 0) return `Differs from the opinion from the first word: "${differing}"`;
+  const tail = words.slice(Math.max(0, first - 3), first).map((w) => w.text).join(" ");
+  const lead = first > 3 ? "… " : "";
+  return `Matches the opinion up to "${lead}${tail}", then differs: "${differing}"`;
+}
+```
+
+Reading it against the requirements:
+
+- The Match_Tail is the last three whole words before the first differing word, or all of them when fewer than three precede it (27.5, 27.10). The leading "… " (U+2026 and a space) appears only when `first > 3`, which means words were dropped before the tail (27.6). A divergence inside a word makes `firstWordIndex` return that word, so the whole word is in the differing part and the tail ends before it (27.9).
+- A divergence at the first word, including inside the first word or at offset 0, gives the "Differs from the opinion from the first word" form (27.8). An offset past the last word makes `firstWordIndex` return the last word, so the sentence still names it.
+- An empty or whitespace-only quotation gives the empty string, and the callers show no divergence line (27.11). Words are taken as written, with no change to apostrophes or marks (27.13). Only the ASCII `"` and U+2026 are used, there is no icon and no exclamation mark (27.12).
+- For the demo motion's quotation the result is `Matches the opinion up to "a pro", then differs: "se plaintiff who alleges retaliation is…"`, with no leading ellipsis because "a pro" begin the quotation.
+
+**Where it is used (27.2, 27.3).**
+
+| Place | Before | After |
+| ----- | ------ | ----- |
+| `check-rows.ts`, `divergenceFor`, feeding `row.divergence` | `divergenceWords(...)` or null | `divergenceSentence(...)`, null when empty (27.16) |
+| Issues row, `issues-list.tsx` | "Diverges at: " plus the words | the sentence alone |
+| Check_Page result list, `result-list.tsx` | same | the sentence alone |
+| Pane status, `composeStatus` in `use-pane.ts` | `statusText` plus the words, calling `divergenceWords` directly | `statusText`, two spaces, then `divergenceSentence(...)` |
+
+No caller builds any part of the sentence. The Export dialog and the Copy_Text show no divergence, the Statement carries `prefixLength` as data and does not print it, and nothing the Sentinel reads holds the words, so the DOCX, the Statement, the Appendix, the full serialisation and the Copy_Text do not change by a byte (27.15). The Pane status can now be about 100 characters. The task that edits `use-pane.ts` reads the Status_Bar stylesheet in `src/pane/`; the status line must stay on one line and end in an ellipsis, and if it does not, the three declarations (`white-space: nowrap`, `overflow: hidden`, `text-overflow: ellipsis`) are added there, where Pane styling is exempt from the Tokens. A test asserts that the status element has them.
+
+### S5. One link to the editor on `/check` (Requirement 28, Decision 14)
+
+`check-page.tsx` computes one value, `showEditorLink = wide && !stale && text !== ""`, the condition that renders the Editor_Link today. It renders `EditorLink` when the value is true, and passes `showEditor={!showEditorLink}` to `PageLinks`, which renders "Open the editor" only when `showEditor` is true and always renders "See all court rules" (28.1 to 28.3, 28.6). Exactly one of the two is present at any moment, because both read the same value. The server snapshot of `wide` is `false`, so the server HTML holds the footer link and no Editor_Link (28.4). A change of viewport width, an emptied or filled Draft_Box, or results going out of date change the value and swap the links without a reload (28.5). The one-column page rule in `ui.md` gets the sentence that the checking page shows one link to the editor (28.9). The earlier criteria 2.5 and 14.3 are amended as 28.8 says.
+
+### S6. Process and documents (Requirement 29, Decision 15)
+
+The `BUILD_LOG.md` entry is written by the agent that lands the last task. It records, as plain statements of fact: all five findings were found by a reviewer who used the live site cold, and none was found by a test; the limit counted requests that were answered from the cache; the display information for found cases did not survive a reload; the empty page led with the demo motion while every instruction starts with the Avianca sample; "Diverges at" read as clipped text to two readers; and `/check` showed two links to the editor. It then names each finding with its requirement, the measured values the design used (10 and 60 per minute, 6 and 5 distinct Citation_Lines in the two samples, the Toolbar widths from S3), and the four earlier decisions it reverses (6 a minute counting every request, 429 before the body is read, memory-only Display_Info, the demo motion as the primary sample). `docs/KIRO_USAGE.md` gains the row for the `ui.md` edit and keeps the row for this spec listing `.config.kiro`, `requirements.md`, `design.md`, `tasks.md` and `tasks.meta.json` (29.6). The README edits keep `static/docs.test.ts` true, including that the README holds no exclamation mark (29.7).
+
+### S7. Correctness properties added or updated
+
+Reflection on the prework for Requirements 24 to 28:
+
+- 27.14 and 27.16 describe one pure function and its use in the rows. They update Property 1 and add Property 4. Property 1's divergence clause becomes a comparison with `divergenceSentence`; Property 4 states the function's own invariants.
+- 25.16 and 25.19 describe one round trip and one independence. They merge into Property 3. The clearing rules (25.5, 25.6, 25.18), the Draft_Gate (25.9 to 25.12), the print view and Save a copy depend on the DOM, the store or the clock, and get example tests.
+- 24.7 to 24.9 describe a pure relation between two Verifier functions over a seeded cache. They become Property 5. The counting rules of 24.1 to 24.3, 24.11 to 24.16 and 24.20 to 24.23 involve the route, a clock and an address, so they are example tests with a live guard, a memory cache and a recording `fetch`, as `route-limits.test.ts` builds its live case today. They are enumerable, and one example per row of the S1 table covers each.
+- Requirement 26 (labels, order, widths) and Requirement 28 (links) are markup and layout. They get example tests and the S3 probe. Requirement 29 is documents.
+
+Each property is one `fc.assert(fc.property(...))` in a file named `<module>.properties.test.ts`, with `// Property N` above it and `_Requirements: x.y_` in the `describe` title, `numRuns` 200 locally and 500 in CI. Arbitraries are added to `packages/engine/src/testing/arbitraries.ts` through `arb-check-results.ts`: saved-entry lists (valid, stale `clusterId`, unknown key, wrong types), quotation texts with Unicode words and runs of white space, and citation records with seeded cache contents.
+
+#### Property 1: One answer (updated)
+
+Clause 5 of Property 1 changes. Its text "its `mismatch`, `divergence` and `href` equal the values the Issues row derives for the same item" now reads: for each failing quotation row with a mismatch result, `divergence` equals `divergenceSentence(quote text, prefixLength)` of that quotation, and is `null` when that sentence is empty or the row is not a mismatch; `mismatch` and `href` equal the values the Issues row derives as before. The Issues row, the result list and the Pane status are checked to show that same string through their own derivations in the example tests. Everything else in Property 1 and its extension F2 is unchanged. **Validates: Requirements 6.9 as replaced by 27.2 and 27.16, 8.1, 19.13**
+
+#### Property 3: Saved display information round trip
+
+For any Document built by the existing arbitraries with any verification results, any list of Display_Info entries whose keys are drawn from the Document's keys and from keys it does not have, with matching, stale and absent `clusterId` values, any run log, any `verifiedAt` and any declaration:
+
+1. `deserialise(serialise(document, runLog, verifiedAt, declaration, info))` returns a Document equal to `document`, and a `resolved` map equal to exactly the entries that `storableInfo` keeps, which is those whose key names a Full_Citation of the Document with a `verified` or `wrong_case` result and the same `clusterId`. Entries that fail that test are absent.
+2. The restored Document, its `render(…, "full")` text and the DOCX built from it with a fixed clock are equal to those of the Document restored from `serialise(...)` with `info` null. The bytes of the two DOCX files are identical (25.15, 25.16).
+3. The serialised string with `info` null has no `resolved` key, and the serialised string never contains any text of the Document that is not already in `codes`, other than through the entries' own fields.
+
+**Validates: Requirements 25.1, 25.2, 25.7, 25.15, 25.16, 25.19**
+
+#### Property 4: Divergence sentence
+
+For any quotation text made of words (including non-ASCII letters, apostrophes and curly marks) separated by runs of white space, and any `prefixLength` from 0 to the text length, let `words` be the text split on white space, let `first` be the index of the word that holds the offset `prefixLength` (or the next word, or the last word when none follows), computed by scanning code units independently of `wordsOf`, and let `s = divergenceSentence(text, prefixLength)`:
+
+1. If `words` is empty, `s` is the empty string. Otherwise `s` has no `!`, and the characters outside the words it carries are only ASCII `"`, spaces, commas, colons, periods and U+2026.
+2. If `first` is 0, `s` equals `Differs from the opinion from the first word: "` plus `divergenceWords(text, prefixLength)` plus `"`.
+3. Otherwise `s` equals `Matches the opinion up to "` plus a leading `… ` only when `first > 3` plus the words `max(0, first - 3)` to `first - 1` joined by single spaces plus `", then differs: "` plus `divergenceWords(text, prefixLength)` plus `"`.
+4. The differing words inside `s` begin with `words[first]` and contain at most six words (the trailing U+2026 is not a word), and the Match_Tail has at most three words, each equal to a word of the text in the same order and ending just before `words[first]`.
+5. Adding more words after the divergence, or changing white space between words, does not change the Match_Tail or the part of `s` before `then differs` (metamorphic).
+
+**Validates: Requirements 27.1, 27.4, 27.5, 27.6, 27.7, 27.8, 27.9, 27.10, 27.11, 27.12, 27.14**
+
+#### Property 5: Missing lines agree with the lookup
+
+For any list of citation records (full records of several reporters, short forms, and records that give no Citation_Line), and any memory cache seeded with some of the lines of those records as valid cached entries, some as entries that fail `isCachedLine` (a `verified` entry with no cluster record, a wrong shape), and the rest absent, with a recording `fetch` and a fixed clock:
+
+1. `missingLines(records, deps)` returns a list equal, as a set, to the Citation_Lines that `lookupWithInfo(records, deps)` then sends to the recording `fetch`, and the list is empty exactly when `lookupWithInfo` makes no request.
+2. `missingLines` writes nothing: the store's contents are equal before and after, and the `hits`, `misses` and `writes` counters of `verifierStatus` are equal before and after.
+3. The result of `lookupWithInfo(records, deps)` is equal whether or not `missingLines` ran first (24.9).
+
+**Validates: Requirements 24.7, 24.8, 24.9, 24.14**
+
+### S8. Error handling and testing changes
+
+| Situation | Behaviour | Source |
+| --------- | --------- | ------ |
+| 60 requests of any kind in a window from one address | 429 `CHECKS_BUSY` with `Retry-After`, before the body is read | 24.16 |
+| Over the Verify_Limit with a Service_Request | 429 `CHECKS_BUSY` with `Retry-After`, no lookup | 24.3 |
+| Over the Verify_Limit with a malformed or oversize body | 400 or 413 as for any such body; the limit is not reached | 24.6 |
+| `deps.cache.get` rejects inside `missingLines` | The line counts as missing, as `readStore` already returns `undefined` for a rejection | 24.7 |
+| `resolved` absent, not an array, or an entry malformed | Field or entry ignored; Document loads; Draft_Gate stays open | 25.8 to 25.10, 25.12 |
+| `divergenceSentence` on a quotation with no word | `""`; no divergence line | 27.11 |
+
+No new `try/catch` is added. `cachePeek` reuses `readStore`, which already turns a store rejection into `undefined`.
+
+**Tests that change or are added.**
+
+- `route-limits.test.ts`: the test "refuses before the body is read or any lookup is made" is replaced by tests of 24.3, 24.16 and 24.17, and the tests that call `handleVerify` six or seven times with `fixturesDeps()` are rewritten to count Service_Requests (24.24). New examples, one per row of the S1 table, with a live guard, a memory cache that holds every line of a draft, and a recording `fetch`; any number of repeat checks up to the ceiling answer 200 and call the service once; Service_Requests answer 200 up to 10, 429 after, 200 in the next window, and each address counts alone; the 429 sentence and headers equal those of the earlier tests; fixtures mode never limits (24.20 to 24.23).
+- `packages/verifier/test/missing-lines.properties.test.ts` (Property 5) and a small example test with the file store.
+- `apps/web/test/persist-resolved.properties.test.ts` (Property 3), and examples: verify, reload, same rows and the same addresses; edit a citation and its entry and row go; New, Open, a sample and a Hand_Over clear the entries; a value with no field loads; a malformed field is ignored and leaves the Draft_Gate open; Save a copy equals the stored string; the print view ignores the field; the `/check` page writes nothing (25.20).
+- `apps/web/test/divergence.properties.test.ts` (Property 4) and `divergence.test.ts` examples for the first-word, short-quote, mid-word, no-word and long-quote cases (27.17); `check-rows.properties.test.ts` for the updated Property 1.
+- `toolbar` and `app-shell` tests: Avianca button first and primary on empty text, the demo button plain, order after Open, labels; `next-step.test.ts` and its two property files for `load-avianca`; the nine tests listed in 26.16 updated to the new order.
+- `check-page.test.tsx` and `check-editor-link.test.tsx`: one link to the editor at 375px with text, at 1280px with text, at 1280px with an empty box, at 1280px with out-of-date results, and the server HTML (28.7).
+- Static scans: `draft-storage-writes` and the `check` storage scan stay as they are. A new assertion in `docs.test.ts` or its neighbour is not added; the README edits keep the existing ones true.
+- The S3 browser probe is run once by the task that sets the label, and its numbers go in the `BUILD_LOG`; it is not committed.
