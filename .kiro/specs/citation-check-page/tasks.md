@@ -401,7 +401,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - In the second follow-up entry, replace the "Open observation" paragraph in place with the 23.1 numbers, in the third person and in plain words: the notice area width at 1150, 1280 and 1440px with and without a draft, the longest notice and its one-line width, and how much of it shows at each width. Add a short third follow-up entry: the author walked the build and found that the first fix took the notice's room; no test found it; the Sample_Buttons now show only while the draft is empty; the guard in `loadOrAsk` stays because a silent replacement of a draft would be the worst failure, though no control reaches it with text. Make no first-person claim as the user.
     - _Requirements: 31.6, 32.5, 32.10_
 
-- [~] 24. Final checkpoint
+- [x] 24. Final checkpoint
   - After the last edit, run in order: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, the clean-checkout web build (`pnpm --filter @reveal-codes/web build` from a clean clone after `pnpm install`) and `pnpm kiro:check`. Fix any failure and rerun all of them after the fix.
   - Confirm `git status` shows a clean working tree with everything committed. Do not push. Ask the user if questions arise.
   - _Requirements: 29.8, 29.9, 29.10_
