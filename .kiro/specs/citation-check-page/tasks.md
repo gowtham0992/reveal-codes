@@ -380,7 +380,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - `ui.md` Layout Toolbar sentence and Controls Primary rule: the two sample buttons are shown only while the draft is empty; the order of steps in the Primary rule is unchanged. README "Demo path" and `docs/demo-script.md`: check that neither tells a reader to select a sample button with a draft loaded, and add "To switch samples, press New first." where a reader could be in a loaded draft. Keep `docs.test.ts` green and the README free of exclamation marks.
     - _Requirements: 30.7, 30.8, 30.9_
 
-- [ ] 23. Third follow-up (b): room for the notice
+- [x] 23. Third follow-up (b): room for the notice
   - [x] 23.1 Measure the notice in real Chromium, then stop or go on
     - After 22.1, start `pnpm dev` as a background process and run Playwright scripts kept in `/tmp` (not committed); stop the server afterwards. Follow design T4: enumerate every string set into the Toolbar notice (`notices.ts`, `open-messages.ts`, any other module) and give the longest one's text and its width on one line; produce notices by real actions (open a file for "Opened" and "Could not open", export for `EXPORT_UNSAFE_CHARACTER` if feasible, otherwise render the notice through the store and say so); at 1150, 1280 and 1440px, with an Empty_Draft and with a loaded draft, report the Notice_Area width and exactly how much of the longest notice is visible at 1150, 1280 and 1440px. If the longest fixed notice does not fit in two lines at 1280px with a loaded draft, STOP, report the numbers and pick no remedy: do not run 23.2 to 23.5. A very long file name may still be cut and is not a reason to stop. Report the numbers in the task result.
     - _Requirements: 32.5, 32.6, 32.7, 32.8_
@@ -397,7 +397,7 @@ Language: TypeScript 5.x, strict, as the design specifies. Tests use vitest and 
     - `ui.md`: state the notice rule (at most two lines, ellipsis, full text in `title`, whole text in the DOM) in the Toolbar text and in Copy. `docs/KIRO_USAGE.md`: add a row for the `ui.md` edit if the inventory asks, and keep the row for this spec listing `.config.kiro`, `requirements.md`, `design.md`, `tasks.md` and `tasks.meta.json`. Keep `docs.test.ts` and `pnpm kiro:check` green.
     - _Requirements: 32.9_
 
-  - [~] 23.5 Update `BUILD_LOG.md`
+  - [x] 23.5 Update `BUILD_LOG.md`
     - In the second follow-up entry, replace the "Open observation" paragraph in place with the 23.1 numbers, in the third person and in plain words: the notice area width at 1150, 1280 and 1440px with and without a draft, the longest notice and its one-line width, and how much of it shows at each width. Add a short third follow-up entry: the author walked the build and found that the first fix took the notice's room; no test found it; the Sample_Buttons now show only while the draft is empty; the guard in `loadOrAsk` stays because a silent replacement of a draft would be the worst failure, though no control reaches it with text. Make no first-person claim as the user.
     - _Requirements: 31.6, 32.5, 32.10_
 

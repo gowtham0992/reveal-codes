@@ -869,9 +869,34 @@ All five findings came from a person using the live site cold. No test found any
 - Distinct Citation_Lines: 6 in the Avianca sample, 5 in the demo motion.
 - Toolbar widths, measured in task 18.4: the "Load Mata v. Avianca" button is 149.0px wide, and the "Load demo motion" button is 133.4px wide. Both are 30px high. Neither wraps or clips at 1150px or 1280px. The Toolbar did not overflow at either width, and the "Court rules" link stayed visible.
 
-### Open observation
+### The notice area in the Toolbar (measured, and what was done)
 
-With a draft loaded, the notice area in the Toolbar at 1150px is about 24px wide. A notice such as "Opened small.txt: 47 characters, marked as pasted." needs 299px of text, so the area shows only an ellipsis. No remedy has been chosen.
+The author walked the build and the notice area was too small. The numbers below are from real Chromium, driven by Playwright against `pnpm dev`.
+
+**Before the third follow-up** (the two sample buttons sat in the Toolbar beside Open, also with a draft loaded): the author measured the notice area at 24px at 1150px, 154px at 1280px and 314px at 1440px. The notice "Opened small.txt: 60 characters, marked as pasted." needs 299px on one line, so at 1150px it showed one letter and an ellipsis. The earlier measurement recorded the 24px and chose no remedy. The sample buttons were 149px ("Load Mata v. Avianca") and 133px ("Load demo motion") wide.
+
+**After** (the sample buttons show only while the draft is empty): the notice area is 319px, 449px and 609px at 1150px, 1280px and 1440px with a draft loaded, and 95px, 225px and 385px with an empty draft. The Toolbar stays 52px high and does not overflow.
+
+**The longest notices that reach the Toolbar**, with their one-line widths:
+
+- "Opened" followed by an 83-character file name and "…removed, footnotes": 228 characters, about 1356px.
+- With a short name, "Opened notes12.docx: 95 characters, marked as pasted. 12 characters that Word files cannot store were removed. Footnotes and endnotes follow the body.": 150 characters, about 896px.
+- The Court rule notice: 137 characters, about 792px. It is the longest of the 41 entries in `data/standing-orders.json`.
+- `EXPORT_UNSAFE_CHARACTER`: 128 characters, about 724px.
+- `WAITING_TEXT`: 87 characters, about 478px.
+- The refusal messages for a particular file name go to the Open_Note, not the Toolbar.
+
+**How much shows with a loaded draft.** With the old one-line ellipsis, about 50 to 54 characters showed at 1150px, 73 to 78 at 1280px and 100 to 107 at 1440px. With the two-line clamp (13px text, 16px line height):
+
+| Notice                                 | 1150px                                                      | 1280px                           | 1440px  |
+| -------------------------------------- | ----------------------------------------------------------- | -------------------------------- | ------- |
+| 150 characters (short name, Word file) | about 97                                                    | about 145 of 150 (loses "body.") | all 150 |
+| 137 characters (Court rule)            | about 97 (it needs three lines; the last two words are cut) | all 137                          | all 137 |
+| 128 characters (export)                | about 107                                                   | all 128                          | all 128 |
+
+The 128-character export notice was written into the status element directly. It was not produced by an action, because Export was disabled. With an empty draft a clamp does not help: the area is 95px at 1150px.
+
+**Decision.** The author accepted two lines. One notice loses its last word at 1280px. The `title` attribute and the screen-reader text keep the whole notice. There is no third line, and the open-draft wording is unchanged. A very long file name is cut at any width.
 
 ### Process notes
 
@@ -882,6 +907,29 @@ With a draft loaded, the notice area in the Toolbar at 1150px is about 24px wide
 - **The exported-bytes pin hashes were taken from current output, not from the old code.** They pin today's export. They do not show that the export is unchanged from before this work.
 - **The function-length scans tripped on two test files.** Both files were split until each function was under 40 lines.
 - **A test run under parallel load timed out once.** The run passed when repeated, and no timeout was raised.
+
+### Verification
+
+Nothing was pushed.
+
+## 2026-11-16 citation-check-page third follow-up (room for the notice)
+
+### What was built
+
+The two sample buttons now show in the Toolbar only while the draft is empty, and the notice is clamped to two lines with the whole text in `title`. The measured numbers are in the second follow-up entry above. Task numbers refer to `.kiro/specs/citation-check-page/tasks.md`, task 23.
+
+### What Kiro got wrong, and what fixed it
+
+- **The first fix took the notice's room.** Putting two sample buttons beside Open left the notice 24px at 1150px with a draft loaded. The author found this by walking the build. No test found it, because no test measured the notice area in a browser.
+- **The earlier measurement chose no remedy.** It recorded the 24px as an open observation and moved on. Task 23.1 measured it in real Chromium and the buttons were moved.
+- **A CSS test needed an edit.** The notice font size changed from 12.5px to 13px, so `toolbar-css.test.ts` was changed to expect 13px.
+- **The five confirm tests were rewritten.** A hook alone could not read the editor text, the notice or the Declaration, so the tests now go through a harness that mounts the real AppShell. One `data-primary` assertion was dropped, because the button is no longer in the DOM once a draft is loaded.
+- **The function-length scans tripped on three files.** Each was split until its functions were under 40 lines. `app-shell.tsx` now sits at exactly 300 lines, the module limit, so the next addition there needs a split first.
+
+### Decisions
+
+- The guard in `loadOrAsk` stays, even though no control reaches it with text in the draft. A silent replacement of a draft would be the worst failure, and the guard costs one branch.
+- Two lines are accepted for the notice. One notice loses its last word at 1280px. No third line was added.
 
 ### Verification
 
