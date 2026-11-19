@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "capturedOn": "2026-11-18",
+    "surface": "ide-specs-panel",
+    "how": "IDE Specs panel, Start task on a scratch spec",
+    "date": "2026-11-18",
+    "fieldsFrom": "probe log line n26",
+    "session": "C",
+    "probeMs": [31]
+  },
+  "payload": {
+    "session_id": "<session C>",
+    "hook_event_name": "PreTaskExec",
+    "cwd": "<workspace>",
+    "spec_name": "<workspace>/.kiro/specs/probe-scratch/tasks.md",
+    "task_name": "2. Probe task two"
+  }
+}

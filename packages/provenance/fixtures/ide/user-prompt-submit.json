@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "capturedOn": "2026-11-18",
+    "surface": "ide-chat",
+    "how": "IDE chat tab A (user account, Kiro IDE), plain prompt with no tool use",
+    "date": "2026-11-18",
+    "fieldsFrom": "probe log lines n20, n24",
+    "session": "A",
+    "probeMs": [24, 23]
+  },
+  "payload": {
+    "session_id": "<session A>",
+    "hook_event_name": "UserPromptSubmit",
+    "cwd": "<workspace>",
+    "prompt": "<prompt placeholder>"
+  }
+}

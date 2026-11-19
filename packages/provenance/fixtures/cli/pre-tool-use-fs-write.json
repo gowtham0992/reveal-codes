@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "capturedOn": "2026-11-18",
+    "surface": "cli",
+    "how": "CLI (kiro-cli chat) in a terminal, file-write prompt",
+    "date": "2026-11-18",
+    "fieldsFrom": "probe log lines n11, n15",
+    "session": "F",
+    "pathForm": "absolute",
+    "probeMs": [23, 24]
+  },
+  "payload": {
+    "session_id": "<session F>",
+    "hook_event_name": "PreToolUse",
+    "cwd": "<workspace>",
+    "tool_name": "fs_write",
+    "tool_input": { "path": "<absolute path>", "text": "<text placeholder>" }
+  }
+}

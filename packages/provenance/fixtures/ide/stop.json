@@ -1,0 +1,12 @@
+{
+  "meta": {
+    "capturedOn": "2026-11-18",
+    "surface": "ide-chat",
+    "how": "IDE chat tab A (user account, Kiro IDE), end of a turn",
+    "date": "2026-11-18",
+    "fieldsFrom": "probe log lines n23, n25",
+    "session": "A",
+    "probeMs": [29, 24]
+  },
+  "payload": { "session_id": "<session A>", "hook_event_name": "Stop", "cwd": "<workspace>" }
+}

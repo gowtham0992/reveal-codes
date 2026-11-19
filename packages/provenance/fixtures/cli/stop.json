@@ -1,0 +1,12 @@
+{
+  "meta": {
+    "capturedOn": "2026-11-18",
+    "surface": "cli",
+    "how": "CLI (kiro-cli chat) in a terminal, end of a turn",
+    "date": "2026-11-18",
+    "fieldsFrom": "probe log lines n9, n13, n17",
+    "session": "F",
+    "probeMs": [22, 22, 33]
+  },
+  "payload": { "session_id": "<session F>", "hook_event_name": "Stop", "cwd": "<workspace>" }
+}

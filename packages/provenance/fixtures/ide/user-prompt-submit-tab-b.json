@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "capturedOn": "2026-11-18",
+    "surface": "ide-chat-tab-2",
+    "how": "IDE chat tab B, plain prompt",
+    "date": "2026-11-18",
+    "fieldsFrom": "probe log line n32",
+    "session": "B",
+    "probeMs": [23]
+  },
+  "payload": {
+    "session_id": "<session B>",
+    "hook_event_name": "UserPromptSubmit",
+    "cwd": "<workspace>",
+    "prompt": "<prompt placeholder>"
+  }
+}

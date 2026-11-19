@@ -24,6 +24,18 @@
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795060575513
       }
+    ],
+    "1.3 Commit the scrubbed fixtures and the first BUILD_LOG lines": [
+      {
+        "executionId": "709645e2-9c58-4587-99e3-746d07e19b7f",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795060580238
+      },
+      {
+        "executionId": "709645e2-9c58-4587-99e3-746d07e19b7f",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795060762210
+      }
     ]
   }
 }

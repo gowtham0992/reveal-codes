@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "capturedOn": "2026-11-18",
+    "surface": "ide-chat-extra",
+    "how": "IDE chat, a further session labelled cli by mistake in the probe; its proc was ide",
+    "date": "2026-11-18",
+    "fieldsFrom": "probe log lines n18, n19",
+    "session": "E"
+  },
+  "events": [
+    {
+      "payload": {
+        "session_id": "<session E>",
+        "hook_event_name": "UserPromptSubmit",
+        "cwd": "<workspace>",
+        "prompt": "<prompt placeholder>"
+      }
+    },
+    { "payload": { "session_id": "<session E>", "hook_event_name": "Stop", "cwd": "<workspace>" } }
+  ]
+}

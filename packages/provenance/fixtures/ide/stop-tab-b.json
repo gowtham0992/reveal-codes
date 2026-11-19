@@ -1,0 +1,12 @@
+{
+  "meta": {
+    "capturedOn": "2026-11-18",
+    "surface": "ide-chat-tab-2",
+    "how": "IDE chat tab B, end of a turn",
+    "date": "2026-11-18",
+    "fieldsFrom": "probe log line n33",
+    "session": "B",
+    "probeMs": [24]
+  },
+  "payload": { "session_id": "<session B>", "hook_event_name": "Stop", "cwd": "<workspace>" }
+}

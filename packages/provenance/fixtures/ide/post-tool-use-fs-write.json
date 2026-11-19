@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "capturedOn": "2026-11-18",
+    "surface": "ide-chat",
+    "how": "IDE chat tab A (user account, Kiro IDE), file-write prompt",
+    "date": "2026-11-18",
+    "fieldsFrom": "probe log line n22",
+    "session": "A",
+    "pathForm": "absolute",
+    "probeMs": [26]
+  },
+  "payload": {
+    "session_id": "<session A>",
+    "hook_event_name": "PostToolUse",
+    "cwd": "<workspace>",
+    "tool_name": "fs_write",
+    "tool_input": { "path": "<absolute path>", "text": "<text placeholder>" },
+    "tool_response": "<response placeholder>"
+  }
+}

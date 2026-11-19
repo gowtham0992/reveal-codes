@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "capturedOn": "2026-11-18",
+    "surface": "cli",
+    "how": "CLI (kiro-cli chat) in a terminal, asked in chat to run a spec task: a write turn with no PreTaskExec and no PostTaskExec",
+    "date": "2026-11-18",
+    "fieldsFrom": "probe log lines n14 to n17",
+    "session": "F",
+    "order": ["UserPromptSubmit", "PreToolUse", "PostToolUse", "Stop"]
+  },
+  "events": [
+    {
+      "payload": {
+        "session_id": "<session F>",
+        "hook_event_name": "UserPromptSubmit",
+        "cwd": "<workspace>",
+        "prompt": "<prompt placeholder>"
+      }
+    },
+    {
+      "payload": {
+        "session_id": "<session F>",
+        "hook_event_name": "PreToolUse",
+        "cwd": "<workspace>",
+        "tool_name": "fs_write",
+        "tool_input": { "path": "<absolute path>", "text": "<text placeholder>" }
+      }
+    },
+    {
+      "payload": {
+        "session_id": "<session F>",
+        "hook_event_name": "PostToolUse",
+        "cwd": "<workspace>",
+        "tool_name": "fs_write",
+        "tool_input": { "path": "<absolute path>", "text": "<text placeholder>" },
+        "tool_response": "<response placeholder>"
+      }
+    },
+    { "payload": { "session_id": "<session F>", "hook_event_name": "Stop", "cwd": "<workspace>" } }
+  ]
+}

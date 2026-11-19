@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "capturedOn": "2026-11-18",
+    "surface": "ide-specs-panel",
+    "how": "IDE Specs panel, Start task on a scratch spec; two hook files of different names received this same payload",
+    "date": "2026-11-18",
+    "fieldsFrom": "probe log lines n29, n30",
+    "session": "C",
+    "probeMs": [24, 25]
+  },
+  "payload": {
+    "session_id": "<session C>",
+    "hook_event_name": "PostTaskExec",
+    "cwd": "<workspace>",
+    "spec_name": "<workspace>/.kiro/specs/probe-scratch/tasks.md",
+    "task_name": "2. Probe task two",
+    "task_success": true
+  }
+}

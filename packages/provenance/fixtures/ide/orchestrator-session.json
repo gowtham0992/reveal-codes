@@ -1,0 +1,44 @@
+{
+  "meta": {
+    "capturedOn": "2026-11-18",
+    "surface": "ide-orchestrator",
+    "how": "IDE orchestrator spec chat, task executed through a sub-agent; the chat session has no UserPromptSubmit although two prompts were sent (cause not established)",
+    "date": "2026-11-18",
+    "fieldsFrom": "probe log lines n1, n2, n3, n5, n7",
+    "session": "D",
+    "order": ["PostToolUse", "Stop", "PreTaskExec", "PostTaskExec", "Stop"]
+  },
+  "events": [
+    {
+      "payload": {
+        "session_id": "<session D>",
+        "hook_event_name": "PostToolUse",
+        "cwd": "<workspace>",
+        "tool_name": "fs_write",
+        "tool_input": { "path": "<absolute path>", "text": "<text placeholder>" },
+        "tool_response": "<response placeholder>"
+      }
+    },
+    { "payload": { "session_id": "<session D>", "hook_event_name": "Stop", "cwd": "<workspace>" } },
+    {
+      "payload": {
+        "session_id": "<session D>",
+        "hook_event_name": "PreTaskExec",
+        "cwd": "<workspace>",
+        "spec_name": "<workspace>/.kiro/specs/kiro-provenance/tasks.md",
+        "task_name": "1.1 Reinstall the probe outside the repository"
+      }
+    },
+    {
+      "payload": {
+        "session_id": "<session D>",
+        "hook_event_name": "PostTaskExec",
+        "cwd": "<workspace>",
+        "spec_name": "<workspace>/.kiro/specs/kiro-provenance/tasks.md",
+        "task_name": "1.1 Reinstall the probe outside the repository",
+        "task_success": true
+      }
+    },
+    { "payload": { "session_id": "<session D>", "hook_event_name": "Stop", "cwd": "<workspace>" } }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "capturedOn": "2026-11-18",
+    "surface": "cli",
+    "how": "CLI (kiro-cli chat) in a terminal, plain prompt",
+    "date": "2026-11-18",
+    "fieldsFrom": "probe log lines n8, n10, n14",
+    "session": "F",
+    "probeMs": [26, 23, 22]
+  },
+  "payload": {
+    "session_id": "<session F>",
+    "hook_event_name": "UserPromptSubmit",
+    "cwd": "<workspace>",
+    "prompt": "<prompt placeholder>"
+  }
+}

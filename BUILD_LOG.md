@@ -934,3 +934,34 @@ The two sample buttons now show in the Toolbar only while the draft is empty, an
 ### Verification
 
 Nothing was pushed.
+
+## 2026-11-18 kiro-provenance (hook payload capture)
+
+### What was built
+
+Scrubbed hook payload fixtures under `packages/provenance/fixtures/` and their README. Task numbers refer to `.kiro/specs/kiro-provenance/tasks.md`, task 1.3.
+
+### Method
+
+A probe script outside the repository (`~/.kiro-probe/`, kept out of git through `.git/info/exclude`) was run as a hook on the IDE and the CLI. It logged shapes only: field names and types, the form of the `fs_write` path, `task_name`, `task_success`, the spec directory name, a salted session prefix, and its own run time. No prompt, text, path or session id was kept. The fixtures use fixed placeholders.
+
+### Findings
+
+- **The CLI fires no PreTaskExec or PostTaskExec** when asked in chat to run a spec task. The CLI hook order cannot be measured, and there is no CLI task fixture.
+- **IDE PostTaskExec hooks of different files run in file-name order.** This was measured 4 times, so `.kiro/hooks/0-provenance.json` runs before `commit-on-task.json`.
+- **`session_id` differs** across the CLI, two IDE chat tabs, a Specs-panel task run and the orchestrator chat.
+- **The `fs_write` path is absolute** on both surfaces.
+- **A sub-agent's end fires no Stop.**
+- **UserPromptSubmit probe time** has a floor of 22 to 26 ms.
+- **A Specs-panel task run is its own session** and has no UserPromptSubmit.
+- **In the orchestrator spec chat, UserPromptSubmit did not fire for two prompts** while Stop did. The cause is unknown.
+- **The trigger is `UserPromptSubmit`.** `PromptSubmit` never fires.
+
+### What Kiro got wrong, and what fixed it
+
+- **Captures were split by environment variables**, which labelled IDE events as CLI. The probe then recorded the parent process (`proc`), and the fixtures are labelled by that and by the account that ran each session.
+- **The probe used the trigger name `PromptSubmit`**, which never fires. Renaming it to `UserPromptSubmit` fixed it.
+
+### Verification
+
+Nothing was pushed.
