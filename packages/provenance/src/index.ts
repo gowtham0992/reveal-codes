@@ -28,5 +28,14 @@ export {
 } from "./core/label.js";
 export type { ChangeOrigin, Clock, WindowRef } from "./core/plan.js";
 export { existingRunNumbers, planHunks } from "./core/plan.js";
+export type { Stepped, Transitioned } from "./core/windows.js";
+export {
+  NONE_KEY,
+  closeLeftover,
+  select,
+  sessionKey,
+  sweepStale,
+  transition,
+} from "./core/windows.js";
 export { decodeSessions, decodeState, encodeSessions, encodeState } from "./core/state-codec.js";
 export { appearedRecord, firstRecord, updateRecord } from "./core/update.js";
