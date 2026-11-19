@@ -13,3 +13,4 @@ export type {
   WindowState,
 } from "./core/types.js";
 export * from "./core/limits.js";
+export { parsePayload } from "./core/payload.js";

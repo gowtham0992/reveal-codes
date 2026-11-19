@@ -77,7 +77,7 @@ Conventions that apply to every task:
     - _Requirements: 16.1, 16.14_
 
 - [ ] 4. Pure core, each module followed by its property
-  - [~] 4.1 `payload.ts`
+  - [x] 4.1 `payload.ts`
     - File `src/core/payload.ts`: `parsePayload(text): Payload` per the design: keep `session_id`, `cwd`, `task_name`, `spec_name` and `task_success`, drop every other field including `prompt`, `tool_input` and `tool_response` without copying them. A non-object, non-JSON or over-1-MiB text gives the empty payload. `session_id` that is not a string or is empty gives `null`. `spec_name` is reduced to the name of the directory that holds the `tasks.md`; no absolute path is kept. Total: never throws.
     - Example tests `payload.test.ts`, using the committed fixtures of task 1.3 (read from `packages/provenance/fixtures/`): each captured event parses to the expected five fields; the `UserPromptSubmit` fixtures yield only `session_id` and `cwd`; an absolute `spec_name` becomes a directory name; empty and non-string `session_id`; a payload of exactly 1 MiB and one byte over; invalid JSON; a JSON array.
     - _Requirements: 3.15, 3.16, 3.19, 3.22, 16.6_
