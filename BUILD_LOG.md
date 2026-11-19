@@ -961,6 +961,10 @@ A probe script outside the repository (`~/.kiro-probe/`, kept out of git through
 
 - **Captures were split by environment variables**, which labelled IDE events as CLI. The probe then recorded the parent process (`proc`), and the fixtures are labelled by that and by the account that ran each session.
 - **The probe used the trigger name `PromptSubmit`**, which never fires. Renaming it to `UserPromptSubmit` fixed it.
+- **`timeout_ms` was never a field Kiro reads.** The five hooks ran under the 60-second default, so a test run longer than 60 seconds was killed before the `perl alarm 120` wrapper could act.
+- **The probe found it.** Three hooks ran a 6-second command: one with `timeout: 2`, one with `timeout_ms: 2000` and one with no timeout field. Only the hook with `timeout` was killed, at 2 seconds. This was measured twice in the IDE on 2026-11-17.
+- **Task 2.1 fixed it.** It changed the five hooks to `"timeout": 120` and updated the two tests that pinned the old field. The "killed after 120 s" rows of `docs/KIRO_USAGE.md` for the five hooks are now accurate.
+- **Specs that state `timeout_ms` 120000 are historical records and were not edited:** `citation-verifier` (design.md), `export-certification` (design.md), `editor-app` (requirements.md and tasks.md) and `sentinel-sweep` (requirements.md, design.md and tasks.md).
 
 ### Verification
 

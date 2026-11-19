@@ -51,14 +51,14 @@ Conventions that apply to every task:
     - Report to the user, in plain words, every finding that changes `design.md` or `requirements.md`. The findings of task 1.2 are already in the spec (design, Resolved point 13; requirements, Decisions 4, 13, 18 and 20), so report only what the fixtures of task 1.3 added to them. If a further finding changes the design, stop and ask the user before continuing. Ensure all tests pass, ask the user if questions arise.
     - _Requirements: 18.5, 18.6, 18.7, 18.9_
 
-- [ ] 2. Make the test hooks' timeout effective (Requirement 19)
+- [x] 2. Make the test hooks' timeout effective (Requirement 19)
   - [x] 2.1 The five hooks and the two pinning tests
     - In each of `.kiro/hooks/engine-tests-on-save.json`, `verifier-tests-on-save.json`, `web-tests-on-save.json`, `export-tests-on-save.json` and `sentinel-tests-on-save.json`, replace the line `"timeout_ms": 120000,` with `"timeout": 120,` and change nothing else. The `perl alarm 120` wrapper stays.
     - In `crew/sentinel/test/static/package.test.ts` change the type declaration, `expect(hook.timeout_ms).toBe(120000)` and the cross-file equality check to `timeout` and `120`. In `packages/export/test/package.test.ts` change the type declaration, the equality loop and `toBe(120000)` the same way. These two edits are the only changes under `crew/sentinel` and `packages/export`.
     - Do not edit `docs/KIRO_USAGE.md` or the specs that state `timeout_ms` 120000.
     - Acceptance: `pnpm vitest run --project sentinel --project export` passes, and `git diff --stat` lists exactly the seven files above.
     - _Requirements: 19.1, 19.2, 19.4, 19.5, 15.1, 15.9, 8.7_
-  - [ ] 2.2 BUILD_LOG line for the timeout finding
+  - [x] 2.2 BUILD_LOG line for the timeout finding
     - Add to the entry created in 1.3 the line that Requirement 19, criterion 3 describes: `timeout_ms` was never a field Kiro reads, so the five hooks ran under the 60-second default and a test run longer than 60 seconds was killed before the `perl alarm 120` wrapper could act; found by the kiro-provenance probe, in which hooks with `timeout: 2`, `timeout_ms: 2000` and no timeout field each ran a 6-second command and only the hook with `timeout` was killed, at 2 seconds; the "killed after 120 s" rows of `docs/KIRO_USAGE.md` for the five hooks are now accurate; and the specs that state `timeout_ms` 120000 are historical records and are not edited, naming `citation-verifier` (design.md), `export-certification` (design.md), `editor-app` (requirements.md and tasks.md) and `sentinel-sweep` (requirements.md, design.md and tasks.md).
     - _Requirements: 19.3, 19.4, 17.5_
 
