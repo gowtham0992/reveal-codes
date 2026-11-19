@@ -1,6 +1,15 @@
-// Baseline part filled in by task 4.10; tasks 4.12 and 5.8 add the directory parts.
+// Baseline part filled in by task 4.10, state part by task 4.12; task 5.8 adds the directory parts.
 import fc from "fast-check";
-import type { Baseline, BaselineEntry } from "../core/types.js";
+import type {
+  Baseline,
+  BaselineEntry,
+  ClosedBy,
+  FileCache,
+  OpenWindow,
+  SessionState,
+  SkippedFile,
+  WindowState,
+} from "../core/types.js";
 import { arbPath } from "./arb-text.js";
 
 const HEX = "0123456789abcdef".split("");
@@ -73,3 +82,119 @@ export const arbBaselineTwoOrders: fc.Arbitrary<{ first: Baseline; second: Basel
       .shuffledSubarray(pairs, { minLength: pairs.length, maxLength: pairs.length })
       .map((shuffled) => ({ first: build(at, pairs), second: build(at, shuffled) })),
   );
+
+// State part (task 4.12): valid WindowState values for Property 9.
+
+/** A count: a non-negative integer. */
+const arbCount: fc.Arbitrary<number> = fc.integer({ min: 0, max: 1_000_000 });
+
+/** A non-negative finite number, often fractional, never `-0` (JSON writes `-0` as `0`). */
+const arbMs: fc.Arbitrary<number> = fc
+  .oneof(
+    fc.integer({ min: 0, max: 2_000_000_000_000 }),
+    fc.double({ min: 0, max: 1e13, noNaN: true }),
+  )
+  .map((n) => n + 0);
+
+/** Free text for labels and window runs, including quotes, backslashes and lone surrogates. */
+const arbFree: fc.Arbitrary<string> = fc.oneof(
+  fc.string({ maxLength: 16 }),
+  fc.string({ unit: "binary", maxLength: 8 }),
+);
+
+/** A map key (a Session_Key or a path), sometimes one that is special to objects. */
+const arbMapKey: fc.Arbitrary<string> = fc.oneof(
+  { weight: 4, arbitrary: arbBaselinePath },
+  { weight: 1, arbitrary: fc.constantFrom("__proto__", "constructor", "toString", "") },
+);
+
+export const arbOpenWindow: fc.Arbitrary<OpenWindow> = fc
+  .tuple(
+    arbFree,
+    arbFree,
+    fc.option(fc.string({ maxLength: 6 }), { nil: null }),
+    fc.constantFrom<"turn" | "task">("turn", "task"),
+    arbBaselineAt,
+    arbCount,
+    fc.option(arbFree, { nil: undefined }),
+  )
+  .map(([windowRun, label, taskNumber, kind, openedAt, order, spec]) => {
+    const base: OpenWindow = { windowRun, label, taskNumber, kind, openedAt, order };
+    return spec === undefined ? base : { ...base, spec };
+  });
+
+export const arbClosedBy: fc.Arbitrary<ClosedBy | null> = fc.constantFrom<ClosedBy | null>(
+  "postTask",
+  "agentStop",
+  "sweep",
+  "leftover",
+  null,
+);
+
+/** A session entry; the stack may be empty. */
+export const arbSessionState: fc.Arbitrary<SessionState> = fc
+  .tuple(
+    arbBaselineAt,
+    arbClosedBy,
+    fc.boolean(),
+    fc.boolean(),
+    fc.array(arbOpenWindow, { maxLength: 3 }),
+  )
+  .map(([lastEventAt, lastClosedBy, promptSeen, noPromptCounted, windows]) => ({
+    lastEventAt,
+    lastClosedBy,
+    promptSeen,
+    noPromptCounted,
+    windows,
+  }));
+
+export const arbFileCache: fc.Arbitrary<FileCache> = fc
+  .tuple(arbCount, arbMs, arbSha256, arbMs)
+  .map(([size, mtimeMs, digest, seenMs]) => ({ size, mtimeMs, digest, seenMs }));
+
+export const arbSkippedFile: fc.Arbitrary<SkippedFile> = fc
+  .tuple(arbCount, arbMs)
+  .map(([size, mtimeMs]) => ({ size, mtimeMs, reason: "over_limit" as const }));
+
+const arbRecord = <T>(value: fc.Arbitrary<T>): fc.Arbitrary<Record<string, T>> =>
+  fc
+    .uniqueArray(fc.tuple(arbMapKey, value), { maxLength: 4, selector: ([key]) => key })
+    .map((pairs) => Object.fromEntries(pairs));
+
+/** A valid WindowState: any mix of sessions, hints and skipped entries, every flag. */
+export const arbWindowState: fc.Arbitrary<WindowState> = fc
+  .tuple(
+    arbCount,
+    fc.option(arbFree, { nil: null }),
+    fc.option(arbBaselineAt, { nil: null }),
+    arbMs,
+    fc.boolean(),
+    arbRecord(arbSessionState),
+    arbRecord(arbFileCache),
+    arbRecord(arbSkippedFile),
+  )
+  .map(
+    ([
+      order,
+      lastWindowRun,
+      lastEventAt,
+      recordedAtMs,
+      noSessionIdLogged,
+      sessions,
+      files,
+      skipped,
+    ]) => ({
+      version: 1 as const,
+      order,
+      lastWindowRun,
+      lastEventAt,
+      recordedAtMs,
+      noSessionIdLogged,
+      sessions,
+      files,
+      skipped,
+    }),
+  );
+
+/** A count for `sessions.json`. */
+export const arbSessionsCount: fc.Arbitrary<number> = arbCount;
