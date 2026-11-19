@@ -4,3 +4,4 @@ export * from "./arb-windows.js";
 export * from "./arb-dirs.js";
 export * from "./arb-ignore.js";
 export * from "./arb-payload.js";
+export * from "./arb-label.js";

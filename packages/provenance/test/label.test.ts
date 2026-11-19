@@ -78,6 +78,13 @@ describe("parseTaskName", () => {
   });
 });
 
+describe("parseTaskName: DEL and C1 controls (Property 10 counterexample)", () => {
+  it("turns DEL and C1 controls into single spaces, like the C0 controls", () => {
+    expect(parseTaskName("a\u007fb\u0085\u009fc")).toEqual({ taskNumber: null, title: "a b c" });
+    expect(parseTaskName("\u007f")).toEqual({ taskNumber: null, title: "task" });
+  });
+});
+
 describe("makeLabel and describeRun", () => {
   it("gives a turn window the title `turn` and no number whatever the name", () => {
     expect(makeLabel("5.3 Build", "promptSubmit")).toEqual({ taskNumber: null, title: "turn" });

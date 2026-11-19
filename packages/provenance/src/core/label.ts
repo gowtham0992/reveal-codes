@@ -17,9 +17,8 @@ export type RunName = {
 
 const FALLBACK_TITLE = "task";
 const TURN_TITLE = "turn";
-// `\s` and the C0 controls (U+0000 to U+001F).
-// eslint-disable-next-line no-control-regex
-const SPACE_RUN = /[\s\u0000-\u001f]+/gu;
+// `\s` and every control character (C0, DEL and C1: general category Cc).
+const SPACE_RUN = /[\s\p{Cc}]+/gu;
 const TASK_TOKEN = /^(\d+(?:\.\d+)*)\.?(?= |$)/u;
 const RUN_ID = /^(?:(\d+(?:\.\d+)*) )?(.*) (\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ)(?:~(\d+))?\.(\d+)$/su;
 
