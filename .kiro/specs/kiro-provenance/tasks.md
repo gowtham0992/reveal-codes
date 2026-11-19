@@ -6,7 +6,7 @@ The plan builds the Recorder, the Reveal_Command, the MCP server and the Power o
 
 **The Open points of the earlier design were settled by the user on 2026-11-18** and are recorded in the "Resolved points" section of `design.md`. The plan follows the design as it stands. A later change to a resolved point is made in `design.md` and in the affected tasks first.
 
-Task count: **63 tasks**, counted as leaf sub-tasks (numbered `N.M`), the four checkpoints (1.4, 4.17, 6.5 and 12.1) included. The twelve group headings are not counted. The dependency graph lists the 59 non-checkpoint leaves plus the four checkpoints, each in a wave of its own. Sixteen properties exist, one per task, none optional: Property 13 in 4.2, Property 10 in 4.4, Property 7 in 4.6, Property 3 in 4.8, Property 8 in 4.10, Property 9 in 4.12, Property 15 in 4.16, Property 1 in 5.8, Property 2 in 5.9, Property 4 in 5.10, Property 5 in 5.11, Property 14 in 5.12, Property 16 in 5.13, Property 11 in 7.2, Property 6 in 7.4 and Property 12 in 7.6.
+Task count: **66 tasks**, counted as leaf sub-tasks (numbered `N.M`), the five checkpoints (1.4, 4.17, 4.20, 6.5 and 12.1) included. The twelve group headings are not counted. The dependency graph lists the 61 non-checkpoint leaves plus the five checkpoints, each in a wave of its own. Seventeen properties exist, one per task, none optional: Property 13 in 4.2, Property 10 in 4.4, Property 7 in 4.6, Property 3 in 4.8, Property 8 in 4.10, Property 9 in 4.12, Property 15 in 4.16, Property 17 in 4.19, Property 1 in 5.8, Property 2 in 5.9, Property 4 in 5.10, Property 5 in 5.11, Property 14 in 5.12, Property 16 in 5.13, Property 11 in 7.2, Property 6 in 7.4 and Property 12 in 7.6.
 
 **The capture of task 1.2 and the user's decisions of 2026-11-18 changed the plan** (design, Resolved point 13; requirements, Decision 20): a session entry persists with an empty stack and records `lastClosedBy`, `promptSeen` and `noPromptCounted`; an `agentStop` that follows the same session's own `postTask` logs nothing; sessions that fire `Stop` with no prompt event are logged as `no_prompt_events` and counted in the committed file `.kiro/provenance/sessions.json`; the `[HUM]` and `[AI>HUM]` words now say "while no agent window was open"; and the CLI has no spec-task windows. Task 1.2 itself is unchanged and nothing is marked complete by this change.
 
@@ -137,6 +137,20 @@ Conventions that apply to every task:
   - [x] 4.17 Checkpoint - the pure core
     - Run `pnpm typecheck`, `pnpm vitest run --project provenance` and `FC_NUM_RUNS=500 pnpm vitest run --project provenance properties.test`. Confirm that no module under `src/core/` imports `node:` (`grep -rn "node:" packages/provenance/src/core` is empty) and that every module is at most 300 lines. Ensure all tests pass, ask the user if questions arise.
     - _Requirements: 1.5, 1.6, 1.7, 16.1_
+
+  - [ ] 4.18 Character trim inside each Hunk in `plan.ts`
+    - Decision of 2026-11-18 (design M15, Resolved point 14; Requirement 4, criteria 15 and 16): `diffLines` still finds the Hunks; each Hunk is trimmed before the Engine sees it. Implement `trimHunk(oldText, hunk)` in `src/core/plan.ts`, or in a new `src/core/trim.ts` if `plan.ts` would pass 300 lines: take the common prefix of the Hunk's old text and new text, by UTF-16 code unit, first; then the common suffix, which may not overlap the prefix; a boundary that would fall between a high and a low surrogate, or between `\r` and `\n` (in either text), is moved back so that the pair stays whole (the prefix is shortened for the first, the suffix for the second). The Engine gets one `replace` from `from + prefix` to `to - suffix` whose text is the remaining new text. Still one `replace` and one Run for each Hunk that keeps inserted text, a delete-only remainder takes no Run number, no `relabelThreshold` is passed, the Engine is unchanged, and operations are still applied from the highest offset to the lowest. A Hunk that is empty after the trim (old and new text equal) produces no operation and takes no Run number. `planHunks` applies the trim before it numbers the Hunks; its signature stays the same.
+    - Example tests, added to `plan.test.ts` and `update.test.ts` (no mock of the Engine): a one-character typo fix by a person in an `AI` line keeps the rest of the line `AI` with its Run, and only that one character is `HUM`; an insert at the start of a line and an insert at the end of a line each give a `replace` of only the inserted characters; a CRLF file where the last character before `\r\n` is edited does not split the pair (the boundary is moved back, `\r\n` stays in the remainder or outside it whole); edits next to and inside a surrogate pair keep the pair whole; a Hunk whose old and new text are equal after the trim yields no operation and takes no Run number, so the next Hunk takes the number that it would have taken anyway; an Agent_Change typo fix inside an `AI` line of another window leaves the rest of the line with its earlier Run and gives only the new character the new Run; a Hunk that only deletes after the trim takes no number.
+    - Update the existing tests that asserted whole-line replacement: in `plan.test.ts`, the test that an Agent_Change yields Runs `.1` and `.2` in ascending offset order and `highest + 1` on a later event (its expected `from` and `to` become the trimmed offsets, or its edits are made to differ from the first character of the line to the last), and the test that a delete-only Agent_Change takes no number (its Hunk is a whole line, which stays a pure delete after the trim); in `update.test.ts`, the test that a `HUM` replace of 20 of the 30 characters of one Hunk's Run flips that Run and leaves the neighbour `AI` (the count of edited `AI` code units is now the trimmed count, so its expected numbers are re-derived), the `firstRecord` tests with a Baseline_Text that compare spans (untouched text on a changed line is now `PST` and not `AI` or `HUM`), and the test of a file with a leading byte order mark and `\r\n`; in `update.properties.test.ts`, the reference sequence of Property 3 (it applies the same trimmed operations to the same starting Document, so it takes them from `trimHunk` and not from the whole-line Hunks). `diff.test.ts` and `diff.properties.test.ts` are not changed (Hunks stay line-aligned, Property 7).
+    - Ends with `node scripts/build-power.mjs --power provenance` and `node powers/provenance/server/provenance.mjs setup` only once task 6.3 has installed the Bundle; before that, nothing to rebuild.
+    - _Requirements: 4.3, 4.6, 4.7, 4.8, 4.10, 4.15, 4.16, 3.12_
+  - [ ] 4.19 Property 17: an edit changes only the edited stretch
+    - Add to `src/testing/arb-edits.ts` the shared arbitrary for single contiguous edits (a Record, which may hold `AI`, `HUM` and `PST` text from earlier operations, and one insert, delete or replace of a stretch within one line or across lines, including at the start and at the end and on empty text, over text with surrogate pairs, carriage returns and line feeds). File `test/update.edit.properties.test.ts` (or `test/trim.properties.test.ts`; the name ends in `.properties.test.ts`), with `// Property 17` and the Validates ids below in the `describe` title. **Property 17: An edit changes only the edited stretch.** For any Record and any single contiguous edit of its file text (an insert, delete or replace of a stretch within one line or across lines, including at the start and end and on empty text), recording the edit as an Agent_Change or as an Outside_Change leaves every character outside the edited stretch with the origin and run it had, and gives only the inserted characters the new origin (AI with the hunk's run, or HUM). "Outside the edited stretch" means outside the minimal changed stretch `[p, q)` where `p` is the common-prefix length and `q` the old length minus the common-suffix length of old against new whole text, adjusted for surrogate pairs and CR LF as in task 4.18; the property computes `p` and `q` itself, from the two texts, and not through `trimHunk`.
+    - Re-run Property 3 (`test/update.properties.test.ts`) at 500 runs with `FC_NUM_RUNS=500 pnpm vitest run --project provenance update.properties` and confirm that it still passes with the trimmed operations.
+    - **Validates: Requirements 4.10, 4.15, 4.16, 16.24**
+  - [ ] 4.20 Checkpoint - the trim
+    - Run `pnpm typecheck`, `pnpm vitest run --project provenance` and `FC_NUM_RUNS=500 pnpm vitest run --project provenance properties.test` (Properties 3, 7 and 17 included). Add to the `BUILD_LOG.md` entry one line: whole-line replacement was changed to a character trim inside each hunk, because labelling a whole line `[HUM]` when a person changed one character claims that untouched characters were changed outside the agent, which breaks "say only what is known", and makes `untouched_agent_text` lose agent lines to typo fixes (design M15, Resolved point 14). Ensure all tests pass, ask the user if questions arise.
+    - _Requirements: 4.15, 4.16, 16.24, 17.5_
 
 - [ ] 5. The Recorder around the core
   - [~] 5.1 `Deps`, environment, fault log, stdin, lock and the store; in-memory test dependencies
@@ -308,6 +322,8 @@ Conventions that apply to every task:
 - Task 6.3 is the point from which the repository records itself. Files changed before it are `[PST]` or unrecorded, as the documentation says.
 - The generated Bundle `powers/provenance/server/provenance.mjs` and the installed copy `.kiro/provenance/provenance.mjs` are rebuilt by every task after 6.3 that changes `packages/provenance/src`.
 - Wall-clock limits are reported by task 6.4 and not asserted in CI.
+- The user's cuts, if time runs short, decided at the group 6 checkpoint (task 6.5): cut 1 (the 256-colour mode), cut 2 (the MCP import-cost test) and cut 3 (`provenance setup --git-hook`) are approved only if time runs short. Cut 4 (dropping `setup_provenance`) is NOT approved.
+- Whole-line replacement was changed on 2026-11-18 to a character trim inside each Hunk (tasks 4.18 to 4.20; design M15). The tests of group 5 and later that build Records from edits expect the trimmed operations.
 
 ## Task Dependency Graph
 
@@ -327,31 +343,34 @@ Conventions that apply to every task:
     { "id": 10, "tasks": ["4.7", "4.11", "4.14"] },
     { "id": 11, "tasks": ["4.8", "4.12", "4.13"] },
     { "id": 12, "tasks": ["4.17"] },
-    { "id": 13, "tasks": ["5.1"] },
-    { "id": 14, "tasks": ["5.2"] },
-    { "id": 15, "tasks": ["5.3"] },
-    { "id": 16, "tasks": ["5.4"] },
-    { "id": 17, "tasks": ["5.5"] },
-    { "id": 18, "tasks": ["5.6", "5.7", "5.8"] },
-    { "id": 19, "tasks": ["5.9", "5.10", "5.11", "5.12", "5.13"] },
-    { "id": 20, "tasks": ["6.1"] },
-    { "id": 21, "tasks": ["6.2"] },
-    { "id": 22, "tasks": ["6.3"] },
-    { "id": 23, "tasks": ["6.4"] },
-    { "id": 24, "tasks": ["6.5"] },
-    { "id": 25, "tasks": ["7.1", "7.7"] },
-    { "id": 26, "tasks": ["7.2", "7.3", "7.5"] },
-    { "id": 27, "tasks": ["7.4", "7.6", "7.8"] },
-    { "id": 28, "tasks": ["7.9"] },
-    { "id": 29, "tasks": ["8.1"] },
-    { "id": 30, "tasks": ["8.2"] },
-    { "id": 31, "tasks": ["9.1"] },
-    { "id": 32, "tasks": ["9.2"] },
-    { "id": 33, "tasks": ["10.1"] },
-    { "id": 34, "tasks": ["10.2"] },
-    { "id": 35, "tasks": ["11.1", "11.2", "11.3"] },
-    { "id": 36, "tasks": ["11.4"] },
-    { "id": 37, "tasks": ["12.1"] }
+    { "id": 13, "tasks": ["4.18"] },
+    { "id": 14, "tasks": ["4.19"] },
+    { "id": 15, "tasks": ["4.20"] },
+    { "id": 16, "tasks": ["5.1"] },
+    { "id": 17, "tasks": ["5.2"] },
+    { "id": 18, "tasks": ["5.3"] },
+    { "id": 19, "tasks": ["5.4"] },
+    { "id": 20, "tasks": ["5.5"] },
+    { "id": 21, "tasks": ["5.6", "5.7", "5.8"] },
+    { "id": 22, "tasks": ["5.9", "5.10", "5.11", "5.12", "5.13"] },
+    { "id": 23, "tasks": ["6.1"] },
+    { "id": 24, "tasks": ["6.2"] },
+    { "id": 25, "tasks": ["6.3"] },
+    { "id": 26, "tasks": ["6.4"] },
+    { "id": 27, "tasks": ["6.5"] },
+    { "id": 28, "tasks": ["7.1", "7.7"] },
+    { "id": 29, "tasks": ["7.2", "7.3", "7.5"] },
+    { "id": 30, "tasks": ["7.4", "7.6", "7.8"] },
+    { "id": 31, "tasks": ["7.9"] },
+    { "id": 32, "tasks": ["8.1"] },
+    { "id": 33, "tasks": ["8.2"] },
+    { "id": 34, "tasks": ["9.1"] },
+    { "id": 35, "tasks": ["9.2"] },
+    { "id": 36, "tasks": ["10.1"] },
+    { "id": 37, "tasks": ["10.2"] },
+    { "id": 38, "tasks": ["11.1", "11.2", "11.3"] },
+    { "id": 39, "tasks": ["11.4"] },
+    { "id": 40, "tasks": ["12.1"] }
   ]
 }
 ```
