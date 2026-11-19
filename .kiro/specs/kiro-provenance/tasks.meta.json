@@ -1,0 +1,24 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Reinstall the probe outside the repository": [
+      {
+        "executionId": "108819c7-1717-4ea2-b696-5406301de344",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795051427733
+      },
+      {
+        "executionId": "a4f32cdf-7f2a-4951-ad6b-9960e89fedc3",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795052052807
+      }
+    ],
+    "1.2 Recapture every event and take the measurements on the IDE and the CLI": [
+      {
+        "executionId": "f511cb75-ccd9-453b-a352-2d4a07183b23",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795053097731
+      }
+    ]
+  }
+}
