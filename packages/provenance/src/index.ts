@@ -28,4 +28,5 @@ export {
 } from "./core/label.js";
 export type { ChangeOrigin, Clock, WindowRef } from "./core/plan.js";
 export { existingRunNumbers, planHunks } from "./core/plan.js";
+export { decodeSessions, decodeState, encodeSessions, encodeState } from "./core/state-codec.js";
 export { appearedRecord, firstRecord, updateRecord } from "./core/update.js";

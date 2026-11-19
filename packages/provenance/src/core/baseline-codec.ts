@@ -66,7 +66,7 @@ function decodeFiles(value: unknown): Result<Record<string, BaselineEntry>, Prov
   return ok(Object.fromEntries(pairs));
 }
 
-function validAt(at: unknown): at is string {
+export function validAt(at: unknown): at is string {
   // The Engine exports no timestamp predicate; createDocument checks the same one first.
   return typeof at === "string" && createDocument("", at).ok;
 }
