@@ -9,7 +9,7 @@ import {
 import { arbSessionsCount, arbWindowState } from "../src/testing/arbitraries.js";
 import { runs } from "./support/fc.js";
 
-describe("state-codec properties _Requirements: 3.17, 3.27, 5.16_", () => {
+describe("state-codec properties _Requirements: 3.17, 3.27, 5.16, 5.17_", () => {
   // Property 9
   it("P9 the window state round-trips", () => {
     fc.assert(

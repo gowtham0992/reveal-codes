@@ -403,6 +403,16 @@
         "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795063644020
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795067574110
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795067824928
       }
     ],
     "5.1 `Deps`, environment, fault log, stdin, lock and the store; in-memory test dependencies": [
@@ -676,6 +686,13 @@
         "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795063921900
+      }
+    ],
+    "4. Pure core, each module followed by its property": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795067825017
       }
     ]
   }
