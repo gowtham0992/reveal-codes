@@ -5,7 +5,7 @@
       "name": "Sentinel tests on save",
       "trigger": "PostFileSave",
       "matcher": "crew/sentinel/(src|test)/.*\\.ts$",
-      "timeout_ms": 120000,
+      "timeout": 120,
       "action": {
         "type": "command",
         "command": "perl -e 'alarm shift; exec @ARGV' 120 pnpm vitest run --project sentinel --passWithNoTests"

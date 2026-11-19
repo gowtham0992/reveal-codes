@@ -52,7 +52,7 @@ Conventions that apply to every task:
     - _Requirements: 18.5, 18.6, 18.7, 18.9_
 
 - [ ] 2. Make the test hooks' timeout effective (Requirement 19)
-  - [ ] 2.1 The five hooks and the two pinning tests
+  - [x] 2.1 The five hooks and the two pinning tests
     - In each of `.kiro/hooks/engine-tests-on-save.json`, `verifier-tests-on-save.json`, `web-tests-on-save.json`, `export-tests-on-save.json` and `sentinel-tests-on-save.json`, replace the line `"timeout_ms": 120000,` with `"timeout": 120,` and change nothing else. The `perl alarm 120` wrapper stays.
     - In `crew/sentinel/test/static/package.test.ts` change the type declaration, `expect(hook.timeout_ms).toBe(120000)` and the cross-file equality check to `timeout` and `120`. In `packages/export/test/package.test.ts` change the type declaration, the equality loop and `toBe(120000)` the same way. These two edits are the only changes under `crew/sentinel` and `packages/export`.
     - Do not edit `docs/KIRO_USAGE.md` or the specs that state `timeout_ms` 120000.

@@ -25,7 +25,7 @@ type HookFile = {
     name: string;
     trigger: string;
     matcher: string;
-    timeout_ms?: number;
+    timeout?: number;
     action: { type: string; command: string };
   }[];
 };
@@ -79,7 +79,7 @@ describe("sentinel-tests-on-save hook", () => {
     expect(hookFile.hooks).toHaveLength(1);
     expect(hook.name).toBe("Sentinel tests on save");
     expect(hook.trigger).toBe("PostFileSave");
-    expect(hook.timeout_ms).toBe(120000);
+    expect(hook.timeout).toBe(120);
     expect(hook.action.type).toBe("command");
     expect(hook.action.command).toBe(
       "perl -e 'alarm shift; exec @ARGV' 120 pnpm vitest run --project sentinel --passWithNoTests",
@@ -92,7 +92,7 @@ describe("sentinel-tests-on-save hook", () => {
     for (const name of files) {
       const other = readJson(join(HOOKS_DIR, name)) as unknown as HookFile;
       for (const h of other.hooks) {
-        if (h.timeout_ms !== undefined) expect(h.timeout_ms, name).toBe(hook.timeout_ms);
+        if (h.timeout !== undefined) expect(h.timeout, name).toBe(hook.timeout);
       }
     }
   });

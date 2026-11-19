@@ -69,7 +69,7 @@ type HookFile = {
     name: string;
     trigger: string;
     matcher: string;
-    timeout_ms?: number;
+    timeout?: number;
     action: { type: string; command: string };
   }[];
 };
@@ -93,11 +93,11 @@ describe("export-tests-on-save hook _Requirements: 10.2_", () => {
     expect(others.length).toBeGreaterThan(0);
     for (const file of others) {
       for (const hook of readHook(file).hooks) {
-        if (hook.timeout_ms === undefined) continue;
-        expect(exportHook?.timeout_ms, file).toBe(hook.timeout_ms);
+        if (hook.timeout === undefined) continue;
+        expect(exportHook?.timeout, file).toBe(hook.timeout);
       }
     }
-    expect(exportHook?.timeout_ms).toBe(120000);
+    expect(exportHook?.timeout).toBe(120);
   });
 
   it("matches export src and test files only", () => {
