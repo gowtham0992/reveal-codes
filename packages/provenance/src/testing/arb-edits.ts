@@ -93,3 +93,36 @@ export const arbAnyTextPair: fc.Arbitrary<TextPair> = fc.oneof(
   },
   { weight: 1, arbitrary: arbFileText.map((t) => ({ old: t, new: t })) },
 );
+
+/** A Record's starting text, the agent's insertion into it, and later whole-file texts. */
+export type AgentThenOutside = { base: string; agent: string; outside: string[] };
+const arbNonEmptyLine = arbLine.map((l) => `x${l}`);
+const arbOutsideEdits = fc.array(arbLineEdit, { minLength: 1, maxLength: 3 });
+/**
+ * A starting text; an agent text that inserts at least one non-empty line into
+ * it, so the Record holds `AI` text; and one to four later texts, each a few
+ * line edits (insertions, deletions, replacements) of the one before. Every text
+ * ends in `\n`, and one `\n` or `\r\n` style is used throughout.
+ */
+export const arbAgentThenOutside: fc.Arbitrary<AgentThenOutside> = fc
+  .tuple(
+    arbLines,
+    arbEol,
+    fc.nat({ max: 40 }),
+    fc.array(arbNonEmptyLine, { minLength: 1, maxLength: 3 }),
+    fc.array(arbOutsideEdits, { minLength: 1, maxLength: 4 }),
+  )
+  .map(([base, eol, at, inserted, rounds]) => {
+    const agentLines = applyEdit(base, { at, del: 0, ins: inserted });
+    const texts: string[][] = [];
+    let current = agentLines;
+    for (const edits of rounds) {
+      current = edits.reduce(applyEdit, current);
+      texts.push(current);
+    }
+    return {
+      base: terminate(base, eol, true).join(""),
+      agent: terminate(agentLines, eol, true).join(""),
+      outside: texts.map((t) => terminate(t, eol, true).join("")),
+    };
+  });
