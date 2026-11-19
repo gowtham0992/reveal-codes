@@ -88,6 +88,86 @@ describe("updateRecord", () => {
   });
 });
 
+describe("updateRecord character trim", () => {
+  const W2 = { windowRun: "turn 2026-11-19T11:00:00Z" };
+  const agentDoc = () => {
+    const base = must(createDocument("head\n", AT));
+    return must(updateRecord(base, "head\nthe quikk fox\n", "AI", W, clock));
+  };
+
+  it("keeps the rest of an AI line AI with its Run when a person fixes one character", () => {
+    const doc = must(updateRecord(agentDoc(), "head\nthe quick fox\n", "HUM", null, clock));
+    expect(doc.text).toBe("head\nthe quick fox\n");
+    expect(originAt(doc, 5 + 7)).toBe("HUM");
+    expect(doc.spans.filter((s) => s.provenance.origin === "HUM")).toHaveLength(1);
+    const ai = doc.spans.filter((s) => s.provenance.origin === "AI");
+    expect(ai.length).toBeGreaterThan(0);
+    expect(ai.every((s) => s.provenance.runId === `${W.windowRun}.1`)).toBe(true);
+    expect(originAt(doc, 0)).toBe("PST");
+  });
+
+  it("gives an insert at the start of a line only the inserted characters", () => {
+    const base = must(createDocument("line\n", AT));
+    const doc = must(updateRecord(base, ">> line\n", "HUM", null, clock));
+    const hum = doc.spans.filter((s) => s.provenance.origin === "HUM");
+    expect(hum.map((s) => [s.start, s.end])).toEqual([[0, 3]]);
+  });
+
+  it("gives an insert at the end of a line only the inserted characters", () => {
+    const base = must(createDocument("line\n", AT));
+    const doc = must(updateRecord(base, "line!!\n", "HUM", null, clock));
+    const hum = doc.spans.filter((s) => s.provenance.origin === "HUM");
+    expect(hum.map((s) => [s.start, s.end])).toEqual([[4, 6]]);
+  });
+
+  it("keeps CR LF whole when the last character before it is edited", () => {
+    const base = must(createDocument("ab\r\n", AT));
+    const doc = must(updateRecord(base, "ac\r\n", "HUM", null, clock));
+    expect(doc.text).toBe("ac\r\n");
+    expect(originAt(doc, 1)).toBe("HUM");
+    expect(originAt(doc, 2)).toBe("PST");
+    expect(originAt(doc, 3)).toBe("PST");
+    const crlf = must(updateRecord(must(createDocument("a\r\n", AT)), "a\n", "HUM", null, clock));
+    expect(crlf.text).toBe("a\n");
+  });
+
+  it("keeps a surrogate pair whole next to and inside an edit", () => {
+    const base = must(createDocument("a\u{1F600}b\n", AT));
+    const doc = must(updateRecord(base, "a\u{1F680}b\n", "HUM", null, clock));
+    expect(doc.text).toBe("a\u{1F680}b\n");
+    expect(
+      doc.spans.filter((s) => s.provenance.origin === "HUM").map((s) => [s.start, s.end]),
+    ).toEqual([[1, 3]]);
+  });
+
+  it("makes no operation and takes no Run number for a Hunk that is equal after the trim", () => {
+    // A Hunk from diffLines is never equal, so this is covered by trimHunk; here a no-op update.
+    const doc = agentDoc();
+    const same = must(updateRecord(doc, doc.text, "AI", W, clock));
+    expect(same).toEqual(doc);
+  });
+
+  it("gives an Agent_Change typo fix in another window's AI line only the new character the new Run", () => {
+    const doc = must(updateRecord(agentDoc(), "head\nthe quick fox\n", "AI", W2, clock));
+    const runs = doc.spans
+      .filter((s) => s.provenance.origin === "AI")
+      .map((s) => s.provenance.runId);
+    expect(runs).toContain(`${W.windowRun}.1`);
+    expect(runs.filter((r) => r === `${W2.windowRun}.1`)).toHaveLength(1);
+    expect(originAt(doc, 5 + 7)).toBe("AI");
+    expect(doc.spans.find((s) => s.start <= 12 && 12 < s.end)?.provenance.runId).toBe(
+      `${W2.windowRun}.1`,
+    );
+  });
+
+  it("takes no number for a Hunk that only deletes after the trim, and the next Hunk takes .1", () => {
+    const base = must(createDocument("abc\nx\nq\n", AT));
+    const doc = must(updateRecord(base, "ac\nx\nqq\n", "AI", W, clock));
+    expect(doc.runs.map((r) => r.runId)).toEqual([`${W.windowRun}.1`]);
+    expect(doc.spans.find((s) => s.provenance.runId === `${W.windowRun}.1`)?.start).toBe(6);
+  });
+});
+
 describe("firstRecord", () => {
   it("leaves untouched baseline text PST at the baseline time", () => {
     const doc = must(firstRecord("a\nb\n", AT, "a\nb\nc\n", "AI", W, clock));

@@ -5,6 +5,7 @@
  */
 import { apply, createDocument, err, ok, type Document, type Result } from "@reveal-codes/engine";
 import { diffLines } from "./diff.js";
+import { trimHunk } from "./trim.js";
 import {
   existingRunNumbers,
   planHunks,
@@ -27,7 +28,8 @@ function applyHunks(
     return err({ kind: "no_open_window", detail: "an Agent_Change needs a Window_Run" });
   }
   const windowRun = window === null ? "" : window.windowRun;
-  const ops = planHunks(hunks, origin, windowRun, existingRunNumbers(doc, windowRun), clock);
+  const trimmed = hunks.flatMap((h) => trimHunk(doc.text, h) ?? []);
+  const ops = planHunks(trimmed, origin, windowRun, existingRunNumbers(doc, windowRun), clock);
   let current = doc;
   for (const op of ops) {
     const applied = apply(current, op);

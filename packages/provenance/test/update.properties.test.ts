@@ -2,6 +2,7 @@ import fc from "fast-check";
 import { apply, createDocument, renderRecord, type Document } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import { diffLines } from "../src/core/diff.js";
+import { trimHunk } from "../src/core/trim.js";
 import { updateRecord } from "../src/core/update.js";
 import { arbAgentThenOutside } from "../src/testing/arbitraries.js";
 import { fixedClock } from "./support/clock.js";
@@ -15,9 +16,9 @@ function must<T>(r: { ok: true; value: T } | { ok: false; error: unknown }): T {
   return r.value;
 }
 
-/** The Engine applied directly: one `replace` per Hunk, highest offset first, no config. */
+/** The Engine applied directly: one `replace` per trimmed Hunk, highest offset first, no config. */
 function engineDirect(doc: Document, fileText: string, timestamp: string): Document {
-  const hunks = diffLines(doc.text, fileText);
+  const hunks = diffLines(doc.text, fileText).flatMap((h) => trimHunk(doc.text, h) ?? []);
   return [...hunks].reverse().reduce((current, h) => {
     const op = {
       kind: "replace" as const,
