@@ -5,7 +5,7 @@
  */
 import fc from "fast-check";
 import { DIFF_CAP } from "../core/limits.js";
-import { arbLine, arbLines } from "./arb-text.js";
+import { arbFileText, arbLine, arbLines } from "./arb-text.js";
 
 /** An old text and a new text derived from it. */
 export type TextPair = { old: string; new: string };
@@ -82,4 +82,14 @@ export const arbTextPair: fc.Arbitrary<TextPair> = fc.oneof(
   { weight: 3, arbitrary: arbEnds },
   { weight: 1, arbitrary: arbWholeText },
   { weight: 1, arbitrary: arbPastCap },
+);
+
+/** Any two texts: related pairs, unrelated file texts, and two equal texts. */
+export const arbAnyTextPair: fc.Arbitrary<TextPair> = fc.oneof(
+  { weight: 4, arbitrary: arbTextPair },
+  {
+    weight: 2,
+    arbitrary: fc.tuple(arbFileText, arbFileText).map(([o, n]) => ({ old: o, new: n })),
+  },
+  { weight: 1, arbitrary: arbFileText.map((t) => ({ old: t, new: t })) },
 );
