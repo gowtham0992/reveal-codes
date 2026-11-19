@@ -36,6 +36,25 @@
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795060762210
       }
+    ],
+    "1.4 Checkpoint - remove the probe and report findings that change the design": [
+      {
+        "executionId": "709645e2-9c58-4587-99e3-746d07e19b7f",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795060775652
+      },
+      {
+        "executionId": "709645e2-9c58-4587-99e3-746d07e19b7f",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795061044259
+      }
+    ],
+    "1. Capture the hook payloads and measurements (Requirement 18)": [
+      {
+        "executionId": "709645e2-9c58-4587-99e3-746d07e19b7f",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795061044295
+      }
     ]
   }
 }

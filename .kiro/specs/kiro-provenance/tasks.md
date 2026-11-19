@@ -26,7 +26,7 @@ Conventions that apply to every task:
 
 ## Tasks
 
-- [ ] 1. Capture the hook payloads and measurements (Requirement 18)
+- [x] 1. Capture the hook payloads and measurements (Requirement 18)
   - [x] 1.1 Reinstall the probe outside the repository
     - Confirm first that `git log` shows the committed spec files `requirements.md`, `design.md`, `tasks.md` and `.config.kiro` (Req 18.1). Do not start otherwise.
     - Create `~/.kiro-probe/` (kept until task 1.3 has committed the fixtures, Req 18.9) holding `probe.mjs` and its log directory. `probe.mjs` reads standard input for at most 1.5 s (Req 18.3), parses the JSON, and appends one line per event to `~/.kiro-probe/log/<surface-label>.jsonl` holding only: the event name from argv, the hook order marker (a monotonic counter and the time), the field names, the field types, whether `session_id` is present, the form of `tool_input.path` (`absolute`, `relative` or `none`, never the value), `task_name`, `spec_name` reduced to the directory name, and `task_success`. It records no prompt value, no `session_id` value and no path value (Req 18.2). For session comparison it writes a salted SHA-256 prefix of `session_id` with a random salt generated per capture run and discarded, so equality inside one run can be read and no value is kept.
@@ -46,7 +46,7 @@ Conventions that apply to every task:
     - Create the single new `BUILD_LOG.md` entry for this spec with the seven findings of the capture of task 1.2 (design, Resolved point 13): the CLI fired no `PreTaskExec` or `PostTaskExec`, so there is no CLI hook order and no spec-task window on the CLI; the IDE order confirmed twice more; `session_id` differs across the CLI, two IDE tabs, the Specs panel and the orchestrator chat; the `fs_write` path is absolute on both surfaces; a sub-agent's end fires no `Stop`; the `UserPromptSubmit` floor of 22 to 26 ms; a Specs-panel task is its own session with no `UserPromptSubmit`; and `UserPromptSubmit` did not fire for two prompts in the orchestrator chat for a cause not established. Existing entries stay unchanged.
     - Run `git status --porcelain` and confirm that only the fixtures, their README and `BUILD_LOG.md` are new or changed, and that no probe file is staged or committed (`git ls-files | grep -i probe` is empty). Commit the fixtures, README and BUILD_LOG with `test(provenance): scrubbed hook payload fixtures` unless the task hook commits them.
     - _Requirements: 18.4, 18.5, 18.9, 16.6, 17.5_
-  - [ ] 1.4 Checkpoint - remove the probe and report findings that change the design
+  - [x] 1.4 Checkpoint - remove the probe and report findings that change the design
     - Remove `~/.kiro-probe/`, the probe hook files in `.kiro/hooks/`, the scratch spec, and the lines added to `.git/info/exclude`. Confirm with `git status --porcelain` and `ls -a ~ | grep kiro-probe` that nothing is left.
     - Report to the user, in plain words, every finding that changes `design.md` or `requirements.md`. The findings of task 1.2 are already in the spec (design, Resolved point 13; requirements, Decisions 4, 13, 18 and 20), so report only what the fixtures of task 1.3 added to them. If a further finding changes the design, stop and ask the user before continuing. Ensure all tests pass, ask the user if questions arise.
     - _Requirements: 18.5, 18.6, 18.7, 18.9_
