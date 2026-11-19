@@ -11,6 +11,7 @@
     { "path": "packages/engine/scripts" },
     { "path": "packages/engine/bench" },
     { "path": "packages/verifier" },
+    { "path": "packages/provenance" },
     { "path": "packages/export" },
     { "path": "packages/export/test" },
     { "path": "packages/courtlistener-mcp" },

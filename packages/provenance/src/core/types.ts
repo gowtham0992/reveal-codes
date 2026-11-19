@@ -1,0 +1,102 @@
+import type { Origin } from "@reveal-codes/engine";
+
+export type { Origin };
+
+/** The five fields kept from a hook payload; nothing else is read (design, Data Models). */
+export type Payload = {
+  sessionId: string | null;
+  cwd: string | null;
+  taskName: string | null;
+  specName: string | null;
+  taskSuccess: boolean | null;
+};
+
+/** The Recorder's events (design, Recorder run, step 1). */
+export type HookEvent = "promptSubmit" | "agentStop" | "preTask" | "postTask" | "manual";
+
+/** A replacement of `oldText[from, to)` by `text`, on line boundaries of the old text. */
+export type Hunk = { from: number; to: number; text: string };
+
+/** One open Agent_Window on a session's stack. `spec` is a directory name, never a path. */
+export type OpenWindow = {
+  windowRun: string;
+  label: string;
+  taskNumber: string | null;
+  kind: "turn" | "task";
+  openedAt: string;
+  order: number;
+  spec?: string;
+};
+
+/** What closed a session's last window (design, Data Models). */
+export type ClosedBy = "postTask" | "agentStop" | "sweep" | "leftover";
+
+/** One session's entry; it persists with an empty stack. */
+export type SessionState = {
+  lastEventAt: string;
+  lastClosedBy: ClosedBy | null;
+  promptSeen: boolean;
+  noPromptCounted: boolean;
+  windows: OpenWindow[];
+};
+
+/** A file-hint entry of state.json: lets an unchanged file skip a read. */
+export type FileCache = { size: number; mtimeMs: number; digest: string; seenMs: number };
+
+/** A file the Recorder skipped, and why. */
+export type SkippedFile = { size: number; mtimeMs: number; reason: "over_limit" };
+
+/** The contents of state.json, version 1 (Session_Keys live here and nowhere else). */
+export type WindowState = {
+  version: 1;
+  order: number;
+  lastWindowRun: string | null;
+  lastEventAt: string | null;
+  recordedAtMs: number;
+  noSessionIdLogged: boolean;
+  sessions: Record<string, SessionState>;
+  files: Record<string, FileCache>;
+  skipped: Record<string, SkippedFile>;
+};
+
+/** One Baseline_Entry: SHA-256 of the file bytes and, with git, its Blob_Id. */
+export type BaselineEntry = { sha256: string; blob?: string };
+
+/** The contents of baseline.json, version 1. */
+export type Baseline = {
+  version: 1;
+  at: string;
+  files: Record<string, BaselineEntry>;
+};
+
+/** A file as read for one event. `text` is null unless the kind is "text". */
+export type FileFact = {
+  path: string;
+  digest: string;
+  text: string | null;
+  kind: "text" | "binary" | "over_limit";
+};
+
+/** The Fault_Log reasons (design, Data Models). `deadline_reached` and `apply_failed` carry a suffix. */
+export type FaultReason =
+  | "over_limit"
+  | "no_open_window"
+  | "window_left_open"
+  | "lock_timeout"
+  | "no_session_id"
+  | "no_prompt_events"
+  | "bad_sessions"
+  | "baseline_text_unavailable"
+  | "tampered_record"
+  | "bad_state"
+  | "bad_baseline"
+  | "apply_mismatch"
+  | "read_failed"
+  | "write_failed"
+  | "unknown_event"
+  | "exception"
+  | `deadline_reached:${number}`
+  | `apply_failed:${string}`;
+
+/** The error value of every fallible function in the package (Req 1.6). */
+export type ProvenanceError = { kind: FaultReason; detail?: string };

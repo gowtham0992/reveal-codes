@@ -86,6 +86,415 @@
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795063414423
       }
+    ],
+    "3.1 Package manifest, tsconfig, Vitest project, core types and limits": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643456
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063650780
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063783601
+      }
+    ],
+    "3.2 Test support and the arbitrary files": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643506
+      }
+    ],
+    "4.1 `payload.ts`": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643539
+      }
+    ],
+    "4.2 Property 13: the payload keeps five fields and no prompt": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643569
+      }
+    ],
+    "4.3 `label.ts`: Run labels, Window_Run names and Run_Ids": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643601
+      }
+    ],
+    "4.4 Property 10: Run names round-trip": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643631
+      }
+    ],
+    "4.5 `lines.ts` and `diff.ts`: the line difference, and `arb-edits.ts`": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643670
+      }
+    ],
+    "4.6 Property 7: Hunks reproduce the new text": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643698
+      }
+    ],
+    "4.7 `plan.ts` and `update.ts`: Hunks into Engine operations": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643724
+      }
+    ],
+    "4.8 Property 3: changed agent text goes through the Engine and only the Engine": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643751
+      }
+    ],
+    "4.9 `baseline-codec.ts`": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643779
+      }
+    ],
+    "4.10 Property 8: the baseline file round-trips, and `arb-dirs.ts` baseline part": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643811
+      }
+    ],
+    "4.11 `state-codec.ts`": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643847
+      }
+    ],
+    "4.12 Property 9: the window state round-trips, and `arb-dirs.ts` state part": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643877
+      }
+    ],
+    "4.13 `windows.ts`: sweep, leftover, rule 21 and transitions": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643906
+      }
+    ],
+    "4.14 `exclude.ts` and `renames.ts`": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643933
+      }
+    ],
+    "4.15 `glob.ts`, `ignore-parse.ts` and `ignore.ts`: the full gitignore matcher": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643963
+      }
+    ],
+    "4.16 Property 15: the ignore matcher agrees with git, and `arb-ignore.ts`": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643991
+      }
+    ],
+    "4.17 Checkpoint - the pure core": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644020
+      }
+    ],
+    "5.1 `Deps`, environment, fault log, stdin, lock and the store; in-memory test dependencies": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644052
+      }
+    ],
+    "5.2 `git.ts` and `scan.ts`: candidates, exclusion, size and binary": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644094
+      }
+    ],
+    "5.3 `baseline-text.ts`, `baseline-cache.ts` and the `baseline` command": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644124
+      }
+    ],
+    "5.4 `recorder-files.ts`: the per-file phases": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644150
+      }
+    ],
+    "5.5 `recorder.ts` and `cli/main.ts`: one event from start to exit": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644181
+      }
+    ],
+    "5.6 Example tests: the events with the captured fixtures": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644207
+      }
+    ],
+    "5.7 Example tests: faults, a corrupt directory and the command's silence": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644237
+      }
+    ],
+    "5.8 Property 1: the record or the baseline is the file, with `arb-windows.ts` and `arb-dirs.ts`": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644266
+      }
+    ],
+    "5.9 Property 2: attribution follows the windows and nothing else": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644295
+      }
+    ],
+    "5.10 Property 4: nothing happens twice": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644323
+      }
+    ],
+    "5.11 Property 5: sessions are independent": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644351
+      }
+    ],
+    "5.12 Property 14: the first change never over-attributes": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644386
+      }
+    ],
+    "5.13 Property 16: sessions without prompt events are counted once": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644416
+      }
+    ],
+    "6.1 `scripts/build-power.mjs` builds the provenance Bundle": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644445
+      }
+    ],
+    "6.2 `hook-file.ts`, the Hook_File and the static hook tests": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644475
+      }
+    ],
+    "6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-commit hook": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644505
+      }
+    ],
+    "6.4 Measure the Recorder and add the times to BUILD_LOG": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644534
+      }
+    ],
+    "6.5 Checkpoint - the Recorder is installed and recording": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644564
+      }
+    ],
+    "7.1 `legend.ts` and `structured.ts`": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644592
+      }
+    ],
+    "7.2 Property 11: structured spans cover the file exactly": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644620
+      }
+    ],
+    "7.3 `palette.ts`, `neutralize.ts` and `view.ts`": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644649
+      }
+    ],
+    "7.4 Property 6: colour output is the plain output with the colour removed": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644677
+      }
+    ],
+    "7.5 `summary.ts`": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644704
+      }
+    ],
+    "7.6 Property 12: summary counts add up": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644734
+      }
+    ],
+    "7.7 `check.ts`": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644767
+      }
+    ],
+    "7.8 `load.ts`, `reveal <file>`, the wrapper and the root script": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644796
+      }
+    ],
+    "7.9 `reveal --summary`, `--check [--strict]` and `--record`": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644824
+      }
+    ],
+    "8.1 MCP dependencies, workspace discovery and schemas": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644852
+      }
+    ],
+    "8.2 The four read-only tools and the server": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644883
+      }
+    ],
+    "9.1 `setup.ts` and the `provenance setup` command": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644912
+      }
+    ],
+    "9.2 The `setup_provenance` tool": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644947
+      }
+    ],
+    "10.1 `powers/provenance` manifests, skills and README": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644992
+      }
+    ],
+    "10.2 Bundle freshness, tools from a copy outside the repository, and the MCP import cost": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063645021
+      }
+    ],
+    "11.1 Static boundary tests": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063645050
+      }
+    ],
+    "11.2 README section \"Reveal Codes for your own repository\"": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063645078
+      }
+    ],
+    "11.3 `docs/KIRO_USAGE.md` and the steering files": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063645108
+      }
+    ],
+    "11.4 Complete the BUILD_LOG entry": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063645136
+      }
+    ],
+    "12.1 Final checkpoint - everything green and the record complete": [
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063645166
+      }
     ]
   }
 }

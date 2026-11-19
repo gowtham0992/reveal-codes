@@ -36,6 +36,7 @@ export default defineConfig({
     projects: [
       project("engine", "packages/engine"),
       project("verifier", "packages/verifier"),
+      project("provenance", "packages/provenance"),
       project("export", "packages/export", ["test/**/*.test.ts"], { TZ: EXPORT_TZ }),
       project("courtlistener-mcp", "packages/courtlistener-mcp"),
       WEB,
