@@ -25,11 +25,11 @@ Requirement 4 and Decision 8 depend on how the Engine counts Runs. I read `packa
 | Does `replace` give the same result as delete then insert? | **Yes.** `applyReplace` is `deleteDraft` with Actor `provenance.origin`, relabel, `insertDraft`, relabel. With empty `text` it is a `delete`; with `from == to` it is an `insert`. The Recorder can therefore use one `replace` call for every Hunk. | `ops/replace.ts` |
 | Are Run table entries ever removed? | **No.** Deleting all text of a Run leaves its `RunEntry`. Hunk numbers are therefore stable and a count of existing Runs of a Window_Run equals the highest Hunk number if numbers are gapless. | `ops/delete.ts`, `ops/pipeline.ts` |
 | What does an `AI` insert into an already relabelled Run do? | It becomes `AI>HUM` (`effectiveProvenance`). With one Run per window and file (option (a)) this would mark the agent's later text as human-edited. With one Run per Hunk (option (b)) a new Hunk never reuses a relabelled Run. This is a second reason for (b). | `ops/insert.ts` |
-| Are all Run_Ids legal? | Any non-empty string. `renderRecord` escapes `\ [ ] { } ; = ,` in the payload and `\ [ ] {` in the retained part. A Run_Id such as `1. Probe task one 2026-11-19T10:00:00Z.1` round-trips through `renderRecord` and `parseRecord`. | `codes/syntax.ts`; scratch run |
+| Are all Run_Ids legal? | Any non-empty string. `renderRecord` escapes `\ [ ] { } ; = ,` in the payload and `\ [ ] {` in the retained part. A Run_Id such as `1 Probe task one 2026-11-19T10:00:00Z.1` round-trips through `renderRecord` and `parseRecord`. | `codes/syntax.ts`; scratch run |
 | Does a source file's citation layer interfere? | `createDocument` and every `apply` run the citation extractor over the file text. The Record then holds `[CIT …]`, `[QUO …]` and `[REF]` codes for citation-like text. The Recorder never sets a result or override. The viewer draws spans from `Document.spans` and `Document.text`, so these codes never reach the view (Decision 10). | `document.ts`, `citation-layer.ts` |
-| Does a Record grow with the text or with the number of Hunks? | With the number of Hunks ever applied. 300 one-line `AI` Hunks into a 2.6 KB text gave a 39 KB full Record, about 125 bytes per Run (one `r=` entry in `[DOC]` and one `[AI:…{t=…}]` code). Run entries are never pruned. See Open points. | scratch run |
+| Does a Record grow with the text or with the number of Hunks? | With the number of Hunks ever applied. 300 one-line `AI` Hunks into a 2.6 KB text gave a 39 KB full Record, about 125 bytes per Run (one `r=` entry in `[DOC]` and one `[AI:…{t=…}]` code). Run entries are never pruned. See Resolved point 8. | scratch run |
 
-**Cost of (b) over (a).** The Engine already supports (b) with no change. The extra work is the Hunk numbering rule, the Run_Id parser and the grouping in the summary, about two to three hours over (a). It is well under half a day. It is not an open point. The open point is the Record growth in the last row.
+**Cost of (b) over (a).** The Engine already supports (b) with no change. The extra work is the Hunk numbering rule, the Run_Id parser and the grouping in the summary, about two to three hours over (a). It is well under half a day. The Record growth in the last row is Resolved point 8: the design does not compact.
 
 **BOM.** `new TextDecoder("utf-8", { fatal: true })` drops a leading byte order mark. The Recorder must pass `ignoreBOM: true` or Requirement 4, criterion 1 fails. I confirmed the difference (one code unit without the option, two with it).
 
@@ -39,14 +39,16 @@ Requirement 4 and Decision 8 depend on how the Engine counts Runs. I read `packa
 | -- | -------- | ------ |
 | M1 | The line difference is hand-written Myers O(ND) over line hashes. It trims the common prefix and suffix first, caps the edit distance at 1,500 lines, and past the cap treats the whole middle as one Hunk. | Requirement 1, criterion 3 allows a library only if a hand-written difference cannot meet Requirement 4. Requirement 4 asks for line-aligned replacement Hunks that reproduce the new text, not for a minimal diff. A cap bounds memory at about 9 MB and cannot make a result wrong. |
 | M2 | One `replace` per Hunk, applied from the highest offset to the lowest. Hunks that insert text get Run numbers in ascending offset order. A delete-only Hunk takes no number. | Requirement 4, criteria 3 and 8; Requirement 3, criterion 12. Numbers stay gapless, so count and highest number agree. |
-| M3 | The Window_Run is `<Run_Label> <UTC time to the second>`, with `~<k>` appended only when that string is already used by an open window or by the last opened window. A Run_Id is the Window_Run, `.`, and the Hunk number. The viewer parses it from the right. | Requirement 3, criteria 11 and 12. Run_Ids stay self-describing, so no side index is needed. |
+| M3 | The Window_Run is `[<Task_Number> ]<Run_Label> <UTC time to the second>`, with `~<k>` appended only when that string is already used by an open window or by the last opened window. A Run_Id is the Window_Run, `.`, and the Hunk number. The viewer parses the Task_Number from the left and the time, suffix and Hunk number from the right. | Requirement 3, criteria 11 and 12. Run_Ids stay self-describing, so no side index is needed, and the Task_Number and the title are separate values in the name (Resolved point 11a). |
 | M4 | Pure core takes digests and times as inputs. SHA-256 and the clock are injected. | Requirement 1, criterion 5. |
 | M5 | The viewer builds its output from `Document.text` and `Document.spans`. For plain mode it calls `render(view, "display")` on a copy of the Document with `citations`, `quotes` and `overrides` emptied. | Requirement 9, criterion 4. No Engine change. |
-| M6 | The viewer replaces control characters in file text with visible Unicode control pictures, in colour and plain mode alike. Characters keep their length, so columns are unaffected. | A file can hold terminal escape sequences, and colour mode prints text unescaped. Without this a file could inject escape codes into the user's terminal. Open point 9. |
-| M7 | `.kiroignore` supports negation (`!pattern`, last match wins) in addition to Requirement 2, criterion 9. | Kiro already reads `.kiroignore` with gitignore syntax and shows `!.env.example` in its own documentation. Open point 6. |
+| M6 | The viewer replaces control characters in file text, in colour and plain mode alike: a C0 control other than line feed and tab becomes the character U+2400 plus its code (ESC is U+241B, carriage return U+240D), DEL becomes U+2421, and a C1 control becomes U+FFFD. Each is one code unit, so length and columns are unaffected. | A file can hold terminal escape sequences, and colour mode prints text unescaped. Without this a file could inject escape codes into the user's terminal. Requirement 9, criterion 13. Resolved point 7. |
+| M7 | `.kiroignore` and `.kiro/provenance/ignore` are parsed with the full gitignore syntax by a hand-written matcher (`core/glob.ts`, `core/ignore-parse.ts`, `core/ignore.ts`) that Property 15 checks against `git check-ignore --no-index`. Each file is evaluated on its own, and a file is excluded when either excludes it. | Requirement 2, criteria 8 and 9. A subset would exclude fewer files than Kiro and git do and would record files that a person meant to hide; a dependency would break Requirement 1, criterion 3. Resolved point 5. |
 | M8 | The Recorder trusts its per-file cache only as a hint, and only when the file's modification time is at least 2 seconds older than the time the cache entry was made. The Record or Baseline_Entry is always the authority. | A killed run can leave a Record newer than `state.json`; the comparison with the Record repairs it, and a file saved in the same clock tick as the last hash is not skipped. |
 | M9 | A stale lock file (older than 30 seconds) is removed before the 5 second wait. | A crashed Recorder must not make every later event time out. |
-| M10 | `over_limit` is logged once per path and size and modification time, not at every event. | Requirement 2, criterion 10 says "one line" per skipped file; logging at every event would fill the Fault_Log on this repository, which has over-limit tracked files. |
+| M10 | `over_limit` is logged once for each file until its size or modification time changes, not at every event. | Requirement 2, criterion 10 says "one line" per skipped file; logging at every event would fill the Fault_Log on this repository, which has over-limit tracked files. |
+| M11 | A Baseline_Entry holds the SHA-256 digest and, where git is present, the Blob_Id that one batched `git hash-object --no-filters --stdin-paths` call computes. The starting text of a First_Change comes from `git cat-file blob <Blob_Id>`, else from `cache/<digest>`, else it is not found and the current text is recorded as `[PST]`. | Requirement 5, criteria 5, 7 and 19. A blob is addressed by id, so there is no depth limit and no history walk. The cache is a second copy of text only for files that git cannot return. Resolved point 2. |
+| M12 | `no_session_id` is logged once for each lifetime of `state.json`, by the flag `noSessionIdLogged` in it. | Requirement 3, criterion 22. Resolved point 3. |
 
 ## Architecture
 
@@ -97,16 +99,18 @@ Each module is at most 300 lines and each function at most 40. `core/` imports n
 | `src/core/types.ts` | yes | Plain data types in Data Models. |
 | `src/core/limits.ts` | yes | `SIZE_LIMIT` 200,000; `HOOK_DEADLINE_MS` 20,000; `STALE_WINDOW_MS` 43,200,000; `LABEL_MAX` 80; `STDIN_MAX` 1 MiB; `STDIN_WAIT_MS` 1,500; `LOCK_WAIT_MS` 5,000; `RACY_MS` 2,000; `DIFF_CAP` 1,500. |
 | `src/core/payload.ts` | yes | `parsePayload(text)`: keep `session_id`, `cwd`, `task_name`, `spec_name`, `task_success`; drop every other field including `prompt`. |
-| `src/core/label.ts` | yes | `makeLabel`, `windowRunName`, `runId`, `parseRunId`. |
+| `src/core/label.ts` | yes | `parseTaskName`, `makeLabel`, `windowRunName`, `runId`, `parseRunId`, `describeRun` (the words `written in task 5.3 Build the view`). |
 | `src/core/windows.ts` | yes | Stale sweep, `select` (rule 21), `transition` per event, ordering counter. |
 | `src/core/state-codec.ts` | yes | `encodeState`, `decodeState` for `state.json`. |
-| `src/core/baseline-codec.ts` | yes | `encodeBaseline`, `decodeBaseline`. |
+| `src/core/baseline-codec.ts` | yes | `encodeBaseline`, `decodeBaseline`; an entry is `{ sha256, blob? }`. |
 | `src/core/lines.ts` | yes | Line starts, `LineIndex`, offset to line and column, column in UTF-16 units. |
 | `src/core/diff.ts` | yes | `diffLines(old, new)` giving `Hunk[]`. |
 | `src/core/plan.ts` | yes | `planHunks(hunks, origin, runBase, clock)` giving Engine operations. |
 | `src/core/update.ts` | yes | `updateRecord`, `firstRecord`, `appearedRecord` over the Engine. Returns `Result`. |
 | `src/core/exclude.ts` | yes | Built-in exclusion rules of Requirement 2, criteria 4 to 7. |
-| `src/core/ignore.ts` | yes | `.kiroignore` parser and matcher. |
+| `src/core/glob.ts` | yes | One gitignore glob (`*`, `?`, bracket classes with ranges, negation and POSIX names, `**`, escapes) as an iterative matcher over path segments, in the manner of git's `wildmatch`. |
+| `src/core/ignore-parse.ts` | yes | Ignore-file text into rules: comments, escapes, trailing spaces, `!`, anchoring, directory-only. |
+| `src/core/ignore.ts` | yes | `isIgnored(rules, path)`: tests each ancestor directory and then the file; the last matching rule decides; nothing below an excluded directory is re-included. |
 | `src/core/renames.ts` | yes | `pairRenames(gone, appeared)`. |
 | `src/core/legend.ts` | yes | The Source_Legend text and the not-know notice. |
 | `src/core/structured.ts` | yes | `Structured_Span` builder over a Document. |
@@ -120,9 +124,10 @@ Each module is at most 300 lines and each function at most 40. `core/` imports n
 | `src/io/store.ts` | no | Record_Directory layout, atomic write, read of Records, baseline and state. |
 | `src/io/lock.ts` | no | Exclusive lock with 5 s wait and stale break. |
 | `src/io/faults.ts` | no | Fault_Log append and trim. |
-| `src/io/git.ts` | no | `ls-files`, `cat-file`, `log`; every call through `execFile` with an argument array. |
+| `src/io/git.ts` | no | `ls-files`, `hash-object --no-filters --stdin-paths`, `cat-file --batch-check`, `cat-file blob`; every call through `execFile` with an argument array. |
 | `src/io/scan.ts` | no | Candidates from git or a walk, exclusion, stat, read, decode, hash. |
-| `src/io/baseline-text.ts` | no | Baseline_Text resolver: HEAD blob, then 20 commits. |
+| `src/io/baseline-text.ts` | no | Baseline_Text resolver: the blob named by the Blob_Id, then `cache/<digest>`, else none. |
+| `src/io/baseline-cache.ts` | no | Read, write and delete `cache/<digest>` files, atomically; a file is deleted when no entry has its digest. |
 | `src/io/stdin.ts` | no | Bounded stdin read. |
 | `src/io/recorder.ts` | no | One event from start to exit; calls the pure core in order. |
 | `src/io/recorder-files.ts` | no | Per-file phases of an event. |
@@ -134,7 +139,7 @@ Each module is at most 300 lines and each function at most 40. `core/` imports n
 | `src/cli/main.ts` | no | Entry. Dispatch on `record`, `baseline`, `reveal`, `mcp`, `setup`. Catches everything for `record`. |
 | `src/testing/arbitraries.ts` | yes | Re-exports from `arb-text.ts`, `arb-edits.ts`, `arb-windows.ts`, `arb-dirs.ts`. |
 
-Package files: `package.json` (dependencies `@reveal-codes/engine` `workspace:*`, plus the two that Requirement 12 forces, see Open points 1), `tsconfig.json` (extends `tsconfig.base.json`, `types: ["node"]`, references `../engine`). Root changes: `tsconfig.json` gains `{ "path": "packages/provenance" }`; `vitest.config.ts` gains `project("provenance", "packages/provenance")`; `package.json` gains `"reveal": "node --import jiti/register packages/provenance/src/cli/main.ts reveal"`. `pnpm-workspace.yaml` already includes `packages/*` and is not changed.
+Package files: `package.json` (dependencies `@reveal-codes/engine` `workspace:*`, plus `@modelcontextprotocol/sdk` and `zod`, pinned as `courtlistener-mcp` pins them and imported only under `src/mcp/`; Resolved point 1), `tsconfig.json` (extends `tsconfig.base.json`, `types: ["node"]`, references `../engine`). Root changes: `tsconfig.json` gains `{ "path": "packages/provenance" }`; `vitest.config.ts` gains `project("provenance", "packages/provenance")`; `package.json` gains `"reveal": "node --import jiti/register packages/provenance/src/cli/main.ts reveal"`. `pnpm-workspace.yaml` already includes `packages/*` and is not changed.
 
 ### Layout of the Record_Directory
 
@@ -144,11 +149,13 @@ Package files: `package.json` (dependencies `@reveal-codes/engine` `workspace:*`
   records/<path>.reveal  committed, one per changed file
   provenance.mjs         committed, the Bundle
   reveal                 committed, shell wrapper
-  .gitignore             lists state.json, errors.log, lock
+  ignore                 committed, recording-only patterns (Ignore_File)
+  .gitignore             lists state.json, errors.log, lock, cache/
   state.json             not committed
   errors.log             not committed
   lock                   not committed
-.kiroignore              committed, at the Workspace_Root
+  cache/<sha256>         not committed, starting text of files that git cannot return
+.kiroignore              Kiro's own file at the Workspace_Root; read, never written
 .kiro/hooks/0-provenance.json
 ```
 
@@ -182,10 +189,11 @@ For an Agent_Change that replaces `AI` text the delete step has Actor `AI`, whic
 
 ### Run names (M3)
 
-- **Label.** For `preTask` the `task_name` string with `\s` and C0 controls collapsed to single spaces, trimmed, cut to 80 code points (never inside a Surrogate_Pair). For `promptSubmit` the word `turn`. Empty after cleaning, or no `task_name`, gives `task` (Open point 4).
-- **Window_Run.** `<label> <YYYY-MM-DDTHH:MM:SSZ>`. If an open window or the last opened window already has that name, append `~2`, `~3`, and so on.
+- **Task_Number and title.** For `preTask`, `parseTaskName(taskName)` collapses `\s` and C0 controls to single spaces and trims. If the result starts with a token that matches `^\d+(\.\d+)*\.?` and is followed by a space or the end, that token without a trailing `.` is the Task_Number and the rest, trimmed, is the title. The title is cut to 80 code points (never inside a Surrogate_Pair), and an empty title gives `task`. No `task_name`, or one that is empty after cleaning, gives no Task_Number and `task`. For `promptSubmit` there is no Task_Number and the title is the word `turn`. So `5.3 Build the view` gives (`5.3`, `Build the view`), `1. Probe task one` gives (`1`, `Probe task one`), `5.3` gives (`5.3`, `task`), and `2024plan` gives (none, `2024plan`). The field `task` is not read (Resolved point 11a).
+- **Window_Run.** `[<Task_Number> ]<title> <YYYY-MM-DDTHH:MM:SSZ>`. If an open window or the last opened window already has that name, append `~2`, `~3`, and so on.
 - **Run_Id.** `<Window_Run>.<n>`.
-- **Parse.** `^(.*) (\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ)(~\d+)?\.(\d+)$`, label greedy from the left, the rest anchored at the right. Hunk number is the digits after the last `.`. The viewer, summary and MCP tools read the label, the opening time and the Hunk number from the Run_Id and need no other index. A Run_Id that does not match is shown with label `?` and sorts last.
+- **Parse.** `^(?:(\d+(?:\.\d+)*) )?(.*) (\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ)(~\d+)?\.(\d+)$`: the optional Task_Number is taken from the left, the time, the suffix and the Hunk number from the right, and the title is what lies between. This is unambiguous, because a window without a Task_Number never has a title that begins with a number token and a space (`parseTaskName` would have taken the token). The Hunk number is the digits after the last `.`. The viewer, summary and MCP tools read the Task_Number, the title, the opening time and the Hunk number from the Run_Id and need no other index. A Run_Id that does not match is shown with title `?` and sorts last.
+- **Describe.** `describeRun(taskNumber, title)` gives `written in turn` for the title `turn` with no Task_Number, and otherwise `written in task`, then the Task_Number if there is one, then the title unless it is the fallback `task`. So `5.3 Build the view` reads `written in task 5.3 Build the view`. A task with no Task_Number whose title is literally `turn` reads as a turn window; this is accepted. The summary, the stretch list, the window table and the text summary of each tool use these words. The reading of the user's example label is to be confirmed (Resolved point 11a).
 - No part of any prompt or Session_Key enters a name (Requirement 3, criteria 11 and 25).
 
 ### Windows, sessions and attribution
@@ -207,7 +215,7 @@ All of this is one pure module, `core/windows.ts`, over `WindowState` (Data Mode
 
 `order` is a counter in `state.json` that increases by one for each window opened. It breaks ties between windows opened in the same second, so rule (b) is a total order and deterministic (Property 5).
 
-**`_none` sessions (criterion 22).** A missing, non-string or empty `session_id` gives the key `_none`. Events with such a payload share one session, so their windows open and close as a pair. `no_session_id` is logged at most once per process, which is once per event, because each event is one process. Open point 3 proposes once per state lifetime.
+**`_none` sessions (criterion 22).** A missing, non-string or empty `session_id` gives the key `_none`. Events with such a payload share one session, so their windows open and close as a pair. `no_session_id` is logged once for each lifetime of `state.json`: the flag `noSessionIdLogged` is false at the first such event, which writes the line and sets the flag, and true afterwards. A `state.json` that is absent, unreadable or replaced starts a new lifetime (M12, Resolved point 3).
 
 **What rule (b) can and cannot say.** A hook event reports no file path, and a write is seen only at the next event of any session. When two sessions have windows open together, a change goes to the window that opened most recently, which may be the other session's. The README and the legend say that attribution while sessions overlap is a rule, not a fact.
 
@@ -216,9 +224,11 @@ All of this is one pure module, `core/windows.ts`, over `WindowState` (Data Mode
 1. **Git tree.** `git ls-files -z --cached --others --exclude-standard`, minus `git ls-files -z --cached --ignored --exclude-standard` (tracked files that an ignore rule matches). Both through `execFile`, no shell. On this repository the first takes about 30 ms and the second about 30 ms.
 2. **No git.** A walk that skips `.git node_modules dist build out .next coverage target` and applies no ignore file. `lstat` first; a symbolic link is absent.
 3. **Built-in exclusions**, in `core/exclude.ts`: everything under the Record_Directory; lockfiles and `*.lock`; `*.min.js`, `*.min.css`, `*.map`; anything under a directory named `dist build out .next coverage target`; `.env`, `.env.*`, `*.pem`, `*.key`, `*.p12`, `*.pfx`, `id_rsa*`, `id_ed25519*`. These cannot be re-included by `.kiroignore`.
-4. **`.kiroignore`** at the Workspace_Root only (`core/ignore.ts`). Blank lines and `#` lines skipped. `*` is any run except `/`; `**` is any run; `?` is one character except `/`; a trailing `/` marks a directory and matches every file below it. A pattern with no `/` matches the name at any depth. A pattern with a `/` elsewhere, or a leading `/`, is anchored at the root. A line starting with `!` re-includes a path that an earlier line excluded (M7); the last match wins.
+4. **`.kiroignore` and `.kiro/provenance/ignore`**, each read on its own through `core/ignore-parse.ts` and `core/ignore.ts`. A file is excluded when either excludes it, and neither can re-include a file that the other, git or the built-in rules exclude. The syntax is the full gitignore syntax for a root-level file: blank lines and `#` comments, `\#` and `\!`, trailing spaces unless escaped, `!` negation with the last match deciding, `*`, `?`, bracket classes with ranges, `!` or `^` negation and POSIX names, `**/`, `/**` and `/**/`, a trailing `/` for directories only, anchoring by a leading or inner `/`, and no re-inclusion below an excluded directory. `core/glob.ts` matches iteratively, as git's `wildmatch` does, and builds no regular expression from a pattern, so a pattern cannot cause catastrophic backtracking.
 
-**Kiro already reads `.kiroignore`** (checked against the Kiro documentation, `kiro.dev/docs/kiroignore`). In Kiro it stops the agent reading files, with gitignore syntax, including `!` negation, `[]` classes, nested `.kiroignore` files and a global file. The Recorder shares the root file so that secrets listed there are not recorded. It implements the subset above, so three things differ from Kiro: `[]` classes are not matched, nested and global ignore files are not read, and a pattern the Recorder cannot parse is skipped. A line that Kiro treats as a class would not exclude here. The README says so.
+**Kiro already reads `.kiroignore`** (checked against the Kiro documentation, `kiro.dev/docs/kiroignore`): it stops the agent reading the files that it lists, with gitignore syntax, `!` negation, `[]` classes, nested `.kiroignore` files and a global file. The Recorder never writes it, because a pattern added there would hide the file from the agent as well. Recording-only patterns go in `.kiro/provenance/ignore`, which setup writes with comment lines. The Recorder reads the root `.kiroignore` so that secrets listed there are not recorded. The syntax is the same in both files. Two things differ from Kiro: nested and global ignore files are not read, so a file that Kiro hides through one of them may still be recorded; and a file that `.kiro/provenance/ignore` excludes is still readable by Kiro. The README says so.
+
+**How the matcher is tested.** Property 15 compares `isIgnored` with `git check-ignore --no-index` on generated patterns and paths. Each run makes a temporary repository, writes the patterns to its root `.gitignore`, creates every generated path (so that directory-only patterns see real directories), and asks git about all of them in one process, with `core.ignorecase` false and the global and system configuration disabled (`GIT_CONFIG_GLOBAL=/dev/null`, `GIT_CONFIG_NOSYSTEM=1`). That is one `git` process for each run, about 30 to 40 ms, so 500 runs take 15 to 20 s. It is a local process and touches no network, as the Baseline_Text tests do. A property is the better tool here, because generated patterns find disagreements that a table of examples does not. A table drawn from the gitignore documentation still runs where `git` is absent, and the property is skipped there, with the reason in its title.
 
 **Size and binary.** If `stat.size > 600,000` bytes the file is over the limit without reading, because a text of 200,000 code units takes at most 600,000 bytes of UTF-8. If `stat.size <= 200,000` it cannot be over. Between the two the text is decoded and its `length` is compared. A file with a NUL byte or invalid UTF-8 is binary and silently skipped. Decoding uses `fatal: true, ignoreBOM: true`.
 
@@ -231,19 +241,21 @@ All of this is one pure module, `core/windows.ts`, over `WindowState` (Data Mode
   "version": 1,
   "at": "2026-11-19T09:00:00Z",
   "files": {
-    "README.md": "<64 hex>",
-    "apps/web/app/page.tsx": "<64 hex>"
+    "README.md": { "sha256": "<64 hex>", "blob": "<40 hex>" },
+    "apps/web/app/page.tsx": { "sha256": "<64 hex>", "blob": "<40 hex>" }
   }
 }
 ```
 
-The digest is SHA-256 of the file's bytes, which equals the digest of its text because decoding is lossless (BOM and CR kept). A path appears only while the file has no Record (Requirement 5, criterion 1). `at` is set once and never changed.
+`sha256` is the SHA-256 of the file's bytes, which equals the digest of its text because decoding is lossless (BOM and CR kept). `blob` is the git object id of the same bytes, as `git hash-object --no-filters` computes it, and is present only where git is present; one batched `git hash-object --no-filters --stdin-paths` call gives all of them, and one `git cat-file --batch-check` call tells which are in the object store. A path appears only while the file has no Record (Requirement 5, criterion 1). `at` is set once and never changed.
 
 **First change.** When a file with a Baseline_Entry and no Record differs from the entry's digest:
 
-1. `io/baseline-text.ts` looks for the Baseline_Text: `git cat-file blob HEAD:<path>`, and if its SHA-256 equals the entry's digest, use it. Otherwise `git log -n 20 --format=%H -- <path>`, then `git cat-file blob <commit>:<path>` for each commit, newest first, with the same digest test. Otherwise none.
-2. Found: `createDocument(baselineText, baseline.at)` makes every character `PST`. The Hunks from `baselineText` to the file text are applied as above, the Record is written, the entry is removed.
-3. Not found: `createDocument("", clock)` then one `replace` of the whole text, with the origin of the event (`AI` and Run `<Window_Run>.1`, or `HUM`), and `baseline_text_unavailable` in the Fault_Log (Requirement 5, criterion 7). The Record then says the whole file is `[AI]` or `[HUM]`, including lines nobody changed. This over-attributes. It happens when git is absent, when the file was changed and committed after the baseline and more than 20 commits ago, when it had uncommitted changes at the baseline, or when line-ending conversion alters the blob bytes. The pre-commit hook of this repository (below) reduces the second case, because it records the first change before the commit that would bury the baseline blob. Open point 2 asks whether to add an ignored cache of baseline text.
+1. `io/baseline-text.ts` looks for the Baseline_Text in two places and no other. First, if the entry has a `blob` and git is present, `git cat-file blob <blob>`; the bytes are used if their SHA-256 equals the entry's `sha256`. There is no limit on how old the commit is and no walk of the history, because a blob is found by its id. Second, `cache/<sha256>` through `io/baseline-cache.ts`; its bytes are used if their SHA-256 equals its name. Otherwise none.
+2. Found: `createDocument(baselineText, baseline.at)` makes every character `PST`. The Hunks from `baselineText` to the file text are applied as above, the Record is written, the entry is removed, and the cache file named by its digest is deleted if no other entry has that digest.
+3. Not found: `createDocument(fileText, clock)`. Every character is `PST` with the time of the event. No Hunk is applied and no window is consulted. The entry is removed (and its cache file, by the rule of step 2) and `baseline_text_unavailable` is logged (Requirement 5, criterion 7). The Record says only what is known: the file's text is recorded now, and nobody can say who wrote the change that arrived with the lost text. It never says that the whole file is `[AI]` or `[HUM]`. This happens when the blob is gone from the object store (a rewritten history, a pruned object, a shallow clone) and the file has no cache file. Resolved point 2 records the user's change from the earlier rule, which inserted the whole file with the origin of the event.
+
+**The Baseline_Cache.** `provenance baseline` writes `cache/<sha256>` for a file only when git cannot return it: for every file when there is no git, and, with git, for each file whose `blob` is not in the object store (an untracked file, or a file modified at the baseline). Identical texts share one file, because the name is the digest. `cache/` is listed in the Record_Directory `.gitignore`. A cache file is deleted at the end of the event that removes the last entry with its digest, and `provenance baseline` also removes cache files that no entry names. Measured on 2026-11-18 on this repository: all 1,064 tracked files have their exact-byte blob in the object store, no end-of-line conversion is in effect and the tree is clean, so a baseline taken on a clean tree writes 0 files and 0 bytes here. A baseline taken with untracked or modified files writes one cache file for each of them. A workspace with no git writes a cache file for every file, a second copy of every tracked text (about 7 MB for a repository of this size).
 
 **A file that appears.** A candidate with neither a Record nor a Baseline_Entry gets `createDocument("", clock)` and one whole-text insert, `AI` with Run `<Window_Run>.1` if rule 21 selects a window, `HUM` otherwise.
 
@@ -256,7 +268,7 @@ The digest is SHA-256 of the file's bytes, which equals the digest of its text b
 1. Parse argv: event name. Unknown name: log `unknown_event`, exit 0.
 2. Read stdin for `promptSubmit`, `agentStop`, `preTask`, `postTask`: at most 1.5 s and 1 MiB. Skip stdin for `manual`, because a git hook's stdin is not a payload. `parsePayload` keeps five fields.
 3. Find the Workspace_Root: walk up from `process.cwd()` to the first directory that holds `.kiro/provenance`; if none, use the payload `cwd` if it is absolute and holds one; else exit 0 with no log.
-4. Take the lock (below). Read `state.json`, `baseline.json`, `.kiroignore`.
+4. Take the lock (below). Read `state.json`, `baseline.json`, `.kiroignore` and `.kiro/provenance/ignore`.
 5. Sweep, leftover, as in Windows.
 6. Scan candidates. For each: if the cache entry matches size and modification time and is not racy, skip. Else read, decode, hash. Compare with the Record (parsed once) or entry.
 7. Pair renames. Choose the window by rule 21 once for the event.
@@ -265,11 +277,11 @@ The digest is SHA-256 of the file's bytes, which equals the digest of its text b
 10. Transition windows. Write `state.json` last, by temporary file and rename.
 11. Release the lock. Exit 0.
 
-The deadline is checked before each file. After 20 s the loop stops, the remaining files keep their Records, and `deadline` is logged. Differences in those files are then seen at the next event and attributed by the windows open then, which may be none; the README says a deadline can misattribute. A watchdog `setTimeout` of 22 s calls `process.exit(0)`.
+The deadline is checked before each file. After 20 s the loop stops, the remaining files keep their Records, and `deadline_reached:<n>` is logged, where `n` is the number of files not reached. Differences in those files are then seen at the next event and attributed by the windows open then, which may be none; the README Limits subsection says so (Resolved point 9). A watchdog `setTimeout` of 22 s calls `process.exit(0)`.
 
 **Lock.** `open(lock, "wx")` holding the process id and the time. Retry every 25 ms for 5 s. A lock file older than 30 s is renamed away and retried (M9). On timeout: log `lock_timeout`, exit 0, change nothing.
 
-**Cache hint.** `state.files[path] = { size, mtimeMs, digest, seenMs }`. It is trusted when `mtimeMs + 2000 <= seenMs` and size and mtime match. If the cache is absent or unreadable (`bad_state`), every file is compared with its Record or entry. Without a cache the work is about 1,055 reads and hashes (0.2 s measured) plus the parse of each existing Record.
+**File hint (not the Baseline_Cache).** `state.files[path] = { size, mtimeMs, digest, seenMs }`. It is trusted when `mtimeMs + 2000 <= seenMs` and size and mtime match. If the cache is absent or unreadable (`bad_state`), every file is compared with its Record or entry. Without a cache the work is about 1,055 reads and hashes (0.2 s measured) plus the parse of each existing Record.
 
 ### The Hook_File and why it runs first
 
@@ -302,7 +314,7 @@ Requirement 8, criterion 3 allows no other trigger. `PreToolUse` and `PostToolUs
 | No Record, no entry | One line with `not_tracked`, `over_limit`, `binary`, `ignored` or `no_record` | 1 |
 | Record that does not parse | One line with `tampered_record` | 1 |
 
-`<n>` is the sum of the lengths of the Hunk texts and deleted texts between the recorded text and the file. For a stale file with only an entry, the Baseline_Text is looked up in git as above; if not found, `<n>` is the whole file length.
+`<n>` is the sum of the lengths of the Hunk texts and deleted texts between the recorded text and the file. For a stale file with only an entry, the Baseline_Text is looked up by Blob_Id and in the Baseline_Cache as above; if not found, `<n>` is the whole file length.
 
 **Colour choice** (`io/env.ts` and `process.stdout.isTTY`): 24-bit when stdout is a terminal, `COLORTERM` is `truecolor` or `24bit`, `NO_COLOR` is unset and `TERM` is not `dumb`; 256 colours when `TERM` contains `256color` and not 24-bit; plain otherwise.
 
@@ -314,7 +326,7 @@ Requirement 8, criterion 3 allows no other trigger. `PreToolUse` and `PostToolUs
 
 **The legend** has the four items of Requirement 9, criterion 3, in order, one line each, under the header.
 
-**`reveal --summary [path] [--top n]`** (`core/summary.ts`). Per file and in total: characters and share of each Origin to one decimal. An Unchanged_File counts all its characters as `PST`. Then up to `top` (default 10) largest `AI` Spans, ordered by length descending, path ascending, offset ascending, each with path, first and last line, length, label and Window_Run. One line gives the `AI>HUM` characters left out of the list. A table groups `AI` and `AI>HUM` characters by Window_Run: label, opening time, files, Runs, characters of each. Files whose text differs from their Record are marked `stale`. The notice that `[HUM]` does not tell typing from pasting is printed once. No clock is read, so the output is a function of the Records, the baseline, the files and the arguments. With nothing recorded: one line naming `setup_provenance`, exit 1.
+**`reveal --summary [path] [--top n]`** (`core/summary.ts`). Per file and in total: characters and share of each Origin to one decimal. An Unchanged_File counts all its characters as `PST`. Then up to `top` (default 10) largest `AI` Spans, ordered by length descending, path ascending, offset ascending, each with path, first and last line, length, the `describeRun` words and the Window_Run. One line gives the `AI>HUM` characters left out of the list. A table groups `AI` and `AI>HUM` characters by Window_Run: Task_Number, label, opening time, files, Runs, characters of each, and the `describeRun` words. Files whose text differs from their Record are marked `stale`. The notice that `[HUM]` does not tell typing from pasting is printed once. No clock is read, so the output is a function of the Records, the baseline, the files and the arguments. With nothing recorded: one line naming `setup_provenance`, exit 1.
 
 **`reveal --check [--strict]`** (`core/check.ts`). For every Tracked_File, the Record or the entry is compared with the file. Lines are printed in path order, each labelled `fail` or `report`:
 
@@ -334,29 +346,29 @@ Exit 1 when any `fail` line is printed (or any `report` line with `--strict`), e
 
 `provenance mcp` starts a stdio server with `@modelcontextprotocol/sdk`. The tool code in `mcp/tools.ts` calls the same functions as the command line (`io/load.ts`, `core/structured.ts`, `core/summary.ts`, `core/check.ts`), so a tool and its command cannot disagree. All results hold `structuredContent` that matches the tool's `outputSchema`, and a text summary of one to five lines. No tool returns file text, escaped text or ANSI sequences, and no tool calls a model.
 
-**Workspace.** The argument `workspace` (absolute path) or else the process's current directory, then up to the first directory that holds `.kiro/provenance`. If none: an error result that says provenance is not set up and names `setup_provenance`. Every `path` argument is resolved inside the Workspace_Root and rejected otherwise. `setup_provenance` without `workspace` works only when the current directory holds `.git` or `.kiro`; otherwise it returns an error asking for `workspace`, because it has not been verified where Kiro starts a Power's server (Open point 8).
+**Workspace.** The argument `workspace` (absolute path) or else the process's current directory, then up to the first directory that holds `.kiro/provenance`. If none: an error result that says provenance is not set up and names `setup_provenance`. Every `path` argument is resolved inside the Workspace_Root and rejected otherwise. `setup_provenance` without `workspace` works only when the current directory holds `.git` or `.kiro`; otherwise it returns an error asking for `workspace`, because it has not been verified where Kiro starts a Power's server; the Setup_Skill always passes `workspace` (Resolved point 11b).
 
 **Types** (`StructuredSpan` has 1-based lines and columns in UTF-16 code units, end exclusive):
 
 | Tool | Input | Output |
 | ---- | ----- | ------ |
-| `reveal_file` | `path`, `workspace?` | `{ file, status, reason, unrecordedCharacters, spans: StructuredSpan[], legend: string[4] }`. `status` is `current`, `unchanged_baseline`, `stale` or `unrecorded`. `reason` is `null` or one of the Requirement 9 reasons. `reason` is an addition to Requirement 12, criterion 4. |
+| `reveal_file` | `path`, `workspace?` | `{ file, status, reason, unrecordedCharacters, spans: StructuredSpan[], legend: string[4] }`. `status` is `current`, `unchanged_baseline`, `stale` or `unrecorded`. `reason` is `null` or one of the Requirement 9 reasons. Requirement 12, criterion 4 lists `reason` (Resolved point 12). |
 | `untouched_agent_text` | `path`, `top?`, `workspace?` | `{ path, stretches: StructuredSpan[], countsByOrigin: { AI, "AI>HUM", HUM, PST }, omittedAiHumCharacters, stale, notice }` |
 | `provenance_summary` | `path?`, `top?`, `workspace?` | `{ files: FileCounts[], total: FileCounts, windows: WindowRow[], stretches: (StructuredSpan & { file })[], omittedAiHumCharacters, notice }` |
 | `check_records` | `strict?`, `workspace?` | `{ ok, filesChecked, failures: {path, reason}[], reports: {path, reason}[] }`; `isError` is true when the command would exit non-zero |
-| `setup_provenance` | `workspace?` | `{ written: string[], kept: string[] }` |
+| `setup_provenance` | `workspace?` | `{ written: string[], replaced: string[], kept: string[] }` |
 
-`FileCounts = { path, stale, characters: { AI, "AI>HUM", HUM, PST }, shares: same keys as percentages }`. `WindowRow = { windowRun, taskTitle, openedAt, files, runs, aiCharacters, aiHumCharacters }`. `StructuredSpan = { startLine, startColumn, endLine, endColumn, length, origin, run, taskTitle }` with `run` and `taskTitle` null for `HUM` and `PST`. `run` is the Run_Id; `taskTitle` is the Run_Label parsed from it.
+`FileCounts = { path, stale, characters: { AI, "AI>HUM", HUM, PST }, shares: same keys as percentages }`. `WindowRow = { windowRun, taskNumber, taskTitle, openedAt, files, runs, aiCharacters, aiHumCharacters }`. `StructuredSpan = { startLine, startColumn, endLine, endColumn, length, origin, run, taskNumber, taskTitle }` with `run`, `taskNumber` and `taskTitle` null for `HUM` and `PST`, and `taskNumber` null for a window without a Task_Number. `run` is the Run_Id; `taskNumber` and `taskTitle` are the Task_Number and the Run_Label parsed from it. The text summary of each tool names a window with the `describeRun` words.
 
-The four read tools carry `annotations: { readOnlyHint: true }`; `setup_provenance` does not. They read only the Record_Directory, the `.kiroignore` and the files they describe.
+The four read tools carry `annotations: { readOnlyHint: true }`; `setup_provenance` does not. They read only the Record_Directory, `.kiroignore`, `.kiro/provenance/ignore` and the files they describe.
 
-**Startup cost.** The hook path loads the same Bundle. The MCP modules are loaded with a dynamic `import()` only for `provenance mcp`, so the hook path does not evaluate the SDK. esbuild still parses the bundled text, which adds a few milliseconds (a 917 KB bundle for citation-check). Task 7 measures it; if it costs more than 20 ms of a `promptSubmit` event, Open point 1 gives the fallback.
+**Startup cost.** The hook path loads the same Bundle. The MCP modules are loaded with a dynamic `import()` only for `provenance mcp`, so the hook path does not evaluate the SDK. esbuild still parses the bundled text, which adds a few milliseconds (a 917 KB bundle for citation-check). Task 10.2 measures it; if it costs more than 20 ms of a `promptSubmit` event, the number goes to the user in `BUILD_LOG.md` before anything changes, because the only fallback (a second file `provenance-mcp.mjs`) would break Requirement 13, criterion 10 (Resolved point 1).
 
 ### Setup and the pre-commit hook
 
-`provenance setup` (also the body of `setup_provenance`) does, in order, and reports each file as written or kept: create `.kiro/provenance/`; copy the running Bundle to `provenance.mjs` and write `reveal` and `.gitignore`; write `.kiroignore` (comment lines only) if absent; write `.kiro/hooks/0-provenance.json` if absent; run the baseline, which writes `baseline.json` and no Record. An existing `.kiroignore`, Hook_File, `baseline.json` or Record_Directory is kept and named. The Bundle copy and wrapper are program files: they are replaced when their bytes differ and then reported as written. Without this a rebuilt Bundle would never reach a workspace (Open point 7).
+`provenance setup` (also the body of `setup_provenance`) does, in order, and reports each file as written, replaced or kept: create `.kiro/provenance/`; copy the running Bundle to `provenance.mjs` and write `reveal` and `.gitignore` (which lists `state.json`, `errors.log`, `lock` and `cache/`); write `.kiro/provenance/ignore` (comment lines only) if absent; write `.kiro/hooks/0-provenance.json` if absent; run the baseline, which writes `baseline.json` and the Baseline_Cache and no Record. Setup never writes or changes `.kiroignore`. The Bundle copy and the wrapper are the only files it replaces, and only when their bytes differ; it then reports them as `replaced`, and as `kept` when the bytes are equal. Without this a rebuilt Bundle would never reach a workspace. An existing Hook_File, Ignore_File, Record_Directory `.gitignore`, `baseline.json`, Baseline_Cache and every Record are never overwritten and are reported as `kept`; a file that did not exist and is written is reported as `written` (Resolved point 6).
 
-**In this repository** the install task builds the Bundle (`node scripts/build-power.mjs --power provenance`), runs `node powers/provenance/server/provenance.mjs setup`, adds the line `powers/*/server/` to `.kiroignore`, and writes `.git/hooks/pre-commit` with this block, appended if a hook exists:
+**In this repository** the install task builds the Bundle (`node scripts/build-power.mjs --power provenance`), runs `node powers/provenance/server/provenance.mjs setup`, adds the line `powers/*/server/` to `.kiro/provenance/ignore` (never to `.kiroignore`), and writes `.git/hooks/pre-commit` with this block, appended if a hook exists:
 
 ```sh
 # reveal-codes provenance: catch up the record, stage it. Never blocks a commit.
@@ -395,7 +407,7 @@ In each of the five files `engine-tests-on-save.json`, `verifier-tests-on-save.j
 | `promptSubmit`, no file changed, this repository | 0.5 s | About 80 to 120 ms on the M4 (the user's measured floor is 33 to 50 ms for node, stdin and three git calls). In the shell of this session, an empty `node` start took about 105 ms, one `git ls-files` about 30 ms, and a node process that ran `git ls-files` and `stat` on 1,060 files took about 140 ms, so the same event takes about 200 ms there. | `test/timing.test.ts`, run only when `PROVENANCE_TIMING=1`: spawn the built Bundle 25 times in a copy of this repository's working tree state, report the median and the maximum. Value recorded in `BUILD_LOG.md` next to the floor. |
 | Other events, no change | 1.5 s | Same as above plus the parse of `state.json` (about 100 KB). | Same test. |
 | Any event, no `state.json` | 5 s | 1,055 reads and hashes (0.2 s), parse of every Record (under 1 s for a few hundred), Engine `createDocument` only for changed files. | Same test, with `state.json` removed. |
-| Baseline of this repository | 10 s | About 0.3 s. | Same test, `provenance baseline`. |
+| Baseline of this repository | 10 s | About 0.3 s, plus one batched `git hash-object` call and one `git cat-file --batch-check` call (about 40 ms). A cache file is written for each untracked or modified file, and none on a clean tree here. | Same test, `provenance baseline`. |
 | One file, one Hunk, 194,104 characters | n/a | 2 ms for `apply` (measured), plus the diff pass over the lines. | Unit timing in the same test file. |
 | Hook end | Deadline 20 s plus 2 s | Watchdog at 22 s. | Example test with an injected slow clock. |
 
@@ -412,13 +424,14 @@ The tests do not assert wall-clock limits in CI, because a shared runner is slow
   "lastWindowRun": "turn 2026-11-19T10:00:00Z",
   "lastEventAt": "2026-11-19T10:05:00Z",
   "recordedAtMs": 1794981816799,
+  "noSessionIdLogged": false,
   "sessions": {
     "<Session_Key>": {
       "lastEventAt": "2026-11-19T10:05:00Z",
       "windows": [                      // stack, innermost last
-        { "windowRun": "turn 2026-11-19T10:00:00Z", "label": "turn",
+        { "windowRun": "turn 2026-11-19T10:00:00Z", "label": "turn", "taskNumber": null,
           "kind": "turn", "openedAt": "2026-11-19T10:00:00Z", "order": 16 },
-        { "windowRun": "1. Probe task one 2026-11-19T10:01:00Z", "label": "1. Probe task one",
+        { "windowRun": "1 Probe task one 2026-11-19T10:01:00Z", "label": "Probe task one", "taskNumber": "1",
           "kind": "task", "openedAt": "2026-11-19T10:01:00Z", "order": 17, "spec": "probe-scratch" }
       ]
     }
@@ -434,7 +447,7 @@ The tests do not assert wall-clock limits in CI, because a shared runner is slow
 
 The Session_Key is stored here and nowhere else (Requirement 3, criterion 25). `spec` is the directory name that holds the payload's `tasks.md`, never a path. `decodeState` returns an error for any other shape, and the Recorder then treats the state as absent, logs `bad_state` and closes every window it held.
 
-**`Baseline_File`**: as above. `decodeBaseline` accepts `version` 1, an `at` that passes the Engine's timestamp check, and a `files` object whose values are 64 lowercase hex characters.
+**`Baseline_File`**: as above. `decodeBaseline` accepts `version` 1, an `at` that passes the Engine's timestamp check, and a `files` object whose values are objects `{ sha256, blob? }`, where `sha256` is 64 lowercase hex characters and `blob`, when present, is 40 or 64 lowercase hex characters (the object format of the repository). **`Baseline_Cache`**: files `cache/<sha256>` that hold the bytes of a starting text, written by temporary file and rename, never committed.
 
 **Record**: `renderRecord(document, null, "full").text`, at `records/<path>.reveal`, `/` as separator on every platform. `parseRecord` of the file returns the Document it was made from. The file holds no path, so moving it is a rename.
 
@@ -442,7 +455,7 @@ The Session_Key is stored here and nowhere else (Requirement 3, criterion 25). `
 
 **`Hunk`** `= { from, to, text }`. **`FileFact`** `= { path, digest, text | null, kind: "text" | "binary" | "over_limit" }`. **`WorkspaceFacts`** is the Records parsed, the entries, the files read and the candidate list, gathered once by `io/load.ts` for the viewer, the summary, the check and the tools.
 
-**`Fault_Log` line**: `<ISO time> <event> <path or -> <reason>`, one line, no file text, no payload field. Reasons: `over_limit`, `no_open_window`, `window_left_open`, `lock_timeout`, `no_session_id`, `baseline_text_unavailable`, `tampered_record`, `bad_state`, `bad_baseline`, `deadline`, `apply_failed:<kind>`, `apply_mismatch`, `read_failed`, `write_failed`, `unknown_event`, `exception`. A log over 256 KiB is cut to its last 128 KiB, at a line boundary, before the next append.
+**`Fault_Log` line**: `<ISO time> <event> <path or -> <reason>`, one line, no file text, no payload field. Reasons: `over_limit`, `no_open_window`, `window_left_open`, `lock_timeout`, `no_session_id`, `baseline_text_unavailable`, `tampered_record`, `bad_state`, `bad_baseline`, `deadline_reached:<n>`, `apply_failed:<kind>`, `apply_mismatch`, `read_failed`, `write_failed`, `unknown_event`, `exception`. A log over 256 KiB is cut to its last 128 KiB, at a line boundary, before the next append.
 
 **The Source_Legend** (also the `legend` of `reveal_file`), exactly: `[AI:<run>] changed while the agent was working, with the run it belongs to`; `[AI>HUM:<run>] agent text in a run that the Engine counts as edited outside the agent`; `[HUM] changed outside the agent; typing, pasting and other tools are not told apart`; `[PST] already in the file when recording started; origin not recorded`.
 
@@ -450,17 +463,17 @@ The Session_Key is stored here and nowhere else (Requirement 3, criterion 25). `
 
 *A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
 
-The properties below follow Requirement 16 (Properties 1 to 5 and the colour equality of criterion 12) and add round trips for each parser and codec. Each is one `fc.assert(fc.property(...))` in a file named `<module>.properties.test.ts`, with `// Property N` above it and `_Requirements: x.y_` in the `describe` title. Run counts come from a `runs()` helper in `packages/provenance/test/support/fc.ts`, copied from the engine's (200 locally, 500 with `FC_NUM_RUNS=500`). Reflection: the cache rule (Requirement 5, criterion 16) and the Record round trip (criterion 2) are folded into Property 1; the bytes of the Fault_Log and state are excluded from Property 4 by Requirement 16, criterion 5.
+The properties below follow Requirement 16 (Properties 1 to 5, the colour equality of criterion 12, and Properties 14 and 15 of criteria 20 and 21) and add round trips for each parser and codec. Each is one `fc.assert(fc.property(...))` in a file named `<module>.properties.test.ts`, with `// Property N` above it and `_Requirements: x.y_` in the `describe` title. Run counts come from a `runs()` helper in `packages/provenance/test/support/fc.ts`, copied from the engine's (200 locally, 500 with `FC_NUM_RUNS=500`). Reflection: the cache rule (Requirement 5, criterion 16) and the Record round trip (criterion 2) are folded into Property 1; the bytes of the Fault_Log and state are excluded from Property 4 by Requirement 16, criterion 5.
 
 ### Property 1: The record or the baseline is the file
 
-*For any* starting file text (including empty, with a leading byte order mark, with carriage returns, with surrogate pairs and with `[`, `]` and `\`), *for any* sequence of events and *for any* replacement of the file text before each event (including deletion of all text and changes at the start and the end), and with `state.json` removed before a generated subset of the events, after every event the file has a Record whose `parseRecord` Document has `text` equal to the file text, or has no Record and a Baseline_Entry whose digest equals the digest of the file text; it never has both.
+*For any* starting file text (including empty, with a leading byte order mark, with carriage returns, with surrogate pairs and with `[`, `]` and `\`), *for any* sequence of events and *for any* replacement of the file text before each event (including deletion of all text and changes at the start and the end), with `state.json` removed before a generated subset of the events, and whatever the availability of the starting text (through the Blob_Id, only through the Baseline_Cache, or not at all), after every event the file has a Record whose `parseRecord` Document has `text` equal to the file text, or has no Record and a Baseline_Entry whose digest equals the digest of the file text; it never has both.
 
-**Validates: Requirements 4.1, 4.2, 5.1, 5.2, 5.6, 5.15, 5.16, 16.2**
+**Validates: Requirements 4.1, 4.2, 5.1, 5.2, 5.5, 5.6, 5.7, 5.15, 5.16, 16.2**
 
 ### Property 2: Attribution follows the windows and nothing else
 
-*For any* sequence of events over one or more sessions and *for any* file edits between them, let `W` be the window that rule 21 selects at an event from the windows open when the event starts (after the sweep and the leftover closing). Then every character the event inserts has origin `AI` and a Run_Id `W.windowRun + "." + n` with `n` distinct per inserting Hunk and ascending with the Hunk's offset, one more than the highest number already used in that Record by that Window_Run; when no window is open, every inserted character has origin `HUM` and none has origin `AI`; and every character outside the event's Hunks keeps its Run_Id and timestamp, and keeps its origin except that `AI` may become `AI>HUM` for a Run the Engine's table marks relabelled.
+*For any* sequence of events over one or more sessions and *for any* file edits between them, let `W` be the window that rule 21 selects at an event from the windows open when the event starts (after the sweep and the leftover closing). Then every character the event inserts has origin `AI` and a Run_Id `W.windowRun + "." + n` with `n` distinct per inserting Hunk and ascending with the Hunk's offset, one more than the highest number already used in that Record by that Window_Run; when no window is open, every inserted character has origin `HUM` and none has origin `AI`; and every character outside the event's Hunks keeps its Run_Id and timestamp, and keeps its origin except that `AI` may become `AI>HUM` for a Run the Engine's table marks relabelled. The one exception to the first clause is a First_Change whose Baseline_Text is not found: its whole text has origin `PST` and no Run (Property 14).
 
 **Validates: Requirements 3.12, 3.21, 4.3, 4.4, 4.5, 4.10, 5.7, 5.8, 5.9, 16.3**
 
@@ -472,7 +485,7 @@ The properties below follow Requirement 16 (Properties 1 to 5 and the colour equ
 
 ### Property 4: Nothing happens twice
 
-*For any* Record_Directory and *for any* event, running the same event a second time with no file change leaves every file under the Record_Directory except `state.json` and `errors.log` byte for byte the same, including `baseline.json` and every Record.
+*For any* Record_Directory and *for any* event, running the same event a second time with no file change leaves every file under the Record_Directory except `state.json` and `errors.log` byte for byte the same, including `baseline.json`, every Record and every file of the Baseline_Cache.
 
 **Validates: Requirements 5.15, 6.2, 6.3, 16.5**
 
@@ -496,25 +509,25 @@ The properties below follow Requirement 16 (Properties 1 to 5 and the colour equ
 
 ### Property 8: The baseline file round-trips
 
-*For any* set of paths and digests and *for any* valid `at`, `decodeBaseline(encodeBaseline(x))` equals `x`, the encoded text has one entry per line, the entries are in UTF-16 code unit order of path, and encoding the same set in any insertion order gives the same bytes.
+*For any* set of paths, each with a SHA-256 digest and, for any subset of them, a Blob_Id of 40 or 64 hex characters, and *for any* valid `at`, `decodeBaseline(encodeBaseline(x))` equals `x`, the encoded text has one entry per line, the entries are in UTF-16 code unit order of path, and encoding the same set in any insertion order gives the same bytes.
 
 **Validates: Requirements 5.4, 6.3**
 
 ### Property 9: The window state round-trips
 
-*For any* valid `WindowState` (sessions with stacks of windows, cache entries, skipped entries and counters), `decodeState(encodeState(s))` equals `s`, and `decodeState` of any text that is not a valid encoding returns an error value and never throws.
+*For any* valid `WindowState` (sessions with stacks of windows, each window with an optional Task_Number, file-hint entries, skipped entries, counters and the flag `noSessionIdLogged`), `decodeState(encodeState(s))` equals `s`, and `decodeState` of any text that is not a valid encoding returns an error value and never throws.
 
 **Validates: Requirements 3.17, 5.16, 5.17**
 
 ### Property 10: Run names round-trip
 
-*For any* label string (including spaces, dots, digits, brackets, surrogate pairs and control characters), *for any* time and *for any* collision suffix and Hunk number, `parseRunId(runId(windowRunName(makeLabel(label), time, k), n))` gives back the cleaned label, the time, the suffix and `n`; the cleaned label has at most 80 code points, no control character and no run of spaces; and the Run_Id contains no part of the original label beyond the cleaned label.
+*For any* `task_name` string (including spaces, dots, digits, brackets, surrogate pairs, control characters, a leading Task_Number and none), *for any* time, collision suffix and Hunk number, `parseRunId(runId(windowRunName(parseTaskName(taskName), time, k), n))` gives back the Task_Number, the title, the time, the suffix and `n`; the Task_Number is absent or matches `\d+(\.\d+)*`; the title has at most 80 code points, no control character and no run of spaces, and, when there is no Task_Number, does not begin with a token that matches `\d+(\.\d+)*\.?` followed by a space; and the Run_Id contains no part of the original `task_name` beyond the Task_Number and the cleaned title.
 
-**Validates: Requirements 3.11, 3.12, 3.13, 10.6**
+**Validates: Requirements 3.11, 3.12, 3.13, 3.14, 10.6, 10.11**
 
 ### Property 11: Structured spans cover the file exactly
 
-*For any* Document, the `StructuredSpan` list of its spans is contiguous in order, starts at line 1 column 1, ends at the position of `text.length`, has lengths that sum to `text.length`, and each span's start and end positions convert back to the offsets of the Document span it came from; `run` and `taskTitle` are null exactly for `HUM` and `PST`.
+*For any* Document, the `StructuredSpan` list of its spans is contiguous in order, starts at line 1 column 1, ends at the position of `text.length`, has lengths that sum to `text.length`, and each span's start and end positions convert back to the offsets of the Document span it came from; `run` and `taskTitle` are null exactly for `HUM` and `PST`, and `taskNumber` is null for those and for a window with no Task_Number.
 
 **Validates: Requirements 12.4, 12.5, 12.8**
 
@@ -530,6 +543,18 @@ The properties below follow Requirement 16 (Properties 1 to 5 and the colour equ
 
 **Validates: Requirements 3.15, 3.16, 3.19**
 
+### Property 14: The first change never over-attributes
+
+*For any* file with a Baseline_Entry, *for any* starting text, *for any* later file text, and *for any* availability of the starting text (found through the Blob_Id in the fake object store, found only through the Baseline_Cache, found nowhere): when the starting text is available, the Record that the first change writes equals the Document obtained by `createDocument(startingText, at)` and the same Hunks applied through Engine `apply`, and every character that no Hunk touches has origin `PST`; when it is not, the Record's Document has the file's current text, every character has origin `PST`, no span has origin `AI` or `HUM`, the Fault_Log gains one `baseline_text_unavailable` line for the path, and the path has no Baseline_Entry; and after every event the Baseline_Cache holds no file whose name is the digest of no Baseline_Entry.
+
+**Validates: Requirements 5.5, 5.6, 5.7, 5.19, 6.1, 16.20**
+
+### Property 15: The ignore matcher agrees with git
+
+*For any* ignore-file contents built from comments, blank lines, escapes, negation, `*`, `?`, bracket classes, `**` forms, anchored and unanchored patterns and trailing slashes, and *for any* set of file paths created in a temporary git repository whose root `.gitignore` holds those contents, `isIgnored(parseIgnore(contents), path)` equals the answer of `git check-ignore --no-index` for the path (ignored or not), run with `core.ignorecase` false and the global and system git configuration disabled. The property is skipped, with the reason in its title, where `git` is not on the path.
+
+**Validates: Requirements 2.8, 2.9, 16.21**
+
 ## Error Handling
 
 Every failure of the Recorder ends in exit status 0 with nothing on standard output or standard error. The reason goes to the Fault_Log (Data Models). The table gives the action.
@@ -538,7 +563,7 @@ Every failure of the Recorder ends in exit status 0 with nothing on standard out
 | ------- | ------ |
 | Unknown event name | Log `unknown_event`, exit 0. |
 | stdin not closed, empty, invalid JSON or over 1 MiB | Continue with the empty payload. |
-| No `session_id` | Use `_none`; log `no_session_id`. |
+| No `session_id` | Use `_none`; log `no_session_id` once for each lifetime of `state.json` (the flag `noSessionIdLogged`). |
 | No Record_Directory found | Exit 0, log nothing (nowhere to write). |
 | Lock not obtained in 5 s | Log `lock_timeout`, change nothing. |
 | `state.json` unreadable | Treat as absent, log `bad_state`, close held windows. |
@@ -546,10 +571,10 @@ Every failure of the Recorder ends in exit status 0 with nothing on standard out
 | Record does not parse | Leave the file, log `tampered_record`, write no new Record for that path. |
 | `apply` returns an error, or text differs from file after apply | Keep the old Record and entry, log `apply_failed:<kind>` or `apply_mismatch`, continue. |
 | File changed while being updated | Keep the old Record and entry; the next event handles it. |
-| File over the limit | Skip; log `over_limit` once per path, size and modification time; delete its Record or entry. |
+| File over the limit | Skip; log `over_limit` once for each file until its size or modification time changes; delete its Record or entry. |
 | Binary file | Skip silently; delete its Record or entry. |
-| Baseline_Text not found | Insert the whole text with the origin of the event; log `baseline_text_unavailable`. |
-| Deadline (20 s) | Stop starting files, log `deadline`. |
+| Baseline_Text not found | Record the file's current text as `[PST]` with no Hunk, attribute the change to no one, delete the entry; log `baseline_text_unavailable`. |
+| Deadline (20 s) | Stop starting files, log `deadline_reached:<n>` with the number of files not reached. |
 | Uncaught exception, unhandled rejection | Caught in `cli/main.ts`, log `exception`, exit 0. |
 | Fault_Log not writable | Discard the line. |
 
@@ -557,45 +582,45 @@ The Reveal_Command and the MCP tools return error values (never throw) and exit 
 
 ## Testing Strategy
 
-**Property tests** use `fast-check` with vitest, as `tech.md` requires: Properties 1 to 13 above, each with the `// Property N` comment, the `_Requirements: x.y_` title and `runs()`. Arbitraries live in `packages/provenance/src/testing/arbitraries.ts` (re-exporting `arb-text.ts`, `arb-edits.ts`, `arb-windows.ts`, `arb-dirs.ts`) and cover text with surrogate pairs, carriage returns, a byte order mark, empty text and text with `[`, `]` and `\`; line-based edit sequences; interleaved events of two or more sessions, with and without `session_id`; and Record_Directories with few Records and a Baseline_File. The IO modules take an in-memory `Deps` (a map for the file system, a fake git, a fixed clock), so the properties run without disk and without the network. No test mocks the Engine. The exception to `tech.md` (arbitraries in the package, not in `packages/engine`) goes in `BUILD_LOG.md` (Decision 17). The design changed no property from Requirement 16; any change during the build is listed in `BUILD_LOG.md`.
+**Property tests** use `fast-check` with vitest, as `tech.md` requires: Properties 1 to 15 above, each with the `// Property N` comment, the `_Requirements: x.y_` title and `runs()`. Arbitraries live in `packages/provenance/src/testing/arbitraries.ts` (re-exporting `arb-text.ts`, `arb-edits.ts`, `arb-windows.ts`, `arb-dirs.ts`) and cover text with surrogate pairs, carriage returns, a byte order mark, empty text and text with `[`, `]` and `\`; line-based edit sequences; interleaved events of two or more sessions, with and without `session_id`; Record_Directories with few Records, a Baseline_File and a Baseline_Cache, with starting text available through a Blob_Id, only through the cache, or not at all; and ignore-file lines and paths. The IO modules take an in-memory `Deps` (a map for the file system, a fake git, a fixed clock), so the properties run without disk and without the network. No test mocks the Engine. Property 15 is the one property that runs a real `git` process, in a temporary repository (see the matcher test in Candidate files and exclusion). The exception to `tech.md` (arbitraries in the package, not in `packages/engine`) goes in `BUILD_LOG.md` (Decision 17). The user's decisions added Properties 14 and 15 and changed the statements of Properties 1, 2, 4, 8, 9, 10 and 11; any change during the build is listed in `BUILD_LOG.md`.
 
 **Example tests**, in `packages/provenance/test/`:
 
 - Payloads. Scrubbed fixtures captured by task 1, one per event and surface for which a payload exists (field names, types, `task_name`, `spec_name`, `task_success`, a fixed placeholder for `prompt` and for every `session_id`), each labelled by how it was captured (Requirement 16, criterion 6). The IDE and CLI `Stop` and `UserPromptSubmit` shapes are already known from the probe; the CLI task events are not.
-- Files. Rename of an Unchanged_File; rename of a recorded file; deletion of each; a binary file; a file at 199,999, 200,000 and 200,001 code units; a rename plus an edit; a git-ignored file; a `.kiroignore` file, with negation; a file that appears inside a window; a symbolic link.
-- Baseline text. Three temporary git repositories: Baseline_Text found at `HEAD`, found 5 commits back, not found (whole text inserted with the origin of the event, `baseline_text_unavailable` logged).
+- Files. Rename of an Unchanged_File; rename of a recorded file; deletion of each; a binary file; a file at 199,999, 200,000 and 200,001 code units; a rename plus an edit; a git-ignored file; a `.kiroignore` file and a `.kiro/provenance/ignore` file, each with negation and a character class, and a file that only one of them excludes; a file that appears inside a window; a symbolic link.
+- Baseline text. Temporary git repositories and one temporary directory with no git: Baseline_Text found by Blob_Id for a file unchanged in `HEAD`; found for a file changed and committed more than 20 commits after the baseline (no depth limit); found for a file whose blob is reachable only from an older commit; an untracked file at the baseline read from the Baseline_Cache; a file modified at the baseline read from the Baseline_Cache; a non-git directory read from the Baseline_Cache; a Blob_Id that is gone from the object store with no cache file, which records the current text as `[PST]`, attributes nothing and logs `baseline_text_unavailable`; one cache file shared by two files with identical text and deleted with the last entry that needs it; `baseline` writes no cache file for a clean tracked file.
 - Corrupt directory. A truncated Record, an unparseable `state.json`, an unparseable `baseline.json` and an unwritable directory: the Fault_Log gains a line, standard output and standard error are empty, the status is 0.
 - Check. `--check` fails on a tampered Record, an orphan Record and an orphan baseline entry; reports a stale file and a `no_record` file without failing; fails on both with `--strict`; one run per case with the exit status and the reason line.
 - Tools. The Bundle copied from `powers/provenance` to a directory outside the repository with no `node_modules`, run over stdin and stdout with the SDK client; each tool is called and its result is checked against its `outputSchema` and against Requirement 12.
-- View. `reveal <file>` in 24-bit, 256-colour and plain mode on a file that contains `[`, `]` and `\`; the legend text; the stale first line; the `[PST]`-only view of an Unchanged_File; exit statuses 0 and 1.
-- Events. `manual` with and without an open window; overlapping IDE and CLI sessions as in Requirement 16, criterion 19 (the IDE opens, the CLI opens, a change and the IDE stops, a second change and the CLI stops, a third change after both); an event with no `session_id` and one with an empty one (`_none`, one `no_session_id` line); rule (b) with two other sessions that opened in the same second; a window left open for 13 hours.
+- View. `reveal <file>` in 24-bit, 256-colour and plain mode on a file that contains `[`, `]` and `\`; a file with ESC and carriage return characters (shown as U+241B and U+240D in both modes); the legend text; the stale first line; the `[PST]`-only view of an Unchanged_File; exit statuses 0 and 1.
+- Events. `manual` with and without an open window; overlapping IDE and CLI sessions as in Requirement 16, criterion 19 (the IDE opens, the CLI opens, a change and the IDE stops, a second change and the CLI stops, a third change after both); an event with no `session_id` and one with an empty one (`_none`; one `no_session_id` line for the lifetime of `state.json`, none at the next such event, one more after `state.json` is removed); rule (b) with two other sessions that opened in the same second; a window left open for 13 hours.
 - Engine. One `replace` of a Hunk yields one Run, and an edit to one Hunk does not count against the extent of a neighbour (Requirement 16, criterion 17; the scratch run of the Overview, made permanent).
+- Task titles. `5.3 Build the view`, `1. Probe task one`, `Build the view`, `2024plan`, `5.3`, an empty name and a missing name through `parseTaskName`; `describeRun` for each; a Run_Id with a Task_Number round-trips through the Engine's `renderRecord` and `parseRecord`; a `preTask` payload with a `task` field and no `task_name` gives the label `task`.
 - Hook file and order. `0-provenance.json` has four hooks with `timeout` 30, no `timeout_ms`, and output redirected; its name sorts before `commit-on-task.json` byte-wise; `commit-task.sh` is unchanged (`git diff` empty); `scripts/commit-task.sh --print-scope` gives the same scope with and without a path under `.kiro/provenance/`.
 - Static. No `node:` import under `src/core/`; `process.env` in one module; no module over 300 lines; no function over 40 lines; no `any`; no network call; the `provenance` Vitest project exists and `pnpm-workspace.yaml` is unchanged.
-- Power. Manifests; the Bundle equals a fresh build in a temporary directory; `.kiro/provenance/provenance.mjs` equals the Bundle; `pnpm power:build` leaves `git status` clean; `setup` in a temporary directory writes the listed files and a second run keeps them.
+- Power. Manifests; the Bundle equals a fresh build in a temporary directory; `.kiro/provenance/provenance.mjs` equals the Bundle; `pnpm power:build` leaves `git status` clean; `setup` in a temporary directory writes the listed files, a second run keeps them, a changed Bundle is reported as `replaced`, an existing Hook_File, Ignore_File, Record_Directory `.gitignore`, `baseline.json` and Baseline_Cache file are never overwritten, and `.kiroignore` is never created or changed; `setup --git-hook` writes only the pre-commit block.
 - Timing. `test/timing.test.ts`, run when `PROVENANCE_TIMING=1`: median and maximum of 25 runs of `promptSubmit` with no change, of another event, of an event with no `state.json`, and of `baseline`, against the limits of Requirement 7 and Requirement 6; the deadline with an injected clock.
 - Requirement 19. The two updated `package.test.ts` files, and a check that the five hook files hold `"timeout": 120` and no `timeout_ms`.
 
 **Not property-tested**, and why: the Hook_File, the manifests, the Power build and the documentation are fixed text (smoke and snapshot of file content); git and the real file system are integration (a few temporary repositories); wall-clock limits depend on the machine (reported, not asserted); Kiro's scheduling of hooks cannot be tested from this repository (measured by hand in task 1).
 
-## Open points
+## Resolved points
 
-Each item is a decision the design had to make, or a place where a requirement could not be met as written. Please confirm or change before tasks run.
+The user settled the open points of the earlier design on 2026-11-18. Each entry below gives the decision, the open point of the earlier design that it settles (the user numbered their answers in their own order, so both numbers are given), and what changed in the three spec documents.
 
-1. **Requirement 1, criterion 3 conflicts with Requirement 12, criterion 1.** The package may depend only on the Engine, but the MCP server needs `@modelcontextprotocol/sdk` (and `zod` for `outputSchema`). Design: both are `dependencies` of `packages/provenance`, pinned to the versions `courtlistener-mcp` uses (1.32.2 and 3.25.76), imported only by `src/mcp/`, and loaded by dynamic `import()` only for `provenance mcp`. The pure core, the Recorder and the viewer import neither. Fallback if the Bundle's parse cost passes 20 ms on a `promptSubmit` event: a second file `provenance-mcp.mjs`, which breaks Requirement 13, criterion 10 (one file).
-2. **Baseline text for a first change can be missing.** For a non-git workspace, or a file changed and committed more than 20 commits after the baseline, or a file with uncommitted changes at the baseline, or a line-ending conversion, the Record says the whole file is `[AI]` or `[HUM]`. That over-attributes. The alternative is an ignored cache of baseline text under the Record_Directory, a second copy of every tracked file (about 7 MB here). The design does not include it. Decision for you.
-3. **`no_session_id` is logged once per process,** which is once per event, so a client that never sends `session_id` writes a line at every event. The design follows the requirement. A line once per state lifetime would be quieter.
-4. **Requirement 3, criterion 14 conflicts with criterion 16.** Criterion 14 reads the field `task` as a label fallback; criterion 16 allows reading only five fields. The design follows 16 and uses the word `task` when `task_name` is missing.
-5. **The 12-hour stale rule** (criterion 23) is the proposal from Decision 18, kept as written. A single session that is idle more than 12 hours with a window open loses it at the next event of any session, and its late `Stop` logs `no_open_window`.
-6. **`.kiroignore` is already a Kiro file.** Kiro reads it with gitignore syntax to keep files from the agent. The design shares the root file and supports negation (`!`), which Requirement 2, criterion 9 does not list. `[]` classes, nested `.kiroignore` files and the global ignore file are not supported, so a file Kiro hides may still be recorded and a file the Recorder excludes may be readable by Kiro. A pattern added for recording also hides the file from the agent.
-7. **Refreshing the installed Bundle.** Requirement 13, criterion 4 says an existing Record_Directory is left unchanged. The design replaces `provenance.mjs` and `reveal` when their bytes differ, and keeps everything else. Without it a rebuilt Bundle never reaches a workspace. A test compares the repository's installed copy with the built one, so every change to the package needs a rebuild and `setup` before commit.
-8. **Where Kiro starts a Power's MCP server is unverified.** `setup_provenance` without a `workspace` argument works only if the current directory holds `.git` or `.kiro`. The Setup_Skill passes `workspace`. This tightens Requirement 12, criterion 12 for that one tool.
-9. **Control characters in file text** are replaced by visible control pictures in the view, in both modes, so a file cannot send escape sequences to the terminal. This departs from "print the file's text as it is" (Requirement 9, criterion 5) for files that contain control characters. The MCP tools return no text.
-10. **Record growth.** A Record grows by about 125 bytes for every Hunk ever applied, because the Engine never prunes Runs. A file the agent edits 1,000 times reaches about 125 KB of Record. The design does not compact. Compaction would need an Engine change, which Requirement 1, criterion 4 forbids.
-11. **`reveal_file` has an added `reason` field** (Requirement 12, criterion 4 lists five fields). It carries the Requirement 9 reasons for an unrecorded file.
-12. **Baseline "files skipped"** is read as the candidate files that were not baselined because they are over the limit, binary or unreadable. Files that already have a Record or entry are not counted.
-13. **A deadline can misattribute.** Files not processed before the 20 s deadline are seen at a later event, when the window may already be closed; their changes become an Outside_Change.
-14. **A stale lock is broken** after 30 s (M9). This is not in the requirements.
-15. **Unmeasured, and carried to task 1:** the order of two `PostTaskExec` hooks on the CLI; whether the CLI fires `PreTaskExec` and `PostTaskExec` at all; whether `session_id` differs between the IDE, the CLI and two IDE chat tabs (the probe stored only its type); and whether `fs_write` and `fs_append` paths are absolute or workspace-relative (the probe stored no path value, and the Recorder does not use them). Also unmeasured: whether a sub-agent started by `invoke_sub_agent` fires its own `Stop` in the same `session_id`, which would close the parent's windows early.
-16. **`pre-commit` with partial commits.** With `git commit <paths>` or `--only`, git uses a temporary index and the `git add` of Records may not reach the final index; they are staged by the next commit.
-17. **Documentation in two places.** This design asks for `--git-hook` as an extra flag of `provenance setup` so the hook can be recreated by one command. It is not in the requirements.
+1. **MCP dependencies (was open point 1).** Accepted. `@modelcontextprotocol/sdk` and `zod` are runtime dependencies of `packages/provenance`, pinned as `courtlistener-mcp` pins them (read from its `package.json` by task 8.1), imported only under `src/mcp/`, loaded by dynamic `import()` only for `provenance mcp`, and bundled into the Power's single file. Requirement 1, criterion 3 now allows exactly these two besides the Engine and no text-difference library. Changed: Requirement 1.3, Decision 19, `tech.md` wording in Requirement 17.8, the package files paragraph, the startup-cost paragraph (if the cost on the hook path passes 20 ms, task 10.2 reports it to the user before any change, because the second-file fallback would break Requirement 13, criterion 10).
+2. **Baseline text (was open point 2).** Changed by the user. The fallback never over-attributes. A Baseline_Entry holds the SHA-256 digest and, where git is present, the Blob_Id (`git hash-object --no-filters`). At a first change the starting text is read with `git cat-file blob <id>`, with no depth limit and no history walk (the HEAD-then-20-commits rule is removed everywhere). An ignored Baseline_Cache, `.kiro/provenance/cache/<sha256>`, holds starting text only for files that git cannot give back: files whose Blob_Id is not in the object store at the baseline (untracked, or modified), and every file in a workspace with no git. When neither source has the text, the file's current text is recorded as `[PST]` at that event with no Hunk, the change is attributed to no one, and `baseline_text_unavailable` is logged; a whole file is never recorded as `AI` or `HUM` for this reason. Measured on 2026-11-18: all 1,064 tracked files' Blob_Ids are in this repository's object store, none is missing, no end-of-line conversion is in effect and the tree is clean, so the cache would hold 0 files and 0 bytes at a baseline taken on a clean tree. Changed: Requirement 5 (criteria 5, 6, 7, 10, new 19), Requirement 6 (criteria 1, 4 and new 6), Requirement 16 (criteria 3, 8, 14, new 20), Property 1, Property 2, Property 4, Property 8, new Property 14, the glossary, Decision 1, the Baseline file and first change section, the module layout, tasks 4.7, 4.9, 4.10, 5.1 to 5.4, 5.12, 6.3 and 9.1.
+3. **`no_session_id` (was open point 3).** Changed by the user. It is logged once for each lifetime of `state.json`, by the flag `noSessionIdLogged` in it, not at every event. A `state.json` that is absent, unreadable or replaced starts a new lifetime. Changed: Requirement 3, criterion 22, Requirement 16 criterion 19, Decision 18, the `_none` paragraph, the state model, Property 9, M12, tasks 4.11, 4.13 and 5.6.
+4. **Windows (was open point 5).** Accepted with the requirements' rule. The next `promptSubmit` of the same session records what it finds as outside the agent (an Outside_Change, unless another session's window is open, by the attribution rule), writes `window_left_open`, and opens a new window. The 12-hour sweep rule stays as written, and a late `agentStop` of a swept session logs `no_open_window`. No change to Requirement 3, criteria 8, 21 and 23; Decision 18 records the acceptance.
+5. **Ignore files (was open point 6).** Changed by the user. The Recorder never adds a pattern to `.kiroignore`, because Kiro reads that file and a pattern there also hides the file from the agent. Recording-only patterns go in `.kiro/provenance/ignore` (committed). A file is excluded when git ignores it, when `.kiroignore` excludes it, when `.kiro/provenance/ignore` excludes it, or when a built-in rule excludes it. Both files use the full gitignore syntax, through a hand-written matcher in the package (`core/glob.ts`, `core/ignore-parse.ts`, `core/ignore.ts`) with no dependency. The design chose a property against `git check-ignore --no-index` (Property 15) over a table of examples alone, because generated patterns find disagreements that a table does not, and `git` is already a test dependency; it costs one local `git` process for each run (about 30 to 40 ms), and a table drawn from the gitignore documentation still runs where `git` is absent. Setup writes `.kiro/provenance/ignore` with comment lines and never touches `.kiroignore`. Changed: Requirement 2 (criteria 8, 9), Requirement 13 (criteria 3, 4), Requirement 14.1, Requirement 16 (criteria 7, 14, new 21), Requirement 17.7, the glossary (Ignore_File back at `.kiro/provenance/ignore`), Decision 16, M7, the module layout, the exclusion section, new Property 15, tasks 4.14 to 4.16, 6.3, 9.1, 11.2.
+6. **Refreshing the Bundle (was open point 7).** Accepted. Setup replaces only `provenance.mjs` and `reveal` when their bytes differ and reports them as `replaced`; it never overwrites the Hook_File, the Ignore_File, the Record_Directory `.gitignore`, the Baseline_File, the Baseline_Cache or any Record, and reports each as `kept`. The result of `setup_provenance` is `{ written, replaced, kept }`. Changed: Requirement 13 (criteria 3, 4, 5), Requirement 12.9, the setup section, the tool table, tasks 9.1, 9.2 and 10.1.
+7. **Control characters (was open point 9).** Accepted. File text is shown with control characters replaced by visible characters in both modes: C0 controls other than line feed and tab become U+2400 plus the code (carriage return is U+240D, so a CRLF file shows a visible mark at each line end), DEL becomes U+2421, C1 controls become U+FFFD; each is one code unit. The treatment of carriage return and of C1 controls is the design's choice within the accepted point. Changed: Requirement 9 (criteria 5, 6, 7, 8, new 13), M6, task 7.3.
+8. **Record growth (was open point 10).** Accepted: no compaction. A Record grows by about 125 bytes for every Hunk ever applied, because the Engine never prunes Runs; a file edited 1,000 times has a Record of about 125 KB. The README Limits subsection says so (Requirement 17, criterion 10). Changed: Requirement 17, task 11.2.
+9. **Deadline (was open point 13).** Accepted. At the deadline the Recorder logs `deadline_reached:<n>`, where `n` is the number of files not reached. The README Limits subsection states the 20-second deadline and that the changes in unreached files may be attributed at a later event. Changed: Requirement 4.13, Requirement 17.10, the event section, the error table, the Fault_Log reasons, tasks 5.5 and 11.2.
+10. **Partial commits (was open point 16).** Accepted. `git commit <paths>` and `--only` use a temporary index, so Records may be left for the next commit; the README Limits subsection says so. The description in the pre-commit section stays. Changed: Requirement 17.10, task 11.2.
+11. **Task title and workspace (was open points 4 and 8).**
+   - **11a. Changed by the user.** `task_name` is read explicitly and the `task` field is not read. Requirement 3, criterion 16 lists `task_name` beside `session_id`, `cwd`, `spec_name` and `task_success`, and says that `task_name` is spec text and not the person's prompt; criterion 14 no longer reads the `task` fallback field. The user asked for the task number to be stripped and gave the example label `written in task 5.3 Build the view`. This design reads both: `task_name` is parsed into a Task_Number (the leading `\d+(\.\d+)*\.?` token followed by a space or the end, without a trailing `.`) and a title, the Run_Label is the title, the Task_Number is a separate value on the window, in the Window_Run and so on every Run, and the summary, the stretch list, the window table and the tools say `written in task 5.3 Build the view` (`describeRun`). With no `task_name` the label is `task` and there is no number. **This reading should be confirmed.** Changed: Requirement 3 (criteria 11, 13, 14, 16), Requirement 10 (criteria 3, 6, new 11), Requirement 12 (criteria 5, 6), the glossary (Run_Label, Task_Number, Window_Run, Structured_Span), Decision 4, M3, the Run names section, Properties 10 and 11, tasks 4.3, 4.4, 4.13, 7.1, 7.5, 8.1.
+   - **11b. Accepted.** `setup_provenance` without `workspace` works only if the current directory holds `.git` or `.kiro`; the Setup_Skill always passes `workspace`. Changed: Requirement 12.12, Requirement 13 (criteria 3, 6), task 8.1, task 10.1.
+12. **Additions moved into the requirements (was open points 11, 12, 14, 17 and M10).** Accepted, all five. (a) A stale lock is removed after 30 seconds (Requirement 3.18; M9). (b) `over_limit` is logged once for each file until its size or modification time changes (Requirement 2.10; M10). (c) `reveal_file` has the field `reason` (Requirement 12.4). (d) `provenance setup --git-hook` writes only the pre-commit block (Requirement 13.14; Requirement 14.7). (e) The files skipped by the baseline are the candidate files that were not baselined because they are over the Size_Limit, binary or unreadable, and files that already have a Record or a Baseline_Entry are not counted (Requirement 6.4).
+
+**Still to be measured by task 1 (was open point 15).** Unchanged: the order of two `PostTaskExec` hooks on the CLI; whether the CLI fires `PreTaskExec` and `PostTaskExec` at all; whether `session_id` differs between the IDE, the CLI and two IDE chat tabs; whether the `fs_write` and `fs_append` path is absolute or workspace-relative; and whether a sub-agent started by `invoke_sub_agent` fires its own `Stop` in the same `session_id`, which would close the parent's windows early.
