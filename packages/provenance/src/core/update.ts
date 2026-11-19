@@ -1,0 +1,85 @@
+/**
+ * Records one file's change through the Engine and only the Engine (design
+ * M2; Req 4.1 to 4.10, 5.6 to 5.9). No span, result, override or quote check
+ * is built here, and `AI>HUM` is made only by the Engine's relabelling.
+ */
+import { apply, createDocument, err, ok, type Document, type Result } from "@reveal-codes/engine";
+import { diffLines } from "./diff.js";
+import {
+  existingRunNumbers,
+  planHunks,
+  type ChangeOrigin,
+  type Clock,
+  type WindowRef,
+} from "./plan.js";
+import type { Hunk, ProvenanceError } from "./types.js";
+type Outcome = Result<Document, ProvenanceError>;
+function applyHunks(
+  doc: Document,
+  hunks: readonly Hunk[],
+  fileText: string,
+  origin: ChangeOrigin,
+  window: WindowRef | null,
+  clock: Clock,
+): Outcome {
+  if (hunks.length === 0) return checked(doc, fileText);
+  if (origin === "AI" && window === null) {
+    return err({ kind: "no_open_window", detail: "an Agent_Change needs a Window_Run" });
+  }
+  const windowRun = window === null ? "" : window.windowRun;
+  const ops = planHunks(hunks, origin, windowRun, existingRunNumbers(doc, windowRun), clock);
+  let current = doc;
+  for (const op of ops) {
+    const applied = apply(current, op);
+    if (!applied.ok) return err({ kind: `apply_failed:${applied.error.kind}` });
+    current = applied.value.document;
+  }
+  return checked(current, fileText);
+}
+function checked(doc: Document, fileText: string): Outcome {
+  if (doc.text !== fileText) return err({ kind: "apply_mismatch" });
+  return ok(doc);
+}
+/** The Document after `fileText` replaces `doc.text`: one Engine `replace` per Hunk. */
+export function updateRecord(
+  doc: Document,
+  fileText: string,
+  origin: ChangeOrigin,
+  window: WindowRef | null,
+  clock: Clock,
+): Outcome {
+  return applyHunks(doc, diffLines(doc.text, fileText), fileText, origin, window, clock);
+}
+function created(text: string, timestamp: string): Outcome {
+  const doc = createDocument(text, timestamp);
+  return doc.ok ? ok(doc.value) : err({ kind: `apply_failed:${doc.error.kind}` });
+}
+/**
+ * The Record of a file's first change. With the Baseline_Text, the Document
+ * starts as that text, all `PST` at `baselineAt`, and the Hunks go on top. Without
+ * it the file's text is all `PST` at the event's time, with no Hunk and no window.
+ */
+export function firstRecord(
+  baselineText: string | null,
+  baselineAt: string,
+  fileText: string,
+  origin: ChangeOrigin,
+  window: WindowRef | null,
+  clock: Clock,
+): Outcome {
+  if (baselineText === null) return created(fileText, clock.nowIso());
+  const doc = created(baselineText, baselineAt);
+  if (!doc.ok) return doc;
+  return updateRecord(doc.value, fileText, origin, window, clock);
+}
+/** The Record of a file that appeared: an empty Document, then one insertion of the whole text. */
+export function appearedRecord(
+  fileText: string,
+  origin: ChangeOrigin,
+  window: WindowRef | null,
+  clock: Clock,
+): Outcome {
+  const doc = created("", clock.nowIso());
+  if (!doc.ok) return doc;
+  return updateRecord(doc.value, fileText, origin, window, clock);
+}

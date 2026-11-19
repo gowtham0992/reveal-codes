@@ -26,3 +26,6 @@ export {
   runId,
   windowRunName,
 } from "./core/label.js";
+export type { ChangeOrigin, Clock, WindowRef } from "./core/plan.js";
+export { existingRunNumbers, planHunks } from "./core/plan.js";
+export { appearedRecord, firstRecord, updateRecord } from "./core/update.js";
