@@ -969,6 +969,19 @@ A probe script outside the repository (`~/.kiro-probe/`, kept out of git through
 - **Property 17 (an edit changes only the edited stretch) was changed twice while it was written** (Requirement 16.17 requires listing changed properties). (1) It claims origin and run, not timestamp, because the Engine merges adjacent spans of the same origin and run and a merged span keeps one timestamp. (2) Characters kept by the line difference inside the edited stretch keep their old origin and run, because identical text can be matched in more than one place and the record cannot know which was retyped. Requirement 4, criterion 10, was reworded to match (1).
 - **Property 10's title rule** was enforced in code by collapsing every control character, and the design wording was updated to match.
 
+### Recorder times (task 6.4)
+
+Measured 2026-11-19 on Apple M4, node v22.23.4 by `packages/provenance/test/timing.test.ts` (`PROVENANCE_TIMING=1 pnpm exec vitest run --project provenance packages/provenance/test/timing.test.ts`; skipped otherwise). It builds a disposable copy of this repository in a temp directory (tracked files, `.kiro/provenance/` with the Bundle, a fresh `git init` and commit with no hooks), spawns the built Bundle 25 times per row with a made-up session id on stdin and no prompt text, prints median and maximum wall time, asserts nothing, and removes the copy in `afterAll`. It never runs `record` against the live `.kiro/provenance/`. No limit was exceeded.
+
+- **Node floor** (`node -e ''`): 41.6 ms median, 44.8 ms maximum.
+- **`promptSubmit`, no change** (limit 0.5 s): 104.4 ms median, 268.7 ms maximum (one slow run; the other 24 were near the median).
+- **`agentStop`, no change** (limit 1.5 s): 103.9 ms median, 105.2 ms maximum.
+- **`promptSubmit`, `state.json` removed** (limit 5 s): 249.6 ms median, 277.1 ms maximum.
+- **`provenance baseline`, `baseline.json` and cache removed first** (limit 10 s): 177.0 ms median, 180.8 ms maximum.
+- **One Engine `apply` (insert) on 194,104 characters**: 0.7 ms median, 1.4 ms maximum, in process.
+
+The `promptSubmit` median is about 63 ms above the node floor. The earlier ten-run manual measurement (103 ms, 224 ms without `state.json`) agrees; it also measured `preTask` and `postTask` at 103 ms and one edited 50 KB file at 128 ms, which the test does not repeat.
+
 ### Verification
 
 Nothing was pushed.

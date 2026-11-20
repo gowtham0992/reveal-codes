@@ -99,7 +99,6 @@
     ".nvmrc": { "sha256": "f14b4987904bcb5814e4459a057ed4d20f58a633152288a761214dcd28780b56", "blob": "2bd5a0a98a36cc08ada88b804d3be047e6aa5b8a" },
     ".prettierignore": { "sha256": "5c2748e6a304883dc689319be83727162587f9d4842245a75bcc36ef499a0428", "blob": "8e5de88fd4f4ea6b87392c23bc6a0ac0de61ace6" },
     ".prettierrc.json": { "sha256": "6b380994ae171521d31a3e92447de7e80a8cfdff7ced1e4787a26ce98dcfe6ae", "blob": "de753c537d23c0e1d512153827c8f36d2adda4a6" },
-    "BUILD_LOG.md": { "sha256": "ac230f2a9b9fe97ead91f860583ee1ccae59c7932a540f66034102a7f77ae8da", "blob": "c91e0bdaec8903d940858109f7dc7790d87d1e59" },
     "LICENSE": { "sha256": "e559341b357728bcbeff43d7a559a0c67af494afe2cd110beb09659a4c2a8a99", "blob": "fec3db129ceb539eaf094573c0b01de5e5c35ec4" },
     "README.md": { "sha256": "41b79c0fad0054af76ae0ffebf3ff6e3ed0ff0d29fa2e966e6abb74f5aaac82a", "blob": "f4890034cdfd43992b4c035691acc98736e02938" },
     "apps/web/app/api/assistant/route.ts": { "sha256": "7531ed8d7f9263ffe5cfc4c553bb96bc140987d2108f102be1a018623661e4e1", "blob": "01dce4d3f297c075c5c458b8cabae690c6e7ad9a" },
