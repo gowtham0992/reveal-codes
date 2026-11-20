@@ -242,7 +242,7 @@ Conventions that apply to every task:
     - _Requirements: 14.1, 14.4, 17.5_
 
 - [ ] 7. The viewer: `reveal`
-  - [~] 7.1 `legend.ts` and `structured.ts`
+  - [x] 7.1 `legend.ts` and `structured.ts`
     - Files: `src/core/legend.ts` (the four items of the Source_Legend exactly as in the design's Data Models, in order, with `[HUM]` "changed while no agent window was open; typing, pasting and other tools are not told apart" and `[AI>HUM:<run>]` "agent text in a run that the Engine counts as edited while no agent window was open"; the notice, which is the `[HUM]` item; the stale-line wording; the wording of the no-prompt-sessions line) and `src/core/structured.ts` (`structuredSpans(doc): StructuredSpan[]`: `{ startLine, startColumn, endLine, endColumn, length, origin, run, taskNumber, taskTitle }` with 1-based lines and columns in UTF-16 code units, end exclusive, `run`, `taskNumber` and `taskTitle` null for `HUM` and `PST`, `taskNumber` null for a window with no Task_Number, `taskNumber` and `taskTitle` parsed from the Run_Id by `parseRunId`).
     - Example tests `legend.test.ts` and `structured.test.ts`: the legend text equals the requirement's wording item by item; a span that ends on a newline; a span after a surrogate pair; CRLF text; a span over a whole file with no final newline; an `AI` span's `run`, `taskNumber` and `taskTitle` for the Run_Id `1 Probe task one 2026-11-19T10:00:00Z.2` and for `turn 2026-11-19T10:00:00Z.1` (no number).
     - _Requirements: 9.3, 12.4, 12.5, 12.8, 10.9_

@@ -920,7 +920,6 @@
     "packages/provenance/src/core/renames.ts": { "sha256": "68441e29e41792fe766b294dd38fc4845641e7e1b4a25f41646abdaa8727efce", "blob": "a25348a7d7277e82cab748fbf730ddf8f74ecf17" },
     "packages/provenance/src/core/trim.ts": { "sha256": "d89e3c6210066b53759e351e741074500242ab8d7599c30626340065766034cb", "blob": "fdc106afbf7da9ac4a5fc92af4dfc3138e526541" },
     "packages/provenance/src/core/update.ts": { "sha256": "75835d762c4623d73f8befb35fca359dc8255435013e3b1d811bec664e7f8281", "blob": "dfbc25f56f5ba4f01b730bcd626b737713d320d4" },
-    "packages/provenance/src/index.ts": { "sha256": "e29e0045df25a84c82252bac2247c74002f906061cb6fd2d478c7ba9b457f335", "blob": "74785e5b889591f16e8dcaf3663a1bb91e701329" },
     "packages/provenance/src/io/atomic.ts": { "sha256": "8395dbaed7307cff6a2f80af3f8fa9d943b378ea4c77f3ea24dc946fcba0cf95", "blob": "a1ad5ab2d263e355b91b5408803ef68df70953df" },
     "packages/provenance/src/io/baseline-cache.ts": { "sha256": "69b8f707041e272e281b862a0277e0d44fbc50721f6401ea94ab4b16acdbf124", "blob": "4f955b031ee1fc3da309d6dce71247559a098517" },
     "packages/provenance/src/io/baseline-text.ts": { "sha256": "c993c1b072fa79f6bb51c5450c9f98acead92cec7ee84cc7eb3adc259f4da545", "blob": "2fe12e8017c29c5b9145acc4e169b57ece51b5ab" },

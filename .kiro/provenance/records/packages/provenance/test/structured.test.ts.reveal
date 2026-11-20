@@ -1,0 +1,75 @@
+[DOC{v=1;n=0;r=7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1,2625,0,0}][AI:7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1{t=2026-11-20T03:51:42.789Z}]import type { Document } from "@reveal-codes/engine";
+import { describe, expect, it } from "vitest";
+import { structuredSpans } from "../src/core/structured.js";
+type S = Document\["spans"\]\[number\];
+const AT = "2026-11-19T10:00:00.000Z";
+const span = (
+  start: number,
+  end: number,
+  origin: S\["provenance"\]\["origin"\],
+  runId?: string,
+): S => ({
+  start,
+  end,
+  provenance: runId === undefined ? { origin, timestamp: AT } : { origin, runId, timestamp: AT },
+});
+describe("structuredSpans", () => {
+  it("ends a span that ends on a newline at column 1 of the next line", () => {
+    const text = "ab\\ncd\\n";
+    const out = structuredSpans({ text, spans: \[span(0, 3, "HUM"), span(3, 6, "PST")\] });
+    expect(out\[0\]).toMatchObject({
+      startLine: 1,
+      startColumn: 1,
+      endLine: 2,
+      endColumn: 1,
+      length: 3,
+    });
+    expect(out\[1\]).toMatchObject({
+      startLine: 2,
+      startColumn: 1,
+      endLine: 3,
+      endColumn: 1,
+      length: 3,
+    });
+  });
+  it("counts a surrogate pair as two columns", () => {
+    const text = "a\\u{1F600}b";
+    const out = structuredSpans({ text, spans: \[span(0, 3, "PST"), span(3, 4, "HUM")\] });
+    expect(out\[1\]).toMatchObject({ startLine: 1, startColumn: 4, endLine: 1, endColumn: 5 });
+  });
+  it("keeps the CR with its line in CRLF text", () => {
+    const text = "ab\\r\\ncd";
+    const out = structuredSpans({ text, spans: \[span(0, 4, "PST"), span(4, 6, "HUM")\] });
+    expect(out\[0\]).toMatchObject({ endLine: 2, endColumn: 1 });
+    expect(out\[1\]).toMatchObject({ startLine: 2, startColumn: 1, endLine: 2, endColumn: 3 });
+  });
+  it("covers a whole file with no final newline", () => {
+    const out = structuredSpans({ text: "a\\nbc", spans: \[span(0, 4, "PST")\] });
+    expect(out).toEqual(\[
+      {
+        startLine: 1,
+        startColumn: 1,
+        endLine: 2,
+        endColumn: 3,
+        length: 4,
+        origin: "PST",
+        run: null,
+        taskNumber: null,
+        taskTitle: null,
+      },
+    \]);
+  });
+  it("reads run, Task_Number and title from the Run_Id", () => {
+    const task = "1 Probe task one 2026-11-19T10:00:00Z.2";
+    const turn = "turn 2026-11-19T10:00:00Z.1";
+    const out = structuredSpans({
+      text: "abcd",
+      spans: \[span(0, 2, "AI", task), span(2, 4, "AI>HUM", turn)\],
+    });
+    expect(out\[0\]).toMatchObject({ run: task, taskNumber: "1", taskTitle: "Probe task one" });
+    expect(out\[1\]).toMatchObject({ run: turn, taskNumber: null, taskTitle: "turn" });
+  });
+  it("gives no spans for empty text with no spans", () => {
+    expect(structuredSpans({ text: "", spans: \[\] })).toEqual(\[\]);
+  });
+});
