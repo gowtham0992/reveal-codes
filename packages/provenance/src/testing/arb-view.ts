@@ -1,0 +1,59 @@
+/**
+ * Documents for the viewer (Req 16.14, task 7.4): built Records whose text is then
+ * overwritten, length for length, with Codes syntax characters, control characters,
+ * line ends and citation-like strings. Spans stay valid because no length changes.
+ * Only `src/testing/` imports fast-check.
+ */
+import fc from "fast-check";
+import type { Document } from "@reveal-codes/engine";
+import { arbBuiltRecord } from "./arb-edits.js";
+
+/** C0 controls, DEL, C1 controls and the Codes syntax characters. */
+const arbOdd: fc.Arbitrary<string> = fc.oneof(
+  fc.integer({ min: 0x00, max: 0x1f }).map((u) => String.fromCharCode(u)),
+  fc.integer({ min: 0x7f, max: 0x9f }).map((u) => String.fromCharCode(u)),
+  fc.constantFrom("[", "]", "\\", "\\[", "[]", "\u001b[31m", "\r\n", "\r", "\n", "\t"),
+);
+
+/** Strings that look like citations, quotations and codes. */
+const arbCitationLike: fc.Arbitrary<string> = fc.constantFrom(
+  "410 U.S. 113",
+  "Roe v. Wade, 410 U.S. 113, 153 (1973)",
+  '"quoted [text]"',
+  "[CIT ✓]",
+  "[/QUO]",
+  "[OVR: x]",
+  "[DOC]",
+  "Id. at 7",
+  "42 U.S.C. § 1983",
+);
+
+/** What to write over the text, and where (the offset is taken modulo the text length). */
+export type Overwrite = { at: number; text: string };
+const arbOverwrite: fc.Arbitrary<Overwrite> = fc.record({
+  at: fc.nat({ max: 10_000 }),
+  text: fc.oneof(arbOdd, arbOdd, arbCitationLike),
+});
+
+const isSurrogate = (u: number): boolean => u >= 0xd800 && u <= 0xdfff;
+
+/** `text` with `s` written over the stretch at `at`, unless that is past the end or touches a surrogate. */
+function overwrite(text: string, at: number, s: string): string {
+  if (text.length === 0) return text;
+  const from = at % text.length;
+  const to = from + s.length;
+  if (to > text.length) return text;
+  for (let i = from; i < to; i += 1) if (isSurrogate(text.charCodeAt(i))) return text;
+  return text.slice(0, from) + s + text.slice(to);
+}
+
+/**
+ * A built Record with up to eight overwrites of its text. Surrogate pairs and a
+ * leading byte order mark of the base text survive where they are not overwritten.
+ */
+export const arbViewDocument: fc.Arbitrary<Document> = fc
+  .tuple(arbBuiltRecord, fc.array(arbOverwrite, { maxLength: 8 }))
+  .map(([doc, writes]) => ({
+    ...doc,
+    text: writes.reduce((t, w) => overwrite(t, w.at, w.text), doc.text),
+  }));

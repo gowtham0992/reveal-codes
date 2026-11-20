@@ -939,7 +939,6 @@
     "packages/provenance/src/testing/arb-label.ts": { "sha256": "706e7f4cb41af3c4778b4dd4909b0db9083b8a5103cd3d845f45e958f149862e", "blob": "5449ffc105ca8a02dc53404494d23a2f4c2b2f2d" },
     "packages/provenance/src/testing/arb-payload.ts": { "sha256": "69c4124f526b249d202a59f6404c437474ec269eec62bad97a2bac9fcedbf6fa", "blob": "058b4ea5734eff89ca090bc03d77bb4bb2eb37fe" },
     "packages/provenance/src/testing/arb-text.ts": { "sha256": "aadd2444d029eba2c52498a9c2b43c5c125f68f0a179076414962a4f00bb82be", "blob": "90e18442dfcf8417d165223cf1bb6f95f3f85234" },
-    "packages/provenance/src/testing/arbitraries.ts": { "sha256": "70483a55088bdf0abda47a9e2ad4ea3c97a9cec5f2e85ee5e48902bb4ae15faf", "blob": "0b1767917761ee83db5341e73e47d89ea4ae82aa" },
     "packages/provenance/test/arb-text.test.ts": { "sha256": "040bc3f0ce15ae9ed5f23ca57b2689f400c9ffeb0c87bde1a33ca3d63ff024b7", "blob": "94ab57b385586b0f3de294f6fa471bfdce64c3a7" },
     "packages/provenance/test/attribution.properties.test.ts": { "sha256": "4e37e30ccce94e9713a7aecda671cb3802c4a5ac2c317176417c0ab92f28c167", "blob": "8519d347fef75f226e00179edba5af2c062f6378" },
     "packages/provenance/test/baseline-cache.test.ts": { "sha256": "c0f2ce62a02e3fa83916e3cae4a80b90b6cc6b136bcd4f910197f2675c2337f9", "blob": "52ede55a7e511ba54ddcb8dfe50cf1ea8db9a3ad" },

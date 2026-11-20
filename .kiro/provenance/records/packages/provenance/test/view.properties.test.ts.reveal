@@ -1,0 +1,87 @@
+[DOC{v=1;n=0;r=7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1,3118,0,0}][AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}]import fc from "fast-check";
+import { describe, expect, it } from "vitest";
+import { viewRecord } from "../src/core/view.js";
+import { arbPath, arbViewDocument } from "../src/testing/arbitraries.js";
+import { runs } from "./support/fc.js";
+
+/** Header line plus the four legend lines. */
+const HEAD_LINES = 5;
+const arbColourMode = fc.constantFrom("truecolor" as const, "ansi256" as const);
+
+/** Every ANSI sequence the viewer prints is `ESC \[ digits and semicolons m`. */
+// eslint-disable-next-line no-control-regex
+const ANSI = /\\u001b\\\[\[0-9;\]*m/g;
+const stripAnsi = (s: string): string => s.replace(ANSI, "");
+
+/** The control-character pictures, written out here and not read from `neutralize.ts`. */
+function expectedPictures(text: string): string {
+  let out = "";
+  for (const ch of text) {
+    const u = ch.charCodeAt(0);
+    if (ch.length === 1 && u < 0x20 && u !== 0x0a && u !== 0x09)
+      out += String.fromCharCode(0x2400 + u);
+    else if (u === 0x7f) out += "\\u2421";
+    else if (ch.length === 1 && u >= 0x80 && u <= 0x9f) out += "\\ufffd";
+    else out += ch;
+  }
+  return out;
+}
+
+type Scanned = { kept: string; text: string; codes: string\[\] };
+
+/**
+ * Reads a plain body: `\\x` is the character `x`; an unescaped `\[` opens a code that
+ * ends at the next unescaped `\]`. `kept` is the body with escapes removed from text only.
+ */
+function scanBody(body: string): Scanned {
+  const out: Scanned = { kept: "", text: "", codes: \[\] };
+  let i = 0;
+  while (i < body.length) {
+    const ch = body.charAt(i);
+    if (ch === "\\\\") {
+      const next = body.charAt(i + 1);
+      out.kept += next;
+      out.text += next;
+      i += 2;
+    } else if (ch === "\[") {
+      let j = i + 1;
+      while (j < body.length && body.charAt(j) !== "\]") j += body.charAt(j) === "\\\\" ? 2 : 1;
+      const code = body.slice(i, j + 1);
+      out.kept += code;
+      out.codes.push(code);
+      i = j + 1;
+    } else {
+      out.kept += ch;
+      out.text += ch;
+      i += 1;
+    }
+  }
+  return out;
+}
+
+describe("view properties _Requirements: 9.4, 9.5, 9.6, 9.7, 9.8, 16.12_", () => {
+  // Property 6
+  it("P6 colour output is the plain output with the colour removed", () => {
+    fc.assert(
+      fc.property(arbViewDocument, arbColourMode, arbPath, (doc, mode, path) => {
+        const plain = viewRecord(doc, "plain", path);
+        const coloured = viewRecord(doc, mode, path);
+        const lines = plain.split("\\n");
+        const head = lines.slice(0, HEAD_LINES).join("\\n");
+        const scanned = scanBody(lines.slice(HEAD_LINES).join("\\n"));
+        const stripped = stripAnsi(coloured);
+
+        expect(stripped).toBe(`${head}\\n${scanned.kept}`);
+        expect(stripped).not.toContain("\\u001b");
+        expect(plain).not.toContain("\\u001b");
+        expect(scanned.text).toBe(expectedPictures(doc.text));
+        expect(scanned.codes.length).toBe(doc.spans.length);
+        for (const code of scanned.codes) {
+          expect(code).toMatch(/^\\\[(HUM|PST|AI|AI>HUM)\[:\\\]\]/u);
+          expect(code).not.toMatch(/CIT|QUO|REF|OVR|DOC/u);
+        }
+      }),
+      { numRuns: runs(process.env) },
+    );
+  });
+});
