@@ -1,14 +1,14 @@
-[DOC{v=1;n=0;r=7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1,1913,0,0}][AI:7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1{t=2026-11-20T03:51:42.789Z}]/**
+[DOC{v=1;n=0;r=7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1,1913,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,32,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,3,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,3,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,469,0,0}][AI:7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1{t=2026-11-20T03:51:42.789Z}]/**
  * The Source_Legend and the fixed sentences of the Reveal_Command (Req 9.3, 9.9, 10.9, 10.12).
  * Pure; no `node:`. The words are those of requirements.md, Requirement 9, criterion 3.
  */
 /** One item of the Source_Legend: the code as printed and its meaning. */
 export type LegendItem = { code: string; words: string };
-/** The four items, in the order of Requirement 9, criterion 3. */
+/** The four items, in the order of Requirement 9, criterion 3[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}], as `reveal <file>` prints them[AI:7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1{t=2026-11-20T03:51:42.789Z}]. */
 export const LEGEND_ITEMS: readonly LegendItem\[\] = \[
-  { code: "\[AI:<run>\]", words: "changed while the agent was working, with the run it belongs to" },
+  { code: "\[AI:<[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.2{t=2026-11-20T05:35:16.652Z}]tag[AI:7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1{t=2026-11-20T03:51:42.789Z}]>\]", words: "changed while the agent was working, with the run it belongs to" },
   {
-    code: "\[AI>HUM:<run>\]",
+    code: "\[AI>HUM:<[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.3{t=2026-11-20T05:35:16.652Z}]tag[AI:7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1{t=2026-11-20T03:51:42.789Z}]>\]",
     words: "agent text in a run that the Engine counts as edited while no agent window was open",
   },
   {
@@ -18,9 +18,15 @@ export const LEGEND_ITEMS: readonly LegendItem\[\] = \[
   },
   { code: "\[PST\]", words: "already in the file when recording started; origin not recorded" },
 \];
-/** The legend as four one-line strings, `<code> <words>`. */
-export function legendLines(): string\[\] {
-  return LEGEND_ITEMS.map((item) => `${item.code} ${item.words}`);
+/** [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.4{t=2026-11-20T05:35:16.652Z}]How the first two items name the run: a short `<tag>` or, for `--full` and the MCP tool, `<run>`. */
+export type RunWording = "tag" | "run";
+
+/** The legend as four one-line strings, `<code> <words>`; `run` gives the `<run>` wording. */
+export function legendLines(wording: RunWording = "tag"): string\[\] {
+  return LEGEND_ITEMS.map((item) => {
+    const code = wording === "run" ? item.code.replace("<tag>", "<run>") : item.code;
+    return `${code} ${item.words}`;
+  }[AI:7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1{t=2026-11-20T03:51:42.789Z}]);
 }
 /** The notice of Requirement 9, criterion 9 and 12.5: the `\[HUM\]` item, as printed in the legend. */
 export function humNotice(): string {

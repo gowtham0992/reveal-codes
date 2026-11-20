@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.3 `palette.ts`\, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1,2552,0,0}][AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]/**
+[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,116,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,235,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,1602,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,43,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.5,15,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.6,111,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.7,151,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.8,231,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.9,115,0,0;r=7.3 `palette.ts`\, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1,2552,0,0}][AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]/**
  * `viewRecord`: the file with its provenance codes inline (Req 9.1 to 9.8, 9.13; design M5, M6).
  * Pure; no `node:`. Only the four provenance codes are printed: the citation layer is emptied
  * before the Engine renders, and the colour body reads the codes of that same rendering.
@@ -7,21 +7,58 @@ import { render, type Document } from "@reveal-codes/engine";
 import { legendLines } from "./legend.js";
 import { neutralize } from "./neutralize.js";
 import { onBody, PANE, RESET, type ColourMode } from "./palette.js";
-/** How the output is coloured: 24-bit, 256 colours, or none. */
+[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]import { runsListLines, TAGS_SENTENCE } from "./runs-list.js";
+import { assignTags, windowRunOf } from "./tags.js";
+[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]/** How the output is coloured: 24-bit, 256 colours, or none. */
 export type ViewMode = ColourMode | "plain";
 /** The header line, which names the file. */
 export function headerLine(path: string): string {
   return `Reveal Codes: ${neutralize(path)}`;
 }
-/** A copy of `doc` with neutralized text and no citation layer, so only provenance codes render. */
-function provenanceOnly(doc: Document): Document {
-  return { ...doc, text: neutralize(doc.text), citations: \[\], quotes: \[\], overrides: \[\] };
+[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.2{t=2026-11-20T05:35:16.652Z}]type SpanOf = Document\["spans"\]\[number\];
+function agentRun(span: SpanOf): string | null {
+  const { provenance } = span;
+  if (provenance.origin !== "AI" && provenance.origin !== "AI>HUM") return null;
+  return provenance.runId ?? null[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}];
 }
-function lineEnds(style: string, text: string): string {
+[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.3{t=2026-11-20T05:35:16.652Z}]
+/** The Run_Ids of the file's `AI` and `AI>HUM` spans, in file order. */
+function runIdsOf(doc: Document): string\[\] {
+  return doc.spans.flatMap((span) => agentRun(span) ?? \[\]);
+}
+
+/** `span` with its Run_Id replaced by `tags.get(window)`, when it has a run and a tag for it. */
+function tagged(span: SpanOf, tags: ReadonlyMap<string, string>): SpanOf {
+  const run = agentRun(span);
+  const tag = run === null ? undefined : tags.get(windowRunOf(run));
+  if (tag === undefined || span.provenance.origin === "HUM") return span;
+  if (span.provenance.origin === "PST") return span;
+  return { ...span, provenance: { ...span.provenance, runId: tag } };
+}
+
+/**
+ * A copy of `doc` with neutralized text and no citation layer, so only provenance codes render.
+ * Unless `full`, the code of an agent span names its window by tag instead of by Run_Id.
+ */
+function provenanceOnly(doc: Document, full: boolean): Document {
+  const base = { ...doc, text: neutralize(doc.text), citations: \[\], quotes: \[\], overrides: \[\] };
+  if (full) return base;
+  const windows = assignTags(runIdsOf(doc));
+  const tags = new Map(windows.map((w) => \[w.windowRun, w.tag\]));
+  return { ...base, spans: doc.spans.map((span) => tagged(span, tags)) };
+}
+
+/** The legend, then the tags sentence and the Runs list when the file has agent text. */
+function legendBlock(doc: Document, full: boolean, escape: boolean): string\[\] {
+  const items = legendLines(full ? "run" : "tag");
+  const ids = runIdsOf(doc);
+  if (full || ids.length === 0) return items;
+  return \[...items, TAGS_SENTENCE, ...runsListLines(assignTags(ids), escape)\];
+}
+[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]function lineEnds(style: string, text: string): string {
   return text.split("\\n").join(`${RESET}\\n${style}`);
 }
-function colourBody(doc: Document, mode: ColourMode): string {
-  const view = provenanceOnly(doc);
+function colourBody([AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.4{t=2026-11-20T05:35:16.652Z}]view: Document, mode: ColourMode): string {[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]
   const codes = render(view, "display").positions;
   let out = "";
   view.spans.forEach((span, i) => {
@@ -35,19 +72,20 @@ function colourLines(lines: readonly string\[\], colour: string, mode: ColourMod
   const style = onBody(colour, mode);
   return lines.map((line) => `${style}${line}${RESET}`);
 }
-function colourView(doc: Document, mode: ColourMode, path: string): string {
+function colourView(doc: Document, mode: ColourMode, path: string[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.5{t=2026-11-20T05:35:16.652Z}], full: boolean[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]): string {
   const head = colourLines(\[headerLine(path)\], PANE.title, mode);
-  const legend = colourLines(legendLines(), PANE.legend, mode);
-  return \[...head, ...legend, colourBody(doc, mode)\].join("\\n");
+  const legend = colourLines(legend[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.6{t=2026-11-20T05:35:16.652Z}]Block(doc, full, false), PANE.legend, mode);
+  return \[...head, ...legend, colourBody(provenanceOnly(doc, full)[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}], mode)\].join("\\n");
 }
-function plainView(doc: Document, path: string): string {
-  const body = render(provenanceOnly(doc), "display").text;
-  return \[headerLine(path), ...legendLines(), body\].join("\\n");
+function plainView(doc: Document, path: string[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.7{t=2026-11-20T05:35:16.652Z}], full: boolean): string {
+  const body = render(provenanceOnly(doc, full), "display").text;
+  return \[headerLine(path), ...legendBlock(doc, full, true[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]), body\].join("\\n");
 }
 /**
- * The header naming `path`, the four-item legend, then the body of `doc`, in `mode`.
- * Colour mode prints the text unescaped, plain mode with the Engine's escaping.
+ * The header naming `path`, the four-item legend, the[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.8{t=2026-11-20T05:35:16.652Z}] Runs list (when the file has agent text),
+ * then the body of `doc`, in `mode`. Colour mode prints the text unescaped, plain mode with the
+ * Engine's escaping. With `full` the codes carry the full Run_Id and there is no Runs list[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}].
  */
-export function viewRecord(doc: Document, mode: ViewMode, path: string): string {
-  return mode === "plain" ? plainView(doc, path) : colourView(doc, mode, path);
+export function viewRecord(doc: Document, mode: ViewMode, path: string[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.9{t=2026-11-20T05:35:16.652Z}], full = false): string {
+  return mode === "plain" ? plainView(doc, path, full) : colourView(doc, mode, path, full[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]);
 }

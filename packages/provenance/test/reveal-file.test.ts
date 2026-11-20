@@ -41,6 +41,24 @@ function record(d: TempDir, path: string, base: string, current: string): void {
   if (!edited.ok) throw new Error(edited.error.kind);
   d.write(`${PROV}/records/${path}.reveal`, renderRecord(edited.value, null, "full").text);
 }
+const W66 = "6.6 Wire [it] 2026-11-19T10:00:00Z";
+const W66B = "6.6 Again 2026-11-19T10:05:00Z";
+/** A Record with agent text from each window of `windows`, one line each, after `base`. */
+function agentRecord(d: TempDir, path: string, windows: readonly string[]): string {
+  const made = createDocument("base\n", AT);
+  if (!made.ok) throw new Error("createDocument failed");
+  let doc = made.value;
+  let text = "base\n";
+  for (const windowRun of windows) {
+    text += `from ${windowRun.slice(0, 3)}\n`;
+    const next = updateRecord(doc, text, "AI", { windowRun }, { nowIso: () => AT });
+    if (!next.ok) throw new Error(next.error.kind);
+    doc = next.value;
+  }
+  d.write(path, text);
+  d.write(`${PROV}/records/${path}.reveal`, renderRecord(doc, null, "full").text);
+  return text;
+}
 type Ran = { status: number | null; stdout: string; stderr: string };
 function reveal(d: TempDir, args: string[], env: Record<string, string> = {}): Ran {
   const ran = spawnSync(process.execPath, ["--import", JITI, ENTRY, "reveal", ...args], {
@@ -233,5 +251,53 @@ describe("the wrapper _Requirements: 1.11_", () => {
   it("is the content of the installed .kiro/provenance/reveal", () => {
     const installed = new URL("../../../.kiro/provenance/reveal", import.meta.url).pathname;
     expect(readFileSync(installed, "utf8")).toBe(wrapperText());
+  });
+});
+describe("run tags, the Runs list and --full _Requirements: 9.3, 9.14, 9.15, 9.16_", () => {
+  it("prints short tags, the tags sentence and the Runs list, with a suffix for a clash", () => {
+    const d = fresh();
+    agentRecord(d, "a.ts", [W66, W66B]);
+    const ran = reveal(d, ["a.ts"]);
+    const lines = ran.stdout.split("\n");
+    expect(ran.status).toBe(0);
+    expect(lines.slice(1, 5)).toEqual(legendLines());
+    expect(lines[5]).toBe('Tags are listed under "Runs in this file".');
+    expect(lines[6]).toBe("Runs in this file");
+    expect(lines[7]).toBe("  6.6    6.6 Wire \\[it\\]  opened 2026-11-19T10:00:00Z  1 hunk");
+    expect(lines[8]).toBe("  6.6~2  6.6 Again      opened 2026-11-19T10:05:00Z  1 hunk");
+    expect(ran.stdout).toContain("[AI:6.6]from 6.6\n[AI:6.6~2]from 6.6\n");
+  });
+  it("prints the full Run_Ids and no list with --full, before or after the file", () => {
+    const d = fresh();
+    agentRecord(d, "a.ts", [W66]);
+    for (const args of [
+      ["a.ts", "--full"],
+      ["--full", "a.ts"],
+    ]) {
+      const ran = reveal(d, args);
+      const lines = ran.stdout.split("\n");
+      expect(ran.status).toBe(0);
+      expect(lines.slice(1, 5)).toEqual(legendLines("run"));
+      expect(ran.stdout).not.toContain("Runs in this file");
+      expect(ran.stdout).toContain("[AI:6.6 Wire \\[it\\] 2026-11-19T10:00:00Z.1]from 6.6");
+    }
+  });
+  it("gives the usage line for a second file or an unknown flag", async () => {
+    const d = fresh();
+    agentRecord(d, "a.ts", [W66]);
+    for (const args of [["a.ts", "b.ts"], ["--full"], ["a.ts", "--wide"]]) {
+      const errors: string[] = [];
+      const io = {
+        cwd: d.root,
+        env: colorEnvFrom({}),
+        isTTY: false,
+        out: () => undefined,
+        err: (t: string) => errors.push(t),
+      };
+      expect(await revealCommand(deps, args, io)).toBe(1);
+      expect(errors).toEqual([
+        "usage: reveal <file> [--full] | --summary [path] [--top <n>] [--all] | --check [--strict] | --record",
+      ]);
+    }
   });
 });

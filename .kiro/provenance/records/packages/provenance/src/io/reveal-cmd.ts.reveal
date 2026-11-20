@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.1,8,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.2,12,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,2862,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1,60,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.2,179,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.3,78,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.4,10,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.5,1840,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.6,288,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]/**
+[DOC{v=1;n=0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.1,8,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.2,12,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,9,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,69,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,55,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,224,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,2862,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1,60,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.2,179,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.3,78,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.4,10,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.5,1840,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.6,288,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]/**
  * The Reveal_Command dispatch (design The Reveal_Command): the colour choice, the Workspace_Root,
  * the path argument and the form[AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1{t=2026-11-20T04:28:48.740Z}]: `reveal <file>`, `--summary`, `--check` and `--record`.
  *[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}] Standard output and the injected writers carry every line.
@@ -25,7 +25,7 @@ export type RevealIo = {
 };
 
 export const USAGE =
-  "usage: reveal <file> | --summary \[path\] \[--top <n>\] [AI:7.10 Summary order, file filter, `--all`, aligned columns, no repeated titles 2026-11-20T05:17:25Z.1{t=2026-11-20T05:24:04.007Z}]\[--all\] [AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]| --check \[--strict\] | --record";
+  "usage: reveal <file> [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]\[--full\] [AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]| --summary \[path\] \[--top <n>\] [AI:7.10 Summary order, file filter, `--all`, aligned columns, no repeated titles 2026-11-20T05:17:25Z.1{t=2026-11-20T05:24:04.007Z}]\[--all\] [AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]| --check \[--strict\] | --record";
 
 /** 24-bit, 256 colours or plain, from the terminal facts (Req 9.5 to 9.7). */
 export function chooseMode(env: ColorEnv, isTTY: boolean): ViewMode {
@@ -47,7 +47,12 @@ export function relativeTo(root: string, cwd: string, arg: string): string | nul
   return parts.slice(base.length).join("/");
 }
 
-async function revealOne(deps: RevealDeps, io: RevealIo, arg: string): Promise<number> {
+async function revealOne([AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.2{t=2026-11-20T05:35:16.652Z}]
+  deps: RevealDeps,
+  io: RevealIo,
+  arg: string,
+  full: boolean,
+[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]): Promise<number> {
   const root = await findWorkspaceRoot(deps, io.cwd, null);
   if (root === null) {
     io.out([AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.4{t=2026-11-20T04:28:48.740Z}]NOT_SET_UP[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]);
@@ -58,7 +63,10 @@ async function revealOne(deps: RevealDeps, io: RevealIo, arg: string): Promise<n
     io.out(`${neutralize(arg)}: not recorded: not_tracked`);
     return 1;
   }
-  const shown = await revealFile(deps, root, path, chooseMode(io.env, io.isTTY));
+  const shown = await revealFile(deps, root, path, [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.3{t=2026-11-20T05:35:16.652Z}]{
+    mode: chooseMode(io.env, io.isTTY),
+    full,
+  }[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]);
   io.out(shown.text);
   return shown.status;
 }
@@ -125,6 +133,8 @@ export async function revealCommand(
   if (first === [AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.6{t=2026-11-20T04:28:48.740Z}]"--summary") return summaryForm(deps, io, rest);
   if (first === "--check") return checkForm(deps, io, rest);
   if (first === "--record") return rest.length === 0 ? recordForm(deps, io) : usage(io);
-  if (first === undefined || first.startsWith("--") || rest.length > 0) return usage(io);[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]
-  return revealOne(deps, io, first);
+  [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.4{t=2026-11-20T05:35:16.652Z}]const files = args.filter((a) => a !== "--full");
+  const \[file\] = files;
+  if (file === undefined || file.startsWith("--") || files.length > 1) return usage(io);
+  return revealOne(deps, io, file, files.length < args.length[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]);
 }

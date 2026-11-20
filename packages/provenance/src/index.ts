@@ -39,7 +39,7 @@ export {
 } from "./core/windows.js";
 export { decodeSessions, decodeState, encodeSessions, encodeState } from "./core/state-codec.js";
 export { appearedRecord, firstRecord, updateRecord } from "./core/update.js";
-export type { LegendItem } from "./core/legend.js";
+export type { LegendItem, RunWording } from "./core/legend.js";
 export {
   humNotice,
   LEGEND_ITEMS,

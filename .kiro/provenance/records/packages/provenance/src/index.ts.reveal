@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1,285,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,49,0,0}][PST{t=2026-11-20T03:04:47Z}]// The pure API is exported here as the modules of src/core/ are built.
+[DOC{v=1;n=0;r=7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1,285,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,12,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,49,0,0}][PST{t=2026-11-20T03:04:47Z}]// The pure API is exported here as the modules of src/core/ are built.
 export type {
   Baseline,
   FileCache,
@@ -39,7 +39,7 @@ export {
 } from "./core/windows.js";
 export { decodeSessions, decodeState, encodeSessions, encodeState } from "./core/state-codec.js";
 export { appearedRecord, firstRecord, updateRecord } from "./core/update.js";
-[AI:7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1{t=2026-11-20T03:51:42.789Z}]export type { LegendItem } from "./core/legend.js";
+[AI:7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1{t=2026-11-20T03:51:42.789Z}]export type { LegendItem[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}], RunWording[AI:7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1{t=2026-11-20T03:51:42.789Z}] } from "./core/legend.js";
 export {
   humNotice,
   LEGEND_ITEMS,

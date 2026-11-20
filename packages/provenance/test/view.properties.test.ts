@@ -1,11 +1,15 @@
+import type { Document } from "@reveal-codes/engine";
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import { assignTags } from "../src/core/tags.js";
 import { viewRecord } from "../src/core/view.js";
 import { arbPath, arbViewDocument } from "../src/testing/arbitraries.js";
 import { runs } from "./support/fc.js";
 
 /** Header line plus the four legend lines. */
-const HEAD_LINES = 5;
+const LEGEND_LINES = 5;
+/** The tags sentence and the heading of the Runs list. */
+const LIST_LINES = 2;
 const arbColourMode = fc.constantFrom("truecolor" as const, "ansi256" as const);
 
 /** Every ANSI sequence the viewer prints is `ESC [ digits and semicolons m`. */
@@ -59,26 +63,121 @@ function scanBody(body: string): Scanned {
   return out;
 }
 
-describe("view properties _Requirements: 9.4, 9.5, 9.6, 9.7, 9.8, 16.12_", () => {
-  // Property 6
-  it("P6 colour output is the plain output with the colour removed", () => {
-    fc.assert(
-      fc.property(arbViewDocument, arbColourMode, arbPath, (doc, mode, path) => {
-        const plain = viewRecord(doc, "plain", path);
-        const coloured = viewRecord(doc, mode, path);
-        const lines = plain.split("\n");
-        const head = lines.slice(0, HEAD_LINES).join("\n");
-        const scanned = scanBody(lines.slice(HEAD_LINES).join("\n"));
-        const stripped = stripAnsi(coloured);
+const arbWindowRun: fc.Arbitrary<string> = fc
+  .tuple(
+    fc.constantFrom("", "6.6 ", "6.6 ", "7 ", "12.1 "),
+    fc.constantFrom("turn", "task", "Wire it", "A[b]\\c", "x ~2"),
+    fc.constantFrom("10:00:00Z", "10:00:00Z", "10:05:00Z", "09:59:59Z"),
+    fc.constantFrom("", "~2"),
+  )
+  .map(([number, title, time, suffix]) => `${number}${title} 2026-11-19T${time}${suffix}`);
 
-        expect(stripped).toBe(`${head}\n${scanned.kept}`);
-        expect(stripped).not.toContain("\u001b");
-        expect(plain).not.toContain("\u001b");
-        expect(scanned.text).toBe(expectedPictures(doc.text));
-        expect(scanned.codes.length).toBe(doc.spans.length);
-        for (const code of scanned.codes) {
-          expect(code).toMatch(/^\[(HUM|PST|AI|AI>HUM)[:\]]/u);
-          expect(code).not.toMatch(/CIT|QUO|REF|OVR|DOC/u);
+/** `doc` with every agent span moved into one of `windows`, so that windows clash on tags. */
+function intoWindows(
+  doc: Document,
+  windows: readonly string[],
+  picks: readonly number[],
+): Document {
+  let n = 0;
+  const spans = doc.spans.map((span) => {
+    const p = span.provenance;
+    if (p.origin !== "AI" && p.origin !== "AI>HUM") return span;
+    const window = windows[(picks[n] ?? 0) % windows.length] ?? "";
+    n += 1;
+    return { ...span, provenance: { ...p, runId: `${window}.${String(1 + (n % 3))}` } };
+  });
+  return { ...doc, spans };
+}
+
+/** The window of a Run_Id, written out here and not read from `tags.ts`. */
+const windowOf = (runId: string): string => runId.replace(/\.\d+$/u, "");
+
+function agentRuns(doc: Document): string[] {
+  return doc.spans.flatMap((s) =>
+    s.provenance.origin === "AI" || s.provenance.origin === "AI>HUM"
+      ? [s.provenance.runId ?? ""]
+      : [],
+  );
+}
+
+function expectTagsConsistent(codes: readonly string[], doc: Document): void {
+  const tagOf = new Map<string, string>();
+  const spans = doc.spans.filter(
+    (s) => s.provenance.origin === "AI" || s.provenance.origin === "AI>HUM",
+  );
+  codes
+    .filter((c) => c.startsWith("[AI"))
+    .forEach((code, i) => {
+      const tag = /^\[AI(?:>HUM)?:(.*)\]$/u.exec(code)?.[1] ?? "";
+      const run = spans[i]?.provenance.runId ?? "";
+      expect(tag).toMatch(/^(\d+(\.\d+)*|turn|task)(~[2-9]\d*)?$/u);
+      expect(tagOf.get(windowOf(run)) ?? tag).toBe(tag);
+      tagOf.set(windowOf(run), tag);
+    });
+  const tags = [...tagOf.values()];
+  expect(new Set(tags).size).toBe(tags.length);
+  for (const tag of tags) {
+    const [base = "", k] = tag.split("~");
+    for (let j = 2; j < Number(k ?? 1); j += 1) expect(tags).toContain(`${base}~${String(j)}`);
+    if (k !== undefined) expect(tags).toContain(base);
+  }
+}
+
+describe("view properties _Requirements: 9.4, 9.5, 9.6, 9.7, 9.8, 9.14, 9.15, 9.16, 16.12_", () => {
+  // Property 6
+  it("P6 colour output is the plain output with the colour removed, with tags and with --full", () => {
+    fc.assert(
+      fc.property(
+        arbViewDocument,
+        arbColourMode,
+        arbPath,
+        fc.boolean(),
+        fc.array(arbWindowRun, { minLength: 1, maxLength: 4 }),
+        fc.array(fc.nat(), { maxLength: 40 }),
+        (base, mode, path, full, windows, picks) => {
+          const doc = intoWindows(base, windows, picks);
+          const plain = viewRecord(doc, "plain", path, full);
+          const coloured = viewRecord(doc, mode, path, full);
+          const runs = agentRuns(doc);
+          const count = new Set(runs.map(windowOf)).size;
+          const listed = runs.length > 0 && !full ? LIST_LINES + count : 0;
+          const lines = plain.split("\n");
+          const head = lines.slice(0, LEGEND_LINES + listed);
+          const list = head
+            .slice(LEGEND_LINES + LIST_LINES)
+            .map((l) => l.replace(/\\([\s\S])/gu, "$1"));
+          const scanned = scanBody(lines.slice(LEGEND_LINES + listed).join("\n"));
+          const unescaped = [...head.slice(0, LEGEND_LINES + LIST_LINES), ...list].join("\n");
+          expect(stripAnsi(coloured)).toBe(`${unescaped}\n${scanned.kept}`);
+          expect(stripAnsi(coloured)).not.toContain("\u001b");
+          expect(plain).not.toContain("\u001b");
+          expect(scanned.text).toBe(expectedPictures(doc.text));
+          expect(scanned.codes.length).toBe(doc.spans.length);
+          for (const code of scanned.codes) {
+            expect(code).toMatch(/^\[(HUM|PST|AI|AI>HUM)[:\]]/u);
+            expect(code).not.toMatch(/CIT|QUO|REF|OVR|DOC/u);
+          }
+          if (!full) expectTagsConsistent(scanned.codes, doc);
+        },
+      ),
+      { numRuns: runs(process.env) },
+    );
+  });
+  // Property 6 (tags)
+  it("P6 assignTags: one tag for each window, unique, a suffix only for a clash, earlier tags stable", () => {
+    fc.assert(
+      fc.property(fc.array(arbWindowRun, { maxLength: 8 }), (windows) => {
+        const ids = windows.map((w, i) => `${w}.${String(1 + (i % 3))}`);
+        const tagged = assignTags(ids);
+        expect(tagged.length).toBe(new Set(windows).size);
+        expect(new Set(tagged.map((t) => t.tag)).size).toBe(tagged.length);
+        const added = assignTags([...ids, "6.6 Late 2026-11-19T23:00:00Z.1"]);
+        for (const t of tagged) {
+          expect(added.find((u) => u.windowRun === t.windowRun)?.tag).toBe(t.tag);
+        }
+        for (const t of tagged) {
+          const clash = tagged.filter((u) => u.tag.split("~")[0] === t.tag.split("~")[0]);
+          expect(t.tag.includes("~")).toBe(clash.indexOf(t) > 0);
         }
       }),
       { numRuns: runs(process.env) },

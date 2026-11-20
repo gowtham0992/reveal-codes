@@ -25,7 +25,7 @@ export type RevealIo = {
 };
 
 export const USAGE =
-  "usage: reveal <file> | --summary [path] [--top <n>] [--all] | --check [--strict] | --record";
+  "usage: reveal <file> [--full] | --summary [path] [--top <n>] [--all] | --check [--strict] | --record";
 
 /** 24-bit, 256 colours or plain, from the terminal facts (Req 9.5 to 9.7). */
 export function chooseMode(env: ColorEnv, isTTY: boolean): ViewMode {
@@ -47,7 +47,12 @@ export function relativeTo(root: string, cwd: string, arg: string): string | nul
   return parts.slice(base.length).join("/");
 }
 
-async function revealOne(deps: RevealDeps, io: RevealIo, arg: string): Promise<number> {
+async function revealOne(
+  deps: RevealDeps,
+  io: RevealIo,
+  arg: string,
+  full: boolean,
+): Promise<number> {
   const root = await findWorkspaceRoot(deps, io.cwd, null);
   if (root === null) {
     io.out(NOT_SET_UP);
@@ -58,7 +63,10 @@ async function revealOne(deps: RevealDeps, io: RevealIo, arg: string): Promise<n
     io.out(`${neutralize(arg)}: not recorded: not_tracked`);
     return 1;
   }
-  const shown = await revealFile(deps, root, path, chooseMode(io.env, io.isTTY));
+  const shown = await revealFile(deps, root, path, {
+    mode: chooseMode(io.env, io.isTTY),
+    full,
+  });
   io.out(shown.text);
   return shown.status;
 }
@@ -125,6 +133,8 @@ export async function revealCommand(
   if (first === "--summary") return summaryForm(deps, io, rest);
   if (first === "--check") return checkForm(deps, io, rest);
   if (first === "--record") return rest.length === 0 ? recordForm(deps, io) : usage(io);
-  if (first === undefined || first.startsWith("--") || rest.length > 0) return usage(io);
-  return revealOne(deps, io, first);
+  const files = args.filter((a) => a !== "--full");
+  const [file] = files;
+  if (file === undefined || file.startsWith("--") || files.length > 1) return usage(io);
+  return revealOne(deps, io, file, files.length < args.length);
 }

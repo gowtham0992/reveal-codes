@@ -9,9 +9,9 @@ import {
 describe("Source_Legend (Req 9.3)", () => {
   it("has the four items of the requirement, in order, word for word", () => {
     expect(LEGEND_ITEMS.map((i) => [i.code, i.words])).toEqual([
-      ["[AI:<run>]", "changed while the agent was working, with the run it belongs to"],
+      ["[AI:<tag>]", "changed while the agent was working, with the run it belongs to"],
       [
-        "[AI>HUM:<run>]",
+        "[AI>HUM:<tag>]",
         "agent text in a run that the Engine counts as edited while no agent window was open",
       ],
       [
@@ -24,6 +24,14 @@ describe("Source_Legend (Req 9.3)", () => {
     expect(legendLines()[3]).toBe(
       "[PST] already in the file when recording started; origin not recorded",
     );
+  });
+  it("reads <run> in the first two items for --full and keeps every word", () => {
+    const full = legendLines("run");
+    expect(full[0]).toBe(
+      "[AI:<run>] changed while the agent was working, with the run it belongs to",
+    );
+    expect(full[1]?.startsWith("[AI>HUM:<run>] agent text in a run")).toBe(true);
+    expect(full.slice(2)).toEqual(legendLines().slice(2));
   });
   it("uses the [HUM] item as the notice", () => {
     expect(humNotice()).toBe(legendLines()[2]);

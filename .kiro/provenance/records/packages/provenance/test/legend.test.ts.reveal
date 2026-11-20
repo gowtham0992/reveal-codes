@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1,1660,0,0}][AI:7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1{t=2026-11-20T03:51:42.789Z}]import { describe, expect, it } from "vitest";
+[DOC{v=1;n=0;r=7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1,1660,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,3,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,3,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,384,0,0}][AI:7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1{t=2026-11-20T03:51:42.789Z}]import { describe, expect, it } from "vitest";
 import {
   humNotice,
   legendLines,
@@ -9,9 +9,9 @@ import {
 describe("Source_Legend (Req 9.3)", () => {
   it("has the four items of the requirement, in order, word for word", () => {
     expect(LEGEND_ITEMS.map((i) => \[i.code, i.words\])).toEqual(\[
-      \["\[AI:<run>\]", "changed while the agent was working, with the run it belongs to"\],
+      \["\[AI:<[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]tag[AI:7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1{t=2026-11-20T03:51:42.789Z}]>\]", "changed while the agent was working, with the run it belongs to"\],
       \[
-        "\[AI>HUM:<run>\]",
+        "\[AI>HUM:<[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.2{t=2026-11-20T05:35:16.652Z}]tag[AI:7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1{t=2026-11-20T03:51:42.789Z}]>\]",
         "agent text in a run that the Engine counts as edited while no agent window was open",
       \],
       \[
@@ -23,7 +23,15 @@ describe("Source_Legend (Req 9.3)", () => {
     expect(legendLines()).toHaveLength(4);
     expect(legendLines()\[3\]).toBe(
       "\[PST\] already in the file when recording started; origin not recorded",
+    [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.3{t=2026-11-20T05:35:16.652Z}]);
+  });
+  it("reads <run> in the first two items for --full and keeps every word", () => {
+    const full = legendLines("run");
+    expect(full\[0\]).toBe(
+      "\[AI:<run>\] changed while the agent was working, with the run it belongs to",
     );
+    expect(full\[1\]?.startsWith("\[AI>HUM:<run>\] agent text in a run")).toBe(true);
+    expect(full.slice(2)).toEqual(legendLines().slice(2)[AI:7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1{t=2026-11-20T03:51:42.789Z}]);
   });
   it("uses the \[HUM\] item as the notice", () => {
     expect(humNotice()).toBe(legendLines()\[2\]);

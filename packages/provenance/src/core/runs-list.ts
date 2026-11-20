@@ -1,0 +1,50 @@
+/**
+ * The "Runs in this file" list of `reveal <file>` (Req 9.15; design, Runs in this file).
+ * Pure; no `node:`. Titles come from the file's Record, so they are neutralized (M6) and, in plain
+ * output, escaped like text. Columns are padded by the width of the unescaped title, so the
+ * plain and the coloured list differ only by the escapes (Property 6).
+ */
+import { neutralize } from "./neutralize.js";
+import type { WindowTag } from "./tags.js";
+
+/** The heading of the list. */
+export const RUNS_HEADING = "Runs in this file";
+/** The sentence after the legend that points to the list. */
+export const TAGS_SENTENCE = 'Tags are listed under "Runs in this file".';
+
+const INDENT = "  ";
+const width = (text: string): number => Array.from(text).length;
+const escapeText = (text: string): string => text.replace(/[\\[\]]/gu, "\\$&");
+
+function description(w: WindowTag): string {
+  const title = neutralize(w.title).replace(/[\n\t]/gu, " ");
+  return w.taskNumber === null ? title : `${w.taskNumber} ${title}`;
+}
+
+function hunkWords(n: number): string {
+  return `${String(n)} ${n === 1 ? "hunk" : "hunks"}`;
+}
+
+/** The heading and one line for each window, in the order given; titles escaped when `escape`. */
+export function runsListLines(windows: readonly WindowTag[], escape: boolean): string[] {
+  const descs = windows.map(description);
+  const opened = windows.map((w) => `opened ${w.time ?? "?"}`);
+  const hunks = windows.map((w) => hunkWords(w.hunks));
+  const widest = (cells: readonly string[]): number => Math.max(0, ...cells.map(width));
+  const [tagW, descW, openedW, hunkW] = [
+    widest(windows.map((w) => w.tag)),
+    widest(descs),
+    widest(opened),
+    widest(hunks),
+  ];
+  const lines = windows.map((w, i) => {
+    const desc = descs[i] ?? "";
+    const shown = escape ? escapeText(desc) : desc;
+    const tag = w.tag + " ".repeat(tagW - width(w.tag));
+    const gap = " ".repeat(descW - width(desc));
+    const open = (opened[i] ?? "") + " ".repeat(openedW - width(opened[i] ?? ""));
+    const count = " ".repeat(hunkW - width(hunks[i] ?? "")) + (hunks[i] ?? "");
+    return `${INDENT}${tag}  ${shown}${gap}  ${open}  ${count}`;
+  });
+  return [RUNS_HEADING, ...lines];
+}

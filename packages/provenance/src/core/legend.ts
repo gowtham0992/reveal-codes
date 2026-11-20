@@ -4,11 +4,11 @@
  */
 /** One item of the Source_Legend: the code as printed and its meaning. */
 export type LegendItem = { code: string; words: string };
-/** The four items, in the order of Requirement 9, criterion 3. */
+/** The four items, in the order of Requirement 9, criterion 3, as `reveal <file>` prints them. */
 export const LEGEND_ITEMS: readonly LegendItem[] = [
-  { code: "[AI:<run>]", words: "changed while the agent was working, with the run it belongs to" },
+  { code: "[AI:<tag>]", words: "changed while the agent was working, with the run it belongs to" },
   {
-    code: "[AI>HUM:<run>]",
+    code: "[AI>HUM:<tag>]",
     words: "agent text in a run that the Engine counts as edited while no agent window was open",
   },
   {
@@ -18,9 +18,15 @@ export const LEGEND_ITEMS: readonly LegendItem[] = [
   },
   { code: "[PST]", words: "already in the file when recording started; origin not recorded" },
 ];
-/** The legend as four one-line strings, `<code> <words>`. */
-export function legendLines(): string[] {
-  return LEGEND_ITEMS.map((item) => `${item.code} ${item.words}`);
+/** How the first two items name the run: a short `<tag>` or, for `--full` and the MCP tool, `<run>`. */
+export type RunWording = "tag" | "run";
+
+/** The legend as four one-line strings, `<code> <words>`; `run` gives the `<run>` wording. */
+export function legendLines(wording: RunWording = "tag"): string[] {
+  return LEGEND_ITEMS.map((item) => {
+    const code = wording === "run" ? item.code.replace("<tag>", "<run>") : item.code;
+    return `${code} ${item.words}`;
+  });
 }
 /** The notice of Requirement 9, criterion 9 and 12.5: the `[HUM]` item, as printed in the legend. */
 export function humNotice(): string {

@@ -70,10 +70,10 @@ describe("viewRecord (Req 9)", () => {
       expect(out).not.toMatch(/\[\/?(CIT|QUO|REF|OVR|DOC)/);
     }
   });
-  it("prints the codes of AI and AI>HUM spans with their run, and the colours of the pane", () => {
+  it("prints the codes of AI and AI>HUM spans with their tag, and the colours of the pane", () => {
     const doc = mixed("aaabbbccc");
     const plain = viewRecord(doc, "plain", "f");
-    expect(plain.endsWith(`[HUM]aaa[AI:${RUN}]bbb[AI>HUM:${RUN}]ccc`)).toBe(true);
+    expect(plain.endsWith("[HUM]aaa[AI:1]bbb[AI>HUM:1]ccc")).toBe(true);
     const colour = viewRecord(doc, "truecolor", "f");
     expect(colour).toContain("\u001b[38;2;232;236;246m\u001b[48;2;15;39;102m[HUM]aaa");
     expect(colour).toContain("\u001b[38;2;166;212;247m\u001b[48;2;15;39;102m[AI:");
@@ -87,8 +87,8 @@ describe("viewRecord (Req 9)", () => {
   });
   it("unescaping the text of the plain view gives the coloured view without ANSI (Req 9.8)", () => {
     const doc = mixed("a[x]\\y\u001bz\nq[");
-    const head = (s: string): string => s.split("\n").slice(0, 5).join("\n");
-    const body = (s: string): string => s.split("\n").slice(5).join("\n");
+    const head = (s: string): string => s.split("\n").slice(0, 8).join("\n");
+    const body = (s: string): string => s.split("\n").slice(8).join("\n");
     const plain = viewRecord(doc, "plain", "f");
     const unescapedBody = body(plain).replace(/\\([\s\S])/g, "$1");
     for (const mode of ["truecolor", "ansi256"] as const) {
@@ -99,5 +99,89 @@ describe("viewRecord (Req 9)", () => {
     expect(body(plain)).toContain("a\\[x");
     expect(body(plain)).toContain("\\]\\\\y");
     expect(body(plain)).toContain("\u241bz");
+  });
+  it("prints the full Run_Id inline with --full, the <run> legend and no list", () => {
+    const doc = mixed("aaabbbccc");
+    const plain = viewRecord(doc, "plain", "f", true);
+    expect(plain.endsWith(`[HUM]aaa[AI:${RUN}]bbb[AI>HUM:${RUN}]ccc`)).toBe(true);
+    expect(plain.split("\n").slice(1, 5)).toEqual(legendLines("run"));
+    expect(plain).not.toContain("Runs in this file");
+    expect(plain).not.toContain("Tags are listed");
+    expect(plain.split("\n")).toHaveLength(6);
+  });
+});
+
+/** An AI span of `text` in the window `windowRun`, hunk `n`. */
+function agent(
+  windowRun: string,
+  n: number,
+  start: number,
+  end: number,
+): Document["spans"][number] {
+  const runId = `${windowRun}.${String(n)}`;
+  return { start, end, provenance: { origin: "AI", runId, timestamp: AT } };
+}
+function withSpans(text: string, spans: Document["spans"]): Document {
+  return { ...pst(text), spans };
+}
+const W66 = "6.6 Wire it 2026-11-19T10:00:00Z";
+const W66B = "6.6 Wire it again 2026-11-19T10:05:00Z";
+const TURN = "turn 2026-11-19T10:01:00Z";
+const BARE = "task 2026-11-19T10:02:00Z";
+
+describe("run tags and the Runs list (Req 9.14, 9.15)", () => {
+  it("tags a numbered window, a prompt window and a window with no number", () => {
+    const doc = withSpans("aabbcc", [
+      agent(W66, 1, 0, 2),
+      agent(TURN, 1, 2, 4),
+      agent(BARE, 1, 4, 6),
+    ]);
+    const lines = viewRecord(doc, "plain", "f").split("\n");
+    expect(lines.slice(-1)[0]).toBe("[AI:6.6]aa[AI:turn]bb[AI:task]cc");
+    expect(lines[5]).toBe('Tags are listed under "Runs in this file".');
+    expect(lines[6]).toBe("Runs in this file");
+    expect(lines.slice(7, 10)).toEqual([
+      "  6.6   6.6 Wire it  opened 2026-11-19T10:00:00Z  1 hunk",
+      "  turn  turn         opened 2026-11-19T10:01:00Z  1 hunk",
+      "  task  task         opened 2026-11-19T10:02:00Z  1 hunk",
+    ]);
+  });
+  it("suffixes only a clash: two windows of one Task_Number give 6.6 and 6.6~2", () => {
+    const doc = withSpans("aabbcc", [
+      agent(W66B, 1, 0, 2),
+      agent(W66, 1, 2, 4),
+      agent(TURN, 1, 4, 6),
+    ]);
+    const plain = viewRecord(doc, "plain", "f");
+    expect(plain.endsWith("[AI:6.6~2]aa[AI:6.6]bb[AI:turn]cc")).toBe(true);
+  });
+  it("gives the hunks of one window one tag and counts them", () => {
+    const doc = withSpans("aabbcc", [
+      agent(W66, 1, 0, 2),
+      agent(W66, 2, 2, 4),
+      agent(W66, 1, 4, 6),
+    ]);
+    const plain = viewRecord(doc, "plain", "f");
+    expect(plain.endsWith("[AI:6.6]aa[AI:6.6]bb[AI:6.6]cc")).toBe(true);
+    expect(plain).toContain("  6.6  6.6 Wire it  opened 2026-11-19T10:00:00Z  2 hunks\n");
+  });
+  it("prints no list and no tags sentence for a file with no agent span", () => {
+    const plain = viewRecord(pst("x"), "plain", "f");
+    expect(plain).not.toContain("Runs in this file");
+    expect(plain.split("\n")).toHaveLength(6);
+  });
+  it("escapes [ ] and \\ in a title in plain output only, with the same padding", () => {
+    const window = "7 A[b]\\c 2026-11-19T10:00:00Z";
+    const doc = withSpans("aa", [agent(window, 1, 0, 2)]);
+    const plain = viewRecord(doc, "plain", "f").split("\n");
+    const colour = viewRecord(doc, "truecolor", "f").replace(ANSI, "").split("\n");
+    expect(plain[7]).toBe("  7  7 A\\[b\\]\\\\c  opened 2026-11-19T10:00:00Z  1 hunk");
+    expect(colour[7]).toBe("  7  7 A[b]\\c  opened 2026-11-19T10:00:00Z  1 hunk");
+    expect(plain[7]?.replace(/\\([\s\S])/g, "$1")).toBe(colour[7]);
+  });
+  it("prints the list in colour output in the legend colour", () => {
+    const doc = withSpans("aa", [agent(W66, 1, 0, 2)]);
+    const colour = viewRecord(doc, "truecolor", "f");
+    expect(colour).toContain("\u001b[48;2;15;39;102mRuns in this file\u001b[0m");
   });
 });
