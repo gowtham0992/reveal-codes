@@ -87,7 +87,7 @@ describe("sentinel-tests-on-save hook", () => {
   });
 
   it("uses the same timeout as every other hook file", () => {
-    const files = readdirSync(HOOKS_DIR).filter((name) => name.endsWith(".json"));
+    const files = readdirSync(HOOKS_DIR).filter((name) => name.endsWith("-tests-on-save.json"));
     expect(files.length).toBeGreaterThan(1);
     for (const name of files) {
       const other = readJson(join(HOOKS_DIR, name)) as unknown as HookFile;

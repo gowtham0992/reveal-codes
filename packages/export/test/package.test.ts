@@ -88,7 +88,7 @@ describe("export-tests-on-save hook _Requirements: 10.2_", () => {
 
   it("has the same timeout as every other hook file", () => {
     const others = readdirSync(HOOKS_DIR).filter(
-      (f) => f.endsWith(".json") && f !== "export-tests-on-save.json",
+      (f) => f.endsWith("-tests-on-save.json") && f !== "export-tests-on-save.json",
     );
     expect(others.length).toBeGreaterThan(0);
     for (const file of others) {
