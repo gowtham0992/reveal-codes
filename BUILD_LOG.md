@@ -985,3 +985,20 @@ The `promptSubmit` median is about 63 ms above the node floor. The earlier ten-r
 ### Verification
 
 Nothing was pushed.
+
+### Task windows opened together, found in this repository's own record (task 6.6)
+
+- **What happened:** the task tool fires PreTaskExec each time a task is re-marked in progress. On sub-agent re-dispatches, tasks 6.3 and 6.4 got two or three PreTaskExec events. Each opened a window, and PostTaskExec closed only the innermost one. The 6.3, 6.4 and 6.5 windows were therefore open together, and the task tracker's later edits to `tasks.md` (and the spec edits made between tasks 6.5 and 6.6) were recorded under an earlier task's title.
+- **Those records stay as recorded.** Nothing was corrected by hand.
+- **The fix (task 6.6):** a repeated preTask with the same `task_name` opens no window, and postTask closes the window of its own `task_name`. It came from seeing this in this repository's own record.
+
+### Gaps closed in task 6.7
+
+- **`baseline` takes the lock.**
+- **Property 16's generator** now produces prompt-then-stop-again sessions, so its "never count a session that saw a prompt" clause is exercised.
+- **A child-process test** covers an uncaught exception and an unhandled rejection, with no test-only code in the Bundle.
+
+### Bundle rebuilt and reinstalled (task 6.8)
+
+- `node scripts/build-power.mjs --power provenance`, then the Bundle was copied to `.kiro/provenance/provenance.mjs`. Both files have SHA-256 `6fd9a84a…654a24ab`.
+- The new Bundle contains `installCrashHandlers` and not `crash-entry`. `powers/citation-check` is unchanged.

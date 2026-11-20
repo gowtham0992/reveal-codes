@@ -1,6 +1,16 @@
 import { createRequire as __createRequire } from "node:module";
 const require = __createRequire(import.meta.url);
 
+// packages/provenance/src/cli/crash.ts
+function installCrashHandlers(getLogger, exit, event) {
+  const bail = () => {
+    getLogger().fault({ event, path: null, reason: "exception" }).then(exit, exit);
+  };
+  process.on("uncaughtException", bail);
+  process.on("unhandledRejection", bail);
+  return bail;
+}
+
 // packages/provenance/src/io/deps.ts
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -4820,6 +4830,51 @@ function catBlob(deps, root, blobId) {
   return deps.git.exec(root, ["cat-file", "blob", blobId]);
 }
 
+// packages/provenance/src/core/limits.ts
+var SIZE_LIMIT = 2e5;
+var HOOK_DEADLINE_MS = 2e4;
+var STALE_WINDOW_MS = 432e5;
+var LABEL_MAX = 80;
+var STDIN_MAX = 1048576;
+var STDIN_WAIT_MS = 1500;
+var LOCK_WAIT_MS = 5e3;
+var RACY_MS = 2e3;
+var DIFF_CAP = 1500;
+var LOCK_STALE_MS = 3e4;
+
+// packages/provenance/src/io/lock.ts
+var LOCK_RETRY_MS = 25;
+var staleCounter = 0;
+async function breakStale(deps, path) {
+  const stat = await deps.fs.lstat(path);
+  if (!stat.ok || deps.clock.nowMs() - stat.value.mtimeMs <= LOCK_STALE_MS) return false;
+  staleCounter += 1;
+  const away = `${path}.stale-${String(deps.pid)}-${String(staleCounter)}`;
+  const moved = await deps.fs.rename(path, away);
+  if (!moved.ok) return false;
+  await deps.fs.unlink(away);
+  return true;
+}
+async function acquireLock(deps, path) {
+  const started = deps.clock.nowMs();
+  for (; ; ) {
+    const body = `${String(deps.pid)} ${deps.clock.nowIso()}
+`;
+    const taken = await deps.fs.writeFile(path, body, true);
+    if (taken.ok)
+      return ok({
+        release: async () => {
+          await deps.fs.unlink(path);
+        }
+      });
+    if (taken.error.code !== "EEXIST")
+      return err({ kind: "write_failed", detail: taken.error.code });
+    if (await breakStale(deps, path)) continue;
+    if (deps.clock.nowMs() - started >= LOCK_WAIT_MS) return err({ kind: "lock_timeout" });
+    await deps.clock.timer(LOCK_RETRY_MS).done;
+  }
+}
+
 // packages/provenance/src/core/exclude.ts
 var RECORD_DIRECTORY = ".kiro/provenance";
 var LOCKFILE_NAMES = /* @__PURE__ */ new Set([
@@ -5143,18 +5198,6 @@ function parseIgnore(text) {
   return rules;
 }
 
-// packages/provenance/src/core/limits.ts
-var SIZE_LIMIT = 2e5;
-var HOOK_DEADLINE_MS = 2e4;
-var STALE_WINDOW_MS = 432e5;
-var LABEL_MAX = 80;
-var STDIN_MAX = 1048576;
-var STDIN_WAIT_MS = 1500;
-var LOCK_WAIT_MS = 5e3;
-var RACY_MS = 2e3;
-var DIFF_CAP = 1500;
-var LOCK_STALE_MS = 3e4;
-
 // packages/provenance/src/io/scan.ts
 var READ_FREE_LIMIT_BYTES = SIZE_LIMIT * 3;
 var WALK_SKIP = /* @__PURE__ */ new Set([
@@ -5361,16 +5404,18 @@ function decodeWindow(v, where) {
     v,
     where,
     ["windowRun", "label", "taskNumber", "kind", "openedAt", "order"],
-    ["spec"]
+    ["spec", "taskName"]
   );
   if (!s.ok) return s;
   const o = s.value;
-  const { windowRun, label, taskNumber, kind, openedAt, order, spec } = o;
+  const { windowRun, label, taskNumber, kind, openedAt, order, spec, taskName } = o;
   if (!isStr(windowRun) || !isStr(label)) return bad4(`bad window text: ${where}`);
   if (!isNullable(taskNumber, isStr)) return bad4(`bad taskNumber: ${where}`);
   if (kind !== "turn" && kind !== "task") return bad4(`bad kind: ${where}`);
   if (!validAt(openedAt) || !isCount(order)) return bad4(`bad openedAt or order: ${where}`);
   if (spec !== void 0 && !isStr(spec)) return bad4(`bad spec: ${where}`);
+  if (taskName !== void 0 && (!isStr(taskName) || taskName === ""))
+    return bad4(`bad taskName: ${where}`);
   const base = {
     windowRun,
     label,
@@ -5379,7 +5424,8 @@ function decodeWindow(v, where) {
     openedAt,
     order
   };
-  return ok(spec === void 0 ? base : { ...base, spec });
+  const withSpec = spec === void 0 ? base : { ...base, spec };
+  return ok(taskName === void 0 ? withSpec : { ...withSpec, taskName });
 }
 function decodeList(v, where, item) {
   if (!Array.isArray(v)) return bad4(`${where} is not an array`);
@@ -5489,7 +5535,8 @@ function windowJson(w) {
     openedAt: w.openedAt,
     order: w.order
   };
-  return w.spec === void 0 ? base : { ...base, spec: w.spec };
+  const withSpec = w.spec === void 0 ? base : { ...base, spec: w.spec };
+  return w.taskName === void 0 ? withSpec : { ...withSpec, taskName: w.taskName };
 }
 function sessionJson(s) {
   return {
@@ -5710,8 +5757,7 @@ async function collect(deps, root, store, base) {
   const plan = await planEntries(deps, root, list.git, texts);
   return { ...plan, texts, skipped };
 }
-async function runBaseline(deps, root) {
-  const store = createStore(deps, `${root}/.kiro/provenance`);
+async function baselineLocked(deps, root, store) {
   const cache = createBaselineCache(deps, store.cacheDir());
   const existing = await store.readBaseline();
   if (!existing.ok) {
@@ -5737,12 +5783,26 @@ async function runBaseline(deps, root) {
   await ensureSessions(deps, store);
   return ok({ added: found.entries.size, skipped: found.skipped });
 }
+async function runBaseline(deps, root) {
+  const store = createStore(deps, `${root}/.kiro/provenance`);
+  await deps.fs.mkdirp(store.dir);
+  const taken = await acquireLock(deps, `${store.dir}/lock`);
+  if (!taken.ok) {
+    await deps.log.fault({ event: EVENT, path: null, reason: taken.error.kind });
+    return taken;
+  }
+  try {
+    return await baselineLocked(deps, root, store);
+  } finally {
+    await taken.value.release();
+  }
+}
 function formatBaselineLine(summary) {
   return `baseline: ${String(summary.added)} added, ${String(summary.skipped)} skipped`;
 }
 async function baselineCommand(deps, root, print) {
   const result = await runBaseline(deps, root);
-  if (!result.ok) return 1;
+  if (!result.ok) return result.error.kind === "lock_timeout" ? 0 : 1;
   print(formatBaselineLine(result.value));
   return 0;
 }
@@ -5922,6 +5982,9 @@ function select(state, session) {
   }
   return best;
 }
+function nameOf(payload) {
+  return payload.taskName === null || payload.taskName === "" ? null : payload.taskName;
+}
 function freshEntry(now) {
   return {
     lastEventAt: now,
@@ -5949,18 +6012,29 @@ function openWindow(state, entry, event, payload, now) {
     order
   };
   const spec = event === "preTask" ? payload.specName : null;
-  const win = spec === null ? base : { ...base, spec };
+  const name = event === "preTask" ? nameOf(payload) : null;
+  const withSpec = spec === null ? base : { ...base, spec };
+  const win = name === null ? withSpec : { ...withSpec, taskName: name };
   const next = { ...state, order, lastWindowRun: windowRun };
   return { state: next, entry: { ...entry, windows: [...entry.windows, win], lastClosedBy: null } };
 }
-function closeWindows(entry, event) {
-  const empty = entry.windows.length === 0;
-  if (event === "postTask") {
-    if (empty) return { entry, faults: [fault3("no_open_window")] };
-    const windows = entry.windows.slice(0, -1);
-    const lastClosedBy = windows.length === 0 ? "postTask" : entry.lastClosedBy;
-    return { entry: { ...entry, windows, lastClosedBy }, faults: [] };
+function closeIndex(entry, name) {
+  for (let i = entry.windows.length - 1; i >= 0; i -= 1) {
+    const w = entry.windows[i];
+    if (w === void 0) continue;
+    if (name === null ? w.kind === "task" : w.taskName === name) return i;
   }
+  return -1;
+}
+function closePostTask(entry, payload) {
+  const at = closeIndex(entry, nameOf(payload));
+  if (at < 0) return { entry, faults: [fault3("no_open_window")] };
+  const windows = entry.windows.filter((_, i) => i !== at);
+  const lastClosedBy = windows.length === 0 ? "postTask" : entry.lastClosedBy;
+  return { entry: { ...entry, windows, lastClosedBy }, faults: [] };
+}
+function closeAgentStop(entry) {
+  const empty = entry.windows.length === 0;
   const quiet = empty && entry.lastClosedBy === "postTask";
   const faults = empty && !quiet ? [fault3("no_open_window")] : [];
   return { entry: { ...entry, windows: [], lastClosedBy: "agentStop" }, faults };
@@ -5969,8 +6043,12 @@ function apply2(state, entry, event, p, now) {
   if (event === "promptSubmit") {
     return { ...openWindow(state, { ...entry, promptSeen: true }, event, p, now), faults: [] };
   }
-  if (event === "preTask") return { ...openWindow(state, entry, event, p, now), faults: [] };
-  return { state, ...closeWindows(entry, event) };
+  if (event === "preTask") {
+    const name = nameOf(p);
+    if (name !== null && innermost(entry)?.taskName === name) return { state, entry, faults: [] };
+    return { ...openWindow(state, entry, event, p, now), faults: [] };
+  }
+  return { state, ...event === "postTask" ? closePostTask(entry, p) : closeAgentStop(entry) };
 }
 function transition(state, event, session, payload, clock, outsideFound) {
   if (event === "manual" || session === null) return { state, faults: [], countSession: false };
@@ -5991,39 +6069,6 @@ function transition(state, event, session, payload, clock, outsideFound) {
   const next = withEntry(applied.state, session, done2);
   const flagged = logNoId ? { ...next, noSessionIdLogged: true } : next;
   return { state: { ...flagged, lastEventAt: now }, faults, countSession: count };
-}
-
-// packages/provenance/src/io/lock.ts
-var LOCK_RETRY_MS = 25;
-var staleCounter = 0;
-async function breakStale(deps, path) {
-  const stat = await deps.fs.lstat(path);
-  if (!stat.ok || deps.clock.nowMs() - stat.value.mtimeMs <= LOCK_STALE_MS) return false;
-  staleCounter += 1;
-  const away = `${path}.stale-${String(deps.pid)}-${String(staleCounter)}`;
-  const moved = await deps.fs.rename(path, away);
-  if (!moved.ok) return false;
-  await deps.fs.unlink(away);
-  return true;
-}
-async function acquireLock(deps, path) {
-  const started = deps.clock.nowMs();
-  for (; ; ) {
-    const body = `${String(deps.pid)} ${deps.clock.nowIso()}
-`;
-    const taken = await deps.fs.writeFile(path, body, true);
-    if (taken.ok)
-      return ok({
-        release: async () => {
-          await deps.fs.unlink(path);
-        }
-      });
-    if (taken.error.code !== "EEXIST")
-      return err({ kind: "write_failed", detail: taken.error.code });
-    if (await breakStale(deps, path)) continue;
-    if (deps.clock.nowMs() - started >= LOCK_WAIT_MS) return err({ kind: "lock_timeout" });
-    await deps.clock.timer(LOCK_RETRY_MS).done;
-  }
 }
 
 // packages/provenance/src/core/lines.ts
@@ -6789,12 +6834,8 @@ async function recordCommand(name) {
   const deps = nodeDeps();
   let logger = deps.log;
   const event = parseEvent(name) ?? "unknown";
-  const bail = () => {
-    logger.fault({ event, path: null, reason: "exception" }).then(exitZero, exitZero);
-  };
   setTimeout(exitZero, WATCHDOG_MS).unref();
-  process.on("uncaughtException", bail);
-  process.on("unhandledRejection", bail);
+  const bail = installCrashHandlers(() => logger, exitZero, event);
   try {
     await runRecord(deps, name, process.cwd(), (made) => {
       logger = made;
