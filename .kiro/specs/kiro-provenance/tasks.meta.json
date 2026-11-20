@@ -722,6 +722,16 @@
         "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795063644564
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795144878121
+      },
+      {
+        "executionId": "4552179f-1b44-4f53-a498-0cf828d7f239",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795145453338
       }
     ],
     "7.1 `legend.ts` and `structured.ts`": [
@@ -936,6 +946,27 @@
         "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795142467552
+      }
+    ],
+    "6.6 One window per task: duplicate preTask and postTask by name": [
+      {
+        "executionId": "4552179f-1b44-4f53-a498-0cf828d7f239",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795145453422
+      }
+    ],
+    "6.7 Close the gaps: baseline lock, Property 16 prompt-then-stop sessions, crash handlers test": [
+      {
+        "executionId": "4552179f-1b44-4f53-a498-0cf828d7f239",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795145453476
+      }
+    ],
+    "6.8 Rebuild and reinstall the Bundle, BUILD_LOG": [
+      {
+        "executionId": "4552179f-1b44-4f53-a498-0cf828d7f239",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795145453513
       }
     ]
   }
