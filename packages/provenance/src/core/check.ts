@@ -1,0 +1,109 @@
+/**
+ * `checkWorkspace`: the decision of `reveal --check [--strict]` (Req 11, design "The Reveal_Command").
+ * A pure function of the facts; it reads no file and prints nothing. Pure; no `node:`.
+ */
+
+/** A Tracked_File candidate as read: its workspace-relative path, SHA-256 digest and text. */
+export type CheckedFile = { path: string; digest: string; text: string };
+
+/** A Record as loaded: its Recorded_Text, or `ok: false` when `parseRecord` or the Engine's checks fail. */
+export type CheckedRecord = { ok: true; text: string } | { ok: false };
+
+export type CheckFacts = {
+  /** The files that may have a Record or a Baseline_Entry (text files that are not excluded). */
+  files: readonly CheckedFile[];
+  /** Records by workspace-relative path of the file they describe. */
+  records: Readonly<Record<string, CheckedRecord>>;
+  /** Baseline_Entry digests (SHA-256, lowercase hex) by path. */
+  entries: Readonly<Record<string, string>>;
+  strict: boolean;
+};
+
+export type CheckReason =
+  "tampered_record" | "orphan_record" | "orphan_baseline" | "stale" | "no_record";
+
+export type CheckLine = {
+  label: "fail" | "report";
+  reason: CheckReason;
+  path: string;
+  /** The printed line, `<label> <reason>: <name>`. */
+  text: string;
+};
+
+export type CheckResult = {
+  /** Lines of class fail (`tampered_record`, `orphan_record`, `orphan_baseline`), in path order. */
+  failures: CheckLine[];
+  /** Lines of class report (`stale`, `no_record`), in path order. */
+  reports: CheckLine[];
+  /** Every line to print, in path order, then the summary or the hint line. */
+  lines: string[];
+  /** 1 when any fail line is printed, or any report line with `strict`; else 0. */
+  status: 0 | 1;
+};
+
+/** The command that catches the record up, the last line of a run that printed stale or no_record. */
+export const RECORD_HINT = "run: reveal --record";
+
+/** Where a Record for `path` lives, relative to the Workspace_Root. */
+export function recordName(path: string): string {
+  return `.kiro/provenance/records/${path}.reveal`;
+}
+
+const FAIL_REASONS: ReadonlySet<CheckReason> = new Set([
+  "tampered_record",
+  "orphan_record",
+  "orphan_baseline",
+]);
+
+function line(reason: CheckReason, path: string, name: string): CheckLine {
+  const label = FAIL_REASONS.has(reason) ? "fail" : "report";
+  return { label, reason, path, text: `${label} ${reason}: ${name}` };
+}
+
+function compareCodeUnits(a: string, b: string): number {
+  if (a < b) return -1;
+  return a > b ? 1 : 0;
+}
+
+function recordLines(file: CheckedFile, record: CheckedRecord, hasEntry: boolean): CheckLine[] {
+  const out: CheckLine[] = [];
+  if (hasEntry) out.push(line("orphan_baseline", file.path, file.path));
+  if (!record.ok) out.push(line("tampered_record", file.path, recordName(file.path)));
+  else if (!hasEntry && record.text !== file.text) out.push(line("stale", file.path, file.path));
+  return out;
+}
+
+function fileLines(facts: CheckFacts, file: CheckedFile): CheckLine[] {
+  const record = Object.hasOwn(facts.records, file.path) ? facts.records[file.path] : undefined;
+  const entry = Object.hasOwn(facts.entries, file.path) ? facts.entries[file.path] : undefined;
+  if (record !== undefined) return recordLines(file, record, entry !== undefined);
+  if (entry === undefined) return [line("no_record", file.path, file.path)];
+  return entry === file.digest ? [] : [line("stale", file.path, file.path)];
+}
+
+function orphanLines(facts: CheckFacts, tracked: ReadonlySet<string>): CheckLine[] {
+  const out: CheckLine[] = [];
+  for (const path of Object.keys(facts.records)) {
+    if (!tracked.has(path)) out.push(line("orphan_record", path, recordName(path)));
+  }
+  for (const path of Object.keys(facts.entries)) {
+    if (!tracked.has(path)) out.push(line("orphan_baseline", path, path));
+  }
+  return out;
+}
+
+/** Decide the check: every failure and every report, in path order, with the exit status. */
+export function checkWorkspace(facts: CheckFacts): CheckResult {
+  const tracked = new Set(facts.files.map((file) => file.path));
+  const all = [
+    ...facts.files.flatMap((file) => fileLines(facts, file)),
+    ...orphanLines(facts, tracked),
+  ].sort((a, b) => compareCodeUnits(a.path, b.path));
+  const failures = all.filter((item) => item.label === "fail");
+  const reports = all.filter((item) => item.label === "report");
+  const lines = all.map((item) => item.text);
+  if (all.length === 0) lines.push(`checked ${String(facts.files.length)} files: ok`);
+  if (reports.length > 0) lines.push(RECORD_HINT);
+  const status = failures.length > 0 || (facts.strict && reports.length > 0) ? 1 : 0;
+  return { failures, reports, lines, status };
+}
