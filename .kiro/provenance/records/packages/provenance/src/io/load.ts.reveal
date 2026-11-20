@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,8022,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]/**
+[DOC{v=1;n=0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.1,17,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.2,66,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.3,135,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,8022,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]/**
  * The loader (design, The Reveal_Command and The MCP tools): reads the Records, the Baseline_File,
  * the Sessions_File and the files into plain facts for the viewer, the summary, the check and the
  * MCP tools. It writes nothing and makes no network request; a failed read is a value.
@@ -159,30 +159,32 @@ export function checkFactsOf(facts: WorkspaceFacts, strict: boolean): CheckFacts
   return { files: facts.files, records, entries: facts.entries, strict };
 }
 
-function underPath(path: string, scope: string | null): boolean {
-  return scope === null || scope === "" || path === scope || path.startsWith(`${scope}/`);
-}
-
 /** The summary's input; `scope` is a workspace-relative file or directory, or null for all. */
 export function summaryInputOf(
   facts: WorkspaceFacts,
   scope: string | null,
   top?: number,
-): SummaryInput {
+[AI:7.10 Summary order, file filter, `--all`, aligned columns, no repeated titles 2026-11-20T05:17:25Z.1{t=2026-11-20T05:24:04.007Z}]  all?: boolean,
+[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]): SummaryInput {
   const byPath = new Map(facts.files.map((f) => \[f.path, f\]));
   const records = Object.entries(facts.records).flatMap((\[path, r\]) =>
-    r.ok && underPath(path, scope)
-      ? \[{ path, doc: r.doc, stale: byPath.get(path)?.text !== r.text }\]
-      : \[\],
+    r.ok [AI:7.10 Summary order, file filter, `--all`, aligned columns, no repeated titles 2026-11-20T05:17:25Z.2{t=2026-11-20T05:24:04.007Z}]? \[{ path, doc: r.doc, stale: byPath.get(path)?.text !== r.text }\][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}] : \[\],
   );
   const unchanged = Object.entries(facts.entries).flatMap((\[path, digest\]) => {
     const file = byPath.get(path);
-    const keep = underPath(path, scope) && !Object.hasOwn(facts.records, path);
+    const keep = !Object.hasOwn(facts.records, path);
     return keep && file !== undefined
       ? \[{ path, length: file.text.length, stale: file.digest !== digest }\]
       : \[\];
   });
-  return { records, unchanged, path: scope, sessions: facts.sessions, ...(top ? { top } : {}) };
+  return {[AI:7.10 Summary order, file filter, `--all`, aligned columns, no repeated titles 2026-11-20T05:17:25Z.3{t=2026-11-20T05:24:04.007Z}]
+    records,
+    unchanged,
+    path: scope,
+    sessions: facts.sessions,
+    ...(top ? { top } : {}),
+    ...(all ? { all } : {}),
+ [AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}] };
 }
 
 /** The Document of an Unchanged_File: the file's text as one `PST` span at the baseline time. */

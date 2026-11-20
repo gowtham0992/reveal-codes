@@ -1,5 +1,5 @@
 /**
- * `reveal --summary [path] [--top n]` and `reveal --check [--strict]` (Req 10, Req 11): the forms
+ * `reveal --summary [path] [--top n] [--all]` and `reveal --check [--strict]` (Req 10, Req 11): the forms
  * over the loader, `summarize` and `checkWorkspace`. They read and print; they write no file and
  * make no network request. Every printed line passes through `neutralize`.
  */
@@ -14,26 +14,30 @@ type ReportDeps = Pick<Deps, "fs" | "git" | "sha256" | "log" | "pid">;
 /** What a form prints and the exit status it gives. */
 export type Report = { status: 0 | 1; text: string };
 
-/** The arguments after `--summary`: an optional path and an optional positive `--top`. */
-export type SummaryArgs = { path: string | null; top: number | undefined };
+/** The arguments after `--summary`: an optional path, an optional positive `--top` and `--all`. */
+export type SummaryArgs = { path: string | null; top: number | undefined; all: boolean };
 
 /** Parses the arguments after `--summary`; null for anything the usage line does not allow. */
 export function parseSummaryArgs(args: readonly string[]): SummaryArgs | null {
   let path: string | null = null;
   let top: number | undefined;
+  let all = false;
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i] as string;
     if (arg === "--top") {
       const value = args[(i += 1)];
       if (value === undefined || !/^[1-9][0-9]*$/u.test(value) || top !== undefined) return null;
       top = Number(value);
+    } else if (arg === "--all") {
+      if (all) return null;
+      all = true;
     } else if (arg.startsWith("--") || path !== null) {
       return null;
     } else {
       path = arg;
     }
   }
-  return { path, top };
+  return { path, top, all };
 }
 
 /** The arguments after `--check`: nothing, or `--strict`; null otherwise. */
@@ -56,10 +60,11 @@ export async function summaryReport(
   root: string,
   scope: string | null,
   top: number | undefined,
+  all = false,
 ): Promise<Report> {
   const loaded = await loadWorkspace(deps, root);
   if (!loaded.ok) return unreadable(loaded.error.kind);
-  const result = summarize(summaryInputOf(loaded.value, scope, top));
+  const result = summarize(summaryInputOf(loaded.value, scope, top, all));
   return { status: result.status, text: printable(result.lines) };
 }
 

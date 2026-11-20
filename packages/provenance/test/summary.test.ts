@@ -51,8 +51,11 @@ describe("summarize", () => {
     expect(s?.files[0]?.counts).toEqual({ AI: 0, "AI>HUM": 0, HUM: 0, PST: 20 });
     expect(s?.total).toEqual({ AI: 17, "AI>HUM": 3, HUM: 5, PST: 23 });
     expect(s?.totalCharacters).toBe(48);
-    expect(out.text).toContain(
-      "src/a.ts: 13 characters: AI 5 (38.5%), AI>HUM 3 (23.1%), HUM 5 (38.5%), PST 0 (0.0%)",
+    expect(out.lines[0]).toBe(
+      "Total: 48 characters: AI 17 (35.4%), AI>HUM 3 (6.3%), HUM 5 (10.4%), PST 23 (47.9%)",
+    );
+    expect(out.text).toMatch(
+      /^src\/a\.ts +13 +5 \(38\.5%\) +3 \(23\.1%\) +5 \(38\.5%\) +0 \(0\.0%\)$/mu,
     );
     expect(out.status).toBe(0);
   });
@@ -97,8 +100,8 @@ describe("summarize", () => {
 
   it("marks a stale file", () => {
     const out = summarize(base({ records: [{ ...a, stale: true }, b] }));
-    expect(out.text).toContain("src/a.ts (stale):");
-    expect(out.text).not.toContain("src/b.ts (stale)");
+    expect(out.text).toMatch(/^src\/a\.ts .* stale$/mu);
+    expect(out.text).not.toMatch(/^src\/b\.ts .*stale$/mu);
   });
 
   it("limits the output to a file path or a directory path", () => {
@@ -143,12 +146,12 @@ describe("summarize", () => {
 
   it("says where the text was written", () => {
     const out = summarize(base({ records: [a, b] }));
-    expect(out.text).toContain(
-      `src/a.ts line 1, 5 characters, written in task 5.3 Build the view, ${T53}`,
+    expect(out.lines).toContain(
+      "src/a.ts:1-1  5 chars  written in task 5.3 Build the view  opened 2026-11-19T10:01:00Z",
     );
-    expect(out.text).toContain("written in turn");
+    expect(out.text).toContain("  written in turn  opened 2026-11-19T10:05:00Z");
     const fallback = rec("f.ts", "f\n", [span(0, 2, "AI", "task 2026-11-19T10:09:00Z.1")]);
-    expect(summarize(base({ records: [fallback] })).text).toContain("written in task,");
+    expect(summarize(base({ records: [fallback] })).text).toContain("  written in task  opened ");
   });
 
   it("prints the notice once and gives the same string twice", () => {
@@ -169,6 +172,89 @@ describe("summarize", () => {
     expect(summarize(base({ records: [a], path: "src/b.ts", sessions: 7 })).text).toContain(
       noPromptSessionsLine(7),
     );
+  });
+});
+
+const pst = rec("p.ts", "pppp\n", [span(0, 5, "PST")]);
+const empty = rec("e.ts", "", []);
+const stalePst = rec("s.ts", "ssss\n", [span(0, 5, "PST")], true);
+const humOnly = rec("h.ts", "hh\n", [span(0, 3, "HUM")]);
+const mixed = base({
+  records: [a, humOnly, pst, empty, stalePst],
+  unchanged,
+});
+
+describe("summary order, file filter and --all (Req 10.13 to 10.18)", () => {
+  const index = (lines: string[], start: string): number =>
+    lines.findIndex((l) => l.startsWith(start));
+
+  it("prints the sections in the order of criterion 13", () => {
+    const { lines } = summarize({ ...mixed, sessions: 2 });
+    const order = [
+      "Total: ",
+      "Largest untouched agent stretches:",
+      "AI>HUM characters left out",
+      "Agent text by window:",
+      "Files:",
+      "3 files unchanged",
+      "[HUM] changed while",
+      "Sessions with no prompt events",
+    ].map((start) => index(lines, start));
+    expect(order.every((i) => i >= 0)).toBe(true);
+    expect(order).toEqual([...order].sort((x, y) => x - y));
+  });
+
+  it("lists AI, AI>HUM, HUM and stale files and counts the others", () => {
+    const out = summarize(mixed);
+    expect(out.summary?.listed.map((f) => f.path)).toEqual(["h.ts", "s.ts", "src/a.ts"]);
+    expect(out.summary?.unchangedCount).toBe(3);
+    expect(out.lines).toContain("3 files unchanged since recording started, all [PST].");
+    expect(out.text).not.toMatch(/^(README\.md|p\.ts|e\.ts) /mu);
+    expect(out.text).toMatch(/^s\.ts .* stale$/mu);
+  });
+
+  it("says 1 file for one, and prints the line with 0", () => {
+    const one = summarize(base({ records: [a, pst] })).lines;
+    expect(one).toContain("1 file unchanged since recording started, all [PST].");
+    const none = summarize(base({ records: [a] })).lines;
+    expect(none).toContain("0 files unchanged since recording started, all [PST].");
+  });
+
+  it("--all lists every file and prints no unchanged-files line", () => {
+    const out = summarize({ ...mixed, all: true });
+    expect(out.summary?.listed).toHaveLength(6);
+    expect(out.text).not.toContain("unchanged since recording started");
+    expect(out.text).toMatch(/^README\.md /mu);
+  });
+
+  it("aligns columns: no tab, no trailing space, numbers right, equal widths", () => {
+    const long = rec("src/much/longer/path.ts", "q\n", [span(0, 2, "HUM")]);
+    const out = summarize(base({ records: [a, b, long] }));
+    expect(out.text).not.toContain("\t");
+    for (const line of out.lines) expect(line).toBe(line.trimEnd());
+    const at = out.lines.indexOf("Files:");
+    const rows = out.lines.slice(at + 1, at + 5);
+    expect(rows[0]).toMatch(/^File {19} {2}Characters/u);
+    expect(rows[3]).toMatch(/^src\/much\/longer\/path\.ts {2}/u);
+    expect(rows[1]).toMatch(/^src\/a\.ts {17} {2}/u);
+    expect(new Set(rows.map((r) => Array.from(r).length)).size).toBe(1);
+  });
+
+  it("prints a title once on a stretch line and once in the window table", () => {
+    const out = summarize(base({ records: [a] }));
+    const stretch = out.lines.filter((l) => l.startsWith("src/a.ts:"));
+    expect(stretch).toHaveLength(1);
+    expect(stretch[0]?.split("Build the view").length).toBe(2);
+    expect(out.lines.filter((l) => l.includes("Build the view"))).toHaveLength(2);
+    const header = out.lines[out.lines.indexOf("Agent text by window:") + 1];
+    expect(header).toBe("Task  Label           Opened                Files  Runs  AI  AI>HUM");
+  });
+
+  it("prints the nothing-under-path line with status 0", () => {
+    const out = summarize(base({ records: [a], path: "docs", sessions: 3 }));
+    expect(out.status).toBe(0);
+    expect(out.lines[0]).toBe("Nothing recorded under docs.");
+    expect(out.lines).toHaveLength(2);
   });
 });
 

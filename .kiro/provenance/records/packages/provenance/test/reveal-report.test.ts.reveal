@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1,10446,0,0}][AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1{t=2026-11-20T04:28:48.740Z}]import { spawnSync } from "node:child_process";
+[DOC{v=1;n=0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.1,162,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.2,136,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.3,82,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.4,1067,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.5,39,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1,10446,0,0}][AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1{t=2026-11-20T04:28:48.740Z}]import { spawnSync } from "node:child_process";
 import { rmSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import { humNotice } from "../src/core/legend.js";
@@ -58,11 +58,9 @@ describe("reveal --summary _Requirements: 10.1, 10.10_", { timeout: 30_000 }, ()
     const ran = reveal(d, \["--summary"\]);
     expect(ran.status).toBe(0);
     expect(ran.stderr).toBe("");
-    expect(ran.stdout).toContain("src/a.ts: ");
-    expect(ran.stdout).toContain("src/b.ts: ");
-    expect(ran.stdout).toContain(
-      "README.md: 6 characters: AI 0 (0.0%), AI>HUM 0 (0.0%), HUM 0 (0.0%), PST 6 (100.0%)",
-    );
+    expect(ran.stdout).to[AI:7.10 Summary order, file filter, `--all`, aligned columns, no repeated titles 2026-11-20T05:17:25Z.1{t=2026-11-20T05:24:04.007Z}]Match(/^src\\/a\\.ts /mu);
+    expect(ran.stdout).toMatch(/^src\\/b\\.ts /mu);
+    expect(ran.stdout).toContain("1 file unchanged since recording started, all \[PST\]."[AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1{t=2026-11-20T04:28:48.740Z}]);
     expect(ran.stdout).toContain(humNotice());
     expect(ran.stdout).not.toContain(NO_PROMPT);
   });
@@ -72,23 +70,47 @@ describe("reveal --summary _Requirements: 10.1, 10.10_", { timeout: 30_000 }, ()
     await twoRecordsAndAnEntry(d);
     const scoped = reveal(d, \["--summary", "src/a.ts"\]);
     expect(scoped.status).toBe(0);
-    expect(scoped.stdout).toContain("src/a.ts: ");
-    expect(scoped.stdout).not.toContain("src/b.ts: ");
-    expect(scoped.stdout).not.toContain("README.md: ");
+    expect(scoped.stdout).to[AI:7.10 Summary order, file filter, `--all`, aligned columns, no repeated titles 2026-11-20T05:17:25Z.2{t=2026-11-20T05:24:04.007Z}]Match(/^src\\/a\\.ts /mu);
+    expect(scoped.stdout).not.toMatch(/^src\\/b\\.ts /mu);
+    expect(scoped.stdout).not.toMatch(/^README\\.md /mu[AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1{t=2026-11-20T04:28:48.740Z}]);
     const dirScoped = reveal(d, \["--summary", "src", "--top", "1"\]);
-    expect(dirScoped.stdout).toContain("src/b.ts: ");
-    expect(dirScoped.stdout).not.toContain("README.md: ");
+    expect(dirScoped.stdout).to[AI:7.10 Summary order, file filter, `--all`, aligned columns, no repeated titles 2026-11-20T05:17:25Z.3{t=2026-11-20T05:24:04.007Z}]Match(/^src\\/b\\.ts /mu);
+    expect(dirScoped.stdout).not.toMatch(/^README\\.md /mu[AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1{t=2026-11-20T04:28:48.740Z}]);
     const outside = reveal(d, \["--summary", "../elsewhere"\]);
     expect(outside.stdout).toBe("../elsewhere: not recorded: not_tracked\\n");
     expect(outside.status).toBe(1);
   });
 
-  it("rejects a bad --top with the usage line and exit 1", () => {
+[AI:7.10 Summary order, file filter, `--all`, aligned columns, no repeated titles 2026-11-20T05:17:25Z.4{t=2026-11-20T05:24:04.007Z}]  it("lists files with agent or human text, counts the rest, and --all lists every file", async () => {
+    const d = fresh();
+    await twoRecordsAndAnEntry(d);
+    const ran = reveal(d, \["--summary"\]);
+    expect(ran.stdout).toMatch(/^src\\/a\\.ts +\\d+ /mu);
+    expect(ran.stdout).not.toMatch(/^README\\.md /mu);
+    expect(ran.stdout).toContain("1 file unchanged since recording started, all \[PST\].");
+    const all = reveal(d, \["--summary", "--all"\]);
+    expect(all.status).toBe(0);
+    expect(all.stdout).toMatch(/^README\\.md +6 /mu);
+    expect(all.stdout).not.toContain("unchanged since recording started");
+    const withTop = reveal(d, \["--summary", "src", "--all", "--top", "1"\]);
+    expect(withTop.stdout).toMatch(/^src\\/b\\.ts /mu);
+  });
+
+  it("prints the nothing-under-path line and exits 0 when something is recorded elsewhere", async () => {
+    const d = fresh();
+    await twoRecordsAndAnEntry(d);
+    const ran = reveal(d, \["--summary", "docs"\]);
+    expect(ran.stdout).toBe("Nothing recorded under docs.\\n");
+    expect(ran.status).toBe(0);
+  });
+
+[AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1{t=2026-11-20T04:28:48.740Z}]  it("rejects a bad --top with the usage line and exit 1", () => {
     const d = fresh();
     for (const args of \[
       \["--summary", "--top", "0"\],
       \["--summary", "--top"\],
-      \["--summary", "a", "b"\],
+      \["--summary", "a", "b[AI:7.10 Summary order, file filter, `--all`, aligned columns, no repeated titles 2026-11-20T05:17:25Z.5{t=2026-11-20T05:24:04.007Z}]"\],
+      \["--summary", "--all", "--all[AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1{t=2026-11-20T04:28:48.740Z}]"\],
     \]) {
       const ran = reveal(d, args);
       expect(ran.status).toBe(1);

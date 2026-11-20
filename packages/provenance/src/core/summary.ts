@@ -1,90 +1,41 @@
 /**
- * `summarize`: the decision and the plain-text output of `reveal --summary [path] [--top n]`
+ * `summarize`: the decision and the plain-text output of `reveal --summary [path] [--top n] [--all]`
  * (Req 10, design "The Reveal_Command"). A pure function of its input: no clock, no file
  * system, so the same input gives the same output. Pure; no `node:`.
  */
-import type { Document, Origin } from "@reveal-codes/engine";
-import { humNotice, noPromptSessionsLine } from "./legend.js";
 import { describeRun, parseRunId } from "./label.js";
 import { createLineIndex, positionAt } from "./lines.js";
+import { renderSummary, sessionsLines } from "./summary-render.js";
+import {
+  formatShare,
+  ORIGINS,
+  type Counts,
+  type FileSummary,
+  type Stretch,
+  type Summary,
+  type SummaryInput,
+  type SummaryRecord,
+  type SummaryResult,
+  type SummaryUnchanged,
+  type WindowRow,
+} from "./summary-types.js";
 
-/** A Record as loaded, by workspace-relative path. `stale` when its text differs from the file. */
-export type SummaryRecord = {
-  path: string;
-  doc: Pick<Document, "text" | "spans">;
-  stale: boolean;
-};
-
-/** An Unchanged_File: a Baseline_Entry with no Record. `length` is the file's length. */
-export type SummaryUnchanged = { path: string; length: number; stale: boolean };
-
-/** The count of `sessions.json`, or `"unreadable"` when the file does not parse (Req 10.12). */
-export type SessionsCount = number | "unreadable";
-
-export type SummaryInput = {
-  records: readonly SummaryRecord[];
-  unchanged: readonly SummaryUnchanged[];
-  /** The path argument (a file or a directory), or null for the whole workspace. */
-  path: string | null;
-  /** `--top n`; 10 when absent. */
-  top?: number;
-  sessions: SessionsCount;
-};
-
-export type Counts = Record<Origin, number>;
-export type FileSummary = { path: string; stale: boolean; characters: number; counts: Counts };
-
-/** One Untouched_Stretch: an `AI` span (Req 10.3). Lines are 1-based. */
-export type Stretch = {
-  path: string;
-  firstLine: number;
-  lastLine: number;
-  offset: number;
-  length: number;
-  run: string;
-  windowRun: string;
-  taskNumber: string | null;
-  title: string;
-  words: string;
-};
-
-/** One row of the table that groups agent text by Window_Run (Req 10.6). */
-export type WindowRow = {
-  windowRun: string;
-  taskNumber: string | null;
-  title: string;
-  openedAt: string | null;
-  files: number;
-  runs: number;
-  ai: number;
-  aiHuman: number;
-  words: string;
-};
-
-export type Summary = {
-  files: FileSummary[];
-  total: Counts;
-  totalCharacters: number;
-  stretches: Stretch[];
-  /** Characters of `AI>HUM` spans, which the stretch list leaves out (Req 10.5). */
-  omittedAiHuman: number;
-  windows: WindowRow[];
-};
-
-export type SummaryResult = {
-  /** 1 only when nothing is recorded at all (Req 10.10). */
-  status: 0 | 1;
-  lines: string[];
-  text: string;
-  /** Null when nothing is recorded, or nothing under the path. */
-  summary: Summary | null;
-};
+export { formatShare };
+export type {
+  Counts,
+  FileSummary,
+  SessionsCount,
+  Stretch,
+  Summary,
+  SummaryInput,
+  SummaryRecord,
+  SummaryResult,
+  SummaryUnchanged,
+  WindowRow,
+} from "./summary-types.js";
 
 const DEFAULT_TOP = 10;
-const ORIGINS: readonly Origin[] = ["AI", "AI>HUM", "HUM", "PST"];
 const NOTHING_RECORDED = "Nothing is recorded. Run setup_provenance to start recording.";
-const UNREADABLE =
-  "Sessions with no prompt events: the count is unreadable (sessions.json does not parse).";
 
 function emptyCounts(): Counts {
   return { AI: 0, "AI>HUM": 0, HUM: 0, PST: 0 };
@@ -93,12 +44,6 @@ function emptyCounts(): Counts {
 function compareCodeUnits(a: string, b: string): number {
   if (a < b) return -1;
   return a > b ? 1 : 0;
-}
-
-/** The share of `part` in `whole` to one decimal, from integer tenths so no float is printed. */
-export function formatShare(part: number, whole: number): string {
-  const tenths = whole === 0 ? 0 : Math.round((part * 1000) / whole);
-  return `${String(Math.floor(tenths / 10))}.${String(tenths % 10)}`;
 }
 
 function normalizePath(path: string | null): string | null {
@@ -144,6 +89,7 @@ function stretchesOf(record: SummaryRecord): Stretch[] {
       windowRun: windowRunOf(run),
       taskNumber: name.taskNumber,
       title: name.title,
+      openedAt: name.time,
       words: describeRun(name.taskNumber, name.title),
     });
   }
@@ -164,7 +110,6 @@ function windowRows(records: readonly SummaryRecord[]): WindowRow[] {
       if ((origin !== "AI" && origin !== "AI>HUM") || runId === undefined) continue;
       const key = windowRunOf(runId);
       const name = parseRunId(runId);
-      const words = describeRun(name.taskNumber, name.title);
       const row = {
         windowRun: key,
         taskNumber: name.taskNumber,
@@ -174,7 +119,6 @@ function windowRows(records: readonly SummaryRecord[]): WindowRow[] {
         runs: 0,
         ai: 0,
         aiHuman: 0,
-        words,
       };
       const entry = acc.get(key) ?? { row, files: new Set<string>(), runs: new Set<string>() };
       entry.files.add(record.path);
@@ -198,10 +142,17 @@ function compareWindows(a: WindowRow, b: WindowRow): number {
   return compareCodeUnits(a.windowRun, b.windowRun);
 }
 
+/** A file the list prints without `--all`: any `AI`, `AI>HUM` or `HUM` text, or stale (Req 10.14). */
+function isListed(file: FileSummary): boolean {
+  const { AI, "AI>HUM": aiHuman, HUM } = file.counts;
+  return file.stale || AI + aiHuman + HUM > 0;
+}
+
 function buildSummary(
   records: readonly SummaryRecord[],
   unchanged: readonly SummaryUnchanged[],
   top: number,
+  all: boolean,
 ): Summary {
   const files = [...records.map(recordFile), ...unchanged.map(unchangedFile)].sort((a, b) =>
     compareCodeUnits(a.path, b.path),
@@ -209,6 +160,7 @@ function buildSummary(
   const total = emptyCounts();
   for (const file of files) for (const o of ORIGINS) total[o] += file.counts[o];
   const stretches = records.flatMap(stretchesOf).sort(compareStretches);
+  const listed = all ? files : files.filter(isListed);
   return {
     files,
     total,
@@ -216,53 +168,13 @@ function buildSummary(
     stretches: stretches.slice(0, Math.max(0, top)),
     omittedAiHuman: total["AI>HUM"],
     windows: windowRows(records),
+    listed,
+    unchangedCount: files.length - listed.length,
+    all,
   };
 }
 
-function countsLine(counts: Counts, characters: number): string {
-  const parts = ORIGINS.map(
-    (o) => `${o} ${String(counts[o])} (${formatShare(counts[o], characters)}%)`,
-  );
-  return `${String(characters)} characters: ${parts.join(", ")}`;
-}
-
-function stretchLine(s: Stretch): string {
-  const lines =
-    s.firstLine === s.lastLine
-      ? `line ${String(s.firstLine)}`
-      : `lines ${String(s.firstLine)}-${String(s.lastLine)}`;
-  return `${s.path} ${lines}, ${String(s.length)} characters, ${s.words}, ${s.windowRun}`;
-}
-
-function windowLine(w: WindowRow): string {
-  const number = w.taskNumber ?? "-";
-  const opened = w.openedAt ?? "-";
-  return `${number} | ${w.title} | ${opened} | files ${String(w.files)} | runs ${String(w.runs)} | AI ${String(w.ai)} | AI>HUM ${String(w.aiHuman)} | ${w.words}`;
-}
-
-function sessionsLines(sessions: SessionsCount): string[] {
-  if (sessions === "unreadable") return [UNREADABLE];
-  return sessions > 0 ? [noPromptSessionsLine(sessions)] : [];
-}
-
-/** The plain-text lines of a non-empty summary. */
-export function renderSummary(summary: Summary, sessions: SessionsCount): string[] {
-  const out = [`Total: ${countsLine(summary.total, summary.totalCharacters)}`];
-  out.push("Files:");
-  for (const f of summary.files)
-    out.push(`${f.path}${f.stale ? " (stale)" : ""}: ${countsLine(f.counts, f.characters)}`);
-  out.push("Largest untouched agent stretches:");
-  if (summary.stretches.length === 0) out.push("none");
-  for (const s of summary.stretches) out.push(stretchLine(s));
-  out.push(`AI>HUM characters left out of this list: ${String(summary.omittedAiHuman)}`);
-  out.push("Agent text by window (task number | label | opened | files | runs | AI | AI>HUM):");
-  if (summary.windows.length === 0) out.push("none");
-  for (const w of summary.windows) out.push(windowLine(w));
-  out.push(humNotice(), ...sessionsLines(sessions));
-  return out;
-}
-
-/** Summarize the Records and Unchanged_Files under `input.path` (Req 10.1 to 10.12). */
+/** Summarize the Records and Unchanged_Files under `input.path` (Req 10.1 to 10.18). */
 export function summarize(input: SummaryInput): SummaryResult {
   if (input.records.length === 0 && input.unchanged.length === 0) {
     return { status: 1, lines: [NOTHING_RECORDED], text: NOTHING_RECORDED, summary: null };
@@ -273,10 +185,10 @@ export function summarize(input: SummaryInput): SummaryResult {
   const summary =
     records.length + unchanged.length === 0
       ? null
-      : buildSummary(records, unchanged, input.top ?? DEFAULT_TOP);
+      : buildSummary(records, unchanged, input.top ?? DEFAULT_TOP, input.all === true);
   const lines =
     summary === null
-      ? [`Nothing recorded under ${scope ?? ""}.`, humNotice(), ...sessionsLines(input.sessions)]
+      ? [`Nothing recorded under ${scope ?? ""}.`, ...sessionsLines(input.sessions)]
       : renderSummary(summary, input.sessions);
   return { status: 0, lines, text: lines.join("\n"), summary };
 }

@@ -1102,6 +1102,44 @@
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795148928633
       }
+    ],
+    "7.10 Summary order, file filter, `--all`, aligned columns, no repeated titles": [
+      {
+        "executionId": "f0761a54-e0c0-4251-a672-764b69642217",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795151841543
+      },
+      {
+        "executionId": "f0761a54-e0c0-4251-a672-764b69642217",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795151845949
+      },
+      {
+        "executionId": "f0761a54-e0c0-4251-a672-764b69642217",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795152243885
+      }
+    ],
+    "7.11 Short run tags, \"Runs in this file\", `--full`": [
+      {
+        "executionId": "f0761a54-e0c0-4251-a672-764b69642217",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795151841584
+      }
+    ],
+    "7.12 Solid pane in colour mode": [
+      {
+        "executionId": "f0761a54-e0c0-4251-a672-764b69642217",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795151841648
+      }
+    ],
+    "7.13 Checkpoint - the viewer, again": [
+      {
+        "executionId": "f0761a54-e0c0-4251-a672-764b69642217",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795151841685
+      }
     ]
   }
 }

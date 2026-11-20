@@ -159,30 +159,32 @@ export function checkFactsOf(facts: WorkspaceFacts, strict: boolean): CheckFacts
   return { files: facts.files, records, entries: facts.entries, strict };
 }
 
-function underPath(path: string, scope: string | null): boolean {
-  return scope === null || scope === "" || path === scope || path.startsWith(`${scope}/`);
-}
-
 /** The summary's input; `scope` is a workspace-relative file or directory, or null for all. */
 export function summaryInputOf(
   facts: WorkspaceFacts,
   scope: string | null,
   top?: number,
+  all?: boolean,
 ): SummaryInput {
   const byPath = new Map(facts.files.map((f) => [f.path, f]));
   const records = Object.entries(facts.records).flatMap(([path, r]) =>
-    r.ok && underPath(path, scope)
-      ? [{ path, doc: r.doc, stale: byPath.get(path)?.text !== r.text }]
-      : [],
+    r.ok ? [{ path, doc: r.doc, stale: byPath.get(path)?.text !== r.text }] : [],
   );
   const unchanged = Object.entries(facts.entries).flatMap(([path, digest]) => {
     const file = byPath.get(path);
-    const keep = underPath(path, scope) && !Object.hasOwn(facts.records, path);
+    const keep = !Object.hasOwn(facts.records, path);
     return keep && file !== undefined
       ? [{ path, length: file.text.length, stale: file.digest !== digest }]
       : [];
   });
-  return { records, unchanged, path: scope, sessions: facts.sessions, ...(top ? { top } : {}) };
+  return {
+    records,
+    unchanged,
+    path: scope,
+    sessions: facts.sessions,
+    ...(top ? { top } : {}),
+    ...(all ? { all } : {}),
+  };
 }
 
 /** The Document of an Unchanged_File: the file's text as one `PST` span at the baseline time. */

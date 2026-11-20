@@ -1,0 +1,91 @@
+[DOC{v=1;n=0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.1,2995,0,0}][AI:7.10 Summary order, file filter, `--all`, aligned columns, no repeated titles 2026-11-20T05:17:25Z.1{t=2026-11-20T05:24:04.007Z}]/**
+ * The types of `summarize` and the share format (Req 10, design "The Reveal_Command"). Pure; no `node:`.
+ */
+import type { Document, Origin } from "@reveal-codes/engine";
+
+/** A Record as loaded, by workspace-relative path. `stale` when its text differs from the file. */
+export type SummaryRecord = {
+  path: string;
+  doc: Pick<Document, "text" | "spans">;
+  stale: boolean;
+};
+
+/** An Unchanged_File: a Baseline_Entry with no Record. `length` is the file's length. */
+export type SummaryUnchanged = { path: string; length: number; stale: boolean };
+
+/** The count of `sessions.json`, or `"unreadable"` when the file does not parse (Req 10.12). */
+export type SessionsCount = number | "unreadable";
+
+export type SummaryInput = {
+  records: readonly SummaryRecord\[\];
+  unchanged: readonly SummaryUnchanged\[\];
+  /** The path argument (a file or a directory), or null for the whole workspace. */
+  path: string | null;
+  /** `--top n`; 10 when absent. */
+  top?: number;
+  /** `--all`: list every file and print no unchanged-files line (Req 10.15). */
+  all?: boolean;
+  sessions: SessionsCount;
+};
+
+export type Counts = Record<Origin, number>;
+export type FileSummary = { path: string; stale: boolean; characters: number; counts: Counts };
+
+/** One Untouched_Stretch: an `AI` span (Req 10.3). Lines are 1-based. */
+export type Stretch = {
+  path: string;
+  firstLine: number;
+  lastLine: number;
+  offset: number;
+  length: number;
+  run: string;
+  windowRun: string;
+  taskNumber: string | null;
+  title: string;
+  openedAt: string | null;
+  words: string;
+};
+
+/** One row of the table that groups agent text by Window_Run (Req 10.6). */
+export type WindowRow = {
+  windowRun: string;
+  taskNumber: string | null;
+  title: string;
+  openedAt: string | null;
+  files: number;
+  runs: number;
+  ai: number;
+  aiHuman: number;
+};
+
+export type Summary = {
+  files: FileSummary\[\];
+  total: Counts;
+  totalCharacters: number;
+  stretches: Stretch\[\];
+  /** Characters of `AI>HUM` spans, which the stretch list leaves out (Req 10.5). */
+  omittedAiHuman: number;
+  windows: WindowRow\[\];
+  /** The files the file list prints: those with agent or human text, the stale ones, or all with `--all` (Req 10.14, 10.15). */
+  listed: FileSummary\[\];
+  /** Summarized files that are not listed: all `\[PST\]`, and not stale (Req 10.14). */
+  unchangedCount: number;
+  all: boolean;
+};
+
+export type SummaryResult = {
+  /** 1 only when nothing is recorded at all (Req 10.10). */
+  status: 0 | 1;
+  lines: string\[\];
+  text: string;
+  /** Null when nothing is recorded, or nothing under the path. */
+  summary: Summary | null;
+};
+
+export const ORIGINS: readonly Origin\[\] = \["AI", "AI>HUM", "HUM", "PST"\];
+
+/** The share of `part` in `whole` to one decimal, from integer tenths so no float is printed. */
+export function formatShare(part: number, whole: number): string {
+  const tenths = whole === 0 ? 0 : Math.round((part * 1000) / whole);
+  return `${String(Math.floor(tenths / 10))}.${String(tenths % 10)}`;
+}

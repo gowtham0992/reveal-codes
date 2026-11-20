@@ -25,7 +25,7 @@ export type RevealIo = {
 };
 
 export const USAGE =
-  "usage: reveal <file> | --summary [path] [--top <n>] | --check [--strict] | --record";
+  "usage: reveal <file> | --summary [path] [--top <n>] [--all] | --check [--strict] | --record";
 
 /** 24-bit, 256 colours or plain, from the terminal facts (Req 9.5 to 9.7). */
 export function chooseMode(env: ColorEnv, isTTY: boolean): ViewMode {
@@ -89,7 +89,7 @@ async function summaryForm(deps: RevealDeps, io: RevealIo, args: readonly string
     if (found === null) {
       return { status: 1, text: `${neutralize(parsed.path ?? "")}: not recorded: not_tracked` };
     }
-    return summaryReport(deps, root, found.scope, parsed.top);
+    return summaryReport(deps, root, found.scope, parsed.top, parsed.all);
   });
 }
 

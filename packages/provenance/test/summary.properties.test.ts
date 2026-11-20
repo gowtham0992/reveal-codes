@@ -63,6 +63,7 @@ const arbEntries: fc.Arbitrary<Entry[]> = fc
 
 const arbInput = fc.record({
   entries: arbEntries,
+  all: fc.boolean(),
   scope: fc.constantFrom(...SCOPES),
   top: fc.option(fc.integer({ min: 1, max: 12 }), { nil: undefined }),
 });
@@ -117,6 +118,7 @@ function toInput(
   entries: readonly Entry[],
   scope: string | null,
   top: number | undefined,
+  all: boolean,
 ): SummaryInput {
   const records: SummaryRecord[] = [];
   const unchanged: SummaryUnchanged[] = [];
@@ -124,7 +126,7 @@ function toInput(
     if (e.kind === "record") records.push({ path: e.path, doc: e.doc, stale: e.stale });
     else unchanged.push({ path: e.path, length: e.length, stale: e.stale });
   }
-  const base: SummaryInput = { records, unchanged, path: scope, sessions: 0 };
+  const base: SummaryInput = { records, unchanged, path: scope, sessions: 0, all };
   return top === undefined ? base : { ...base, top };
 }
 
@@ -144,6 +146,13 @@ function parseLine(line: string): { chars: number; counts: Counts; tenths: Count
 
 function checkPrinted(line: string, want: { characters: number; counts: Counts }): void {
   const got = parseLine(line);
+  checkParsed(got, want);
+}
+
+function checkParsed(
+  got: { chars: number; counts: Counts; tenths: Counts },
+  want: { characters: number; counts: Counts },
+): void {
   expect(got.chars).toBe(want.characters);
   expect(got.counts).toEqual(want.counts);
   const sum = ORIGINS.reduce((acc, o) => acc + got.tenths[o], 0);
@@ -158,8 +167,53 @@ function checkPrinted(line: string, want: { characters: number; counts: Counts }
   }
 }
 
-function check(entries: readonly Entry[], rawScope: string | null, top: number | undefined): void {
-  const input = toInput(entries, rawScope, top);
+/** One row of the file list: the characters, then count and share of each Origin. */
+function parseRow(row: string): { chars: number; counts: Counts; tenths: Counts } {
+  const chars = Number(/^\S+ +(\d+)/u.exec(row)?.[1]);
+  const counts = zero();
+  const tenths = zero();
+  const found = [...row.matchAll(/(\d+) \((\d+)\.(\d)%\)/gu)];
+  for (const [i, o] of ORIGINS.entries()) {
+    counts[o] = Number(found[i]?.[1]);
+    tenths[o] = Number(found[i]?.[2]) * 10 + Number(found[i]?.[3]);
+  }
+  return { chars, counts, tenths };
+}
+
+const isListed = (f: Expected): boolean =>
+  f.stale || f.counts.AI + f.counts["AI>HUM"] + f.counts.HUM > 0;
+
+function checkFileList(
+  out: ReturnType<typeof summarize>,
+  want: readonly Expected[],
+  all: boolean,
+): void {
+  const listed = all ? want : want.filter(isListed);
+  const at = out.lines.indexOf("Files:");
+  const rows = out.lines.slice(at + 2, at + 2 + listed.length);
+  expect(rows.map((r) => r.split(" ")[0])).toEqual(listed.map((f) => f.path));
+  for (const [i, f] of listed.entries()) {
+    const row = rows[i] ?? "";
+    expect(row.endsWith(" stale")).toBe(f.stale);
+    checkParsed(parseRow(row), f);
+  }
+  expect(out.summary?.listed.map((f) => f.path)).toEqual(listed.map((f) => f.path));
+  const n = want.length - listed.length;
+  expect(out.summary?.unchangedCount).toBe(n);
+  expect(listed.length + n).toBe(want.length);
+  const found = out.lines.filter((l) => l.includes("unchanged since recording started"));
+  const noun = n === 1 ? "file" : "files";
+  const line = `${String(n)} ${noun} unchanged since recording started, all [PST].`;
+  expect(found).toEqual(all ? [] : [line]);
+}
+
+function check(
+  entries: readonly Entry[],
+  rawScope: string | null,
+  top: number | undefined,
+  all: boolean,
+): void {
+  const input = toInput(entries, rawScope, top, all);
   const out = summarize(input);
   const scope = normalize(rawScope);
   const kept = entries.filter((e) => inScope(e.path, scope));
@@ -181,11 +235,8 @@ function check(entries: readonly Entry[], rawScope: string | null, top: number |
     expect(f.characters).toBe(want[i]?.characters);
     expect(f.counts).toEqual(want[i]?.counts);
     expect(ORIGINS.reduce((acc, o) => acc + f.counts[o], 0)).toBe(f.characters);
-    const suffix = f.stale ? " (stale)" : "";
-    const line = out.lines.find((l) => l.startsWith(`${f.path}${suffix}: `));
-    expect(line).toBeDefined();
-    checkPrinted(line ?? "", f);
   }
+  checkFileList(out, want, all);
   const total = zero();
   for (const f of want) for (const o of ORIGINS) total[o] += f.counts[o];
   const chars = want.reduce((acc, f) => acc + f.characters, 0);
@@ -210,12 +261,12 @@ function check(entries: readonly Entry[], rawScope: string | null, top: number |
   expect(again.summary).toEqual(summary);
 }
 
-describe("summarize properties _Requirements: 10.2, 10.3, 10.5, 10.8_", () => {
+describe("summarize properties _Requirements: 10.2, 10.3, 10.5, 10.8, 10.13, 10.14, 10.15_", () => {
   // Property 12
-  it("counts add up, shares sum to 100.0 within rounding, stretches are ordered and AI>HUM is counted", () => {
+  it("counts add up, listed files plus the unchanged count equal the summarized files (all listed with --all), stretches are ordered and AI>HUM is counted", () => {
     fc.assert(
-      fc.property(arbInput, ({ entries, scope, top }) => {
-        check(entries, scope, top);
+      fc.property(arbInput, ({ entries, scope, top, all }) => {
+        check(entries, scope, top, all);
       }),
       { numRuns: runs(process.env) },
     );
