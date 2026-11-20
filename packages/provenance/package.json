@@ -7,7 +7,9 @@
   "type": "module",
   "exports": "./src/index.ts",
   "dependencies": {
-    "@reveal-codes/engine": "workspace:*"
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "@reveal-codes/engine": "workspace:*",
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "fast-check": "4.10.2",
