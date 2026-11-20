@@ -2,10 +2,12 @@ import { createDocument, renderRecord } from "@reveal-codes/engine";
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
-import { SIZE_LIMIT } from "../src/core/limits.js";
+import { LOCK_STALE_MS, LOCK_WAIT_MS, SIZE_LIMIT } from "../src/core/limits.js";
 import { baselineCommand, formatBaselineLine, runBaseline } from "../src/io/baseline-cmd.js";
 import { nodeDeps } from "../src/io/deps.js";
 import { gitAvailable } from "./support/git-ignore.js";
+import { memoryDeps } from "./support/memory-deps.js";
+import type { MemoryDeps } from "./support/memory-deps.js";
 import { makeTempDir, useIsolatedGit } from "./support/temp-repo.js";
 import type { TempDir } from "./support/temp-repo.js";
 const deps = nodeDeps();
@@ -145,5 +147,53 @@ describe.skipIf(!gitAvailable())("provenance baseline in a git repository", () =
     expect(ran.ok).toBe(true);
     const named = (n: string): number => calls.filter((c) => c.includes(n)).length;
     expect([named("--stdin-paths"), named("--batch-check")]).toEqual([1, 1]);
+  });
+});
+
+describe("provenance baseline and the lock (Requirement 6, criterion 8)", () => {
+  const ROOT = "/ws";
+  const DIR = `${ROOT}/${PROV}`;
+  const LOCK = `${DIR}/lock`;
+  function workspace(): MemoryDeps {
+    const mem = memoryDeps();
+    mem.fs.put(`${ROOT}/a.txt`, "a\n", mem.clock.nowMs() - 60_000);
+    return mem;
+  }
+  const faultReasons = (mem: MemoryDeps): string[] => mem.faults.map((f) => f.reason);
+  const snapshot = (mem: MemoryDeps): string =>
+    JSON.stringify([...mem.fs.files].map(([p, e]) => [p, [...e.bytes]]).sort());
+  it("gives up with lock_timeout after the wait when the lock is held, and changes no byte", async () => {
+    const mem = workspace();
+    mem.fs.put(LOCK, "999 now\n", mem.clock.nowMs());
+    const before = snapshot(mem);
+    const started = mem.clock.nowMs();
+    const lines: string[] = [];
+    expect(await baselineCommand(mem, ROOT, (l) => lines.push(l))).toBe(0);
+    expect(lines).toEqual([]);
+    expect(mem.clock.nowMs() - started).toBe(LOCK_WAIT_MS);
+    expect(faultReasons(mem)).toEqual(["lock_timeout"]);
+    expect(snapshot(mem)).toBe(before);
+    expect(mem.fs.text(`${DIR}/baseline.json`)).toBeNull();
+    expect(mem.fs.text(`${DIR}/sessions.json`)).toBeNull();
+  });
+  it("breaks a stale lock and baselines", async () => {
+    const mem = workspace();
+    mem.fs.put(LOCK, "999 old\n", mem.clock.nowMs() - LOCK_STALE_MS - 1000);
+    const ran = await runBaseline(mem, ROOT);
+    expect(ran).toEqual({ ok: true, value: { added: 1, skipped: 0 } });
+    expect(mem.fs.text(`${DIR}/baseline.json`)).not.toBeNull();
+    expect(faultReasons(mem)).toEqual([]);
+  });
+  it("releases the lock after a baseline", async () => {
+    const mem = workspace();
+    expect((await runBaseline(mem, ROOT)).ok).toBe(true);
+    expect(mem.fs.text(LOCK)).toBeNull();
+  });
+  it("releases the lock after a failure", async () => {
+    const mem = workspace();
+    mem.fs.put(`${DIR}/baseline.json`, "{ nope");
+    expect((await runBaseline(mem, ROOT)).ok).toBe(false);
+    expect(mem.fs.text(LOCK)).toBeNull();
+    expect(faultReasons(mem)).toEqual(["bad_baseline"]);
   });
 });

@@ -11,6 +11,7 @@ import { createBaselineCache } from "./baseline-cache.js";
 import type { BaselineCache } from "./baseline-cache.js";
 import type { Deps } from "./deps.js";
 import { checkBlobs, hashObjects } from "./git.js";
+import { acquireLock } from "./lock.js";
 import { listCandidates, readCandidate } from "./scan.js";
 import type { Candidate, FileRead } from "./scan.js";
 import { createStore } from "./store.js";
@@ -109,12 +110,11 @@ async function collect(deps: BaselineDeps, root: string, store: Store, base: Bas
   const plan = await planEntries(deps, root, list.git, texts);
   return { ...plan, texts, skipped };
 }
-/** Runs the baseline. A Baseline_File that cannot be read is left as it is and logged. */
-export async function runBaseline(
+async function baselineLocked(
   deps: BaselineDeps,
   root: string,
+  store: Store,
 ): Promise<Result<BaselineSummary, ProvenanceError>> {
-  const store = createStore(deps, `${root}/.kiro/provenance`);
   const cache = createBaselineCache(deps, store.cacheDir());
   const existing = await store.readBaseline();
   if (!existing.ok) {
@@ -140,18 +140,43 @@ export async function runBaseline(
   await ensureSessions(deps, store);
   return ok({ added: found.entries.size, skipped: found.skipped });
 }
+/**
+ * Runs the baseline under the Recorder's lock (Req 6.8): the same wait, stale-lock rule and
+ * `lock_timeout` as an event. When the lock cannot be taken it logs the reason and changes
+ * nothing. A Baseline_File that cannot be read is left as it is and logged.
+ */
+export async function runBaseline(
+  deps: BaselineDeps,
+  root: string,
+): Promise<Result<BaselineSummary, ProvenanceError>> {
+  const store = createStore(deps, `${root}/.kiro/provenance`);
+  await deps.fs.mkdirp(store.dir);
+  const taken = await acquireLock(deps, `${store.dir}/lock`);
+  if (!taken.ok) {
+    await deps.log.fault({ event: EVENT, path: null, reason: taken.error.kind });
+    return taken;
+  }
+  try {
+    return await baselineLocked(deps, root, store);
+  } finally {
+    await taken.value.release();
+  }
+}
 /** The one output line (Req 6.4). */
 export function formatBaselineLine(summary: BaselineSummary): string {
   return `baseline: ${String(summary.added)} added, ${String(summary.skipped)} skipped`;
 }
-/** `provenance baseline`: prints one line on success; exit status 0, or 1 when it could not run. */
+/**
+ * `provenance baseline`: prints one line on success; exit status 0, also when the lock timed out
+ * (nothing printed, nothing changed), or 1 when it could not run.
+ */
 export async function baselineCommand(
   deps: BaselineDeps,
   root: string,
   print: (line: string) => void,
 ): Promise<number> {
   const result = await runBaseline(deps, root);
-  if (!result.ok) return 1;
+  if (!result.ok) return result.error.kind === "lock_timeout" ? 0 : 1;
   print(formatBaselineLine(result.value));
   return 0;
 }

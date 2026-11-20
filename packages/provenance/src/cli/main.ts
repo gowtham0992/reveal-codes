@@ -4,6 +4,7 @@
  * failure, including an uncaught exception and an unhandled rejection (Req 7.1 to 7.3, 7.10).
  * This is the only module that catches everything or calls `process.exit`.
  */
+import { installCrashHandlers } from "./crash.js";
 import { nodeDeps } from "../io/deps.js";
 import type { Logger } from "../io/deps.js";
 import { baselineCommand } from "../io/baseline-cmd.js";
@@ -18,12 +19,8 @@ async function recordCommand(name: string): Promise<void> {
   const deps = nodeDeps();
   let logger: Logger = deps.log;
   const event = parseEvent(name) ?? "unknown";
-  const bail = (): void => {
-    logger.fault({ event, path: null, reason: "exception" }).then(exitZero, exitZero);
-  };
   setTimeout(exitZero, WATCHDOG_MS).unref();
-  process.on("uncaughtException", bail);
-  process.on("unhandledRejection", bail);
+  const bail = installCrashHandlers(() => logger, exitZero, event);
   try {
     await runRecord(deps, name, process.cwd(), (made) => {
       logger = made;

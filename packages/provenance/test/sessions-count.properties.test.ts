@@ -8,11 +8,18 @@ import { runs } from "./support/fc.js";
 import type { MemoryDeps } from "./support/memory-deps.js";
 import { fire, prepare, seed } from "./support/scenario.js";
 import type { Tree } from "./support/scenario.js";
+const NEW_TALLY: Tally = { promptSeen: false, counted: false, stopped: false };
 const NO_PROMPT = "agentStop - no_prompt_events";
 /** What the property saw, so that a run in which nothing was counted cannot pass unnoticed. */
-type Seen = { counted: number; quiet: number; rerunCounted: number };
+type Seen = {
+  counted: number;
+  quiet: number;
+  rerunCounted: number;
+  /** Second or later `agentStop` of a session with a prompt, after outside changes, not counted. */
+  promptStopOutside: number;
+};
 /** What the oracle knows about one session: whether a prompt event came, and whether it was counted. */
-type Tally = { promptSeen: boolean; counted: boolean };
+type Tally = { promptSeen: boolean; counted: boolean; stopped: boolean };
 /** The texts of the files the Recorder has taken in so far, by path (the oracle's own bookkeeping). */
 type Known = ReadonlyMap<string, string>;
 const countOf = (texts: readonly string[], text: string): number =>
@@ -73,7 +80,7 @@ async function countedKeys(deps: MemoryDeps): Promise<string[]> {
 type Facts = { counts: Map<string, Tally>; known: Known; lost: Set<string> };
 /** The oracle's verdict on one event: does it count its session (Requirement 3, criterion 26)? */
 function verdict(f: Facts, key: string, stop: boolean, outside: boolean): boolean {
-  const t = f.counts.get(key) ?? { promptSeen: false, counted: false };
+  const t = f.counts.get(key) ?? NEW_TALLY;
   return stop && !t.promptSeen && !t.counted && outside;
 }
 /** One event: fires it and returns the problems found. */
@@ -92,10 +99,11 @@ async function playEvent(
   const window = step(model, s.event, ms);
   const outside = window === null && hasDifference(f.known, f.lost, tree);
   const counts = verdict(f, key, stop, outside);
-  const prior = f.counts.get(key) ?? { promptSeen: false, counted: false };
+  const prior = f.counts.get(key) ?? NEW_TALLY;
   f.counts.set(key, {
     promptSeen: prior.promptSeen || s.event.event === "promptSubmit",
     counted: prior.counted || counts,
+    stopped: prior.stopped || stop,
   });
   await fire(deps, s);
   tally(seen, stop, outside, prior, counts);
@@ -112,6 +120,7 @@ async function playEvent(
 }
 function tally(seen: Seen, stop: boolean, outside: boolean, prior: Tally, counts: boolean): void {
   if (counts) seen.counted += 1;
+  else if (stop && prior.promptSeen && prior.stopped && outside) seen.promptStopOutside += 1;
   else if (stop && !prior.promptSeen && !prior.counted && !outside) seen.quiet += 1;
 }
 /** The end-of-run checks: the count, the log and the entries agree with the oracle. */
@@ -177,7 +186,7 @@ async function replay(scenario: Scenario, seen: Seen): Promise<string[]> {
 describe("sessions-count properties _Requirements: 3.26, 3.27, 16.23_", () => {
   // Property 16
   it("P16 sessions without prompt events are counted once", async () => {
-    const seen: Seen = { counted: 0, quiet: 0, rerunCounted: 0 };
+    const seen: Seen = { counted: 0, quiet: 0, rerunCounted: 0, promptStopOutside: 0 };
     await fc.assert(
       fc.asyncProperty(
         arbScenario({
@@ -199,5 +208,9 @@ describe("sessions-count properties _Requirements: 3.26, 3.27, 16.23_", () => {
       0,
     );
     expect(seen.rerunCounted, "some last event that counted was run again").toBeGreaterThan(0);
+    expect(
+      seen.promptStopOutside,
+      "some session with a prompt stopped twice with outside changes and was not counted",
+    ).toBeGreaterThan(0);
   });
 });

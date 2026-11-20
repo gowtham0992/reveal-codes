@@ -2,7 +2,8 @@
  * Event sequences for the Recorder properties (task 5.8; Properties 1, 2, 4, 5, 14 and 16): one or
  * more sessions, each a valid `promptSubmit`, `preTask`, `postTask`, `agentStop` sequence, or the
  * Specs-panel shape (`preTask`, `postTask`, `agentStop`, no `promptSubmit`), or a bare `agentStop`
- * (the orchestrator shape), interleaved in any order. Every gap between two events is at most 30
+ * (the orchestrator shape), or a prompt, a stop and a second stop (`promptSubmit`, `agentStop`,
+ * `agentStop`: the session has seen a prompt, so the second stop must never count it), interleaved in any order. Every gap between two events is at most 30
  * minutes and a sequence has at most 18 events, so no session ever waits 12 hours.
  */
 import fc from "fast-check";
@@ -24,7 +25,7 @@ export type GenEvent = {
 /** The longest gap between two events of the generated sequences. */
 export const MAX_GAP_MS = 1_800_000;
 
-type Shape = "turn" | "specsPanel" | "bareStop";
+type Shape = "turn" | "specsPanel" | "bareStop" | "promptThenStops";
 type Plain = Omit<GenEvent, "gapMs">;
 
 const plain = (event: GenEventName, session: string | null, task: number | null): Plain => ({
@@ -69,6 +70,12 @@ function sessionEvents(
 ): Plain[] {
   const inner = taskEvents(session, tasks, q);
   if (shape === "bareStop") return [plain("agentStop", session, null)];
+  if (shape === "promptThenStops")
+    return [
+      plain("promptSubmit", session, null),
+      plain("agentStop", session, null),
+      plain("agentStop", session, null),
+    ];
   const head = shape === "turn" ? [plain("promptSubmit", session, null)] : [];
   return [...head, ...inner, plain("agentStop", session, null)];
 }
@@ -84,6 +91,7 @@ const arbShape: fc.Arbitrary<Shape> = fc.oneof(
   { weight: 3, arbitrary: fc.constant<Shape>("turn") },
   { weight: 1, arbitrary: fc.constant<Shape>("specsPanel") },
   { weight: 1, arbitrary: fc.constant<Shape>("bareStop") },
+  { weight: 1, arbitrary: fc.constant<Shape>("promptThenStops") },
 );
 
 const arbSessionPlan = (index: number, allowNoId: boolean): fc.Arbitrary<Plain[]> =>
