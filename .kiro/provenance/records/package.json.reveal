@@ -1,0 +1,36 @@
+[DOC{v=1;n=0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,88,0,0}][PST{t=2026-11-20T03:04:47Z}]{
+  "name": "reveal-codes",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Drafting editor for court filings that records the provenance of every character and verifies every legal citation.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=22.12.0 <23"
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings 0 && prettier --check .",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "test:pbt": "FC_NUM_RUNS=500 vitest run --passWithNoTests properties.test",
+    "dev": "pnpm --filter @reveal-codes/web dev",
+    "mcp": "pnpm --filter @reveal-codes/courtlistener-mcp start",
+    "sentinel": "pnpm --filter @reveal-codes/sentinel run cli",
+    "kiro:check": "node scripts/kiro-usage-check.mjs",
+    "power:build": "node scripts/build-power.mjs"[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}],
+    "reveal": "node --import jiti/register packages/provenance/src/cli/main.ts reveal"[PST{t=2026-11-20T03:04:47Z}]
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "eslint": "10.14.0",
+    "eslint-config-prettier": "10.1.8",
+    "jiti": "2.7.0",
+    "prettier": "3.9.10",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.1",
+    "vitest": "5.1.0"
+  }
+}

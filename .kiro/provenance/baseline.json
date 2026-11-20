@@ -542,7 +542,6 @@
     "docs/KIRO_USAGE.md": { "sha256": "d751e18b75c200e656e19b056631324b1594ae6e6d83c8eed260044f95cbc9ac", "blob": "ebfd9c21a86262fcf9bcd5d2b00163e7489394ce" },
     "docs/demo-script.md": { "sha256": "00b2bbf9a1aca5753fcaa432fb77d53897b019522040cfe4b189aae9bc93d268", "blob": "14efcc045c7ad504dcd8b2cdfca812a9ca32aa69" },
     "docs/images/mark.svg": { "sha256": "f1db9a4467f001870b8aa6b9157602e06669d39110c21c9fbeddaef05e71cca4", "blob": "8500169510bd53ac40fc170c1aec855bf0230ad7" },
-    "package.json": { "sha256": "f0b4c303bc7615332799232520b735b2901cb6491dba3a900ff8a7ec27b3b7a3", "blob": "5fbcf6da9c8113538b32297d1299ab3ffdf4178c" },
     "packages/courtlistener-mcp/package.json": { "sha256": "235decb4ba7eb213c69edeef100c5785ab2dd3ca99373cf325f5c214df8101dc", "blob": "f2f8d9a36706845afb37834f5e71c24eada40dae" },
     "packages/courtlistener-mcp/src/context.ts": { "sha256": "d237932f98e646a72e122748749a1b50f5f52919a406fbaa0c19f447d711e39a", "blob": "70a0c5d7fb3cea68077ba9903d01ee530e2352e5" },
     "packages/courtlistener-mcp/src/env.ts": { "sha256": "e3f14aac5c9b89a0f161ff1bfa534ac23f4d0bb1154b877844d8aca907987d4f", "blob": "39d872903c0a4f1a084a9ce706c7b2ee6a84e55e" },

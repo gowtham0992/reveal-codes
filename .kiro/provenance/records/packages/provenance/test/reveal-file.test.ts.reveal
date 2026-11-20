@@ -1,0 +1,237 @@
+[DOC{v=1;n=0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,9924,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]import { createDocument, renderRecord } from "@reveal-codes/engine";
+import { spawnSync } from "node:child_process";
+import { chmodSync, copyFileSync, readFileSync, rmSync } from "node:fs";
+import { afterEach, describe, expect, it } from "vitest";
+import { legendLines } from "../src/core/legend.js";
+import { updateRecord } from "../src/core/update.js";
+import { wrapperText } from "../src/core/wrapper.js";
+import { SIZE_LIMIT } from "../src/core/limits.js";
+import { baselineCommand } from "../src/io/baseline-cmd.js";
+import { nodeDeps } from "../src/io/deps.js";
+import { colorEnvFrom } from "../src/io/env.js";
+import { chooseMode, relativeTo, revealCommand } from "../src/io/reveal-cmd.js";
+import { makeTempDir } from "./support/temp-repo.js";
+import type { TempDir } from "./support/temp-repo.js";
+
+const ENTRY = new URL("../src/cli/main.ts", import.meta.url).pathname;
+const BUNDLE = new URL("../../../.kiro/provenance/provenance.mjs", import.meta.url).pathname;
+const JITI = import.meta.resolve("jiti/register");
+const AT = "2026-11-19T10:00:00Z";
+const PROV = ".kiro/provenance";
+const deps = nodeDeps();
+let dir: TempDir | null = null;
+afterEach(() => {
+  dir?.cleanup();
+  dir = null;
+});
+
+function fresh(): TempDir {
+  dir = makeTempDir();
+  dir.write(`${PROV}/ignore`, "# none\\n");
+  return dir;
+}
+async function baseline(d: TempDir): Promise<void> {
+  await baselineCommand(deps, d.root, () => undefined);
+}
+/** A Record whose recorded text is `current`, built from `base` with one outside change. */
+function record(d: TempDir, path: string, base: string, current: string): void {
+  const made = createDocument(base, AT);
+  if (!made.ok) throw new Error("createDocument failed");
+  const edited = updateRecord(made.value, current, "HUM", null, { nowIso: () => AT });
+  if (!edited.ok) throw new Error(edited.error.kind);
+  d.write(`${PROV}/records/${path}.reveal`, renderRecord(edited.value, null, "full").text);
+}
+type Ran = { status: number | null; stdout: string; stderr: string };
+function reveal(d: TempDir, args: string\[\], env: Record<string, string> = {}): Ran {
+  const ran = spawnSync(process.execPath, \["--import", JITI, ENTRY, "reveal", ...args\], {
+    cwd: d.root,
+    encoding: "utf8",
+    timeout: 30_000,
+    env: { PATH: process.env\["PATH"\] ?? "", ...env },
+  });
+  return { status: ran.status, stdout: ran.stdout, stderr: ran.stderr };
+}
+async function inProcess(d: TempDir, path: string, env: Record<string, string>, isTTY: boolean) {
+  const out: string\[\] = \[\];
+  const io = {
+    cwd: d.root,
+    env: colorEnvFrom(env),
+    isTTY,
+    out: (t: string) => out.push(t),
+    err: () => undefined,
+  };
+  const status = await revealCommand(deps, \[path\], io);
+  return { status, text: out.join("\\n") };
+}
+
+describe("reveal <file> _Requirements: 9.1, 9.7, 9.9, 9.12_", () => {
+  it("prints the header, the four legend lines and the codes of a current Record, plain when piped", () => {
+    const d = fresh();
+    d.write("a.ts", "x\\n");
+    record(d, "a.ts", "x\\n", "x\[1\]\\\\y\\n");
+    d.write("a.ts", "x\[1\]\\\\y\\n");
+    const ran = reveal(d, \["a.ts"\], { COLORTERM: "truecolor", TERM: "xterm-256color" });
+    expect(ran.status).toBe(0);
+    expect(ran.stderr).toBe("");
+    const lines = ran.stdout.split("\\n");
+    expect(lines\[0\]).toBe("Reveal Codes: a.ts");
+    expect(lines.slice(1, 5)).toEqual(legendLines());
+    expect(ran.stdout).toContain("\[HUM\]");
+    expect(ran.stdout).toContain("\\\\\[1\\\\\]\\\\\\\\y");
+    expect(ran.stdout).not.toContain("\\u001b");
+  });
+
+  it("gives plain text for NO_COLOR and for TERM=dumb even on a terminal", async () => {
+    const d = fresh();
+    d.write("a.ts", "x\[1\]\\n");
+    await baseline(d);
+    for (const env of \[{ COLORTERM: "truecolor", NO_COLOR: "1" }, { TERM: "dumb" }\]) {
+      const shown = await inProcess(d, "a.ts", env, true);
+      expect(shown.text).not.toContain("\\u001b");
+      expect(shown.text).toContain("\\\\\[1\\\\\]");
+    }
+  });
+
+  it("colours a terminal in 24-bit or 256 colours and leaves the text unescaped", async () => {
+    const d = fresh();
+    d.write("a.ts", "x\\n");
+    record(d, "a.ts", "x\\n", "x\[1\]\\\\y\\n");
+    d.write("a.ts", "x\[1\]\\\\y\\n");
+    const wide = await inProcess(d, "a.ts", { COLORTERM: "24bit", TERM: "xterm" }, true);
+    const narrow = await inProcess(d, "a.ts", { TERM: "xterm-256color" }, true);
+    expect(wide.text).toContain("\\u001b\[38;2;");
+    expect(narrow.text).toContain("\\u001b\[38;5;");
+    expect(narrow.text).not.toContain("38;2;");
+    for (const shown of \[wide, narrow\]) {
+      expect(shown.text).toContain("\[HUM\]\[1\]\\\\y");
+      expect(shown.text).not.toContain("\\\\\[1\\\\\]");
+    }
+  });
+
+  it("prints an Unchanged_File as one \[PST\] and its text", async () => {
+    const d = fresh();
+    d.write("README.md", "hello\\nworld\\n");
+    await baseline(d);
+    const ran = reveal(d, \["README.md"\]);
+    expect(ran.status).toBe(0);
+    expect(ran.stdout.split("\\n").slice(5).join("\\n")).toBe("\[PST\]hello\\nworld\\n\\n");
+    expect(ran.stderr).toBe("");
+  });
+});
+
+describe("a stale file _Requirements: 9.10_", () => {
+  const first = (text: string): string => text.split("\\n")\[0\] ?? "";
+  it("starts with the count of unrecorded characters and the command, then the Record as recorded", () => {
+    const d = fresh();
+    record(d, "a.ts", "abc\\n", "abXc\\n");
+    d.write("a.ts", "abXYZc\\n");
+    const ran = reveal(d, \["a.ts"\]);
+    expect(ran.status).toBe(0);
+    expect(first(ran.stdout)).toBe(
+      "stale: a.ts changed after the last recorded event; 2 characters not yet recorded; run: reveal --record",
+    );
+    expect(ran.stdout).toContain("\[PST\]ab\[HUM\]X\[PST\]c");
+    expect(ran.stdout).not.toContain("XYZ");
+  });
+
+  it("counts the changed characters of an entry from its Baseline_Text, no codes after the line", async () => {
+    const d = fresh();
+    d.write("b.ts", "abc\\n");
+    await baseline(d);
+    d.write("b.ts", "abXc\\n");
+    const ran = reveal(d, \["b.ts"\]);
+    expect(ran.status).toBe(0);
+    expect(first(ran.stdout)).toContain("; 1 characters not yet recorded; run: reveal --record");
+    expect(ran.stdout).not.toContain("\[HUM\]");
+    expect(ran.stdout).not.toContain("\[PST\]");
+  });
+
+  it("counts the whole file when the Baseline_Text cannot be found", async () => {
+    const d = fresh();
+    d.write("b.ts", "abc\\n");
+    await baseline(d);
+    rmSync(`${d.root}/${PROV}/cache`, { recursive: true, force: true });
+    d.write("b.ts", "abXc\\n");
+    expect(first(reveal(d, \["b.ts"\]).stdout)).toContain("; 5 characters not yet recorded;");
+  });
+});
+
+describe("a file that is not shown _Requirements: 9.9, 9.11_", () => {
+  it.each(\["not_tracked", "over_limit", "binary", "ignored", "no_record"\] as const)(
+    "prints one line with %s and exits 1",
+    async (reason) => {
+      const d = fresh();
+      d.write(`${PROV}/ignore`, "secret.txt\\n");
+      d.write("big.txt", "x".repeat(SIZE_LIMIT + 1));
+      d.write("bin.dat", new Uint8Array(\[1, 0, 2\]));
+      d.write("secret.txt", "s\\n");
+      await baseline(d);
+      d.write("late.txt", "late\\n");
+      const file = {
+        not_tracked: "missing.txt",
+        over_limit: "big.txt",
+        binary: "bin.dat",
+        ignored: "secret.txt",
+        no_record: "late.txt",
+      }\[reason\];
+      const ran = reveal(d, \[file\]);
+      expect(ran.stdout).toBe(`${file}: not recorded: ${reason}\\n`);
+      expect(ran.status).toBe(1);
+    },
+  );
+
+  it("prints one tampered_record line for a Record that does not parse and exits 1", () => {
+    const d = fresh();
+    d.write("a.ts", "x\\n");
+    d.write(`${PROV}/records/a.ts.reveal`, "not a record");
+    const ran = reveal(d, \["a.ts"\]);
+    expect(ran.stdout).toBe("a.ts: tampered_record\\n");
+    expect(ran.status).toBe(1);
+  });
+
+  it("reports a path outside the workspace as not_tracked", () => {
+    const d = fresh();
+    expect(reveal(d, \["../outside.txt"\]).stdout).toBe(
+      "../outside.txt: not recorded: not_tracked\\n",
+    );
+  });
+});
+
+describe("colour choice and paths _Requirements: 9.5, 9.6, 9.7_", () => {
+  const pick = (e: Record<string, string>, tty: boolean) => chooseMode(colorEnvFrom(e), tty);
+  it("chooses by terminal, COLORTERM, TERM and NO_COLOR", () => {
+    expect(pick({ COLORTERM: "truecolor" }, true)).toBe("truecolor");
+    expect(pick({ COLORTERM: "24bit", TERM: "xterm-256color" }, true)).toBe("truecolor");
+    expect(pick({ TERM: "xterm-256color" }, true)).toBe("ansi256");
+    expect(pick({ TERM: "xterm" }, true)).toBe("plain");
+    expect(pick({ COLORTERM: "truecolor" }, false)).toBe("plain");
+    expect(pick({ COLORTERM: "truecolor", NO_COLOR: "1" }, true)).toBe("plain");
+    expect(pick({ COLORTERM: "truecolor", TERM: "dumb" }, true)).toBe("plain");
+  });
+  it("resolves a path against the current directory and refuses one outside the root", () => {
+    expect(relativeTo("/w", "/w/src", "../a/./b.ts")).toBe("a/b.ts");
+    expect(relativeTo("/w", "/w", "/w/x.ts")).toBe("x.ts");
+    expect(relativeTo("/w", "/w", "../x.ts")).toBeNull();
+    expect(relativeTo("/w", "/w", "/wx/y.ts")).toBeNull();
+    expect(relativeTo("/w", "/w", ".")).toBeNull();
+  });
+});
+
+describe("the wrapper _Requirements: 1.11_", () => {
+  it("runs the Bundle that sits beside it and passes the arguments", async () => {
+    const d = fresh();
+    d.write("n.txt", "note\\n");
+    await baseline(d);
+    d.write(`${PROV}/reveal`, wrapperText());
+    chmodSync(`${d.root}/${PROV}/reveal`, 0o755);
+    copyFileSync(BUNDLE, `${d.root}/${PROV}/provenance.mjs`);
+    const ran = spawnSync(`${d.root}/${PROV}/reveal`, \["n.txt"\], { cwd: d.root, encoding: "utf8" });
+    expect(ran.stdout.split("\\n")\[0\]).toBe("Reveal Codes: n.txt");
+    expect(ran.stdout).toContain("\[PST\]note");
+    expect(ran.status).toBe(0);
+  });
+  it("is the content of the installed .kiro/provenance/reveal", () => {
+    const installed = new URL("../../../.kiro/provenance/reveal", import.meta.url).pathname;
+    expect(readFileSync(installed, "utf8")).toBe(wrapperText());
+  });
+});

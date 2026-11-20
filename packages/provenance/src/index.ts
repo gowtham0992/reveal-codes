@@ -49,3 +49,4 @@ export {
 } from "./core/legend.js";
 export type { StructuredSpan } from "./core/structured.js";
 export { structuredSpans } from "./core/structured.js";
+export { wrapperText } from "./core/wrapper.js";

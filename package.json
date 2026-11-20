@@ -18,7 +18,8 @@
     "mcp": "pnpm --filter @reveal-codes/courtlistener-mcp start",
     "sentinel": "pnpm --filter @reveal-codes/sentinel run cli",
     "kiro:check": "node scripts/kiro-usage-check.mjs",
-    "power:build": "node scripts/build-power.mjs"
+    "power:build": "node scripts/build-power.mjs",
+    "reveal": "node --import jiti/register packages/provenance/src/cli/main.ts reveal"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

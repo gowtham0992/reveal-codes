@@ -1,5 +1,5 @@
-[DOC{v=1;n=0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.1,51,0,0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.2,63,0,0}][PST{t=2026-11-20T03:04:47Z}]/**
- * The entry: dispatches `record`, `baseline` and, in later tasks, `reveal`, `mcp` and `setup`.
+[DOC{v=1;n=0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.1,51,0,0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.2,63,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,30,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.2,718,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.3,174,0,0}][PST{t=2026-11-20T03:04:47Z}]/**
+ * The entry: dispatches `record`, `baseline`[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}], `reveal` and, in later tasks[PST{t=2026-11-20T03:04:47Z}], `mcp` and `setup`.
  * `record` writes nothing to standard output or standard error and exits 0 for every input and
  * failure, including an uncaught exception and an unhandled rejection (Req 7.1 to 7.3, 7.10).
  * This is the only module that catches everything or calls `process.exit`.
@@ -39,13 +39,34 @@ async function baselineMain(): Promise<number> {
   const deps = { ...base, log: createFaultLog(base, `${root}/.kiro/provenance/errors.log`) };
   return baselineCommand(deps, root, (line) => process.stdout.write(`${line}\\n`));
 }
-async function main(argv: readonly string\[\]): Promise<void> {
+[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.2{t=2026-11-20T04:21:31.980Z}]/** `reveal <args>`: a closed pipe (`| head`) ends the output without an error (Req 9.12). */
+async function revealMain(args: readonly string\[\]): Promise<number> {
+  const { revealCommand } = await import("../io/reveal-cmd.js");
+  const { readColorEnv } = await import("../io/env.js");
+  process.stdout.on("error", (error: NodeJS.ErrnoException) => {
+    if (error.code !== "EPIPE") throw error;
+    process.exit(0);
+  });
+  const io = {
+    cwd: process.cwd().replace(/\\\\/gu, "/"),
+    env: readColorEnv(),
+    isTTY: process.stdout.isTTY,
+    out: (text: string) => process.stdout.write(`${text}\\n`),
+    err: (text: string) => process.stderr.write(`${text}\\n`),
+  };
+  return revealCommand(nodeDeps(), args, io);
+}
+[PST{t=2026-11-20T03:04:47Z}]async function main(argv: readonly string\[\]): Promise<void> {
   const \[command, ...rest\] = argv;
   if (command === "record") return recordCommand(rest\[0\] ?? "");
   if (command === "baseline") {
     process.exit(await baselineMain());
   }
-  process.stderr.write("usage: provenance record <event> | baseline\\n");
+  [AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.3{t=2026-11-20T04:21:31.980Z}]if (command === "reveal") {
+    process.exitCode = await revealMain(rest);
+    return;
+  }
+  process.stderr.write("usage: provenance record <event> | baseline | reveal <file>[PST{t=2026-11-20T03:04:47Z}]\\n");
   process.exit(1);
 }
 void main(process.argv.slice(2));

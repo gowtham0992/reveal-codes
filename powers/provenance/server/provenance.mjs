@@ -1,33 +1,21 @@
 import { createRequire as __createRequire } from "node:module";
 const require = __createRequire(import.meta.url);
-
-// packages/provenance/src/cli/crash.ts
-function installCrashHandlers(getLogger, exit, event) {
-  const bail = () => {
-    getLogger().fault({ event, path: null, reason: "exception" }).then(exit, exit);
-  };
-  process.on("uncaughtException", bail);
-  process.on("unhandledRejection", bail);
-  return bail;
-}
-
-// packages/provenance/src/io/deps.ts
-import { execFile } from "node:child_process";
-import { createHash } from "node:crypto";
-import {
-  appendFile,
-  lstat,
-  mkdir,
-  readdir,
-  readFile,
-  rename,
-  rmdir,
-  unlink,
-  writeFile
-} from "node:fs/promises";
+var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __esm = (fn, res, err2) => function __init() {
+  if (err2) throw err2[0];
+  try {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  } catch (e) {
+    throw err2 = [e], e;
+  }
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
 
 // packages/engine/src/anchor-keys.ts
-var NO_CARRY = { citations: [], quotes: [] };
 function issueOrder(citationStarts, quoteStarts) {
   const out = [];
   let i = 0;
@@ -45,11 +33,6 @@ function issueOrder(citationStarts, quoteStarts) {
   }
   return out;
 }
-var fresh = (counter2) => {
-  const key = `k${String(counter2.n)}`;
-  counter2.n += 1;
-  return key;
-};
 function citationRecord(c, prev, counter2) {
   switch (c.value.kind) {
     case "other":
@@ -108,36 +91,54 @@ function keptOverrides(previous, layer, carried) {
   }
   return out;
 }
+var NO_CARRY, fresh;
+var init_anchor_keys = __esm({
+  "packages/engine/src/anchor-keys.ts"() {
+    "use strict";
+    NO_CARRY = { citations: [], quotes: [] };
+    fresh = (counter2) => {
+      const key = `k${String(counter2.n)}`;
+      counter2.n += 1;
+      return key;
+    };
+  }
+});
 
 // packages/engine/src/equal.ts
-var hasOwn = (o, key) => Object.prototype.hasOwnProperty.call(o, key);
-var isObject = (v) => typeof v === "object" && v !== null;
-var arraysEqual = (a, b) => {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (!structuralEqual(a[i], b[i])) return false;
+var hasOwn, isObject, arraysEqual, objectsEqual, structuralEqual;
+var init_equal = __esm({
+  "packages/engine/src/equal.ts"() {
+    "use strict";
+    hasOwn = (o, key) => Object.prototype.hasOwnProperty.call(o, key);
+    isObject = (v) => typeof v === "object" && v !== null;
+    arraysEqual = (a, b) => {
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) {
+        if (!structuralEqual(a[i], b[i])) return false;
+      }
+      return true;
+    };
+    objectsEqual = (a, b) => {
+      const keys = Object.keys(a);
+      if (keys.length !== Object.keys(b).length) return false;
+      for (const key of keys) {
+        if (!hasOwn(b, key)) return false;
+        if (!structuralEqual(a[key], b[key])) return false;
+      }
+      return true;
+    };
+    structuralEqual = (a, b) => {
+      if (a === b) return true;
+      if (typeof a === "number" && typeof b === "number") {
+        return Number.isNaN(a) && Number.isNaN(b);
+      }
+      if (!isObject(a) || !isObject(b)) return false;
+      if (Array.isArray(a)) return Array.isArray(b) && arraysEqual(a, b);
+      if (Array.isArray(b)) return false;
+      return objectsEqual(a, b);
+    };
   }
-  return true;
-};
-var objectsEqual = (a, b) => {
-  const keys = Object.keys(a);
-  if (keys.length !== Object.keys(b).length) return false;
-  for (const key of keys) {
-    if (!hasOwn(b, key)) return false;
-    if (!structuralEqual(a[key], b[key])) return false;
-  }
-  return true;
-};
-var structuralEqual = (a, b) => {
-  if (a === b) return true;
-  if (typeof a === "number" && typeof b === "number") {
-    return Number.isNaN(a) && Number.isNaN(b);
-  }
-  if (!isObject(a) || !isObject(b)) return false;
-  if (Array.isArray(a)) return Array.isArray(b) && arraysEqual(a, b);
-  if (Array.isArray(b)) return false;
-  return objectsEqual(a, b);
-};
+});
 
 // packages/engine/src/anchor.ts
 function creationEdit(length) {
@@ -176,8 +177,6 @@ function indexByMappedStart(records, rangeOf, edit) {
   }
   return index;
 }
-var withoutTarget = (v) => v.kind === "short" ? { ...v, targetStart: null } : v;
-var targetOf = (v) => v.kind === "short" ? v.targetStart : null;
 function sameTarget(old, next, links) {
   if (old === null || next === null) return old === next;
   const key = links.oldKeyAt.get(old);
@@ -191,7 +190,6 @@ function citationCarries(p, c, links) {
   }
   return p.record.kind === "short" && c.value.kind === "short" && structuralEqual(withoutTarget(prev.value), withoutTarget(c.value)) && sameTarget(targetOf(prev.value), targetOf(c.value), links);
 }
-var isKeyed = (r) => r.kind !== "other";
 function carryCitations(prev, citations, edit, links) {
   const keyed = prev.citations.filter(isKeyed);
   const index = indexByMappedStart(keyed, (r) => r.citation, edit);
@@ -232,39 +230,20 @@ function reanchor(prev, draft, edit, extraction) {
   const overrides2 = keptOverrides(prev.overrides, layer, carried);
   return { ...layer, overrides: overrides2 };
 }
+var withoutTarget, targetOf, isKeyed;
+var init_anchor = __esm({
+  "packages/engine/src/anchor.ts"() {
+    "use strict";
+    init_anchor_keys();
+    init_equal();
+    init_anchor_keys();
+    withoutTarget = (v) => v.kind === "short" ? { ...v, targetStart: null } : v;
+    targetOf = (v) => v.kind === "short" ? v.targetStart : null;
+    isKeyed = (r) => r.kind !== "other";
+  }
+});
 
 // packages/engine/src/abbreviations.ts
-var LEGAL_ABBREVIATIONS = [
-  "Id.",
-  "v.",
-  "Inc.",
-  "Corp.",
-  "Ltd.",
-  "Co.",
-  "L.P.",
-  "N.A.",
-  "L.L.C.",
-  "No.",
-  "Cir.",
-  "Dist.",
-  "Ct.",
-  "Fed.",
-  "Supp.",
-  "et al."
-];
-var ENTITY_SUFFIX_WORDS = [
-  "Inc.",
-  "LLC",
-  "L.L.C.",
-  "Ltd.",
-  "Co.",
-  "Corp.",
-  "L.P.",
-  "N.A."
-];
-var allEntries = (extra) => [
-  ...new Set([...LEGAL_ABBREVIATIONS, ...extra].filter((a) => a.length > 0))
-];
 function buildLengthIndex(extra) {
   const index = /* @__PURE__ */ new Map();
   for (const a of allEntries(extra)) {
@@ -287,9 +266,6 @@ function buildAbbreviationIndex(extra) {
   const longest = allEntries(extra).reduce((m, a) => a.length > m ? a.length : m, 0);
   return { byLength: buildLengthIndex(extra), byFirstUnit: buildFirstUnitIndex(extra), longest };
 }
-var BASE_ABBREVIATION_INDEX = buildAbbreviationIndex([]);
-var isWhitespace = (unit) => /\s/.test(unit);
-var isAbbreviationContext = (text, start) => start === 0 || isWhitespace(text.charAt(start - 1)) || text.charAt(start - 1) === "(";
 function isAbbreviationEndingAt(text, i, index = BASE_ABBREVIATION_INDEX) {
   if (!Number.isInteger(i) || i < 0 || i >= text.length || text.charAt(i) !== ".") return false;
   for (const [length, entries] of index.byLength) {
@@ -308,12 +284,48 @@ function abbreviationsStartingAt(text, at, limit, index = BASE_ABBREVIATION_INDE
   }
   return ends;
 }
+var LEGAL_ABBREVIATIONS, ENTITY_SUFFIX_WORDS, allEntries, BASE_ABBREVIATION_INDEX, isWhitespace, isAbbreviationContext;
+var init_abbreviations = __esm({
+  "packages/engine/src/abbreviations.ts"() {
+    "use strict";
+    LEGAL_ABBREVIATIONS = [
+      "Id.",
+      "v.",
+      "Inc.",
+      "Corp.",
+      "Ltd.",
+      "Co.",
+      "L.P.",
+      "N.A.",
+      "L.L.C.",
+      "No.",
+      "Cir.",
+      "Dist.",
+      "Ct.",
+      "Fed.",
+      "Supp.",
+      "et al."
+    ];
+    ENTITY_SUFFIX_WORDS = [
+      "Inc.",
+      "LLC",
+      "L.L.C.",
+      "Ltd.",
+      "Co.",
+      "Corp.",
+      "L.P.",
+      "N.A."
+    ];
+    allEntries = (extra) => [
+      ...new Set([...LEGAL_ABBREVIATIONS, ...extra].filter((a) => a.length > 0))
+    ];
+    BASE_ABBREVIATION_INDEX = buildAbbreviationIndex([]);
+    isWhitespace = (unit) => /\s/.test(unit);
+    isAbbreviationContext = (text, start) => start === 0 || isWhitespace(text.charAt(start - 1)) || text.charAt(start - 1) === "(";
+  }
+});
 
 // packages/engine/src/citations/party-lex.ts
-var LETTER = new RegExp("^\\p{L}$", "u");
-var W_PUNCT = /* @__PURE__ */ new Set([".", "'", "\u2019", "-"]);
-var isHigh = (u) => u >= 55296 && u <= 56319;
-var isLow = (u) => u >= 56320 && u <= 57343;
 function isWUnit(ch) {
   if (ch.length !== 1) return false;
   const u = ch.charCodeAt(0);
@@ -351,945 +363,959 @@ function readTokenBefore(text, end, lo) {
   }
   return readWordTokenBefore(text, end, lo);
 }
+var LETTER, W_PUNCT, isHigh, isLow;
+var init_party_lex = __esm({
+  "packages/engine/src/citations/party-lex.ts"() {
+    "use strict";
+    LETTER = new RegExp("^\\p{L}$", "u");
+    W_PUNCT = /* @__PURE__ */ new Set([".", "'", "\u2019", "-"]);
+    isHigh = (u) => u >= 55296 && u <= 56319;
+    isLow = (u) => u >= 56320 && u <= 57343;
+  }
+});
 
 // packages/engine/src/citations/reporters.json
-var reporters_default = [
-  "A.",
-  "A.2d",
-  "A.3d",
-  "A.D.",
-  "A.D.2d",
-  "A.D.3d",
-  "A.E.C.",
-  "A.K. Marsh.",
-  "A.L.R.",
-  "A.L.R. 2d",
-  "A.L.R. 3d",
-  "A.L.R. 4th",
-  "A.L.R. 5th",
-  "A.L.R. 6th",
-  "A.L.R. Fed.",
-  "A.L.R. Fed. 2d",
-  "A.M.C.",
-  "AOA",
-  "AWCC",
-  "AZ",
-  "Abb.",
-  "Abb. Adm.",
-  "Abb. Ct. App.",
-  "Abb. N. Cas.",
-  "Abb. Pr.",
-  "Abbotts",
-  "Add.",
-  "Adm. Rec.",
-  "Adv. S.",
-  "Agric. Dec.",
-  "Aik.",
-  "Ala.",
-  "Ala. 2d",
-  "Ala. App.",
-  "Alaska",
-  "Alaska Fed.",
-  "Alb. Law J.",
-  "Allen",
-  "Am. & Eng. R. Cas.",
-  "Am. Ann. Cas.",
-  "Am. B.R.",
-  "Am. Dec.",
-  "Am. Disabilities Dec.",
-  "Am. Jur.",
-  "Am. Law Reg.",
-  "Am. Law T.",
-  "Am. Law T. Rep. Bankr.",
-  "Am. Law T. Rep. U.S. Cts.",
-  "Am. Law. Rec.",
-  "Am. Lead. Cas.",
-  "Am. Neg. Ca.",
-  "Am. Neg. Cas.",
-  "Am. Neg. Cases",
-  "Am. Rep.",
-  "Am. Ry. Rep.",
-  "Am. Samoa",
-  "Am. Samoa 2d",
-  "Am. Samoa 3d",
-  "Am. St. Rep.",
-  "Am. Tribal Law",
-  "Amer. L. Rev.",
-  "Amer. Law J.",
-  "Amer. Law T. Rep.",
-  "Ant. N.P. Cas.",
-  "App. D.C.",
-  "Ariz.",
-  "Ariz. Adv. Rep.",
-  "Ariz. App.",
-  "Arizona Cases Digest",
-  "Ark.",
-  "Ark. Adv. Op.",
-  "Ark. App.",
-  "Armstrong. Election Cases",
-  "Auto. Cas.",
-  "Auto. Cas.2d",
-  "B. Mon.",
-  "B.R.",
-  "B.T.A.",
-  "BCA",
-  "BNA OSHC",
-  "BNH",
-  "Backes",
-  "Bail.",
-  "Bail. Eq.",
-  "Baldw.",
-  "Balt. C. Rep.",
-  "Balt. Law Trans.",
-  "Ban. & A.",
-  "Bankr. Ct. Rep.",
-  "Bankr. L. Rep.",
-  "Barb.",
-  "Barb. Ch.",
-  "Baxt.",
-  "Bay",
-  "Bedell",
-  "Bee",
-  "Beeler",
-  "Ben.",
-  "Bibb",
-  "Bigelow. Ins. Rep.",
-  "Binn.",
-  "Biss.",
-  "Black",
-  "Blackf.",
-  "Bland",
-  "Blatchf.",
-  "Blatchf. & H.",
-  "Blatchf. Pr. Cas.",
-  "Blume Sup. Ct. Trans.",
-  "Blume Unrep. Op.",
-  "Bond",
-  "Bosw.",
-  "Boyce",
-  "Bradf.",
-  "Brayt.",
-  "Breese",
-  "Brev.",
-  "Brief Times Rptr.",
-  "Brightly",
-  "Brock.",
-  "Brown Adm.",
-  "Brunn. Coll. Cas.",
-  "Buchanan",
-  "Bur.",
-  "Busb.",
-  "Busb. Eq.",
-  "Bush",
-  "C.B.",
-  "C.C.A.",
-  "C.C.L.J.",
-  "C.C.P.A.",
-  "C.M.A.",
-  "C.M.R.",
-  "CCH OSHD",
-  "CIT",
-  "CJ C.A.R.",
-  "CO",
-  "COA",
-  "Cai. Cas.",
-  "Cai. R.",
-  "Cal.",
-  "Cal. 2d",
-  "Cal. 3d",
-  "Cal. 3d Spec. Trib Supp.",
-  "Cal. 4th",
-  "Cal. 5th",
-  "Cal. 4th CJP Supp.",
-  "Cal. 5th CJP Supp.",
-  "Cal. App.",
-  "Cal. App. 2d",
-  "Cal. App. 3d",
-  "Cal. App. 4th",
-  "Cal. App. 5th",
-  "Cal. App. Supp.",
-  "Cal. App. Supp. 2d",
-  "Cal. App. Supp. 3d",
-  "Cal. App. Supp. 4th",
-  "Cal. App. Supp. 5th",
-  "Cal. Bankr. Ct. Rep.",
-  "Cal. Comp. Cases",
-  "Cal. Daily Op. Serv.",
-  "Cal. Dist. Ct.",
-  "Cal. I.A.C.",
-  "Cal. Law J.",
-  "Cal. Law J. & Lit. Rev.",
-  "Cal. Rptr.",
-  "Cal. Rptr. 2d",
-  "Cal. Rptr. 3d",
-  "Cal. Sup.",
-  "Cal. Super. Ct.",
-  "Cal. Unrep.",
-  "Cal. WCC",
-  "Call",
-  "Cam. & Nor.",
-  "Car. L. Rep.",
-  "Cates.",
-  "Cent. Law J.",
-  "Chand.",
-  "Charlton",
-  "Chase",
-  "Chest.",
-  "Chev.",
-  "Chev. Eq.",
-  "Chi. Law J.",
-  "Chi. Leg. News",
-  "Chit. Cr. Law",
-  "Cin. L. Bull.",
-  "Cin. Sup. Ct. Rep.",
-  "Cl. Ch.",
-  "Cl. Ct.",
-  "Cliff.",
-  "Codd. Dig.",
-  "Code Rep.",
-  "Coffey",
-  "Cold.",
-  "Cole. & Cai. Cas.",
-  "Cole. Cas.",
-  "Collier Bankr. Cas.",
-  "Collier Bankr. Cas. 2d",
-  "Colo.",
-  "Colo. App.",
-  "Colo. Bankr. Ct. Rep.",
-  "Colo. J.",
-  "Colo. J. C.A.R.",
-  "Colo. L. Rep.",
-  "Colo. N. P.",
-  "Comm. Fut. L. Rep.",
-  "Comp. Gen.",
-  "Conn.",
-  "Conn. App.",
-  "Conn. Cir. Ct.",
-  "Conn. L. Rptr.",
-  "Conn. Super. Ct.",
-  "Conn. Supp.",
-  "Conn. Surr.",
-  "Connoly",
-  "Cont. Cas. Fed.",
-  "Cooke",
-  "Cow.",
-  "Cox. Manual Trade-Mark Cas.",
-  "Crabbe",
-  "Cranch",
-  "Ct. Cl.",
-  "Ct. Cust.",
-  "Curt.",
-  "Cush.",
-  "Cust. B. & Dec.",
-  "Cust. Ct.",
-  "D. Chip.",
-  "D. Haw.",
-  "D.A.R.",
-  "D.C.",
-  "D.C. App.",
-  "DJCAR",
-  "DNH",
-  "DSD",
-  "DTA",
-  "DTS",
-  "Daily Journal DAR",
-  "Daily L.N.",
-  "Daily Wash. L. Rptr.",
-  "Dakota",
-  "Dall.",
-  "Dallam",
-  "Daly",
-  "Dana",
-  "Davis. L. Ct. Cas.",
-  "Day",
-  "Day.",
-  "Deady",
-  "Dec. Com. Pat.",
-  "Del.",
-  "Del. Cas.",
-  "Del. Ch.",
-  "Del. Co.",
-  "Dem. Sur.",
-  "Dem. Surr.",
-  "Denio",
-  "Des.",
-  "Des. Eq.",
-  "Dev.",
-  "Dev. & Bat.",
-  "Dev. & Bat. Eq.",
-  "Dev. Eq.",
-  "Dickinson",
-  "Dill.",
-  "Div.",
-  "Doug.",
-  "Dud.",
-  "Dud. Eq.",
-  "Dudley Rep.",
-  "Duer",
-  "Duv.",
-  "E.A.D.",
-  "E.D. Pa.",
-  "E.D. Smith",
-  "E.H. Smith",
-  "ERC",
-  "Edm. Sel. Cas.",
-  "Educ. L. Rep.",
-  "Edw. Ch.",
-  "F.",
-  "F.2d",
-  "F.3d",
-  "F.4th",
-  "F. Cas.",
-  "F. Supp.",
-  "F. Supp. 2d",
-  "F. Supp. 3d",
-  "F.C.C.",
-  "F.C.C.2d",
-  "F.L.R.A.",
-  "F.R.D.",
-  "F.T.C.",
-  "FCC Rcd",
-  "FCDR",
-  "FED App.",
-  "FERC",
-  "FL",
-  "FLW Fed",
-  "FMSHRC",
-  "FPSC",
-  "Fed. Cl.",
-  "Fed. R. Serv.",
-  "Fed. R. Serv. 2d",
-  "Fed. R. Serv. 3d",
-  "Fire & Casualty Cas.",
-  "Fish. Pat. Cas.",
-  "Fish. Pat. Rep.",
-  "Fish. Prize Cas.",
-  "Fla.",
-  "Fla. L. Weekly",
-  "Fla. L. Weekly Fed. B",
-  "Fla. L. Weekly Fed. C",
-  "Fla. L. Weekly Fed. D",
-  "Fla. L. Weekly Fed. S",
-  "Fla. L. Weekly Supp.",
-  "Fla. Supp.",
-  "Fla. Supp. 2d",
-  "Flip.",
-  "Foster",
-  "Free. Ch.",
-  "Fulton County D. Rep.",
-  "G. & J.",
-  "G.D.R.",
-  "Ga.",
-  "Ga. App.",
-  "Ga. L. Rep.",
-  "Gall.",
-  "Georgia Decisions",
-  "Gibb. Surr.",
-  "Gibbons",
-  "Gild.",
-  "Gill",
-  "Gilm.",
-  "Gilmer",
-  "Gilp.",
-  "Goebel",
-  "Grant",
-  "Gratt.",
-  "Gray",
-  "Greene",
-  "Guam",
-  "Gummere",
-  "Gunby",
-  "H. & G.",
-  "H. & J.",
-  "H. & McH.",
-  "Hall",
-  "Handy",
-  "Handy R.",
-  "Hard.",
-  "Harp.",
-  "Harp. Eq.",
-  "Harr. Ch.",
-  "Harrington",
-  "Hasb.",
-  "Hask.",
-  "Haskell C.C.",
-  "Haw.",
-  "Haw. App.",
-  "Hawks",
-  "Hay. & Haz.",
-  "Hayw.",
-  "Hayw. & H.D.C.",
-  "Haz. Reg. Pa.",
-  "Haz. U. S. Reg.",
-  "Head",
-  "Heisk.",
-  "Hempst.",
-  "Hen. & M.",
-  "Hill",
-  "Hill & Den.",
-  "Hill Eq.",
-  "Hilt.",
-  "Hoff.",
-  "Hoff. Ch.",
-  "Hoff. Land Cas.",
-  "Hoff. Op.",
-  "Holmes",
-  "Hopk. Ch.",
-  "Hopk. Works.",
-  "Houston",
-  "How.",
-  "How. App. Cas.",
-  "How. N.P.",
-  "How. Pr.",
-  "Howard",
-  "Howison",
-  "Hughes",
-  "Hum.",
-  "Hun",
-  "Hunt Mer. Mag.",
-  "I. & N. Dec.",
-  "I.C.C.",
-  "I.C.C.2d",
-  "I.R.B.",
-  "IL",
-  "Idaho",
-  "Ill.",
-  "Ill. 2d",
-  "Ill. App.",
-  "Ill. App. 2d",
-  "Ill. App. 3d",
-  "Ill. C.C.",
-  "Ill. Cir. Ct.",
-  "Ill. Ct. Cl.",
-  "Ill. Dec.",
-  "Ind.",
-  "Ind. App.",
-  "Ind. Cl. Comm.",
-  "Ind. Dec.",
-  "Ind. L. Rep.",
-  "Indian Terr.",
-  "Ins. L.J.",
-  "Int. Rev. Rec.",
-  "Interior Dec.",
-  "Iowa",
-  "Ired.",
-  "Ired. Eq.",
-  "J.J. Marsh.",
-  "JTS",
-  "Jeff.",
-  "Johns.",
-  "Johns. Cas.",
-  "Johns. Ch.",
-  "Jones",
-  "Jones & S.",
-  "Jones Eq.",
-  "Jones Law",
-  "Jour. Fr. Inst.",
-  "Jour. Jur.",
-  "Juris P.R.",
-  "Just.",
-  "Kan.",
-  "Kan. App.",
-  "Kan. App. 2d",
-  "Kelly",
-  "Keyes",
-  "Kirby",
-  "Kulp",
-  "Ky.",
-  "Ky. App.",
-  "Ky. L. Rptr.",
-  "Ky. L. Summ.",
-  "Ky. Op.",
-  "L. Ed.",
-  "L. Ed. 2d",
-  "L.R.A.",
-  "LA",
-  "LCR",
-  "La.",
-  "La. Ann.",
-  "La. App.",
-  "La. Law J.",
-  "Lack. L.N.",
-  "Lack.Jur.",
-  "Lanc. L. Rev.",
-  "Lans.",
-  "Lans. Ch.",
-  "Law & Eq. Rep.",
-  "Law J. Q.B.",
-  "Law Rep.",
-  "Law Reporter",
-  "Lea.",
-  "Leg. Int.",
-  "Leg. Op.",
-  "Leg. Rec. Rep.",
-  "Legal Gaz.",
-  "Lehigh",
-  "Leigh",
-  "Liquor Tax Rep.",
-  "Litt.",
-  "Litt. Sel. Cas.",
-  "Liv. Law Mag.",
-  "Lock. Rev. Cas.",
-  "Low.",
-  "Luz. L.R.",
-  "M.J.",
-  "M.S.P.B.",
-  "M.S.P.R.",
-  "M.T.C.A.",
-  "M.T.C.R.",
-  "MDBT",
-  "MDLR",
-  "ME",
-  "ML",
-  "MP",
-  "MS",
-  "MSPB",
-  "MT",
-  "MacA. Pat. Cas.",
-  "MacArth.",
-  "MacArth. & M.",
-  "Mackey",
-  "Mann. Unrep. Cas.",
-  "Mart.",
-  "Mart. & Yer.",
-  "Marvel",
-  "Mason C.C.",
-  "Mass.",
-  "Mass. App. Ct.",
-  "Mass. App. Dec.",
-  "Mass. App. Div.",
-  "Mass. App. Div. Adv. Sh.",
-  "Mass. L. Rptr.",
-  "Mass. Supp.",
-  "McAll.",
-  "McCahon",
-  "McCanless",
-  "McCord",
-  "McCord Eq.",
-  "McGl.",
-  "McGrath",
-  "McLean",
-  "McMul.",
-  "McMul. Eq.",
-  "Md.",
-  "Md. App.",
-  "Md. Ch.",
-  "Md. Law Rec.",
-  "Me.",
-  "Meigs",
-  "Met.",
-  "Mich.",
-  "Mich. App.",
-  "Mich. Ct. Cl.",
-  "Mich. Lawy.",
-  "Mich. N.P.",
-  "Mich. Pr.",
-  "Miles",
-  "Mill",
-  "Mills Surr.",
-  "Minn.",
-  "Minor",
-  "Misc.",
-  "Misc. 2d",
-  "Misc. 3d",
-  "Miss.",
-  "Miss. Dec.",
-  "Mo.",
-  "Mo. App.",
-  "Monag.",
-  "Mont.",
-  "Montg.",
-  "Month. Jur.",
-  "Month. West. Jur.",
-  "Morr. Min. Rep.",
-  "Morr. St. Cas.",
-  "Morris",
-  "Munf.",
-  "Mur.",
-  "Myrick",
-  "N. Chip.",
-  "N. Mar. I.",
-  "N. Mar. I. Commw.",
-  "N. Y. City H. Rec.",
-  "N.C.",
-  "N.C. App.",
-  "N.D.",
-  "N.E.",
-  "N.E.2d",
-  "N.E.3d",
-  "N.H.",
-  "N.J.",
-  "N.J. Admin.",
-  "N.J. Admin. 2d",
-  "N.J. Eq.",
-  "N.J. Law J.",
-  "N.J. Misc.",
-  "N.J. Super.",
-  "N.J. Tax",
-  "N.J.L.",
-  "N.J.L.J.",
-  "N.L.R.B.",
-  "N.M.",
-  "N.M. Ct. App.",
-  "N.M. St. B. Bull.",
-  "N.M.B.",
-  "N.R.C.",
-  "N.T.S.B.",
-  "N.W.",
-  "N.W.2d",
-  "N.W.3d",
-  "N.Y.",
-  "N.Y.2d",
-  "N.Y.3d",
-  "N.Y. Ann. Cas.",
-  "N.Y. Ch. Ann.",
-  "N.Y. City Ct. Rep.",
-  "N.Y. Civ. Proc. R.",
-  "N.Y. Crim.",
-  "N.Y. Leg. Obs.",
-  "N.Y. Proc. Ct. Ass.",
-  "N.Y. St. Rep.",
-  "N.Y. Sup. Ct.",
-  "N.Y. Super. Ct.",
-  "N.Y.L.J.",
-  "N.Y.S.",
-  "N.Y.S.2d",
-  "N.Y.S.3d",
-  "NCA",
-  "NCBC",
-  "ND",
-  "ND App",
-  "NDLR",
-  "NLRB No.",
-  "NM",
-  "NMCA",
-  "NMCERT",
-  "NMSC",
-  "NV",
-  "NY Slip Op",
-  "Nat. Bank. Reg.",
-  "Navajo Rptr.",
-  "Neb.",
-  "Neb. Ct. App.",
-  "Nev.",
-  "Nev. Adv. Op. No.",
-  "Nev. Adv. Rep.",
-  "Newb. Adm.",
-  "Niles Reg.",
-  "Northumb. L.J.",
-  "Nott & McC.",
-  "O. Supp.",
-  "O.B.A.J.",
-  "O.G.",
-  "O.R.W.",
-  "O.S.U.",
-  "OK",
-  "OK AG",
-  "OK CIV APP",
-  "OK CR",
-  "OK JUD ETH",
-  "Ohio",
-  "Ohio App.",
-  "Ohio App. 2d",
-  "Ohio App. 3d",
-  "Ohio App. Unrep.",
-  "Ohio B.",
-  "Ohio C.A.",
-  "Ohio C.C.",
-  "Ohio C.C. Dec.",
-  "Ohio Ch.",
-  "Ohio Cir. Dec.",
-  "Ohio Dec.",
-  "Ohio Dec. Reprint",
-  "Ohio F. Dec.",
-  "Ohio Law Rep.",
-  "Ohio Law. Abs.",
-  "Ohio Misc.",
-  "Ohio Misc. 2d",
-  "Ohio N.P.",
-  "Ohio Op.",
-  "Ohio Op. 2d",
-  "Ohio Op. 3d",
-  "Ohio St.",
-  "Ohio St. 2d",
-  "Ohio St. 3d",
-  "Oil & Gas Rep.",
-  "Okl Jud.",
-  "Okla.",
-  "Okla. Crim.",
-  "Okla. Trib.",
-  "Olcott",
-  "Op. O.L.C.",
-  "Ops.Cal.Atty.Gen.",
-  "Or.",
-  "Or. App.",
-  "Or. Tax",
-  "Otto",
-  "Overt.",
-  "P.",
-  "P.2d",
-  "P.3d",
-  "P.C.L.J.",
-  "P.H.",
-  "P.L.R.",
-  "P.O.R.",
-  "P.R. Dec.",
-  "P.R. Fed.",
-  "P.R. Offic. Trans.",
-  "P.R. Sent.",
-  "P.R.R.",
-  "P.U.R.",
-  "P.U.R.3d",
-  "P.U.R.4th",
-  "PA",
-  "Pa.",
-  "Pa. C.",
-  "Pa. Commw.",
-  "Pa. Corp.",
-  "Pa. D.",
-  "Pa. D. & C.",
-  "Pa. D. & C.2d",
-  "Pa. D. & C.3d",
-  "Pa. D. & C.4th",
-  "Pa. D. & C.5th",
-  "Pa. Fid.",
-  "Pa. Just. L. Rep.",
-  "Pa. Super.",
-  "Pac. Law Mag.",
-  "Paige Ch.",
-  "Paine",
-  "Park. Cr.",
-  "Parsons",
-  "Patton & Heath",
-  "Pears.",
-  "Peck",
-  "Pelt.",
-  "Pen. & W.",
-  "Penn. Law J.",
-  "Penne.",
-  "Pennewill",
-  "Pennyp.",
-  "Pet.",
-  "Pet. Adm.",
-  "Pet. C.C.",
-  "Pet. Cir. C.R.",
-  "Phil. Eq.",
-  "Phil. Law",
-  "Phila.",
-  "Pick.",
-  "Pickle",
-  "Pin.",
-  "Pitts L.J.",
-  "Pitts. Rpts.",
-  "Port.",
-  "Posey",
-  "Pow. Surr.",
-  "Pub. Lands Dec.",
-  "Quart. Law J.",
-  "R.I.",
-  "R.I. Dec.",
-  "Rad. Reg.",
-  "Rand.",
-  "Rawle",
-  "Rec. Co. Ct.",
-  "Redf.",
-  "Rep. Cont. El.",
-  "Rep. Cont. Elect. Case.",
-  "Rice",
-  "Rice Eq.",
-  "Rich.",
-  "Rich. Cas.",
-  "Rich. Eq.",
-  "Ril.",
-  "Ril. Eq.",
-  "Rob.",
-  "Robards",
-  "Robb.",
-  "Root",
-  "S. & M.",
-  "S. Ct.",
-  "S.C.",
-  "S.C. Eq.",
-  "S.C.L.",
-  "S.D.",
-  "S.E.",
-  "S.E.2d",
-  "S.T.B.",
-  "S.W.",
-  "S.W.2d",
-  "S.W.3d",
-  "SCDB",
-  "SD",
-  "SEC Docket",
-  "SEC Jud. Dec.",
-  "Sadler",
-  "San Fran. Law J.",
-  "Sand. Ch.",
-  "Sandf.",
-  "Sarat. Ch. Sent.",
-  "Sawy.",
-  "Scam.",
-  "Sch. Reg.",
-  "Seld. Notes",
-  "Serg. & Rawle",
-  "Shan.",
-  "Shan. Cas.",
-  "Sickels",
-  "Silv. Ct. App.",
-  "Silv. Sup.",
-  "Smith & H.",
-  "Sneed",
-  "So.",
-  "So. 2d",
-  "So. 3d",
-  "Som. L.J.",
-  "Speers",
-  "Speers Eq.",
-  "Sprague",
-  "State Rptr.",
-  "Stew.",
-  "Stew. & P.",
-  "Stock.",
-  "Storey",
-  "Story",
-  "Strob.",
-  "Strob. Eq.",
-  "Sumn.",
-  "Super. Ct. Jud.",
-  "Swan",
-  "Sweeny",
-  "Syllabi",
-  "T.B. Mon.",
-  "T.C.",
-  "T.C. Memo.",
-  "T.C. No.",
-  "T.C. Summary Opinion",
-  "T.C.A.",
-  "T.C.M.",
-  "TN WC",
-  "TN WC App.",
-  "TNT",
-  "TSPR",
-  "Taney",
-  "Tapp. Rep.",
-  "Tay.",
-  "Taylor",
-  "Teiss.",
-  "Tenn.",
-  "Tenn. App.",
-  "Tenn. Ch. App.",
-  "Tenn. Ch. R.",
-  "Tenn. Crim. App.",
-  "Tenn. Leg. Rep.",
-  "Terry",
-  "Tex.",
-  "Tex. Bus.",
-  "Tex. Civ. App.",
-  "Tex. Crim.",
-  "Tex. Ct. App.",
-  "Tex. L. R.",
-  "Tex. Law J.",
-  "Tex. Sup. Ct. J.",
-  "Tex.Bankr.Ct.Rep.",
-  "Thomp. & Cook",
-  "Thompson",
-  "Tiess.",
-  "Tiffany",
-  "Trans. App.",
-  "Tread.",
-  "Treas. Dec.",
-  "Treas. Dec. Int. Rev.",
-  "Tuck. & Cl.",
-  "Tuck. Surr.",
-  "Tyl.",
-  "Tyng",
-  "U. S. Law J.",
-  "U.S.",
-  "U.S. App. D.C.",
-  "U.S. Law Int.",
-  "U.S.L.W.",
-  "USCMA",
-  "UT",
-  "UT App",
-  "Unemployment Ins. Rep.",
-  "Utah",
-  "Utah 2d",
-  "Utah Adv. Rep.",
-  "V.I.",
-  "VI Super",
-  "VT",
-  "Va.",
-  "Va. App.",
-  "Va. Cas.",
-  "Va. Ch. Dec.",
-  "Va. Cir.",
-  "Va. Col. Dec.",
-  "Va. Dec.",
-  "Va. Law J.",
-  "Va. Law Rep.",
-  "Van Ness",
-  "Vaux",
-  "Vet. App.",
-  "Vroom",
-  "Vt.",
-  "Vt. Super.",
-  "W. Va.",
-  "W.L.B.",
-  "W.L.J.",
-  "W.L.M.",
-  "W.N.C.",
-  "W.W. Harr.",
-  "WI",
-  "WI App",
-  "WY",
-  "Walk.",
-  "Walk. Ch.",
-  "Walker",
-  "Wall.",
-  "Wall. Jr.",
-  "Wall. Jr. Append.",
-  "Ware",
-  "Wash.",
-  "Wash. 2d",
-  "Wash. 3d",
-  "Wash. App.",
-  "Wash. App. 2d",
-  "Wash. C. C.",
-  "Wash. Co.",
-  "Wash. Terr.",
-  "Watts",
-  "Watts & Serg.",
-  "Week. Law Gaz.",
-  "Week. No.",
-  "Wend.",
-  "West Coast Rep.",
-  "West. Jur.",
-  "Whart.",
-  "Whart. Hom.",
-  "Whart. St. Tr.",
-  "Wheat.",
-  "Wheel. Cr. Cas.",
-  "White & W.",
-  "Will.",
-  "Willson",
-  "Wilson",
-  "Win.",
-  "Wis.",
-  "Wis. 2d",
-  "Wkly. Dig.",
-  "Woodb. & M.",
-  "Woods",
-  "Woolw.",
-  "Wright",
-  "Wyo.",
-  "Yates Sel. Cas.",
-  "Yeates",
-  "Yer.",
-  "York"
-];
+var reporters_default;
+var init_reporters = __esm({
+  "packages/engine/src/citations/reporters.json"() {
+    reporters_default = [
+      "A.",
+      "A.2d",
+      "A.3d",
+      "A.D.",
+      "A.D.2d",
+      "A.D.3d",
+      "A.E.C.",
+      "A.K. Marsh.",
+      "A.L.R.",
+      "A.L.R. 2d",
+      "A.L.R. 3d",
+      "A.L.R. 4th",
+      "A.L.R. 5th",
+      "A.L.R. 6th",
+      "A.L.R. Fed.",
+      "A.L.R. Fed. 2d",
+      "A.M.C.",
+      "AOA",
+      "AWCC",
+      "AZ",
+      "Abb.",
+      "Abb. Adm.",
+      "Abb. Ct. App.",
+      "Abb. N. Cas.",
+      "Abb. Pr.",
+      "Abbotts",
+      "Add.",
+      "Adm. Rec.",
+      "Adv. S.",
+      "Agric. Dec.",
+      "Aik.",
+      "Ala.",
+      "Ala. 2d",
+      "Ala. App.",
+      "Alaska",
+      "Alaska Fed.",
+      "Alb. Law J.",
+      "Allen",
+      "Am. & Eng. R. Cas.",
+      "Am. Ann. Cas.",
+      "Am. B.R.",
+      "Am. Dec.",
+      "Am. Disabilities Dec.",
+      "Am. Jur.",
+      "Am. Law Reg.",
+      "Am. Law T.",
+      "Am. Law T. Rep. Bankr.",
+      "Am. Law T. Rep. U.S. Cts.",
+      "Am. Law. Rec.",
+      "Am. Lead. Cas.",
+      "Am. Neg. Ca.",
+      "Am. Neg. Cas.",
+      "Am. Neg. Cases",
+      "Am. Rep.",
+      "Am. Ry. Rep.",
+      "Am. Samoa",
+      "Am. Samoa 2d",
+      "Am. Samoa 3d",
+      "Am. St. Rep.",
+      "Am. Tribal Law",
+      "Amer. L. Rev.",
+      "Amer. Law J.",
+      "Amer. Law T. Rep.",
+      "Ant. N.P. Cas.",
+      "App. D.C.",
+      "Ariz.",
+      "Ariz. Adv. Rep.",
+      "Ariz. App.",
+      "Arizona Cases Digest",
+      "Ark.",
+      "Ark. Adv. Op.",
+      "Ark. App.",
+      "Armstrong. Election Cases",
+      "Auto. Cas.",
+      "Auto. Cas.2d",
+      "B. Mon.",
+      "B.R.",
+      "B.T.A.",
+      "BCA",
+      "BNA OSHC",
+      "BNH",
+      "Backes",
+      "Bail.",
+      "Bail. Eq.",
+      "Baldw.",
+      "Balt. C. Rep.",
+      "Balt. Law Trans.",
+      "Ban. & A.",
+      "Bankr. Ct. Rep.",
+      "Bankr. L. Rep.",
+      "Barb.",
+      "Barb. Ch.",
+      "Baxt.",
+      "Bay",
+      "Bedell",
+      "Bee",
+      "Beeler",
+      "Ben.",
+      "Bibb",
+      "Bigelow. Ins. Rep.",
+      "Binn.",
+      "Biss.",
+      "Black",
+      "Blackf.",
+      "Bland",
+      "Blatchf.",
+      "Blatchf. & H.",
+      "Blatchf. Pr. Cas.",
+      "Blume Sup. Ct. Trans.",
+      "Blume Unrep. Op.",
+      "Bond",
+      "Bosw.",
+      "Boyce",
+      "Bradf.",
+      "Brayt.",
+      "Breese",
+      "Brev.",
+      "Brief Times Rptr.",
+      "Brightly",
+      "Brock.",
+      "Brown Adm.",
+      "Brunn. Coll. Cas.",
+      "Buchanan",
+      "Bur.",
+      "Busb.",
+      "Busb. Eq.",
+      "Bush",
+      "C.B.",
+      "C.C.A.",
+      "C.C.L.J.",
+      "C.C.P.A.",
+      "C.M.A.",
+      "C.M.R.",
+      "CCH OSHD",
+      "CIT",
+      "CJ C.A.R.",
+      "CO",
+      "COA",
+      "Cai. Cas.",
+      "Cai. R.",
+      "Cal.",
+      "Cal. 2d",
+      "Cal. 3d",
+      "Cal. 3d Spec. Trib Supp.",
+      "Cal. 4th",
+      "Cal. 5th",
+      "Cal. 4th CJP Supp.",
+      "Cal. 5th CJP Supp.",
+      "Cal. App.",
+      "Cal. App. 2d",
+      "Cal. App. 3d",
+      "Cal. App. 4th",
+      "Cal. App. 5th",
+      "Cal. App. Supp.",
+      "Cal. App. Supp. 2d",
+      "Cal. App. Supp. 3d",
+      "Cal. App. Supp. 4th",
+      "Cal. App. Supp. 5th",
+      "Cal. Bankr. Ct. Rep.",
+      "Cal. Comp. Cases",
+      "Cal. Daily Op. Serv.",
+      "Cal. Dist. Ct.",
+      "Cal. I.A.C.",
+      "Cal. Law J.",
+      "Cal. Law J. & Lit. Rev.",
+      "Cal. Rptr.",
+      "Cal. Rptr. 2d",
+      "Cal. Rptr. 3d",
+      "Cal. Sup.",
+      "Cal. Super. Ct.",
+      "Cal. Unrep.",
+      "Cal. WCC",
+      "Call",
+      "Cam. & Nor.",
+      "Car. L. Rep.",
+      "Cates.",
+      "Cent. Law J.",
+      "Chand.",
+      "Charlton",
+      "Chase",
+      "Chest.",
+      "Chev.",
+      "Chev. Eq.",
+      "Chi. Law J.",
+      "Chi. Leg. News",
+      "Chit. Cr. Law",
+      "Cin. L. Bull.",
+      "Cin. Sup. Ct. Rep.",
+      "Cl. Ch.",
+      "Cl. Ct.",
+      "Cliff.",
+      "Codd. Dig.",
+      "Code Rep.",
+      "Coffey",
+      "Cold.",
+      "Cole. & Cai. Cas.",
+      "Cole. Cas.",
+      "Collier Bankr. Cas.",
+      "Collier Bankr. Cas. 2d",
+      "Colo.",
+      "Colo. App.",
+      "Colo. Bankr. Ct. Rep.",
+      "Colo. J.",
+      "Colo. J. C.A.R.",
+      "Colo. L. Rep.",
+      "Colo. N. P.",
+      "Comm. Fut. L. Rep.",
+      "Comp. Gen.",
+      "Conn.",
+      "Conn. App.",
+      "Conn. Cir. Ct.",
+      "Conn. L. Rptr.",
+      "Conn. Super. Ct.",
+      "Conn. Supp.",
+      "Conn. Surr.",
+      "Connoly",
+      "Cont. Cas. Fed.",
+      "Cooke",
+      "Cow.",
+      "Cox. Manual Trade-Mark Cas.",
+      "Crabbe",
+      "Cranch",
+      "Ct. Cl.",
+      "Ct. Cust.",
+      "Curt.",
+      "Cush.",
+      "Cust. B. & Dec.",
+      "Cust. Ct.",
+      "D. Chip.",
+      "D. Haw.",
+      "D.A.R.",
+      "D.C.",
+      "D.C. App.",
+      "DJCAR",
+      "DNH",
+      "DSD",
+      "DTA",
+      "DTS",
+      "Daily Journal DAR",
+      "Daily L.N.",
+      "Daily Wash. L. Rptr.",
+      "Dakota",
+      "Dall.",
+      "Dallam",
+      "Daly",
+      "Dana",
+      "Davis. L. Ct. Cas.",
+      "Day",
+      "Day.",
+      "Deady",
+      "Dec. Com. Pat.",
+      "Del.",
+      "Del. Cas.",
+      "Del. Ch.",
+      "Del. Co.",
+      "Dem. Sur.",
+      "Dem. Surr.",
+      "Denio",
+      "Des.",
+      "Des. Eq.",
+      "Dev.",
+      "Dev. & Bat.",
+      "Dev. & Bat. Eq.",
+      "Dev. Eq.",
+      "Dickinson",
+      "Dill.",
+      "Div.",
+      "Doug.",
+      "Dud.",
+      "Dud. Eq.",
+      "Dudley Rep.",
+      "Duer",
+      "Duv.",
+      "E.A.D.",
+      "E.D. Pa.",
+      "E.D. Smith",
+      "E.H. Smith",
+      "ERC",
+      "Edm. Sel. Cas.",
+      "Educ. L. Rep.",
+      "Edw. Ch.",
+      "F.",
+      "F.2d",
+      "F.3d",
+      "F.4th",
+      "F. Cas.",
+      "F. Supp.",
+      "F. Supp. 2d",
+      "F. Supp. 3d",
+      "F.C.C.",
+      "F.C.C.2d",
+      "F.L.R.A.",
+      "F.R.D.",
+      "F.T.C.",
+      "FCC Rcd",
+      "FCDR",
+      "FED App.",
+      "FERC",
+      "FL",
+      "FLW Fed",
+      "FMSHRC",
+      "FPSC",
+      "Fed. Cl.",
+      "Fed. R. Serv.",
+      "Fed. R. Serv. 2d",
+      "Fed. R. Serv. 3d",
+      "Fire & Casualty Cas.",
+      "Fish. Pat. Cas.",
+      "Fish. Pat. Rep.",
+      "Fish. Prize Cas.",
+      "Fla.",
+      "Fla. L. Weekly",
+      "Fla. L. Weekly Fed. B",
+      "Fla. L. Weekly Fed. C",
+      "Fla. L. Weekly Fed. D",
+      "Fla. L. Weekly Fed. S",
+      "Fla. L. Weekly Supp.",
+      "Fla. Supp.",
+      "Fla. Supp. 2d",
+      "Flip.",
+      "Foster",
+      "Free. Ch.",
+      "Fulton County D. Rep.",
+      "G. & J.",
+      "G.D.R.",
+      "Ga.",
+      "Ga. App.",
+      "Ga. L. Rep.",
+      "Gall.",
+      "Georgia Decisions",
+      "Gibb. Surr.",
+      "Gibbons",
+      "Gild.",
+      "Gill",
+      "Gilm.",
+      "Gilmer",
+      "Gilp.",
+      "Goebel",
+      "Grant",
+      "Gratt.",
+      "Gray",
+      "Greene",
+      "Guam",
+      "Gummere",
+      "Gunby",
+      "H. & G.",
+      "H. & J.",
+      "H. & McH.",
+      "Hall",
+      "Handy",
+      "Handy R.",
+      "Hard.",
+      "Harp.",
+      "Harp. Eq.",
+      "Harr. Ch.",
+      "Harrington",
+      "Hasb.",
+      "Hask.",
+      "Haskell C.C.",
+      "Haw.",
+      "Haw. App.",
+      "Hawks",
+      "Hay. & Haz.",
+      "Hayw.",
+      "Hayw. & H.D.C.",
+      "Haz. Reg. Pa.",
+      "Haz. U. S. Reg.",
+      "Head",
+      "Heisk.",
+      "Hempst.",
+      "Hen. & M.",
+      "Hill",
+      "Hill & Den.",
+      "Hill Eq.",
+      "Hilt.",
+      "Hoff.",
+      "Hoff. Ch.",
+      "Hoff. Land Cas.",
+      "Hoff. Op.",
+      "Holmes",
+      "Hopk. Ch.",
+      "Hopk. Works.",
+      "Houston",
+      "How.",
+      "How. App. Cas.",
+      "How. N.P.",
+      "How. Pr.",
+      "Howard",
+      "Howison",
+      "Hughes",
+      "Hum.",
+      "Hun",
+      "Hunt Mer. Mag.",
+      "I. & N. Dec.",
+      "I.C.C.",
+      "I.C.C.2d",
+      "I.R.B.",
+      "IL",
+      "Idaho",
+      "Ill.",
+      "Ill. 2d",
+      "Ill. App.",
+      "Ill. App. 2d",
+      "Ill. App. 3d",
+      "Ill. C.C.",
+      "Ill. Cir. Ct.",
+      "Ill. Ct. Cl.",
+      "Ill. Dec.",
+      "Ind.",
+      "Ind. App.",
+      "Ind. Cl. Comm.",
+      "Ind. Dec.",
+      "Ind. L. Rep.",
+      "Indian Terr.",
+      "Ins. L.J.",
+      "Int. Rev. Rec.",
+      "Interior Dec.",
+      "Iowa",
+      "Ired.",
+      "Ired. Eq.",
+      "J.J. Marsh.",
+      "JTS",
+      "Jeff.",
+      "Johns.",
+      "Johns. Cas.",
+      "Johns. Ch.",
+      "Jones",
+      "Jones & S.",
+      "Jones Eq.",
+      "Jones Law",
+      "Jour. Fr. Inst.",
+      "Jour. Jur.",
+      "Juris P.R.",
+      "Just.",
+      "Kan.",
+      "Kan. App.",
+      "Kan. App. 2d",
+      "Kelly",
+      "Keyes",
+      "Kirby",
+      "Kulp",
+      "Ky.",
+      "Ky. App.",
+      "Ky. L. Rptr.",
+      "Ky. L. Summ.",
+      "Ky. Op.",
+      "L. Ed.",
+      "L. Ed. 2d",
+      "L.R.A.",
+      "LA",
+      "LCR",
+      "La.",
+      "La. Ann.",
+      "La. App.",
+      "La. Law J.",
+      "Lack. L.N.",
+      "Lack.Jur.",
+      "Lanc. L. Rev.",
+      "Lans.",
+      "Lans. Ch.",
+      "Law & Eq. Rep.",
+      "Law J. Q.B.",
+      "Law Rep.",
+      "Law Reporter",
+      "Lea.",
+      "Leg. Int.",
+      "Leg. Op.",
+      "Leg. Rec. Rep.",
+      "Legal Gaz.",
+      "Lehigh",
+      "Leigh",
+      "Liquor Tax Rep.",
+      "Litt.",
+      "Litt. Sel. Cas.",
+      "Liv. Law Mag.",
+      "Lock. Rev. Cas.",
+      "Low.",
+      "Luz. L.R.",
+      "M.J.",
+      "M.S.P.B.",
+      "M.S.P.R.",
+      "M.T.C.A.",
+      "M.T.C.R.",
+      "MDBT",
+      "MDLR",
+      "ME",
+      "ML",
+      "MP",
+      "MS",
+      "MSPB",
+      "MT",
+      "MacA. Pat. Cas.",
+      "MacArth.",
+      "MacArth. & M.",
+      "Mackey",
+      "Mann. Unrep. Cas.",
+      "Mart.",
+      "Mart. & Yer.",
+      "Marvel",
+      "Mason C.C.",
+      "Mass.",
+      "Mass. App. Ct.",
+      "Mass. App. Dec.",
+      "Mass. App. Div.",
+      "Mass. App. Div. Adv. Sh.",
+      "Mass. L. Rptr.",
+      "Mass. Supp.",
+      "McAll.",
+      "McCahon",
+      "McCanless",
+      "McCord",
+      "McCord Eq.",
+      "McGl.",
+      "McGrath",
+      "McLean",
+      "McMul.",
+      "McMul. Eq.",
+      "Md.",
+      "Md. App.",
+      "Md. Ch.",
+      "Md. Law Rec.",
+      "Me.",
+      "Meigs",
+      "Met.",
+      "Mich.",
+      "Mich. App.",
+      "Mich. Ct. Cl.",
+      "Mich. Lawy.",
+      "Mich. N.P.",
+      "Mich. Pr.",
+      "Miles",
+      "Mill",
+      "Mills Surr.",
+      "Minn.",
+      "Minor",
+      "Misc.",
+      "Misc. 2d",
+      "Misc. 3d",
+      "Miss.",
+      "Miss. Dec.",
+      "Mo.",
+      "Mo. App.",
+      "Monag.",
+      "Mont.",
+      "Montg.",
+      "Month. Jur.",
+      "Month. West. Jur.",
+      "Morr. Min. Rep.",
+      "Morr. St. Cas.",
+      "Morris",
+      "Munf.",
+      "Mur.",
+      "Myrick",
+      "N. Chip.",
+      "N. Mar. I.",
+      "N. Mar. I. Commw.",
+      "N. Y. City H. Rec.",
+      "N.C.",
+      "N.C. App.",
+      "N.D.",
+      "N.E.",
+      "N.E.2d",
+      "N.E.3d",
+      "N.H.",
+      "N.J.",
+      "N.J. Admin.",
+      "N.J. Admin. 2d",
+      "N.J. Eq.",
+      "N.J. Law J.",
+      "N.J. Misc.",
+      "N.J. Super.",
+      "N.J. Tax",
+      "N.J.L.",
+      "N.J.L.J.",
+      "N.L.R.B.",
+      "N.M.",
+      "N.M. Ct. App.",
+      "N.M. St. B. Bull.",
+      "N.M.B.",
+      "N.R.C.",
+      "N.T.S.B.",
+      "N.W.",
+      "N.W.2d",
+      "N.W.3d",
+      "N.Y.",
+      "N.Y.2d",
+      "N.Y.3d",
+      "N.Y. Ann. Cas.",
+      "N.Y. Ch. Ann.",
+      "N.Y. City Ct. Rep.",
+      "N.Y. Civ. Proc. R.",
+      "N.Y. Crim.",
+      "N.Y. Leg. Obs.",
+      "N.Y. Proc. Ct. Ass.",
+      "N.Y. St. Rep.",
+      "N.Y. Sup. Ct.",
+      "N.Y. Super. Ct.",
+      "N.Y.L.J.",
+      "N.Y.S.",
+      "N.Y.S.2d",
+      "N.Y.S.3d",
+      "NCA",
+      "NCBC",
+      "ND",
+      "ND App",
+      "NDLR",
+      "NLRB No.",
+      "NM",
+      "NMCA",
+      "NMCERT",
+      "NMSC",
+      "NV",
+      "NY Slip Op",
+      "Nat. Bank. Reg.",
+      "Navajo Rptr.",
+      "Neb.",
+      "Neb. Ct. App.",
+      "Nev.",
+      "Nev. Adv. Op. No.",
+      "Nev. Adv. Rep.",
+      "Newb. Adm.",
+      "Niles Reg.",
+      "Northumb. L.J.",
+      "Nott & McC.",
+      "O. Supp.",
+      "O.B.A.J.",
+      "O.G.",
+      "O.R.W.",
+      "O.S.U.",
+      "OK",
+      "OK AG",
+      "OK CIV APP",
+      "OK CR",
+      "OK JUD ETH",
+      "Ohio",
+      "Ohio App.",
+      "Ohio App. 2d",
+      "Ohio App. 3d",
+      "Ohio App. Unrep.",
+      "Ohio B.",
+      "Ohio C.A.",
+      "Ohio C.C.",
+      "Ohio C.C. Dec.",
+      "Ohio Ch.",
+      "Ohio Cir. Dec.",
+      "Ohio Dec.",
+      "Ohio Dec. Reprint",
+      "Ohio F. Dec.",
+      "Ohio Law Rep.",
+      "Ohio Law. Abs.",
+      "Ohio Misc.",
+      "Ohio Misc. 2d",
+      "Ohio N.P.",
+      "Ohio Op.",
+      "Ohio Op. 2d",
+      "Ohio Op. 3d",
+      "Ohio St.",
+      "Ohio St. 2d",
+      "Ohio St. 3d",
+      "Oil & Gas Rep.",
+      "Okl Jud.",
+      "Okla.",
+      "Okla. Crim.",
+      "Okla. Trib.",
+      "Olcott",
+      "Op. O.L.C.",
+      "Ops.Cal.Atty.Gen.",
+      "Or.",
+      "Or. App.",
+      "Or. Tax",
+      "Otto",
+      "Overt.",
+      "P.",
+      "P.2d",
+      "P.3d",
+      "P.C.L.J.",
+      "P.H.",
+      "P.L.R.",
+      "P.O.R.",
+      "P.R. Dec.",
+      "P.R. Fed.",
+      "P.R. Offic. Trans.",
+      "P.R. Sent.",
+      "P.R.R.",
+      "P.U.R.",
+      "P.U.R.3d",
+      "P.U.R.4th",
+      "PA",
+      "Pa.",
+      "Pa. C.",
+      "Pa. Commw.",
+      "Pa. Corp.",
+      "Pa. D.",
+      "Pa. D. & C.",
+      "Pa. D. & C.2d",
+      "Pa. D. & C.3d",
+      "Pa. D. & C.4th",
+      "Pa. D. & C.5th",
+      "Pa. Fid.",
+      "Pa. Just. L. Rep.",
+      "Pa. Super.",
+      "Pac. Law Mag.",
+      "Paige Ch.",
+      "Paine",
+      "Park. Cr.",
+      "Parsons",
+      "Patton & Heath",
+      "Pears.",
+      "Peck",
+      "Pelt.",
+      "Pen. & W.",
+      "Penn. Law J.",
+      "Penne.",
+      "Pennewill",
+      "Pennyp.",
+      "Pet.",
+      "Pet. Adm.",
+      "Pet. C.C.",
+      "Pet. Cir. C.R.",
+      "Phil. Eq.",
+      "Phil. Law",
+      "Phila.",
+      "Pick.",
+      "Pickle",
+      "Pin.",
+      "Pitts L.J.",
+      "Pitts. Rpts.",
+      "Port.",
+      "Posey",
+      "Pow. Surr.",
+      "Pub. Lands Dec.",
+      "Quart. Law J.",
+      "R.I.",
+      "R.I. Dec.",
+      "Rad. Reg.",
+      "Rand.",
+      "Rawle",
+      "Rec. Co. Ct.",
+      "Redf.",
+      "Rep. Cont. El.",
+      "Rep. Cont. Elect. Case.",
+      "Rice",
+      "Rice Eq.",
+      "Rich.",
+      "Rich. Cas.",
+      "Rich. Eq.",
+      "Ril.",
+      "Ril. Eq.",
+      "Rob.",
+      "Robards",
+      "Robb.",
+      "Root",
+      "S. & M.",
+      "S. Ct.",
+      "S.C.",
+      "S.C. Eq.",
+      "S.C.L.",
+      "S.D.",
+      "S.E.",
+      "S.E.2d",
+      "S.T.B.",
+      "S.W.",
+      "S.W.2d",
+      "S.W.3d",
+      "SCDB",
+      "SD",
+      "SEC Docket",
+      "SEC Jud. Dec.",
+      "Sadler",
+      "San Fran. Law J.",
+      "Sand. Ch.",
+      "Sandf.",
+      "Sarat. Ch. Sent.",
+      "Sawy.",
+      "Scam.",
+      "Sch. Reg.",
+      "Seld. Notes",
+      "Serg. & Rawle",
+      "Shan.",
+      "Shan. Cas.",
+      "Sickels",
+      "Silv. Ct. App.",
+      "Silv. Sup.",
+      "Smith & H.",
+      "Sneed",
+      "So.",
+      "So. 2d",
+      "So. 3d",
+      "Som. L.J.",
+      "Speers",
+      "Speers Eq.",
+      "Sprague",
+      "State Rptr.",
+      "Stew.",
+      "Stew. & P.",
+      "Stock.",
+      "Storey",
+      "Story",
+      "Strob.",
+      "Strob. Eq.",
+      "Sumn.",
+      "Super. Ct. Jud.",
+      "Swan",
+      "Sweeny",
+      "Syllabi",
+      "T.B. Mon.",
+      "T.C.",
+      "T.C. Memo.",
+      "T.C. No.",
+      "T.C. Summary Opinion",
+      "T.C.A.",
+      "T.C.M.",
+      "TN WC",
+      "TN WC App.",
+      "TNT",
+      "TSPR",
+      "Taney",
+      "Tapp. Rep.",
+      "Tay.",
+      "Taylor",
+      "Teiss.",
+      "Tenn.",
+      "Tenn. App.",
+      "Tenn. Ch. App.",
+      "Tenn. Ch. R.",
+      "Tenn. Crim. App.",
+      "Tenn. Leg. Rep.",
+      "Terry",
+      "Tex.",
+      "Tex. Bus.",
+      "Tex. Civ. App.",
+      "Tex. Crim.",
+      "Tex. Ct. App.",
+      "Tex. L. R.",
+      "Tex. Law J.",
+      "Tex. Sup. Ct. J.",
+      "Tex.Bankr.Ct.Rep.",
+      "Thomp. & Cook",
+      "Thompson",
+      "Tiess.",
+      "Tiffany",
+      "Trans. App.",
+      "Tread.",
+      "Treas. Dec.",
+      "Treas. Dec. Int. Rev.",
+      "Tuck. & Cl.",
+      "Tuck. Surr.",
+      "Tyl.",
+      "Tyng",
+      "U. S. Law J.",
+      "U.S.",
+      "U.S. App. D.C.",
+      "U.S. Law Int.",
+      "U.S.L.W.",
+      "USCMA",
+      "UT",
+      "UT App",
+      "Unemployment Ins. Rep.",
+      "Utah",
+      "Utah 2d",
+      "Utah Adv. Rep.",
+      "V.I.",
+      "VI Super",
+      "VT",
+      "Va.",
+      "Va. App.",
+      "Va. Cas.",
+      "Va. Ch. Dec.",
+      "Va. Cir.",
+      "Va. Col. Dec.",
+      "Va. Dec.",
+      "Va. Law J.",
+      "Va. Law Rep.",
+      "Van Ness",
+      "Vaux",
+      "Vet. App.",
+      "Vroom",
+      "Vt.",
+      "Vt. Super.",
+      "W. Va.",
+      "W.L.B.",
+      "W.L.J.",
+      "W.L.M.",
+      "W.N.C.",
+      "W.W. Harr.",
+      "WI",
+      "WI App",
+      "WY",
+      "Walk.",
+      "Walk. Ch.",
+      "Walker",
+      "Wall.",
+      "Wall. Jr.",
+      "Wall. Jr. Append.",
+      "Ware",
+      "Wash.",
+      "Wash. 2d",
+      "Wash. 3d",
+      "Wash. App.",
+      "Wash. App. 2d",
+      "Wash. C. C.",
+      "Wash. Co.",
+      "Wash. Terr.",
+      "Watts",
+      "Watts & Serg.",
+      "Week. Law Gaz.",
+      "Week. No.",
+      "Wend.",
+      "West Coast Rep.",
+      "West. Jur.",
+      "Whart.",
+      "Whart. Hom.",
+      "Whart. St. Tr.",
+      "Wheat.",
+      "Wheel. Cr. Cas.",
+      "White & W.",
+      "Will.",
+      "Willson",
+      "Wilson",
+      "Win.",
+      "Wis.",
+      "Wis. 2d",
+      "Wkly. Dig.",
+      "Woodb. & M.",
+      "Woods",
+      "Woolw.",
+      "Wright",
+      "Wyo.",
+      "Yates Sel. Cas.",
+      "Yeates",
+      "Yer.",
+      "York"
+    ];
+  }
+});
 
 // packages/engine/src/citations/reporters.ts
-var REPORTERS = reporters_default;
 function collapseReporter(token) {
   return token.replace(/[. ]/g, "");
 }
@@ -1301,43 +1327,28 @@ function firstIndexBy(entries, key) {
   });
   return index;
 }
-var exactIndex = firstIndexBy(REPORTERS, (e) => e);
-var collapsedIndex = firstIndexBy(
-  REPORTERS,
-  collapseReporter
-);
 function lookupReporter(token) {
   const at = exactIndex.get(token) ?? collapsedIndex.get(collapseReporter(token));
   return at === void 0 ? null : REPORTERS[at] ?? null;
 }
-var REPORTER_ABBREVIATIONS = REPORTERS.filter((r) => r.endsWith("."));
-var LEGAL_ABBREVIATION_INDEX = buildAbbreviationIndex(REPORTER_ABBREVIATIONS);
+var REPORTERS, exactIndex, collapsedIndex, REPORTER_ABBREVIATIONS, LEGAL_ABBREVIATION_INDEX;
+var init_reporters2 = __esm({
+  "packages/engine/src/citations/reporters.ts"() {
+    "use strict";
+    init_abbreviations();
+    init_reporters();
+    REPORTERS = reporters_default;
+    exactIndex = firstIndexBy(REPORTERS, (e) => e);
+    collapsedIndex = firstIndexBy(
+      REPORTERS,
+      collapseReporter
+    );
+    REPORTER_ABBREVIATIONS = REPORTERS.filter((r) => r.endsWith("."));
+    LEGAL_ABBREVIATION_INDEX = buildAbbreviationIndex(REPORTER_ABBREVIATIONS);
+  }
+});
 
 // packages/engine/src/citations/signals.ts
-var SIGNALS = [
-  "See",
-  "See also",
-  "See, e.g.,",
-  "E.g.,",
-  "Accord",
-  "Cf.",
-  "But see",
-  "Compare",
-  "Citing",
-  "Quoting",
-  "But cf.",
-  "Contra",
-  "E.g.",
-  "See generally"
-];
-var GAP_SIGNAL_COUNT = 10;
-var lowerFirst = (s) => s.charAt(0).toLowerCase() + s.slice(1);
-var CAPITALISED_GAP_SIGNALS = SIGNALS.slice(0, GAP_SIGNAL_COUNT);
-var GAP_SIGNALS = [
-  ...CAPITALISED_GAP_SIGNALS,
-  ...CAPITALISED_GAP_SIGNALS.map(lowerFirst)
-];
-var isOffset = (n) => Number.isInteger(n) && n >= 0;
 function startsWithSignal(text, start, end) {
   if (!isOffset(start) || !isOffset(end)) return false;
   const bound = Math.min(end, text.length);
@@ -1358,32 +1369,38 @@ function gapSignalsAt(text, at, limit) {
   }
   return [...ends].sort((a, b) => a - b);
 }
+var SIGNALS, GAP_SIGNAL_COUNT, lowerFirst, CAPITALISED_GAP_SIGNALS, GAP_SIGNALS, isOffset;
+var init_signals = __esm({
+  "packages/engine/src/citations/signals.ts"() {
+    "use strict";
+    SIGNALS = [
+      "See",
+      "See also",
+      "See, e.g.,",
+      "E.g.,",
+      "Accord",
+      "Cf.",
+      "But see",
+      "Compare",
+      "Citing",
+      "Quoting",
+      "But cf.",
+      "Contra",
+      "E.g.",
+      "See generally"
+    ];
+    GAP_SIGNAL_COUNT = 10;
+    lowerFirst = (s) => s.charAt(0).toLowerCase() + s.slice(1);
+    CAPITALISED_GAP_SIGNALS = SIGNALS.slice(0, GAP_SIGNAL_COUNT);
+    GAP_SIGNALS = [
+      ...CAPITALISED_GAP_SIGNALS,
+      ...CAPITALISED_GAP_SIGNALS.map(lowerFirst)
+    ];
+    isOffset = (n) => Number.isInteger(n) && n >= 0;
+  }
+});
 
 // packages/engine/src/citations/party.ts
-var MAX_PARTY = 80;
-var PARTY_SCAN = 2 * MAX_PARTY + 1;
-var CONNECTORS = [
-  ["&"],
-  ["of"],
-  ["the"],
-  ["and"],
-  ["ex", "rel."]
-];
-var PARTY_STOP_LIST = [
-  ...SIGNALS,
-  "In",
-  "As",
-  "Under",
-  "Following",
-  "Applying",
-  "The court in",
-  "The Court in"
-].map((entry) => entry.split(" "));
-var CAPITALISED = new RegExp("^\\p{Lu}[\\p{L}0-9'\u2019-]*$", "u");
-var SINGLE_CAPITAL_INITIAL = /^[A-Z]\.$/;
-var SUFFIXES = new Set(ENTITY_SUFFIX_WORDS);
-var SINGLE_CONNECTORS = /* @__PURE__ */ new Set(["&", "of", "the", "and"]);
-var isOffset2 = (n) => Number.isInteger(n) && n >= 0;
 function isLegalAbbreviation(word) {
   if (word === "v.") return false;
   return LEGAL_ABBREVIATION_INDEX.byLength.get(word.length)?.has(word) ?? false;
@@ -1394,7 +1411,6 @@ function isCapitalisedWord(text, start, end) {
   if (CAPITALISED.test(word) || SINGLE_CAPITAL_INITIAL.test(word)) return true;
   return isLegalAbbreviation(word);
 }
-var wordOf = (text, t) => text.slice(t.start, t.end);
 function tokenBeforeSpace(text, t, lo) {
   const s = t.start;
   if (s - 1 < lo || text[s - 1] !== " ") return null;
@@ -1480,23 +1496,43 @@ function partyStartFor(text, c) {
   if (i >= words.length || words[i] === "v.") return null;
   return words.slice(0, i).reduce((offset, w) => offset + w.length + 1, best);
 }
+var MAX_PARTY, PARTY_SCAN, CONNECTORS, PARTY_STOP_LIST, CAPITALISED, SINGLE_CAPITAL_INITIAL, SUFFIXES, SINGLE_CONNECTORS, isOffset2, wordOf;
+var init_party = __esm({
+  "packages/engine/src/citations/party.ts"() {
+    "use strict";
+    init_abbreviations();
+    init_party_lex();
+    init_reporters2();
+    init_signals();
+    MAX_PARTY = 80;
+    PARTY_SCAN = 2 * MAX_PARTY + 1;
+    CONNECTORS = [
+      ["&"],
+      ["of"],
+      ["the"],
+      ["and"],
+      ["ex", "rel."]
+    ];
+    PARTY_STOP_LIST = [
+      ...SIGNALS,
+      "In",
+      "As",
+      "Under",
+      "Following",
+      "Applying",
+      "The court in",
+      "The Court in"
+    ].map((entry) => entry.split(" "));
+    CAPITALISED = new RegExp("^\\p{Lu}[\\p{L}0-9'\u2019-]*$", "u");
+    SINGLE_CAPITAL_INITIAL = /^[A-Z]\.$/;
+    SUFFIXES = new Set(ENTITY_SUFFIX_WORDS);
+    SINGLE_CONNECTORS = /* @__PURE__ */ new Set(["&", "of", "the", "and"]);
+    isOffset2 = (n) => Number.isInteger(n) && n >= 0;
+    wordOf = (text, t) => text.slice(t.start, t.end);
+  }
+});
 
 // packages/engine/src/citations/case-name.ts
-var MAX_CASE_NAME = 2 * MAX_PARTY + 4 + 1;
-var MIN_CASE_NAME = 7;
-var V = " v. ";
-var LETTER2 = new RegExp("^\\p{L}$", "u");
-var isDigit = (u) => u >= "0" && u <= "9";
-var isLetter = (u) => u.length === 1 && LETTER2.test(u);
-var isAsciiCapital = (u) => u >= "A" && u <= "Z" && u.length === 1;
-var PUNCT = /* @__PURE__ */ new Set([".", ",", "'", "\u2019", "&", "-", " "]);
-var isPartyUnit = (u) => isLetter(u) || isDigit(u) || PUNCT.has(u);
-var GAP_PUNCT = /* @__PURE__ */ new Set([",", ";", ":", ".", "(", ")"]);
-var isP = (u) => GAP_PUNCT.has(u) || /^\s$/.test(u);
-var GAP_LEADING_WORDS = [
-  "with",
-  ...GAP_SIGNALS.filter((s) => /^[a-z]/.test(s))
-];
 function isRange(text, s, t) {
   return Number.isInteger(s) && Number.isInteger(t) && s >= 0 && s <= t && t <= text.length;
 }
@@ -1612,22 +1648,33 @@ function matchPrecedingGap(text, g0, g1) {
   const a2 = skipP(text, b, g1);
   return a2 === g1 || caseAt(text, a2, z, g1);
 }
+var MAX_CASE_NAME, MIN_CASE_NAME, V, LETTER2, isDigit, isLetter, isAsciiCapital, PUNCT, isPartyUnit, GAP_PUNCT, isP, GAP_LEADING_WORDS;
+var init_case_name = __esm({
+  "packages/engine/src/citations/case-name.ts"() {
+    "use strict";
+    init_abbreviations();
+    init_party();
+    init_reporters2();
+    init_signals();
+    MAX_CASE_NAME = 2 * MAX_PARTY + 4 + 1;
+    MIN_CASE_NAME = 7;
+    V = " v. ";
+    LETTER2 = new RegExp("^\\p{L}$", "u");
+    isDigit = (u) => u >= "0" && u <= "9";
+    isLetter = (u) => u.length === 1 && LETTER2.test(u);
+    isAsciiCapital = (u) => u >= "A" && u <= "Z" && u.length === 1;
+    PUNCT = /* @__PURE__ */ new Set([".", ",", "'", "\u2019", "&", "-", " "]);
+    isPartyUnit = (u) => isLetter(u) || isDigit(u) || PUNCT.has(u);
+    GAP_PUNCT = /* @__PURE__ */ new Set([",", ";", ":", ".", "(", ")"]);
+    isP = (u) => GAP_PUNCT.has(u) || /^\s$/.test(u);
+    GAP_LEADING_WORDS = [
+      "with",
+      ...GAP_SIGNALS.filter((s) => /^[a-z]/.test(s))
+    ];
+  }
+});
 
 // packages/engine/src/citations/cited-name.ts
-var MAX_NAME = MAX_CASE_NAME - 1;
-var IN_RE_WINDOW = MAX_PARTY + 6;
-var NAME_TOKEN = new RegExp("^\\p{Lu}[\\p{L}\\p{N}'\u2019.-]*$", "u");
-var DIGITS = /^[0-9]+$/;
-var TOLERANT_CONNECTORS = /* @__PURE__ */ new Set([
-  "of",
-  "the",
-  "and",
-  "for",
-  "&",
-  "de",
-  "la"
-]);
-var isSpace = (ch) => ch !== void 0 && /\s/.test(ch);
 function tailComma(text, start) {
   if (!Number.isInteger(start) || start < 1 || start > text.length) return null;
   let i = start;
@@ -1722,6 +1769,28 @@ function extendsStrictSafely(strict, tolerant) {
   const added = tolerant.slice(0, tolerant.length - strict.length).split(/\s+/);
   return !added.some((w) => w.endsWith("."));
 }
+var MAX_NAME, IN_RE_WINDOW, NAME_TOKEN, DIGITS, TOLERANT_CONNECTORS, isSpace;
+var init_cited_name = __esm({
+  "packages/engine/src/citations/cited-name.ts"() {
+    "use strict";
+    init_case_name();
+    init_party();
+    MAX_NAME = MAX_CASE_NAME - 1;
+    IN_RE_WINDOW = MAX_PARTY + 6;
+    NAME_TOKEN = new RegExp("^\\p{Lu}[\\p{L}\\p{N}'\u2019.-]*$", "u");
+    DIGITS = /^[0-9]+$/;
+    TOLERANT_CONNECTORS = /* @__PURE__ */ new Set([
+      "of",
+      "the",
+      "and",
+      "for",
+      "&",
+      "de",
+      "la"
+    ]);
+    isSpace = (ch) => ch !== void 0 && /\s/.test(ch);
+  }
+});
 
 // packages/engine/src/result.ts
 function ok(value) {
@@ -1730,17 +1799,13 @@ function ok(value) {
 function err(error) {
   return { ok: false, error };
 }
+var init_result = __esm({
+  "packages/engine/src/result.ts"() {
+    "use strict";
+  }
+});
 
 // packages/engine/src/citations/lex.ts
-var VOLUME_RANGE = { min: 1, max: 99999 };
-var PAGE_RANGE = { min: 1, max: 99999 };
-var PINCITE_RANGE = { min: 1, max: 99999 };
-var YEAR_RANGE = { min: 1600, max: 2999 };
-var DOC_NUMBER_RANGE = { min: 1, max: 9999999 };
-var WORD_CHAR = /^[\p{L}\p{N}]$/u;
-var CODE_0 = 48;
-var CODE_9 = 57;
-var SPACE = " ";
 function isAsciiDigitAt(text, i) {
   const u = text.charCodeAt(i);
   return u >= CODE_0 && u <= CODE_9;
@@ -1748,8 +1813,6 @@ function isAsciiDigitAt(text, i) {
 function isWordChar(unit) {
   return WORD_CHAR.test(unit);
 }
-var isHigh2 = (u) => u >= 55296 && u <= 56319;
-var isLow2 = (u) => u >= 56320 && u <= 57343;
 function codePointAt(text, i) {
   if (i < 0 || i >= text.length) return "";
   const end = isHigh2(text.charCodeAt(i)) && isLow2(text.charCodeAt(i + 1)) ? i + 2 : i + 1;
@@ -1796,12 +1859,25 @@ function readLiteral(text, at, literal) {
   if (at < 0 || literal.length === 0) return null;
   return text.startsWith(literal, at) ? at + literal.length : null;
 }
+var VOLUME_RANGE, PAGE_RANGE, PINCITE_RANGE, YEAR_RANGE, DOC_NUMBER_RANGE, WORD_CHAR, CODE_0, CODE_9, SPACE, isHigh2, isLow2;
+var init_lex = __esm({
+  "packages/engine/src/citations/lex.ts"() {
+    "use strict";
+    VOLUME_RANGE = { min: 1, max: 99999 };
+    PAGE_RANGE = { min: 1, max: 99999 };
+    PINCITE_RANGE = { min: 1, max: 99999 };
+    YEAR_RANGE = { min: 1600, max: 2999 };
+    DOC_NUMBER_RANGE = { min: 1, max: 9999999 };
+    WORD_CHAR = /^[\p{L}\p{N}]$/u;
+    CODE_0 = 48;
+    CODE_9 = 57;
+    SPACE = " ";
+    isHigh2 = (u) => u >= 55296 && u <= 56319;
+    isLow2 = (u) => u >= 56320 && u <= 57343;
+  }
+});
 
 // packages/engine/src/citations/pincite.ts
-var MAX_PINCITE_ITEMS = 5;
-var MAX_PINCITE_LENGTH = 24;
-var MAX_SHORT_DIGITS = 5;
-var UPPERCASE = new RegExp("^\\p{Lu}$", "u");
 function readShort(text, at) {
   let end = at;
   while (end < text.length && isAsciiDigitAt(text, end)) {
@@ -1842,12 +1918,19 @@ function readPinciteExpression(text, at, o) {
   }
   return { first: head.first, end };
 }
+var MAX_PINCITE_ITEMS, MAX_PINCITE_LENGTH, MAX_SHORT_DIGITS, UPPERCASE;
+var init_pincite = __esm({
+  "packages/engine/src/citations/pincite.ts"() {
+    "use strict";
+    init_lex();
+    MAX_PINCITE_ITEMS = 5;
+    MAX_PINCITE_LENGTH = 24;
+    MAX_SHORT_DIGITS = 5;
+    UPPERCASE = new RegExp("^\\p{Lu}$", "u");
+  }
+});
 
 // packages/engine/src/citations/grammar.ts
-var MAX_REPORTER_TOKEN = 40;
-var MAX_MEMBERS = 4;
-var MAX_COURT_LENGTH = 40;
-var MAX_PAREN_CONTENT = MAX_COURT_LENGTH + 5;
 function resolveReporterAt(text, at, follow) {
   if (at < 0) return null;
   const last = Math.min(at + MAX_REPORTER_TOKEN, text.length - 1);
@@ -1920,7 +2003,6 @@ function isYearToken(token) {
   const year = readInt(token, 0, YEAR_RANGE);
   return year !== null && year.end === 4;
 }
-var COURT_FORBIDDEN = /[\s()"“”]/u;
 function isCourtText(court) {
   if (court.length < 1 || court.length > MAX_COURT_LENGTH) return false;
   const tokens = court.split(" ");
@@ -1969,215 +2051,225 @@ function matchReporterAt(text, p) {
   const paren = matchParenthetical(text, tail.end);
   return { start: p, end: paren?.end ?? tail.end, value: buildValue(tail.members, paren) };
 }
+var MAX_REPORTER_TOKEN, MAX_MEMBERS, MAX_COURT_LENGTH, MAX_PAREN_CONTENT, COURT_FORBIDDEN;
+var init_grammar = __esm({
+  "packages/engine/src/citations/grammar.ts"() {
+    "use strict";
+    init_lex();
+    init_pincite();
+    init_reporters2();
+    MAX_REPORTER_TOKEN = 40;
+    MAX_MEMBERS = 4;
+    MAX_COURT_LENGTH = 40;
+    MAX_PAREN_CONTENT = MAX_COURT_LENGTH + 5;
+    COURT_FORBIDDEN = /[\s()"“”]/u;
+  }
+});
 
 // packages/engine/src/citations/lexis-courts.json
-var lexis_courts_default = [
-  "Ala. App.",
-  "Ala. Civ. App.",
-  "Ala. Crim. App.",
-  "Ala.",
-  "Alas. App.",
-  "Alas.",
-  "Ariz. App.",
-  "Ariz. App. Unpub.",
-  "Ariz.",
-  "Ariz. Tax",
-  "Ariz. Unpub.",
-  "Ark. App.",
-  "Ark.",
-  "BTA",
-  "Bankr.",
-  "CAAF",
-  "CCA",
-  "CCPA",
-  "CMA",
-  "CMR",
-  "Cal. App.",
-  "Cal. App. Unpub.",
-  "Cal. Comm. Jud. Perform.",
-  "Cal. Jud. Ethics Op.",
-  "Cal.",
-  "Cal. Super.",
-  "Colo. App.",
-  "Colo. Discipl.",
-  "Colo.",
-  "Conn. App.",
-  "Conn. Cir.",
-  "Conn.",
-  "Conn. Super.",
-  "Ct. Intl. Trade",
-  "Cust. Ct.",
-  "D.C. App.",
-  "D.C. Super.",
-  "Dakota",
-  "Del. C.P.",
-  "Del. Ch.",
-  "Del. Fam. Ct.",
-  "Del.",
-  "Del. Super.",
-  "Fla. App.",
-  "Fla.",
-  "Ga. App.",
-  "Ga.",
-  "Guam",
-  "Haw. App.",
-  "Haw.",
-  "Ida. App.",
-  "Ida. App. Unpub.",
-  "Ida.",
-  "Ill. App.",
-  "Ill. App. Unpub.",
-  "Ill. Ct. Cl.",
-  "Ill.",
-  "Ind. App.",
-  "Ind. App. Unpub.",
-  "Ind.",
-  "Ind. Tax",
-  "Indian Terr.",
-  "Iowa App.",
-  "Iowa Sup.",
-  "Kan. App.",
-  "Kan. App. Unpub.",
-  "Kan.",
-  "Kan. Unpub.",
-  "Ky. App.",
-  "Ky. App. Unpub.",
-  "Ky.",
-  "Ky. Unpub.",
-  "La. App.",
-  "La. App. Unpub.",
-  "La.",
-  "Mass. App. Div.",
-  "Mass. App.",
-  "Mass. App. Unpub.",
-  "Mass. LCR",
-  "Mass.",
-  "Mass. Super.",
-  "Md. App.",
-  "Md. Cir. Ct.",
-  "Md.",
-  "Md. Tax",
-  "Me.",
-  "Me. Super.",
-  "Me. Unpub.",
-  "Mich. App.",
-  "Mich.",
-  "Minn. App.",
-  "Minn. App. Unpub.",
-  "Minn. Dist.",
-  "Minn.",
-  "Minn. Tax",
-  "Miss. App.",
-  "Miss.",
-  "Mo. App.",
-  "Mo.",
-  "Mont. Dist.",
-  "Mont.",
-  "Mont. Water",
-  "N. Mar. I.",
-  "N.C. App.",
-  "N.C.",
-  "N.D. App.",
-  "N.D.",
-  "N.H.",
-  "N.H. Super.",
-  "N.J. Ch.",
-  "N.J.",
-  "N.J. Misc.",
-  "N.J. Prerog. Ct.",
-  "N.J. Sup. Ct.",
-  "N.J. Super.",
-  "N.J. Super. Unpub.",
-  "N.M. App.",
-  "N.M. App. Unpub.",
-  "N.M.",
-  "N.M. Unpub.",
-  "N.Y. App. Div.",
-  "N.Y.",
-  "N.Y. Misc.",
-  "NCBC",
-  "Neb. App.",
-  "Neb.",
-  "Nev.",
-  "Nev. Unpub.",
-  "Ohio App.",
-  "Ohio",
-  "Ohio Misc.",
-  "Okla. Civ. App.",
-  "Okla. Crim. App.",
-  "Okla. JUD",
-  "Okla.",
-  "Ore. App.",
-  "Ore.",
-  "Ore. Tax",
-  "PR App.",
-  "PR Sup.",
-  "Pa. Commw.",
-  "Pa. Commw. Unpub.",
-  "Pa. Dist. & Cnty. Dec.",
-  "Pa. Jud. Disc.",
-  "Pa.",
-  "Pa. Super.",
-  "Pa. Super. Unpub.",
-  "Phila. Ct. Com. Pl.",
-  "Phila. Cty. Rptr.",
-  "R.I.",
-  "R.I. Super.",
-  "S.C. App.",
-  "S.C. App. Unpub.",
-  "S.C.",
-  "S.C. Unpub.",
-  "S.D.",
-  "Tax Ct. Memo",
-  "Tax Ct. Summary",
-  "Tenn. App.",
-  "Tenn. Ch. App.",
-  "Tenn. Crim. App.",
-  "Tenn.",
-  "Tex. App.",
-  "Tex. Crim. App.",
-  "Tex. Crim. App. Unpub.",
-  "Tex.",
-  "U.S. App.",
-  "U.S. CMCR",
-  "U.S. Claims",
-  "U.S. Commerce Ct.",
-  "U.S. Ct. Cl.",
-  "U.S. Dist.",
-  "U.S.",
-  "U.S. Tax Ct.",
-  "U.S. Vet. App.",
-  "Utah App.",
-  "Utah",
-  "V.I.",
-  "V.I. Supreme",
-  "Va. App.",
-  "Va. Cir.",
-  "Va.",
-  "Va. Unpub.",
-  "Vt.",
-  "Vt. Super.",
-  "Vt. Unpub.",
-  "W. Va.",
-  "Wash. App.",
-  "Wash.",
-  "Wash. Terr.",
-  "Wisc. App.",
-  "Wisc. Cir.",
-  "Wisc.",
-  "Wyo."
-];
+var lexis_courts_default;
+var init_lexis_courts = __esm({
+  "packages/engine/src/citations/lexis-courts.json"() {
+    lexis_courts_default = [
+      "Ala. App.",
+      "Ala. Civ. App.",
+      "Ala. Crim. App.",
+      "Ala.",
+      "Alas. App.",
+      "Alas.",
+      "Ariz. App.",
+      "Ariz. App. Unpub.",
+      "Ariz.",
+      "Ariz. Tax",
+      "Ariz. Unpub.",
+      "Ark. App.",
+      "Ark.",
+      "BTA",
+      "Bankr.",
+      "CAAF",
+      "CCA",
+      "CCPA",
+      "CMA",
+      "CMR",
+      "Cal. App.",
+      "Cal. App. Unpub.",
+      "Cal. Comm. Jud. Perform.",
+      "Cal. Jud. Ethics Op.",
+      "Cal.",
+      "Cal. Super.",
+      "Colo. App.",
+      "Colo. Discipl.",
+      "Colo.",
+      "Conn. App.",
+      "Conn. Cir.",
+      "Conn.",
+      "Conn. Super.",
+      "Ct. Intl. Trade",
+      "Cust. Ct.",
+      "D.C. App.",
+      "D.C. Super.",
+      "Dakota",
+      "Del. C.P.",
+      "Del. Ch.",
+      "Del. Fam. Ct.",
+      "Del.",
+      "Del. Super.",
+      "Fla. App.",
+      "Fla.",
+      "Ga. App.",
+      "Ga.",
+      "Guam",
+      "Haw. App.",
+      "Haw.",
+      "Ida. App.",
+      "Ida. App. Unpub.",
+      "Ida.",
+      "Ill. App.",
+      "Ill. App. Unpub.",
+      "Ill. Ct. Cl.",
+      "Ill.",
+      "Ind. App.",
+      "Ind. App. Unpub.",
+      "Ind.",
+      "Ind. Tax",
+      "Indian Terr.",
+      "Iowa App.",
+      "Iowa Sup.",
+      "Kan. App.",
+      "Kan. App. Unpub.",
+      "Kan.",
+      "Kan. Unpub.",
+      "Ky. App.",
+      "Ky. App. Unpub.",
+      "Ky.",
+      "Ky. Unpub.",
+      "La. App.",
+      "La. App. Unpub.",
+      "La.",
+      "Mass. App. Div.",
+      "Mass. App.",
+      "Mass. App. Unpub.",
+      "Mass. LCR",
+      "Mass.",
+      "Mass. Super.",
+      "Md. App.",
+      "Md. Cir. Ct.",
+      "Md.",
+      "Md. Tax",
+      "Me.",
+      "Me. Super.",
+      "Me. Unpub.",
+      "Mich. App.",
+      "Mich.",
+      "Minn. App.",
+      "Minn. App. Unpub.",
+      "Minn. Dist.",
+      "Minn.",
+      "Minn. Tax",
+      "Miss. App.",
+      "Miss.",
+      "Mo. App.",
+      "Mo.",
+      "Mont. Dist.",
+      "Mont.",
+      "Mont. Water",
+      "N. Mar. I.",
+      "N.C. App.",
+      "N.C.",
+      "N.D. App.",
+      "N.D.",
+      "N.H.",
+      "N.H. Super.",
+      "N.J. Ch.",
+      "N.J.",
+      "N.J. Misc.",
+      "N.J. Prerog. Ct.",
+      "N.J. Sup. Ct.",
+      "N.J. Super.",
+      "N.J. Super. Unpub.",
+      "N.M. App.",
+      "N.M. App. Unpub.",
+      "N.M.",
+      "N.M. Unpub.",
+      "N.Y. App. Div.",
+      "N.Y.",
+      "N.Y. Misc.",
+      "NCBC",
+      "Neb. App.",
+      "Neb.",
+      "Nev.",
+      "Nev. Unpub.",
+      "Ohio App.",
+      "Ohio",
+      "Ohio Misc.",
+      "Okla. Civ. App.",
+      "Okla. Crim. App.",
+      "Okla. JUD",
+      "Okla.",
+      "Ore. App.",
+      "Ore.",
+      "Ore. Tax",
+      "PR App.",
+      "PR Sup.",
+      "Pa. Commw.",
+      "Pa. Commw. Unpub.",
+      "Pa. Dist. & Cnty. Dec.",
+      "Pa. Jud. Disc.",
+      "Pa.",
+      "Pa. Super.",
+      "Pa. Super. Unpub.",
+      "Phila. Ct. Com. Pl.",
+      "Phila. Cty. Rptr.",
+      "R.I.",
+      "R.I. Super.",
+      "S.C. App.",
+      "S.C. App. Unpub.",
+      "S.C.",
+      "S.C. Unpub.",
+      "S.D.",
+      "Tax Ct. Memo",
+      "Tax Ct. Summary",
+      "Tenn. App.",
+      "Tenn. Ch. App.",
+      "Tenn. Crim. App.",
+      "Tenn.",
+      "Tex. App.",
+      "Tex. Crim. App.",
+      "Tex. Crim. App. Unpub.",
+      "Tex.",
+      "U.S. App.",
+      "U.S. CMCR",
+      "U.S. Claims",
+      "U.S. Commerce Ct.",
+      "U.S. Ct. Cl.",
+      "U.S. Dist.",
+      "U.S.",
+      "U.S. Tax Ct.",
+      "U.S. Vet. App.",
+      "Utah App.",
+      "Utah",
+      "V.I.",
+      "V.I. Supreme",
+      "Va. App.",
+      "Va. Cir.",
+      "Va.",
+      "Va. Unpub.",
+      "Vt.",
+      "Vt. Super.",
+      "Vt. Unpub.",
+      "W. Va.",
+      "Wash. App.",
+      "Wash.",
+      "Wash. Terr.",
+      "Wisc. App.",
+      "Wisc. Cir.",
+      "Wisc.",
+      "Wyo."
+    ];
+  }
+});
 
 // packages/engine/src/citations/lexis-courts.ts
-var LEXIS_COURTS = lexis_courts_default;
-var lexisExactIndex = firstIndexBy(LEXIS_COURTS, (e) => e);
-var lexisCollapsedIndex = firstIndexBy(
-  LEXIS_COURTS,
-  collapseReporter
-);
-var MAX_LEXIS_COURT = 40;
-var UNLISTED_FORBIDDEN = /[\s()"“”,]/u;
-var UNLISTED_TOKEN_START = /^[A-Z0-9]/;
 function lookupLexisCourt(court) {
   const at = lexisExactIndex.get(court) ?? lexisCollapsedIndex.get(collapseReporter(court));
   return at === void 0 ? null : LEXIS_COURTS[at] ?? null;
@@ -2195,9 +2287,26 @@ function isUnlistedLexisCourt(court) {
   if (tokens[0] === "WL" || !tokens.every(isUnlistedToken)) return false;
   return lookupLexisCourt(court) === null;
 }
+var LEXIS_COURTS, lexisExactIndex, lexisCollapsedIndex, MAX_LEXIS_COURT, UNLISTED_FORBIDDEN, UNLISTED_TOKEN_START;
+var init_lexis_courts2 = __esm({
+  "packages/engine/src/citations/lexis-courts.ts"() {
+    "use strict";
+    init_lex();
+    init_lexis_courts();
+    init_reporters2();
+    LEXIS_COURTS = lexis_courts_default;
+    lexisExactIndex = firstIndexBy(LEXIS_COURTS, (e) => e);
+    lexisCollapsedIndex = firstIndexBy(
+      LEXIS_COURTS,
+      collapseReporter
+    );
+    MAX_LEXIS_COURT = 40;
+    UNLISTED_FORBIDDEN = /[\s()"“”,]/u;
+    UNLISTED_TOKEN_START = /^[A-Z0-9]/;
+  }
+});
 
 // packages/engine/src/citations/format.ts
-var MIN_MEMBERS = 2;
 function isIntIn(n, range) {
   return typeof n === "number" && Number.isInteger(n) && n >= range.min && n <= range.max;
 }
@@ -2227,27 +2336,6 @@ function isLexisCourtPart(v) {
   if (typeof c !== "string") return false;
   return v.lexisCourtListed === true ? lexisExactIndex.has(c) : isUnlistedLexisCourt(c);
 }
-var CHECKS = [
-  eachMember("volume", (m) => isIntIn(m.volume, VOLUME_RANGE)),
-  eachMember("reporter", (m) => isReporter(m.reporter)),
-  eachMember("page", (m) => isIntIn(m.page, PAGE_RANGE)),
-  {
-    field: "pincite",
-    ok: (v) => v.kind === "database" ? isOptIntIn(v.pincite, PINCITE_RANGE) : membersOf(v).every((m) => isOptIntIn(m.pincite, PINCITE_RANGE))
-  },
-  { field: "court", ok: (v) => v.kind === "database" || isOptCourt(v.court) },
-  { field: "lexisCourtListed", ok: (v) => v.kind !== "database" || isLexisFlag(v) },
-  { field: "lexisCourt", ok: (v) => v.kind !== "database" || isLexisCourtPart(v) },
-  {
-    field: "year",
-    ok: (v) => v.kind === "database" ? isIntIn(v.year, YEAR_RANGE) : isOptIntIn(v.year, YEAR_RANGE)
-  },
-  {
-    field: "members",
-    ok: (v) => v.kind !== "parallel" || v.members.length >= MIN_MEMBERS && v.members.length <= MAX_MEMBERS
-  },
-  { field: "number", ok: (v) => v.kind !== "database" || isIntIn(v.number, DOC_NUMBER_RANGE) }
-];
 function isFullKind(v) {
   return v.kind === "reporter" || v.kind === "parallel" || v.kind === "database";
 }
@@ -2283,9 +2371,41 @@ function format(value) {
   const valid = validateFullValue(value);
   return valid.ok ? ok(layout(valid.value)) : valid;
 }
+var MIN_MEMBERS, CHECKS;
+var init_format = __esm({
+  "packages/engine/src/citations/format.ts"() {
+    "use strict";
+    init_result();
+    init_grammar();
+    init_lex();
+    init_lexis_courts2();
+    init_reporters2();
+    MIN_MEMBERS = 2;
+    CHECKS = [
+      eachMember("volume", (m) => isIntIn(m.volume, VOLUME_RANGE)),
+      eachMember("reporter", (m) => isReporter(m.reporter)),
+      eachMember("page", (m) => isIntIn(m.page, PAGE_RANGE)),
+      {
+        field: "pincite",
+        ok: (v) => v.kind === "database" ? isOptIntIn(v.pincite, PINCITE_RANGE) : membersOf(v).every((m) => isOptIntIn(m.pincite, PINCITE_RANGE))
+      },
+      { field: "court", ok: (v) => v.kind === "database" || isOptCourt(v.court) },
+      { field: "lexisCourtListed", ok: (v) => v.kind !== "database" || isLexisFlag(v) },
+      { field: "lexisCourt", ok: (v) => v.kind !== "database" || isLexisCourtPart(v) },
+      {
+        field: "year",
+        ok: (v) => v.kind === "database" ? isIntIn(v.year, YEAR_RANGE) : isOptIntIn(v.year, YEAR_RANGE)
+      },
+      {
+        field: "members",
+        ok: (v) => v.kind !== "parallel" || v.members.length >= MIN_MEMBERS && v.members.length <= MAX_MEMBERS
+      },
+      { field: "number", ok: (v) => v.kind !== "database" || isIntIn(v.number, DOC_NUMBER_RANGE) }
+    ];
+  }
+});
 
 // packages/engine/src/citations/link.ts
-var pairKey = (volume, reporter) => `${String(volume)} ${reporter}`;
 function pairsOf(value) {
   switch (value.kind) {
     case "reporter":
@@ -2332,14 +2452,15 @@ function linkShortForms(matches) {
   }
   return out;
 }
+var pairKey;
+var init_link = __esm({
+  "packages/engine/src/citations/link.ts"() {
+    "use strict";
+    pairKey = (volume, reporter) => `${String(volume)} ${reporter}`;
+  }
+});
 
 // packages/engine/src/boundary.ts
-var WHITESPACE = /\s/;
-var isWhitespace2 = (unit) => unit.length > 0 && WHITESPACE.test(unit);
-var isCloser = (unit) => unit === '"' || unit === "\u201D" || unit === "'" || unit === "\u2019" || unit === ")";
-var isTerminator = (unit) => unit === "." || unit === "?" || unit === "!";
-var isAsciiUpper = (unit) => unit.length === 1 && unit >= "A" && unit <= "Z";
-var isHighSurrogate = (u) => u >= 55296 && u <= 56319;
 function isInsideCitation(b, ranges) {
   let lo = 0;
   let hi = ranges.length - 1;
@@ -2398,14 +2519,24 @@ function countBoundaries(text, from, to, citationRanges, cap, index = LEGAL_ABBR
   }
   return count;
 }
+var WHITESPACE, isWhitespace2, isCloser, isTerminator, isAsciiUpper, isHighSurrogate;
+var init_boundary = __esm({
+  "packages/engine/src/boundary.ts"() {
+    "use strict";
+    init_abbreviations();
+    init_party_lex();
+    init_party();
+    init_reporters2();
+    WHITESPACE = /\s/;
+    isWhitespace2 = (unit) => unit.length > 0 && WHITESPACE.test(unit);
+    isCloser = (unit) => unit === '"' || unit === "\u201D" || unit === "'" || unit === "\u2019" || unit === ")";
+    isTerminator = (unit) => unit === "." || unit === "?" || unit === "!";
+    isAsciiUpper = (unit) => unit.length === 1 && unit >= "A" && unit <= "Z";
+    isHighSurrogate = (u) => u >= 55296 && u <= 56319;
+  }
+});
 
 // packages/engine/src/citations/quotes.ts
-var STRAIGHT = '"';
-var CURLY_OPEN = "\u201C";
-var CURLY_CLOSE = "\u201D";
-var NON_WHITESPACE = /\S/;
-var WHITESPACE2 = /^\s$/;
-var FOLLOW_PUNCT = /* @__PURE__ */ new Set([",", ";", ":", "("]);
 function hasContent(text, pair) {
   return NON_WHITESPACE.test(text.slice(pair.open + 1, pair.close));
 }
@@ -2452,7 +2583,6 @@ function pairQuoteMarks(text) {
   const sorted = pairs.filter((p) => hasContent(text, p)).sort((a, b) => a.open - b.open);
   return dropOpeningInsideKept(sorted);
 }
-var isAttachable = (c) => c.value.kind !== "other";
 function firstStartingAfter(cits, at) {
   let lo = 0;
   let hi = cits.length;
@@ -2511,12 +2641,23 @@ function attachQuotes(text, pairs, cits) {
   }
   return out;
 }
+var STRAIGHT, CURLY_OPEN, CURLY_CLOSE, NON_WHITESPACE, WHITESPACE2, FOLLOW_PUNCT, isAttachable;
+var init_quotes = __esm({
+  "packages/engine/src/citations/quotes.ts"() {
+    "use strict";
+    init_boundary();
+    init_case_name();
+    STRAIGHT = '"';
+    CURLY_OPEN = "\u201C";
+    CURLY_CLOSE = "\u201D";
+    NON_WHITESPACE = /\S/;
+    WHITESPACE2 = /^\s$/;
+    FOLLOW_PUNCT = /* @__PURE__ */ new Set([",", ";", ":", "("]);
+    isAttachable = (c) => c.value.kind !== "other";
+  }
+});
 
 // packages/engine/src/citations/grammar-db.ts
-var WL = "WL";
-var LEXIS = "LEXIS";
-var PINCITE_LEAD = ", at *";
-var COURT_TOKEN_END = /[\s()"“”]/u;
 function matchDatabaseAt(text, p) {
   if (p < 0 || p >= text.length || isWordCharBefore(text, p)) return null;
   const year = readInt(text, p, YEAR_RANGE);
@@ -2609,19 +2750,22 @@ function isParentheticalContent(content) {
   if (!isYearToken3(last)) return isCourtText(content);
   return lastSpace === -1 || isCourtText(content.slice(0, lastSpace));
 }
+var WL, LEXIS, PINCITE_LEAD, COURT_TOKEN_END;
+var init_grammar_db = __esm({
+  "packages/engine/src/citations/grammar-db.ts"() {
+    "use strict";
+    init_lex();
+    init_grammar();
+    init_lexis_courts2();
+    init_pincite();
+    WL = "WL";
+    LEXIS = "LEXIS";
+    PINCITE_LEAD = ", at *";
+    COURT_TOKEN_END = /[\s()"“”]/u;
+  }
+});
 
 // packages/engine/src/citations/grammar-other.ts
-var TITLE_RANGE = { min: 1, max: 999 };
-var MAX_SECTION = 40;
-var MAX_SUBDIVISION = 8;
-var FED_RULE_SETS = [
-  "Civ. P. ",
-  "Crim. P. ",
-  "App. P. ",
-  "Bankr. P. ",
-  "Evid. "
-];
-var CODE_1 = 49;
 function isAsciiAlnumAt(text, i) {
   const u = text.charCodeAt(i);
   return u >= 48 && u <= 57 || u >= 65 && u <= 90 || u >= 97 && u <= 122;
@@ -2698,12 +2842,26 @@ function matchOtherAt(text, p) {
   if (p < 0 || p >= text.length || isWordCharBefore(text, p)) return null;
   return isAsciiDigitAt(text, p) ? matchCodeAt(text, p) : matchFedRuleAt(text, p);
 }
+var TITLE_RANGE, MAX_SECTION, MAX_SUBDIVISION, FED_RULE_SETS, CODE_1;
+var init_grammar_other = __esm({
+  "packages/engine/src/citations/grammar-other.ts"() {
+    "use strict";
+    init_lex();
+    TITLE_RANGE = { min: 1, max: 999 };
+    MAX_SECTION = 40;
+    MAX_SUBDIVISION = 8;
+    FED_RULE_SETS = [
+      "Civ. P. ",
+      "Crim. P. ",
+      "App. P. ",
+      "Bankr. P. ",
+      "Evid. "
+    ];
+    CODE_1 = 49;
+  }
+});
 
 // packages/engine/src/citations/grammar-short.ts
-var ID_OPENERS = /* @__PURE__ */ new Set(["(", "[", '"', "\u201C", "\u2018", "'"]);
-var WHITESPACE3 = /^\s$/u;
-var UPPERCASE_START = new RegExp("^\\p{Lu}", "u");
-var isOffset3 = (n) => Number.isInteger(n) && n >= 0;
 function idLeftContextOk(text, p) {
   if (p === 0) return true;
   const before = text.charAt(p - 1);
@@ -2777,11 +2935,24 @@ function matchShortAt(text, p) {
   if (party === null) return id;
   return party.end > id.end ? party : id;
 }
+var ID_OPENERS, WHITESPACE3, UPPERCASE_START, isOffset3;
+var init_grammar_short = __esm({
+  "packages/engine/src/citations/grammar-short.ts"() {
+    "use strict";
+    init_lex();
+    init_grammar();
+    init_pincite();
+    init_party();
+    init_party_lex();
+    init_reporters2();
+    ID_OPENERS = /* @__PURE__ */ new Set(["(", "[", '"', "\u201C", "\u2018", "'"]);
+    WHITESPACE3 = /^\s$/u;
+    UPPERCASE_START = new RegExp("^\\p{Lu}", "u");
+    isOffset3 = (n) => Number.isInteger(n) && n >= 0;
+  }
+});
 
 // packages/engine/src/citations/scan.ts
-var MAX_MATCH = 512;
-var LOOKAHEAD = 2 * MAX_MATCH;
-var LOOKBEHIND = PARTY_SCAN + 1;
 function capped(m) {
   return m !== null && m.end > m.start && m.end - m.start <= MAX_MATCH ? m : null;
 }
@@ -2829,10 +3000,23 @@ function scanRange(text, from, until) {
   }
   return out;
 }
+var MAX_MATCH, LOOKAHEAD, LOOKBEHIND;
+var init_scan = __esm({
+  "packages/engine/src/citations/scan.ts"() {
+    "use strict";
+    init_grammar_db();
+    init_grammar_other();
+    init_grammar_short();
+    init_grammar();
+    init_lex();
+    init_party();
+    MAX_MATCH = 512;
+    LOOKAHEAD = 2 * MAX_MATCH;
+    LOOKBEHIND = PARTY_SCAN + 1;
+  }
+});
 
 // packages/engine/src/citations/extract.ts
-var never = () => false;
-var isFull = (v) => v.kind === "reporter" || v.kind === "parallel" || v.kind === "database";
 function normalisedOf(value, written) {
   if (!isFull(value)) return void 0;
   const canonical = format(value);
@@ -2857,9 +3041,21 @@ function extractFromMatches(text, matches) {
 function extract(text) {
   return extractFromMatches(text, scanRange(text, 0, never));
 }
+var never, isFull;
+var init_extract = __esm({
+  "packages/engine/src/citations/extract.ts"() {
+    "use strict";
+    init_cited_name();
+    init_format();
+    init_link();
+    init_quotes();
+    init_scan();
+    never = () => false;
+    isFull = (v) => v.kind === "reporter" || v.kind === "parallel" || v.kind === "database";
+  }
+});
 
 // packages/engine/src/citations/incremental.ts
-var never2 = () => false;
 function firstStartAfter(matches, x) {
   let lo = 0;
   let hi = matches.length;
@@ -2912,9 +3108,16 @@ function rescan(prev, edit, newText) {
   const kept = prev.slice(0, firstStartAfter(prev, s - 1));
   return [...kept, ...fresh2, ...shiftedFrom(prev, q - delta, delta)];
 }
+var never2;
+var init_incremental = __esm({
+  "packages/engine/src/citations/incremental.ts"() {
+    "use strict";
+    init_scan();
+    never2 = () => false;
+  }
+});
 
 // packages/engine/src/citation-layer.ts
-var unlinked = (v) => v.kind === "short" ? { ...v, targetStart: null } : v;
 function matchOf(r) {
   const { start, end, value } = r.citation;
   return { start, end, value: unlinked(value) };
@@ -2930,16 +3133,23 @@ function reanchorStage({ prev, draft, edit }) {
   const matches = rescan(matchesOf(prev), edit, draft.text);
   return reanchor(prev, draft, edit, extractFromMatches(draft.text, matches));
 }
+var unlinked;
+var init_citation_layer = __esm({
+  "packages/engine/src/citation-layer.ts"() {
+    "use strict";
+    init_anchor();
+    init_extract();
+    init_incremental();
+    unlinked = (v) => v.kind === "short" ? { ...v, targetStart: null } : v;
+  }
+});
 
 // packages/engine/src/spans.ts
-var hasRunId = (p) => Object.prototype.hasOwnProperty.call(p, "runId");
 function isMergeable(a, b) {
   if (a.origin !== b.origin) return false;
   if (hasRunId(a) !== hasRunId(b)) return false;
   return a.runId === b.runId;
 }
-var violation = (offset, kind) => err({ kind: "invalid_spans", offset, violation: kind });
-var isOffset4 = (n) => Number.isInteger(n) && n >= 0;
 function checkOne(span, prevStart, cursor, textLength) {
   if (!isOffset4(span.start) || !Number.isInteger(span.end)) return violation(cursor, "coverage");
   if (span.end <= span.start) return violation(span.start, "empty");
@@ -2962,11 +3172,6 @@ function checkCoverage(textLength, spans) {
   if (cursor !== textLength) return violation(cursor, "coverage");
   return ok(void 0);
 }
-var extend = (last, next) => ({
-  start: last.start,
-  end: next.end,
-  provenance: last.provenance
-});
 function mergeAll(spans) {
   const out = [];
   for (const span of spans) {
@@ -3022,6 +3227,21 @@ function runExtents(spans) {
   }
   return extents;
 }
+var hasRunId, violation, isOffset4, extend;
+var init_spans = __esm({
+  "packages/engine/src/spans.ts"() {
+    "use strict";
+    init_result();
+    hasRunId = (p) => Object.prototype.hasOwnProperty.call(p, "runId");
+    violation = (offset, kind) => err({ kind: "invalid_spans", offset, violation: kind });
+    isOffset4 = (n) => Number.isInteger(n) && n >= 0;
+    extend = (last, next) => ({
+      start: last.start,
+      end: next.end,
+      provenance: last.provenance
+    });
+  }
+});
 
 // packages/engine/src/relabel.ts
 function searchRun(runs, runId2) {
@@ -3079,7 +3299,6 @@ function countInserted(runs, actor, spansBefore, at, length) {
   }
   return addEdited(runs, amounts);
 }
-var crosses = (run, threshold) => !run.relabelled && run.editedCount / run.originalLength > threshold;
 function relabelSpans(spans, runIds) {
   return spans.map((span) => {
     const { origin, runId: runId2, timestamp } = span.provenance;
@@ -3097,6 +3316,15 @@ function relabelRuns(spans, runs, threshold) {
   if (!normalised.ok) return normalised;
   return ok({ spans: normalised.value, runs: newRuns, relabelled: flipped });
 }
+var crosses;
+var init_relabel = __esm({
+  "packages/engine/src/relabel.ts"() {
+    "use strict";
+    init_result();
+    init_spans();
+    crosses = (run, threshold) => !run.relabelled && run.editedCount / run.originalLength > threshold;
+  }
+});
 
 // packages/engine/src/ops/splice.ts
 function spliceText(text, from, to, inserted) {
@@ -3121,11 +3349,6 @@ function effectiveProvenance(provenance, runs) {
   if (run === void 0 || !run.relabelled) return provenance;
   return { origin: "AI>HUM", runId: provenance.runId, timestamp: provenance.timestamp };
 }
-var mkSpan = (start, end, provenance) => ({
-  start,
-  end,
-  provenance
-});
 function indexFrom(spans, offset) {
   const i = spanIndexAt(spans, offset);
   return i === -1 ? spans.length : i;
@@ -3167,6 +3390,18 @@ function spliceSpans(spans, from, to, piece) {
   const deletedPieces = from < to ? deletedBetween(spans, i, from, to) : [];
   return { spans: mergeSeams([...left, ...middle, ...right], seams), deletedPieces };
 }
+var mkSpan;
+var init_splice = __esm({
+  "packages/engine/src/ops/splice.ts"() {
+    "use strict";
+    init_spans();
+    mkSpan = (start, end, provenance) => ({
+      start,
+      end,
+      provenance
+    });
+  }
+});
 
 // packages/engine/src/ops/inverse.ts
 function makeInverse(prev, next, at, removedText, insertedLength) {
@@ -3211,6 +3446,14 @@ function applyInverse(doc, inv) {
   const document = restored(inv);
   return ok({ document, inverse: redo(inv, document) });
 }
+var init_inverse = __esm({
+  "packages/engine/src/ops/inverse.ts"() {
+    "use strict";
+    init_equal();
+    init_result();
+    init_splice();
+  }
+});
 
 // packages/engine/src/ops/pipeline.ts
 function relabelDraft(draft, threshold) {
@@ -3228,6 +3471,15 @@ function finishDraft(prev, draft, edit, threshold) {
   if (!relabelled.ok) return relabelled;
   return ok(settleDraft(prev, relabelled.value, edit));
 }
+var init_pipeline = __esm({
+  "packages/engine/src/ops/pipeline.ts"() {
+    "use strict";
+    init_anchor();
+    init_citation_layer();
+    init_relabel();
+    init_result();
+  }
+});
 
 // packages/engine/src/ops/delete.ts
 function deleteEdit(from, to) {
@@ -3249,6 +3501,16 @@ function applyDelete(doc, op, threshold) {
   const removed = doc.text.slice(op.from, op.to);
   return ok({ document, inverse: makeInverse(doc, document, op.from, removed, 0) });
 }
+var init_delete = __esm({
+  "packages/engine/src/ops/delete.ts"() {
+    "use strict";
+    init_relabel();
+    init_result();
+    init_inverse();
+    init_pipeline();
+    init_splice();
+  }
+});
 
 // packages/engine/src/ops/insert.ts
 function insertEdit(at, length) {
@@ -3278,6 +3540,16 @@ function applyInsert(doc, op, threshold) {
   const document = next.value;
   return ok({ document, inverse: makeInverse(doc, document, op.at, "", op.text.length) });
 }
+var init_insert = __esm({
+  "packages/engine/src/ops/insert.ts"() {
+    "use strict";
+    init_relabel();
+    init_result();
+    init_inverse();
+    init_pipeline();
+    init_splice();
+  }
+});
 
 // packages/engine/src/ops/replace.ts
 function replaceEdit(from, to, length) {
@@ -3306,10 +3578,18 @@ function applyReplace(doc, op, threshold) {
   const removed = doc.text.slice(from, to);
   return ok({ document, inverse: makeInverse(doc, document, from, removed, text.length) });
 }
+var init_replace = __esm({
+  "packages/engine/src/ops/replace.ts"() {
+    "use strict";
+    init_result();
+    init_delete();
+    init_insert();
+    init_inverse();
+    init_pipeline();
+  }
+});
 
 // packages/engine/src/validate.ts
-var TIMESTAMP_RE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d{1,9})?Z$/;
-var ORIGINS = ["HUM", "PST", "AI", "AI>HUM"];
 function isLeapYear(year) {
   return year % 4 === 0 && year % 100 !== 0 || year % 400 === 0;
 }
@@ -3368,10 +3648,17 @@ function checkProvenance(p) {
   }
   return ok(p);
 }
+var TIMESTAMP_RE, ORIGINS;
+var init_validate = __esm({
+  "packages/engine/src/validate.ts"() {
+    "use strict";
+    init_result();
+    TIMESTAMP_RE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d{1,9})?Z$/;
+    ORIGINS = ["HUM", "PST", "AI", "AI>HUM"];
+  }
+});
 
 // packages/engine/src/ops/validate.ts
-var DEFAULT_RELABEL_THRESHOLD = 0.4;
-var ORIGINS2 = ["HUM", "PST", "AI", "AI>HUM"];
 function validateConfig(config) {
   if (config === void 0) return ok(DEFAULT_RELABEL_THRESHOLD);
   if (!Object.prototype.hasOwnProperty.call(config, "relabelThreshold")) {
@@ -3447,6 +3734,30 @@ function validateCallerOp(doc, op) {
   }
   return ok(op);
 }
+var DEFAULT_RELABEL_THRESHOLD, ORIGINS2;
+var init_validate2 = __esm({
+  "packages/engine/src/ops/validate.ts"() {
+    "use strict";
+    init_result();
+    init_validate();
+    DEFAULT_RELABEL_THRESHOLD = 0.4;
+    ORIGINS2 = ["HUM", "PST", "AI", "AI>HUM"];
+  }
+});
+
+// packages/engine/src/ops.ts
+var init_ops = __esm({
+  "packages/engine/src/ops.ts"() {
+    "use strict";
+    init_delete();
+    init_insert();
+    init_inverse();
+    init_pipeline();
+    init_replace();
+    init_splice();
+    init_validate2();
+  }
+});
 
 // packages/engine/src/document.ts
 function createDocument(text, timestamp) {
@@ -3480,6 +3791,28 @@ function apply(doc, op, config) {
   if (at !== null) return ok({ document: doc, inverse: makeInverse(doc, doc, at, "", 0) });
   return dispatch(doc, valid.value, threshold.value);
 }
+var init_document = __esm({
+  "packages/engine/src/document.ts"() {
+    "use strict";
+    init_anchor();
+    init_citation_layer();
+    init_ops();
+    init_result();
+    init_spans();
+    init_validate();
+  }
+});
+
+// packages/engine/src/segment.ts
+var init_segment = __esm({
+  "packages/engine/src/segment.ts"() {
+    "use strict";
+    init_boundary();
+    init_extract();
+    init_result();
+    init_spans();
+  }
+});
 
 // packages/engine/src/verification.ts
 function findKeyed(doc, key) {
@@ -3494,7 +3827,6 @@ function fullAt2(doc, start) {
   }
   return null;
 }
-var UNCHECKED = { status: "unchecked" };
 function verificationOf(doc, key) {
   const rec = findKeyed(doc, key);
   if (rec === null) return null;
@@ -3504,13 +3836,38 @@ function verificationOf(doc, key) {
   const target = fullAt2(doc, value.targetStart);
   return target === null ? UNCHECKED : target.result;
 }
+var UNCHECKED;
+var init_verification = __esm({
+  "packages/engine/src/verification.ts"() {
+    "use strict";
+    init_equal();
+    init_result();
+    init_validate();
+    UNCHECKED = { status: "unchecked" };
+  }
+});
+
+// packages/engine/src/issues.ts
+var init_issues = __esm({
+  "packages/engine/src/issues.ts"() {
+    "use strict";
+    init_anchor_keys();
+    init_result();
+    init_validate();
+  }
+});
 
 // packages/engine/src/codes/check-types.ts
-var rangeKey = (start, end) => `${String(start)}:${String(end)}`;
-var fault = (index, rule) => ({ index, rule });
+var rangeKey, fault;
+var init_check_types = __esm({
+  "packages/engine/src/codes/check-types.ts"() {
+    "use strict";
+    rangeKey = (start, end) => `${String(start)}:${String(end)}`;
+    fault = (index, rule) => ({ index, rule });
+  }
+});
 
 // packages/engine/src/codes/build.ts
-var mismatch = () => fault(0, "extractor_mismatch");
 function resultOf(s) {
   switch (s.status) {
     case "verified":
@@ -3556,11 +3913,6 @@ function quoteRecords(done2) {
   }
   return out;
 }
-var asOverride = (key, o) => ({
-  key,
-  reason: o.reason,
-  timestamp: o.timestamp
-});
 function buildOverrides(done2, citations, quotes) {
   const byKey = /* @__PURE__ */ new Map();
   for (const c of done2.draft.citations) {
@@ -3601,9 +3953,23 @@ function build(done2) {
     keyCounter: done2.draft.keyCounter
   });
 }
+var mismatch, asOverride;
+var init_build = __esm({
+  "packages/engine/src/codes/build.ts"() {
+    "use strict";
+    init_anchor_keys();
+    init_result();
+    init_check_types();
+    mismatch = () => fault(0, "extractor_mismatch");
+    asOverride = (key, o) => ({
+      key,
+      reason: o.reason,
+      timestamp: o.timestamp
+    });
+  }
+});
 
 // packages/engine/src/codes/check-doc.ts
-var toSpans = (d) => d.spans.map((s) => ({ start: s.start, end: s.end, provenance: s.provenance }));
 function checkSpanCoverage(d) {
   const r = checkCoverage(d.text.length, toSpans(d));
   if (r.ok) return void 0;
@@ -3653,9 +4019,18 @@ function checkRunInvariant(d) {
   }
   return void 0;
 }
+var toSpans;
+var init_check_doc = __esm({
+  "packages/engine/src/codes/check-doc.ts"() {
+    "use strict";
+    init_spans();
+    init_validate();
+    init_check_types();
+    toSpans = (d) => d.spans.map((s) => ({ start: s.start, end: s.end, provenance: s.provenance }));
+  }
+});
 
 // packages/engine/src/codes/check-citations.ts
-var isNonEmpty = (s) => s !== void 0 && s !== "";
 function fullPayloadOk(s) {
   switch (s.status) {
     case "verified":
@@ -3672,8 +4047,6 @@ function fullPayloadOk(s) {
       return true;
   }
 }
-var hasPayload = (s) => "clusterId" in s || "foundName" in s || "foundYear" in s || "candidates" in s || "reason" in s || "waitUntil" in s;
-var valueOf = (i, c) => i.byRange.get(rangeKey(c.start, c.end))?.value;
 function checkFullPayloads(i) {
   for (const c of i.draft.citations) {
     const v = valueOf(i, c);
@@ -3757,6 +4130,16 @@ function checkIssueKeys(i) {
   }
   return void 0;
 }
+var isNonEmpty, hasPayload, valueOf;
+var init_check_citations = __esm({
+  "packages/engine/src/codes/check-citations.ts"() {
+    "use strict";
+    init_check_types();
+    isNonEmpty = (s) => s !== void 0 && s !== "";
+    hasPayload = (s) => "clusterId" in s || "foundName" in s || "foundYear" in s || "candidates" in s || "reason" in s || "waitUntil" in s;
+    valueOf = (i, c) => i.byRange.get(rangeKey(c.start, c.end))?.value;
+  }
+});
 
 // packages/engine/src/codes/check-extractor.ts
 function compareFamily(codes, expected) {
@@ -3786,23 +4169,14 @@ function checkExtractor(i) {
   ];
   return found.sort((a, b) => a.index - b.index)[0];
 }
+var init_check_extractor = __esm({
+  "packages/engine/src/codes/check-extractor.ts"() {
+    "use strict";
+    init_check_types();
+  }
+});
 
 // packages/engine/src/codes/check.ts
-var RULES = [
-  (i) => checkSpanCoverage(i.draft),
-  (i) => checkCanonical(i.draft),
-  (i) => checkSpanProvenance(i.draft),
-  (i) => checkSurrogates2(i.draft),
-  checkFullPayloads,
-  checkQuotePrefix,
-  checkShortForms,
-  checkUnverifiable,
-  checkRefCodes,
-  (i) => checkRunInvariant(i.draft),
-  checkOverrideTargets,
-  checkIssueKeys,
-  checkExtractor
-];
 function check(draft) {
   const extraction = extract(draft.text);
   const byRange = new Map(extraction.citations.map((c) => [rangeKey(c.start, c.end), c]));
@@ -3813,12 +4187,35 @@ function check(draft) {
   }
   return ok({ draft, extraction });
 }
+var RULES;
+var init_check = __esm({
+  "packages/engine/src/codes/check.ts"() {
+    "use strict";
+    init_extract();
+    init_result();
+    init_check_doc();
+    init_check_citations();
+    init_check_extractor();
+    init_check_types();
+    RULES = [
+      (i) => checkSpanCoverage(i.draft),
+      (i) => checkCanonical(i.draft),
+      (i) => checkSpanProvenance(i.draft),
+      (i) => checkSurrogates2(i.draft),
+      checkFullPayloads,
+      checkQuotePrefix,
+      checkShortForms,
+      checkUnverifiable,
+      checkRefCodes,
+      (i) => checkRunInvariant(i.draft),
+      checkOverrideTargets,
+      checkIssueKeys,
+      checkExtractor
+    ];
+  }
+});
 
 // packages/engine/src/declaration.ts
-var TOOL_NAME_MIN = 2;
-var TOOL_NAME_MAX = 100;
-var CONTROL = /[\p{Cc}\u2028\u2029]/u;
-var NON_SPACE = new RegExp("\\P{White_Space}", "u");
 function checkToolName(raw) {
   const name = raw.trim();
   if (name.length < TOOL_NAME_MIN) return err("too_short");
@@ -3839,9 +4236,20 @@ function isDeclaration(value) {
   const checked2 = checkToolName(v.toolName);
   return checked2.ok && checked2.value === v.toolName;
 }
+var TOOL_NAME_MIN, TOOL_NAME_MAX, CONTROL, NON_SPACE;
+var init_declaration = __esm({
+  "packages/engine/src/declaration.ts"() {
+    "use strict";
+    init_result();
+    init_validate();
+    TOOL_NAME_MIN = 2;
+    TOOL_NAME_MAX = 100;
+    CONTROL = /[\p{Cc}\u2028\u2029]/u;
+    NON_SPACE = new RegExp("\\P{White_Space}", "u");
+  }
+});
 
 // packages/engine/src/codes/doc-declaration.ts
-var DECLARATION_KEY = "d";
 function encodeDeclaration(declaration) {
   const values = declaration.choice === "declared_ai" ? [declaration.subject, declaration.choice, declaration.toolName] : [declaration.subject, declaration.choice];
   return { key: DECLARATION_KEY, values };
@@ -3852,11 +4260,16 @@ function decodeDeclaration(values) {
   const candidate = toolName === void 0 ? { subject, choice } : { subject, choice, toolName };
   return isDeclaration(candidate) ? candidate : void 0;
 }
+var DECLARATION_KEY;
+var init_doc_declaration = __esm({
+  "packages/engine/src/codes/doc-declaration.ts"() {
+    "use strict";
+    init_declaration();
+    DECLARATION_KEY = "d";
+  }
+});
 
 // packages/engine/src/codes/decode-fields.ts
-var BAD = "bad";
-var INT_RE = /^(0|[1-9][0-9]*)$/;
-var KEY_RE = /^k(0|[1-9][0-9]*)$/;
 function decodeInt(s) {
   if (!INT_RE.test(s)) return void 0;
   const n = Number(s);
@@ -3872,10 +4285,6 @@ function single(code, key, parse2) {
   const parsed = only === void 0 ? void 0 : parse2(only);
   return parsed === void 0 ? err(BAD) : ok(parsed);
 }
-var readText = (code, key) => single(code, key, (s) => s);
-var readInt2 = (code, key) => single(code, key, decodeInt);
-var readTimestamp = (code, key) => single(code, key, (s) => isTimestamp(s) ? s : void 0);
-var readKey = (code, key) => single(code, key, (s) => KEY_RE.test(s) ? s : void 0);
 function readList(code, key) {
   const values = valuesOf(code, key);
   return values === void 0 || values.length === 0 ? ok(void 0) : ok(values);
@@ -3908,9 +4317,24 @@ function readRuns(code) {
   }
   return runs;
 }
+var BAD, INT_RE, KEY_RE, readText, readInt2, readTimestamp, readKey;
+var init_decode_fields = __esm({
+  "packages/engine/src/codes/decode-fields.ts"() {
+    "use strict";
+    init_result();
+    init_validate();
+    init_doc_declaration();
+    BAD = "bad";
+    INT_RE = /^(0|[1-9][0-9]*)$/;
+    KEY_RE = /^k(0|[1-9][0-9]*)$/;
+    readText = (code, key) => single(code, key, (s) => s);
+    readInt2 = (code, key) => single(code, key, decodeInt);
+    readTimestamp = (code, key) => single(code, key, (s) => isTimestamp(s) ? s : void 0);
+    readKey = (code, key) => single(code, key, (s) => KEY_RE.test(s) ? s : void 0);
+  }
+});
 
 // packages/engine/src/codes/decode-header.ts
-var bad = (code) => ({ index: code.index, rule: "bad_field" });
 function decodeHeader(code) {
   const v = readVersion(code);
   const n = readInt2(code, "n");
@@ -3923,38 +4347,20 @@ function decodeHeader(code) {
   const header = { keyCounter: n.value, runs };
   return ok(d.value === void 0 ? header : { ...header, declaration: d.value });
 }
+var bad;
+var init_decode_header = __esm({
+  "packages/engine/src/codes/decode-header.ts"() {
+    "use strict";
+    init_result();
+    init_decode_fields();
+    bad = (code) => ({ index: code.index, rule: "bad_field" });
+  }
+});
 
 // packages/engine/src/codes/syntax.ts
-var ESCAPE = "\\";
-var CODE_NAMES = {
-  hum: "HUM",
-  pst: "PST",
-  ai: "AI",
-  aiHum: "AI>HUM",
-  citVerified: "CIT \u2713",
-  citNotFound: "CIT \u2718",
-  citWrongCase: "CIT \u2260",
-  citAmbiguous: "CIT ?",
-  citUnchecked: "CIT \u2026",
-  quoVerified: "QUO \u2713",
-  quoMismatch: "QUO \u2718",
-  quoUnchecked: "QUO \u2026",
-  ref: "REF",
-  closeCit: "/CIT",
-  closeQuo: "/QUO",
-  closeRef: "/REF",
-  ovr: "OVR",
-  doc: "DOC"
-};
-var NAME_SET = new Set(Object.values(CODE_NAMES));
 function isCodeName(s) {
   return NAME_SET.has(s);
 }
-var ESCAPED = {
-  text: /* @__PURE__ */ new Set(["\\", "[", "]"]),
-  retained: /* @__PURE__ */ new Set(["\\", "[", "]", "{"]),
-  payload: /* @__PURE__ */ new Set(["\\", "[", "]", "{", "}", ";", "=", ","])
-};
 function escapeWith(s, set) {
   let out = "";
   for (let i = 0; i < s.length; i++) {
@@ -3998,10 +4404,42 @@ function codeString(name, retained, fields, mode) {
   const section = mode === "full" && fields.length > 0 ? `{${fields.map(fieldString).join(";")}}` : "";
   return `[${head}${section}]`;
 }
+var ESCAPE, CODE_NAMES, NAME_SET, ESCAPED;
+var init_syntax = __esm({
+  "packages/engine/src/codes/syntax.ts"() {
+    "use strict";
+    init_result();
+    ESCAPE = "\\";
+    CODE_NAMES = {
+      hum: "HUM",
+      pst: "PST",
+      ai: "AI",
+      aiHum: "AI>HUM",
+      citVerified: "CIT \u2713",
+      citNotFound: "CIT \u2718",
+      citWrongCase: "CIT \u2260",
+      citAmbiguous: "CIT ?",
+      citUnchecked: "CIT \u2026",
+      quoVerified: "QUO \u2713",
+      quoMismatch: "QUO \u2718",
+      quoUnchecked: "QUO \u2026",
+      ref: "REF",
+      closeCit: "/CIT",
+      closeQuo: "/QUO",
+      closeRef: "/REF",
+      ovr: "OVR",
+      doc: "DOC"
+    };
+    NAME_SET = new Set(Object.values(CODE_NAMES));
+    ESCAPED = {
+      text: /* @__PURE__ */ new Set(["\\", "[", "]"]),
+      retained: /* @__PURE__ */ new Set(["\\", "[", "]", "{"]),
+      payload: /* @__PURE__ */ new Set(["\\", "[", "]", "{", "}", ";", "=", ","])
+    };
+  }
+});
 
 // packages/engine/src/codes/decode.ts
-var fault2 = (index, rule) => ({ index, rule });
-var bad2 = (code) => fault2(code.index, "bad_field");
 function opt(key, r) {
   if (!r.ok) return err(BAD);
   const out = {};
@@ -4203,36 +4641,21 @@ function decodeTokens(tokens) {
     refs: done(out.refs)
   });
 }
+var fault2, bad2;
+var init_decode = __esm({
+  "packages/engine/src/codes/decode.ts"() {
+    "use strict";
+    init_result();
+    init_decode_fields();
+    init_decode_fields();
+    init_decode_header();
+    init_syntax();
+    fault2 = (index, rule) => ({ index, rule });
+    bad2 = (code) => fault2(code.index, "bad_field");
+  }
+});
 
 // packages/engine/src/codes/lex.ts
-var NONE = { retained: false, required: [], optional: [] };
-var T = { retained: false, required: ["t"], optional: [] };
-var RUN_T = { retained: true, required: ["t"], optional: [] };
-var K = { retained: false, required: ["k"], optional: [] };
-var SCHEMAS = {
-  [CODE_NAMES.doc]: { retained: false, required: ["v", "n"], optional: ["d"], repeat: "r" },
-  [CODE_NAMES.hum]: T,
-  [CODE_NAMES.pst]: T,
-  [CODE_NAMES.ai]: RUN_T,
-  [CODE_NAMES.aiHum]: RUN_T,
-  [CODE_NAMES.citVerified]: { retained: false, required: ["k"], optional: ["cl"] },
-  [CODE_NAMES.citNotFound]: { retained: false, required: ["k"], optional: ["why"] },
-  [CODE_NAMES.citWrongCase]: {
-    retained: false,
-    required: ["k"],
-    optional: ["cl", "nm", "yr"]
-  },
-  [CODE_NAMES.citAmbiguous]: { retained: true, required: ["k"], optional: ["cs"] },
-  [CODE_NAMES.citUnchecked]: { retained: false, required: ["k"], optional: ["wu"] },
-  [CODE_NAMES.quoVerified]: K,
-  [CODE_NAMES.quoMismatch]: { retained: false, required: ["k", "p"], optional: [] },
-  [CODE_NAMES.quoUnchecked]: K,
-  [CODE_NAMES.ref]: NONE,
-  [CODE_NAMES.closeCit]: NONE,
-  [CODE_NAMES.closeQuo]: NONE,
-  [CODE_NAMES.closeRef]: NONE,
-  [CODE_NAMES.ovr]: RUN_T
-};
 function splitTop(s, sep, base) {
   const out = [];
   let start = 0;
@@ -4341,22 +4764,6 @@ function scanCode(input, start) {
   }
   return { closed: false, end: input.length, dangling: -1 };
 }
-var OPENS = {
-  [CODE_NAMES.citVerified]: "cit",
-  [CODE_NAMES.citNotFound]: "cit",
-  [CODE_NAMES.citWrongCase]: "cit",
-  [CODE_NAMES.citAmbiguous]: "cit",
-  [CODE_NAMES.citUnchecked]: "cit",
-  [CODE_NAMES.quoVerified]: "quo",
-  [CODE_NAMES.quoMismatch]: "quo",
-  [CODE_NAMES.quoUnchecked]: "quo",
-  [CODE_NAMES.ref]: "ref"
-};
-var CLOSES = {
-  [CODE_NAMES.closeCit]: "cit",
-  [CODE_NAMES.closeQuo]: "quo",
-  [CODE_NAMES.closeRef]: "ref"
-};
 function trackBalance(code, stacks, sink) {
   const open2 = OPENS[code.name];
   if (open2 !== void 0) stacks[open2].push(code.index);
@@ -4430,21 +4837,60 @@ function finish(tokens, stacks, faults) {
   }
   return { tokens, fault: lowest };
 }
+var NONE, T, RUN_T, K, SCHEMAS, OPENS, CLOSES;
+var init_lex2 = __esm({
+  "packages/engine/src/codes/lex.ts"() {
+    "use strict";
+    init_result();
+    init_syntax();
+    NONE = { retained: false, required: [], optional: [] };
+    T = { retained: false, required: ["t"], optional: [] };
+    RUN_T = { retained: true, required: ["t"], optional: [] };
+    K = { retained: false, required: ["k"], optional: [] };
+    SCHEMAS = {
+      [CODE_NAMES.doc]: { retained: false, required: ["v", "n"], optional: ["d"], repeat: "r" },
+      [CODE_NAMES.hum]: T,
+      [CODE_NAMES.pst]: T,
+      [CODE_NAMES.ai]: RUN_T,
+      [CODE_NAMES.aiHum]: RUN_T,
+      [CODE_NAMES.citVerified]: { retained: false, required: ["k"], optional: ["cl"] },
+      [CODE_NAMES.citNotFound]: { retained: false, required: ["k"], optional: ["why"] },
+      [CODE_NAMES.citWrongCase]: {
+        retained: false,
+        required: ["k"],
+        optional: ["cl", "nm", "yr"]
+      },
+      [CODE_NAMES.citAmbiguous]: { retained: true, required: ["k"], optional: ["cs"] },
+      [CODE_NAMES.citUnchecked]: { retained: false, required: ["k"], optional: ["wu"] },
+      [CODE_NAMES.quoVerified]: K,
+      [CODE_NAMES.quoMismatch]: { retained: false, required: ["k", "p"], optional: [] },
+      [CODE_NAMES.quoUnchecked]: K,
+      [CODE_NAMES.ref]: NONE,
+      [CODE_NAMES.closeCit]: NONE,
+      [CODE_NAMES.closeQuo]: NONE,
+      [CODE_NAMES.closeRef]: NONE,
+      [CODE_NAMES.ovr]: RUN_T
+    };
+    OPENS = {
+      [CODE_NAMES.citVerified]: "cit",
+      [CODE_NAMES.citNotFound]: "cit",
+      [CODE_NAMES.citWrongCase]: "cit",
+      [CODE_NAMES.citAmbiguous]: "cit",
+      [CODE_NAMES.citUnchecked]: "cit",
+      [CODE_NAMES.quoVerified]: "quo",
+      [CODE_NAMES.quoMismatch]: "quo",
+      [CODE_NAMES.quoUnchecked]: "quo",
+      [CODE_NAMES.ref]: "ref"
+    };
+    CLOSES = {
+      [CODE_NAMES.closeCit]: "cit",
+      [CODE_NAMES.closeQuo]: "quo",
+      [CODE_NAMES.closeRef]: "ref"
+    };
+  }
+});
 
 // packages/engine/src/codes/render.ts
-var RANK = {
-  doc: 0,
-  closeQuo: 1,
-  closeCit: 2,
-  closeRef: 3,
-  span: 4,
-  cit: 5,
-  citOvr: 6,
-  ref: 7,
-  quo: 8,
-  quoOvr: 9
-};
-var field = (key, ...values) => ({ key, values });
 function docCode(doc, declaration, mode) {
   const runs = doc.runs.map(
     (r) => field("r", r.runId, String(r.originalLength), String(r.editedCount), r.relabelled ? "1" : "0")
@@ -4598,16 +5044,43 @@ function renderRecord(doc, declaration, mode) {
   out += escapeText(doc.text.slice(cursor));
   return { text: out, positions };
 }
+function render(doc, mode) {
+  return renderRecord(doc, null, mode);
+}
+var RANK, field;
+var init_render = __esm({
+  "packages/engine/src/codes/render.ts"() {
+    "use strict";
+    init_verification();
+    init_doc_declaration();
+    init_syntax();
+    RANK = {
+      doc: 0,
+      closeQuo: 1,
+      closeCit: 2,
+      closeRef: 3,
+      span: 4,
+      cit: 5,
+      citOvr: 6,
+      ref: 7,
+      quo: 8,
+      quoOvr: 9
+    };
+    field = (key, ...values) => ({ key, values });
+  }
+});
 
 // packages/engine/src/codes/strip.ts
-var DOC_OPEN = `[${CODE_NAMES.doc}`;
+var DOC_OPEN;
+var init_strip = __esm({
+  "packages/engine/src/codes/strip.ts"() {
+    "use strict";
+    init_syntax();
+    DOC_OPEN = `[${CODE_NAMES.doc}`;
+  }
+});
 
 // packages/engine/src/codes.ts
-var malformed = (f) => ({
-  kind: "malformed_codes",
-  index: f.index,
-  rule: f.rule
-});
 function lowestFault(a, b) {
   if (a === void 0 || b === void 0) return a ?? b;
   return b.index < a.index ? b : a;
@@ -4624,97 +5097,44 @@ function parseRecord(revealCodesText) {
   if (!built.ok) return err(malformed(built.error));
   return ok({ document: built.value, declaration: checked2.value.draft.declaration ?? null });
 }
-
-// packages/provenance/src/io/deps.ts
-async function attempt(run) {
-  try {
-    return ok(await run());
-  } catch (error) {
-    const code = error?.code;
-    return err({ code: typeof code === "string" ? code : "EIO" });
+var malformed;
+var init_codes = __esm({
+  "packages/engine/src/codes.ts"() {
+    "use strict";
+    init_build();
+    init_check();
+    init_decode();
+    init_lex2();
+    init_result();
+    init_render();
+    init_strip();
+    malformed = (f) => ({
+      kind: "malformed_codes",
+      index: f.index,
+      rule: f.rule
+    });
   }
-}
-function toKind(s) {
-  if (s.isSymbolicLink()) return "symlink";
-  if (s.isFile()) return "file";
-  return s.isDirectory() ? "dir" : "other";
-}
-function nodeFs() {
-  const void_ = (run) => attempt(async () => {
-    await run();
-  });
-  return {
-    readFile: (p) => attempt(async () => new Uint8Array(await readFile(p))),
-    writeFile: (p, data, exclusive = false) => void_(() => writeFile(p, data, exclusive ? { flag: "wx" } : void 0)),
-    appendFile: (p, text) => void_(() => appendFile(p, text)),
-    rename: (a, b) => void_(() => rename(a, b)),
-    unlink: (p) => void_(() => unlink(p)),
-    rmdir: (p) => void_(() => rmdir(p)),
-    mkdirp: (p) => void_(() => mkdir(p, { recursive: true })),
-    readdir: (p) => attempt(() => readdir(p)),
-    lstat: (p) => attempt(async () => {
-      const s = await lstat(p);
-      return { size: s.size, mtimeMs: s.mtimeMs, kind: toKind(s) };
-    })
-  };
-}
-function nodeGit(command) {
-  return {
-    exec: (cwd, args, input) => new Promise((resolve) => {
-      const child = execFile(
-        command,
-        [...args],
-        { cwd, encoding: "buffer", maxBuffer: 1 << 28 },
-        (error, stdout) => {
-          if (error === null) {
-            resolve(ok(new Uint8Array(stdout)));
-            return;
-          }
-          const code = error.code;
-          if (code === "ENOENT") {
-            resolve(err({ kind: "missing" }));
-            return;
-          }
-          resolve(err(typeof code === "number" ? { kind: "failed", code } : { kind: "failed" }));
-        }
-      );
-      child.stdin?.on("error", () => void 0);
-      child.stdin?.end(input);
-    })
-  };
-}
-function nodeClock() {
-  return {
-    nowMs: () => Date.now(),
-    nowIso: () => (/* @__PURE__ */ new Date()).toISOString(),
-    timer: (ms) => {
-      let handle;
-      const done2 = new Promise((resolve) => {
-        handle = setTimeout(resolve, ms);
-      });
-      return {
-        done: done2,
-        cancel: () => {
-          clearTimeout(handle);
-        }
-      };
-    }
-  };
-}
-function nodeDeps(gitCommand = "git") {
-  return {
-    fs: nodeFs(),
-    git: nodeGit(gitCommand),
-    clock: nodeClock(),
-    sha256: (bytes) => createHash("sha256").update(bytes).digest("hex"),
-    stdin: process.stdin,
-    log: { fault: () => Promise.resolve() },
-    pid: process.pid
-  };
-}
+});
+
+// packages/engine/src/index.ts
+var init_src = __esm({
+  "packages/engine/src/index.ts"() {
+    "use strict";
+    init_document();
+    init_spans();
+    init_validate2();
+    init_segment();
+    init_extract();
+    init_format();
+    init_verification();
+    init_issues();
+    init_codes();
+    init_declaration();
+    init_result();
+  }
+});
 
 // packages/provenance/src/io/atomic.ts
-var counter = 0;
 function dirOf(path) {
   const cut = path.lastIndexOf("/");
   return cut <= 0 ? "/" : path.slice(0, cut);
@@ -4736,9 +5156,16 @@ async function atomicWrite(deps, path, data) {
   }
   return ok(void 0);
 }
+var counter;
+var init_atomic = __esm({
+  "packages/provenance/src/io/atomic.ts"() {
+    "use strict";
+    init_src();
+    counter = 0;
+  }
+});
 
 // packages/provenance/src/io/baseline-cache.ts
-var DIGEST_RE = /^[0-9a-f]{64}$/u;
 function digestsOf(baseline) {
   return new Set(Object.values(baseline?.files ?? {}).map((e) => e.sha256));
 }
@@ -4776,14 +5203,20 @@ function createBaselineCache(deps, dir) {
     }
   };
 }
+var DIGEST_RE;
+var init_baseline_cache = __esm({
+  "packages/provenance/src/io/baseline-cache.ts"() {
+    "use strict";
+    init_src();
+    init_atomic();
+    DIGEST_RE = /^[0-9a-f]{64}$/u;
+  }
+});
 
 // packages/provenance/src/io/git.ts
-var decoder = new TextDecoder("utf-8");
-var encoder = new TextEncoder();
 function nulList(bytes) {
   return decoder.decode(bytes).split("\0").filter((p) => p !== "");
 }
-var LIST_BASE = ["ls-files", "-z", "--cached"];
 async function listGitFiles(deps, root) {
   const all = await deps.git.exec(root, [...LIST_BASE, "--others", "--exclude-standard"]);
   if (!all.ok) return { kind: "none" };
@@ -4796,7 +5229,6 @@ async function listGitFiles(deps, root) {
 function hashable(path) {
   return !path.includes("\n") && !path.startsWith('"');
 }
-var failedCall = { kind: "failed" };
 async function hashObjects(deps, root, paths) {
   const carried = paths.filter(hashable);
   if (carried.length === 0) return ok(/* @__PURE__ */ new Map());
@@ -4829,22 +5261,37 @@ function catBlob(deps, root, blobId) {
   if (!/^[0-9a-f]{40}([0-9a-f]{24})?$/u.test(blobId)) return Promise.resolve(err(failedCall));
   return deps.git.exec(root, ["cat-file", "blob", blobId]);
 }
+var decoder, encoder, LIST_BASE, failedCall;
+var init_git = __esm({
+  "packages/provenance/src/io/git.ts"() {
+    "use strict";
+    init_src();
+    decoder = new TextDecoder("utf-8");
+    encoder = new TextEncoder();
+    LIST_BASE = ["ls-files", "-z", "--cached"];
+    failedCall = { kind: "failed" };
+  }
+});
 
 // packages/provenance/src/core/limits.ts
-var SIZE_LIMIT = 2e5;
-var HOOK_DEADLINE_MS = 2e4;
-var STALE_WINDOW_MS = 432e5;
-var LABEL_MAX = 80;
-var STDIN_MAX = 1048576;
-var STDIN_WAIT_MS = 1500;
-var LOCK_WAIT_MS = 5e3;
-var RACY_MS = 2e3;
-var DIFF_CAP = 1500;
-var LOCK_STALE_MS = 3e4;
+var SIZE_LIMIT, HOOK_DEADLINE_MS, STALE_WINDOW_MS, LABEL_MAX, STDIN_MAX, STDIN_WAIT_MS, LOCK_WAIT_MS, RACY_MS, DIFF_CAP, LOCK_STALE_MS;
+var init_limits = __esm({
+  "packages/provenance/src/core/limits.ts"() {
+    "use strict";
+    SIZE_LIMIT = 2e5;
+    HOOK_DEADLINE_MS = 2e4;
+    STALE_WINDOW_MS = 432e5;
+    LABEL_MAX = 80;
+    STDIN_MAX = 1048576;
+    STDIN_WAIT_MS = 1500;
+    LOCK_WAIT_MS = 5e3;
+    RACY_MS = 2e3;
+    DIFF_CAP = 1500;
+    LOCK_STALE_MS = 3e4;
+  }
+});
 
 // packages/provenance/src/io/lock.ts
-var LOCK_RETRY_MS = 25;
-var staleCounter = 0;
 async function breakStale(deps, path) {
   const stat = await deps.fs.lstat(path);
   if (!stat.ok || deps.clock.nowMs() - stat.value.mtimeMs <= LOCK_STALE_MS) return false;
@@ -4874,31 +5321,18 @@ async function acquireLock(deps, path) {
     await deps.clock.timer(LOCK_RETRY_MS).done;
   }
 }
+var LOCK_RETRY_MS, staleCounter;
+var init_lock = __esm({
+  "packages/provenance/src/io/lock.ts"() {
+    "use strict";
+    init_src();
+    init_limits();
+    LOCK_RETRY_MS = 25;
+    staleCounter = 0;
+  }
+});
 
 // packages/provenance/src/core/exclude.ts
-var RECORD_DIRECTORY = ".kiro/provenance";
-var LOCKFILE_NAMES = /* @__PURE__ */ new Set([
-  "package-lock.json",
-  "pnpm-lock.yaml",
-  "yarn.lock",
-  "bun.lock",
-  "Cargo.lock",
-  "Gemfile.lock",
-  "poetry.lock",
-  "composer.lock",
-  "go.sum"
-]);
-var OUTPUT_DIRECTORIES = /* @__PURE__ */ new Set([
-  "dist",
-  "build",
-  "out",
-  ".next",
-  "coverage",
-  "target"
-]);
-var GENERATED_SUFFIXES = [".lock", ".min.js", ".min.css", ".map"];
-var SECRET_SUFFIXES = [".pem", ".key", ".p12", ".pfx"];
-var SECRET_PREFIXES = ["id_rsa", "id_ed25519"];
 function underRecordDirectory(path) {
   return path === RECORD_DIRECTORY || path.startsWith(`${RECORD_DIRECTORY}/`);
 }
@@ -4919,40 +5353,37 @@ function isBuiltInExcluded(path) {
   if (directories.some((directory) => OUTPUT_DIRECTORIES.has(directory))) return true;
   return isGeneratedName(name) || isSecretName(name);
 }
+var RECORD_DIRECTORY, LOCKFILE_NAMES, OUTPUT_DIRECTORIES, GENERATED_SUFFIXES, SECRET_SUFFIXES, SECRET_PREFIXES;
+var init_exclude = __esm({
+  "packages/provenance/src/core/exclude.ts"() {
+    "use strict";
+    RECORD_DIRECTORY = ".kiro/provenance";
+    LOCKFILE_NAMES = /* @__PURE__ */ new Set([
+      "package-lock.json",
+      "pnpm-lock.yaml",
+      "yarn.lock",
+      "bun.lock",
+      "Cargo.lock",
+      "Gemfile.lock",
+      "poetry.lock",
+      "composer.lock",
+      "go.sum"
+    ]);
+    OUTPUT_DIRECTORIES = /* @__PURE__ */ new Set([
+      "dist",
+      "build",
+      "out",
+      ".next",
+      "coverage",
+      "target"
+    ]);
+    GENERATED_SUFFIXES = [".lock", ".min.js", ".min.css", ".map"];
+    SECRET_SUFFIXES = [".pem", ".key", ".p12", ".pfx"];
+    SECRET_PREFIXES = ["id_rsa", "id_ed25519"];
+  }
+});
 
 // packages/provenance/src/core/glob.ts
-var SLASH = 47;
-var BACKSLASH = 92;
-var STAR = 42;
-var QUESTION = 63;
-var LBRACKET = 91;
-var RBRACKET = 93;
-var COLON = 58;
-var DASH = 45;
-var BANG = 33;
-var CARET = 94;
-var isDigit2 = (b) => b >= 48 && b <= 57;
-var isLower = (b) => b >= 97 && b <= 122;
-var isUpper = (b) => b >= 65 && b <= 90;
-var isAlnum = (b) => isDigit2(b) || isLower(b) || isUpper(b);
-var isGraph = (b) => b >= 33 && b <= 126;
-var CLASSES = /* @__PURE__ */ new Map([
-  ["alnum", isAlnum],
-  ["alpha", (b) => isLower(b) || isUpper(b)],
-  ["blank", (b) => b === 32 || b === 9],
-  ["cntrl", (b) => b < 32 || b === 127],
-  ["digit", isDigit2],
-  ["graph", isGraph],
-  ["lower", isLower],
-  ["print", (b) => b >= 32 && b <= 126],
-  ["punct", (b) => isGraph(b) && !isAlnum(b)],
-  ["space", (b) => b === 32 || b >= 9 && b <= 13],
-  ["upper", isUpper],
-  ["xdigit", (b) => isDigit2(b) || b >= 65 && b <= 70 || b >= 97 && b <= 102]
-]);
-var NEVER = { never: true, segments: [] };
-var encoder2 = new TextEncoder();
-var decoder2 = new TextDecoder();
 function parseClass(p, j) {
   const s = j + 2;
   let k = s;
@@ -5132,6 +5563,44 @@ function matchGlob(glob, text) {
   while (pi < pat.length - 1 && pat[pi]?.kind === "globstar") pi += 1;
   return pi === pat.length;
 }
+var SLASH, BACKSLASH, STAR, QUESTION, LBRACKET, RBRACKET, COLON, DASH, BANG, CARET, isDigit2, isLower, isUpper, isAlnum, isGraph, CLASSES, NEVER, encoder2, decoder2;
+var init_glob = __esm({
+  "packages/provenance/src/core/glob.ts"() {
+    "use strict";
+    SLASH = 47;
+    BACKSLASH = 92;
+    STAR = 42;
+    QUESTION = 63;
+    LBRACKET = 91;
+    RBRACKET = 93;
+    COLON = 58;
+    DASH = 45;
+    BANG = 33;
+    CARET = 94;
+    isDigit2 = (b) => b >= 48 && b <= 57;
+    isLower = (b) => b >= 97 && b <= 122;
+    isUpper = (b) => b >= 65 && b <= 90;
+    isAlnum = (b) => isDigit2(b) || isLower(b) || isUpper(b);
+    isGraph = (b) => b >= 33 && b <= 126;
+    CLASSES = /* @__PURE__ */ new Map([
+      ["alnum", isAlnum],
+      ["alpha", (b) => isLower(b) || isUpper(b)],
+      ["blank", (b) => b === 32 || b === 9],
+      ["cntrl", (b) => b < 32 || b === 127],
+      ["digit", isDigit2],
+      ["graph", isGraph],
+      ["lower", isLower],
+      ["print", (b) => b >= 32 && b <= 126],
+      ["punct", (b) => isGraph(b) && !isAlnum(b)],
+      ["space", (b) => b === 32 || b >= 9 && b <= 13],
+      ["upper", isUpper],
+      ["xdigit", (b) => isDigit2(b) || b >= 65 && b <= 70 || b >= 97 && b <= 102]
+    ]);
+    NEVER = { never: true, segments: [] };
+    encoder2 = new TextEncoder();
+    decoder2 = new TextDecoder();
+  }
+});
 
 // packages/provenance/src/core/ignore.ts
 function ruleMatches(rule, parts, isDir) {
@@ -5157,6 +5626,12 @@ function isIgnored(rules, path) {
 function isIgnoredByAny(files, path) {
   return files.some((rules) => isIgnored(rules, path));
 }
+var init_ignore = __esm({
+  "packages/provenance/src/core/ignore.ts"() {
+    "use strict";
+    init_glob();
+  }
+});
 
 // packages/provenance/src/core/ignore-parse.ts
 function trimTrailingSpaces(line) {
@@ -5197,21 +5672,14 @@ function parseIgnore(text) {
   }
   return rules;
 }
+var init_ignore_parse = __esm({
+  "packages/provenance/src/core/ignore-parse.ts"() {
+    "use strict";
+    init_glob();
+  }
+});
 
 // packages/provenance/src/io/scan.ts
-var READ_FREE_LIMIT_BYTES = SIZE_LIMIT * 3;
-var WALK_SKIP = /* @__PURE__ */ new Set([
-  ".git",
-  "node_modules",
-  "dist",
-  "build",
-  "out",
-  ".next",
-  "coverage",
-  "target"
-]);
-var IGNORE_FILES = [".kiroignore", ".kiro/provenance/ignore"];
-var STAT_BATCH = 64;
 async function loadIgnoreFiles(deps, root) {
   const found = [];
   for (const name of IGNORE_FILES) {
@@ -5290,10 +5758,32 @@ async function readCandidate(deps, root, candidate) {
   if (size > SIZE_LIMIT && text.length > SIZE_LIMIT) return { kind: "over_limit", size, mtimeMs };
   return { kind: "text", text, bytes, sha256: deps.sha256(bytes), size, mtimeMs };
 }
+var READ_FREE_LIMIT_BYTES, WALK_SKIP, IGNORE_FILES, STAT_BATCH;
+var init_scan2 = __esm({
+  "packages/provenance/src/io/scan.ts"() {
+    "use strict";
+    init_exclude();
+    init_ignore();
+    init_ignore_parse();
+    init_limits();
+    init_git();
+    READ_FREE_LIMIT_BYTES = SIZE_LIMIT * 3;
+    WALK_SKIP = /* @__PURE__ */ new Set([
+      ".git",
+      "node_modules",
+      "dist",
+      "build",
+      "out",
+      ".next",
+      "coverage",
+      "target"
+    ]);
+    IGNORE_FILES = [".kiroignore", ".kiro/provenance/ignore"];
+    STAT_BATCH = 64;
+  }
+});
 
 // packages/provenance/src/core/baseline-codec.ts
-var SHA256_RE = /^[0-9a-f]{64}$/u;
-var BLOB_RE = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u;
 function bad3(detail) {
   return err({ kind: "bad_baseline", detail });
 }
@@ -5363,10 +5853,17 @@ function decodeBaseline(text) {
   if (!files.ok) return files;
   return ok({ version: 1, at, files: files.value });
 }
+var SHA256_RE, BLOB_RE;
+var init_baseline_codec = __esm({
+  "packages/provenance/src/core/baseline-codec.ts"() {
+    "use strict";
+    init_src();
+    SHA256_RE = /^[0-9a-f]{64}$/u;
+    BLOB_RE = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u;
+  }
+});
 
 // packages/provenance/src/core/state-codec.ts
-var SHA256_RE2 = /^[0-9a-f]{64}$/u;
-var CLOSED_BY = ["postTask", "agentStop", "sweep", "leftover"];
 function bad4(detail) {
   return err({ kind: "bad_state", detail });
 }
@@ -5591,6 +6088,16 @@ function decodeSessions(text) {
   const n = s.value["noPromptEventSessions"];
   return isCount(n) ? ok(n) : badSessions("bad count");
 }
+var SHA256_RE2, CLOSED_BY;
+var init_state_codec = __esm({
+  "packages/provenance/src/core/state-codec.ts"() {
+    "use strict";
+    init_src();
+    init_baseline_codec();
+    SHA256_RE2 = /^[0-9a-f]{64}$/u;
+    CLOSED_BY = ["postTask", "agentStop", "sweep", "leftover"];
+  }
+});
 
 // packages/provenance/src/io/store.ts
 function failed(kind, error) {
@@ -5681,135 +6188,17 @@ function createStore(deps, dir) {
   };
   return store;
 }
-
-// packages/provenance/src/io/baseline-cmd.ts
-var READ_BATCH = 64;
-var EVENT = "baseline";
-async function listRecordPaths2(deps, dir, prefix = "") {
-  const names = await deps.fs.readdir(prefix === "" ? dir : `${dir}/${prefix}`);
-  if (!names.ok) return [];
-  const found = [];
-  for (const name of names.value) {
-    const rel = prefix === "" ? name : `${prefix}/${name}`;
-    const stat = await deps.fs.lstat(`${dir}/${rel}`);
-    if (!stat.ok) continue;
-    if (stat.value.kind === "dir") found.push(...await listRecordPaths2(deps, dir, rel));
-    else if (stat.value.kind === "file" && rel.endsWith(".reveal")) found.push(rel.slice(0, -7));
+var init_store = __esm({
+  "packages/provenance/src/io/store.ts"() {
+    "use strict";
+    init_src();
+    init_baseline_codec();
+    init_state_codec();
+    init_atomic();
   }
-  return found;
-}
-async function readAll(deps, root, files) {
-  const texts = /* @__PURE__ */ new Map();
-  let skipped = 0;
-  for (let i = 0; i < files.length; i += READ_BATCH) {
-    const batch = files.slice(i, i + READ_BATCH);
-    const reads = await Promise.all(batch.map((c) => readCandidate(deps, root, c)));
-    reads.forEach((read, j) => {
-      if (read.kind === "text") texts.set(batch[j].path, read);
-      else skipped += 1;
-    });
-  }
-  return { texts, skipped };
-}
-async function blobInfo(deps, root, paths) {
-  const ids = await hashObjects(deps, root, paths);
-  if (!ids.ok) {
-    await deps.log.fault({ event: EVENT, path: null, reason: "read_failed" });
-    return { ids: /* @__PURE__ */ new Map(), held: /* @__PURE__ */ new Map() };
-  }
-  const held = await checkBlobs(deps, root, [...ids.value.values()]);
-  if (!held.ok) await deps.log.fault({ event: EVENT, path: null, reason: "read_failed" });
-  return { ids: ids.value, held: held.ok ? held.value : /* @__PURE__ */ new Map() };
-}
-async function writeCacheFiles(deps, cache, texts, needed) {
-  for (const path of needed) {
-    const file = texts.get(path);
-    const have = await cache.read(file.sha256);
-    if (have !== null && deps.sha256(have) === file.sha256) continue;
-    const written = await cache.write(file.sha256, file.bytes);
-    if (!written.ok) await deps.log.fault({ event: EVENT, path, reason: "write_failed" });
-  }
-}
-async function planEntries(deps, root, git, texts) {
-  const paths = [...texts.keys()];
-  const info = git ? await blobInfo(deps, root, paths) : { ids: /* @__PURE__ */ new Map(), held: /* @__PURE__ */ new Map() };
-  const entries = /* @__PURE__ */ new Map();
-  const needed = [];
-  for (const path of paths) {
-    const sha256 = texts.get(path).sha256;
-    const blob = info.ids.get(path);
-    entries.set(path, blob === void 0 ? { sha256 } : { sha256, blob });
-    if (blob === void 0 || info.held.get(blob) !== true) needed.push(path);
-  }
-  return { entries, needed };
-}
-async function ensureSessions(deps, store) {
-  const stat = await deps.fs.lstat(`${store.dir}/sessions.json`);
-  if (stat.ok || stat.error.code !== "ENOENT") return;
-  const written = await store.writeSessions(0);
-  if (!written.ok) await deps.log.fault({ event: EVENT, path: null, reason: "write_failed" });
-}
-async function collect(deps, root, store, base) {
-  const list = await listCandidates(deps, root);
-  const recorded = new Set(await listRecordPaths2(deps, `${store.dir}/records`));
-  const todo = list.files.filter((f) => !recorded.has(f.path) && base?.files[f.path] === void 0);
-  const { texts, skipped } = await readAll(deps, root, todo);
-  const plan = await planEntries(deps, root, list.git, texts);
-  return { ...plan, texts, skipped };
-}
-async function baselineLocked(deps, root, store) {
-  const cache = createBaselineCache(deps, store.cacheDir());
-  const existing = await store.readBaseline();
-  if (!existing.ok) {
-    await deps.log.fault({ event: EVENT, path: null, reason: existing.error.kind });
-    return existing;
-  }
-  const found = await collect(deps, root, store, existing.value);
-  await writeCacheFiles(deps, cache, found.texts, found.needed);
-  const next = existing.value ?? {
-    version: 1,
-    at: `${deps.clock.nowIso().slice(0, 19)}Z`,
-    files: {}
-  };
-  const merged = {
-    ...next,
-    files: { ...next.files, ...Object.fromEntries(found.entries) }
-  };
-  if (existing.value === null || found.entries.size > 0) {
-    const written = await store.writeBaseline(merged);
-    if (!written.ok) return written;
-  }
-  await cache.prune(merged);
-  await ensureSessions(deps, store);
-  return ok({ added: found.entries.size, skipped: found.skipped });
-}
-async function runBaseline(deps, root) {
-  const store = createStore(deps, `${root}/.kiro/provenance`);
-  await deps.fs.mkdirp(store.dir);
-  const taken = await acquireLock(deps, `${store.dir}/lock`);
-  if (!taken.ok) {
-    await deps.log.fault({ event: EVENT, path: null, reason: taken.error.kind });
-    return taken;
-  }
-  try {
-    return await baselineLocked(deps, root, store);
-  } finally {
-    await taken.value.release();
-  }
-}
-function formatBaselineLine(summary) {
-  return `baseline: ${String(summary.added)} added, ${String(summary.skipped)} skipped`;
-}
-async function baselineCommand(deps, root, print) {
-  const result = await runBaseline(deps, root);
-  if (!result.ok) return result.error.kind === "lock_timeout" ? 0 : 1;
-  print(formatBaselineLine(result.value));
-  return 0;
-}
+});
 
 // packages/provenance/src/io/faults.ts
-var LOG_MAX_BYTES = 256 * 1024;
-var LOG_KEEP_BYTES = 128 * 1024;
 function field2(text) {
   return text.replace(/[\s\p{Cc}]/gu, "_");
 }
@@ -5845,15 +6234,17 @@ function shouldLogOverLimit(skipped, path, size, mtimeMs) {
   const known = skipped[path];
   return known === void 0 || known.size !== size || known.mtimeMs !== mtimeMs;
 }
+var LOG_MAX_BYTES, LOG_KEEP_BYTES;
+var init_faults = __esm({
+  "packages/provenance/src/io/faults.ts"() {
+    "use strict";
+    init_atomic();
+    LOG_MAX_BYTES = 256 * 1024;
+    LOG_KEEP_BYTES = 128 * 1024;
+  }
+});
 
 // packages/provenance/src/core/payload.ts
-var EMPTY = {
-  sessionId: null,
-  cwd: null,
-  taskName: null,
-  specName: null,
-  taskSuccess: null
-};
 function emptyPayload() {
   return { ...EMPTY };
 }
@@ -5895,12 +6286,22 @@ function parsePayload(text) {
     taskSuccess: typeof success === "boolean" ? success : null
   };
 }
+var EMPTY;
+var init_payload = __esm({
+  "packages/provenance/src/core/payload.ts"() {
+    "use strict";
+    init_limits();
+    EMPTY = {
+      sessionId: null,
+      cwd: null,
+      taskName: null,
+      specName: null,
+      taskSuccess: null
+    };
+  }
+});
 
 // packages/provenance/src/core/label.ts
-var FALLBACK_TITLE = "task";
-var TURN_TITLE = "turn";
-var SPACE_RUN = /[\s\p{Cc}]+/gu;
-var TASK_TOKEN = /^(\d+(?:\.\d+)*)\.?(?= |$)/u;
 function clean(text) {
   return text.replace(SPACE_RUN, " ").trim();
 }
@@ -5931,9 +6332,19 @@ function windowRunName(taskNumber, title, time, taken) {
 function runId(windowRun, n) {
   return windowRun + "." + String(n);
 }
+var FALLBACK_TITLE, TURN_TITLE, SPACE_RUN, TASK_TOKEN;
+var init_label = __esm({
+  "packages/provenance/src/core/label.ts"() {
+    "use strict";
+    init_limits();
+    FALLBACK_TITLE = "task";
+    TURN_TITLE = "turn";
+    SPACE_RUN = /[\s\p{Cc}]+/gu;
+    TASK_TOKEN = /^(\d+(?:\.\d+)*)\.?(?= |$)/u;
+  }
+});
 
 // packages/provenance/src/core/windows.ts
-var NONE_KEY = "_none";
 function fault3(kind) {
   return { kind };
 }
@@ -6070,6 +6481,15 @@ function transition(state, event, session, payload, clock, outsideFound) {
   const flagged = logNoId ? { ...next, noSessionIdLogged: true } : next;
   return { state: { ...flagged, lastEventAt: now }, faults, countSession: count };
 }
+var NONE_KEY;
+var init_windows = __esm({
+  "packages/provenance/src/core/windows.ts"() {
+    "use strict";
+    init_label();
+    init_limits();
+    NONE_KEY = "_none";
+  }
+});
 
 // packages/provenance/src/core/lines.ts
 function splitLines(text) {
@@ -6082,6 +6502,11 @@ function splitLines(text) {
   if (from < text.length) out.push(text.slice(from));
   return out;
 }
+var init_lines = __esm({
+  "packages/provenance/src/core/lines.ts"() {
+    "use strict";
+  }
+});
 
 // packages/provenance/src/core/diff.ts
 function fnv1a(s) {
@@ -6179,6 +6604,13 @@ function middleSteps(ma, mb) {
   const trace = myers(ma, mb, ma.map(fnv1a), mb.map(fnv1a));
   return trace === null ? null : mergeSteps(backtrack(trace, ma.length, mb.length));
 }
+var init_diff = __esm({
+  "packages/provenance/src/core/diff.ts"() {
+    "use strict";
+    init_limits();
+    init_lines();
+  }
+});
 
 // packages/provenance/src/core/trim.ts
 function isHigh4(code) {
@@ -6187,8 +6619,6 @@ function isHigh4(code) {
 function isLow4(code) {
   return code >= 56320 && code <= 57343;
 }
-var CR = 13;
-var LF = 10;
 function commonPrefix(a, b) {
   const max = Math.min(a.length, b.length);
   let n = 0;
@@ -6232,9 +6662,16 @@ function trimHunk(oldDocText, hunk) {
   if (from === to && text === "") return null;
   return { from, to, text };
 }
+var CR, LF;
+var init_trim = __esm({
+  "packages/provenance/src/core/trim.ts"() {
+    "use strict";
+    CR = 13;
+    LF = 10;
+  }
+});
 
 // packages/provenance/src/core/plan.ts
-var DIGITS2 = /^[0-9]+$/;
 function existingRunNumbers(doc, windowRun) {
   const prefix = windowRun + ".";
   const out = [];
@@ -6260,6 +6697,14 @@ function planHunks(hunks, origin, windowRun, existing, clock) {
   });
   return ops.reverse();
 }
+var DIGITS2;
+var init_plan = __esm({
+  "packages/provenance/src/core/plan.ts"() {
+    "use strict";
+    init_label();
+    DIGITS2 = /^[0-9]+$/;
+  }
+});
 
 // packages/provenance/src/core/update.ts
 function changeHunks(oldText, newText) {
@@ -6308,6 +6753,15 @@ function appearedRecord(fileText, origin, window, clock) {
   if (!doc.ok) return doc;
   return updateRecord(doc.value, fileText, origin, window, clock);
 }
+var init_update = __esm({
+  "packages/provenance/src/core/update.ts"() {
+    "use strict";
+    init_src();
+    init_diff();
+    init_trim();
+    init_plan();
+  }
+});
 
 // packages/provenance/src/io/baseline-text.ts
 async function fromGit(deps, root, entry) {
@@ -6323,9 +6777,15 @@ async function resolveBaselineText(deps, root, cache, entry) {
   const bytes = await fromGit(deps, root, entry) ?? await fromCache(deps, cache, entry);
   return bytes === null ? null : decodeUtf8(bytes);
 }
+var init_baseline_text = __esm({
+  "packages/provenance/src/io/baseline-text.ts"() {
+    "use strict";
+    init_git();
+    init_scan2();
+  }
+});
 
 // packages/provenance/src/core/renames.ts
-var EMPTY_SHA256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
 function countByDigest(files) {
   const counts = /* @__PURE__ */ new Map();
   for (const file of files) counts.set(file.digest, (counts.get(file.digest) ?? 0) + 1);
@@ -6347,6 +6807,13 @@ function pairRenames(gone, appeared) {
   }
   return pairs;
 }
+var EMPTY_SHA256;
+var init_renames = __esm({
+  "packages/provenance/src/core/renames.ts"() {
+    "use strict";
+    EMPTY_SHA256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+  }
+});
 
 // packages/provenance/src/io/recorder-work.ts
 function fault4(w, path, reason) {
@@ -6418,9 +6885,15 @@ async function removeTracked(w, path) {
   }
   removeEntry(w, path);
 }
+var init_recorder_work = __esm({
+  "packages/provenance/src/io/recorder-work.ts"() {
+    "use strict";
+    init_src();
+    init_limits();
+  }
+});
 
 // packages/provenance/src/io/recorder-moves.ts
-var encoder3 = new TextEncoder();
 async function goneFiles(w) {
   const paths = /* @__PURE__ */ new Set([...w.recordPaths, ...w.entries.keys()]);
   const gone = [];
@@ -6489,9 +6962,20 @@ async function settleMoves(w, appeared) {
   for (const { path } of gone) if (!paired.has(path)) await removeTracked(w, path);
   for (const target of appeared) if (!moved.has(target.c.path)) await createAppeared(w, target);
 }
+var encoder3;
+var init_recorder_moves = __esm({
+  "packages/provenance/src/io/recorder-moves.ts"() {
+    "use strict";
+    init_src();
+    init_renames();
+    init_update();
+    init_recorder_work();
+    encoder3 = new TextEncoder();
+  }
+});
 
 // packages/provenance/src/io/recorder-files.ts
-async function createWork(ctx, candidates) {
+async function createWork(ctx, candidates2) {
   const baseline = ctx.baseline.ok ? ctx.baseline.value : null;
   const usable = ctx.stateStatus === "ok";
   const w = {
@@ -6505,7 +6989,7 @@ async function createWork(ctx, candidates) {
     slots: /* @__PURE__ */ new Map(),
     files: new Map(usable ? Object.entries(ctx.state.files) : []),
     skipped: new Map(usable ? Object.entries(ctx.state.skipped) : []),
-    present: new Set(candidates.map((c) => c.path)),
+    present: new Set(candidates2.map((c) => c.path)),
     outside: false,
     release: /* @__PURE__ */ new Set()
   };
@@ -6593,10 +7077,10 @@ function deadlineReason(left) {
 function overDeadline(w) {
   return w.ctx.deps.clock.nowMs() - w.ctx.startMs > HOOK_DEADLINE_MS;
 }
-async function visitAll(w, candidates, appeared) {
-  for (const [i, c] of candidates.entries()) {
+async function visitAll(w, candidates2, appeared) {
+  for (const [i, c] of candidates2.entries()) {
     if (overDeadline(w)) {
-      const left = candidates.length - i;
+      const left = candidates2.length - i;
       await fault4(w, null, deadlineReason(left));
       return left;
     }
@@ -6619,10 +7103,10 @@ async function finishBaseline(w) {
     if (!freed.ok) await fault4(w, null, "write_failed");
   }
 }
-async function recordFiles(ctx, candidates) {
-  const w = await createWork(ctx, candidates);
+async function recordFiles(ctx, candidates2) {
+  const w = await createWork(ctx, candidates2);
   const appeared = [];
-  const notReached = await visitAll(w, candidates, appeared);
+  const notReached = await visitAll(w, candidates2, appeared);
   await settleMoves(w, appeared);
   await finishBaseline(w);
   for (const path of [...w.files.keys()]) if (!w.present.has(path)) w.files.delete(path);
@@ -6634,6 +7118,18 @@ async function recordFiles(ctx, candidates) {
   };
   return { state, outsideFound: w.outside, notReached };
 }
+var init_recorder_files = __esm({
+  "packages/provenance/src/io/recorder-files.ts"() {
+    "use strict";
+    init_limits();
+    init_update();
+    init_faults();
+    init_baseline_text();
+    init_scan2();
+    init_recorder_moves();
+    init_recorder_work();
+  }
+});
 
 // packages/provenance/src/io/stdin.ts
 async function collect2(source, gate) {
@@ -6673,9 +7169,14 @@ async function readStdin(deps) {
   gate.stopped = true;
   return bytes === null ? "" : decode(bytes);
 }
+var init_stdin = __esm({
+  "packages/provenance/src/io/stdin.ts"() {
+    "use strict";
+    init_limits();
+  }
+});
 
 // packages/provenance/src/io/recorder.ts
-var EVENTS = ["promptSubmit", "agentStop", "preTask", "postTask", "manual"];
 function parseEvent(name) {
   return EVENTS.find((e) => e === name) ?? null;
 }
@@ -6773,7 +7274,7 @@ async function runLocked(ctx) {
   const state = await sweepAndLeftover(ctx, loaded.state, key, startMs);
   const chosen = select(state, key);
   const cache = createBaselineCache(deps, store.cacheDir());
-  const candidates = await listCandidates(deps, ctx.root);
+  const candidates2 = await listCandidates(deps, ctx.root);
   const outcome = await recordFiles(
     {
       deps,
@@ -6788,7 +7289,7 @@ async function runLocked(ctx) {
       eventIso,
       startMs
     },
-    candidates.files
+    candidates2.files
   );
   const clock = { nowIso: () => eventIso };
   const done2 = transition(outcome.state, event, key, payload, clock, outcome.outsideFound);
@@ -6824,8 +7325,626 @@ async function runRecord(deps, name, cwd, onLog = () => void 0) {
   }
   await recordInRoot({ deps: live, root, store, event, payload });
 }
+var EVENTS;
+var init_recorder = __esm({
+  "packages/provenance/src/io/recorder.ts"() {
+    "use strict";
+    init_payload();
+    init_windows();
+    init_baseline_cache();
+    init_faults();
+    init_lock();
+    init_recorder_files();
+    init_scan2();
+    init_stdin();
+    init_store();
+    EVENTS = ["promptSubmit", "agentStop", "preTask", "postTask", "manual"];
+  }
+});
+
+// packages/provenance/src/core/neutralize.ts
+function replacement(code) {
+  if (code === 10 || code === 9) return null;
+  if (code < 32) return String.fromCharCode(9216 + code);
+  if (code === 127) return "\u2421";
+  if (code >= 128 && code <= 159) return "\uFFFD";
+  return null;
+}
+function neutralize(text) {
+  let out = "";
+  for (let i = 0; i < text.length; i += 1) {
+    const ch = text.charAt(i);
+    out += replacement(ch.charCodeAt(0)) ?? ch;
+  }
+  return out;
+}
+var init_neutralize = __esm({
+  "packages/provenance/src/core/neutralize.ts"() {
+    "use strict";
+  }
+});
+
+// packages/provenance/src/core/legend.ts
+function legendLines() {
+  return LEGEND_ITEMS.map((item) => `${item.code} ${item.words}`);
+}
+function staleLine(path, unrecorded) {
+  return `stale: ${path} changed after the last recorded event; ${String(unrecorded)} characters not yet recorded; run: reveal --record`;
+}
+var LEGEND_ITEMS;
+var init_legend = __esm({
+  "packages/provenance/src/core/legend.ts"() {
+    "use strict";
+    LEGEND_ITEMS = [
+      { code: "[AI:<run>]", words: "changed while the agent was working, with the run it belongs to" },
+      {
+        code: "[AI>HUM:<run>]",
+        words: "agent text in a run that the Engine counts as edited while no agent window was open"
+      },
+      {
+        code: "[HUM]",
+        words: "changed while no agent window was open; typing, pasting and other tools are not told apart"
+      },
+      { code: "[PST]", words: "already in the file when recording started; origin not recorded" }
+    ];
+  }
+});
+
+// packages/provenance/src/core/palette.ts
+function parseHex(hex) {
+  const n = Number.parseInt(hex.slice(1), 16);
+  return [n >> 16 & 255, n >> 8 & 255, n & 255];
+}
+function distance(a, b) {
+  return (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2;
+}
+function candidates() {
+  const out = [];
+  CUBE_LEVELS.forEach((r, ri) => {
+    CUBE_LEVELS.forEach((g, gi) => {
+      CUBE_LEVELS.forEach((b, bi) => {
+        out.push({ index: 16 + 36 * ri + 6 * gi + bi, rgb: [r, g, b] });
+      });
+    });
+  });
+  for (let i = 0; i < 24; i += 1) {
+    const v = 8 + 10 * i;
+    out.push({ index: 232 + i, rgb: [v, v, v] });
+  }
+  return out;
+}
+function nearest256(hex) {
+  const want = parseHex(hex);
+  let best = CANDIDATES[0];
+  if (best === void 0) return 16;
+  let bestDistance = distance(want, best.rgb);
+  for (const c of CANDIDATES) {
+    const d = distance(want, c.rgb);
+    if (d < bestDistance) {
+      best = c;
+      bestDistance = d;
+    }
+  }
+  return best.index;
+}
+function colourSequence(hex, layer, mode) {
+  const base = layer === "fg" ? 38 : 48;
+  if (mode === "ansi256") return `\x1B[${String(base)};5;${String(nearest256(hex))}m`;
+  const [r, g, b] = parseHex(hex);
+  return `\x1B[${String(base)};2;${String(r)};${String(g)};${String(b)}m`;
+}
+function onBody(fg, mode) {
+  return colourSequence(fg, "fg", mode) + colourSequence(PANE.body, "bg", mode);
+}
+var PANE, RESET, CUBE_LEVELS, CANDIDATES;
+var init_palette = __esm({
+  "packages/provenance/src/core/palette.ts"() {
+    "use strict";
+    PANE = {
+      body: "#0F2766",
+      text: "#E8ECF6",
+      title: "#FFFFFF",
+      legend: "#BAC4E2",
+      origin: { HUM: "#E8ECF6", PST: "#F5D98B", AI: "#A6D4F7", "AI>HUM": "#D7C6F5" }
+    };
+    RESET = "\x1B[0m";
+    CUBE_LEVELS = [0, 95, 135, 175, 215, 255];
+    CANDIDATES = candidates();
+  }
+});
+
+// packages/provenance/src/core/view.ts
+function headerLine(path) {
+  return `Reveal Codes: ${neutralize(path)}`;
+}
+function provenanceOnly(doc) {
+  return { ...doc, text: neutralize(doc.text), citations: [], quotes: [], overrides: [] };
+}
+function lineEnds(style, text) {
+  return text.split("\n").join(`${RESET}
+${style}`);
+}
+function colourBody(doc, mode) {
+  const view = provenanceOnly(doc);
+  const codes = render(view, "display").positions;
+  let out = "";
+  view.spans.forEach((span, i) => {
+    const style = onBody(PANE.origin[span.provenance.origin], mode);
+    const code = codes[i]?.code ?? "";
+    out += style + lineEnds(style, code + view.text.slice(span.start, span.end));
+  });
+  return out === "" ? out : out + RESET;
+}
+function colourLines(lines, colour, mode) {
+  const style = onBody(colour, mode);
+  return lines.map((line) => `${style}${line}${RESET}`);
+}
+function colourView(doc, mode, path) {
+  const head = colourLines([headerLine(path)], PANE.title, mode);
+  const legend = colourLines(legendLines(), PANE.legend, mode);
+  return [...head, ...legend, colourBody(doc, mode)].join("\n");
+}
+function plainView(doc, path) {
+  const body = render(provenanceOnly(doc), "display").text;
+  return [headerLine(path), ...legendLines(), body].join("\n");
+}
+function viewRecord(doc, mode, path) {
+  return mode === "plain" ? plainView(doc, path) : colourView(doc, mode, path);
+}
+var init_view = __esm({
+  "packages/provenance/src/core/view.ts"() {
+    "use strict";
+    init_src();
+    init_legend();
+    init_neutralize();
+    init_palette();
+  }
+});
+
+// packages/provenance/src/io/load.ts
+async function loadRecord2(store, path) {
+  const read = await store.readRecord(path);
+  if (read.ok) {
+    const document = read.value?.document;
+    return ok(document === void 0 ? null : { ok: true, text: document.text, doc: document });
+  }
+  return read.error.kind === "tampered_record" ? ok({ ok: false }) : err(read.error);
+}
+async function readFileAt(deps, root, path) {
+  const stat = await deps.fs.lstat(`${root}/${path}`);
+  if (!stat.ok || stat.value.kind !== "file") return { kind: "absent" };
+  const { size, mtimeMs } = stat.value;
+  return readCandidate(deps, root, { path, size, mtimeMs });
+}
+async function baselineTextOf(deps, root, entry, read) {
+  if (entry === null || read.kind === "text" && read.sha256 === entry.sha256) return null;
+  const cache = createBaselineCache(deps, createStore(deps, `${root}/.kiro/provenance`).cacheDir());
+  return resolveBaselineText(deps, root, cache, entry);
+}
+async function loadFile(deps, root, path) {
+  const store = createStore(deps, `${root}/.kiro/provenance`);
+  const record = await loadRecord2(store, path);
+  if (!record.ok) return record;
+  const baseline = await store.readBaseline();
+  if (!baseline.ok) return baseline;
+  const read = await readFileAt(deps, root, path);
+  const entry = baseline.value?.files[path] ?? null;
+  return ok({
+    read,
+    record: record.value,
+    entry,
+    baselineAt: baseline.value?.at ?? null,
+    baselineText: await baselineTextOf(deps, root, entry, read),
+    listed: record.value !== null || entry !== null ? null : await isListed(deps, root, path)
+  });
+}
+async function isListed(deps, root, path) {
+  return (await listCandidates(deps, root)).files.some((c) => c.path === path);
+}
+function unchangedDocument(text, baselineAt) {
+  const doc = createDocument(text, baselineAt);
+  return doc.ok ? doc.value : null;
+}
+var init_load = __esm({
+  "packages/provenance/src/io/load.ts"() {
+    "use strict";
+    init_src();
+    init_baseline_cache();
+    init_baseline_text();
+    init_scan2();
+    init_store();
+  }
+});
+
+// packages/provenance/src/io/reveal-file.ts
+function unrecordedCharacters(recorded, current) {
+  return changeHunks(recorded, current).reduce((n, h) => n + (h.to - h.from) + h.text.length, 0);
+}
+function notShown(path, reason) {
+  const text = reason === "tampered_record" ? `${neutralize(path)}: tampered_record` : `${neutralize(path)}: not recorded: ${reason}`;
+  return { status: 1, text };
+}
+function reasonOf(facts) {
+  const { read } = facts;
+  if (read.kind === "absent" || read.kind === "unreadable") return "not_tracked";
+  const nothing = facts.record === null && facts.entry === null;
+  if (nothing && facts.listed === false) return "ignored";
+  if (read.kind === "over_limit" || read.kind === "binary") return read.kind;
+  return nothing ? "no_record" : null;
+}
+function shown(doc, mode, path, stale) {
+  const view = viewRecord(doc, mode, path);
+  return { status: 0, text: stale === null ? view : `${stale}
+${view}` };
+}
+function staleOf(path, count) {
+  return staleLine(neutralize(path), count);
+}
+function entryOutput(facts, text, mode, path) {
+  const { entry, read, baselineAt, baselineText } = facts;
+  if (entry === null || read.kind !== "text" || baselineAt === null)
+    return notShown(path, "no_record");
+  if (read.sha256 === entry.sha256) {
+    const doc = unchangedDocument(text, baselineAt);
+    return doc === null ? notShown(path, "no_record") : shown(doc, mode, path, null);
+  }
+  const count = baselineText === null ? text.length : unrecordedCharacters(baselineText, text);
+  return { status: 0, text: `${staleOf(path, count)}
+${headerLine(path)}` };
+}
+function decideReveal(facts, path, mode) {
+  const { record, read } = facts;
+  if (record !== null && !record.ok) return notShown(path, "tampered_record");
+  const reason = reasonOf(facts);
+  if (reason !== null || read.kind !== "text") return notShown(path, reason ?? "not_tracked");
+  if (record === null) return entryOutput(facts, read.text, mode, path);
+  if (record.text === read.text) return shown(record.doc, mode, path, null);
+  const stale = staleOf(path, unrecordedCharacters(record.text, read.text));
+  return shown(record.doc, mode, path, stale);
+}
+async function revealFile(deps, root, path, mode) {
+  const facts = await loadFile(deps, root, path);
+  if (!facts.ok) return { status: 1, text: `${neutralize(path)}: ${facts.error.kind}` };
+  return decideReveal(facts.value, path, mode);
+}
+var init_reveal_file = __esm({
+  "packages/provenance/src/io/reveal-file.ts"() {
+    "use strict";
+    init_legend();
+    init_neutralize();
+    init_update();
+    init_view();
+    init_load();
+  }
+});
+
+// packages/provenance/src/io/reveal-cmd.ts
+var reveal_cmd_exports = {};
+__export(reveal_cmd_exports, {
+  USAGE: () => USAGE,
+  chooseMode: () => chooseMode,
+  relativeTo: () => relativeTo,
+  revealCommand: () => revealCommand
+});
+function chooseMode(env, isTTY) {
+  if (!isTTY || env.noColor || env.term === "dumb") return "plain";
+  if (env.colorterm === "truecolor" || env.colorterm === "24bit") return "truecolor";
+  return env.term?.includes("256color") === true ? "ansi256" : "plain";
+}
+function relativeTo(root, cwd, arg) {
+  const parts = [];
+  const joined = arg.startsWith("/") ? arg : `${cwd}/${arg}`;
+  for (const part of joined.split("/")) {
+    if (part === "..") parts.pop();
+    else if (part !== "" && part !== ".") parts.push(part);
+  }
+  const base = root.split("/").filter((p) => p !== "");
+  if (parts.length <= base.length || base.some((p, i) => parts[i] !== p)) return null;
+  return parts.slice(base.length).join("/");
+}
+async function revealOne(deps, io, arg) {
+  const root = await findWorkspaceRoot(deps, io.cwd, null);
+  if (root === null) {
+    io.out("provenance is not set up here: run setup_provenance");
+    return 1;
+  }
+  const path = relativeTo(root, io.cwd, arg);
+  if (path === null) {
+    io.out(`${neutralize(arg)}: not recorded: not_tracked`);
+    return 1;
+  }
+  const shown2 = await revealFile(deps, root, path, chooseMode(io.env, io.isTTY));
+  io.out(shown2.text);
+  return shown2.status;
+}
+async function revealCommand(deps, args, io) {
+  const [first, ...rest] = args;
+  if (first === void 0 || first.startsWith("--") || rest.length > 0) {
+    io.err(USAGE);
+    return 1;
+  }
+  return revealOne(deps, io, first);
+}
+var USAGE;
+var init_reveal_cmd = __esm({
+  "packages/provenance/src/io/reveal-cmd.ts"() {
+    "use strict";
+    init_neutralize();
+    init_recorder();
+    init_reveal_file();
+    USAGE = "usage: reveal <file> | --summary [path] [--top <n>] | --check [--strict] | --record";
+  }
+});
+
+// packages/provenance/src/io/env.ts
+var env_exports = {};
+__export(env_exports, {
+  colorEnvFrom: () => colorEnvFrom,
+  readColorEnv: () => readColorEnv
+});
+function colorEnvFrom(env) {
+  const noColor = env["NO_COLOR"];
+  return {
+    noColor: noColor !== void 0 && noColor !== "",
+    colorterm: env["COLORTERM"] ?? null,
+    term: env["TERM"] ?? null
+  };
+}
+function readColorEnv() {
+  return colorEnvFrom(process.env);
+}
+var init_env = __esm({
+  "packages/provenance/src/io/env.ts"() {
+    "use strict";
+  }
+});
+
+// packages/provenance/src/cli/crash.ts
+function installCrashHandlers(getLogger, exit, event) {
+  const bail = () => {
+    getLogger().fault({ event, path: null, reason: "exception" }).then(exit, exit);
+  };
+  process.on("uncaughtException", bail);
+  process.on("unhandledRejection", bail);
+  return bail;
+}
+
+// packages/provenance/src/io/deps.ts
+init_src();
+import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
+import {
+  appendFile,
+  lstat,
+  mkdir,
+  readdir,
+  readFile,
+  rename,
+  rmdir,
+  unlink,
+  writeFile
+} from "node:fs/promises";
+async function attempt(run) {
+  try {
+    return ok(await run());
+  } catch (error) {
+    const code = error?.code;
+    return err({ code: typeof code === "string" ? code : "EIO" });
+  }
+}
+function toKind(s) {
+  if (s.isSymbolicLink()) return "symlink";
+  if (s.isFile()) return "file";
+  return s.isDirectory() ? "dir" : "other";
+}
+function nodeFs() {
+  const void_ = (run) => attempt(async () => {
+    await run();
+  });
+  return {
+    readFile: (p) => attempt(async () => new Uint8Array(await readFile(p))),
+    writeFile: (p, data, exclusive = false) => void_(() => writeFile(p, data, exclusive ? { flag: "wx" } : void 0)),
+    appendFile: (p, text) => void_(() => appendFile(p, text)),
+    rename: (a, b) => void_(() => rename(a, b)),
+    unlink: (p) => void_(() => unlink(p)),
+    rmdir: (p) => void_(() => rmdir(p)),
+    mkdirp: (p) => void_(() => mkdir(p, { recursive: true })),
+    readdir: (p) => attempt(() => readdir(p)),
+    lstat: (p) => attempt(async () => {
+      const s = await lstat(p);
+      return { size: s.size, mtimeMs: s.mtimeMs, kind: toKind(s) };
+    })
+  };
+}
+function nodeGit(command) {
+  return {
+    exec: (cwd, args, input) => new Promise((resolve) => {
+      const child = execFile(
+        command,
+        [...args],
+        { cwd, encoding: "buffer", maxBuffer: 1 << 28 },
+        (error, stdout) => {
+          if (error === null) {
+            resolve(ok(new Uint8Array(stdout)));
+            return;
+          }
+          const code = error.code;
+          if (code === "ENOENT") {
+            resolve(err({ kind: "missing" }));
+            return;
+          }
+          resolve(err(typeof code === "number" ? { kind: "failed", code } : { kind: "failed" }));
+        }
+      );
+      child.stdin?.on("error", () => void 0);
+      child.stdin?.end(input);
+    })
+  };
+}
+function nodeClock() {
+  return {
+    nowMs: () => Date.now(),
+    nowIso: () => (/* @__PURE__ */ new Date()).toISOString(),
+    timer: (ms) => {
+      let handle;
+      const done2 = new Promise((resolve) => {
+        handle = setTimeout(resolve, ms);
+      });
+      return {
+        done: done2,
+        cancel: () => {
+          clearTimeout(handle);
+        }
+      };
+    }
+  };
+}
+function nodeDeps(gitCommand = "git") {
+  return {
+    fs: nodeFs(),
+    git: nodeGit(gitCommand),
+    clock: nodeClock(),
+    sha256: (bytes) => createHash("sha256").update(bytes).digest("hex"),
+    stdin: process.stdin,
+    log: { fault: () => Promise.resolve() },
+    pid: process.pid
+  };
+}
+
+// packages/provenance/src/io/baseline-cmd.ts
+init_src();
+init_baseline_cache();
+init_git();
+init_lock();
+init_scan2();
+init_store();
+var READ_BATCH = 64;
+var EVENT = "baseline";
+async function listRecordPaths2(deps, dir, prefix = "") {
+  const names = await deps.fs.readdir(prefix === "" ? dir : `${dir}/${prefix}`);
+  if (!names.ok) return [];
+  const found = [];
+  for (const name of names.value) {
+    const rel = prefix === "" ? name : `${prefix}/${name}`;
+    const stat = await deps.fs.lstat(`${dir}/${rel}`);
+    if (!stat.ok) continue;
+    if (stat.value.kind === "dir") found.push(...await listRecordPaths2(deps, dir, rel));
+    else if (stat.value.kind === "file" && rel.endsWith(".reveal")) found.push(rel.slice(0, -7));
+  }
+  return found;
+}
+async function readAll(deps, root, files) {
+  const texts = /* @__PURE__ */ new Map();
+  let skipped = 0;
+  for (let i = 0; i < files.length; i += READ_BATCH) {
+    const batch = files.slice(i, i + READ_BATCH);
+    const reads = await Promise.all(batch.map((c) => readCandidate(deps, root, c)));
+    reads.forEach((read, j) => {
+      if (read.kind === "text") texts.set(batch[j].path, read);
+      else skipped += 1;
+    });
+  }
+  return { texts, skipped };
+}
+async function blobInfo(deps, root, paths) {
+  const ids = await hashObjects(deps, root, paths);
+  if (!ids.ok) {
+    await deps.log.fault({ event: EVENT, path: null, reason: "read_failed" });
+    return { ids: /* @__PURE__ */ new Map(), held: /* @__PURE__ */ new Map() };
+  }
+  const held = await checkBlobs(deps, root, [...ids.value.values()]);
+  if (!held.ok) await deps.log.fault({ event: EVENT, path: null, reason: "read_failed" });
+  return { ids: ids.value, held: held.ok ? held.value : /* @__PURE__ */ new Map() };
+}
+async function writeCacheFiles(deps, cache, texts, needed) {
+  for (const path of needed) {
+    const file = texts.get(path);
+    const have = await cache.read(file.sha256);
+    if (have !== null && deps.sha256(have) === file.sha256) continue;
+    const written = await cache.write(file.sha256, file.bytes);
+    if (!written.ok) await deps.log.fault({ event: EVENT, path, reason: "write_failed" });
+  }
+}
+async function planEntries(deps, root, git, texts) {
+  const paths = [...texts.keys()];
+  const info = git ? await blobInfo(deps, root, paths) : { ids: /* @__PURE__ */ new Map(), held: /* @__PURE__ */ new Map() };
+  const entries = /* @__PURE__ */ new Map();
+  const needed = [];
+  for (const path of paths) {
+    const sha256 = texts.get(path).sha256;
+    const blob = info.ids.get(path);
+    entries.set(path, blob === void 0 ? { sha256 } : { sha256, blob });
+    if (blob === void 0 || info.held.get(blob) !== true) needed.push(path);
+  }
+  return { entries, needed };
+}
+async function ensureSessions(deps, store) {
+  const stat = await deps.fs.lstat(`${store.dir}/sessions.json`);
+  if (stat.ok || stat.error.code !== "ENOENT") return;
+  const written = await store.writeSessions(0);
+  if (!written.ok) await deps.log.fault({ event: EVENT, path: null, reason: "write_failed" });
+}
+async function collect(deps, root, store, base) {
+  const list = await listCandidates(deps, root);
+  const recorded = new Set(await listRecordPaths2(deps, `${store.dir}/records`));
+  const todo = list.files.filter((f) => !recorded.has(f.path) && base?.files[f.path] === void 0);
+  const { texts, skipped } = await readAll(deps, root, todo);
+  const plan = await planEntries(deps, root, list.git, texts);
+  return { ...plan, texts, skipped };
+}
+async function baselineLocked(deps, root, store) {
+  const cache = createBaselineCache(deps, store.cacheDir());
+  const existing = await store.readBaseline();
+  if (!existing.ok) {
+    await deps.log.fault({ event: EVENT, path: null, reason: existing.error.kind });
+    return existing;
+  }
+  const found = await collect(deps, root, store, existing.value);
+  await writeCacheFiles(deps, cache, found.texts, found.needed);
+  const next = existing.value ?? {
+    version: 1,
+    at: `${deps.clock.nowIso().slice(0, 19)}Z`,
+    files: {}
+  };
+  const merged = {
+    ...next,
+    files: { ...next.files, ...Object.fromEntries(found.entries) }
+  };
+  if (existing.value === null || found.entries.size > 0) {
+    const written = await store.writeBaseline(merged);
+    if (!written.ok) return written;
+  }
+  await cache.prune(merged);
+  await ensureSessions(deps, store);
+  return ok({ added: found.entries.size, skipped: found.skipped });
+}
+async function runBaseline(deps, root) {
+  const store = createStore(deps, `${root}/.kiro/provenance`);
+  await deps.fs.mkdirp(store.dir);
+  const taken = await acquireLock(deps, `${store.dir}/lock`);
+  if (!taken.ok) {
+    await deps.log.fault({ event: EVENT, path: null, reason: taken.error.kind });
+    return taken;
+  }
+  try {
+    return await baselineLocked(deps, root, store);
+  } finally {
+    await taken.value.release();
+  }
+}
+function formatBaselineLine(summary) {
+  return `baseline: ${String(summary.added)} added, ${String(summary.skipped)} skipped`;
+}
+async function baselineCommand(deps, root, print) {
+  const result = await runBaseline(deps, root);
+  if (!result.ok) return result.error.kind === "lock_timeout" ? 0 : 1;
+  print(formatBaselineLine(result.value));
+  return 0;
+}
 
 // packages/provenance/src/cli/main.ts
+init_faults();
+init_recorder();
 var WATCHDOG_MS = 22e3;
 function exitZero() {
   process.exit(0);
@@ -6854,13 +7973,35 @@ async function baselineMain() {
   return baselineCommand(deps, root, (line) => process.stdout.write(`${line}
 `));
 }
+async function revealMain(args) {
+  const { revealCommand: revealCommand2 } = await Promise.resolve().then(() => (init_reveal_cmd(), reveal_cmd_exports));
+  const { readColorEnv: readColorEnv2 } = await Promise.resolve().then(() => (init_env(), env_exports));
+  process.stdout.on("error", (error) => {
+    if (error.code !== "EPIPE") throw error;
+    process.exit(0);
+  });
+  const io = {
+    cwd: process.cwd().replace(/\\/gu, "/"),
+    env: readColorEnv2(),
+    isTTY: process.stdout.isTTY,
+    out: (text) => process.stdout.write(`${text}
+`),
+    err: (text) => process.stderr.write(`${text}
+`)
+  };
+  return revealCommand2(nodeDeps(), args, io);
+}
 async function main(argv) {
   const [command, ...rest] = argv;
   if (command === "record") return recordCommand(rest[0] ?? "");
   if (command === "baseline") {
     process.exit(await baselineMain());
   }
-  process.stderr.write("usage: provenance record <event> | baseline\n");
+  if (command === "reveal") {
+    process.exitCode = await revealMain(rest);
+    return;
+  }
+  process.stderr.write("usage: provenance record <event> | baseline | reveal <file>\n");
   process.exit(1);
 }
 void main(process.argv.slice(2));

@@ -1,5 +1,5 @@
 /**
- * The entry: dispatches `record`, `baseline` and, in later tasks, `reveal`, `mcp` and `setup`.
+ * The entry: dispatches `record`, `baseline`, `reveal` and, in later tasks, `mcp` and `setup`.
  * `record` writes nothing to standard output or standard error and exits 0 for every input and
  * failure, including an uncaught exception and an unhandled rejection (Req 7.1 to 7.3, 7.10).
  * This is the only module that catches everything or calls `process.exit`.
@@ -39,13 +39,34 @@ async function baselineMain(): Promise<number> {
   const deps = { ...base, log: createFaultLog(base, `${root}/.kiro/provenance/errors.log`) };
   return baselineCommand(deps, root, (line) => process.stdout.write(`${line}\n`));
 }
+/** `reveal <args>`: a closed pipe (`| head`) ends the output without an error (Req 9.12). */
+async function revealMain(args: readonly string[]): Promise<number> {
+  const { revealCommand } = await import("../io/reveal-cmd.js");
+  const { readColorEnv } = await import("../io/env.js");
+  process.stdout.on("error", (error: NodeJS.ErrnoException) => {
+    if (error.code !== "EPIPE") throw error;
+    process.exit(0);
+  });
+  const io = {
+    cwd: process.cwd().replace(/\\/gu, "/"),
+    env: readColorEnv(),
+    isTTY: process.stdout.isTTY,
+    out: (text: string) => process.stdout.write(`${text}\n`),
+    err: (text: string) => process.stderr.write(`${text}\n`),
+  };
+  return revealCommand(nodeDeps(), args, io);
+}
 async function main(argv: readonly string[]): Promise<void> {
   const [command, ...rest] = argv;
   if (command === "record") return recordCommand(rest[0] ?? "");
   if (command === "baseline") {
     process.exit(await baselineMain());
   }
-  process.stderr.write("usage: provenance record <event> | baseline\n");
+  if (command === "reveal") {
+    process.exitCode = await revealMain(rest);
+    return;
+  }
+  process.stderr.write("usage: provenance record <event> | baseline | reveal <file>\n");
   process.exit(1);
 }
 void main(process.argv.slice(2));

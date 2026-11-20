@@ -1,0 +1,8 @@
+[DOC{v=1;n=0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,327,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]/**
+ * The shell wrapper `.kiro/provenance/reveal` (Decision 3): POSIX `sh`, runs the Bundle that sits
+ * beside it. Windows is not supported. Pure; no `node:`.
+ */
+/** The file content of the wrapper. */
+export function wrapperText(): string {
+  return '#!/bin/sh\\nexec node "$(dirname "$0")/provenance.mjs" reveal "$@"\\n';
+}

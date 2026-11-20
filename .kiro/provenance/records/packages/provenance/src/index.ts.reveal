@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1,285,0,0}][PST{t=2026-11-20T03:04:47Z}]// The pure API is exported here as the modules of src/core/ are built.
+[DOC{v=1;n=0;r=7.1 `legend.ts` and `structured.ts` 2026-11-20T03:49:01Z.1,285,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,49,0,0}][PST{t=2026-11-20T03:04:47Z}]// The pure API is exported here as the modules of src/core/ are built.
 export type {
   Baseline,
   FileCache,
@@ -49,3 +49,4 @@ export {
 } from "./core/legend.js";
 export type { StructuredSpan } from "./core/structured.js";
 export { structuredSpans } from "./core/structured.js";
+[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]export { wrapperText } from "./core/wrapper.js";
