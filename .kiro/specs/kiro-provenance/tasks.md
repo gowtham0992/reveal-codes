@@ -6,7 +6,7 @@ The plan builds the Recorder, the Reveal_Command, the MCP server and the Power o
 
 **The Open points of the earlier design were settled by the user on 2026-11-18** and are recorded in the "Resolved points" section of `design.md`. The plan follows the design as it stands. A later change to a resolved point is made in `design.md` and in the affected tasks first.
 
-Task count: **73 tasks**, counted as leaf sub-tasks (numbered `N.M`), the six checkpoints (1.4, 4.17, 4.20, 6.5, 7.13 and 12.1) included. The twelve group headings are not counted. The dependency graph lists the 67 non-checkpoint leaves plus the six checkpoints, each in a wave of its own. Seventeen properties exist, one per task, none optional: Property 13 in 4.2, Property 10 in 4.4, Property 7 in 4.6, Property 3 in 4.8, Property 8 in 4.10, Property 9 in 4.12, Property 15 in 4.16, Property 17 in 4.19, Property 1 in 5.8, Property 2 in 5.9, Property 4 in 5.10, Property 5 in 5.11, Property 14 in 5.12, Property 16 in 5.13, Property 11 in 7.2, Property 6 in 7.4 (updated in 7.11 and 7.12) and Property 12 in 7.6 (updated in 7.10).
+Task count: **75 tasks**, counted as leaf sub-tasks (numbered `N.M`), the seven checkpoints (1.4, 4.17, 4.20, 6.5, 7.13, 10.3 and 12.1) included. The twelve group headings are not counted. The dependency graph lists the 68 non-checkpoint leaves plus the seven checkpoints, each in a wave of its own. Seventeen properties exist, one per task, none optional: Property 13 in 4.2, Property 10 in 4.4, Property 7 in 4.6, Property 3 in 4.8, Property 8 in 4.10, Property 9 in 4.12, Property 15 in 4.16, Property 17 in 4.19, Property 1 in 5.8, Property 2 in 5.9, Property 4 in 5.10, Property 5 in 5.11, Property 14 in 5.12, Property 16 in 5.13, Property 11 in 7.2, Property 6 in 7.4 (updated in 7.11, 7.12 and 7.14) and Property 12 in 7.6 (updated in 7.10).
 
 **The capture of task 1.2 and the user's decisions of 2026-11-18 changed the plan** (design, Resolved point 13; requirements, Decision 20): a session entry persists with an empty stack and records `lastClosedBy`, `promptSeen` and `noPromptCounted`; an `agentStop` that follows the same session's own `postTask` logs nothing; sessions that fire `Stop` with no prompt event are logged as `no_prompt_events` and counted in the committed file `.kiro/provenance/sessions.json`; the `[HUM]` and `[AI>HUM]` words now say "while no agent window was open"; and the CLI has no spec-task windows. Task 1.2 itself is unchanged and nothing is marked complete by this change.
 
@@ -293,6 +293,10 @@ Conventions that apply to every task:
     - Rebuild the Bundle, and copy it to `.kiro/provenance/provenance.mjs`, as two separate commands. Run, each with exit code 0: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, and the properties at 500 runs. Paste into the report the first 30 lines of `pnpm -s reveal --summary` and the first 30 lines of `pnpm -s reveal packages/provenance/src/core/windows.ts` (plain, piped).
     - Stop for the user. Do not start group 8 until the user says so. Ensure all tests pass, ask the user if questions arise.
     - _Requirements: 9.14, 9.17, 10.13, 10.14, 16.12_
+  - [ ] 7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line
+    - Files: `src/core/view.ts` and `src/core/runs-list.ts` (and `legend.ts` if the sentence is built there). (a) In "Runs in this file" each line gives the tag (which carries the Task_Number), then the title WITHOUT the Task_Number, then the opening time and the hunk count, for example `  6.6  One window per task: duplicate preTask and postTask by name  opened … 5 hunks`. (b) The line `Tags are listed under "Runs in this file".` is printed only when tags are shown and the Runs list is absent; when the list is printed below the legend the line is dropped; with `--full` there is no list and no tag, so the line is not printed. (c) One empty pane line between the header block (title, legend, Runs list) and the file's text: in colour a full-width pane line (background, `ESC[K`, reset), in plain output an empty line.
+    - Update `view.test.ts`, `reveal-file.test.ts` and `view.properties.test.ts` (the title is printed without its Task_Number and the number appears once on the line; the sentence is absent when the list is printed and absent with `--full`; the blank line is present in colour and plain output; Property 6 still holds in both modes and with `--full`). Rebuild the Bundle, and copy it to `.kiro/provenance/provenance.mjs`, as two separate commands. Run `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:pbt`, each with exit code 0.
+    - _Requirements: 9.3, 9.8, 9.15, 9.17, 9.18_
 
 - [ ] 8. The MCP server
   - [~] 8.1 MCP dependencies, workspace discovery and schemas
@@ -326,6 +330,10 @@ Conventions that apply to every task:
     - File `test/power-tools.test.ts`: copy `powers/provenance` to a directory outside the repository with no `node_modules`, start `node server/provenance.mjs mcp` over standard input and output, call each of the five tools with the SDK client and check each result against the shape of Requirement 12 (Req 16.11); run `setup` from the copy in a temporary workspace.
     - Measure the cost of the Bundle's size on the hook path: the median of 25 `record promptSubmit` runs of the Bundle with the MCP modules present against the node floor; if the difference exceeds 20 ms, write it in `BUILD_LOG.md` with the only fallback (a second file `provenance-mcp.mjs`, which breaks Req 13.10) for the user to decide, and do not change the Bundle layout without that decision.
     - _Requirements: 13.10, 13.11, 13.12, 16.11, 7.7_
+  - [ ] 10.3 Checkpoint - the Power is built
+    - Run, each with exit code 0: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt` and the properties at 500 runs; `pnpm power:build` twice, with `git status --porcelain` empty after each; `pnpm kiro:check`. Copy `powers/provenance` to a directory outside the repository with no `node_modules`, start its MCP server (`node server/provenance.mjs mcp`) from the copy and call each of the five tools. Report the results.
+    - Then STOP for the user and give exact steps to import the Power into a second workspace that has no pnpm and no node_modules: how Kiro imports a local Power (from the folder `powers/provenance`, or from a copy of it); what to ask Kiro (for example "set up provenance in this workspace"); which files the setup writes (the Hook_File, `.kiro/provenance/` with `provenance.mjs`, `reveal`, the Record_Directory files); how to run the three reveal commands there with `.kiro/provenance/reveal` or `node .kiro/provenance/provenance.mjs reveal …`; and how to remove it. Do not start group 11 until the user says so. Ensure all tests pass, ask the user if questions arise.
+    - _Requirements: 13.10, 13.11, 13.12, 16.11_
 
 - [ ] 11. Boundary tests and documentation
   - [~] 11.1 Static boundary tests
@@ -407,15 +415,17 @@ Conventions that apply to every task:
     { "id": 36, "tasks": ["7.11"] },
     { "id": 37, "tasks": ["7.12"] },
     { "id": 38, "tasks": ["7.13"] },
-    { "id": 39, "tasks": ["8.1"] },
-    { "id": 40, "tasks": ["8.2"] },
-    { "id": 41, "tasks": ["9.1"] },
-    { "id": 42, "tasks": ["9.2"] },
-    { "id": 43, "tasks": ["10.1"] },
-    { "id": 44, "tasks": ["10.2"] },
-    { "id": 45, "tasks": ["11.1", "11.2", "11.3"] },
-    { "id": 46, "tasks": ["11.4"] },
-    { "id": 47, "tasks": ["12.1"] }
+    { "id": 39, "tasks": ["7.14"] },
+    { "id": 40, "tasks": ["8.1"] },
+    { "id": 41, "tasks": ["8.2"] },
+    { "id": 42, "tasks": ["9.1"] },
+    { "id": 43, "tasks": ["9.2"] },
+    { "id": 44, "tasks": ["10.1"] },
+    { "id": 45, "tasks": ["10.2"] },
+    { "id": 46, "tasks": ["10.3"] },
+    { "id": 47, "tasks": ["11.1", "11.2", "11.3"] },
+    { "id": 48, "tasks": ["11.4"] },
+    { "id": 49, "tasks": ["12.1"] }
   ]
 }
 ```
