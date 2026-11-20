@@ -348,10 +348,10 @@ function isPartyWordUnitAt(text, i) {
 function readWordTokenBefore(text, end, lo) {
   let j = end;
   while (j > lo) {
-    const width = wWidthEndingAt(text, j - 1, lo);
-    if (width < 0) return null;
-    if (width === 0) break;
-    j -= width;
+    const width3 = wWidthEndingAt(text, j - 1, lo);
+    if (width3 < 0) return null;
+    if (width3 === 0) break;
+    j -= width3;
   }
   if (j === end) return null;
   if (j === lo && lo > 0) return null;
@@ -7468,8 +7468,11 @@ var init_check2 = __esm({
 });
 
 // packages/provenance/src/core/legend.ts
-function legendLines() {
-  return LEGEND_ITEMS.map((item) => `${item.code} ${item.words}`);
+function legendLines(wording = "tag") {
+  return LEGEND_ITEMS.map((item) => {
+    const code = wording === "run" ? item.code.replace("<tag>", "<run>") : item.code;
+    return `${code} ${item.words}`;
+  });
 }
 function humNotice() {
   return legendLines()[2] ?? "";
@@ -7485,9 +7488,9 @@ var init_legend = __esm({
   "packages/provenance/src/core/legend.ts"() {
     "use strict";
     LEGEND_ITEMS = [
-      { code: "[AI:<run>]", words: "changed while the agent was working, with the run it belongs to" },
+      { code: "[AI:<tag>]", words: "changed while the agent was working, with the run it belongs to" },
       {
-        code: "[AI>HUM:<run>]",
+        code: "[AI>HUM:<tag>]",
         words: "agent text in a run that the Engine counts as edited while no agent window was open"
       },
       {
@@ -7499,6 +7502,113 @@ var init_legend = __esm({
   }
 });
 
+// packages/provenance/src/core/summary-types.ts
+function formatShare(part, whole) {
+  const tenths = whole === 0 ? 0 : Math.round(part * 1e3 / whole);
+  return `${String(Math.floor(tenths / 10))}.${String(tenths % 10)}`;
+}
+var ORIGINS3;
+var init_summary_types = __esm({
+  "packages/provenance/src/core/summary-types.ts"() {
+    "use strict";
+    ORIGINS3 = ["AI", "AI>HUM", "HUM", "PST"];
+  }
+});
+
+// packages/provenance/src/core/summary-render.ts
+function alignTable(columns, rows) {
+  const all = [columns.map((c) => c.head), ...rows];
+  const widths = columns.map((_, i) => Math.max(...all.map((r) => width(r[i] ?? ""))));
+  return all.map(
+    (row) => columns.map((c, i) => {
+      const cell = row[i] ?? "";
+      const pad = " ".repeat((widths[i] ?? 0) - width(cell));
+      return c.right ? pad + cell : cell + pad;
+    }).join("  ").trimEnd()
+  );
+}
+function countsLine(counts, characters) {
+  const parts = ORIGINS3.map(
+    (o) => `${o} ${String(counts[o])} (${formatShare(counts[o], characters)}%)`
+  );
+  return `${String(characters)} characters: ${parts.join(", ")}`;
+}
+function stretchLine(s) {
+  const where = `${s.path}:${String(s.firstLine)}-${String(s.lastLine)}`;
+  return `${where}  ${String(s.length)} chars  ${s.words}  opened ${s.openedAt ?? "-"}`;
+}
+function windowTable(windows) {
+  const columns = [
+    { head: "Task", right: false },
+    { head: "Label", right: false },
+    { head: "Opened", right: false },
+    { head: "Files", right: true },
+    { head: "Runs", right: true },
+    { head: "AI", right: true },
+    { head: "AI>HUM", right: true }
+  ];
+  const rows = windows.map((w) => [
+    w.taskNumber ?? "-",
+    w.title,
+    w.openedAt ?? "-",
+    String(w.files),
+    String(w.runs),
+    String(w.ai),
+    String(w.aiHuman)
+  ]);
+  return alignTable(columns, rows);
+}
+function fileTable(files) {
+  const columns = [
+    { head: "File", right: false },
+    { head: "Characters", right: true },
+    ...ORIGINS3.map((o) => ({ head: o, right: true })),
+    { head: "", right: false }
+  ];
+  const rows = files.map((f) => [
+    f.path,
+    String(f.characters),
+    ...ORIGINS3.map((o) => `${String(f.counts[o])} (${formatShare(f.counts[o], f.characters)}%)`),
+    f.stale ? "stale" : ""
+  ]);
+  return alignTable(columns, rows);
+}
+function unchangedLine(n) {
+  const files = n === 1 ? "1 file" : `${String(n)} files`;
+  return `${files} unchanged since recording started, all [PST].`;
+}
+function sessionsLines(sessions) {
+  if (sessions === "unreadable") return [UNREADABLE];
+  return sessions > 0 ? [noPromptSessionsLine(sessions)] : [];
+}
+function closingLines(sessions) {
+  return [humNotice(), ...sessionsLines(sessions)];
+}
+function renderSummary(summary, sessions) {
+  const out = [`Total: ${countsLine(summary.total, summary.totalCharacters)}`];
+  out.push("Largest untouched agent stretches:");
+  if (summary.stretches.length === 0) out.push("none");
+  for (const s of summary.stretches) out.push(stretchLine(s));
+  out.push(`AI>HUM characters left out of this list: ${String(summary.omittedAiHuman)}`);
+  out.push("Agent text by window:");
+  if (summary.windows.length === 0) out.push("none");
+  else out.push(...windowTable(summary.windows));
+  out.push("Files:", ...fileTable(summary.listed));
+  if (!summary.all) out.push(unchangedLine(summary.unchangedCount));
+  out.push(...closingLines(sessions));
+  return out;
+}
+var UNREADABLE, width;
+var init_summary_render = __esm({
+  "packages/provenance/src/core/summary-render.ts"() {
+    "use strict";
+    init_legend();
+    init_summary_types();
+    UNREADABLE = "Sessions with no prompt events: the count is unreadable (sessions.json does not parse).";
+    width = (text) => Array.from(text).length;
+  }
+});
+
 // packages/provenance/src/core/summary.ts
 function emptyCounts() {
   return { AI: 0, "AI>HUM": 0, HUM: 0, PST: 0 };
@@ -7506,10 +7616,6 @@ function emptyCounts() {
 function compareCodeUnits2(a, b) {
   if (a < b) return -1;
   return a > b ? 1 : 0;
-}
-function formatShare(part, whole) {
-  const tenths = whole === 0 ? 0 : Math.round(part * 1e3 / whole);
-  return `${String(Math.floor(tenths / 10))}.${String(tenths % 10)}`;
 }
 function normalizePath(path) {
   if (path === null) return null;
@@ -7549,6 +7655,7 @@ function stretchesOf(record) {
       windowRun: windowRunOf(run),
       taskNumber: name.taskNumber,
       title: name.title,
+      openedAt: name.time,
       words: describeRun(name.taskNumber, name.title)
     });
   }
@@ -7565,7 +7672,6 @@ function windowRows(records) {
       if (origin !== "AI" && origin !== "AI>HUM" || runId2 === void 0) continue;
       const key = windowRunOf(runId2);
       const name = parseRunId(runId2);
-      const words = describeRun(name.taskNumber, name.title);
       const row = {
         windowRun: key,
         taskNumber: name.taskNumber,
@@ -7574,8 +7680,7 @@ function windowRows(records) {
         files: 0,
         runs: 0,
         ai: 0,
-        aiHuman: 0,
-        words
+        aiHuman: 0
       };
       const entry = acc.get(key) ?? { row, files: /* @__PURE__ */ new Set(), runs: /* @__PURE__ */ new Set() };
       entry.files.add(record.path);
@@ -7595,55 +7700,29 @@ function compareWindows(a, b) {
   }
   return compareCodeUnits2(a.windowRun, b.windowRun);
 }
-function buildSummary(records, unchanged, top) {
+function isListed(file) {
+  const { AI, "AI>HUM": aiHuman, HUM } = file.counts;
+  return file.stale || AI + aiHuman + HUM > 0;
+}
+function buildSummary(records, unchanged, top, all) {
   const files = [...records.map(recordFile), ...unchanged.map(unchangedFile)].sort(
     (a, b) => compareCodeUnits2(a.path, b.path)
   );
   const total = emptyCounts();
   for (const file of files) for (const o of ORIGINS3) total[o] += file.counts[o];
   const stretches = records.flatMap(stretchesOf).sort(compareStretches);
+  const listed = all ? files : files.filter(isListed);
   return {
     files,
     total,
     totalCharacters: files.reduce((sum, f) => sum + f.characters, 0),
     stretches: stretches.slice(0, Math.max(0, top)),
     omittedAiHuman: total["AI>HUM"],
-    windows: windowRows(records)
+    windows: windowRows(records),
+    listed,
+    unchangedCount: files.length - listed.length,
+    all
   };
-}
-function countsLine(counts, characters) {
-  const parts = ORIGINS3.map(
-    (o) => `${o} ${String(counts[o])} (${formatShare(counts[o], characters)}%)`
-  );
-  return `${String(characters)} characters: ${parts.join(", ")}`;
-}
-function stretchLine(s) {
-  const lines = s.firstLine === s.lastLine ? `line ${String(s.firstLine)}` : `lines ${String(s.firstLine)}-${String(s.lastLine)}`;
-  return `${s.path} ${lines}, ${String(s.length)} characters, ${s.words}, ${s.windowRun}`;
-}
-function windowLine(w) {
-  const number = w.taskNumber ?? "-";
-  const opened = w.openedAt ?? "-";
-  return `${number} | ${w.title} | ${opened} | files ${String(w.files)} | runs ${String(w.runs)} | AI ${String(w.ai)} | AI>HUM ${String(w.aiHuman)} | ${w.words}`;
-}
-function sessionsLines(sessions) {
-  if (sessions === "unreadable") return [UNREADABLE];
-  return sessions > 0 ? [noPromptSessionsLine(sessions)] : [];
-}
-function renderSummary(summary, sessions) {
-  const out = [`Total: ${countsLine(summary.total, summary.totalCharacters)}`];
-  out.push("Files:");
-  for (const f of summary.files)
-    out.push(`${f.path}${f.stale ? " (stale)" : ""}: ${countsLine(f.counts, f.characters)}`);
-  out.push("Largest untouched agent stretches:");
-  if (summary.stretches.length === 0) out.push("none");
-  for (const s of summary.stretches) out.push(stretchLine(s));
-  out.push(`AI>HUM characters left out of this list: ${String(summary.omittedAiHuman)}`);
-  out.push("Agent text by window (task number | label | opened | files | runs | AI | AI>HUM):");
-  if (summary.windows.length === 0) out.push("none");
-  for (const w of summary.windows) out.push(windowLine(w));
-  out.push(humNotice(), ...sessionsLines(sessions));
-  return out;
 }
 function summarize(input) {
   if (input.records.length === 0 && input.unchanged.length === 0) {
@@ -7652,21 +7731,20 @@ function summarize(input) {
   const scope = normalizePath(input.path);
   const records = input.records.filter((r) => under(r.path, scope));
   const unchanged = input.unchanged.filter((u) => under(u.path, scope));
-  const summary = records.length + unchanged.length === 0 ? null : buildSummary(records, unchanged, input.top ?? DEFAULT_TOP);
-  const lines = summary === null ? [`Nothing recorded under ${scope ?? ""}.`, humNotice(), ...sessionsLines(input.sessions)] : renderSummary(summary, input.sessions);
+  const summary = records.length + unchanged.length === 0 ? null : buildSummary(records, unchanged, input.top ?? DEFAULT_TOP, input.all === true);
+  const lines = summary === null ? [`Nothing recorded under ${scope ?? ""}.`, ...sessionsLines(input.sessions)] : renderSummary(summary, input.sessions);
   return { status: 0, lines, text: lines.join("\n"), summary };
 }
-var DEFAULT_TOP, ORIGINS3, NOTHING_RECORDED, UNREADABLE;
+var DEFAULT_TOP, NOTHING_RECORDED;
 var init_summary = __esm({
   "packages/provenance/src/core/summary.ts"() {
     "use strict";
-    init_legend();
     init_label();
     init_lines();
+    init_summary_render();
+    init_summary_types();
     DEFAULT_TOP = 10;
-    ORIGINS3 = ["AI", "AI>HUM", "HUM", "PST"];
     NOTHING_RECORDED = "Nothing is recorded. Run setup_provenance to start recording.";
-    UNREADABLE = "Sessions with no prompt events: the count is unreadable (sessions.json does not parse).";
   }
 });
 
@@ -7749,10 +7827,10 @@ async function loadFile(deps, root, path) {
     entry,
     baselineAt: baseline.value?.at ?? null,
     baselineText: await baselineTextOf(deps, root, entry, read),
-    listed: record.value !== null || entry !== null ? null : await isListed(deps, root, path)
+    listed: record.value !== null || entry !== null ? null : await isListed2(deps, root, path)
   });
 }
-async function isListed(deps, root, path) {
+async function isListed2(deps, root, path) {
   return (await listCandidates(deps, root)).files.some((c) => c.path === path);
 }
 function checkFactsOf(facts, strict) {
@@ -7762,20 +7840,24 @@ function checkFactsOf(facts, strict) {
   }
   return { files: facts.files, records, entries: facts.entries, strict };
 }
-function underPath(path, scope) {
-  return scope === null || scope === "" || path === scope || path.startsWith(`${scope}/`);
-}
-function summaryInputOf(facts, scope, top) {
+function summaryInputOf(facts, scope, top, all) {
   const byPath = new Map(facts.files.map((f) => [f.path, f]));
   const records = Object.entries(facts.records).flatMap(
-    ([path, r]) => r.ok && underPath(path, scope) ? [{ path, doc: r.doc, stale: byPath.get(path)?.text !== r.text }] : []
+    ([path, r]) => r.ok ? [{ path, doc: r.doc, stale: byPath.get(path)?.text !== r.text }] : []
   );
   const unchanged = Object.entries(facts.entries).flatMap(([path, digest]) => {
     const file = byPath.get(path);
-    const keep = underPath(path, scope) && !Object.hasOwn(facts.records, path);
+    const keep = !Object.hasOwn(facts.records, path);
     return keep && file !== void 0 ? [{ path, length: file.text.length, stale: file.digest !== digest }] : [];
   });
-  return { records, unchanged, path: scope, sessions: facts.sessions, ...top ? { top } : {} };
+  return {
+    records,
+    unchanged,
+    path: scope,
+    sessions: facts.sessions,
+    ...top ? { top } : {},
+    ...all ? { all } : {}
+  };
 }
 function unchangedDocument(text, baselineAt) {
   const doc = createDocument(text, baselineAt);
@@ -7798,19 +7880,23 @@ var init_load = __esm({
 function parseSummaryArgs(args) {
   let path = null;
   let top;
+  let all = false;
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
     if (arg === "--top") {
       const value = args[i += 1];
       if (value === void 0 || !/^[1-9][0-9]*$/u.test(value) || top !== void 0) return null;
       top = Number(value);
+    } else if (arg === "--all") {
+      if (all) return null;
+      all = true;
     } else if (arg.startsWith("--") || path !== null) {
       return null;
     } else {
       path = arg;
     }
   }
-  return { path, top };
+  return { path, top, all };
 }
 function parseCheckArgs(args) {
   if (args.length === 0) return { strict: false };
@@ -7822,10 +7908,10 @@ function printable(lines) {
 function unreadable(kind) {
   return { status: 1, text: `Records cannot be read: ${kind}` };
 }
-async function summaryReport(deps, root, scope, top) {
+async function summaryReport(deps, root, scope, top, all = false) {
   const loaded = await loadWorkspace(deps, root);
   if (!loaded.ok) return unreadable(loaded.error.kind);
-  const result = summarize(summaryInputOf(loaded.value, scope, top));
+  const result = summarize(summaryInputOf(loaded.value, scope, top, all));
   return { status: result.status, text: printable(result.lines) };
 }
 async function checkReport(deps, root, strict) {
@@ -7890,7 +7976,7 @@ function colourSequence(hex, layer, mode) {
 function onBody(fg, mode) {
   return colourSequence(fg, "fg", mode) + colourSequence(PANE.body, "bg", mode);
 }
-var PANE, RESET, CUBE_LEVELS, CANDIDATES;
+var PANE, RESET, ERASE_LINE, LINE_END, CUBE_LEVELS, CANDIDATES;
 var init_palette = __esm({
   "packages/provenance/src/core/palette.ts"() {
     "use strict";
@@ -7902,8 +7988,102 @@ var init_palette = __esm({
       origin: { HUM: "#E8ECF6", PST: "#F5D98B", AI: "#A6D4F7", "AI>HUM": "#D7C6F5" }
     };
     RESET = "\x1B[0m";
+    ERASE_LINE = "\x1B[K";
+    LINE_END = ERASE_LINE + RESET;
     CUBE_LEVELS = [0, 95, 135, 175, 215, 255];
     CANDIDATES = candidates();
+  }
+});
+
+// packages/provenance/src/core/runs-list.ts
+function description(w) {
+  const title = neutralize(w.title).replace(/[\n\t]/gu, " ");
+  return w.taskNumber === null ? title : `${w.taskNumber} ${title}`;
+}
+function hunkWords(n) {
+  return `${String(n)} ${n === 1 ? "hunk" : "hunks"}`;
+}
+function runsListLines(windows, escape) {
+  const descs = windows.map(description);
+  const opened = windows.map((w) => `opened ${w.time ?? "?"}`);
+  const hunks = windows.map((w) => hunkWords(w.hunks));
+  const widest = (cells) => Math.max(0, ...cells.map(width2));
+  const [tagW, descW, openedW, hunkW] = [
+    widest(windows.map((w) => w.tag)),
+    widest(descs),
+    widest(opened),
+    widest(hunks)
+  ];
+  const lines = windows.map((w, i) => {
+    const desc = descs[i] ?? "";
+    const shown2 = escape ? escapeText2(desc) : desc;
+    const tag = w.tag + " ".repeat(tagW - width2(w.tag));
+    const gap = " ".repeat(descW - width2(desc));
+    const open2 = (opened[i] ?? "") + " ".repeat(openedW - width2(opened[i] ?? ""));
+    const count = " ".repeat(hunkW - width2(hunks[i] ?? "")) + (hunks[i] ?? "");
+    return `${INDENT}${tag}  ${shown2}${gap}  ${open2}  ${count}`;
+  });
+  return [RUNS_HEADING, ...lines];
+}
+var RUNS_HEADING, TAGS_SENTENCE, INDENT, width2, escapeText2;
+var init_runs_list = __esm({
+  "packages/provenance/src/core/runs-list.ts"() {
+    "use strict";
+    init_neutralize();
+    RUNS_HEADING = "Runs in this file";
+    TAGS_SENTENCE = 'Tags are listed under "Runs in this file".';
+    INDENT = "  ";
+    width2 = (text) => Array.from(text).length;
+    escapeText2 = (text) => text.replace(/[\\[\]]/gu, "\\$&");
+  }
+});
+
+// packages/provenance/src/core/tags.ts
+function windowRunOf2(runId2) {
+  return runId2.replace(HUNK_SUFFIX, "");
+}
+function baseOf(taskNumber, title) {
+  if (taskNumber !== null) return taskNumber;
+  return title === "turn" ? "turn" : "task";
+}
+function groupOf(runId2) {
+  const name = parseRunId(runId2);
+  return {
+    windowRun: windowRunOf2(runId2),
+    taskNumber: name.taskNumber,
+    title: name.title,
+    time: name.time,
+    base: baseOf(name.taskNumber, name.title),
+    hunks: 0,
+    runIds: /* @__PURE__ */ new Set()
+  };
+}
+function byOpening(a, b) {
+  return compareUnits(a.time ?? "", b.time ?? "") || compareUnits(a.windowRun, b.windowRun);
+}
+function assignTags(runIds) {
+  const groups = /* @__PURE__ */ new Map();
+  for (const id of runIds) {
+    const key = windowRunOf2(id);
+    const group = groups.get(key) ?? groupOf(id);
+    group.runIds.add(id);
+    groups.set(key, group);
+  }
+  const seen = /* @__PURE__ */ new Map();
+  return [...groups.values()].sort(byOpening).map((g) => {
+    const k = (seen.get(g.base) ?? 0) + 1;
+    seen.set(g.base, k);
+    const { base, runIds: ids, ...rest } = g;
+    return { ...rest, tag: k === 1 ? base : `${base}~${String(k)}`, hunks: ids.size };
+  });
+}
+var HUNK_SUFFIX, compareUnits;
+var init_tags = __esm({
+  "packages/provenance/src/core/tags.ts"() {
+    "use strict";
+    init_label();
+    HUNK_SUFFIX = /\.\d+$/u;
+    compareUnits = (a, b) => a < b ? -1 : a > b ? 1 : 0;
   }
 });
 
@@ -7911,15 +8091,39 @@ var init_palette = __esm({
 function headerLine(path) {
   return `Reveal Codes: ${neutralize(path)}`;
 }
-function provenanceOnly(doc) {
-  return { ...doc, text: neutralize(doc.text), citations: [], quotes: [], overrides: [] };
+function agentRun(span) {
+  const { provenance } = span;
+  if (provenance.origin !== "AI" && provenance.origin !== "AI>HUM") return null;
+  return provenance.runId ?? null;
+}
+function runIdsOf(doc) {
+  return doc.spans.flatMap((span) => agentRun(span) ?? []);
+}
+function tagged(span, tags) {
+  const run = agentRun(span);
+  const tag = run === null ? void 0 : tags.get(windowRunOf2(run));
+  if (tag === void 0 || span.provenance.origin === "HUM") return span;
+  if (span.provenance.origin === "PST") return span;
+  return { ...span, provenance: { ...span.provenance, runId: tag } };
+}
+function provenanceOnly(doc, full) {
+  const base = { ...doc, text: neutralize(doc.text), citations: [], quotes: [], overrides: [] };
+  if (full) return base;
+  const windows = assignTags(runIdsOf(doc));
+  const tags = new Map(windows.map((w) => [w.windowRun, w.tag]));
+  return { ...base, spans: doc.spans.map((span) => tagged(span, tags)) };
+}
+function legendBlock(doc, full, escape) {
+  const items = legendLines(full ? "run" : "tag");
+  const ids = runIdsOf(doc);
+  if (full || ids.length === 0) return items;
+  return [...items, TAGS_SENTENCE, ...runsListLines(assignTags(ids), escape)];
 }
 function lineEnds(style, text) {
-  return text.split("\n").join(`${RESET}
+  return text.split("\n").join(`${LINE_END}
 ${style}`);
 }
-function colourBody(doc, mode) {
-  const view = provenanceOnly(doc);
+function colourBody(view, mode) {
   const codes = render(view, "display").positions;
   let out = "";
   view.spans.forEach((span, i) => {
@@ -7927,23 +8131,23 @@ function colourBody(doc, mode) {
     const code = codes[i]?.code ?? "";
     out += style + lineEnds(style, code + view.text.slice(span.start, span.end));
   });
-  return out === "" ? out : out + RESET;
+  return out === "" ? out : out + LINE_END;
 }
 function colourLines(lines, colour, mode) {
   const style = onBody(colour, mode);
-  return lines.map((line2) => `${style}${line2}${RESET}`);
+  return lines.map((line2) => `${style}${line2}${LINE_END}`);
 }
-function colourView(doc, mode, path) {
+function colourView(doc, mode, path, full) {
   const head = colourLines([headerLine(path)], PANE.title, mode);
-  const legend = colourLines(legendLines(), PANE.legend, mode);
-  return [...head, ...legend, colourBody(doc, mode)].join("\n");
+  const legend = colourLines(legendBlock(doc, full, false), PANE.legend, mode);
+  return [...head, ...legend, colourBody(provenanceOnly(doc, full), mode)].join("\n");
 }
-function plainView(doc, path) {
-  const body = render(provenanceOnly(doc), "display").text;
-  return [headerLine(path), ...legendLines(), body].join("\n");
+function plainView(doc, path, full) {
+  const body = render(provenanceOnly(doc, full), "display").text;
+  return [headerLine(path), ...legendBlock(doc, full, true), body].join("\n");
 }
-function viewRecord(doc, mode, path) {
-  return mode === "plain" ? plainView(doc, path) : colourView(doc, mode, path);
+function viewRecord(doc, mode, path, full = false) {
+  return mode === "plain" ? plainView(doc, path, full) : colourView(doc, mode, path, full);
 }
 var init_view = __esm({
   "packages/provenance/src/core/view.ts"() {
@@ -7952,6 +8156,8 @@ var init_view = __esm({
     init_legend();
     init_neutralize();
     init_palette();
+    init_runs_list();
+    init_tags();
   }
 });
 
@@ -7971,40 +8177,40 @@ function reasonOf(facts) {
   if (read.kind === "over_limit" || read.kind === "binary") return read.kind;
   return nothing ? "no_record" : null;
 }
-function shown(doc, mode, path, stale) {
-  const view = viewRecord(doc, mode, path);
+function shown(doc, how, path, stale) {
+  const view = viewRecord(doc, how.mode, path, how.full);
   return { status: 0, text: stale === null ? view : `${stale}
 ${view}` };
 }
 function staleOf(path, count) {
   return staleLine(neutralize(path), count);
 }
-function entryOutput(facts, text, mode, path) {
+function entryOutput(facts, text, how, path) {
   const { entry, read, baselineAt, baselineText } = facts;
   if (entry === null || read.kind !== "text" || baselineAt === null)
     return notShown(path, "no_record");
   if (read.sha256 === entry.sha256) {
     const doc = unchangedDocument(text, baselineAt);
-    return doc === null ? notShown(path, "no_record") : shown(doc, mode, path, null);
+    return doc === null ? notShown(path, "no_record") : shown(doc, how, path, null);
   }
   const count = baselineText === null ? text.length : unrecordedCharacters(baselineText, text);
   return { status: 0, text: `${staleOf(path, count)}
 ${headerLine(path)}` };
 }
-function decideReveal(facts, path, mode) {
+function decideReveal(facts, path, how) {
   const { record, read } = facts;
   if (record !== null && !record.ok) return notShown(path, "tampered_record");
   const reason = reasonOf(facts);
   if (reason !== null || read.kind !== "text") return notShown(path, reason ?? "not_tracked");
-  if (record === null) return entryOutput(facts, read.text, mode, path);
-  if (record.text === read.text) return shown(record.doc, mode, path, null);
+  if (record === null) return entryOutput(facts, read.text, how, path);
+  if (record.text === read.text) return shown(record.doc, how, path, null);
   const stale = staleOf(path, unrecordedCharacters(record.text, read.text));
-  return shown(record.doc, mode, path, stale);
+  return shown(record.doc, how, path, stale);
 }
-async function revealFile(deps, root, path, mode) {
+async function revealFile(deps, root, path, how) {
   const facts = await loadFile(deps, root, path);
   if (!facts.ok) return { status: 1, text: `${neutralize(path)}: ${facts.error.kind}` };
-  return decideReveal(facts.value, path, mode);
+  return decideReveal(facts.value, path, how);
 }
 var init_reveal_file = __esm({
   "packages/provenance/src/io/reveal-file.ts"() {
@@ -8041,7 +8247,7 @@ function relativeTo(root, cwd, arg) {
   if (parts.length <= base.length || base.some((p, i) => parts[i] !== p)) return null;
   return parts.slice(base.length).join("/");
 }
-async function revealOne(deps, io, arg) {
+async function revealOne(deps, io, arg, full) {
   const root = await findWorkspaceRoot(deps, io.cwd, null);
   if (root === null) {
     io.out(NOT_SET_UP);
@@ -8052,7 +8258,10 @@ async function revealOne(deps, io, arg) {
     io.out(`${neutralize(arg)}: not recorded: not_tracked`);
     return 1;
   }
-  const shown2 = await revealFile(deps, root, path, chooseMode(io.env, io.isTTY));
+  const shown2 = await revealFile(deps, root, path, {
+    mode: chooseMode(io.env, io.isTTY),
+    full
+  });
   io.out(shown2.text);
   return shown2.status;
 }
@@ -8075,7 +8284,7 @@ async function summaryForm(deps, io, args) {
     if (found === null) {
       return { status: 1, text: `${neutralize(parsed.path ?? "")}: not recorded: not_tracked` };
     }
-    return summaryReport(deps, root, found.scope, parsed.top);
+    return summaryReport(deps, root, found.scope, parsed.top, parsed.all);
   });
 }
 async function checkForm(deps, io, args) {
@@ -8101,8 +8310,10 @@ async function revealCommand(deps, args, io) {
   if (first === "--summary") return summaryForm(deps, io, rest);
   if (first === "--check") return checkForm(deps, io, rest);
   if (first === "--record") return rest.length === 0 ? recordForm(deps, io) : usage(io);
-  if (first === void 0 || first.startsWith("--") || rest.length > 0) return usage(io);
-  return revealOne(deps, io, first);
+  const files = args.filter((a) => a !== "--full");
+  const [file] = files;
+  if (file === void 0 || file.startsWith("--") || files.length > 1) return usage(io);
+  return revealOne(deps, io, file, files.length < args.length);
 }
 var NOT_SET_UP, USAGE;
 var init_reveal_cmd = __esm({
@@ -8113,7 +8324,7 @@ var init_reveal_cmd = __esm({
     init_reveal_report();
     init_reveal_file();
     NOT_SET_UP = "provenance is not set up here: run setup_provenance";
-    USAGE = "usage: reveal <file> | --summary [path] [--top <n>] | --check [--strict] | --record";
+    USAGE = "usage: reveal <file> [--full] | --summary [path] [--top <n>] [--all] | --check [--strict] | --record";
   }
 });
 

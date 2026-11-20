@@ -289,7 +289,7 @@ Conventions that apply to every task:
     - File `src/core/view.ts` (and `palette.ts` for the sequence): in 24-bit and 256-colour output every line, the header, legend, Runs list and body included, sets the pane background on each colour sequence and ends with `ESC[K` before the reset, empty lines too; plain and piped output do not change.
     - Update `view.test.ts` (every line of a coloured view ends with `ESC[K` and a reset; an empty line is background, `ESC[K`, reset; plain output has no escape) and the Property 6 test: the ANSI strip covers the erase sequence, so `unescape(plain)` still equals `strip(coloured)`. Rebuild and refresh the installed Bundle.
     - _Requirements: 9.5, 9.6, 9.8, 9.17_
-  - [~] 7.13 Checkpoint - the viewer, again
+  - [x] 7.13 Checkpoint - the viewer, again
     - Rebuild the Bundle, and copy it to `.kiro/provenance/provenance.mjs`, as two separate commands. Run, each with exit code 0: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, and the properties at 500 runs. Paste into the report the first 30 lines of `pnpm -s reveal --summary` and the first 30 lines of `pnpm -s reveal packages/provenance/src/core/windows.ts` (plain, piped).
     - Stop for the user. Do not start group 8 until the user says so. Ensure all tests pass, ask the user if questions arise.
     - _Requirements: 9.14, 9.17, 10.13, 10.14, 16.12_
