@@ -1,0 +1,90 @@
+/**
+ * Plays a generated `Scenario` (src/testing/arb-dirs.ts) over in-memory `Deps` with the real
+ * `runRecord`: seeds the Record_Directory and the working tree, then for each step removes
+ * `state.json` when asked, applies the file changes, and runs the event. Shared by the Recorder
+ * properties (1, 2, 4, 5, 14 and 16).
+ */
+import { createDocument, renderRecord } from "@reveal-codes/engine";
+import { encodeBaseline } from "../../src/core/baseline-codec.js";
+import type { Baseline, BaselineEntry } from "../../src/core/types.js";
+import { applyChange } from "../../src/testing/arb-dirs.js";
+import type { Scenario, SetupFile, Step } from "../../src/testing/arb-dirs.js";
+import { payloadOf } from "../../src/testing/arb-windows.js";
+import { BASELINE_AT, PROV, ROOT, play } from "./event-harness.js";
+import { CLOCK_START_MS } from "./clock.js";
+import { memoryDeps } from "./memory-deps.js";
+import type { MemoryDeps } from "./memory-deps.js";
+
+const enc = new TextEncoder();
+const OLD_MTIME = CLOCK_START_MS - 60_000;
+
+/** The working tree the scenario has made so far: text by workspace-relative path. */
+export type Tree = ReadonlyMap<string, string>;
+
+function entryOf(deps: MemoryDeps, file: SetupFile): BaselineEntry | null {
+  if (!file.tracking.startsWith("entry-")) return null;
+  const bytes = enc.encode(file.text);
+  const sha256 = deps.sha256(bytes);
+  if (file.tracking === "entry-blob") return { sha256, blob: deps.git.addBlob(bytes) };
+  if (file.tracking === "entry-cache") deps.fs.put(`${PROV}/cache/${sha256}`, bytes);
+  return { sha256 };
+}
+
+/** A workspace holding the scenario's starting files, Baseline_File, Baseline_Cache and Records. */
+export function seed(scenario: Scenario): { deps: MemoryDeps; tree: Tree } {
+  const deps = memoryDeps();
+  const files: Record<string, BaselineEntry> = {};
+  const tree = new Map<string, string>();
+  for (const file of scenario.setup) {
+    const path = scenario.pool[file.at] ?? "";
+    tree.set(path, file.text);
+    deps.fs.put(`${ROOT}/${path}`, file.text, OLD_MTIME);
+    const entry = entryOf(deps, file);
+    if (entry !== null) files[path] = entry;
+    if (file.tracking === "record") {
+      const made = createDocument(file.text, BASELINE_AT);
+      if (!made.ok) throw new Error(made.error.kind);
+      deps.fs.put(`${PROV}/records/${path}.reveal`, renderRecord(made.value, null, "full").text);
+    }
+  }
+  const baseline: Baseline = { version: 1, at: BASELINE_AT, files };
+  deps.fs.put(`${PROV}/baseline.json`, encodeBaseline(baseline));
+  return { deps, tree };
+}
+
+/** Makes the files on disk equal `after`, writing with the clock's current time. */
+function sync(deps: MemoryDeps, before: Tree, after: Tree): void {
+  for (const path of before.keys()) {
+    if (!after.has(path)) deps.fs.files.delete(`${ROOT}/${path}`);
+  }
+  for (const [path, text] of after) {
+    if (before.get(path) !== text) deps.fs.put(`${ROOT}/${path}`, text, deps.clock.nowMs());
+  }
+}
+
+/** Applies a step's removal of `state.json` and its file changes; returns the new tree. */
+export function prepare(deps: MemoryDeps, scenario: Scenario, tree: Tree, step: Step): Tree {
+  if (step.dropState) deps.fs.files.delete(`${PROV}/state.json`);
+  const next = step.changes.reduce((t, c) => applyChange(t, scenario.pool, c), tree);
+  sync(deps, tree, next);
+  return next;
+}
+
+/** Runs the step's event after moving the clock on by the event's gap. */
+export function fire(deps: MemoryDeps, step: Step, gapMs = step.event.gapMs): Promise<void> {
+  return play(deps, { event: step.event.event, payload: payloadOf(step.event, ROOT) }, gapMs);
+}
+
+/** Seeds the scenario and plays every step, calling `after` once the event has run. */
+export async function playScenario(
+  scenario: Scenario,
+  after: (deps: MemoryDeps, tree: Tree, step: Step, index: number) => void | Promise<void>,
+): Promise<void> {
+  const { deps, tree: first } = seed(scenario);
+  let tree = first;
+  for (const [index, step] of scenario.steps.entries()) {
+    tree = prepare(deps, scenario, tree, step);
+    await fire(deps, step);
+    await after(deps, tree, step, index);
+  }
+}
