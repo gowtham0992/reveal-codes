@@ -480,6 +480,11 @@
         "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795137205717
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795137753079
       }
     ],
     "5.5 `recorder.ts` and `cli/main.ts`: one event from start to exit": [

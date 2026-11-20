@@ -23,6 +23,8 @@ export type Store = {
   /** `null` when there is no Record for the path. */
   readRecord: (path: string) => Fallible<DocumentRecord | null>;
   writeRecord: (path: string, recordText: string) => Fallible<void>;
+  /** The workspace-relative paths that have a `records/<path>.reveal` file, found by walking `records/`. */
+  listRecords: () => Promise<string[]>;
   /** Removes the file, then every directory under `records/` that is now empty. */
   deleteRecord: (path: string) => Fallible<void>;
   readBaseline: () => Fallible<Baseline | null>;
@@ -74,6 +76,19 @@ async function pruneEmptyDirs(deps: StoreDeps, recordsDir: string, file: string)
   }
 }
 
+async function listRecordPaths(deps: StoreDeps, dir: string, prefix = ""): Promise<string[]> {
+  const names = await deps.fs.readdir(prefix === "" ? dir : `${dir}/${prefix}`);
+  if (!names.ok) return [];
+  const found: string[] = [];
+  for (const name of names.value) {
+    const rel = prefix === "" ? name : `${prefix}/${name}`;
+    const stat = await deps.fs.lstat(`${dir}/${rel}`);
+    if (!stat.ok) continue;
+    if (stat.value.kind === "dir") found.push(...(await listRecordPaths(deps, dir, rel)));
+    else if (stat.value.kind === "file" && rel.endsWith(".reveal")) found.push(rel.slice(0, -7));
+  }
+  return found;
+}
 function recordReader(deps: StoreDeps, store: () => Store) {
   return async (path: string): Fallible<DocumentRecord | null> => {
     const file = store().recordPath(path);
@@ -104,6 +119,7 @@ export function createStore(deps: StoreDeps, dir: string): Store {
       const file = recordPath(path);
       return file.ok ? writeText(deps, file.value, text) : file;
     },
+    listRecords: () => listRecordPaths(deps, recordsDir),
     deleteRecord: async (path) => {
       const file = recordPath(path);
       if (!file.ok) return file;
