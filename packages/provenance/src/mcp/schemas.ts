@@ -114,3 +114,18 @@ export type UntouchedAgentTextJson = z.infer<typeof untouchedAgentTextOutput>;
 export type ProvenanceSummaryJson = z.infer<typeof provenanceSummaryOutput>;
 export type CheckRecordsJson = z.infer<typeof checkRecordsOutput>;
 export type SetupProvenanceJson = z.infer<typeof setupProvenanceOutput>;
+const workspaceArg = z.string().optional();
+const topArg = z.number().int().min(1).optional();
+/** The input shapes of the four read tools (Req 12.4 to 12.7, 12.12). */
+export const revealFileInput = { path: z.string().min(1), workspace: workspaceArg };
+export const untouchedAgentTextInput = {
+  path: z.string().min(1),
+  top: topArg,
+  workspace: workspaceArg,
+};
+export const provenanceSummaryInput = {
+  path: z.string().optional(),
+  top: topArg,
+  workspace: workspaceArg,
+};
+export const checkRecordsInput = { strict: z.boolean().optional(), workspace: workspaceArg };

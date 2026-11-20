@@ -33,7 +33,7 @@ function notShown(path: string, reason: NotShown | "tampered_record"): RevealOut
 }
 
 /** The reason for a file that cannot be shown as text, or that has nothing recorded. */
-function reasonOf(facts: FileFacts): NotShown | null {
+export function reasonOf(facts: FileFacts): NotShown | null {
   const { read } = facts;
   if (read.kind === "absent" || read.kind === "unreadable") return "not_tracked";
   const nothing = facts.record === null && facts.entry === null;

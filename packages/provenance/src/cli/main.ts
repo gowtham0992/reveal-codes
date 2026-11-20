@@ -1,5 +1,5 @@
 /**
- * The entry: dispatches `record`, `baseline`, `reveal` and, in later tasks, `mcp` and `setup`.
+ * The entry: dispatches `record`, `baseline`, `reveal`, `mcp` and, in a later task, `setup`.
  * `record` writes nothing to standard output or standard error and exits 0 for every input and
  * failure, including an uncaught exception and an unhandled rejection (Req 7.1 to 7.3, 7.10).
  * This is the only module that catches everything or calls `process.exit`.
@@ -56,6 +56,11 @@ async function revealMain(args: readonly string[]): Promise<number> {
   };
   return revealCommand(nodeDeps(), args, io);
 }
+/** `mcp`: the stdio server. The SDK is loaded here only, never on the hook path. */
+async function mcpMain(): Promise<void> {
+  const { runMcpServer } = await import("../mcp/server.js");
+  await runMcpServer(nodeDeps(), process.cwd());
+}
 async function main(argv: readonly string[]): Promise<void> {
   const [command, ...rest] = argv;
   if (command === "record") return recordCommand(rest[0] ?? "");
@@ -66,7 +71,8 @@ async function main(argv: readonly string[]): Promise<void> {
     process.exitCode = await revealMain(rest);
     return;
   }
-  process.stderr.write("usage: provenance record <event> | baseline | reveal <file>\n");
+  if (command === "mcp") return mcpMain();
+  process.stderr.write("usage: provenance record <event> | baseline | reveal <file> | mcp\n");
   process.exit(1);
 }
 void main(process.argv.slice(2));

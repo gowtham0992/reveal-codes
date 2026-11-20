@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=8.1 MCP dependencies\, workspace discovery and schemas 2026-11-20T16:21:57Z.1,3612,0,0}][AI:8.1 MCP dependencies, workspace discovery and schemas 2026-11-20T16:21:57Z.1{t=2026-11-20T16:26:30.350Z}]/**
+[DOC{v=1;n=0;r=8.1 MCP dependencies\, workspace discovery and schemas 2026-11-20T16:21:57Z.1,3612,0,0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,577,0,0}][AI:8.1 MCP dependencies, workspace discovery and schemas 2026-11-20T16:21:57Z.1{t=2026-11-20T16:26:30.350Z}]/**
  * The `outputSchema` of the five Provenance_Tools (Req 12.3 to 12.9, design "The MCP tools",
  * Types). With `workspace.ts` this is where `zod` is imported; nothing outside `src/mcp/` may.
  */
@@ -114,3 +114,18 @@ export type UntouchedAgentTextJson = z.infer<typeof untouchedAgentTextOutput>;
 export type ProvenanceSummaryJson = z.infer<typeof provenanceSummaryOutput>;
 export type CheckRecordsJson = z.infer<typeof checkRecordsOutput>;
 export type SetupProvenanceJson = z.infer<typeof setupProvenanceOutput>;
+[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]const workspaceArg = z.string().optional();
+const topArg = z.number().int().min(1).optional();
+/** The input shapes of the four read tools (Req 12.4 to 12.7, 12.12). */
+export const revealFileInput = { path: z.string().min(1), workspace: workspaceArg };
+export const untouchedAgentTextInput = {
+  path: z.string().min(1),
+  top: topArg,
+  workspace: workspaceArg,
+};
+export const provenanceSummaryInput = {
+  path: z.string().optional(),
+  top: topArg,
+  workspace: workspaceArg,
+};
+export const checkRecordsInput = { strict: z.boolean().optional(), workspace: workspaceArg };
