@@ -123,7 +123,7 @@ export type FileRead =
     };
 
 /** The decoded text, or null when the bytes are not valid UTF-8. A leading BOM is kept. */
-function decodeUtf8(bytes: Uint8Array): string | null {
+export function decodeUtf8(bytes: Uint8Array): string | null {
   try {
     return new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes);
   } catch (error) {

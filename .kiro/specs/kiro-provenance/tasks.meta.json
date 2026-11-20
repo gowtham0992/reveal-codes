@@ -458,6 +458,16 @@
         "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795063644124
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795136822803
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795137205670
       }
     ],
     "5.4 `recorder-files.ts`: the per-file phases": [
@@ -465,6 +475,11 @@
         "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795063644150
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795137205717
       }
     ],
     "5.5 `recorder.ts` and `cli/main.ts`: one event from start to exit": [
