@@ -1,16 +1,19 @@
-[DOC{v=1;n=0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,2862,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]/**
+[DOC{v=1;n=0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,2862,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1,60,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.2,179,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.3,78,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.4,10,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.5,1840,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.6,288,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]/**
  * The Reveal_Command dispatch (design The Reveal_Command): the colour choice, the Workspace_Root,
- * the path argument and the form. `reveal <file>` is built here; `--summary`, `--check` and
- * `--record` are added by the next task. Standard output and the injected writers carry every line.
+ * the path argument and the form[AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1{t=2026-11-20T04:28:48.740Z}]: `reveal <file>`, `--summary`, `--check` and `--record`.
+ *[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}] Standard output and the injected writers carry every line.
  */
 import { neutralize } from "../core/neutralize.js";
 import type { ViewMode } from "../core/view.js";
 import type { Deps } from "./deps.js";
 import type { ColorEnv } from "./env.js";
-import { findWorkspaceRoot } from "./recorder.js";
+import { findWorkspaceRoot[AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.2{t=2026-11-20T04:28:48.740Z}], runRecord } from "./recorder.js";
+import { checkReport, parseCheckArgs, parseSummaryArgs, summaryReport } from "./reveal-report.js";
+import type { Report } from "./reveal-report[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}].js";
 import { revealFile } from "./reveal-file.js";
 
-type RevealDeps = Pick<Deps, "fs" | "git" | "sha256" | "log" | "pid">;
+type RevealDeps = [AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.3{t=2026-11-20T04:28:48.740Z}]Deps;
+const NOT_SET_UP = "provenance is not set up here: run setup_provenance"[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}];
 
 /** The process facts the command needs, injected so a test passes its own. */
 export type RevealIo = {
@@ -47,7 +50,7 @@ export function relativeTo(root: string, cwd: string, arg: string): string | nul
 async function revealOne(deps: RevealDeps, io: RevealIo, arg: string): Promise<number> {
   const root = await findWorkspaceRoot(deps, io.cwd, null);
   if (root === null) {
-    io.out("provenance is not set up here: run setup_provenance");
+    io.out([AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.4{t=2026-11-20T04:28:48.740Z}]NOT_SET_UP[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]);
     return 1;
   }
   const path = relativeTo(root, io.cwd, arg);
@@ -60,16 +63,68 @@ async function revealOne(deps: RevealDeps, io: RevealIo, arg: string): Promise<n
   return shown.status;
 }
 
-/** Runs `reveal <args>` and returns the exit status. */
+[AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.5{t=2026-11-20T04:28:48.740Z}]/** The scope of a summary path: `{ scope: null }` for the root itself, null when outside it. */
+function scopeOf(root: string, cwd: string, arg: string): { scope: string | null } | null {
+  const probe = relativeTo(root, cwd, `${arg}/x`);
+  if (probe === null) return null;
+  return { scope: probe === "x" ? null : probe.slice(0, -2) };
+}
+
+async function inWorkspace(
+  deps: RevealDeps,
+  io: RevealIo,
+  run: (root: string) => Promise<Report>,
+): Promise<number> {
+  const root = await findWorkspaceRoot(deps, io.cwd, null);
+  const report = root === null ? { status: 1 as const, text: NOT_SET_UP } : await run(root);
+  io.out(report.text);
+  return report.status;
+}
+
+async function summaryForm(deps: RevealDeps, io: RevealIo, args: readonly string\[\]) {
+  const parsed = parseSummaryArgs(args);
+  if (parsed === null) return usage(io);
+  return inWorkspace(deps, io, async (root) => {
+    const found = parsed.path === null ? { scope: null } : scopeOf(root, io.cwd, parsed.path);
+    if (found === null) {
+      return { status: 1, text: `${neutralize(parsed.path ?? "")}: not recorded: not_tracked` };
+    }
+    return summaryReport(deps, root, found.scope, parsed.top);
+  });
+}
+
+async function checkForm(deps: RevealDeps, io: RevealIo, args: readonly string\[\]) {
+  const parsed = parseCheckArgs(args);
+  if (parsed === null) return usage(io);
+  return inWorkspace(deps, io, (root) => checkReport(deps, root, parsed.strict));
+}
+
+/** `reveal --record`: the Recorder with the event `manual` (Req 11.11). */
+async function recordForm(deps: RevealDeps, io: RevealIo): Promise<number> {
+  const root = await findWorkspaceRoot(deps, io.cwd, null);
+  if (root === null) {
+    io.out(NOT_SET_UP);
+    return 1;
+  }
+  await runRecord(deps, "manual", io.cwd);
+  return 0;
+}
+
+function usage(io: RevealIo): number {
+  io.err(USAGE);
+  return 1;
+}
+
+[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]/** Runs `reveal <args>` and returns the exit status. */
 export async function revealCommand(
   deps: RevealDeps,
   args: readonly string\[\],
   io: RevealIo,
 ): Promise<number> {
   const \[first, ...rest\] = args;
-  if (first === undefined || first.startsWith("--") || rest.length > 0) {
-    io.err(USAGE);
-    return 1;
-  }
+  if (first === [AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.6{t=2026-11-20T04:28:48.740Z}]"--summary") return summaryForm(deps, io, rest);
+  if (first === "--check") return checkForm(deps, io, rest);
+  if (first === "--record") return rest.length === 0 ? recordForm(deps, io) : usage(io);
+  if (first === undefined || first.startsWith("--") || rest.length > 0) return usage(io);[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]
   return revealOne(deps, io, first);
 }

@@ -1,0 +1,278 @@
+[DOC{v=1;n=0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1,10446,0,0}][AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1{t=2026-11-20T04:28:48.740Z}]import { spawnSync } from "node:child_process";
+import { rmSync } from "node:fs";
+import { afterEach, describe, expect, it } from "vitest";
+import { humNotice } from "../src/core/legend.js";
+import { baselineCommand } from "../src/io/baseline-cmd.js";
+import { nodeDeps } from "../src/io/deps.js";
+import { record, snapshot, windowsOf } from "./support/report-files.js";
+import { makeTempDir } from "./support/temp-repo.js";
+import type { TempDir } from "./support/temp-repo.js";
+
+const ENTRY = new URL("../src/cli/main.ts", import.meta.url).pathname;
+const JITI = import.meta.resolve("jiti/register");
+const PROV = ".kiro/provenance";
+const SESSIONS = `${PROV}/sessions.json`;
+const NO_PROMPT = "Sessions with no prompt events: ";
+let dir: TempDir | null = null;
+afterEach(() => {
+  dir?.cleanup();
+  dir = null;
+});
+
+function fresh(): TempDir {
+  dir = makeTempDir();
+  dir.write(`${PROV}/ignore`, "# none\\n");
+  return dir;
+}
+async function baseline(d: TempDir): Promise<void> {
+  await baselineCommand(nodeDeps(), d.root, () => undefined);
+}
+type Ran = { status: number | null; stdout: string; stderr: string };
+function node(d: TempDir, args: string\[\], input = ""): Ran {
+  const ran = spawnSync(process.execPath, \["--import", JITI, ENTRY, ...args\], {
+    cwd: d.root,
+    encoding: "utf8",
+    input,
+    timeout: 30_000,
+    env: { PATH: process.env\["PATH"\] ?? "" },
+  });
+  return { status: ran.status, stdout: ran.stdout, stderr: ran.stderr };
+}
+const reveal = (d: TempDir, args: string\[\]): Ran => node(d, \["reveal", ...args\]);
+const lines = (ran: Ran): string\[\] => ran.stdout.split("\\n").filter((l) => l !== "");
+
+/** Two Records (one with an AI run), and an Unchanged_File. */
+async function twoRecordsAndAnEntry(d: TempDir): Promise<void> {
+  d.write("README.md", "hello\\n");
+  await baseline(d);
+  record(d, "src/a.ts", "one\\n", "one\\nmore\\n");
+  record(d, "src/b.ts", "two\\n", "two\\nplus\\n");
+  d.write("src/a.ts", "one\\nmore\\n");
+  d.write("src/b.ts", "two\\nplus\\n");
+}
+
+describe("reveal --summary _Requirements: 10.1, 10.10_", { timeout: 30_000 }, () => {
+  it("summarizes two Records and an Unchanged_File, with the HUM notice, exit 0", async () => {
+    const d = fresh();
+    await twoRecordsAndAnEntry(d);
+    const ran = reveal(d, \["--summary"\]);
+    expect(ran.status).toBe(0);
+    expect(ran.stderr).toBe("");
+    expect(ran.stdout).toContain("src/a.ts: ");
+    expect(ran.stdout).toContain("src/b.ts: ");
+    expect(ran.stdout).toContain(
+      "README.md: 6 characters: AI 0 (0.0%), AI>HUM 0 (0.0%), HUM 0 (0.0%), PST 6 (100.0%)",
+    );
+    expect(ran.stdout).toContain(humNotice());
+    expect(ran.stdout).not.toContain(NO_PROMPT);
+  });
+
+  it("summarizes only the files under a path, and refuses a path outside the workspace", async () => {
+    const d = fresh();
+    await twoRecordsAndAnEntry(d);
+    const scoped = reveal(d, \["--summary", "src/a.ts"\]);
+    expect(scoped.status).toBe(0);
+    expect(scoped.stdout).toContain("src/a.ts: ");
+    expect(scoped.stdout).not.toContain("src/b.ts: ");
+    expect(scoped.stdout).not.toContain("README.md: ");
+    const dirScoped = reveal(d, \["--summary", "src", "--top", "1"\]);
+    expect(dirScoped.stdout).toContain("src/b.ts: ");
+    expect(dirScoped.stdout).not.toContain("README.md: ");
+    const outside = reveal(d, \["--summary", "../elsewhere"\]);
+    expect(outside.stdout).toBe("../elsewhere: not recorded: not_tracked\\n");
+    expect(outside.status).toBe(1);
+  });
+
+  it("rejects a bad --top with the usage line and exit 1", () => {
+    const d = fresh();
+    for (const args of \[
+      \["--summary", "--top", "0"\],
+      \["--summary", "--top"\],
+      \["--summary", "a", "b"\],
+    \]) {
+      const ran = reveal(d, args);
+      expect(ran.status).toBe(1);
+      expect(ran.stderr).toContain("usage: reveal");
+    }
+  });
+
+  it("with nothing recorded prints one line naming setup_provenance and exits 1", () => {
+    const d = fresh();
+    const ran = reveal(d, \["--summary"\]);
+    expect(lines(ran)).toHaveLength(1);
+    expect(ran.stdout).toContain("setup_provenance");
+    expect(ran.status).toBe(1);
+  });
+});
+
+describe("reveal --summary and sessions.json _Requirements: 10.12_", { timeout: 30_000 }, () => {
+  const withSessions = async (content: string | null): Promise<Ran> => {
+    const d = fresh();
+    await twoRecordsAndAnEntry(d);
+    if (content !== null) d.write(SESSIONS, content);
+    return reveal(d, \["--summary", "src/a.ts"\]);
+  };
+  const body = (n: number): string => `{ "version": 1, "noPromptEventSessions": ${String(n)} }\\n`;
+
+  it("prints the line with the count 2, whatever the path", async () => {
+    const ran = await withSessions(body(2));
+    expect(ran.stdout).toContain(
+      "Sessions with no prompt events: 2 counted. In such a session an edit the agent made between tasks is recorded as \[HUM\]. The count can miss sessions or count one twice; see Limits.",
+    );
+    expect(ran.status).toBe(0);
+  });
+
+  it("prints no such line for a count of 0 or an absent file", async () => {
+    expect((await withSessions(body(0))).stdout).not.toContain(NO_PROMPT);
+    expect((await withSessions(null)).stdout).not.toContain(NO_PROMPT);
+  });
+
+  it("says the count is unreadable when the file does not parse, exit status unchanged", async () => {
+    const ran = await withSessions("not json");
+    expect(ran.stdout).toContain("the count is unreadable");
+    expect(ran.status).toBe(0);
+  });
+
+  it("prints the count 1 after an orchestrator-like session with an outside change", async () => {
+    const d = fresh();
+    d.write("a.txt", "one\\n");
+    await baseline(d);
+    d.write("a.txt", "one\\ntwo\\n");
+    expect(node(d, \["record", "agentStop"\], '{"session_id":"orch"}').status).toBe(0);
+    const ran = reveal(d, \["--summary"\]);
+    expect(ran.stdout).toContain(`${NO_PROMPT}1 counted.`);
+    expect(ran.status).toBe(0);
+  });
+});
+
+describe("reveal --check _Requirements: 11.2, 11.3, 11.4, 11.5, 11.9_", { timeout: 30_000 }, () => {
+  it("prints one ok line and exits 0 when every file matches its Record or entry", async () => {
+    const d = fresh();
+    await twoRecordsAndAnEntry(d);
+    const ran = reveal(d, \["--check"\]);
+    expect(ran.stdout).toBe("checked 3 files: ok\\n");
+    expect(ran.status).toBe(0);
+  });
+
+  it("fails on a tampered Record, naming it", () => {
+    const d = fresh();
+    d.write("a.ts", "x\\n");
+    d.write(`${PROV}/records/a.ts.reveal`, "not a record");
+    const ran = reveal(d, \["--check"\]);
+    expect(lines(ran)).toEqual(\[`fail tampered_record: ${PROV}/records/a.ts.reveal`\]);
+    expect(ran.status).toBe(1);
+  });
+
+  it("fails on an orphan Record and an orphan baseline entry, in path order", async () => {
+    const d = fresh();
+    d.write("gone.ts", "g\\n");
+    d.write("kept.ts", "k\\n");
+    await baseline(d);
+    record(d, "orphan.ts", "o\\n", "o\\np\\n");
+    rmFile(d, "gone.ts");
+    const ran = reveal(d, \["--check"\]);
+    expect(lines(ran)).toEqual(\[
+      "fail orphan_baseline: gone.ts",
+      `fail orphan_record: ${PROV}/records/orphan.ts.reveal`,
+    \]);
+    expect(ran.status).toBe(1);
+  });
+});
+
+function rmFile(d: TempDir, path: string): void {
+  rmSync(`${d.root}/${path}`, { force: true });
+}
+
+describe(
+  "reveal --check reports _Requirements: 11.6, 11.7, 11.8, 11.10_",
+  { timeout: 30_000 },
+  () => {
+    async function staleAndLate(): Promise<TempDir> {
+      const d = fresh();
+      d.write("a.ts", "one\\n");
+      await baseline(d);
+      d.write("a.ts", "one\\nchanged\\n");
+      d.write("late.ts", "late\\n");
+      return d;
+    }
+
+    it("reports stale and no_record with exit 0 and ends with the hint", async () => {
+      const d = await staleAndLate();
+      const ran = reveal(d, \["--check"\]);
+      expect(lines(ran)).toEqual(\[
+        "report stale: a.ts",
+        "report no_record: late.ts",
+        "run: reveal --record",
+      \]);
+      expect(ran.status).toBe(0);
+    });
+
+    it("fails both with --strict", async () => {
+      const d = await staleAndLate();
+      const strict = reveal(d, \["--check", "--strict"\]);
+      expect(strict.status).toBe(1);
+      expect(lines(strict).at(-1)).toBe("run: reveal --record");
+      const only = fresh();
+      only.write("a.ts", "one\\n");
+      await baseline(only);
+      only.write("a.ts", "two\\n");
+      expect(reveal(only, \["--check", "--strict"\]).status).toBe(1);
+    });
+
+    it("rejects an unknown argument with the usage line", () => {
+      const d = fresh();
+      const ran = reveal(d, \["--check", "--loose"\]);
+      expect(ran.status).toBe(1);
+      expect(ran.stderr).toContain("usage: reveal");
+    });
+  },
+);
+
+describe("reveal --record _Requirements: 11.11, 3.9, 3.10_", { timeout: 30_000 }, () => {
+  it("brings a stale file up to date so that --check --strict exits 0", async () => {
+    const d = fresh();
+    d.write("a.ts", "one\\n");
+    await baseline(d);
+    d.write("a.ts", "one\\ntwo\\n");
+    expect(reveal(d, \["--check", "--strict"\]).status).toBe(1);
+    expect(reveal(d, \["--record"\]).status).toBe(0);
+    const after = reveal(d, \["--check", "--strict"\]);
+    expect(after.stdout).toBe("checked 1 files: ok\\n");
+    expect(after.status).toBe(0);
+    expect(reveal(d, \["a.ts"\]).stdout).toContain("\[HUM\]two");
+  });
+
+  it("with an open window records the change as AI and leaves the window open", async () => {
+    const d = fresh();
+    d.write("a.ts", "one\\n");
+    await baseline(d);
+    node(d, \["record", "promptSubmit"\], '{"session_id":"s1"}');
+    const open = windowsOf(d);
+    expect(open).toBe(1);
+    d.write("a.ts", "one\\nagent\\n");
+    expect(reveal(d, \["--record"\]).status).toBe(0);
+    expect(reveal(d, \["a.ts"\]).stdout).toContain("\[AI:");
+    expect(windowsOf(d)).toBe(open);
+  });
+
+  it("says provenance is not set up outside a workspace", () => {
+    dir = makeTempDir();
+    const ran = reveal(dir, \["--record"\]);
+    expect(ran.stdout).toContain("setup_provenance");
+    expect(ran.status).toBe(1);
+  });
+});
+
+describe("no write during --check and --summary _Requirements: 11.12_", { timeout: 30_000 }, () => {
+  it("leaves every file under .kiro/provenance with its modification time", async () => {
+    const d = fresh();
+    await twoRecordsAndAnEntry(d);
+    d.write("late.ts", "late\\n");
+    d.write(SESSIONS, '{ "version": 1, "noPromptEventSessions": 2 }\\n');
+    const before = snapshot(d);
+    reveal(d, \["--check", "--strict"\]);
+    reveal(d, \["--summary"\]);
+    reveal(d, \["--summary", "src", "--top", "1"\]);
+    expect(snapshot(d)).toEqual(before);
+  });
+});

@@ -5634,26 +5634,26 @@ var init_ignore = __esm({
 });
 
 // packages/provenance/src/core/ignore-parse.ts
-function trimTrailingSpaces(line) {
+function trimTrailingSpaces(line2) {
   let lastSpace = -1;
-  for (let i = 0; i < line.length; i += 1) {
-    const ch = line[i];
+  for (let i = 0; i < line2.length; i += 1) {
+    const ch = line2[i];
     if (ch === " ") {
       if (lastSpace < 0) lastSpace = i;
     } else if (ch === "\\") {
       i += 1;
-      if (i >= line.length) return line;
+      if (i >= line2.length) return line2;
       lastSpace = -1;
     } else {
       lastSpace = -1;
     }
   }
-  return lastSpace >= 0 ? line.slice(0, lastSpace) : line;
+  return lastSpace >= 0 ? line2.slice(0, lastSpace) : line2;
 }
 function parseLine(raw) {
-  const line = raw.endsWith("\r") ? raw.slice(0, -1) : raw;
-  if (line === "" || line.startsWith("#")) return null;
-  let pattern = trimTrailingSpaces(line);
+  const line2 = raw.endsWith("\r") ? raw.slice(0, -1) : raw;
+  if (line2 === "" || line2.startsWith("#")) return null;
+  let pattern = trimTrailingSpaces(line2);
   const negated = pattern.startsWith("!");
   if (negated) pattern = pattern.slice(1);
   const dirOnly = pattern.endsWith("/");
@@ -6332,7 +6332,25 @@ function windowRunName(taskNumber, title, time, taken) {
 function runId(windowRun, n) {
   return windowRun + "." + String(n);
 }
-var FALLBACK_TITLE, TURN_TITLE, SPACE_RUN, TASK_TOKEN;
+function parseRunId(id) {
+  const m = RUN_ID.exec(id);
+  if (m === null) return { taskNumber: null, title: "?", time: null, suffix: null, n: null };
+  const suffix = m[4];
+  return {
+    taskNumber: m[1] ?? null,
+    title: m[2] ?? "",
+    time: m[3] ?? null,
+    suffix: suffix === void 0 ? null : Number(suffix),
+    n: Number(m[5])
+  };
+}
+function describeRun(taskNumber, title) {
+  if (taskNumber === null && title === TURN_TITLE) return "written in turn";
+  const number = taskNumber === null ? "" : ` ${taskNumber}`;
+  const name = title === FALLBACK_TITLE ? "" : ` ${title}`;
+  return `written in task${number}${name}`;
+}
+var FALLBACK_TITLE, TURN_TITLE, SPACE_RUN, TASK_TOKEN, RUN_ID;
 var init_label = __esm({
   "packages/provenance/src/core/label.ts"() {
     "use strict";
@@ -6341,6 +6359,7 @@ var init_label = __esm({
     TURN_TITLE = "turn";
     SPACE_RUN = /[\s\p{Cc}]+/gu;
     TASK_TOKEN = /^(\d+(?:\.\d+)*)\.?(?= |$)/u;
+    RUN_ID = /^(?:(\d+(?:\.\d+)*) )?(.*) (\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ)(?:~(\d+))?\.(\d+)$/su;
   }
 });
 
@@ -6501,6 +6520,27 @@ function splitLines(text) {
   }
   if (from < text.length) out.push(text.slice(from));
   return out;
+}
+function lineStarts(text) {
+  const starts = [0];
+  for (let i = text.indexOf("\n"); i !== -1; i = text.indexOf("\n", i + 1)) {
+    starts.push(i + 1);
+  }
+  return starts;
+}
+function createLineIndex(text) {
+  return { starts: lineStarts(text), length: text.length };
+}
+function positionAt(index, offset) {
+  const at = Math.min(Math.max(offset, 0), index.length);
+  let lo = 0;
+  let hi = index.starts.length - 1;
+  while (lo < hi) {
+    const mid = lo + hi + 1 >> 1;
+    if ((index.starts[mid] ?? 0) <= at) lo = mid;
+    else hi = mid - 1;
+  }
+  return { line: lo + 1, column: at - (index.starts[lo] ?? 0) + 1 };
 }
 var init_lines = __esm({
   "packages/provenance/src/core/lines.ts"() {
@@ -7364,12 +7404,81 @@ var init_neutralize = __esm({
   }
 });
 
+// packages/provenance/src/core/check.ts
+function recordName(path) {
+  return `.kiro/provenance/records/${path}.reveal`;
+}
+function line(reason, path, name) {
+  const label = FAIL_REASONS.has(reason) ? "fail" : "report";
+  return { label, reason, path, text: `${label} ${reason}: ${name}` };
+}
+function compareCodeUnits(a, b) {
+  if (a < b) return -1;
+  return a > b ? 1 : 0;
+}
+function recordLines(file, record, hasEntry) {
+  const out = [];
+  if (hasEntry) out.push(line("orphan_baseline", file.path, file.path));
+  if (!record.ok) out.push(line("tampered_record", file.path, recordName(file.path)));
+  else if (!hasEntry && record.text !== file.text) out.push(line("stale", file.path, file.path));
+  return out;
+}
+function fileLines(facts, file) {
+  const record = Object.hasOwn(facts.records, file.path) ? facts.records[file.path] : void 0;
+  const entry = Object.hasOwn(facts.entries, file.path) ? facts.entries[file.path] : void 0;
+  if (record !== void 0) return recordLines(file, record, entry !== void 0);
+  if (entry === void 0) return [line("no_record", file.path, file.path)];
+  return entry === file.digest ? [] : [line("stale", file.path, file.path)];
+}
+function orphanLines(facts, tracked) {
+  const out = [];
+  for (const path of Object.keys(facts.records)) {
+    if (!tracked.has(path)) out.push(line("orphan_record", path, recordName(path)));
+  }
+  for (const path of Object.keys(facts.entries)) {
+    if (!tracked.has(path)) out.push(line("orphan_baseline", path, path));
+  }
+  return out;
+}
+function checkWorkspace(facts) {
+  const tracked = new Set(facts.files.map((file) => file.path));
+  const all = [
+    ...facts.files.flatMap((file) => fileLines(facts, file)),
+    ...orphanLines(facts, tracked)
+  ].sort((a, b) => compareCodeUnits(a.path, b.path));
+  const failures = all.filter((item) => item.label === "fail");
+  const reports = all.filter((item) => item.label === "report");
+  const lines = all.map((item) => item.text);
+  if (all.length === 0) lines.push(`checked ${String(facts.files.length)} files: ok`);
+  if (reports.length > 0) lines.push(RECORD_HINT);
+  const status = failures.length > 0 || facts.strict && reports.length > 0 ? 1 : 0;
+  return { failures, reports, lines, status };
+}
+var RECORD_HINT, FAIL_REASONS;
+var init_check2 = __esm({
+  "packages/provenance/src/core/check.ts"() {
+    "use strict";
+    RECORD_HINT = "run: reveal --record";
+    FAIL_REASONS = /* @__PURE__ */ new Set([
+      "tampered_record",
+      "orphan_record",
+      "orphan_baseline"
+    ]);
+  }
+});
+
 // packages/provenance/src/core/legend.ts
 function legendLines() {
   return LEGEND_ITEMS.map((item) => `${item.code} ${item.words}`);
 }
+function humNotice() {
+  return legendLines()[2] ?? "";
+}
 function staleLine(path, unrecorded) {
   return `stale: ${path} changed after the last recorded event; ${String(unrecorded)} characters not yet recorded; run: reveal --record`;
+}
+function noPromptSessionsLine(count) {
+  return `Sessions with no prompt events: ${String(count)} counted. In such a session an edit the agent made between tasks is recorded as [HUM]. The count can miss sessions or count one twice; see Limits.`;
 }
 var LEGEND_ITEMS;
 var init_legend = __esm({
@@ -7387,6 +7496,351 @@ var init_legend = __esm({
       },
       { code: "[PST]", words: "already in the file when recording started; origin not recorded" }
     ];
+  }
+});
+
+// packages/provenance/src/core/summary.ts
+function emptyCounts() {
+  return { AI: 0, "AI>HUM": 0, HUM: 0, PST: 0 };
+}
+function compareCodeUnits2(a, b) {
+  if (a < b) return -1;
+  return a > b ? 1 : 0;
+}
+function formatShare(part, whole) {
+  const tenths = whole === 0 ? 0 : Math.round(part * 1e3 / whole);
+  return `${String(Math.floor(tenths / 10))}.${String(tenths % 10)}`;
+}
+function normalizePath(path) {
+  if (path === null) return null;
+  const cleaned = path.replace(/^(\.\/)+/u, "").replace(/\/+$/u, "");
+  return cleaned === "" || cleaned === "." ? null : cleaned;
+}
+function under(path, scope) {
+  return scope === null || path === scope || path.startsWith(scope + "/");
+}
+function windowRunOf(runId2) {
+  const name = parseRunId(runId2);
+  return name.n === null ? runId2 : runId2.slice(0, runId2.lastIndexOf("."));
+}
+function recordFile(record) {
+  const counts = emptyCounts();
+  for (const span of record.doc.spans) counts[span.provenance.origin] += span.end - span.start;
+  return { path: record.path, stale: record.stale, characters: record.doc.text.length, counts };
+}
+function unchangedFile(file) {
+  const counts = { ...emptyCounts(), PST: file.length };
+  return { path: file.path, stale: file.stale, characters: file.length, counts };
+}
+function stretchesOf(record) {
+  const index = createLineIndex(record.doc.text);
+  const out = [];
+  for (const span of record.doc.spans) {
+    const run = span.provenance.runId;
+    if (span.provenance.origin !== "AI" || span.end <= span.start || run === void 0) continue;
+    const name = parseRunId(run);
+    out.push({
+      path: record.path,
+      firstLine: positionAt(index, span.start).line,
+      lastLine: positionAt(index, span.end - 1).line,
+      offset: span.start,
+      length: span.end - span.start,
+      run,
+      windowRun: windowRunOf(run),
+      taskNumber: name.taskNumber,
+      title: name.title,
+      words: describeRun(name.taskNumber, name.title)
+    });
+  }
+  return out;
+}
+function compareStretches(a, b) {
+  return b.length - a.length || compareCodeUnits2(a.path, b.path) || a.offset - b.offset;
+}
+function windowRows(records) {
+  const acc = /* @__PURE__ */ new Map();
+  for (const record of records) {
+    for (const span of record.doc.spans) {
+      const { origin, runId: runId2 } = span.provenance;
+      if (origin !== "AI" && origin !== "AI>HUM" || runId2 === void 0) continue;
+      const key = windowRunOf(runId2);
+      const name = parseRunId(runId2);
+      const words = describeRun(name.taskNumber, name.title);
+      const row = {
+        windowRun: key,
+        taskNumber: name.taskNumber,
+        title: name.title,
+        openedAt: name.time,
+        files: 0,
+        runs: 0,
+        ai: 0,
+        aiHuman: 0,
+        words
+      };
+      const entry = acc.get(key) ?? { row, files: /* @__PURE__ */ new Set(), runs: /* @__PURE__ */ new Set() };
+      entry.files.add(record.path);
+      entry.runs.add(record.path + "\0" + runId2);
+      if (origin === "AI") entry.row.ai += span.end - span.start;
+      else entry.row.aiHuman += span.end - span.start;
+      acc.set(key, entry);
+    }
+  }
+  return [...acc.values()].map((e) => ({ ...e.row, files: e.files.size, runs: e.runs.size })).sort(compareWindows);
+}
+function compareWindows(a, b) {
+  if (a.openedAt !== b.openedAt) {
+    if (a.openedAt === null) return 1;
+    if (b.openedAt === null) return -1;
+    return compareCodeUnits2(a.openedAt, b.openedAt);
+  }
+  return compareCodeUnits2(a.windowRun, b.windowRun);
+}
+function buildSummary(records, unchanged, top) {
+  const files = [...records.map(recordFile), ...unchanged.map(unchangedFile)].sort(
+    (a, b) => compareCodeUnits2(a.path, b.path)
+  );
+  const total = emptyCounts();
+  for (const file of files) for (const o of ORIGINS3) total[o] += file.counts[o];
+  const stretches = records.flatMap(stretchesOf).sort(compareStretches);
+  return {
+    files,
+    total,
+    totalCharacters: files.reduce((sum, f) => sum + f.characters, 0),
+    stretches: stretches.slice(0, Math.max(0, top)),
+    omittedAiHuman: total["AI>HUM"],
+    windows: windowRows(records)
+  };
+}
+function countsLine(counts, characters) {
+  const parts = ORIGINS3.map(
+    (o) => `${o} ${String(counts[o])} (${formatShare(counts[o], characters)}%)`
+  );
+  return `${String(characters)} characters: ${parts.join(", ")}`;
+}
+function stretchLine(s) {
+  const lines = s.firstLine === s.lastLine ? `line ${String(s.firstLine)}` : `lines ${String(s.firstLine)}-${String(s.lastLine)}`;
+  return `${s.path} ${lines}, ${String(s.length)} characters, ${s.words}, ${s.windowRun}`;
+}
+function windowLine(w) {
+  const number = w.taskNumber ?? "-";
+  const opened = w.openedAt ?? "-";
+  return `${number} | ${w.title} | ${opened} | files ${String(w.files)} | runs ${String(w.runs)} | AI ${String(w.ai)} | AI>HUM ${String(w.aiHuman)} | ${w.words}`;
+}
+function sessionsLines(sessions) {
+  if (sessions === "unreadable") return [UNREADABLE];
+  return sessions > 0 ? [noPromptSessionsLine(sessions)] : [];
+}
+function renderSummary(summary, sessions) {
+  const out = [`Total: ${countsLine(summary.total, summary.totalCharacters)}`];
+  out.push("Files:");
+  for (const f of summary.files)
+    out.push(`${f.path}${f.stale ? " (stale)" : ""}: ${countsLine(f.counts, f.characters)}`);
+  out.push("Largest untouched agent stretches:");
+  if (summary.stretches.length === 0) out.push("none");
+  for (const s of summary.stretches) out.push(stretchLine(s));
+  out.push(`AI>HUM characters left out of this list: ${String(summary.omittedAiHuman)}`);
+  out.push("Agent text by window (task number | label | opened | files | runs | AI | AI>HUM):");
+  if (summary.windows.length === 0) out.push("none");
+  for (const w of summary.windows) out.push(windowLine(w));
+  out.push(humNotice(), ...sessionsLines(sessions));
+  return out;
+}
+function summarize(input) {
+  if (input.records.length === 0 && input.unchanged.length === 0) {
+    return { status: 1, lines: [NOTHING_RECORDED], text: NOTHING_RECORDED, summary: null };
+  }
+  const scope = normalizePath(input.path);
+  const records = input.records.filter((r) => under(r.path, scope));
+  const unchanged = input.unchanged.filter((u) => under(u.path, scope));
+  const summary = records.length + unchanged.length === 0 ? null : buildSummary(records, unchanged, input.top ?? DEFAULT_TOP);
+  const lines = summary === null ? [`Nothing recorded under ${scope ?? ""}.`, humNotice(), ...sessionsLines(input.sessions)] : renderSummary(summary, input.sessions);
+  return { status: 0, lines, text: lines.join("\n"), summary };
+}
+var DEFAULT_TOP, ORIGINS3, NOTHING_RECORDED, UNREADABLE;
+var init_summary = __esm({
+  "packages/provenance/src/core/summary.ts"() {
+    "use strict";
+    init_legend();
+    init_label();
+    init_lines();
+    DEFAULT_TOP = 10;
+    ORIGINS3 = ["AI", "AI>HUM", "HUM", "PST"];
+    NOTHING_RECORDED = "Nothing is recorded. Run setup_provenance to start recording.";
+    UNREADABLE = "Sessions with no prompt events: the count is unreadable (sessions.json does not parse).";
+  }
+});
+
+// packages/provenance/src/io/load.ts
+async function loadRecord2(store, path) {
+  const read = await store.readRecord(path);
+  if (read.ok) {
+    const document = read.value?.document;
+    return ok(document === void 0 ? null : { ok: true, text: document.text, doc: document });
+  }
+  return read.error.kind === "tampered_record" ? ok({ ok: false }) : err(read.error);
+}
+async function loadRecords(store) {
+  const records = {};
+  for (const path of (await store.listRecords()).sort()) {
+    const loaded = await loadRecord2(store, path);
+    if (!loaded.ok) return loaded;
+    if (loaded.value !== null) records[path] = loaded.value;
+  }
+  return ok(records);
+}
+async function readTexts(deps, root, list) {
+  const files = [];
+  for (let i = 0; i < list.length; i += READ_BATCH2) {
+    const batch = list.slice(i, i + READ_BATCH2);
+    const reads = await Promise.all(batch.map((c) => readCandidate(deps, root, c)));
+    reads.forEach((read, j) => {
+      if (read.kind === "text") {
+        files.push({ path: batch[j].path, digest: read.sha256, text: read.text });
+      }
+    });
+  }
+  return files;
+}
+function entryDigests(baseline) {
+  return Object.fromEntries(Object.entries(baseline?.files ?? {}).map(([p, e]) => [p, e.sha256]));
+}
+async function loadSessions(store) {
+  const read = await store.readSessions();
+  return read.ok ? read.value : "unreadable";
+}
+async function loadWorkspace(deps, root) {
+  const store = createStore(deps, `${root}/.kiro/provenance`);
+  const records = await loadRecords(store);
+  if (!records.ok) return records;
+  const baseline = await store.readBaseline();
+  if (!baseline.ok) return baseline;
+  const list = await listCandidates(deps, root);
+  return ok({
+    root,
+    files: await readTexts(deps, root, list.files),
+    records: records.value,
+    entries: entryDigests(baseline.value),
+    baseline: baseline.value,
+    sessions: await loadSessions(store)
+  });
+}
+async function readFileAt(deps, root, path) {
+  const stat = await deps.fs.lstat(`${root}/${path}`);
+  if (!stat.ok || stat.value.kind !== "file") return { kind: "absent" };
+  const { size, mtimeMs } = stat.value;
+  return readCandidate(deps, root, { path, size, mtimeMs });
+}
+async function baselineTextOf(deps, root, entry, read) {
+  if (entry === null || read.kind === "text" && read.sha256 === entry.sha256) return null;
+  const cache = createBaselineCache(deps, createStore(deps, `${root}/.kiro/provenance`).cacheDir());
+  return resolveBaselineText(deps, root, cache, entry);
+}
+async function loadFile(deps, root, path) {
+  const store = createStore(deps, `${root}/.kiro/provenance`);
+  const record = await loadRecord2(store, path);
+  if (!record.ok) return record;
+  const baseline = await store.readBaseline();
+  if (!baseline.ok) return baseline;
+  const read = await readFileAt(deps, root, path);
+  const entry = baseline.value?.files[path] ?? null;
+  return ok({
+    read,
+    record: record.value,
+    entry,
+    baselineAt: baseline.value?.at ?? null,
+    baselineText: await baselineTextOf(deps, root, entry, read),
+    listed: record.value !== null || entry !== null ? null : await isListed(deps, root, path)
+  });
+}
+async function isListed(deps, root, path) {
+  return (await listCandidates(deps, root)).files.some((c) => c.path === path);
+}
+function checkFactsOf(facts, strict) {
+  const records = {};
+  for (const [path, r] of Object.entries(facts.records)) {
+    records[path] = r.ok ? { ok: true, text: r.text } : { ok: false };
+  }
+  return { files: facts.files, records, entries: facts.entries, strict };
+}
+function underPath(path, scope) {
+  return scope === null || scope === "" || path === scope || path.startsWith(`${scope}/`);
+}
+function summaryInputOf(facts, scope, top) {
+  const byPath = new Map(facts.files.map((f) => [f.path, f]));
+  const records = Object.entries(facts.records).flatMap(
+    ([path, r]) => r.ok && underPath(path, scope) ? [{ path, doc: r.doc, stale: byPath.get(path)?.text !== r.text }] : []
+  );
+  const unchanged = Object.entries(facts.entries).flatMap(([path, digest]) => {
+    const file = byPath.get(path);
+    const keep = underPath(path, scope) && !Object.hasOwn(facts.records, path);
+    return keep && file !== void 0 ? [{ path, length: file.text.length, stale: file.digest !== digest }] : [];
+  });
+  return { records, unchanged, path: scope, sessions: facts.sessions, ...top ? { top } : {} };
+}
+function unchangedDocument(text, baselineAt) {
+  const doc = createDocument(text, baselineAt);
+  return doc.ok ? doc.value : null;
+}
+var READ_BATCH2;
+var init_load = __esm({
+  "packages/provenance/src/io/load.ts"() {
+    "use strict";
+    init_src();
+    init_baseline_cache();
+    init_baseline_text();
+    init_scan2();
+    init_store();
+    READ_BATCH2 = 64;
+  }
+});
+
+// packages/provenance/src/io/reveal-report.ts
+function parseSummaryArgs(args) {
+  let path = null;
+  let top;
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i];
+    if (arg === "--top") {
+      const value = args[i += 1];
+      if (value === void 0 || !/^[1-9][0-9]*$/u.test(value) || top !== void 0) return null;
+      top = Number(value);
+    } else if (arg.startsWith("--") || path !== null) {
+      return null;
+    } else {
+      path = arg;
+    }
+  }
+  return { path, top };
+}
+function parseCheckArgs(args) {
+  if (args.length === 0) return { strict: false };
+  return args.length === 1 && args[0] === "--strict" ? { strict: true } : null;
+}
+function printable(lines) {
+  return lines.map((line2) => neutralize(line2)).join("\n");
+}
+function unreadable(kind) {
+  return { status: 1, text: `Records cannot be read: ${kind}` };
+}
+async function summaryReport(deps, root, scope, top) {
+  const loaded = await loadWorkspace(deps, root);
+  if (!loaded.ok) return unreadable(loaded.error.kind);
+  const result = summarize(summaryInputOf(loaded.value, scope, top));
+  return { status: result.status, text: printable(result.lines) };
+}
+async function checkReport(deps, root, strict) {
+  const loaded = await loadWorkspace(deps, root);
+  if (!loaded.ok) return unreadable(loaded.error.kind);
+  const result = checkWorkspace(checkFactsOf(loaded.value, strict));
+  return { status: result.status, text: printable(result.lines) };
+}
+var init_reveal_report = __esm({
+  "packages/provenance/src/io/reveal-report.ts"() {
+    "use strict";
+    init_check2();
+    init_neutralize();
+    init_summary();
+    init_load();
   }
 });
 
@@ -7477,7 +7931,7 @@ function colourBody(doc, mode) {
 }
 function colourLines(lines, colour, mode) {
   const style = onBody(colour, mode);
-  return lines.map((line) => `${style}${line}${RESET}`);
+  return lines.map((line2) => `${style}${line2}${RESET}`);
 }
 function colourView(doc, mode, path) {
   const head = colourLines([headerLine(path)], PANE.title, mode);
@@ -7498,61 +7952,6 @@ var init_view = __esm({
     init_legend();
     init_neutralize();
     init_palette();
-  }
-});
-
-// packages/provenance/src/io/load.ts
-async function loadRecord2(store, path) {
-  const read = await store.readRecord(path);
-  if (read.ok) {
-    const document = read.value?.document;
-    return ok(document === void 0 ? null : { ok: true, text: document.text, doc: document });
-  }
-  return read.error.kind === "tampered_record" ? ok({ ok: false }) : err(read.error);
-}
-async function readFileAt(deps, root, path) {
-  const stat = await deps.fs.lstat(`${root}/${path}`);
-  if (!stat.ok || stat.value.kind !== "file") return { kind: "absent" };
-  const { size, mtimeMs } = stat.value;
-  return readCandidate(deps, root, { path, size, mtimeMs });
-}
-async function baselineTextOf(deps, root, entry, read) {
-  if (entry === null || read.kind === "text" && read.sha256 === entry.sha256) return null;
-  const cache = createBaselineCache(deps, createStore(deps, `${root}/.kiro/provenance`).cacheDir());
-  return resolveBaselineText(deps, root, cache, entry);
-}
-async function loadFile(deps, root, path) {
-  const store = createStore(deps, `${root}/.kiro/provenance`);
-  const record = await loadRecord2(store, path);
-  if (!record.ok) return record;
-  const baseline = await store.readBaseline();
-  if (!baseline.ok) return baseline;
-  const read = await readFileAt(deps, root, path);
-  const entry = baseline.value?.files[path] ?? null;
-  return ok({
-    read,
-    record: record.value,
-    entry,
-    baselineAt: baseline.value?.at ?? null,
-    baselineText: await baselineTextOf(deps, root, entry, read),
-    listed: record.value !== null || entry !== null ? null : await isListed(deps, root, path)
-  });
-}
-async function isListed(deps, root, path) {
-  return (await listCandidates(deps, root)).files.some((c) => c.path === path);
-}
-function unchangedDocument(text, baselineAt) {
-  const doc = createDocument(text, baselineAt);
-  return doc.ok ? doc.value : null;
-}
-var init_load = __esm({
-  "packages/provenance/src/io/load.ts"() {
-    "use strict";
-    init_src();
-    init_baseline_cache();
-    init_baseline_text();
-    init_scan2();
-    init_store();
   }
 });
 
@@ -7645,7 +8044,7 @@ function relativeTo(root, cwd, arg) {
 async function revealOne(deps, io, arg) {
   const root = await findWorkspaceRoot(deps, io.cwd, null);
   if (root === null) {
-    io.out("provenance is not set up here: run setup_provenance");
+    io.out(NOT_SET_UP);
     return 1;
   }
   const path = relativeTo(root, io.cwd, arg);
@@ -7657,21 +8056,63 @@ async function revealOne(deps, io, arg) {
   io.out(shown2.text);
   return shown2.status;
 }
-async function revealCommand(deps, args, io) {
-  const [first, ...rest] = args;
-  if (first === void 0 || first.startsWith("--") || rest.length > 0) {
-    io.err(USAGE);
+function scopeOf(root, cwd, arg) {
+  const probe = relativeTo(root, cwd, `${arg}/x`);
+  if (probe === null) return null;
+  return { scope: probe === "x" ? null : probe.slice(0, -2) };
+}
+async function inWorkspace(deps, io, run) {
+  const root = await findWorkspaceRoot(deps, io.cwd, null);
+  const report = root === null ? { status: 1, text: NOT_SET_UP } : await run(root);
+  io.out(report.text);
+  return report.status;
+}
+async function summaryForm(deps, io, args) {
+  const parsed = parseSummaryArgs(args);
+  if (parsed === null) return usage(io);
+  return inWorkspace(deps, io, async (root) => {
+    const found = parsed.path === null ? { scope: null } : scopeOf(root, io.cwd, parsed.path);
+    if (found === null) {
+      return { status: 1, text: `${neutralize(parsed.path ?? "")}: not recorded: not_tracked` };
+    }
+    return summaryReport(deps, root, found.scope, parsed.top);
+  });
+}
+async function checkForm(deps, io, args) {
+  const parsed = parseCheckArgs(args);
+  if (parsed === null) return usage(io);
+  return inWorkspace(deps, io, (root) => checkReport(deps, root, parsed.strict));
+}
+async function recordForm(deps, io) {
+  const root = await findWorkspaceRoot(deps, io.cwd, null);
+  if (root === null) {
+    io.out(NOT_SET_UP);
     return 1;
   }
+  await runRecord(deps, "manual", io.cwd);
+  return 0;
+}
+function usage(io) {
+  io.err(USAGE);
+  return 1;
+}
+async function revealCommand(deps, args, io) {
+  const [first, ...rest] = args;
+  if (first === "--summary") return summaryForm(deps, io, rest);
+  if (first === "--check") return checkForm(deps, io, rest);
+  if (first === "--record") return rest.length === 0 ? recordForm(deps, io) : usage(io);
+  if (first === void 0 || first.startsWith("--") || rest.length > 0) return usage(io);
   return revealOne(deps, io, first);
 }
-var USAGE;
+var NOT_SET_UP, USAGE;
 var init_reveal_cmd = __esm({
   "packages/provenance/src/io/reveal-cmd.ts"() {
     "use strict";
     init_neutralize();
     init_recorder();
+    init_reveal_report();
     init_reveal_file();
+    NOT_SET_UP = "provenance is not set up here: run setup_provenance";
     USAGE = "usage: reveal <file> | --summary [path] [--top <n>] | --check [--strict] | --record";
   }
 });
@@ -7970,7 +8411,7 @@ async function baselineMain() {
   const cwd = process.cwd();
   const root = await findWorkspaceRoot(base, cwd, null) ?? cwd.replace(/\\/gu, "/");
   const deps = { ...base, log: createFaultLog(base, `${root}/.kiro/provenance/errors.log`) };
-  return baselineCommand(deps, root, (line) => process.stdout.write(`${line}
+  return baselineCommand(deps, root, (line2) => process.stdout.write(`${line2}
 `));
 }
 async function revealMain(args) {

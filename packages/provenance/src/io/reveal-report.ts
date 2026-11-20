@@ -1,0 +1,76 @@
+/**
+ * `reveal --summary [path] [--top n]` and `reveal --check [--strict]` (Req 10, Req 11): the forms
+ * over the loader, `summarize` and `checkWorkspace`. They read and print; they write no file and
+ * make no network request. Every printed line passes through `neutralize`.
+ */
+import { checkWorkspace } from "../core/check.js";
+import { neutralize } from "../core/neutralize.js";
+import { summarize } from "../core/summary.js";
+import type { Deps } from "./deps.js";
+import { checkFactsOf, loadWorkspace, summaryInputOf } from "./load.js";
+
+type ReportDeps = Pick<Deps, "fs" | "git" | "sha256" | "log" | "pid">;
+
+/** What a form prints and the exit status it gives. */
+export type Report = { status: 0 | 1; text: string };
+
+/** The arguments after `--summary`: an optional path and an optional positive `--top`. */
+export type SummaryArgs = { path: string | null; top: number | undefined };
+
+/** Parses the arguments after `--summary`; null for anything the usage line does not allow. */
+export function parseSummaryArgs(args: readonly string[]): SummaryArgs | null {
+  let path: string | null = null;
+  let top: number | undefined;
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i] as string;
+    if (arg === "--top") {
+      const value = args[(i += 1)];
+      if (value === undefined || !/^[1-9][0-9]*$/u.test(value) || top !== undefined) return null;
+      top = Number(value);
+    } else if (arg.startsWith("--") || path !== null) {
+      return null;
+    } else {
+      path = arg;
+    }
+  }
+  return { path, top };
+}
+
+/** The arguments after `--check`: nothing, or `--strict`; null otherwise. */
+export function parseCheckArgs(args: readonly string[]): { strict: boolean } | null {
+  if (args.length === 0) return { strict: false };
+  return args.length === 1 && args[0] === "--strict" ? { strict: true } : null;
+}
+
+function printable(lines: readonly string[]): string {
+  return lines.map((line) => neutralize(line)).join("\n");
+}
+
+function unreadable(kind: string): Report {
+  return { status: 1, text: `Records cannot be read: ${kind}` };
+}
+
+/** The summary of the Records and Unchanged_Files under `scope` (null: everything). */
+export async function summaryReport(
+  deps: ReportDeps,
+  root: string,
+  scope: string | null,
+  top: number | undefined,
+): Promise<Report> {
+  const loaded = await loadWorkspace(deps, root);
+  if (!loaded.ok) return unreadable(loaded.error.kind);
+  const result = summarize(summaryInputOf(loaded.value, scope, top));
+  return { status: result.status, text: printable(result.lines) };
+}
+
+/** The check of every Tracked_File; makes no write (Req 11.12). */
+export async function checkReport(
+  deps: ReportDeps,
+  root: string,
+  strict: boolean,
+): Promise<Report> {
+  const loaded = await loadWorkspace(deps, root);
+  if (!loaded.ok) return unreadable(loaded.error.kind);
+  const result = checkWorkspace(checkFactsOf(loaded.value, strict));
+  return { status: result.status, text: printable(result.lines) };
+}
