@@ -1,0 +1,932 @@
+[DOC{v=1;n=0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.1,185,0,0}][PST{t=2026-11-20T03:04:47Z}]{
+  "pbtResults": {
+    "4.2 Property 13: the payload keeps five fields and no prompt": {
+      "status": "passed",
+      "lastRunTimestamp": 1795065295179
+    },
+    "4.19 Property 17: an edit changes only the edited stretch": {
+      "status": "passed",
+      "lastRunTimestamp": 1795134900733
+    },
+    "5.13 Property 16: sessions without prompt events are counted once": {
+      "status": "passed",
+      "lastRunTimestamp": 1795142435353
+    }
+  },
+  "executionHistory": {
+    "1.1 Reinstall the probe outside the repository": \[
+      {
+        "executionId": "108819c7-1717-4ea2-b696-5406301de344",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795051427733
+      },
+      {
+        "executionId": "a4f32cdf-7f2a-4951-ad6b-9960e89fedc3",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795052052807
+      }
+    \],
+    "1.2 Recapture every event and take the measurements on the IDE and the CLI": \[
+      {
+        "executionId": "f511cb75-ccd9-453b-a352-2d4a07183b23",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795053097731
+      },
+      {
+        "executionId": "709645e2-9c58-4587-99e3-746d07e19b7f",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795060575513
+      }
+    \],
+    "1.3 Commit the scrubbed fixtures and the first BUILD_LOG lines": \[
+      {
+        "executionId": "709645e2-9c58-4587-99e3-746d07e19b7f",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795060580238
+      },
+      {
+        "executionId": "709645e2-9c58-4587-99e3-746d07e19b7f",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795060762210
+      }
+    \],
+    "1.4 Checkpoint - remove the probe and report findings that change the design": \[
+      {
+        "executionId": "709645e2-9c58-4587-99e3-746d07e19b7f",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795060775652
+      },
+      {
+        "executionId": "709645e2-9c58-4587-99e3-746d07e19b7f",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795061044259
+      }
+    \],
+    "1. Capture the hook payloads and measurements (Requirement 18)": \[
+      {
+        "executionId": "709645e2-9c58-4587-99e3-746d07e19b7f",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795061044295
+      }
+    \],
+    "2.1 The five hooks and the two pinning tests": \[
+      {
+        "executionId": "25b67d05-8d96-4a1d-b1f5-bd20695e20ed",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063291899
+      },
+      {
+        "executionId": "25b67d05-8d96-4a1d-b1f5-bd20695e20ed",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063349727
+      }
+    \],
+    "2.2 BUILD_LOG line for the timeout finding": \[
+      {
+        "executionId": "25b67d05-8d96-4a1d-b1f5-bd20695e20ed",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063361158
+      },
+      {
+        "executionId": "25b67d05-8d96-4a1d-b1f5-bd20695e20ed",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063414377
+      }
+    \],
+    "2. Make the test hooks' timeout effective (Requirement 19)": \[
+      {
+        "executionId": "25b67d05-8d96-4a1d-b1f5-bd20695e20ed",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063414423
+      }
+    \],
+    "3.1 Package manifest, tsconfig, Vitest project, core types and limits": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643456
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063650780
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063783601
+      }
+    \],
+    "3.2 Test support and the arbitrary files": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643506
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063787110
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063921859
+      }
+    \],
+    "4.1 `payload.ts`": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643539
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063932920
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795064122727
+      }
+    \],
+    "4.2 Property 13: the payload keeps five fields and no prompt": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643569
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795065152478
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795065306502
+      }
+    \],
+    "4.3 `label.ts`: Run labels, Window_Run names and Run_Ids": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643601
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795064137608
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795064371174
+      }
+    \],
+    "4.4 Property 10: Run names round-trip": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643631
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795065310200
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795065600783
+      }
+    \],
+    "4.5 `lines.ts` and `diff.ts`: the line difference, and `arb-edits.ts`": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643670
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795064375677
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795064591879
+      }
+    \],
+    "4.6 Property 7: Hunks reproduce the new text": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643698
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795065600906
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795065734331
+      }
+    \],
+    "4.7 `plan.ts` and `update.ts`: Hunks into Engine operations": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643724
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795066187417
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795066541123
+      }
+    \],
+    "4.8 Property 3: changed agent text goes through the Engine and only the Engine": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643751
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795066858821
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795067063145
+      }
+    \],
+    "4.9 `baseline-codec.ts`": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643779
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795064597128
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795064771749
+      }
+    \],
+    "4.10 Property 8: the baseline file round-trips, and `arb-dirs.ts` baseline part": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643811
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795065740639
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795065908729
+      }
+    \],
+    "4.11 `state-codec.ts`": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643847
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795066544515
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795066720140
+      }
+    \],
+    "4.12 Property 9: the window state round-trips, and `arb-dirs.ts` state part": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643877
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795067064176
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795067250714
+      }
+    \],
+    "4.13 `windows.ts`: sweep, leftover, rule 21 and transitions": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643906
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795067250879
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795067569919
+      }
+    \],
+    "4.14 `exclude.ts` and `renames.ts`": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643933
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795066723687
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795066855399
+      }
+    \],
+    "4.15 `glob.ts`, `ignore-parse.ts` and `ignore.ts`: the full gitignore matcher": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643963
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795064775450
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795065145732
+      }
+    \],
+    "4.16 Property 15: the ignore matcher agrees with git, and `arb-ignore.ts`": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063643991
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795065912468
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795066183783
+      }
+    \],
+    "4.17 Checkpoint - the pure core": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644020
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795067574110
+      },
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795067824928
+      }
+    \],
+    "5.1 `Deps`, environment, fault log, stdin, lock and the store; in-memory test dependencies": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644052
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795135146337
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795135620137
+      }
+    \],
+    "5.2 `git.ts` and `scan.ts`: candidates, exclusion, size and binary": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644094
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795135620710
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795136822451
+      }
+    \],
+    "5.3 `baseline-text.ts`, `baseline-cache.ts` and the `baseline` command": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644124
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795136822803
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795137205670
+      }
+    \],
+    "5.4 `recorder-files.ts`: the per-file phases": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644150
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795137205717
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795137753079
+      }
+    \],
+    "5.5 `recorder.ts` and `cli/main.ts`: one event from start to exit": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644181
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795137753850
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795138022744
+      }
+    \],
+    "5.6 Example tests: the events with the captured fixtures": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644207
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795138023603
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795138371516
+      }
+    \],
+    "5.7 Example tests: faults, a corrupt directory and the command's silence": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644237
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795138372184
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795140210589
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795140472365
+      }
+    \],
+    "5.8 Property 1: the record or the baseline is the file, with `arb-windows.ts` and `arb-dirs.ts`": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644266
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795140472433
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795140821912
+      }
+    \],
+    "5.9 Property 2: attribution follows the windows and nothing else": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644295
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795140822441
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795141364024
+      }
+    \],
+    "5.10 Property 4: nothing happens twice": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644323
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795141367503
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795141584830
+      }
+    \],
+    "5.11 Property 5: sessions are independent": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644351
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795141588396
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795141795055
+      }
+    \],
+    "5.12 Property 14: the first change never over-attributes": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644386
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795141798396
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795142059989
+      }
+    \],
+    "5.13 Property 16: sessions without prompt events are counted once": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644416
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795142063371
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795142467483
+      }
+    \],
+    "6.1 `scripts/build-power.mjs` builds the provenance Bundle": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644445
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795142471339
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795142610445
+      }
+    \],
+    "6.2 `hook-file.ts`, the Hook_File and the static hook tests": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644475
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795142614460
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795143773895
+      }
+    \],
+    "6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-commit hook": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644505
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795143798391
+      }[AI:6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-c 2026-11-20T03:09:24Z.1{t=2026-11-20T03:12:17.688Z}],
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795144337595
+      }[PST{t=2026-11-20T03:04:47Z}]
+    \],
+    "6.4 Measure the Recorder and add the times to BUILD_LOG": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644534
+      }
+    \],
+    "6.5 Checkpoint - the Recorder is installed and recording": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644564
+      }
+    \],
+    "7.1 `legend.ts` and `structured.ts`": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644592
+      }
+    \],
+    "7.2 Property 11: structured spans cover the file exactly": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644620
+      }
+    \],
+    "7.3 `palette.ts`, `neutralize.ts` and `view.ts`": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644649
+      }
+    \],
+    "7.4 Property 6: colour output is the plain output with the colour removed": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644677
+      }
+    \],
+    "7.5 `summary.ts`": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644704
+      }
+    \],
+    "7.6 Property 12: summary counts add up": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644734
+      }
+    \],
+    "7.7 `check.ts`": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644767
+      }
+    \],
+    "7.8 `load.ts`, `reveal <file>`, the wrapper and the root script": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644796
+      }
+    \],
+    "7.9 `reveal --summary`, `--check \[--strict\]` and `--record`": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644824
+      }
+    \],
+    "8.1 MCP dependencies, workspace discovery and schemas": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644852
+      }
+    \],
+    "8.2 The four read-only tools and the server": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644883
+      }
+    \],
+    "9.1 `setup.ts` and the `provenance setup` command": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644912
+      }
+    \],
+    "9.2 The `setup_provenance` tool": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644947
+      }
+    \],
+    "10.1 `powers/provenance` manifests, skills and README": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063644992
+      }
+    \],
+    "10.2 Bundle freshness, tools from a copy outside the repository, and the MCP import cost": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063645021
+      }
+    \],
+    "11.1 Static boundary tests": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063645050
+      }
+    \],
+    "11.2 README section \\"Reveal Codes for your own repository\\"": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063645078
+      }
+    \],
+    "11.3 `docs/KIRO_USAGE.md` and the steering files": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063645108
+      }
+    \],
+    "11.4 Complete the BUILD_LOG entry": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063645136
+      }
+    \],
+    "12.1 Final checkpoint - everything green and the record complete": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063645166
+      }
+    \],
+    "3. Package scaffold": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795063921900
+      }
+    \],
+    "4. Pure core, each module followed by its property": \[
+      {
+        "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795067825017
+      }
+    \],
+    "4.18 Character trim inside each Hunk in `plan.ts`": \[
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795102854302
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795102858146
+      }
+    \],
+    "4.19 Property 17: an edit changes only the edited stretch": \[
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795102854340
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795103185293
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795134931968
+      }
+    \],
+    "4.20 Checkpoint - the trim": \[
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795102854371
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795134932027
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795135145682
+      }
+    \],
+    "4.18 Character trim inside each Hunk (`trim.ts`, applied in `update.ts`)": \[
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795103181710
+      }
+    \],
+    "5. The Recorder around the core": \[
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795142467552
+      }
+    \]
+  }
+}

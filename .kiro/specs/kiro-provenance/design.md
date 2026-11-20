@@ -386,9 +386,11 @@ The four read tools carry `annotations: { readOnlyHint: true }`; `setup_provenan
 # reveal-codes provenance: catch up the record, stage it. Never blocks a commit.
 if [ -f .kiro/provenance/provenance.mjs ]; then
   node .kiro/provenance/provenance.mjs record manual >/dev/null 2>&1 || true
-  git add -- .kiro/provenance/baseline.json .kiro/provenance/sessions.json .kiro/provenance/records >/dev/null 2>&1 || true
+  for p in .kiro/provenance/baseline.json .kiro/provenance/sessions.json .kiro/provenance/records; do [ -e "$p" ] && git add -- "$p" >/dev/null 2>&1; done; true
 fi
 ```
+
+A hook that holds the previous block (one `git add` naming the three paths) has it replaced in place by `setup --git-hook`, and the rest of the hook is unchanged.
 
 If an existing pre-commit hook has an unconditional `exit` before the end, the block never runs; the install task reports this and does not edit the hook. Git does not version `.git/hooks`; `docs/KIRO_USAGE.md` and the README give the recreating command: `node powers/provenance/server/provenance.mjs setup --git-hook`, an extra flag of the setup command that writes only this block.
 
@@ -682,5 +684,7 @@ The user settled the open points of the earlier design on 2026-11-18. Each entry
 16. **Property 17 and the whole-text trim (2026-11-19, binding).** (a) Property 17 claims origin and run only, not timestamp: when two adjacent spans merge, the merged span keeps one timestamp by the Engine's merge rule. (b) Before the line difference, `update.ts` trims the common prefix and suffix of the whole old and new text (`commonAffixes` in `trim.ts`, the `trimHunk` rule: UTF-16 units, no split surrogate pair or CR LF, prefix first, no overlap), runs `diffLines` only on the middle, shifts its Hunks by the prefix length, trims each Hunk as before and drops the empty ones; `planHunks` is unchanged. Reason: a line difference over the whole text could align an inserted line with an equal old line outside the edited stretch (an agent inserting `F⏎` before a line starting with `F`), or keep the wrong one of two equal lines on a delete. Changed: M2, M15, "Hunk to Engine operation (M2)", Property 17, Requirement 4 (criteria 2 and 15), Requirement 16 (criterion 24). (c) Inside the edited stretch the line difference of the middle may keep an old line equal to an inserted one (for example an old `⏎` inside a replaced stretch); Property 17 lets such a character keep its run and origin (up to relabelling) and requires the new origin of every other inserted character. Property 3's reference applies the same operations; Property 7 is about `diffLines` alone and is unchanged. No Engine change. Requirement 4, criterion 10, was aligned with (a): untouched characters keep their origin and run, and their timestamp is that of the span that holds them.
 
 17. **Timeout-equality checks narrowed (2026-11-19, user decision).** The tests `packages/export/test/package.test.ts` and `crew/sentinel/test/static/package.test.ts` compared the timeout of every hook file; `0-provenance.json` has `"timeout": 30` (Requirement 7, criterion 11), so each check now compares only the five `*-tests-on-save.json` files, which keep 120. Requirements 1.10, 15.1 and 19.2 allow this one more edit in each test.
+
+18. **Pre-commit staging, one path at a time (2026-11-20, task 6.3).** A single `git add -- a b c` fails as a whole when any named path is missing, and `records/` does not exist until the first Record is written, so the first block staged nothing. Each path is now added by its own guarded command and the line ends in `true`; `planHook` replaces the previous block in place. No requirement changes.
 
 **Still to be measured by task 1 (was open point 15).** Closed by the capture of task 1.2 (the entry above), except what the fixtures of task 1.3 and the checkpoint of task 1.4 still carry: the committed scrubbed fixtures. The order of two `PostTaskExec` hooks on the CLI cannot be measured because the CLI fires no task events. That `session_id` differs across surfaces and tabs, the `fs_write` path form, and the question of a sub-agent's `Stop` are answered.

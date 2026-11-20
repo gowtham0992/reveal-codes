@@ -1,0 +1,175 @@
+import { spawnSync } from "node:child_process";
+import { chmodSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { afterEach, describe, expect, it } from "vitest";
+import { gitHookBlock, planHook } from "../src/core/git-hook.js";
+import { nodeDeps } from "../src/io/deps.js";
+import { writeGitHook } from "../src/io/git-hook-write.js";
+import { makeTempDir, useIsolatedGit } from "./support/temp-repo.js";
+import type { TempDir } from "./support/temp-repo.js";
+
+const deps = nodeDeps();
+const BUNDLE = ".kiro/provenance/provenance.mjs";
+let dir: TempDir | null = null;
+afterEach(() => {
+  dir?.cleanup();
+});
+useIsolatedGit();
+
+function repo(): TempDir {
+  dir = makeTempDir();
+  dir.git("init", "-q");
+  return dir;
+}
+const hookPath = (d: TempDir): string => `${d.root}/.git/hooks/pre-commit`;
+const hookText = (d: TempDir): string => readFileSync(hookPath(d), "utf8");
+
+async function install(d: TempDir): Promise<string> {
+  const done = await writeGitHook(deps, d.root);
+  if (!done.ok) throw new Error(`write failed: ${done.error.kind}`);
+  return done.value.status;
+}
+
+function runHook(d: TempDir): { status: number | null; out: string } {
+  const run = spawnSync("sh", [hookPath(d)], { cwd: d.root, encoding: "utf8" });
+  return { status: run.status, out: run.stdout + run.stderr };
+}
+
+describe("gitHookBlock", () => {
+  it("is the design block with its comment line, ending in a line feed", () => {
+    const lines = gitHookBlock().split("\n");
+    expect(lines[0]).toBe(
+      "# reveal-codes provenance: catch up the record, stage it. Never blocks a commit.",
+    );
+    expect(lines[1]).toBe("if [ -f .kiro/provenance/provenance.mjs ]; then");
+    expect(lines[2]).toBe(
+      "  node .kiro/provenance/provenance.mjs record manual >/dev/null 2>&1 || true",
+    );
+    expect(lines[3]).toBe(
+      '  for p in .kiro/provenance/baseline.json .kiro/provenance/sessions.json .kiro/provenance/records; do [ -e "$p" ] && git add -- "$p" >/dev/null 2>&1; done; true',
+    );
+    expect(lines.slice(4)).toEqual(["fi", ""]);
+  });
+
+  it("is refused in a hook with an unindented exit or a non-shell shebang", () => {
+    expect(planHook("#!/bin/sh\nexit 0\n")).toEqual({
+      kind: "blocked",
+      reason: "unconditional_exit",
+    });
+    expect(planHook("#!/usr/bin/env node\nconsole.log(1)\n")).toEqual({
+      kind: "blocked",
+      reason: "not_shell_script",
+    });
+    expect(planHook("#!/bin/sh\nif x; then\n  exit 1\nfi\n").kind).toBe("append");
+  });
+});
+
+describe("writeGitHook", () => {
+  it("creates an executable #!/bin/sh script with the block", async () => {
+    const d = repo();
+    expect(await install(d)).toBe("written");
+    expect(hookText(d)).toBe(`#!/bin/sh\n${gitHookBlock()}`);
+    expect(statSync(hookPath(d)).mode & 0o111).toBe(0o111);
+  });
+
+  it("appends to an existing hook and leaves its earlier lines and mode unchanged", async () => {
+    const d = repo();
+    const before = "#!/bin/sh\necho checking\nif false; then\n  exit 1\nfi";
+    writeFileSync(hookPath(d), before);
+    chmodSync(hookPath(d), 0o750);
+    expect(await install(d)).toBe("appended");
+    expect(hookText(d)).toBe(`${before}\n${gitHookBlock()}`);
+    expect(statSync(hookPath(d)).mode & 0o777).toBe(0o750);
+  });
+
+  it("reports a hook with an unconditional exit and does not edit it", async () => {
+    const d = repo();
+    writeFileSync(hookPath(d), "#!/bin/sh\necho a\nexit 0\n");
+    const done = await writeGitHook(deps, d.root);
+    expect(done).toEqual({ ok: true, value: { status: "blocked", reason: "unconditional_exit" } });
+    expect(hookText(d)).toBe("#!/bin/sh\necho a\nexit 0\n");
+  });
+
+  it("replaces the previous block in place and leaves the rest of the hook unchanged", async () => {
+    const d = repo();
+    const previous = [
+      gitHookBlock().split("\n").slice(0, 3).join("\n"),
+      "  git add -- .kiro/provenance/baseline.json .kiro/provenance/sessions.json .kiro/provenance/records >/dev/null 2>&1 || true",
+      "fi",
+      "",
+    ].join("\n");
+    const head = "#!/bin/sh\necho before\n";
+    const tail = "echo after\n";
+    writeFileSync(hookPath(d), `${head}${previous}${tail}`);
+    expect(await install(d)).toBe("replaced");
+    expect(hookText(d)).toBe(`${head}${gitHookBlock()}${tail}`);
+    expect(await install(d)).toBe("kept");
+  });
+
+  it("changes nothing on a second write", async () => {
+    const d = repo();
+    await install(d);
+    const first = hookText(d);
+    expect(await install(d)).toBe("kept");
+    expect(hookText(d)).toBe(first);
+    writeFileSync(hookPath(d), `#!/bin/sh\necho a\n${gitHookBlock()}`);
+    expect(await install(d)).toBe("kept");
+    expect(hookText(d)).toBe(`#!/bin/sh\necho a\n${gitHookBlock()}`);
+  });
+});
+
+describe("the installed pre-commit hook", () => {
+  it("exits 0 and prints nothing when the Recorder fails", async () => {
+    const d = repo();
+    d.write(BUNDLE, 'console.log("recorder noise"); console.error("boom"); process.exit(3);\n');
+    await install(d);
+    expect(runHook(d)).toEqual({ status: 0, out: "" });
+    d.write("a.txt", "a\n");
+    d.git("add", "a.txt");
+    const commit = spawnSync(
+      "git",
+      ["-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "-m", "x"],
+      { cwd: d.root, encoding: "utf8" },
+    );
+    expect(commit.status).toBe(0);
+    expect(commit.stdout + commit.stderr).toBe("");
+  });
+
+  it("does nothing when the Bundle is absent", async () => {
+    const d = repo();
+    d.write(".kiro/provenance/sessions.json", '{"version":1,"noPromptEventSessions":0}\n');
+    await install(d);
+    expect(existsSync(`${d.root}/${BUNDLE}`)).toBe(false);
+    expect(runHook(d)).toEqual({ status: 0, out: "" });
+    expect(d.git("diff", "--cached", "--name-only")).toBe("");
+  });
+
+  it("runs the Recorder with `record manual` and stages sessions.json", async () => {
+    const d = repo();
+    mkdirSync(`${d.root}/.kiro/provenance/records`, { recursive: true });
+    d.write(
+      BUNDLE,
+      'import { writeFileSync } from "node:fs"; writeFileSync("argv.txt", process.argv.slice(2).join(" "));\n',
+    );
+    d.write(".kiro/provenance/baseline.json", "{}\n");
+    d.write(".kiro/provenance/sessions.json", '{"version":1,"noPromptEventSessions":0}\n');
+    await install(d);
+    expect(runHook(d)).toEqual({ status: 0, out: "" });
+    expect(readFileSync(`${d.root}/argv.txt`, "utf8")).toBe("record manual");
+    expect(d.git("diff", "--cached", "--name-only")).toBe(
+      ".kiro/provenance/baseline.json\n.kiro/provenance/sessions.json\n",
+    );
+  });
+
+  it("stages baseline.json and sessions.json when records/ is absent", async () => {
+    const d = repo();
+    d.write(BUNDLE, "\n");
+    d.write(".kiro/provenance/baseline.json", "{}\n");
+    d.write(".kiro/provenance/sessions.json", '{"version":1,"noPromptEventSessions":0}\n');
+    expect(existsSync(`${d.root}/.kiro/provenance/records`)).toBe(false);
+    await install(d);
+    expect(runHook(d)).toEqual({ status: 0, out: "" });
+    expect(d.git("diff", "--cached", "--name-only")).toBe(
+      ".kiro/provenance/baseline.json\n.kiro/provenance/sessions.json\n",
+    );
+  });
+});

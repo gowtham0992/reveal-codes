@@ -1,0 +1,65 @@
+[DOC{v=1;n=0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:05:09Z.1,2169,0,0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.1,561,0,0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.2,181,0,0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.3,38,0,0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.4,61,0,0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.5,210,0,0}][AI:6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-c 2026-11-20T03:05:09Z.1{t=2026-11-20T03:09:24.868Z}]/**
+ * The git pre-commit block (design, Setup and the pre-commit hook) and the pure decision about
+ * how to put it into a hook file. No file access here; `io/git-hook-write.ts` does the writing.
+ */
+
+/** The first line of the block; its presence marks a hook that already has the block. */
+export const GIT_HOOK_MARKER =
+  "# reveal-codes provenance: catch up the record, stage it. Never blocks a commit.";
+
+[AI:6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-c 2026-11-20T03:09:24Z.1{t=2026-11-20T03:12:00.605Z}]const BLOCK_HEAD = \[
+  GIT_HOOK_MARKER,
+  "if \[ -f .kiro/provenance/provenance.mjs \]; then",
+  "  node .kiro/provenance/provenance.mjs record manual >/dev/null 2>&1 || true",
+\];
+
+/** The previous block, whose single `git add` failed as a whole when `records/` was absent. */
+const PREVIOUS_BLOCK = \[
+  ...BLOCK_HEAD,
+  "  git add -- .kiro/provenance/baseline.json .kiro/provenance/sessions.json .kiro/provenance/records >/dev/null 2>&1 || true",
+  "fi",
+  "",
+\].join("\\n");
+
+/** The block, ending in a line feed. Each path is staged by its own guarded `git add`[AI:6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-c 2026-11-20T03:05:09Z.1{t=2026-11-20T03:09:24.868Z}]. */
+export function gitHookBlock(): string {
+  return \[
+    [AI:6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-c 2026-11-20T03:09:24Z.2{t=2026-11-20T03:12:00.605Z}]...BLOCK_HEAD,
+    '  for p in .kiro/provenance/baseline.json .kiro/provenance/sessions.json .kiro/provenance/records; do \[ -e "$p" \] && git add -- "$p" >/dev/null 2>&1; done; true'[AI:6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-c 2026-11-20T03:05:09Z.1{t=2026-11-20T03:09:24.868Z}],
+    "fi",
+    "",
+  \].join("\\n");
+}
+
+export type HookPlan =
+  | { kind: "create"; text: string }
+  | { kind: "append"; text: string }
+  | { kind: "present" }
+[AI:6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-c 2026-11-20T03:09:24Z.3{t=2026-11-20T03:12:00.605Z}]  | { kind: "replace"; text: string }
+[AI:6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-c 2026-11-20T03:05:09Z.1{t=2026-11-20T03:09:24.868Z}]  | { kind: "blocked"; reason: "unconditional_exit" | "not_shell_script" };
+
+const SHELL_SHEBANG = /^#!\\s*(?:\\/usr\\/bin\\/env\\s+)?(?:\\S*\\/)?(?:sh|bash|dash|zsh)(?:\\s|$)/u;
+const TOP_LEVEL_EXIT = /^exit(?:\\s|;|$)/mu;
+
+/**
+ * What to do with the current content of `.git/hooks/pre-commit` (`null` when the file is absent).
+ * An existing hook keeps its bytes; the block is appended after a line feed. A hook that is not a
+ * shell script, or that has an unindented `exit` line, is reported and left alone, because the
+ * block would never run or would not be valid there.[AI:6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-c 2026-11-20T03:09:24Z.4{t=2026-11-20T03:12:00.605Z}] A hook with the previous block gets it
+ * replaced in place.[AI:6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-c 2026-11-20T03:05:09Z.1{t=2026-11-20T03:09:24.868Z}]
+ */
+export function planHook(existing: string | null): HookPlan {
+  if (existing === null) return { kind: "create", text: `#!/bin/sh\\n${gitHookBlock()}` };[AI:6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-c 2026-11-20T03:09:24Z.5{t=2026-11-20T03:12:00.605Z}]
+  if (existing.includes(gitHookBlock())) return { kind: "present" };
+  if (existing.includes(PREVIOUS_BLOCK)) {
+    return { kind: "replace", text: existing.replace(PREVIOUS_BLOCK, () => gitHookBlock()) };
+  }[AI:6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-c 2026-11-20T03:05:09Z.1{t=2026-11-20T03:09:24.868Z}]
+  if (existing.includes(GIT_HOOK_MARKER)) return { kind: "present" };
+  const first = existing.split("\\n", 1)\[0\] ?? "";
+  if (first.startsWith("#!") && !SHELL_SHEBANG.test(first)) {
+    return { kind: "blocked", reason: "not_shell_script" };
+  }
+  if (TOP_LEVEL_EXIT.test(existing)) return { kind: "blocked", reason: "unconditional_exit" };
+  const joiner = existing === "" || existing.endsWith("\\n") ? "" : "\\n";
+  return { kind: "append", text: `${existing}${joiner}${gitHookBlock()}` };
+}

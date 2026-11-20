@@ -1,0 +1,7 @@
+# Recording-only exclusions for Provenance, in gitignore syntax.
+# A path matched here is not recorded and gets no Record or Baseline entry.
+# This file never hides a file from the agent; .kiroignore is separate and is not touched.
+# Generated output that is tracked in git:
+powers/*/server/
+# Copy of data/standing-orders.json made by scripts/build-power.mjs.
+powers/*/skills/*/references/standing-orders.json

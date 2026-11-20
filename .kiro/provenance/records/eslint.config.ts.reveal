@@ -1,0 +1,35 @@
+[DOC{v=1;n=0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.1,32,0,0}][PST{t=2026-11-20T03:04:47Z}]import eslint from "@eslint/js";
+import prettier from "eslint-config-prettier";
+import { defineConfig } from "eslint/config";
+import tseslint from "typescript-eslint";
+
+export default defineConfig(
+  {
+    ignores: \[
+      "**/dist/**",
+      "**/.next/**",
+      "**/node_modules/**",
+      "**/next-env.d.ts",
+      "vitest.config.d.ts",
+      "powers/*/server/*.mjs",
+    [AI:6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-c 2026-11-20T03:09:24Z.1{t=2026-11-20T03:12:00.605Z}]  ".kiro/provenance/*.mjs",
+    [PST{t=2026-11-20T03:04:47Z}]\],
+  },
+  eslint.configs.recommended,
+  tseslint.configs.strictTypeChecked,
+  {
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+  {
+    // Plain Node scripts sit outside every tsconfig, so they get no type-aware rules.
+    files: \["scripts/**/*.mjs"\],
+    extends: \[tseslint.configs.disableTypeChecked\],
+    languageOptions: { globals: { process: "readonly", console: "readonly" } },
+  },
+  prettier,
+);

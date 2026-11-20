@@ -12,6 +12,7 @@ export default defineConfig(
       "**/next-env.d.ts",
       "vitest.config.d.ts",
       "powers/*/server/*.mjs",
+      ".kiro/provenance/*.mjs",
     ],
   },
   eslint.configs.recommended,
