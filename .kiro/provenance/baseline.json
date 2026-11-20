@@ -57,7 +57,6 @@
     ".kiro/specs/first-run-and-flow/tasks.md": { "sha256": "33ef08ab8919d5e008a0e5adac840844e8705426089a54f5a8461b7669e03c2b", "blob": "fa789daf4a68bc3d47ffbfcb185a9d46b8fa5ef9" },
     ".kiro/specs/first-run-and-flow/tasks.meta.json": { "sha256": "534599bc051f5c3e5e9377e582d63b76640cceaa942573624a045e98e6747990", "blob": "01c88dd4a15d452490910b7a34f3cbb17276f081" },
     ".kiro/specs/kiro-provenance/.config.kiro": { "sha256": "fdd235b674deddce4ed8e979dbb8d3ab4556d333021f77a5e0d17386e264286a", "blob": "b0d27d8ec13b4868a3758ee4ee7073553933a7dd" },
-    ".kiro/specs/kiro-provenance/requirements.md": { "sha256": "bdb6e5650955080c7948b6b3320b156a371a42aff2cd9317828c78de66aa4672", "blob": "54dc2605d4528594aa5c98f7490f7a371b30a37d" },
     ".kiro/specs/legal-record-ui/.config.kiro": { "sha256": "36d6a10777a565dcfeb7b31649be1e40a55173fb1576d0c8216c5c7687810210", "blob": "b39a0ffc483a14102635b9c20b36f30186fb3da4" },
     ".kiro/specs/legal-record-ui/design.md": { "sha256": "eee4866dc1ed9e13b850fd4989cab069971790458ff2318e4dce9919814cb107", "blob": "bbd85ca80ac86db3bc38488eea5f99e260dd6495" },
     ".kiro/specs/legal-record-ui/requirements.md": { "sha256": "fa9c4aed03a2d558bc693fcf908198b1f689f3aa51aaa976aca76512137c92c5", "blob": "4cf52fe5176ceb8c6f749d59e245aed25b0d944e" },

@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.1,185,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:12:34Z.1,185,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:14:46Z.1,185,0,0}][PST{t=2026-11-20T03:04:47Z}]{
+[DOC{v=1;n=0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.1,185,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:12:34Z.1,185,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:14:46Z.1,185,0,0;r=6.5 Checkpoint - the Recorder is installed and recording 2026-11-20T03:21:18Z.1,185,0,0}][PST{t=2026-11-20T03:04:47Z}]{
   "pbtResults": {
     "4.2 Property 13: the payload keeps five fields and no prompt": {
       "status": "passed",
@@ -722,7 +722,12 @@
         "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795063644564
-      }
+      }[AI:6.5 Checkpoint - the Recorder is installed and recording 2026-11-20T03:21:18Z.1{t=2026-11-20T03:26:27.483Z}],
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795144878121
+      }[PST{t=2026-11-20T03:04:47Z}]
     \],
     "7.1 `legend.ts` and `structured.ts`": \[
       {

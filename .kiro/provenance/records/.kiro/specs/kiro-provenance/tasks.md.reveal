@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.1,1,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:12:34Z.1,1,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:14:46Z.1,1,0,0}][PST{t=2026-11-20T03:04:47Z}]# Implementation Plan: kiro-provenance
+[DOC{v=1;n=0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.1,1,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:12:34Z.1,1,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:14:46Z.1,1,0,0;r=6.5 Checkpoint - the Recorder is installed and recording 2026-11-20T03:21:18Z.1,1,0,0}][PST{t=2026-11-20T03:04:47Z}]# Implementation Plan: kiro-provenance
 
 ## Overview
 
@@ -6,7 +6,7 @@ The plan builds the Recorder, the Reveal_Command, the MCP server and the Power o
 
 **The Open points of the earlier design were settled by the user on 2026-11-18** and are recorded in the "Resolved points" section of `design.md`. The plan follows the design as it stands. A later change to a resolved point is made in `design.md` and in the affected tasks first.
 
-Task count: **66 tasks**, counted as leaf sub-tasks (numbered `N.M`), the five checkpoints (1.4, 4.17, 4.20, 6.5 and 12.1) included. The twelve group headings are not counted. The dependency graph lists the 61 non-checkpoint leaves plus the five checkpoints, each in a wave of its own. Seventeen properties exist, one per task, none optional: Property 13 in 4.2, Property 10 in 4.4, Property 7 in 4.6, Property 3 in 4.8, Property 8 in 4.10, Property 9 in 4.12, Property 15 in 4.16, Property 17 in 4.19, Property 1 in 5.8, Property 2 in 5.9, Property 4 in 5.10, Property 5 in 5.11, Property 14 in 5.12, Property 16 in 5.13, Property 11 in 7.2, Property 6 in 7.4 and Property 12 in 7.6.
+Task count: **6[HUM{t=2026-11-20T03:30:45.518Z}]9 tasks**, counted as leaf sub-tasks (numbered `N.M`), the five checkpoints (1.4, 4.17, 4.20, 6.5 and 12.1) included. The twelve group headings are not counted. The dependency graph lists the 64[PST{t=2026-11-20T03:04:47Z}] non-checkpoint leaves plus the five checkpoints, each in a wave of its own. Seventeen properties exist, one per task, none optional: Property 13 in 4.2, Property 10 in 4.4, Property 7 in 4.6, Property 3 in 4.8, Property 8 in 4.10, Property 9 in 4.12, Property 15 in 4.16, Property 17 in 4.19, Property 1 in 5.8, Property 2 in 5.9, Property 4 in 5.10, Property 5 in 5.11, Property 14 in 5.12, Property 16 in 5.13, Property 11 in 7.2, Property 6 in 7.4 and Property 12 in 7.6.
 
 **The capture of task 1.2 and the user's decisions of 2026-11-18 changed the plan** (design, Resolved point 13; requirements, Decision 20): a session entry persists with an empty stack and records `lastClosedBy`, `promptSeen` and `noPromptCounted`; an `agentStop` that follows the same session's own `postTask` logs nothing; sessions that fire `Stop` with no prompt event are logged as `no_prompt_events` and counted in the committed file `.kiro/provenance/sessions.json`; the `\[HUM\]` and `\[AI>HUM\]` words now say "while no agent window was open"; and the CLI has no spec-task windows. Task 1.2 itself is unchanged and nothing is marked complete by this change.
 
@@ -219,11 +219,29 @@ Conventions that apply to every task:
     - File `test/timing.test.ts`, run only when `PROVENANCE_TIMING=1` (skipped otherwise, with the reason in the test title). It spawns the built Bundle 25 times each and reports the median and the maximum for: `promptSubmit` with no file changed on this repository (limit 0.5 s); `agentStop` with no change (1.5 s); an event with `state.json` removed (5 s); `provenance baseline` on a copy of this repository's tracked files (10 s); and one Engine `apply` on a 194,104-character text. The test prints the numbers and asserts none of them, because a shared runner is slower than the M4; the deadline is covered by task 5.5's injected clock.
     - Run it here and add to the `BUILD_LOG.md` entry: the median of at least 20 `promptSubmit` runs with no change, the node floor of 33 to 50 ms (typically 35 ms) it is compared against, the other measured times, and a note when a limit is exceeded and by how much. Report the `promptSubmit` median to the user.
     - _Requirements: 7.7, 7.8, 7.9, 6.5, 16.13, 17.5_
-  - \[~\] 6.5 Checkpoint - the Recorder is installed and recording
+  - \[[AI:6.5 Checkpoint - the Recorder is installed and recording 2026-11-20T03:21:18Z.1{t=2026-11-20T03:26:27.483Z}]-[PST{t=2026-11-20T03:04:47Z}]\] 6.5 Checkpoint - the Recorder is installed and recording
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm vitest run --project provenance` and `FC_NUM_RUNS=500 pnpm vitest run --project provenance properties.test`. Confirm with `git status` that the work of tasks 6.1 to 6.4 is recorded: `ls .kiro/provenance/records` holds Records for files changed since the install (for example under `packages/provenance/src`), `.kiro/provenance/errors.log` holds no `tampered_record`, `bad_state` or `exception` line, and `.git/hooks/pre-commit` exists. Report the `promptSubmit` median and any Fault_Log reason that appeared. Ensure all tests pass, ask the user if questions arise.
     - _Requirements: 14.1, 14.4, 7.7_
 
-- \[ \] 7. The viewer: `reveal`
+[HUM{t=2026-11-20T03:30:45.518Z}]  - \[ \] 6.6 One window per task: duplicate preTask and postTask by name
+    - Decision of 2026-11-19 after checkpoint 6.5 (Requirement 3, criterion 28; design M16, Resolved point 19). Observed: the orchestrator's task tool fires `PreTaskExec` each time a task is re-marked in progress, so one task got two or three `preTask` events, each opened a window, `postTask` closed only the innermost, and the windows of 6.3 and 6.4 stayed open, so later edits (the `tasks.md` bookkeeping) were attributed to them.
+    - Edit `src/core/windows.ts`: a task window holds `taskName`, the raw `task_name` as received (a non-empty string; absent for `turn` windows and for a `preTask` with none). A `preTask` whose `task_name` equals the `taskName` of the session's innermost open window opens no window, logs nothing, changes neither `order`, `lastClosedBy` nor `lastWindowRun`, and still attributes differences and sets `lastEventAt`. A `postTask` with a `task_name` closes the innermost window of its own session whose `taskName` equals it, searching from the innermost outwards, and leaves windows above it open; with no match it closes nothing and yields `no_open_window` (so an `agentStop` after the session's own `postTask` stays silent, `lastClosedBy` rule unchanged); with no `task_name` it closes the innermost window of kind `task`, or yields `no_open_window` when there is none. `lastClosedBy` is `"postTask"` only when the closing empties the stack.
+    - Edit `src/core/state-codec.ts` and `src/core/types.ts` for the optional `taskName` (a string when present; a `state.json` without it still decodes). Edit `src/testing/arb-dirs.ts` (state part) so Property 9 generates windows with and without `taskName`. Update the reference model in `test/support/attribution-model.ts` to open and close windows by `task_name` the same way, and the generators of `arb-windows.ts` to repeat `task_name` strings (duplicate `preTask`) and to send `postTask` events for any open or unopened name, so that Properties 2, 5 and 16 still hold; any change to a property is listed in `BUILD_LOG.md` with the reason (Req 16.17).
+    - Example tests in `windows.test.ts` and `recorder-events.sessions.test.ts`: session S: `preTask "6.3 X"`, `preTask "6.3 X"` (no new window, no fault), `postTask "6.3 X"` (window closed, stack empty), an edit with no window open (`HUM`, outside), `preTask "6.4 Y"`, an edit (`AI`, the run of 6.4), `postTask "6.4 Y"`; `pre A`, `pre B` (nested), `post A` closes A and leaves B open, `post B` closes B; a `postTask` with a name that is open nowhere logs `no_open_window` and closes nothing; a `postTask` with no name closes the innermost task window and, with only a `turn` window open, closes nothing and logs `no_open_window`; a `preTask` with no name twice opens two windows; a `Stop` after the last `postTask` stays silent; the state with `taskName` round-trips and a `state.json` without it decodes.
+    - Run all provenance properties at 500: `FC_NUM_RUNS=500 pnpm vitest run --project provenance properties.test`. Rebuild and refresh the installed Bundle as task 6.8 says (6.6 itself leaves the installed copy for 6.8).
+    - _Requirements: 3.4, 3.5, 3.7, 3.21, 3.24, 3.28, 16.3, 16.18_
+  - \[ \] 6.7 Close the gaps: baseline lock, Property 16 prompt-then-stop sessions, crash handlers test
+    - Baseline lock (Requirement 6, criterion 8): edit `src/io/baseline-cmd.ts` (and `src/cli/main.ts` only if the lock must be taken there) so `provenance baseline` takes the lock of `io/lock.ts` before it reads or writes anything, with the same wait, stale-lock rule and `lock_timeout` behaviour (log, change nothing, exit 0), and releases it when done. Example tests in `baseline-cmd.test.ts`: a held lock gives `lock_timeout` after the injected wait and changes no byte; a stale lock is broken; the lock is released after a baseline and after a failure.
+    - Property 16: fill `arb-windows.ts` so the generator also produces sessions that sent a `promptSubmit`, ended their turn with an `agentStop`, and then send a second `agentStop` after outside changes; add a guard in `test/sessions-count.properties.test.ts` that asserts at least one generated run contained such a session, and that the count did not include it (the clause "never count a session that has `promptSeen`").
+    - Crash handlers (Requirement 7, criterion 3): move the handler installation out of `recordCommand` into an exported `installCrashHandlers(getLogger, exit)` in `src/cli/crash.ts` that `main.ts` calls, so the production code is the code under test and no test-only code enters the Bundle. Add `test/support/crash-entry.ts`, which imports `installCrashHandlers` and `nodeDeps`, runs in a temporary workspace with a Record_Directory, installs the handlers and then throws (mode `throw`) or leaves a rejected promise (mode `reject`). Add `test/crash.test.ts`, which spawns it with `node --import jiti/register` and asserts: exit status 0, empty standard output and standard error, and exactly one `exception` line in `errors.log` with no file text and no payload field. If this cannot be done without code in the shipped Bundle that only the test uses, do not add such code: report why in `BUILD_LOG.md` and to the user.
+    - _Requirements: 6.8, 3.18, 3.26, 16.23, 7.3, 7.4_
+  - \[ \] 6.8 Rebuild and reinstall the Bundle, BUILD_LOG
+    - Run `node scripts/build-power.mjs --power provenance`, copy `powers/provenance/server/provenance.mjs` to `.kiro/provenance/provenance.mjs`, and confirm that `git status` shows both changed and that the two files are byte for byte equal (`cmp`). Never touch a Record, `baseline.json` or `sessions.json` by hand.
+    - Add to the `BUILD_LOG.md` entry: (A) what happened at checkpoint 6.5 (the task tool fired `PreTaskExec` again on every re-dispatch of a task; one task got two or three events; `PostTaskExec` closed only the innermost window; the windows of 6.3 and 6.4 stayed open and later `tasks.md` bookkeeping was attributed to them), that the tasks.md records that carry an earlier task's title stay as recorded and were not corrected by hand, and that the fix (task 6.6) came from them; (C) the baseline lock, the Property 16 generator change with its guard, and the result of the crash-handler test (done, or why not).
+    - Run `pnpm lint`, `pnpm typecheck`, `pnpm vitest run --project provenance`, and report any Fault_Log reason that appeared.
+    - _Requirements: 14.1, 14.4, 17.5_
+
+[PST{t=2026-11-20T03:04:47Z}]- \[ \] 7. The viewer: `reveal`
   - \[~\] 7.1 `legend.ts` and `structured.ts`
     - Files: `src/core/legend.ts` (the four items of the Source_Legend exactly as in the design's Data Models, in order, with `\[HUM\]` "changed while no agent window was open; typing, pasting and other tools are not told apart" and `\[AI>HUM:<run>\]` "agent text in a run that the Engine counts as edited while no agent window was open"; the notice, which is the `\[HUM\]` item; the stale-line wording; the wording of the no-prompt-sessions line) and `src/core/structured.ts` (`structuredSpans(doc): StructuredSpan\[\]`: `{ startLine, startColumn, endLine, endColumn, length, origin, run, taskNumber, taskTitle }` with 1-based lines and columns in UTF-16 code units, end exclusive, `run`, `taskNumber` and `taskTitle` null for `HUM` and `PST`, `taskNumber` null for a window with no Task_Number, `taskNumber` and `taskTitle` parsed from the Run_Id by `parseRunId`).
     - Example tests `legend.test.ts` and `structured.test.ts`: the legend text equals the requirement's wording item by item; a span that ends on a newline; a span after a surrogate pair; CRLF text; a span over a whole file with no final newline; an `AI` span's `run`, `taskNumber` and `taskTitle` for the Run_Id `1 Probe task one 2026-11-19T10:00:00Z.2` and for `turn 2026-11-19T10:00:00Z.1` (no number).
@@ -256,7 +274,8 @@ Conventions that apply to every task:
   - \[~\] 7.9 `reveal --summary`, `--check \[--strict\]` and `--record`
     - Files: `src/io/reveal-report.ts` (the `--summary \[path\] \[--top n\]` and `--check \[--strict\]` forms over `load.ts`, `summary.ts` and `check.ts`, exit statuses as the requirements state, the check performs no write and no network request) and an edit of `src/io/reveal-cmd.ts` (`reveal --record` runs the Recorder with the event `manual`). Rebuild and refresh the installed Bundle.
     - Example tests `reveal-report.test.ts` in temporary workspaces, child-process runs: `--summary` on two Records and an Unchanged_File; `--summary` with a path; `--summary` with nothing recorded exits 1 with one line naming `setup_provenance`; `--check` on a tampered Record, an orphan Record and an orphan baseline entry exits 1; a stale file and a `no_record` file report with exit 0; both fail with `--strict`; `--record` brings a stale file up to date and `--check --strict` then exits 0; `--record` with an open window records `AI` and leaves the window open (Req 3.10); no write under `.kiro/provenance` during `--check` and `--summary` (file modification times unchanged); `--summary` prints the no-prompt-sessions line when `sessions.json` holds 2 and none when it holds 0 or is absent, and a line saying the count is unreadable (exit status unchanged) when it does not parse; the orchestrator-like session of task 5.6 (c) followed by `reveal --summary` prints the line with the count 1.
-    - _Requirements: 10.1, 10.10, 10.12, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9, 11.10, 11.11, 11.12, 3.9, 3.10, 16.10, 16.22_
+[HUM{t=2026-11-20T03:30:45.518Z}]    - Stop for the user after group 7: run `reveal <file>` on a file of this repository, `reveal --summary` and `reveal --check` on this repository and report what they print; do not start group 8 until the user says so.
+[PST{t=2026-11-20T03:04:47Z}]    - _Requirements: 10.1, 10.10, 10.12, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9, 11.10, 11.11, 11.12, 3.9, 3.10, 16.10, 16.22_
 
 - \[ \] 8. The MCP server
   - \[~\] 8.1 MCP dependencies, workspace discovery and schemas
@@ -322,7 +341,8 @@ Conventions that apply to every task:
 - Each task carries its own tests and the updates to existing tests that it breaks, so the suite is green after every task.
 - Task 6.3 is the point from which the repository records itself. Files changed before it are `\[PST\]` or unrecorded, as the documentation says.
 - The generated Bundle `powers/provenance/server/provenance.mjs` and the installed copy `.kiro/provenance/provenance.mjs` are rebuilt by every task after 6.3 that changes `packages/provenance/src`.
-- Wall-clock limits are reported by task 6.4 and not asserted in CI.
+[HUM{t=2026-11-20T03:30:45.518Z}]- If `pnpm test` fails while it runs alongside `pnpm test:pbt`, name the failing test before any re-run.
+[PST{t=2026-11-20T03:04:47Z}]- Wall-clock limits are reported by task 6.4 and not asserted in CI.
 - The user's cuts, if time runs short, decided at the group 6 checkpoint (task 6.5): cut 1 (the 256-colour mode), cut 2 (the MCP import-cost test) and cut 3 (`provenance setup --git-hook`) are approved only if time runs short. Cut 4 (dropping `setup_provenance`) is NOT approved.
 - Whole-line replacement was changed on 2026-11-18 to a character trim inside each Hunk (tasks 4.18 to 4.20; design M15). The tests of group 5 and later that build Records from edits expect the trimmed operations.
 
@@ -359,19 +379,22 @@ Conventions that apply to every task:
     { "id": 25, "tasks": \["6.3"\] },
     { "id": 26, "tasks": \["6.4"\] },
     { "id": 27, "tasks": \["6.5"\] },
-    { "id": 28, "tasks": \["7.1", "7.7"\] },
-    { "id": 29, "tasks": \["7.2", "7.3", "7.5"\] },
-    { "id": 30, "tasks": \["7.4", "7.6", "7.8"\] },
-    { "id": 31, "tasks": \["7.9"\] },
-    { "id": 32, "tasks": \["8.1"\] },
-    { "id": 33, "tasks": \["8.2"\] },
-    { "id": 34, "tasks": \["9.1"\] },
-    { "id": 35, "tasks": \["9.2"\] },
-    { "id": 36, "tasks": \["10.1"\] },
-    { "id": 37, "tasks": \["10.2"\] },
-    { "id": 38, "tasks": \["11.1", "11.2", "11.3"\] },
-    { "id": 39, "tasks": \["11.4"\] },
-    { "id": 40, "tasks": \["12.1"\] }
+    { "id": 28, "tasks": \["[HUM{t=2026-11-20T03:30:45.518Z}]6.6"\] },
+    { "id": 29, "tasks": \["6.7"\] },
+    { "id": 30, "tasks": \["6.8"\] },
+    { "id": 31, "tasks": \["7.1", "7.7"\] },
+    { "id": 32, "tasks": \["7.2", "7.3", "7.5"\] },
+    { "id": 33, "tasks": \["7.4", "7.6", "7.8"\] },
+    { "id": 34, "tasks": \["7.9"\] },
+    { "id": 35, "tasks": \["8.1"\] },
+    { "id": 36, "tasks": \["8.2"\] },
+    { "id": 37, "tasks": \["9.1"\] },
+    { "id": 38, "tasks": \["9.2"\] },
+    { "id": 39, "tasks": \["10.1"\] },
+    { "id": 40, "tasks": \["10.2"\] },
+    { "id": 41, "tasks": \["11.1", "11.2", "11.3"\] },
+    { "id": 42, "tasks": \["11.4"\] },
+    { "id": 43[PST{t=2026-11-20T03:04:47Z}], "tasks": \["12.1"\] }
   \]
 }
 ```
