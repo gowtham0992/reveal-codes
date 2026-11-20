@@ -492,6 +492,16 @@
         "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795063644181
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795137753850
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795138022744
       }
     ],
     "5.6 Example tests: the events with the captured fixtures": [
