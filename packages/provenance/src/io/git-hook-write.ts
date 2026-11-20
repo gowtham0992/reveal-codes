@@ -17,7 +17,7 @@ export type HookOutcome =
 const failed = (detail: string): ProvenanceError => ({ kind: "write_failed", detail });
 
 /** The one place a failed `chmod` becomes a value. */
-async function makeExecutable(path: string): Promise<Result<void, ProvenanceError>> {
+export async function makeExecutable(path: string): Promise<Result<void, ProvenanceError>> {
   const done = await chmod(path, 0o755).then(
     () => null,
     (error: unknown) => (error instanceof Error ? error.message : "chmod failed"),

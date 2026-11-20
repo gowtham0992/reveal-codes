@@ -2368,8 +2368,8 @@ function isFullKind(v) {
 }
 function validateFullValue(v) {
   if (!isFullKind(v)) return err({ kind: "invalid_citation", field: "kind" });
-  const failed2 = CHECKS.find((c) => !c.ok(v));
-  return failed2 === void 0 ? ok(v) : err({ kind: "invalid_citation", field: failed2.field });
+  const failed4 = CHECKS.find((c) => !c.ok(v));
+  return failed4 === void 0 ? ok(v) : err({ kind: "invalid_citation", field: failed4.field });
 }
 function layoutMember(m) {
   const core = [String(m.volume), m.reporter, String(m.page)].join(" ");
@@ -4428,8 +4428,8 @@ function fieldString(f) {
 }
 function codeString(name, retained, fields, mode) {
   const head = retained === null ? name : `${name}:${escapeRetained(retained)}`;
-  const section = mode === "full" && fields.length > 0 ? `{${fields.map(fieldString).join(";")}}` : "";
-  return `[${head}${section}]`;
+  const section2 = mode === "full" && fields.length > 0 ? `{${fields.map(fieldString).join(";")}}` : "";
+  return `[${head}${section2}]`;
 }
 var ESCAPE, CODE_NAMES, NAME_SET, ESCAPED;
 var init_syntax = __esm({
@@ -6225,6 +6225,143 @@ var init_store = __esm({
   }
 });
 
+// packages/provenance/src/io/baseline-cmd.ts
+async function listRecordPaths2(deps, dir, prefix = "") {
+  const names = await deps.fs.readdir(prefix === "" ? dir : `${dir}/${prefix}`);
+  if (!names.ok) return [];
+  const found = [];
+  for (const name of names.value) {
+    const rel = prefix === "" ? name : `${prefix}/${name}`;
+    const stat = await deps.fs.lstat(`${dir}/${rel}`);
+    if (!stat.ok) continue;
+    if (stat.value.kind === "dir") found.push(...await listRecordPaths2(deps, dir, rel));
+    else if (stat.value.kind === "file" && rel.endsWith(".reveal")) found.push(rel.slice(0, -7));
+  }
+  return found;
+}
+async function readAll(deps, root, files) {
+  const texts = /* @__PURE__ */ new Map();
+  let skipped = 0;
+  for (let i = 0; i < files.length; i += READ_BATCH) {
+    const batch = files.slice(i, i + READ_BATCH);
+    const reads = await Promise.all(batch.map((c) => readCandidate(deps, root, c)));
+    reads.forEach((read, j) => {
+      if (read.kind === "text") texts.set(batch[j].path, read);
+      else skipped += 1;
+    });
+  }
+  return { texts, skipped };
+}
+async function blobInfo(deps, root, paths) {
+  const ids = await hashObjects(deps, root, paths);
+  if (!ids.ok) {
+    await deps.log.fault({ event: EVENT, path: null, reason: "read_failed" });
+    return { ids: /* @__PURE__ */ new Map(), held: /* @__PURE__ */ new Map() };
+  }
+  const held = await checkBlobs(deps, root, [...ids.value.values()]);
+  if (!held.ok) await deps.log.fault({ event: EVENT, path: null, reason: "read_failed" });
+  return { ids: ids.value, held: held.ok ? held.value : /* @__PURE__ */ new Map() };
+}
+async function writeCacheFiles(deps, cache, texts, needed) {
+  for (const path of needed) {
+    const file = texts.get(path);
+    const have = await cache.read(file.sha256);
+    if (have !== null && deps.sha256(have) === file.sha256) continue;
+    const written = await cache.write(file.sha256, file.bytes);
+    if (!written.ok) await deps.log.fault({ event: EVENT, path, reason: "write_failed" });
+  }
+}
+async function planEntries(deps, root, git, texts) {
+  const paths = [...texts.keys()];
+  const info = git ? await blobInfo(deps, root, paths) : { ids: /* @__PURE__ */ new Map(), held: /* @__PURE__ */ new Map() };
+  const entries = /* @__PURE__ */ new Map();
+  const needed = [];
+  for (const path of paths) {
+    const sha256 = texts.get(path).sha256;
+    const blob = info.ids.get(path);
+    entries.set(path, blob === void 0 ? { sha256 } : { sha256, blob });
+    if (blob === void 0 || info.held.get(blob) !== true) needed.push(path);
+  }
+  return { entries, needed };
+}
+async function ensureSessions(deps, store) {
+  const stat = await deps.fs.lstat(`${store.dir}/sessions.json`);
+  if (stat.ok || stat.error.code !== "ENOENT") return;
+  const written = await store.writeSessions(0);
+  if (!written.ok) await deps.log.fault({ event: EVENT, path: null, reason: "write_failed" });
+}
+async function collect(deps, root, store, base) {
+  const list = await listCandidates(deps, root);
+  const recorded = new Set(await listRecordPaths2(deps, `${store.dir}/records`));
+  const todo = list.files.filter((f) => !recorded.has(f.path) && base?.files[f.path] === void 0);
+  const { texts, skipped } = await readAll(deps, root, todo);
+  const plan = await planEntries(deps, root, list.git, texts);
+  return { ...plan, texts, skipped };
+}
+async function baselineLocked(deps, root, store) {
+  const cache = createBaselineCache(deps, store.cacheDir());
+  const existing2 = await store.readBaseline();
+  if (!existing2.ok) {
+    await deps.log.fault({ event: EVENT, path: null, reason: existing2.error.kind });
+    return existing2;
+  }
+  const found = await collect(deps, root, store, existing2.value);
+  await writeCacheFiles(deps, cache, found.texts, found.needed);
+  const next = existing2.value ?? {
+    version: 1,
+    at: `${deps.clock.nowIso().slice(0, 19)}Z`,
+    files: {}
+  };
+  const merged = {
+    ...next,
+    files: { ...next.files, ...Object.fromEntries(found.entries) }
+  };
+  if (existing2.value === null || found.entries.size > 0) {
+    const written = await store.writeBaseline(merged);
+    if (!written.ok) return written;
+  }
+  await cache.prune(merged);
+  await ensureSessions(deps, store);
+  return ok({ added: found.entries.size, skipped: found.skipped });
+}
+async function runBaseline(deps, root) {
+  const store = createStore(deps, `${root}/.kiro/provenance`);
+  await deps.fs.mkdirp(store.dir);
+  const taken = await acquireLock(deps, `${store.dir}/lock`);
+  if (!taken.ok) {
+    await deps.log.fault({ event: EVENT, path: null, reason: taken.error.kind });
+    return taken;
+  }
+  try {
+    return await baselineLocked(deps, root, store);
+  } finally {
+    await taken.value.release();
+  }
+}
+function formatBaselineLine(summary) {
+  return `baseline: ${String(summary.added)} added, ${String(summary.skipped)} skipped`;
+}
+async function baselineCommand(deps, root, print) {
+  const result = await runBaseline(deps, root);
+  if (!result.ok) return result.error.kind === "lock_timeout" ? 0 : 1;
+  print(formatBaselineLine(result.value));
+  return 0;
+}
+var READ_BATCH, EVENT;
+var init_baseline_cmd = __esm({
+  "packages/provenance/src/io/baseline-cmd.ts"() {
+    "use strict";
+    init_src();
+    init_baseline_cache();
+    init_git();
+    init_lock();
+    init_scan2();
+    init_store();
+    READ_BATCH = 64;
+    EVENT = "baseline";
+  }
+});
+
 // packages/provenance/src/io/faults.ts
 function field2(text) {
   return text.replace(/[\s\p{Cc}]/gu, "_");
@@ -6753,9 +6890,9 @@ function provenanceFor(origin2, windowRun, number3, timestamp) {
   if (origin2 === "HUM") return { origin: "HUM", timestamp };
   return { origin: "AI", runId: runId(windowRun, number3), timestamp };
 }
-function planHunks(hunks, origin2, windowRun, existing, clock) {
+function planHunks(hunks, origin2, windowRun, existing2, clock) {
   const timestamp = clock.nowIso();
-  let next = existing.reduce((a, b) => Math.max(a, b), 0);
+  let next = existing2.reduce((a, b) => Math.max(a, b), 0);
   const ascending = [...hunks].sort((a, b) => a.from - b.from);
   const ops = ascending.map((h) => {
     const number3 = h.text === "" ? 0 : ++next;
@@ -31150,6 +31287,342 @@ var init_server3 = __esm({
   }
 });
 
+// packages/provenance/src/core/hook-file.ts
+function commandFor(event) {
+  return `node .kiro/provenance/provenance.mjs record ${event} >/dev/null 2>&1 || true`;
+}
+function hookFileText() {
+  const hooks = HOOKS.map((h) => ({
+    name: h.name,
+    trigger: h.trigger,
+    timeout: 30,
+    action: { type: "command", command: commandFor(h.event) }
+  }));
+  return `${JSON.stringify({ version: "v1", hooks }, null, 2)}
+`;
+}
+var HOOKS;
+var init_hook_file = __esm({
+  "packages/provenance/src/core/hook-file.ts"() {
+    "use strict";
+    HOOKS = [
+      { name: "Provenance: prompt", trigger: "UserPromptSubmit", event: "promptSubmit" },
+      { name: "Provenance: stop", trigger: "Stop", event: "agentStop" },
+      { name: "Provenance: task start", trigger: "PreTaskExec", event: "preTask" },
+      { name: "Provenance: task end", trigger: "PostTaskExec", event: "postTask" }
+    ];
+  }
+});
+
+// packages/provenance/src/core/wrapper.ts
+function wrapperText() {
+  return '#!/bin/sh\nexec node "$(dirname "$0")/provenance.mjs" reveal "$@"\n';
+}
+var init_wrapper = __esm({
+  "packages/provenance/src/core/wrapper.ts"() {
+    "use strict";
+  }
+});
+
+// packages/provenance/src/core/git-hook.ts
+function gitHookBlock() {
+  return [
+    ...BLOCK_HEAD,
+    '  for p in .kiro/provenance/baseline.json .kiro/provenance/sessions.json .kiro/provenance/records; do [ -e "$p" ] && git add -- "$p" >/dev/null 2>&1; done; true',
+    "fi",
+    ""
+  ].join("\n");
+}
+function planHook(existing2) {
+  if (existing2 === null) return { kind: "create", text: `#!/bin/sh
+${gitHookBlock()}` };
+  if (existing2.includes(gitHookBlock())) return { kind: "present" };
+  if (existing2.includes(PREVIOUS_BLOCK)) {
+    return { kind: "replace", text: existing2.replace(PREVIOUS_BLOCK, () => gitHookBlock()) };
+  }
+  if (existing2.includes(GIT_HOOK_MARKER)) return { kind: "present" };
+  const first = existing2.split("\n", 1)[0] ?? "";
+  if (first.startsWith("#!") && !SHELL_SHEBANG.test(first)) {
+    return { kind: "blocked", reason: "not_shell_script" };
+  }
+  if (TOP_LEVEL_EXIT.test(existing2)) return { kind: "blocked", reason: "unconditional_exit" };
+  const joiner = existing2 === "" || existing2.endsWith("\n") ? "" : "\n";
+  return { kind: "append", text: `${existing2}${joiner}${gitHookBlock()}` };
+}
+var GIT_HOOK_MARKER, BLOCK_HEAD, PREVIOUS_BLOCK, SHELL_SHEBANG, TOP_LEVEL_EXIT;
+var init_git_hook = __esm({
+  "packages/provenance/src/core/git-hook.ts"() {
+    "use strict";
+    GIT_HOOK_MARKER = "# reveal-codes provenance: catch up the record, stage it. Never blocks a commit.";
+    BLOCK_HEAD = [
+      GIT_HOOK_MARKER,
+      "if [ -f .kiro/provenance/provenance.mjs ]; then",
+      "  node .kiro/provenance/provenance.mjs record manual >/dev/null 2>&1 || true"
+    ];
+    PREVIOUS_BLOCK = [
+      ...BLOCK_HEAD,
+      "  git add -- .kiro/provenance/baseline.json .kiro/provenance/sessions.json .kiro/provenance/records >/dev/null 2>&1 || true",
+      "fi",
+      ""
+    ].join("\n");
+    SHELL_SHEBANG = /^#!\s*(?:\/usr\/bin\/env\s+)?(?:\S*\/)?(?:sh|bash|dash|zsh)(?:\s|$)/u;
+    TOP_LEVEL_EXIT = /^exit(?:\s|;|$)/mu;
+  }
+});
+
+// packages/provenance/src/io/git-hook-write.ts
+import { chmod } from "node:fs/promises";
+async function makeExecutable(path) {
+  const done2 = await chmod(path, 493).then(
+    () => null,
+    (error2) => error2 instanceof Error ? error2.message : "chmod failed"
+  );
+  return done2 === null ? ok(void 0) : err(failed2(done2));
+}
+async function readExisting(deps, path) {
+  const read = await deps.fs.readFile(path);
+  if (read.ok) return ok(new TextDecoder("utf-8").decode(read.value));
+  return read.error.code === "ENOENT" ? ok(null) : err({ kind: "read_failed", detail: read.error.code });
+}
+async function writeGitHook(deps, root) {
+  const path = `${root}/.git/hooks/pre-commit`;
+  const existing2 = await readExisting(deps, path);
+  if (!existing2.ok) return existing2;
+  const plan = planHook(existing2.value);
+  if (plan.kind === "present") return ok({ status: "kept" });
+  if (plan.kind === "blocked") return ok({ status: "blocked", reason: plan.reason });
+  if (plan.kind === "replace") {
+    const done2 = await deps.fs.writeFile(path, plan.text);
+    return done2.ok ? ok({ status: "replaced" }) : err(failed2(done2.error.code));
+  }
+  if (plan.kind === "append") {
+    const added = await deps.fs.appendFile(path, plan.text.slice((existing2.value ?? "").length));
+    return added.ok ? ok({ status: "appended" }) : err(failed2(added.error.code));
+  }
+  const made = await deps.fs.mkdirp(`${root}/.git/hooks`);
+  if (!made.ok) return err(failed2(made.error.code));
+  const written = await deps.fs.writeFile(path, plan.text, true);
+  if (!written.ok) return err(failed2(written.error.code));
+  const mode = await makeExecutable(path);
+  return mode.ok ? ok({ status: "written" }) : mode;
+}
+var failed2;
+var init_git_hook_write = __esm({
+  "packages/provenance/src/io/git-hook-write.ts"() {
+    "use strict";
+    init_src();
+    init_git_hook();
+    failed2 = (detail) => ({ kind: "write_failed", detail });
+  }
+});
+
+// packages/provenance/src/io/setup.ts
+function sameBytes(a, b) {
+  return a.length === b.length && a.every((byte, i) => byte === b[i]);
+}
+async function putIfAbsent(deps, put) {
+  const path = `${put.root}/${put.rel}`;
+  const stat = await deps.fs.lstat(path);
+  if (stat.ok) return ok("kept");
+  if (stat.error.code !== "ENOENT") return err(failed3("read_failed", stat.error.code));
+  return writeNew(deps, path, put);
+}
+async function writeNew(deps, path, put) {
+  const written = await atomicWrite(deps, path, put.data);
+  if (!written.ok) return err(failed3("write_failed", written.error.code));
+  if (put.executable) {
+    const mode = await makeExecutable(path);
+    if (!mode.ok) return mode;
+  }
+  return ok("written");
+}
+async function putOrReplace(deps, put) {
+  const path = `${put.root}/${put.rel}`;
+  const read = await deps.fs.readFile(path);
+  if (!read.ok && read.error.code !== "ENOENT") return err(failed3("read_failed", read.error.code));
+  if (!read.ok) return writeNew(deps, path, put);
+  if (sameBytes(read.value, put.data)) return ok("kept");
+  const done2 = await writeNew(deps, path, put);
+  return done2.ok ? ok("replaced") : done2;
+}
+function note(lists, status, rel) {
+  lists[status].push(rel);
+}
+async function readBundle(deps, bundlePath) {
+  if (!bundlePath.endsWith(".mjs")) {
+    return err(failed3("read_failed", "not_running_from_bundle"));
+  }
+  const read = await deps.fs.readFile(bundlePath);
+  return read.ok ? ok(read.value) : err(failed3("read_failed", read.error.code));
+}
+async function writeFixedFiles(deps, root, lists) {
+  const steps = [
+    [putOrReplace, { root, rel: `${PROV}/reveal`, data: enc(wrapperText()), executable: true }],
+    [
+      putIfAbsent,
+      { root, rel: `${PROV}/.gitignore`, data: enc(GITIGNORE_TEXT), executable: false }
+    ],
+    [putIfAbsent, { root, rel: `${PROV}/ignore`, data: enc(IGNORE_TEXT), executable: false }],
+    [putIfAbsent, { root, rel: HOOK_PATH, data: enc(hookFileText()), executable: false }]
+  ];
+  for (const [put, spec] of steps) {
+    const done2 = await put(deps, spec);
+    if (!done2.ok) return done2;
+    note(lists, done2.value, spec.rel);
+  }
+  return ok(void 0);
+}
+async function existing(deps, path) {
+  return (await deps.fs.lstat(path)).ok;
+}
+async function runBaselineStep(deps, root, lists) {
+  const dir = `${root}/${PROV}`;
+  const before = /* @__PURE__ */ new Set();
+  for (const name of ["baseline.json", "sessions.json"]) {
+    if (await existing(deps, `${dir}/${name}`)) before.add(name);
+  }
+  const cacheBefore = await deps.fs.readdir(`${dir}/cache`);
+  const hadCache = new Set(cacheBefore.ok ? cacheBefore.value : []);
+  const summary = await runBaseline(deps, root);
+  if (!summary.ok) return summary;
+  for (const name of ["baseline.json", "sessions.json"]) {
+    if (await existing(deps, `${dir}/${name}`)) {
+      note(lists, before.has(name) ? "kept" : "written", `${PROV}/${name}`);
+    }
+  }
+  const cacheAfter = await deps.fs.readdir(`${dir}/cache`);
+  for (const name of cacheAfter.ok ? cacheAfter.value.sort() : []) {
+    note(lists, hadCache.has(name) ? "kept" : "written", `${PROV}/cache/${name}`);
+  }
+  return summary;
+}
+async function setupProvenance(deps, root, bundlePath, gitHook) {
+  const bundle = await readBundle(deps, bundlePath);
+  if (!bundle.ok) return bundle;
+  if (gitHook) {
+    const git = await deps.fs.lstat(`${root}/.git`);
+    if (!git.ok || git.value.kind !== "dir") return err(failed3("write_failed", "no_git_directory"));
+  }
+  const made = await deps.fs.mkdirp(`${root}/${PROV}`);
+  if (!made.ok) return err(failed3("write_failed", made.error.code));
+  const lists = { written: [], replaced: [], kept: [] };
+  const copy = await putOrReplace(deps, {
+    root,
+    rel: `${PROV}/provenance.mjs`,
+    data: bundle.value,
+    executable: false
+  });
+  if (!copy.ok) return copy;
+  note(lists, copy.value, `${PROV}/provenance.mjs`);
+  const fixed = await writeFixedFiles(deps, root, lists);
+  if (!fixed.ok) return fixed;
+  const baseline = await runBaselineStep(deps, root, lists);
+  if (!baseline.ok) return baseline;
+  if (!gitHook) return ok({ ...lists, baseline: baseline.value });
+  const hook = await writeGitHook(deps, root);
+  return hook.ok ? ok({ ...lists, baseline: baseline.value, gitHook: hook.value }) : hook;
+}
+var PROV, HOOK_PATH, GITIGNORE_TEXT, IGNORE_TEXT, failed3, enc;
+var init_setup = __esm({
+  "packages/provenance/src/io/setup.ts"() {
+    "use strict";
+    init_src();
+    init_hook_file();
+    init_wrapper();
+    init_atomic();
+    init_baseline_cmd();
+    init_git_hook_write();
+    PROV = ".kiro/provenance";
+    HOOK_PATH = ".kiro/hooks/0-provenance.json";
+    GITIGNORE_TEXT = "state.json\nerrors.log\nlock\ncache/\n";
+    IGNORE_TEXT = [
+      "# Recording-only exclusions for Provenance, in gitignore syntax.",
+      "# A path matched here is not recorded and gets no Record or Baseline entry.",
+      "# This file never hides a file from the agent; .kiroignore is separate and is not touched.",
+      ""
+    ].join("\n");
+    failed3 = (kind, detail) => ({
+      kind,
+      detail
+    });
+    enc = (text) => new TextEncoder().encode(text);
+  }
+});
+
+// packages/provenance/src/io/setup-cmd.ts
+var setup_cmd_exports = {};
+__export(setup_cmd_exports, {
+  formatSetupReport: () => formatSetupReport,
+  parseSetupArgs: () => parseSetupArgs,
+  setupCommand: () => setupCommand
+});
+function collapse(paths) {
+  const plain = paths.filter((p) => !p.startsWith(CACHE_DIR));
+  const cached2 = paths.length - plain.length;
+  const noun = cached2 === 1 ? "file" : "files";
+  return cached2 === 0 ? plain : [...plain, `${CACHE_DIR} (${String(cached2)} ${noun})`];
+}
+function section(title, paths) {
+  const lines = collapse(paths);
+  return lines.length === 0 ? [`${title}: none`] : [`${title}:`, ...lines.map((l) => `  ${l}`)];
+}
+function hookLine(report) {
+  const hook = report.gitHook;
+  if (hook === void 0) return [];
+  if (hook.status === "blocked") {
+    return [`git hook: not written, the existing pre-commit hook is blocked (${hook.reason})`];
+  }
+  return [`git hook: ${HOOK_WORDS[hook.status]}`];
+}
+function formatSetupReport(report) {
+  const replacedNote = report.replaced.length === 0 ? [] : ["replaced files had different bytes and were refreshed"];
+  return [
+    ...section("written", report.written),
+    ...section("replaced", report.replaced),
+    ...replacedNote,
+    ...section("kept", report.kept),
+    formatBaselineLine(report.baseline),
+    ...hookLine(report)
+  ];
+}
+function parseSetupArgs(args) {
+  if (args.length === 0) return { gitHook: false };
+  return args.length === 1 && args[0] === "--git-hook" ? { gitHook: true } : null;
+}
+async function setupCommand(deps, root, bundlePath, args, io) {
+  const flags = parseSetupArgs(args);
+  if (flags === null) {
+    io.err("usage: provenance setup [--git-hook]");
+    return 1;
+  }
+  const result = await setupProvenance(deps, root, bundlePath, flags.gitHook);
+  if (!result.ok) {
+    const detail = result.error.detail === void 0 ? "" : `: ${result.error.detail}`;
+    io.err(`setup failed (${result.error.kind}${detail})`);
+    return 1;
+  }
+  for (const line2 of formatSetupReport(result.value)) io.out(line2);
+  return 0;
+}
+var CACHE_DIR, HOOK_WORDS;
+var init_setup_cmd = __esm({
+  "packages/provenance/src/io/setup-cmd.ts"() {
+    "use strict";
+    init_baseline_cmd();
+    init_setup();
+    CACHE_DIR = ".kiro/provenance/cache/";
+    HOOK_WORDS = {
+      written: "written (.git/hooks/pre-commit)",
+      appended: "appended to the existing .git/hooks/pre-commit",
+      replaced: "previous block replaced in .git/hooks/pre-commit",
+      kept: "kept (the block is already in .git/hooks/pre-commit)"
+    };
+  }
+});
+
+// packages/provenance/src/cli/main.ts
+import { fileURLToPath } from "node:url";
+
 // packages/provenance/src/cli/crash.ts
 function installCrashHandlers(getLogger, exit, event) {
   const bail = () => {
@@ -31262,138 +31735,8 @@ function nodeDeps(gitCommand = "git") {
   };
 }
 
-// packages/provenance/src/io/baseline-cmd.ts
-init_src();
-init_baseline_cache();
-init_git();
-init_lock();
-init_scan2();
-init_store();
-var READ_BATCH = 64;
-var EVENT = "baseline";
-async function listRecordPaths2(deps, dir, prefix = "") {
-  const names = await deps.fs.readdir(prefix === "" ? dir : `${dir}/${prefix}`);
-  if (!names.ok) return [];
-  const found = [];
-  for (const name of names.value) {
-    const rel = prefix === "" ? name : `${prefix}/${name}`;
-    const stat = await deps.fs.lstat(`${dir}/${rel}`);
-    if (!stat.ok) continue;
-    if (stat.value.kind === "dir") found.push(...await listRecordPaths2(deps, dir, rel));
-    else if (stat.value.kind === "file" && rel.endsWith(".reveal")) found.push(rel.slice(0, -7));
-  }
-  return found;
-}
-async function readAll(deps, root, files) {
-  const texts = /* @__PURE__ */ new Map();
-  let skipped = 0;
-  for (let i = 0; i < files.length; i += READ_BATCH) {
-    const batch = files.slice(i, i + READ_BATCH);
-    const reads = await Promise.all(batch.map((c) => readCandidate(deps, root, c)));
-    reads.forEach((read, j) => {
-      if (read.kind === "text") texts.set(batch[j].path, read);
-      else skipped += 1;
-    });
-  }
-  return { texts, skipped };
-}
-async function blobInfo(deps, root, paths) {
-  const ids = await hashObjects(deps, root, paths);
-  if (!ids.ok) {
-    await deps.log.fault({ event: EVENT, path: null, reason: "read_failed" });
-    return { ids: /* @__PURE__ */ new Map(), held: /* @__PURE__ */ new Map() };
-  }
-  const held = await checkBlobs(deps, root, [...ids.value.values()]);
-  if (!held.ok) await deps.log.fault({ event: EVENT, path: null, reason: "read_failed" });
-  return { ids: ids.value, held: held.ok ? held.value : /* @__PURE__ */ new Map() };
-}
-async function writeCacheFiles(deps, cache, texts, needed) {
-  for (const path of needed) {
-    const file = texts.get(path);
-    const have = await cache.read(file.sha256);
-    if (have !== null && deps.sha256(have) === file.sha256) continue;
-    const written = await cache.write(file.sha256, file.bytes);
-    if (!written.ok) await deps.log.fault({ event: EVENT, path, reason: "write_failed" });
-  }
-}
-async function planEntries(deps, root, git, texts) {
-  const paths = [...texts.keys()];
-  const info = git ? await blobInfo(deps, root, paths) : { ids: /* @__PURE__ */ new Map(), held: /* @__PURE__ */ new Map() };
-  const entries = /* @__PURE__ */ new Map();
-  const needed = [];
-  for (const path of paths) {
-    const sha256 = texts.get(path).sha256;
-    const blob = info.ids.get(path);
-    entries.set(path, blob === void 0 ? { sha256 } : { sha256, blob });
-    if (blob === void 0 || info.held.get(blob) !== true) needed.push(path);
-  }
-  return { entries, needed };
-}
-async function ensureSessions(deps, store) {
-  const stat = await deps.fs.lstat(`${store.dir}/sessions.json`);
-  if (stat.ok || stat.error.code !== "ENOENT") return;
-  const written = await store.writeSessions(0);
-  if (!written.ok) await deps.log.fault({ event: EVENT, path: null, reason: "write_failed" });
-}
-async function collect(deps, root, store, base) {
-  const list = await listCandidates(deps, root);
-  const recorded = new Set(await listRecordPaths2(deps, `${store.dir}/records`));
-  const todo = list.files.filter((f) => !recorded.has(f.path) && base?.files[f.path] === void 0);
-  const { texts, skipped } = await readAll(deps, root, todo);
-  const plan = await planEntries(deps, root, list.git, texts);
-  return { ...plan, texts, skipped };
-}
-async function baselineLocked(deps, root, store) {
-  const cache = createBaselineCache(deps, store.cacheDir());
-  const existing = await store.readBaseline();
-  if (!existing.ok) {
-    await deps.log.fault({ event: EVENT, path: null, reason: existing.error.kind });
-    return existing;
-  }
-  const found = await collect(deps, root, store, existing.value);
-  await writeCacheFiles(deps, cache, found.texts, found.needed);
-  const next = existing.value ?? {
-    version: 1,
-    at: `${deps.clock.nowIso().slice(0, 19)}Z`,
-    files: {}
-  };
-  const merged = {
-    ...next,
-    files: { ...next.files, ...Object.fromEntries(found.entries) }
-  };
-  if (existing.value === null || found.entries.size > 0) {
-    const written = await store.writeBaseline(merged);
-    if (!written.ok) return written;
-  }
-  await cache.prune(merged);
-  await ensureSessions(deps, store);
-  return ok({ added: found.entries.size, skipped: found.skipped });
-}
-async function runBaseline(deps, root) {
-  const store = createStore(deps, `${root}/.kiro/provenance`);
-  await deps.fs.mkdirp(store.dir);
-  const taken = await acquireLock(deps, `${store.dir}/lock`);
-  if (!taken.ok) {
-    await deps.log.fault({ event: EVENT, path: null, reason: taken.error.kind });
-    return taken;
-  }
-  try {
-    return await baselineLocked(deps, root, store);
-  } finally {
-    await taken.value.release();
-  }
-}
-function formatBaselineLine(summary) {
-  return `baseline: ${String(summary.added)} added, ${String(summary.skipped)} skipped`;
-}
-async function baselineCommand(deps, root, print) {
-  const result = await runBaseline(deps, root);
-  if (!result.ok) return result.error.kind === "lock_timeout" ? 0 : 1;
-  print(formatBaselineLine(result.value));
-  return 0;
-}
-
 // packages/provenance/src/cli/main.ts
+init_baseline_cmd();
 init_faults();
 init_recorder();
 var WATCHDOG_MS = 22e3;
@@ -31446,8 +31789,26 @@ async function mcpMain() {
   const { runMcpServer: runMcpServer2 } = await Promise.resolve().then(() => (init_server3(), server_exports));
   await runMcpServer2(nodeDeps(), process.cwd());
 }
+async function setupMain(args) {
+  const { setupCommand: setupCommand2 } = await Promise.resolve().then(() => (init_setup_cmd(), setup_cmd_exports));
+  const base = nodeDeps();
+  const cwd = process.cwd().replace(/\\/gu, "/");
+  const root = await findWorkspaceRoot(base, cwd, null) ?? cwd;
+  const deps = { ...base, log: createFaultLog(base, `${root}/.kiro/provenance/errors.log`) };
+  const io = {
+    out: (line2) => process.stdout.write(`${line2}
+`),
+    err: (line2) => process.stderr.write(`${line2}
+`)
+  };
+  return setupCommand2(deps, root, fileURLToPath(import.meta.url), args, io);
+}
 async function main(argv) {
   const [command, ...rest] = argv;
+  if (command === "setup") {
+    process.exitCode = await setupMain(rest);
+    return;
+  }
   if (command === "record") return recordCommand(rest[0] ?? "");
   if (command === "baseline") {
     process.exit(await baselineMain());
@@ -31457,7 +31818,9 @@ async function main(argv) {
     return;
   }
   if (command === "mcp") return mcpMain();
-  process.stderr.write("usage: provenance record <event> | baseline | reveal <file> | mcp\n");
+  process.stderr.write(
+    "usage: provenance record <event> | baseline | reveal <file> | setup [--git-hook] | mcp\n"
+  );
   process.exit(1);
 }
 void main(process.argv.slice(2));

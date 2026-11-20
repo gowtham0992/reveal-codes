@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:05:09Z.1,2627,0,0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.1,13,0,0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.2,176,0,0}][AI:6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-c 2026-11-20T03:05:09Z.1{t=2026-11-20T03:09:24.868Z}]/**
+[DOC{v=1;n=0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:05:09Z.1,2627,0,0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.1,13,0,0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.2,176,0,0;r=9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.1,7,0,0}][AI:6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-c 2026-11-20T03:05:09Z.1{t=2026-11-20T03:09:24.868Z}]/**
  * Writes the pre-commit block into `.git/hooks/pre-commit` (design, Setup and the pre-commit
  * hook). A new hook is an executable `#!/bin/sh` script; an existing hook gets the block appended
  * and keeps its earlier bytes and its mode; a hook that already has the block is left unchanged.
@@ -17,7 +17,7 @@ export type HookOutcome =
 const failed = (detail: string): ProvenanceError => ({ kind: "write_failed", detail });
 
 /** The one place a failed `chmod` becomes a value. */
-async function makeExecutable(path: string): Promise<Result<void, ProvenanceError>> {
+[AI:9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.1{t=2026-11-20T16:40:48.005Z}]export [AI:6.3 Install by hand: Record_Directory, `.kiro/provenance/ignore`, baseline and pre-c 2026-11-20T03:05:09Z.1{t=2026-11-20T03:09:24.868Z}]async function makeExecutable(path: string): Promise<Result<void, ProvenanceError>> {
   const done = await chmod(path, 0o755).then(
     () => null,
     (error: unknown) => (error instanceof Error ? error.message : "chmod failed"),

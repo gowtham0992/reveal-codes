@@ -1,10 +1,11 @@
-[DOC{v=1;n=0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.1,51,0,0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.2,63,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,30,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.2,718,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.3,174,0,0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,29,0,0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.2,239,0,0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.3,130,0,0}][PST{t=2026-11-20T03:04:47Z}]/**
- * The entry: dispatches `record`, `baseline`[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}], `reveal`[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}], `mcp` and, in a later task,[PST{t=2026-11-20T03:04:47Z}] `setup`.
+[DOC{v=1;n=0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.1,51,0,0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.2,63,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,30,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.2,718,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.3,174,0,0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,29,0,0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.2,239,0,0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.3,130,0,0;r=9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.1,14,0,0;r=9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.2,42,0,0;r=9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.3,675,0,0;r=9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.4,91,0,0;r=9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.5,99,0,0}][PST{t=2026-11-20T03:04:47Z}]/**
+ * The entry: dispatches `record`, `baseline`[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}], `reveal`[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}], `[AI:9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.1{t=2026-11-20T16:40:48.005Z}]setup` and `mc[PST{t=2026-11-20T03:04:47Z}]p`.
  * `record` writes nothing to standard output or standard error and exits 0 for every input and
  * failure, including an uncaught exception and an unhandled rejection (Req 7.1 to 7.3, 7.10).
  * This is the only module that catches everything or calls `process.exit`.
  */
-import { [AI:6.7 Close the gaps: baseline lock, Property 16 prompt-then-stop sessions, crash hand 2026-11-20T03:37:40Z.1{t=2026-11-20T03:43:18.113Z}]installCrashHandlers } from "./crash.js";
+[AI:9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.2{t=2026-11-20T16:40:48.005Z}]import { fileURLToPath } from "node:url";
+[PST{t=2026-11-20T03:04:47Z}]import { [AI:6.7 Close the gaps: baseline lock, Property 16 prompt-then-stop sessions, crash hand 2026-11-20T03:37:40Z.1{t=2026-11-20T03:43:18.113Z}]installCrashHandlers } from "./crash.js";
 import { [PST{t=2026-11-20T03:04:47Z}]nodeDeps } from "../io/deps.js";
 import type { Logger } from "../io/deps.js";
 import { baselineCommand } from "../io/baseline-cmd.js";
@@ -61,9 +62,26 @@ async function mcpMain(): Promise<void> {
   const { runMcpServer } = await import("../mcp/server.js");
   await runMcpServer(nodeDeps(), process.cwd());
 }
+[AI:9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.3{t=2026-11-20T16:40:48.005Z}]/** `setup`: the running Bundle copies itself, found through `import.meta.url`. */
+async function setupMain(args: readonly string\[\]): Promise<number> {
+  const { setupCommand } = await import("../io/setup-cmd.js");
+  const base = nodeDeps();
+  const cwd = process.cwd().replace(/\\\\/gu, "/");
+  const root = (await findWorkspaceRoot(base, cwd, null)) ?? cwd;
+  const deps = { ...base, log: createFaultLog(base, `${root}/.kiro/provenance/errors.log`) };
+  const io = {
+    out: (line: string) => process.stdout.write(`${line}\\n`),
+    err: (line: string) => process.stderr.write(`${line}\\n`),
+  };
+  return setupCommand(deps, root, fileURLToPath(import.meta.url), args, io);
+}
 [PST{t=2026-11-20T03:04:47Z}]async function main(argv: readonly string\[\]): Promise<void> {
   const \[command, ...rest\] = argv;
-  if (command === "record") return recordCommand(rest\[0\] ?? "");
+[AI:9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.4{t=2026-11-20T16:40:48.005Z}]  if (command === "setup") {
+    process.exitCode = await setupMain(rest);
+    return;
+  }
+[PST{t=2026-11-20T03:04:47Z}]  if (command === "record") return recordCommand(rest\[0\] ?? "");
   if (command === "baseline") {
     process.exit(await baselineMain());
   }
@@ -72,7 +90,9 @@ async function mcpMain(): Promise<void> {
     return;
   }
   [AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.3{t=2026-11-20T16:34:11.498Z}]if (command === "mcp") return mcpMain();
-  process.stderr.write("usage: provenance record <event> | baseline | reveal <file> | mcp[PST{t=2026-11-20T03:04:47Z}]\\n");
+  process.stderr.write([AI:9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.5{t=2026-11-20T16:40:48.005Z}]
+    "usage: provenance record <event> | baseline | reveal <file> | setup \[--git-hook\] | mcp\\n",
+  [PST{t=2026-11-20T03:04:47Z}]);
   process.exit(1);
 }
 void main(process.argv.slice(2));
