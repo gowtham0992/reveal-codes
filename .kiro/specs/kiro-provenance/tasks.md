@@ -189,7 +189,7 @@ Conventions that apply to every task:
   - [x] 5.10 Property 4: nothing happens twice
     - File `test/idempotence.properties.test.ts`. **Property 4: Nothing happens twice.** For any Record_Directory and any event, running the same event a second time with no file change leaves every file under the Record_Directory except `state.json` and `errors.log` byte for byte the same, including `baseline.json`, `sessions.json`, every Record and every file of the Baseline_Cache; in particular a session counted by the first run (a `Stop` with no prompt event that found a difference outside any window) is not counted again by the second.
     - **Validates: Requirements 3.26, 3.27, 5.15, 6.2, 6.3, 6.7, 16.5**
-  - [~] 5.11 Property 5: sessions are independent
+  - [x] 5.11 Property 5: sessions are independent
     - File `test/sessions.properties.test.ts`. **Property 5: Sessions are independent.** For any interleaving of valid event sequences of two sessions with different Session_Keys, with a file change possible before every event and every gap between events under 12 hours: after every event of one session, the set of open windows of the other session equals the set before that event, and the entry of the other session (its stack, `lastClosedBy`, `promptSeen` and `noPromptCounted`) equals the entry before that event unless the 12-hour sweep dropped it; and every difference found at an event while some window is open is inserted with origin `AI` and a Run whose Window_Run is that of the window rule 21 selects, and is never an Outside_Change.
     - **Validates: Requirements 3.2, 3.3, 3.4, 3.5, 3.6, 3.21, 3.24, 16.18**
   - [~] 5.12 Property 14: the first change never over-attributes
