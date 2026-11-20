@@ -903,7 +903,6 @@
     "packages/provenance/fixtures/ide/stop.json": { "sha256": "9c048329ceecd357fcc7647000fe8789a576924356f2356193ace05179c9a8d7", "blob": "6c6cb5b87e391033928d9389076b7974bf24dc48" },
     "packages/provenance/fixtures/ide/user-prompt-submit-tab-b.json": { "sha256": "2a362f0d4a79569d397398956656e6aa7d2e1b73b3455edd155b184d9ff33802", "blob": "2113b5902576a1ba9b014bb458936493c2f8384a" },
     "packages/provenance/fixtures/ide/user-prompt-submit.json": { "sha256": "0b86d0a3b90af44fe478c9e303dfafc47dc9e6ebe7e084f6b7a88b6007cc6654", "blob": "a5468916fc75a1f2528391790c6588a656a760b5" },
-    "packages/provenance/package.json": { "sha256": "e4f05aa83270518388b98f8b73075d457d7fb54f3f019a29e180478d720a95fa", "blob": "7b02beea728dbbf78a4d71af69c1814592560c36" },
     "packages/provenance/src/core/baseline-codec.ts": { "sha256": "de4070429fac92bfd85d5659c04c090adb223bc179c1d456544c9aec211e0a2e", "blob": "0e62699351ff41ea4dd9a4cb4b32efe6ba5e728d" },
     "packages/provenance/src/core/diff.ts": { "sha256": "5c43f956831f5c19f094667622990656b0924894acbad51505bf901109ac34bb", "blob": "69ca1e32c3a15e03637bf4b2a4a3c003da2519f1" },
     "packages/provenance/src/core/exclude.ts": { "sha256": "01f93af739c0f58da9b24f024ca89d4cfa8fc2e0466ad5a77e5060b2b878dfac", "blob": "ef2cb4476b8dcdedebd69a4fbd1d53d47811da9f" },

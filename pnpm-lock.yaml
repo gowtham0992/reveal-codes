@@ -194,9 +194,15 @@ importers:
 
   packages/provenance:
     dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: 1.32.2
+        version: 1.32.2(zod@3.25.76)
       '@reveal-codes/engine':
         specifier: workspace:*
         version: link:../engine
+      zod:
+        specifier: 3.25.76
+        version: 3.25.76
     devDependencies:
       fast-check:
         specifier: 4.10.2
