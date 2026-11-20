@@ -55,7 +55,12 @@ function checked(doc: Document, fileText: string): Outcome {
   if (doc.text !== fileText) return err({ kind: "apply_mismatch" });
   return ok(doc);
 }
-/** The Document after `fileText` replaces `doc.text`: one Engine `replace` per Hunk. */
+/**
+ * The Document after `fileText` replaces `doc.text`. The common prefix and suffix
+ * of the whole old and new text are trimmed, a line difference of the middle finds
+ * the Hunks, each Hunk is trimmed to the characters that changed, and the Engine
+ * gets one `replace` for each non-empty remainder.
+ */
 export function updateRecord(
   doc: Document,
   fileText: string,
