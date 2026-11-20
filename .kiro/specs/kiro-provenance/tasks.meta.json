@@ -3,6 +3,10 @@
     "4.2 Property 13: the payload keeps five fields and no prompt": {
       "status": "passed",
       "lastRunTimestamp": 1795065295179
+    },
+    "4.19 Property 17: an edit changes only the edited stretch": {
+      "status": "passed",
+      "lastRunTimestamp": 1795134900733
     }
   },
   "executionHistory": {
@@ -712,6 +716,16 @@
         "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795102854340
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795103185293
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795134931968
       }
     ],
     "4.20 Checkpoint - the trim": [
@@ -719,6 +733,11 @@
         "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795102854371
+      },
+      {
+        "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795134932027
       }
     ],
     "4.18 Character trim inside each Hunk (`trim.ts`, applied in `update.ts`)": [

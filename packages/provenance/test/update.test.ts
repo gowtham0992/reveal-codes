@@ -161,10 +161,10 @@ describe("updateRecord character trim", () => {
   });
 
   it("takes no number for a Hunk that only deletes after the trim, and the next Hunk takes .1", () => {
-    const base = must(createDocument("abc\nx\nq\n", AT));
-    const doc = must(updateRecord(base, "ac\nx\nqq\n", "AI", W, clock));
+    const base = must(createDocument("a\nb\nx\nq\n", AT));
+    const doc = must(updateRecord(base, "a\nx\nqq\n", "AI", W, clock));
     expect(doc.runs.map((r) => r.runId)).toEqual([`${W.windowRun}.1`]);
-    expect(doc.spans.find((s) => s.provenance.runId === `${W.windowRun}.1`)?.start).toBe(6);
+    expect(doc.spans.find((s) => s.provenance.runId === `${W.windowRun}.1`)?.start).toBe(4);
   });
 });
 
@@ -196,5 +196,56 @@ describe("appearedRecord", () => {
   it("makes the whole file HUM outside a window", () => {
     const doc = must(appearedRecord("a\nb\n", "HUM", null, clock));
     expect(originAt(doc, 3)).toBe("HUM");
+  });
+});
+
+describe("updateRecord whole-text trim before the line difference", () => {
+  const aiChars = (doc: Document): string =>
+    doc.spans
+      .filter((s) => s.provenance.origin === "AI")
+      .map((s) => doc.text.slice(s.start, s.end))
+      .join("");
+  it("gives an agent insert of F and a line feed before a line that starts with F only the inserted stretch", () => {
+    const base = must(createDocument("head\nFoo\n", AT));
+    const doc = must(updateRecord(base, "head\nF\nFoo\n", "AI", W, clock));
+    expect(doc.text).toBe("head\nF\nFoo\n");
+    expect(aiChars(doc)).toBe("\nF");
+    expect(originAt(doc, 5)).toBe("PST");
+    expect(originAt(doc, 8)).toBe("PST");
+  });
+  it("keeps the old F of a line at the start of the text when the agent inserts F and a line feed before it (shrunk counterexample)", () => {
+    const base = must(createDocument("FH;\r\n", AT));
+    const doc = must(updateRecord(base, "F\nFH;\r\n", "AI", W, clock));
+    expect(doc.text).toBe("F\nFH;\r\n");
+    expect(originAt(doc, 0)).toBe("PST");
+    expect(aiChars(doc)).toBe("\nF");
+    expect(doc.spans.filter((s) => s.provenance.origin === "AI")[0]?.start).toBe(1);
+  });
+  it("keeps an old line feed from inside the edited stretch that the line difference matches (shrunk counterexample)", () => {
+    const base = must(createDocument("[7c57FT\n09Q\nH\n\n{gD\n", AT));
+    const doc = must(updateRecord(base, "[7c57FT\n\n {gD\n", "AI", W, clock));
+    expect(doc.text).toBe("[7c57FT\n\n {gD\n");
+    expect(originAt(doc, 8)).toBe("PST");
+    expect(
+      doc.spans.filter((s) => s.provenance.origin === "AI").map((s) => [s.start, s.end]),
+    ).toEqual([[9, 10]]);
+  });
+  it("keeps the last line feed, not the one on line 2, when a delete leaves one of two (shrunk counterexample)", () => {
+    const old = "|S3[]H7D\u{2B2F3}\n\nP]\u{34998}+\n.C9\u{32511}!&6_-\n";
+    expect(old.length).toBe(29);
+    const start = must(
+      updateRecord(must(createDocument(old.slice(0, -1), AT)), old, "HUM", null, clock),
+    );
+    expect(originAt(start, 28)).toBe("HUM");
+    const doc = must(updateRecord(start, "\n", "HUM", null, clock));
+    expect(doc.text).toBe("\n");
+    expect(originAt(doc, 0)).toBe("HUM");
+  });
+  it("deletes one of two identical line feeds and nothing else", () => {
+    const base = must(createDocument("a\n\nb\n", AT));
+    const doc = must(updateRecord(base, "a\nb\n", "HUM", null, clock));
+    expect(doc.text).toBe("a\nb\n");
+    expect(doc.spans.every((s) => s.provenance.origin === "PST")).toBe(true);
+    expect(doc.runs).toEqual([]);
   });
 });

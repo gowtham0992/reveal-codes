@@ -5,7 +5,7 @@
  */
 import { apply, createDocument, err, ok, type Document, type Result } from "@reveal-codes/engine";
 import { diffLines } from "./diff.js";
-import { trimHunk } from "./trim.js";
+import { commonAffixes, trimHunk } from "./trim.js";
 import {
   existingRunNumbers,
   planHunks,
@@ -14,6 +14,19 @@ import {
   type WindowRef,
 } from "./plan.js";
 import type { Hunk, ProvenanceError } from "./types.js";
+/**
+ * The Hunks of an edit (design M2): trim the common prefix and suffix of the
+ * whole texts, run the line difference on the middle, shift its Hunks back by
+ * the prefix length. Each Hunk is trimmed later, in `applyHunks`.
+ */
+export function changeHunks(oldText: string, newText: string): Hunk[] {
+  const { prefix, suffix } = commonAffixes(oldText, newText);
+  const middle = diffLines(
+    oldText.slice(prefix, oldText.length - suffix),
+    newText.slice(prefix, newText.length - suffix),
+  );
+  return middle.map((h) => ({ from: h.from + prefix, to: h.to + prefix, text: h.text }));
+}
 type Outcome = Result<Document, ProvenanceError>;
 function applyHunks(
   doc: Document,
@@ -50,7 +63,7 @@ export function updateRecord(
   window: WindowRef | null,
   clock: Clock,
 ): Outcome {
-  return applyHunks(doc, diffLines(doc.text, fileText), fileText, origin, window, clock);
+  return applyHunks(doc, changeHunks(doc.text, fileText), fileText, origin, window, clock);
 }
 function created(text: string, timestamp: string): Outcome {
   const doc = createDocument(text, timestamp);

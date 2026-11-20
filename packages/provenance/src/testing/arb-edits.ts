@@ -126,3 +126,76 @@ export const arbAgentThenOutside: fc.Arbitrary<AgentThenOutside> = fc
       outside: texts.map((t) => terminate(t, eol, true).join("")),
     };
   });
+
+/** One step of a Record's history: who changed the text, in which window, to what text. */
+export type HistoryStep = { origin: "AI" | "HUM"; window: number; text: string };
+/** A starting text and the later steps that build a Record with mixed `PST`, `HUM`, `AI` and `AI>HUM` text. */
+export type RecordHistory = { base: string; steps: HistoryStep[] };
+
+const arbHistoryStep = fc.record({
+  origin: fc.constantFrom<"AI" | "HUM">("AI", "AI", "HUM"),
+  window: fc.integer({ min: 0, max: 2 }),
+  edits: fc.array(arbLineEdit, { minLength: 1, maxLength: 3 }),
+});
+
+/**
+ * A history of one to four whole-file changes, by the agent (in one of three
+ * windows) or outside it, each a few line edits of the text before. The base text
+ * may be empty; the end-of-line style is one of `\n` or `\r\n` throughout.
+ */
+export const arbRecordHistory: fc.Arbitrary<RecordHistory> = fc
+  .tuple(arbLines, arbEol, fc.array(arbHistoryStep, { minLength: 1, maxLength: 4 }))
+  .map(([base, eol, steps]) => {
+    let lines = base;
+    const out = steps.map((s): HistoryStep => {
+      lines = s.edits.reduce(applyEdit, lines);
+      return { origin: s.origin, window: s.window, text: terminate(lines, eol, true).join("") };
+    });
+    return { base: terminate(base, eol, true).join(""), steps: out };
+  });
+
+/** One contiguous edit of a text: the stretch `[from, to)` is replaced by `text`. */
+export type SingleEdit = { from: number; to: number; text: string };
+
+const isHigh = (u: number): boolean => u >= 0xd800 && u <= 0xdbff;
+const isLow = (u: number): boolean => u >= 0xdc00 && u <= 0xdfff;
+
+/** Moves `at` back so that it does not fall inside a surrogate pair of `text`. */
+function snap(text: string, at: number): number {
+  const inside =
+    at > 0 && at < text.length && isHigh(text.charCodeAt(at - 1)) && isLow(text.charCodeAt(at));
+  return inside ? at - 1 : at;
+}
+
+/** Inserted text: lines of the line arbitrary joined by `\n` or `\r\n`, a bare `\r` or `\n` end included. */
+const arbInserted: fc.Arbitrary<string> = fc
+  .tuple(
+    fc.array(arbLine, { maxLength: 3 }),
+    fc.array(fc.constantFrom("\n", "\r\n", "\r"), { maxLength: 3 }),
+  )
+  .map(([lines, eols]) => lines.map((l, i) => l + (eols[i] ?? "")).join(""));
+
+/**
+ * A single insert, delete or replace of a contiguous stretch of `text`: within
+ * one line or across lines, at the start, at the end, or anywhere, on empty text
+ * as well. No offset falls inside a surrogate pair; a CR LF pair may be split.
+ */
+export function arbSingleEdit(text: string): fc.Arbitrary<SingleEdit> {
+  const n = text.length;
+  const arbAt = fc.oneof(fc.constant(0), fc.constant(n), fc.integer({ min: 0, max: n }));
+  return fc
+    .tuple(
+      fc.constantFrom("insert", "delete", "replace"),
+      fc.constantFrom("short", "span"),
+      arbAt,
+      arbAt,
+      fc.nat({ max: 12 }),
+      arbInserted,
+    )
+    .map(([kind, reach, a, b, width, inserted]) => {
+      const from = snap(text, reach === "span" ? Math.min(a, b) : a);
+      const end = reach === "span" ? Math.max(a, b) : Math.min(n, a + width);
+      const to = kind === "insert" ? from : Math.max(from, snap(text, end));
+      return { from, to, text: kind === "delete" ? "" : inserted };
+    });
+}

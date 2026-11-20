@@ -1,6 +1,6 @@
 /**
- * Character trim inside one Hunk (design M15, Req 4.15 and 4.16). Cuts the
- * common prefix and then the common suffix of the Hunk's old and new text, by
+ * Character trim (design M2 and M15, Req 4.15 and 4.16). Cuts the common prefix
+ * and then the common suffix of two texts (the whole texts, then each Hunk), by
  * UTF-16 code unit, never between a surrogate pair or a CR LF pair. Pure; no `node:`.
  */
 import type { Hunk } from "./types.js";
@@ -50,6 +50,16 @@ function safeSuffix(oldText: string, newText: string, max: number): number {
   return splitsPair ? s - 1 : s;
 }
 
+/** The lengths of the common prefix and then the common suffix (not overlapping), pair-safe in both texts. */
+export function commonAffixes(
+  oldText: string,
+  newText: string,
+): { prefix: number; suffix: number } {
+  const prefix = safePrefix(oldText, newText);
+  const room = Math.min(oldText.length, newText.length) - prefix;
+  return { prefix, suffix: safeSuffix(oldText, newText, room) };
+}
+
 /**
  * The part of `hunk` that really changed, or `null` when its old and new text
  * are equal. `oldDocText` is the whole old text that the Hunk's offsets index.
@@ -57,9 +67,7 @@ function safeSuffix(oldText: string, newText: string, max: number): number {
 export function trimHunk(oldDocText: string, hunk: Hunk): Hunk | null {
   const oldText = oldDocText.slice(hunk.from, hunk.to);
   const newText = hunk.text;
-  const prefix = safePrefix(oldText, newText);
-  const room = Math.min(oldText.length, newText.length) - prefix;
-  const suffix = safeSuffix(oldText, newText, room);
+  const { prefix, suffix } = commonAffixes(oldText, newText);
   const from = hunk.from + prefix;
   const to = hunk.to - suffix;
   const text = newText.slice(prefix, newText.length - suffix);
