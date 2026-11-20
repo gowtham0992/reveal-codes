@@ -132,7 +132,7 @@ describe("reveal <file> _Requirements: 9.1, 9.7, 9.9, 9.12_", () => {
     await baseline(d);
     const ran = reveal(d, ["README.md"]);
     expect(ran.status).toBe(0);
-    expect(ran.stdout.split("\n").slice(5).join("\n")).toBe("[PST]hello\nworld\n\n");
+    expect(ran.stdout.split("\n").slice(5).join("\n")).toBe("\n[PST]hello\nworld\n\n");
     expect(ran.stderr).toBe("");
   });
 });
@@ -254,17 +254,18 @@ describe("the wrapper _Requirements: 1.11_", () => {
   });
 });
 describe("run tags, the Runs list and --full _Requirements: 9.3, 9.14, 9.15, 9.16_", () => {
-  it("prints short tags, the tags sentence and the Runs list, with a suffix for a clash", () => {
+  it("prints short tags and the Runs list, no tags sentence,, with a suffix for a clash", () => {
     const d = fresh();
     agentRecord(d, "a.ts", [W66, W66B]);
     const ran = reveal(d, ["a.ts"]);
     const lines = ran.stdout.split("\n");
     expect(ran.status).toBe(0);
     expect(lines.slice(1, 5)).toEqual(legendLines());
-    expect(lines[5]).toBe('Tags are listed under "Runs in this file".');
-    expect(lines[6]).toBe("Runs in this file");
-    expect(lines[7]).toBe("  6.6    6.6 Wire \\[it\\]  opened 2026-11-19T10:00:00Z  1 hunk");
-    expect(lines[8]).toBe("  6.6~2  6.6 Again      opened 2026-11-19T10:05:00Z  1 hunk");
+    expect(ran.stdout).not.toContain("Tags are listed");
+    expect(lines[5]).toBe("Runs in this file");
+    expect(lines[6]).toBe("  6.6    Wire \\[it\\]  opened 2026-11-19T10:00:00Z  1 hunk");
+    expect(lines[7]).toBe("  6.6~2  Again      opened 2026-11-19T10:05:00Z  1 hunk");
+    expect(lines[8]).toBe("");
     expect(ran.stdout).toContain("[AI:6.6]from 6.6\n[AI:6.6~2]from 6.6\n");
   });
   it("prints the full Run_Ids and no list with --full, before or after the file", () => {

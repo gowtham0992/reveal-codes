@@ -7,7 +7,7 @@ import { render, type Document } from "@reveal-codes/engine";
 import { legendLines } from "./legend.js";
 import { neutralize } from "./neutralize.js";
 import { LINE_END, onBody, PANE, type ColourMode } from "./palette.js";
-import { runsListLines, TAGS_SENTENCE } from "./runs-list.js";
+import { runsListLines } from "./runs-list.js";
 import { assignTags, windowRunOf } from "./tags.js";
 /** How the output is coloured: 24-bit, 256 colours, or none. */
 export type ViewMode = ColourMode | "plain";
@@ -48,12 +48,15 @@ function provenanceOnly(doc: Document, full: boolean): Document {
   return { ...base, spans: doc.spans.map((span) => tagged(span, tags)) };
 }
 
-/** The legend, then the tags sentence and the Runs list when the file has agent text. */
+/**
+ * The legend, then the Runs list when the file has agent text. The sentence that points to the list
+ * is printed only when tags are shown and the list is absent, which never happens (Req 9.3).
+ */
 function legendBlock(doc: Document, full: boolean, escape: boolean): string[] {
   const items = legendLines(full ? "run" : "tag");
   const ids = runIdsOf(doc);
   if (full || ids.length === 0) return items;
-  return [...items, TAGS_SENTENCE, ...runsListLines(assignTags(ids), escape)];
+  return [...items, ...runsListLines(assignTags(ids), escape)];
 }
 function lineEnds(style: string, text: string): string {
   return text.split("\n").join(`${LINE_END}\n${style}`);
@@ -74,16 +77,16 @@ function colourLines(lines: readonly string[], colour: string, mode: ColourMode)
 }
 function colourView(doc: Document, mode: ColourMode, path: string, full: boolean): string {
   const head = colourLines([headerLine(path)], PANE.title, mode);
-  const legend = colourLines(legendBlock(doc, full, false), PANE.legend, mode);
+  const legend = colourLines([...legendBlock(doc, full, false), ""], PANE.legend, mode);
   return [...head, ...legend, colourBody(provenanceOnly(doc, full), mode)].join("\n");
 }
 function plainView(doc: Document, path: string, full: boolean): string {
   const body = render(provenanceOnly(doc, full), "display").text;
-  return [headerLine(path), ...legendBlock(doc, full, true), body].join("\n");
+  return [headerLine(path), ...legendBlock(doc, full, true), "", body].join("\n");
 }
 /**
  * The header naming `path`, the four-item legend, the Runs list (when the file has agent text),
- * then the body of `doc`, in `mode`. Colour mode prints the text unescaped, plain mode with the
+ * one empty line, then the body of `doc`, in `mode`. Colour mode prints the text unescaped, plain mode with the
  * Engine's escaping. With `full` the codes carry the full Run_Id and there is no Runs list.
  */
 export function viewRecord(doc: Document, mode: ViewMode, path: string, full = false): string {

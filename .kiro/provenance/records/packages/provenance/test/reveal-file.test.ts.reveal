@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,794,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,2035,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,9924,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]import { createDocument, renderRecord } from "@reveal-codes/engine";
+[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,794,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,2035,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.1,2,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.2,37,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.3,297,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,9924,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]import { createDocument, renderRecord } from "@reveal-codes/engine";
 import { spawnSync } from "node:child_process";
 import { chmodSync, copyFileSync, readFileSync, rmSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
@@ -132,7 +132,7 @@ describe("reveal <file> _Requirements: 9.1, 9.7, 9.9, 9.12_", () => {
     await baseline(d);
     const ran = reveal(d, \["README.md"\]);
     expect(ran.status).toBe(0);
-    expect(ran.stdout.split("\\n").slice(5).join("\\n")).toBe("\[PST\]hello\\nworld\\n\\n");
+    expect(ran.stdout.split("\\n").slice(5).join("\\n")).toBe("[AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.1{t=2026-11-20T16:21:52.951Z}]\\n[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]\[PST\]hello\\nworld\\n\\n");
     expect(ran.stderr).toBe("");
   });
 });
@@ -254,17 +254,18 @@ describe("the wrapper _Requirements: 1.11_", () => {
   });
 });
 describe("run tags, the Runs list and --full _Requirements: 9.3, 9.14, 9.15, 9.16_", () => {
-  it("prints short tags, the tags sentence and the Runs list, with a suffix for a clash", () => {
+  it("prints short tags[AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.2{t=2026-11-20T16:21:52.951Z}] and the Runs list, no tags sentence,[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.2{t=2026-11-20T05:35:16.652Z}], with a suffix for a clash", () => {
     const d = fresh();
     agentRecord(d, "a.ts", \[W66, W66B\]);
     const ran = reveal(d, \["a.ts"\]);
     const lines = ran.stdout.split("\\n");
     expect(ran.status).toBe(0);
     expect(lines.slice(1, 5)).toEqual(legendLines());
-    expect(lines\[5\]).toBe('Tags are listed under "Runs in this file".');
-    expect(lines\[6\]).toBe("Runs in this file");
-    expect(lines\[7\]).toBe("  6.6    6.6 Wire \\\\\[it\\\\\]  opened 2026-11-19T10:00:00Z  1 hunk");
-    expect(lines\[8\]).toBe("  6.6~2  6.6 Again      opened 2026-11-19T10:05:00Z  1 hunk");
+    expect([AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.3{t=2026-11-20T16:21:52.951Z}]ran.stdout).not.toContain("Tags are listed");
+    expect(lines\[5\]).toBe("Runs in this file");
+    expect(lines\[6\]).toBe("  6.6    Wire \\\\\[it\\\\\]  opened 2026-11-19T10:00:00Z  1 hunk");
+    expect(lines\[7\]).toBe("  6.6~2  Again      opened 2026-11-19T10:05:00Z  1 hunk");
+    expect(lines\[8\]).toBe("[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.2{t=2026-11-20T05:35:16.652Z}]");
     expect(ran.stdout).toContain("\[AI:6.6\]from 6.6\\n\[AI:6.6~2\]from 6.6\\n");
   });
   it("prints the full Run_Ids and no list with --full, before or after the file", () => {

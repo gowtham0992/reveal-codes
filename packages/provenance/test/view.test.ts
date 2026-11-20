@@ -33,7 +33,8 @@ describe("viewRecord (Req 9)", () => {
     const lines = viewRecord(pst("x\n"), "plain", "src/a.ts").split("\n");
     expect(lines[0]).toBe("Reveal Codes: src/a.ts");
     expect(lines.slice(1, 5)).toEqual(legendLines());
-    expect(lines[5]).toMatch(/^\[PST\]x$/);
+    expect(lines[5]).toBe("");
+    expect(lines[6]).toMatch(/^\[PST\]x$/);
   });
   it("prints an Unchanged_File as one [PST] code and its text", () => {
     const out = viewRecord(pst("one\ntwo\n"), "plain", "f.txt");
@@ -94,6 +95,13 @@ describe("viewRecord (Req 9)", () => {
       for (const line of lines) expect(line.startsWith("\u001b[38;")).toBe(true);
     }
   });
+  it("puts one full-width empty pane line between the header block and the text (Req 9.18)", () => {
+    const bg = "\u001b[48;2;15;39;102m";
+    const lines = viewRecord(pst("x"), "truecolor", "f").split("\n");
+    expect(lines[5]?.endsWith(`${bg}\u001b[K\u001b[0m`)).toBe(true);
+    expect(lines[5]?.replace(ANSI, "")).toBe("");
+    expect(lines[6]?.replace(ANSI, "")).toBe("[PST]x");
+  });
   it("prints no escape sequence in plain output, so it does not change (Req 9.17)", () => {
     expect(viewRecord(mixed("ab\n\ncd"), "plain", "f")).not.toContain("\u001b");
   });
@@ -119,7 +127,8 @@ describe("viewRecord (Req 9)", () => {
     expect(plain.split("\n").slice(1, 5)).toEqual(legendLines("run"));
     expect(plain).not.toContain("Runs in this file");
     expect(plain).not.toContain("Tags are listed");
-    expect(plain.split("\n")).toHaveLength(6);
+    expect(plain.split("\n")).toHaveLength(7);
+    expect(plain.split("\n")[5]).toBe("");
   });
 });
 
@@ -150,13 +159,14 @@ describe("run tags and the Runs list (Req 9.14, 9.15)", () => {
     ]);
     const lines = viewRecord(doc, "plain", "f").split("\n");
     expect(lines.slice(-1)[0]).toBe("[AI:6.6]aa[AI:turn]bb[AI:task]cc");
-    expect(lines[5]).toBe('Tags are listed under "Runs in this file".');
-    expect(lines[6]).toBe("Runs in this file");
-    expect(lines.slice(7, 10)).toEqual([
-      "  6.6   6.6 Wire it  opened 2026-11-19T10:00:00Z  1 hunk",
-      "  turn  turn         opened 2026-11-19T10:01:00Z  1 hunk",
-      "  task  task         opened 2026-11-19T10:02:00Z  1 hunk",
+    expect(lines[5]).toBe("Runs in this file");
+    expect(lines.slice(6, 9)).toEqual([
+      "  6.6   Wire it  opened 2026-11-19T10:00:00Z  1 hunk",
+      "  turn  turn     opened 2026-11-19T10:01:00Z  1 hunk",
+      "  task  task     opened 2026-11-19T10:02:00Z  1 hunk",
     ]);
+    expect(lines[9]).toBe("");
+    expect(lines.join("\n")).not.toContain("Tags are listed");
   });
   it("suffixes only a clash: two windows of one Task_Number give 6.6 and 6.6~2", () => {
     const doc = withSpans("aabbcc", [
@@ -175,21 +185,21 @@ describe("run tags and the Runs list (Req 9.14, 9.15)", () => {
     ]);
     const plain = viewRecord(doc, "plain", "f");
     expect(plain.endsWith("[AI:6.6]aa[AI:6.6]bb[AI:6.6]cc")).toBe(true);
-    expect(plain).toContain("  6.6  6.6 Wire it  opened 2026-11-19T10:00:00Z  2 hunks\n");
+    expect(plain).toContain("  6.6  Wire it  opened 2026-11-19T10:00:00Z  2 hunks\n");
   });
   it("prints no list and no tags sentence for a file with no agent span", () => {
     const plain = viewRecord(pst("x"), "plain", "f");
     expect(plain).not.toContain("Runs in this file");
-    expect(plain.split("\n")).toHaveLength(6);
+    expect(plain.split("\n")).toHaveLength(7);
   });
   it("escapes [ ] and \\ in a title in plain output only, with the same padding", () => {
     const window = "7 A[b]\\c 2026-11-19T10:00:00Z";
     const doc = withSpans("aa", [agent(window, 1, 0, 2)]);
     const plain = viewRecord(doc, "plain", "f").split("\n");
     const colour = viewRecord(doc, "truecolor", "f").replace(ANSI, "").split("\n");
-    expect(plain[7]).toBe("  7  7 A\\[b\\]\\\\c  opened 2026-11-19T10:00:00Z  1 hunk");
-    expect(colour[7]).toBe("  7  7 A[b]\\c  opened 2026-11-19T10:00:00Z  1 hunk");
-    expect(plain[7]?.replace(/\\([\s\S])/g, "$1")).toBe(colour[7]);
+    expect(plain[6]).toBe("  7  A\\[b\\]\\\\c  opened 2026-11-19T10:00:00Z  1 hunk");
+    expect(colour[6]).toBe("  7  A[b]\\c  opened 2026-11-19T10:00:00Z  1 hunk");
+    expect(plain[6]?.replace(/\\([\s\S])/g, "$1")).toBe(colour[6]);
   });
   it("prints the list in colour output in the legend colour", () => {
     const doc = withSpans("aa", [agent(W66, 1, 0, 2)]);

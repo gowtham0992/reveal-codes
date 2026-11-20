@@ -8,8 +8,8 @@ import { runs } from "./support/fc.js";
 
 /** Header line plus the four legend lines. */
 const LEGEND_LINES = 5;
-/** The tags sentence and the heading of the Runs list. */
-const LIST_LINES = 2;
+/** The heading of the Runs list. */
+const LIST_LINES = 1;
 const arbColourMode = fc.constantFrom("truecolor" as const, "ansi256" as const);
 
 /** Every ANSI sequence the viewer prints: `ESC [ digits and semicolons m`, or the erase `ESC [ K`. */
@@ -142,11 +142,13 @@ describe("view properties _Requirements: 9.4, 9.5, 9.6, 9.7, 9.8, 9.14, 9.15, 9.
           const count = new Set(runs.map(windowOf)).size;
           const listed = runs.length > 0 && !full ? LIST_LINES + count : 0;
           const lines = plain.split("\n");
-          const head = lines.slice(0, LEGEND_LINES + listed);
+          expect(lines[LEGEND_LINES + listed]).toBe("");
+          expect(plain).not.toContain("Tags are listed");
+          const head = lines.slice(0, LEGEND_LINES + listed + 1);
           const list = head
             .slice(LEGEND_LINES + LIST_LINES)
             .map((l) => l.replace(/\\([\s\S])/gu, "$1"));
-          const scanned = scanBody(lines.slice(LEGEND_LINES + listed).join("\n"));
+          const scanned = scanBody(lines.slice(LEGEND_LINES + listed + 1).join("\n"));
           const unescaped = [...head.slice(0, LEGEND_LINES + LIST_LINES), ...list].join("\n");
           expect(stripAnsi(coloured)).toBe(`${unescaped}\n${scanned.kept}`);
           expect(stripAnsi(coloured)).not.toContain("\u001b");

@@ -7997,8 +7997,7 @@ var init_palette = __esm({
 
 // packages/provenance/src/core/runs-list.ts
 function description(w) {
-  const title = neutralize(w.title).replace(/[\n\t]/gu, " ");
-  return w.taskNumber === null ? title : `${w.taskNumber} ${title}`;
+  return neutralize(w.title).replace(/[\n\t]/gu, " ");
 }
 function hunkWords(n) {
   return `${String(n)} ${n === 1 ? "hunk" : "hunks"}`;
@@ -8025,13 +8024,12 @@ function runsListLines(windows, escape) {
   });
   return [RUNS_HEADING, ...lines];
 }
-var RUNS_HEADING, TAGS_SENTENCE, INDENT, width2, escapeText2;
+var RUNS_HEADING, INDENT, width2, escapeText2;
 var init_runs_list = __esm({
   "packages/provenance/src/core/runs-list.ts"() {
     "use strict";
     init_neutralize();
     RUNS_HEADING = "Runs in this file";
-    TAGS_SENTENCE = 'Tags are listed under "Runs in this file".';
     INDENT = "  ";
     width2 = (text) => Array.from(text).length;
     escapeText2 = (text) => text.replace(/[\\[\]]/gu, "\\$&");
@@ -8117,7 +8115,7 @@ function legendBlock(doc, full, escape) {
   const items = legendLines(full ? "run" : "tag");
   const ids = runIdsOf(doc);
   if (full || ids.length === 0) return items;
-  return [...items, TAGS_SENTENCE, ...runsListLines(assignTags(ids), escape)];
+  return [...items, ...runsListLines(assignTags(ids), escape)];
 }
 function lineEnds(style, text) {
   return text.split("\n").join(`${LINE_END}
@@ -8139,12 +8137,12 @@ function colourLines(lines, colour, mode) {
 }
 function colourView(doc, mode, path, full) {
   const head = colourLines([headerLine(path)], PANE.title, mode);
-  const legend = colourLines(legendBlock(doc, full, false), PANE.legend, mode);
+  const legend = colourLines([...legendBlock(doc, full, false), ""], PANE.legend, mode);
   return [...head, ...legend, colourBody(provenanceOnly(doc, full), mode)].join("\n");
 }
 function plainView(doc, path, full) {
   const body = render(provenanceOnly(doc, full), "display").text;
-  return [headerLine(path), ...legendBlock(doc, full, true), body].join("\n");
+  return [headerLine(path), ...legendBlock(doc, full, true), "", body].join("\n");
 }
 function viewRecord(doc, mode, path, full = false) {
   return mode === "plain" ? plainView(doc, path, full) : colourView(doc, mode, path, full);

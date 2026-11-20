@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,2203,0,0}][AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]/**
+[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,2203,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.1,101,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.2,51,0,0}][AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]/**
  * The "Runs in this file" list of `reveal <file>` (Req 9.15; design, Runs in this file).
  * Pure; no `node:`. Titles come from the file's Record, so they are neutralized (M6) and, in plain
  * output, escaped like text. Columns are padded by the width of the unescaped title, so the
@@ -9,16 +9,14 @@ import type { WindowTag } from "./tags.js";
 
 /** The heading of the list. */
 export const RUNS_HEADING = "Runs in this file";
-/** The sentence after the legend that points to the list. */
-export const TAGS_SENTENCE = 'Tags are listed under "Runs in this file".';
 
 const INDENT = "  ";
 const width = (text: string): number => Array.from(text).length;
 const escapeText = (text: string): string => text.replace(/\[\\\\\[\\\]\]/gu, "\\\\$&");
 
-function description(w: WindowTag): string {
-  const title = neutralize(w.title).replace(/\[\\n\\t\]/gu, " ");
-  return w.taskNumber === null ? title : `${w.taskNumber} ${title}`;
+[AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.1{t=2026-11-20T16:21:52.951Z}]/** The title without the Task_Number: the tag in the first column already carries it (Req 9.15). */
+[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]function description(w: WindowTag): string {
+  [AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.2{t=2026-11-20T16:21:52.951Z}]return neutralize(w.title).replace(/\[\\n\\t\]/gu, " ")[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}];
 }
 
 function hunkWords(n: number): string {

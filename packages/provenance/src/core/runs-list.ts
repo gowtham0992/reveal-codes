@@ -9,16 +9,14 @@ import type { WindowTag } from "./tags.js";
 
 /** The heading of the list. */
 export const RUNS_HEADING = "Runs in this file";
-/** The sentence after the legend that points to the list. */
-export const TAGS_SENTENCE = 'Tags are listed under "Runs in this file".';
 
 const INDENT = "  ";
 const width = (text: string): number => Array.from(text).length;
 const escapeText = (text: string): string => text.replace(/[\\[\]]/gu, "\\$&");
 
+/** The title without the Task_Number: the tag in the first column already carries it (Req 9.15). */
 function description(w: WindowTag): string {
-  const title = neutralize(w.title).replace(/[\n\t]/gu, " ");
-  return w.taskNumber === null ? title : `${w.taskNumber} ${title}`;
+  return neutralize(w.title).replace(/[\n\t]/gu, " ");
 }
 
 function hunkWords(n: number): string {

@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,116,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,235,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,1602,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,43,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.5,15,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.6,111,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.7,151,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.8,231,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.9,115,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.1,22,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.2,8,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.3,8,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.4,8,0,0;r=7.3 `palette.ts`\, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1,2552,0,0}][AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]/**
+[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,116,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,235,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,1602,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,43,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.5,15,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.6,111,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.7,151,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.8,231,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.9,115,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.1,22,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.2,8,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.3,8,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.4,8,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.1,196,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.2,38,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.3,4,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.4,16,0,0;r=7.3 `palette.ts`\, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1,2552,0,0}][AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]/**
  * `viewRecord`: the file with its provenance codes inline (Req 9.1 to 9.8, 9.13; design M5, M6).
  * Pure; no `node:`. Only the four provenance codes are printed: the citation layer is emptied
  * before the Engine renders, and the colour body reads the codes of that same rendering.
@@ -7,7 +7,7 @@ import { render, type Document } from "@reveal-codes/engine";
 import { legendLines } from "./legend.js";
 import { neutralize } from "./neutralize.js";
 import { [AI:7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.1{t=2026-11-20T05:38:00.254Z}]LINE_END, onBody, PANE[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}], type ColourMode } from "./palette.js";
-[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]import { runsListLines, TAGS_SENTENCE } from "./runs-list.js";
+[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]import { runsListLines } from "./runs-list.js";
 import { assignTags, windowRunOf } from "./tags.js";
 [AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]/** How the output is coloured: 24-bit, 256 colours, or none. */
 export type ViewMode = ColourMode | "plain";
@@ -48,12 +48,15 @@ function provenanceOnly(doc: Document, full: boolean): Document {
   return { ...base, spans: doc.spans.map((span) => tagged(span, tags)) };
 }
 
-/** The legend, then the tags sentence and the Runs list when the file has agent text. */
+/**[AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.1{t=2026-11-20T16:21:52.951Z}]
+ * The legend, then the Runs list when the file has agent text. The sentence that points to the list
+ * is printed only when tags are shown and the list is absent, which never happens (Req 9.3).
+[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.3{t=2026-11-20T05:35:16.652Z}] */
 function legendBlock(doc: Document, full: boolean, escape: boolean): string\[\] {
   const items = legendLines(full ? "run" : "tag");
   const ids = runIdsOf(doc);
   if (full || ids.length === 0) return items;
-  return \[...items, TAGS_SENTENCE, ...runsListLines(assignTags(ids), escape)\];
+  return \[...items, ...runsListLines(assignTags(ids), escape)\];
 }
 [AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]function lineEnds(style: string, text: string): string {
   return text.split("\\n").join(`${[AI:7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.2{t=2026-11-20T05:38:00.254Z}]LINE_END[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]}\\n${style}`);
@@ -74,16 +77,16 @@ function colourLines(lines: readonly string\[\], colour: string, mode: ColourMod
 }
 function colourView(doc: Document, mode: ColourMode, path: string[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.5{t=2026-11-20T05:35:16.652Z}], full: boolean[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]): string {
   const head = colourLines(\[headerLine(path)\], PANE.title, mode);
-  const legend = colourLines(legend[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.6{t=2026-11-20T05:35:16.652Z}]Block(doc, full, false), PANE.legend, mode);
+  const legend = colourLines([AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.2{t=2026-11-20T16:21:52.951Z}]\[...legendBlock(doc, full, false), ""\][AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.6{t=2026-11-20T05:35:16.652Z}], PANE.legend, mode);
   return \[...head, ...legend, colourBody(provenanceOnly(doc, full)[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}], mode)\].join("\\n");
 }
 function plainView(doc: Document, path: string[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.7{t=2026-11-20T05:35:16.652Z}], full: boolean): string {
   const body = render(provenanceOnly(doc, full), "display").text;
-  return \[headerLine(path), ...legendBlock(doc, full, true[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]), body\].join("\\n");
+  return \[headerLine(path), ...legendBlock(doc, full, true[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]), [AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.3{t=2026-11-20T16:21:52.951Z}]"", [AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]body\].join("\\n");
 }
 /**
  * The header naming `path`, the four-item legend, the[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.8{t=2026-11-20T05:35:16.652Z}] Runs list (when the file has agent text),
- * then the body of `doc`, in `mode`. Colour mode prints the text unescaped, plain mode with the
+ *[AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.4{t=2026-11-20T16:21:52.951Z}] one empty line,[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.8{t=2026-11-20T05:35:16.652Z}] then the body of `doc`, in `mode`. Colour mode prints the text unescaped, plain mode with the
  * Engine's escaping. With `full` the codes carry the full Run_Id and there is no Runs list[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}].
  */
 export function viewRecord(doc: Document, mode: ViewMode, path: string[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.9{t=2026-11-20T05:35:16.652Z}], full = false): string {

@@ -1,4 +1,4 @@
-[DOC{v=1;n=2;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,3,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,32,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,76,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,3747,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.1,4,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.2,757,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.3,179,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.4,8,0,0;r=7.3 `palette.ts`\, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1,5127,0,0}][AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]import { createDocument } from "@reveal-codes/engine";
+[DOC{v=1;n=2;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,3,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,32,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,76,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,3747,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.1,4,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.2,757,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.3,179,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.4,8,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.1,31,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.2,393,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.3,44,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.4,205,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.5,94,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.6,1,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.7,214,0,0;r=7.3 `palette.ts`\, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1,5127,0,0}][AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]import { createDocument } from "@reveal-codes/engine";
 import type { Document } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import { legendLines } from "../src/core/legend.js";
@@ -33,7 +33,8 @@ describe("viewRecord (Req 9)", () => {
     const lines = viewRecord(pst("x\\n"), "plain", "src/a.ts").split("\\n");
     expect(lines\[0\]).toBe("Reveal Codes: src/a.ts");
     expect(lines.slice(1, 5)).toEqual(legendLines());
-    expect(lines\[5\]).toMatch(/^\\\[PST\\\]x$/);
+    expect(lines\[5\]).to[AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.1{t=2026-11-20T16:21:52.951Z}]Be("");
+    expect(lines\[6\]).to[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]Match(/^\\\[PST\\\]x$/);
   });
   it("prints an Unchanged_File as one \[PST\] code and its text", () => {
     const out = viewRecord(pst("one\\ntwo\\n"), "plain", "f.txt");
@@ -94,6 +95,13 @@ describe("viewRecord (Req 9)", () => {
       for (const line of lines) expect(line.startsWith("\\u001b\[38;")).toBe(true);
     }[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]
   });
+[AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.2{t=2026-11-20T16:21:52.951Z}]  it("puts one full-width empty pane line between the header block and the text (Req 9.18)", () => {
+    const bg = "\\u001b\[48;2;15;39;102m";
+    const lines = viewRecord(pst("x"), "truecolor", "f").split("\\n");
+    expect(lines\[5\]?.endsWith(`${bg}\\u001b\[K\\u001b\[0m`)).toBe(true);
+    expect(lines\[5\]?.replace(ANSI, "")).toBe("");
+    expect(lines\[6\]?.replace(ANSI, "")).toBe("\[PST\]x");
+  });
 [AI:7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.3{t=2026-11-20T05:38:00.254Z}]  it("prints no escape sequence in plain output, so it does not change (Req 9.17)", () => {
     expect(viewRecord(mixed("ab\\n\\ncd"), "plain", "f")).not.toContain("\\u001b");
   });
@@ -119,7 +127,8 @@ describe("viewRecord (Req 9)", () => {
     expect(plain.split("\\n").slice(1, 5)).toEqual(legendLines("run"));
     expect(plain).not.toContain("Runs in this file");
     expect(plain).not.toContain("Tags are listed");
-    expect(plain.split("\\n")).toHaveLength(6);
+    expect(plain.split("\\n")).toHaveLength([AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.3{t=2026-11-20T16:21:52.951Z}]7);
+    expect(plain.split("\\n")\[5\]).toBe(""[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.4{t=2026-11-20T05:35:16.652Z}]);
   });
 });
 
@@ -150,14 +159,15 @@ describe("run tags and the Runs list (Req 9.14, 9.15)", () => {
     \]);
     const lines = viewRecord(doc, "plain", "f").split("\\n");
     expect(lines.slice(-1)\[0\]).toBe("\[AI:6.6\]aa\[AI:turn\]bb\[AI:task\]cc");
-    expect(lines\[5\]).toBe('Tags are listed under "Runs in this file".');
-    expect(lines\[6\]).toBe("Runs in this file");
-    expect(lines.slice(7, 10)).toEqual(\[
-      "  6.6   6.6 Wire it  opened 2026-11-19T10:00:00Z  1 hunk",
-      "  turn  turn         opened 2026-11-19T10:01:00Z  1 hunk",
-      "  task  task         opened 2026-11-19T10:02:00Z  1 hunk",
+    expect(lines\[5\]).toBe([AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.4{t=2026-11-20T16:21:52.951Z}]"Runs in this file");
+    expect(lines.slice(6, 9)).toEqual(\[
+      "  6.6   Wire it  opened 2026-11-19T10:00:00Z  1 hunk",
+      "  turn  turn     opened 2026-11-19T10:01:00Z  1 hunk",
+      "  task  task[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.4{t=2026-11-20T05:35:16.652Z}]     opened 2026-11-19T10:02:00Z  1 hunk",
     \]);
-  });
+[AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.5{t=2026-11-20T16:21:52.951Z}]    expect(lines\[9\]).toBe("");
+    expect(lines.join("\\n")).not.toContain("Tags are listed");
+[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.4{t=2026-11-20T05:35:16.652Z}]  });
   it("suffixes only a clash: two windows of one Task_Number give 6.6 and 6.6~2", () => {
     const doc = withSpans("aabbcc", \[
       agent(W66B, 1, 0, 2),
@@ -175,21 +185,21 @@ describe("run tags and the Runs list (Req 9.14, 9.15)", () => {
     \]);
     const plain = viewRecord(doc, "plain", "f");
     expect(plain.endsWith("\[AI:6.6\]aa\[AI:6.6\]bb\[AI:6.6\]cc")).toBe(true);
-    expect(plain).toContain("  6.6  6.6 Wire it  opened 2026-11-19T10:00:00Z  2 hunks\\n");
+    expect(plain).toContain("  6.6  Wire it  opened 2026-11-19T10:00:00Z  2 hunks\\n");
   });
   it("prints no list and no tags sentence for a file with no agent span", () => {
     const plain = viewRecord(pst("x"), "plain", "f");
     expect(plain).not.toContain("Runs in this file");
-    expect(plain.split("\\n")).toHaveLength(6);
+    expect(plain.split("\\n")).toHaveLength([AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.6{t=2026-11-20T16:21:52.951Z}]7[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.4{t=2026-11-20T05:35:16.652Z}]);
   });
   it("escapes \[ \] and \\\\ in a title in plain output only, with the same padding", () => {
     const window = "7 A\[b\]\\\\c 2026-11-19T10:00:00Z";
     const doc = withSpans("aa", \[agent(window, 1, 0, 2)\]);
     const plain = viewRecord(doc, "plain", "f").split("\\n");
     const colour = viewRecord(doc, "truecolor", "f").replace(ANSI, "").split("\\n");
-    expect(plain\[7\]).toBe("  7  7 A\\\\\[b\\\\\]\\\\\\\\c  opened 2026-11-19T10:00:00Z  1 hunk");
-    expect(colour\[7\]).toBe("  7  7 A\[b\]\\\\c  opened 2026-11-19T10:00:00Z  1 hunk");
-    expect(plain\[7\]?.replace(/\\\\(\[\\s\\S\])/g, "$1")).toBe(colour\[7\]);
+    expect(plain\[[AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.7{t=2026-11-20T16:21:52.951Z}]6\]).toBe("  7  A\\\\\[b\\\\\]\\\\\\\\c  opened 2026-11-19T10:00:00Z  1 hunk");
+    expect(colour\[6\]).toBe("  7  A\[b\]\\\\c  opened 2026-11-19T10:00:00Z  1 hunk");
+    expect(plain\[6\]?.replace(/\\\\(\[\\s\\S\])/g, "$1")).toBe(colour\[6[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.4{t=2026-11-20T05:35:16.652Z}]\]);
   });
   it("prints the list in colour output in the legend colour", () => {
     const doc = withSpans("aa", \[agent(W66, 1, 0, 2)\]);

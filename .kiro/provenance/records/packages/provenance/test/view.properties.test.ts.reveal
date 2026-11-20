@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,54,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,50,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,97,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,2298,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.5,27,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.6,2526,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.1,56,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.2,4,0,0;r=7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1,3118,0,0}][AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}]import [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]type { Document } from "@reveal-codes/engine";
+[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,54,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,50,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,97,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,2298,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.5,27,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.6,2526,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.1,56,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.2,4,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.1,49,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.2,168,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.3,4,0,0;r=7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1,3118,0,0}][AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}]import [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]type { Document } from "@reveal-codes/engine";
 import [AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}]fc from "fast-check";
 import { describe, expect, it } from "vitest";
 [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.2{t=2026-11-20T05:35:16.652Z}]import { assignTags } from "../src/core/tags.js";
@@ -8,8 +8,8 @@ import { runs } from "./support/fc.js";
 
 /** Header line plus the four legend lines. */
 const [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.3{t=2026-11-20T05:35:16.652Z}]LEGEND_LINES = 5;
-/** The tags sentence and the heading of the Runs list. */
-const LIST_LINES = 2[AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}];
+/** The [AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.1{t=2026-11-20T16:21:52.951Z}]heading of the Runs list. */
+const LIST_LINES = 1[AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}];
 const arbColourMode = fc.constantFrom("truecolor" as const, "ansi256" as const);
 
 /** Every ANSI sequence the viewer prints[AI:7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.1{t=2026-11-20T05:38:00.254Z}]: `ESC \[ digits and semicolons m`, or the erase `ESC \[ K[AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}]`. */
@@ -142,11 +142,13 @@ describe("view properties _Requirements: 9.4, 9.5, 9.6, 9.7, 9.8, 9.14, 9.15, 9.
           const count = new Set(runs.map(windowOf)).size;
           const listed = runs.length > 0 && !full ? LIST_LINES + count : 0;
           const lines = plain.split("\\n");
-          const head = lines.slice(0, LEGEND_LINES + listed);
+          [AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.2{t=2026-11-20T16:21:52.951Z}]expect(lines\[LEGEND_LINES + listed\]).toBe("");
+          expect(plain).not.toContain("Tags are listed");
+          const head = lines.slice(0, LEGEND_LINES + listed + 1[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.6{t=2026-11-20T05:35:16.652Z}]);
           const list = head
             .slice(LEGEND_LINES + LIST_LINES)
             .map((l) => l.replace(/\\\\(\[\\s\\S\])/gu, "$1"));
-          const scanned = scanBody(lines.slice(LEGEND_LINES + listed).join("\\n"));
+          const scanned = scanBody(lines.slice(LEGEND_LINES + listed[AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.3{t=2026-11-20T16:21:52.951Z}] + 1[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.6{t=2026-11-20T05:35:16.652Z}]).join("\\n"));
           const unescaped = \[...head.slice(0, LEGEND_LINES + LIST_LINES), ...list\].join("\\n");
           expect(stripAnsi(coloured)).toBe(`${unescaped}\\n${scanned.kept}`);
           expect(stripAnsi(coloured)).not.toContain("\\u001b");
