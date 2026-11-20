@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.1,185,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:12:34Z.1,185,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:14:46Z.1,185,0,0;r=6.5 Checkpoint - the Recorder is installed and recording 2026-11-20T03:21:18Z.1,185,0,0}][PST{t=2026-11-20T03:04:47Z}]{
+[DOC{v=1;n=0;r=6.3 Install by hand: Record_Directory\, `.kiro/provenance/ignore`\, baseline and pre-c 2026-11-20T03:09:24Z.1,185,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:12:34Z.1,185,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:14:46Z.1,185,0,0;r=6.5 Checkpoint - the Recorder is installed and recording 2026-11-20T03:21:18Z.1,185,0,0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.1,370,0,0}][PST{t=2026-11-20T03:04:47Z}]{
   "pbtResults": {
     "4.2 Property 13: the payload keeps five fields and no prompt": {
       "status": "passed",
@@ -953,7 +953,17 @@
         "executionId": "4552179f-1b44-4f53-a498-0cf828d7f239",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795145453422
-      }
+      }[AI:6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.1{t=2026-11-20T03:37:36.319Z}],
+      {
+        "executionId": "4552179f-1b44-4f53-a498-0cf828d7f239",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795145464561
+      },
+      {
+        "executionId": "4552179f-1b44-4f53-a498-0cf828d7f239",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795145856230
+      }[HUM{t=2026-11-20T03:30:53.499Z}]
     \],
     "6.7 Close the gaps: baseline lock, Property 16 prompt-then-stop sessions, crash handlers test": \[
       {

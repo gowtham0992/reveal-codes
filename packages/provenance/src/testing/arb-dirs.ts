@@ -119,10 +119,12 @@ export const arbOpenWindow: fc.Arbitrary<OpenWindow> = fc
     arbBaselineAt,
     arbCount,
     fc.option(arbFree, { nil: undefined }),
+    fc.option(fc.string({ minLength: 1, maxLength: 16 }), { nil: undefined }),
   )
-  .map(([windowRun, label, taskNumber, kind, openedAt, order, spec]) => {
+  .map(([windowRun, label, taskNumber, kind, openedAt, order, spec, taskName]) => {
     const base: OpenWindow = { windowRun, label, taskNumber, kind, openedAt, order };
-    return spec === undefined ? base : { ...base, spec };
+    const withSpec = spec === undefined ? base : { ...base, spec };
+    return taskName === undefined ? withSpec : { ...withSpec, taskName };
   });
 
 export const arbClosedBy: fc.Arbitrary<ClosedBy | null> = fc.constantFrom<ClosedBy | null>(

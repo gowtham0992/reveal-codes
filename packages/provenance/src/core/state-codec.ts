@@ -69,16 +69,18 @@ function decodeWindow(v: unknown, where: string): Result<OpenWindow, ProvenanceE
     v,
     where,
     ["windowRun", "label", "taskNumber", "kind", "openedAt", "order"],
-    ["spec"],
+    ["spec", "taskName"],
   );
   if (!s.ok) return s;
   const o = s.value;
-  const { windowRun, label, taskNumber, kind, openedAt, order, spec } = o;
+  const { windowRun, label, taskNumber, kind, openedAt, order, spec, taskName } = o;
   if (!isStr(windowRun) || !isStr(label)) return bad(`bad window text: ${where}`);
   if (!isNullable(taskNumber, isStr)) return bad(`bad taskNumber: ${where}`);
   if (kind !== "turn" && kind !== "task") return bad(`bad kind: ${where}`);
   if (!validAt(openedAt) || !isCount(order)) return bad(`bad openedAt or order: ${where}`);
   if (spec !== undefined && !isStr(spec)) return bad(`bad spec: ${where}`);
+  if (taskName !== undefined && (!isStr(taskName) || taskName === ""))
+    return bad(`bad taskName: ${where}`);
   const base: OpenWindow = {
     windowRun,
     label,
@@ -87,7 +89,8 @@ function decodeWindow(v: unknown, where: string): Result<OpenWindow, ProvenanceE
     openedAt,
     order,
   };
-  return ok(spec === undefined ? base : { ...base, spec });
+  const withSpec = spec === undefined ? base : { ...base, spec };
+  return ok(taskName === undefined ? withSpec : { ...withSpec, taskName });
 }
 
 function decodeList<T>(v: unknown, where: string, item: Dec<T>): Result<T[], ProvenanceError> {
@@ -217,7 +220,8 @@ function windowJson(w: OpenWindow): Record<string, unknown> {
     openedAt: w.openedAt,
     order: w.order,
   };
-  return w.spec === undefined ? base : { ...base, spec: w.spec };
+  const withSpec = w.spec === undefined ? base : { ...base, spec: w.spec };
+  return w.taskName === undefined ? withSpec : { ...withSpec, taskName: w.taskName };
 }
 
 function sessionJson(s: SessionState): Record<string, unknown> {

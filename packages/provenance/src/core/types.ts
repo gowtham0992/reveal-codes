@@ -26,6 +26,8 @@ export type OpenWindow = {
   openedAt: string;
   order: number;
   spec?: string;
+  /** The raw `task_name` as received; absent on `turn` windows and on a `preTask` with none. */
+  taskName?: string;
 };
 
 /** What closed a session's last window (design, Data Models). */

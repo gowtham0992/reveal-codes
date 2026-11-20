@@ -92,6 +92,11 @@ export function select(state: WindowState, session: string | null): OpenWindow |
   return best;
 }
 
+/** The raw `task_name`, or null when absent or empty. */
+function nameOf(payload: Payload): string | null {
+  return payload.taskName === null || payload.taskName === "" ? null : payload.taskName;
+}
+
 function freshEntry(now: string): SessionState {
   return {
     lastEventAt: now,
@@ -129,21 +134,35 @@ function openWindow(
     order,
   };
   const spec = event === "preTask" ? payload.specName : null;
-  const win: OpenWindow = spec === null ? base : { ...base, spec };
+  const name = event === "preTask" ? nameOf(payload) : null;
+  const withSpec: OpenWindow = spec === null ? base : { ...base, spec };
+  const win: OpenWindow = name === null ? withSpec : { ...withSpec, taskName: name };
   const next = { ...state, order, lastWindowRun: windowRun };
   return { state: next, entry: { ...entry, windows: [...entry.windows, win], lastClosedBy: null } };
 }
 
 type Closed = { entry: SessionState; faults: ProvenanceError[] };
 
-function closeWindows(entry: SessionState, event: "postTask" | "agentStop"): Closed {
-  const empty = entry.windows.length === 0;
-  if (event === "postTask") {
-    if (empty) return { entry, faults: [fault("no_open_window")] };
-    const windows = entry.windows.slice(0, -1);
-    const lastClosedBy = windows.length === 0 ? ("postTask" as const) : entry.lastClosedBy;
-    return { entry: { ...entry, windows, lastClosedBy }, faults: [] };
+/** The index of the window a `postTask` closes: by name, innermost outwards; else the innermost task window. */
+function closeIndex(entry: SessionState, name: string | null): number {
+  for (let i = entry.windows.length - 1; i >= 0; i -= 1) {
+    const w = entry.windows[i];
+    if (w === undefined) continue;
+    if (name === null ? w.kind === "task" : w.taskName === name) return i;
   }
+  return -1;
+}
+
+function closePostTask(entry: SessionState, payload: Payload): Closed {
+  const at = closeIndex(entry, nameOf(payload));
+  if (at < 0) return { entry, faults: [fault("no_open_window")] };
+  const windows = entry.windows.filter((_, i) => i !== at);
+  const lastClosedBy = windows.length === 0 ? ("postTask" as const) : entry.lastClosedBy;
+  return { entry: { ...entry, windows, lastClosedBy }, faults: [] };
+}
+
+function closeAgentStop(entry: SessionState): Closed {
+  const empty = entry.windows.length === 0;
   const quiet = empty && entry.lastClosedBy === "postTask";
   const faults = empty && !quiet ? [fault("no_open_window")] : [];
   return { entry: { ...entry, windows: [], lastClosedBy: "agentStop" }, faults };
@@ -161,8 +180,12 @@ function apply(
   if (event === "promptSubmit") {
     return { ...openWindow(state, { ...entry, promptSeen: true }, event, p, now), faults: [] };
   }
-  if (event === "preTask") return { ...openWindow(state, entry, event, p, now), faults: [] };
-  return { state, ...closeWindows(entry, event) };
+  if (event === "preTask") {
+    const name = nameOf(p);
+    if (name !== null && innermost(entry)?.taskName === name) return { state, entry, faults: [] };
+    return { ...openWindow(state, entry, event, p, now), faults: [] };
+  }
+  return { state, ...(event === "postTask" ? closePostTask(entry, p) : closeAgentStop(entry)) };
 }
 
 /**

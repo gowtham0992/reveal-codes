@@ -100,6 +100,44 @@ describe("sessions without prompt events (Req 16.22)", () => {
   });
 });
 
+describe("one window per task (Req 3.28)", () => {
+  const S = "sess-S";
+  const task = (event: string, name: string) => synthetic(event, S, { task_name: name });
+  it("a repeated preTask opens no window; edits follow the real sequence", async () => {
+    const deps = workspace();
+    await play(deps, task("preTask", "6.3 X"));
+    await play(deps, task("preTask", "6.3 X"));
+    expect(await windowRuns(deps, S)).toHaveLength(1);
+    await play(deps, task("postTask", "6.3 X"));
+    expect(await windowRuns(deps, S)).toEqual([]);
+    write(deps, "a.txt", "bookkeeping\n");
+    await play(deps, task("preTask", "6.4 Y"));
+    expect(pieces(deps, "a.txt")).toEqual([{ origin: "HUM", runId: null, text: "bookkeeping\n" }]);
+    const win = (await windowRuns(deps, S))[0] ?? "";
+    write(deps, "b.txt", "work\n");
+    await play(deps, task("postTask", "6.4 Y"));
+    expect(pieces(deps, "b.txt")).toEqual([{ origin: "AI", runId: `${win}.1`, text: "work\n" }]);
+    expect(win.startsWith("6.4 Y ")).toBe(true);
+    expect(await windowRuns(deps, S)).toEqual([]);
+    expect(logLines(deps)).toEqual([]);
+  });
+  it("pre A, pre B, post A leaves B open; post B closes it; the Stop is silent", async () => {
+    const deps = workspace();
+    await play(deps, task("preTask", "A"));
+    await play(deps, task("preTask", "B"));
+    await play(deps, task("postTask", "A"));
+    expect((await entryOf(deps, S)).windows.map((w) => w.taskName)).toEqual(["B"]);
+    await play(deps, task("postTask", "B"));
+    expect(await windowRuns(deps, S)).toEqual([]);
+    await play(deps, synthetic("agentStop", S));
+    expect(logLines(deps)).toEqual([]);
+  });
+  it("state.json keeps the raw task name", async () => {
+    const deps = workspace();
+    await play(deps, task("preTask", "6.3 X"));
+    expect(deps.fs.text(`${PROV}/state.json`)).toContain('"taskName": "6.3 X"');
+  });
+});
 describe("sessions.json (Req 16.22 h)", () => {
   it("is read as 0 when absent and is not created by events that count nothing", async () => {
     const deps = workspace();

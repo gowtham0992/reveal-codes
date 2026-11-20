@@ -142,10 +142,10 @@ describe("windows: transitions (Req 3.2 to 3.7, 3.24)", () => {
 
   it("opening resets lastClosedBy, counts order, and names collide with ~2", () => {
     let s = run(EMPTY, "preTask", payload("a", "Same"), T).state;
-    s = run(s, "preTask", payload("a", "Same"), T).state;
+    s = run(s, "preTask", payload("b", "Same"), T).state;
     expect(s.order).toBe(2);
-    expect(s.sessions["a"]?.windows.map((w) => w.windowRun)).toEqual([
-      "Same 2026-01-01T00:00:00Z",
+    expect(s.sessions["a"]?.windows.map((w) => w.windowRun)).toEqual(["Same 2026-01-01T00:00:00Z"]);
+    expect(s.sessions["b"]?.windows.map((w) => w.windowRun)).toEqual([
       "Same 2026-01-01T00:00:00Z~2",
     ]);
   });
@@ -318,5 +318,77 @@ describe("windows: captured fixture sequences", () => {
     const b = run(a.state, "agentStop", payload("cli"), T + 1000, true);
     expect(b.faults).toEqual([]);
     expect(b.state.sessions["cli"]).toMatchObject({ windows: [], lastClosedBy: "agentStop" });
+  });
+});
+describe("windows: one window per task (Req 3.28)", () => {
+  const open = (s: WindowState, name: string | null, at: number) =>
+    run(s, "preTask", payload("a", name), T + at);
+  const post = (s: WindowState, name: string | null, at: number) =>
+    run(s, "postTask", payload("a", name), T + at);
+  const names = (s: WindowState) => s.sessions["a"]?.windows.map((w) => w.taskName);
+  it("a duplicate preTask opens nothing and logs nothing, but sets lastEventAt", () => {
+    const first = open(EMPTY, "6.3 X", 0).state;
+    const dup = open(first, "6.3 X", 5000);
+    expect(dup.faults).toEqual([]);
+    expect(dup.state.order).toBe(1);
+    expect(dup.state.lastWindowRun).toBe(first.lastWindowRun);
+    expect(dup.state.sessions["a"]?.windows).toEqual(first.sessions["a"]?.windows);
+    expect(dup.state.sessions["a"]?.lastEventAt).toBe(new Date(T + 5000).toISOString());
+  });
+  it("the raw task name is stored on a task window, and not on a turn window", () => {
+    let s = run(EMPTY, "promptSubmit", payload("a"), T).state;
+    s = open(s, "6.3 X", 1000).state;
+    expect(names(s)).toEqual([undefined, "6.3 X"]);
+  });
+  it("pre A, pre B, post A closes A and leaves B; post B closes B", () => {
+    let s = open(open(EMPTY, "A", 0).state, "B", 1000).state;
+    const a = post(s, "A", 2000);
+    expect(a.faults).toEqual([]);
+    expect(names(a.state)).toEqual(["B"]);
+    expect(a.state.sessions["a"]?.lastClosedBy).toBeNull();
+    s = post(a.state, "B", 3000).state;
+    expect(names(s)).toEqual([]);
+    expect(s.sessions["a"]?.lastClosedBy).toBe("postTask");
+  });
+  it("a postTask for a name open nowhere closes nothing and logs no_open_window", () => {
+    const s = open(EMPTY, "A", 0).state;
+    const r = post(s, "Z", 1000);
+    expect(kinds(r)).toEqual(["no_open_window"]);
+    expect(r.state.sessions["a"]?.windows).toEqual(s.sessions["a"]?.windows);
+  });
+  it("a postTask for another session's task name closes nothing", () => {
+    const s = run(EMPTY, "preTask", payload("b", "A"), T).state;
+    const r = post(s, "A", 1000);
+    expect(kinds(r)).toEqual(["no_open_window"]);
+    expect(r.state.sessions["b"]).toEqual(s.sessions["b"]);
+  });
+  it("a postTask with no name closes the innermost task window", () => {
+    let s = run(EMPTY, "promptSubmit", payload("a"), T).state;
+    s = open(open(s, "A", 1000).state, "B", 2000).state;
+    const r = post(s, null, 3000);
+    expect(kinds(r)).toEqual([]);
+    expect(r.state.sessions["a"]?.windows.map((w) => w.kind)).toEqual(["turn", "task"]);
+    expect(names(r.state)).toEqual([undefined, "A"]);
+  });
+  it("a postTask with no name and only a turn window open closes nothing", () => {
+    const s = run(EMPTY, "promptSubmit", payload("a"), T).state;
+    const r = post(s, null, 1000);
+    expect(kinds(r)).toEqual(["no_open_window"]);
+    expect(r.state.sessions["a"]?.windows).toEqual(s.sessions["a"]?.windows);
+  });
+  it("a preTask with no name twice opens two windows", () => {
+    const s = open(open(EMPTY, null, 0).state, null, 1000).state;
+    expect(s.sessions["a"]?.windows).toHaveLength(2);
+    expect(s.order).toBe(2);
+  });
+  it("an agentStop after the session's own postTask stays silent", () => {
+    const s = post(open(EMPTY, "A", 0).state, "A", 1000).state;
+    expect(kinds(run(s, "agentStop", payload("a"), T + 2000))).toEqual([]);
+  });
+  it("a postTask for an unopened name leaves lastClosedBy as it was", () => {
+    const s = post(open(EMPTY, "A", 0).state, "A", 1000).state;
+    const r = post(s, "A", 2000);
+    expect(kinds(r)).toEqual(["no_open_window"]);
+    expect(r.state.sessions["a"]?.lastClosedBy).toBe("postTask");
   });
 });

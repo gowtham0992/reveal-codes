@@ -11,7 +11,7 @@ const STALE_MS = 12 * 3_600_000;
 const NO_ID = "_none";
 
 /** An open window: its Window_Run and its place in the order of opening. */
-export type ModelWindow = { name: string; seq: number };
+export type ModelWindow = { name: string; seq: number; task: boolean; given: string | null };
 type ModelSession = { windows: ModelWindow[]; lastMs: number };
 export type Model = { sessions: Map<string, ModelSession>; seq: number };
 
@@ -59,12 +59,28 @@ export function step(model: Model, e: GenEvent, ms: number): ModelWindow | null 
   if (e.event === "promptSubmit" && known !== undefined) known.windows = [];
   const selected = select(model, key);
   const mine = model.sessions.get(key) ?? { windows: [], lastMs: ms };
-  if (e.event === "promptSubmit" || e.event === "preTask") {
-    model.seq += 1;
-    mine.windows.push({ name: windowName(e, ms), seq: model.seq });
-  } else if (e.event === "postTask") mine.windows.pop();
+  if (e.event === "promptSubmit") open(model, mine, e, ms, false);
+  else if (e.event === "preTask") {
+    const given = e.taskName === "" ? null : e.taskName;
+    const repeat = given !== null && innermost(mine)?.given === given;
+    if (!repeat) open(model, mine, e, ms, true);
+  } else if (e.event === "postTask") closeByName(mine, e.taskName);
   else mine.windows = [];
   mine.lastMs = ms;
   model.sessions.set(key, mine);
   return selected;
+}
+
+function open(model: Model, s: ModelSession, e: GenEvent, ms: number, task: boolean): void {
+  model.seq += 1;
+  const given = task && e.taskName !== "" ? e.taskName : null;
+  s.windows.push({ name: windowName(e, ms), seq: model.seq, task, given });
+}
+
+/** A named postTask closes the innermost window of that name; an unnamed one the innermost task window. */
+function closeByName(s: ModelSession, name: string | null): void {
+  const wanted = name === "" ? null : name;
+  const fits = (w: ModelWindow): boolean => (wanted === null ? w.task : w.given === wanted);
+  const hit = [...s.windows].reverse().find(fits);
+  if (hit !== undefined) s.windows.splice(s.windows.indexOf(hit), 1);
 }

@@ -35,12 +35,39 @@ const plain = (event: GenEventName, session: string | null, task: number | null)
   taskSuccess: event === "postTask" ? true : null,
 });
 
+/** How a session departs from the plain `pre n, post n` pairs. */
+export type Quirks = {
+  /** Fire each `preTask` twice (the task tool re-marks a task in progress). */
+  repeat: boolean;
+  /** Close the tasks outermost first: `pre 1, pre 2, post 1, post 2`. */
+  nested: boolean;
+  /** Add a `postTask` for a name that is never open. */
+  stray: boolean;
+};
+
+const NO_QUIRKS: Quirks = { repeat: false, nested: false, stray: false };
+
+function taskEvents(session: string | null, tasks: number, q: Quirks): Plain[] {
+  const nums = Array.from({ length: tasks }, (_, i) => i + 1);
+  const pre = (n: number): Plain[] => {
+    const one = plain("preTask", session, n);
+    return q.repeat ? [one, one] : [one];
+  };
+  const post = (n: number): Plain => plain("postTask", session, n);
+  const body = q.nested
+    ? [...nums.flatMap(pre), ...nums.map(post)]
+    : nums.flatMap((n) => [...pre(n), post(n)]);
+  return q.stray ? [...body, plain("postTask", session, 9)] : body;
+}
+
 /** The events of one session, in the order the hooks fire them. */
-function sessionEvents(session: string | null, shape: Shape, tasks: number): Plain[] {
-  const inner: Plain[] = [];
-  for (let n = 1; n <= tasks; n += 1) {
-    inner.push(plain("preTask", session, n), plain("postTask", session, n));
-  }
+function sessionEvents(
+  session: string | null,
+  shape: Shape,
+  tasks: number,
+  q: Quirks = NO_QUIRKS,
+): Plain[] {
+  const inner = taskEvents(session, tasks, q);
   if (shape === "bareStop") return [plain("agentStop", session, null)];
   const head = shape === "turn" ? [plain("promptSubmit", session, null)] : [];
   return [...head, ...inner, plain("agentStop", session, null)];
@@ -65,9 +92,10 @@ const arbSessionPlan = (index: number, allowNoId: boolean): fc.Arbitrary<Plain[]
       arbShape,
       fc.integer({ min: 0, max: 2 }),
       allowNoId && index === 0 ? fc.boolean() : fc.constant(false),
+      fc.record({ repeat: fc.boolean(), nested: fc.boolean(), stray: fc.boolean() }),
     )
-    .map(([shape, tasks, noId]) =>
-      sessionEvents(noId ? null : `sess-${String(index)}`, shape, tasks),
+    .map(([shape, tasks, noId, quirks]) =>
+      sessionEvents(noId ? null : `sess-${String(index)}`, shape, tasks, quirks),
     );
 
 /** Merges per-session lists in the order given by `order` (a session index per event). */

@@ -76,6 +76,17 @@ describe("decodeState(encodeState(s))", () => {
     expect(back.sessions["b"]?.windows[0]).not.toHaveProperty("spec");
   });
 
+  it("keeps the raw taskName on a window, and a state without it still decodes", () => {
+    const named = { ...task, taskName: "1. Probe task one" };
+    const s = state({ sessions: { x: session({ windows: [turn, named] }) } });
+    const back = roundTrip(s);
+    expect(back).toEqual(s);
+    expect(back.sessions["x"]?.windows[0]).not.toHaveProperty("taskName");
+    expect(decodeState(encodeState(state())).ok).toBe(true);
+    expect(
+      decodeState(withEdit((o) => (firstSession(o)["windows"] = [{ ...turn, taskName: 5 }]))).ok,
+    ).toBe(false);
+  });
   it("keeps a window with a Task_Number and one with none", () => {
     const back = roundTrip(state());
     expect(back.sessions["s-1"]?.windows.map((w) => w.taskNumber)).toEqual([null, "1"]);
