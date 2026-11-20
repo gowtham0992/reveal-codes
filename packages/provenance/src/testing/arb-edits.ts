@@ -4,7 +4,9 @@
  * the whole text, and a rewrite past the Myers cap. Only `src/testing/` imports fast-check.
  */
 import fc from "fast-check";
+import { createDocument, type Document } from "@reveal-codes/engine";
 import { DIFF_CAP } from "../core/limits.js";
+import { updateRecord } from "../core/update.js";
 import { arbFileText, arbLine, arbLines } from "./arb-text.js";
 
 /** An old text and a new text derived from it. */
@@ -199,3 +201,37 @@ export function arbSingleEdit(text: string): fc.Arbitrary<SingleEdit> {
       return { from, to, text: kind === "delete" ? "" : inserted };
     });
 }
+
+/** A Window_Run used by `arbBuiltRecord`, with the Task_Number and title its name carries (null: none). */
+export type KnownWindow = { windowRun: string; taskNumber: string | null; title: string };
+/** Three windows: one with a dotted Task_Number, one with a plain one, one with none. */
+export const KNOWN_WINDOWS: readonly KnownWindow[] = [
+  {
+    windowRun: "5.3 Build the view 2026-11-19T10:00:00Z",
+    taskNumber: "5.3",
+    title: "Build the view",
+  },
+  { windowRun: "12 Wire [it] up 2026-11-19T10:01:00Z", taskNumber: "12", title: "Wire [it] up" },
+  { windowRun: "turn 2026-11-19T10:02:00Z", taskNumber: null, title: "turn" },
+];
+const BOM = "\uFEFF";
+/**
+ * A Record built through `createDocument` and `updateRecord` over a Record history,
+ * with a leading byte order mark on every text in about a fifth of the cases. The
+ * text may be empty at the end; spans are `PST`, `HUM`, `AI` and `AI>HUM`.
+ */
+export const arbBuiltRecord: fc.Arbitrary<Document> = fc
+  .tuple(arbRecordHistory, fc.boolean())
+  .map(([h, bom]) => {
+    const pre = bom ? BOM : "";
+    let tick = 0;
+    const clock = { nowIso: () => new Date(Date.UTC(2026, 0, 1) + 1000 * tick++).toISOString() };
+    const created = createDocument(pre + h.base, "2026-01-01T00:00:00.000Z");
+    if (!created.ok) throw new Error("createDocument failed");
+    return h.steps.reduce((doc, s) => {
+      const window = s.origin === "AI" ? (KNOWN_WINDOWS[s.window] ?? null) : null;
+      const next = updateRecord(doc, pre + s.text, s.origin, window, clock);
+      if (!next.ok) throw new Error("updateRecord failed");
+      return next.value;
+    }, created.value);
+  });

@@ -1,0 +1,237 @@
+[DOC{v=1;n=0;r=7.2 Property 11: structured spans cover the file exactly 2026-11-20T03:55:12Z.1,151,0,0;r=7.2 Property 11: structured spans cover the file exactly 2026-11-20T03:55:12Z.2,1642,0,0}][PST{t=2026-11-20T03:04:47Z}]/**
+ * Pairs of related texts for the line difference (Req 16.14, task 4.5): a few
+ * lines edited, inserted or deleted, edits at the start and end, deletion of
+ * the whole text, and a rewrite past the Myers cap. Only `src/testing/` imports fast-check.
+ */
+import fc from "fast-check";
+import { [AI:7.2 Property 11: structured spans cover the file exactly 2026-11-20T03:55:12Z.1{t=2026-11-20T03:57:37.243Z}]createDocument, type Document } from "@reveal-codes/engine";
+import { DIFF_CAP } from "../core/limits.js";
+import { updateRecord } from "../core/update[PST{t=2026-11-20T03:04:47Z}].js";
+import { arbFileText, arbLine, arbLines } from "./arb-text.js";
+
+/** An old text and a new text derived from it. */
+export type TextPair = { old: string; new: string };
+
+type LineEdit = { at: number; del: number; ins: string\[\] };
+
+const arbEol = fc.constantFrom("\\n", "\\r\\n");
+const arbLineEdit: fc.Arbitrary<LineEdit> = fc.record({
+  at: fc.nat({ max: 40 }),
+  del: fc.integer({ min: 0, max: 3 }),
+  ins: fc.array(arbLine, { maxLength: 3 }),
+});
+
+const terminate = (lines: readonly string\[\], eol: string, final: boolean): string\[\] =>
+  lines.map((l, i) => (i < lines.length - 1 || final ? l + eol : l));
+
+function applyEdit(lines: string\[\], e: LineEdit): string\[\] {
+  const at = e.at % (lines.length + 1);
+  return \[...lines.slice(0, at), ...e.ins, ...lines.slice(at + e.del)\];
+}
+
+/** A few line edits anywhere in a text, with or without a final newline. */
+const arbFewEdits: fc.Arbitrary<TextPair> = fc
+  .tuple(arbLines, fc.array(arbLineEdit, { minLength: 1, maxLength: 3 }), arbEol, fc.boolean())
+  .map((\[base, edits, eol, final\]) => {
+    const next = edits.reduce(applyEdit, base);
+    return {
+      old: terminate(base, eol, final).join(""),
+      new: terminate(next, eol, final).join(""),
+    };
+  });
+
+/** An edit at the start, or an insertion or deletion at the end. */
+const arbEnds: fc.Arbitrary<TextPair> = fc
+  .tuple(arbLines, arbLines, arbEol, fc.constantFrom("start", "end", "drop-start", "drop-end"))
+  .map((\[base, extra, eol, where\]) => {
+    const old = terminate(base, eol, true);
+    const add = terminate(extra, eol, true);
+    const next =
+      where === "start"
+        ? \[...add, ...old\]
+        : where === "end"
+          ? \[...old, ...add\]
+          : where === "drop-start"
+            ? old.slice(1)
+            : old.slice(0, -1);
+    return { old: old.join(""), new: next.join("") };
+  });
+
+/** The whole text deleted, or created from nothing. */
+const arbWholeText: fc.Arbitrary<TextPair> = fc
+  .tuple(arbLines, arbEol, fc.boolean())
+  .map((\[base, eol, reverse\]) => {
+    const text = terminate(base, eol, true).join("");
+    return reverse ? { old: "", new: text } : { old: text, new: "" };
+  });
+
+/** Two texts with no line in common and more lines than the cap allows. */
+const arbPastCap: fc.Arbitrary<TextPair> = fc
+  .tuple(
+    fc.integer({ min: DIFF_CAP + 1, max: DIFF_CAP + 40 }),
+    fc.integer({ min: 1, max: 3 }),
+    arbLine,
+  )
+  .map((\[n, shift, tail\]) => {
+    const make = (tag: string): string =>
+      Array.from({ length: n + shift }, (_, i) => `${tag}${String(i)}\\n`).join("") + tail;
+    return { old: make("a"), new: make("b") };
+  });
+
+/** Related text pairs of every shape the line difference must handle. */
+export const arbTextPair: fc.Arbitrary<TextPair> = fc.oneof(
+  { weight: 6, arbitrary: arbFewEdits },
+  { weight: 3, arbitrary: arbEnds },
+  { weight: 1, arbitrary: arbWholeText },
+  { weight: 1, arbitrary: arbPastCap },
+);
+
+/** Any two texts: related pairs, unrelated file texts, and two equal texts. */
+export const arbAnyTextPair: fc.Arbitrary<TextPair> = fc.oneof(
+  { weight: 4, arbitrary: arbTextPair },
+  {
+    weight: 2,
+    arbitrary: fc.tuple(arbFileText, arbFileText).map((\[o, n\]) => ({ old: o, new: n })),
+  },
+  { weight: 1, arbitrary: arbFileText.map((t) => ({ old: t, new: t })) },
+);
+
+/** A Record's starting text, the agent's insertion into it, and later whole-file texts. */
+export type AgentThenOutside = { base: string; agent: string; outside: string\[\] };
+const arbNonEmptyLine = arbLine.map((l) => `x${l}`);
+const arbOutsideEdits = fc.array(arbLineEdit, { minLength: 1, maxLength: 3 });
+/**
+ * A starting text; an agent text that inserts at least one non-empty line into
+ * it, so the Record holds `AI` text; and one to four later texts, each a few
+ * line edits (insertions, deletions, replacements) of the one before. Every text
+ * ends in `\\n`, and one `\\n` or `\\r\\n` style is used throughout.
+ */
+export const arbAgentThenOutside: fc.Arbitrary<AgentThenOutside> = fc
+  .tuple(
+    arbLines,
+    arbEol,
+    fc.nat({ max: 40 }),
+    fc.array(arbNonEmptyLine, { minLength: 1, maxLength: 3 }),
+    fc.array(arbOutsideEdits, { minLength: 1, maxLength: 4 }),
+  )
+  .map((\[base, eol, at, inserted, rounds\]) => {
+    const agentLines = applyEdit(base, { at, del: 0, ins: inserted });
+    const texts: string\[\]\[\] = \[\];
+    let current = agentLines;
+    for (const edits of rounds) {
+      current = edits.reduce(applyEdit, current);
+      texts.push(current);
+    }
+    return {
+      base: terminate(base, eol, true).join(""),
+      agent: terminate(agentLines, eol, true).join(""),
+      outside: texts.map((t) => terminate(t, eol, true).join("")),
+    };
+  });
+
+/** One step of a Record's history: who changed the text, in which window, to what text. */
+export type HistoryStep = { origin: "AI" | "HUM"; window: number; text: string };
+/** A starting text and the later steps that build a Record with mixed `PST`, `HUM`, `AI` and `AI>HUM` text. */
+export type RecordHistory = { base: string; steps: HistoryStep\[\] };
+
+const arbHistoryStep = fc.record({
+  origin: fc.constantFrom<"AI" | "HUM">("AI", "AI", "HUM"),
+  window: fc.integer({ min: 0, max: 2 }),
+  edits: fc.array(arbLineEdit, { minLength: 1, maxLength: 3 }),
+});
+
+/**
+ * A history of one to four whole-file changes, by the agent (in one of three
+ * windows) or outside it, each a few line edits of the text before. The base text
+ * may be empty; the end-of-line style is one of `\\n` or `\\r\\n` throughout.
+ */
+export const arbRecordHistory: fc.Arbitrary<RecordHistory> = fc
+  .tuple(arbLines, arbEol, fc.array(arbHistoryStep, { minLength: 1, maxLength: 4 }))
+  .map((\[base, eol, steps\]) => {
+    let lines = base;
+    const out = steps.map((s): HistoryStep => {
+      lines = s.edits.reduce(applyEdit, lines);
+      return { origin: s.origin, window: s.window, text: terminate(lines, eol, true).join("") };
+    });
+    return { base: terminate(base, eol, true).join(""), steps: out };
+  });
+
+/** One contiguous edit of a text: the stretch `\[from, to)` is replaced by `text`. */
+export type SingleEdit = { from: number; to: number; text: string };
+
+const isHigh = (u: number): boolean => u >= 0xd800 && u <= 0xdbff;
+const isLow = (u: number): boolean => u >= 0xdc00 && u <= 0xdfff;
+
+/** Moves `at` back so that it does not fall inside a surrogate pair of `text`. */
+function snap(text: string, at: number): number {
+  const inside =
+    at > 0 && at < text.length && isHigh(text.charCodeAt(at - 1)) && isLow(text.charCodeAt(at));
+  return inside ? at - 1 : at;
+}
+
+/** Inserted text: lines of the line arbitrary joined by `\\n` or `\\r\\n`, a bare `\\r` or `\\n` end included. */
+const arbInserted: fc.Arbitrary<string> = fc
+  .tuple(
+    fc.array(arbLine, { maxLength: 3 }),
+    fc.array(fc.constantFrom("\\n", "\\r\\n", "\\r"), { maxLength: 3 }),
+  )
+  .map((\[lines, eols\]) => lines.map((l, i) => l + (eols\[i\] ?? "")).join(""));
+
+/**
+ * A single insert, delete or replace of a contiguous stretch of `text`: within
+ * one line or across lines, at the start, at the end, or anywhere, on empty text
+ * as well. No offset falls inside a surrogate pair; a CR LF pair may be split.
+ */
+export function arbSingleEdit(text: string): fc.Arbitrary<SingleEdit> {
+  const n = text.length;
+  const arbAt = fc.oneof(fc.constant(0), fc.constant(n), fc.integer({ min: 0, max: n }));
+  return fc
+    .tuple(
+      fc.constantFrom("insert", "delete", "replace"),
+      fc.constantFrom("short", "span"),
+      arbAt,
+      arbAt,
+      fc.nat({ max: 12 }),
+      arbInserted,
+    )
+    .map((\[kind, reach, a, b, width, inserted\]) => {
+      const from = snap(text, reach === "span" ? Math.min(a, b) : a);
+      const end = reach === "span" ? Math.max(a, b) : Math.min(n, a + width);
+      const to = kind === "insert" ? from : Math.max(from, snap(text, end));
+      return { from, to, text: kind === "delete" ? "" : inserted };
+    });
+}[AI:7.2 Property 11: structured spans cover the file exactly 2026-11-20T03:55:12Z.2{t=2026-11-20T03:57:37.243Z}]
+
+/** A Window_Run used by `arbBuiltRecord`, with the Task_Number and title its name carries (null: none). */
+export type KnownWindow = { windowRun: string; taskNumber: string | null; title: string };
+/** Three windows: one with a dotted Task_Number, one with a plain one, one with none. */
+export const KNOWN_WINDOWS: readonly KnownWindow\[\] = \[
+  {
+    windowRun: "5.3 Build the view 2026-11-19T10:00:00Z",
+    taskNumber: "5.3",
+    title: "Build the view",
+  },
+  { windowRun: "12 Wire \[it\] up 2026-11-19T10:01:00Z", taskNumber: "12", title: "Wire \[it\] up" },
+  { windowRun: "turn 2026-11-19T10:02:00Z", taskNumber: null, title: "turn" },
+\];
+const BOM = "\\uFEFF";
+/**
+ * A Record built through `createDocument` and `updateRecord` over a Record history,
+ * with a leading byte order mark on every text in about a fifth of the cases. The
+ * text may be empty at the end; spans are `PST`, `HUM`, `AI` and `AI>HUM`.
+ */
+export const arbBuiltRecord: fc.Arbitrary<Document> = fc
+  .tuple(arbRecordHistory, fc.boolean())
+  .map((\[h, bom\]) => {
+    const pre = bom ? BOM : "";
+    let tick = 0;
+    const clock = { nowIso: () => new Date(Date.UTC(2026, 0, 1) + 1000 * tick++).toISOString() };
+    const created = createDocument(pre + h.base, "2026-01-01T00:00:00.000Z");
+    if (!created.ok) throw new Error("createDocument failed");
+    return h.steps.reduce((doc, s) => {
+      const window = s.origin === "AI" ? (KNOWN_WINDOWS\[s.window\] ?? null) : null;
+      const next = updateRecord(doc, pre + s.text, s.origin, window, clock);
+      if (!next.ok) throw new Error("updateRecord failed");
+      return next.value;
+    }, created.value);
+  });[PST{t=2026-11-20T03:04:47Z}]
