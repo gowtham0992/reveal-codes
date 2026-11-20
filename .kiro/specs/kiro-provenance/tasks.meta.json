@@ -7,6 +7,10 @@
     "4.19 Property 17: an edit changes only the edited stretch": {
       "status": "passed",
       "lastRunTimestamp": 1795134900733
+    },
+    "5.13 Property 16: sessions without prompt events are counted once": {
+      "status": "passed",
+      "lastRunTimestamp": 1795142435353
     }
   },
   "executionHistory": {
@@ -633,6 +637,16 @@
         "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795063644416
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795142063371
+      },
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795142467483
       }
     ],
     "6.1 `scripts/build-power.mjs` builds the provenance Bundle": [
@@ -875,6 +889,13 @@
         "executionId": "af587fb5-6645-41c2-88ea-b5307d8c4bee",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795103181710
+      }
+    ],
+    "5. The Recorder around the core": [
+      {
+        "executionId": "f10d6500-d2e2-4426-943c-551cb3dbb701",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795142467552
       }
     ]
   }
