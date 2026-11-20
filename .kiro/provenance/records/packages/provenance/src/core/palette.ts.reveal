@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.3 `palette.ts`\, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1,2839,0,0}][AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]/**
+[DOC{v=1;n=0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.1,237,0,0;r=7.3 `palette.ts`\, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1,2839,0,0}][AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]/**
  * The Pane colours of product.md and their terminal escape sequences (Req 9.5, 9.6).
  * Pure; no `node:`. The 256-colour mapping picks the nearest entry of the 6x6x6 cube
  * (indexes 16 to 231) and the 24 greys (232 to 255) by squared RGB distance.
@@ -18,7 +18,11 @@ export const PANE = {
 } as const satisfies { origin: Record<Origin, string> } & Record<string, unknown>;
 /** The sequence that ends all colour. */
 export const RESET = "\\u001b\[0m";
-/** `#RRGGBB` to its three channels. */
+/** [AI:7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.1{t=2026-11-20T05:38:00.254Z}]Erase to end of line: terminals fill it with the current background (Req 9.17). */
+export const ERASE_LINE = "\\u001b\[K";
+/** The end of a solid coloured line: the erase, then the reset. */
+export const LINE_END = ERASE_LINE + RESET;
+/** [AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]`#RRGGBB` to its three channels. */
 export function parseHex(hex: string): Rgb {
   const n = Number.parseInt(hex.slice(1), 16);
   return \[(n >> 16) & 255, (n >> 8) & 255, n & 255\];

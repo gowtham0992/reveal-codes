@@ -6,7 +6,7 @@
 import { render, type Document } from "@reveal-codes/engine";
 import { legendLines } from "./legend.js";
 import { neutralize } from "./neutralize.js";
-import { onBody, PANE, RESET, type ColourMode } from "./palette.js";
+import { LINE_END, onBody, PANE, type ColourMode } from "./palette.js";
 import { runsListLines, TAGS_SENTENCE } from "./runs-list.js";
 import { assignTags, windowRunOf } from "./tags.js";
 /** How the output is coloured: 24-bit, 256 colours, or none. */
@@ -56,7 +56,7 @@ function legendBlock(doc: Document, full: boolean, escape: boolean): string[] {
   return [...items, TAGS_SENTENCE, ...runsListLines(assignTags(ids), escape)];
 }
 function lineEnds(style: string, text: string): string {
-  return text.split("\n").join(`${RESET}\n${style}`);
+  return text.split("\n").join(`${LINE_END}\n${style}`);
 }
 function colourBody(view: Document, mode: ColourMode): string {
   const codes = render(view, "display").positions;
@@ -66,11 +66,11 @@ function colourBody(view: Document, mode: ColourMode): string {
     const code = codes[i]?.code ?? "";
     out += style + lineEnds(style, code + view.text.slice(span.start, span.end));
   });
-  return out === "" ? out : out + RESET;
+  return out === "" ? out : out + LINE_END;
 }
 function colourLines(lines: readonly string[], colour: string, mode: ColourMode): string[] {
   const style = onBody(colour, mode);
-  return lines.map((line) => `${style}${line}${RESET}`);
+  return lines.map((line) => `${style}${line}${LINE_END}`);
 }
 function colourView(doc: Document, mode: ColourMode, path: string, full: boolean): string {
   const head = colourLines([headerLine(path)], PANE.title, mode);

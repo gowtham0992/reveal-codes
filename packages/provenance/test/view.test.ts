@@ -6,7 +6,7 @@ import { viewRecord, type ViewMode } from "../src/core/view.js";
 const AT = "2026-11-19T10:00:00Z";
 const RUN = "1 Probe task one 2026-11-19T10:00:00Z.2";
 // eslint-disable-next-line no-control-regex
-const ANSI = /\u001b\[[0-9;]*m/g;
+const ANSI = /\u001b\[[0-9;]*[mK]/g;
 function pst(text: string): Document {
   const made = createDocument(text, AT);
   if (!made.ok) throw new Error(made.error.kind);
@@ -80,10 +80,22 @@ describe("viewRecord (Req 9)", () => {
     expect(colour).toContain("\u001b[38;2;215;198;245m\u001b[48;2;15;39;102m[AI>HUM:");
     expect(viewRecord(doc, "ansi256", "f")).toContain("\u001b[48;5;17m");
   });
-  it("ends every coloured line with a reset", () => {
-    const out = viewRecord(mixed("ab\ncd\nef\ngh\n"), "truecolor", "f");
-    for (const line of out.split("\n").slice(0, -1)) expect(line.endsWith("\u001b[0m")).toBe(true);
-    expect(out.endsWith("\u001b[0m")).toBe(true);
+  it("ends every coloured line with an erase and a reset, empty lines included (Req 9.17)", () => {
+    const end = "\u001b[K\u001b[0m";
+    for (const mode of ["truecolor", "ansi256"] as const) {
+      const out = viewRecord(mixed("ab\n\ncd\nef\n"), mode, "f");
+      const lines = out.split("\n");
+      expect(lines.length).toBeGreaterThan(6);
+      for (const line of lines) expect(line.endsWith(end)).toBe(true);
+      const bg = mode === "truecolor" ? "\u001b[48;2;15;39;102m" : "\u001b[48;5;17m";
+      const empty = lines.filter((line) => line.replace(ANSI, "") === "");
+      expect(empty.length).toBeGreaterThan(0);
+      for (const line of empty) expect(line.endsWith(`${bg}${end}`)).toBe(true);
+      for (const line of lines) expect(line.startsWith("\u001b[38;")).toBe(true);
+    }
+  });
+  it("prints no escape sequence in plain output, so it does not change (Req 9.17)", () => {
+    expect(viewRecord(mixed("ab\n\ncd"), "plain", "f")).not.toContain("\u001b");
   });
   it("unescaping the text of the plain view gives the coloured view without ANSI (Req 9.8)", () => {
     const doc = mixed("a[x]\\y\u001bz\nq[");
@@ -182,6 +194,6 @@ describe("run tags and the Runs list (Req 9.14, 9.15)", () => {
   it("prints the list in colour output in the legend colour", () => {
     const doc = withSpans("aa", [agent(W66, 1, 0, 2)]);
     const colour = viewRecord(doc, "truecolor", "f");
-    expect(colour).toContain("\u001b[48;2;15;39;102mRuns in this file\u001b[0m");
+    expect(colour).toContain("\u001b[48;2;15;39;102mRuns in this file\u001b[K\u001b[0m");
   });
 });

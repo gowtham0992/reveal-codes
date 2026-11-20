@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,54,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,50,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,97,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,2298,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.5,27,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.6,2526,0,0;r=7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1,3118,0,0}][AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}]import [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]type { Document } from "@reveal-codes/engine";
+[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,54,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,50,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,97,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,2298,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.5,27,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.6,2526,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.1,56,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.2,4,0,0;r=7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1,3118,0,0}][AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}]import [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]type { Document } from "@reveal-codes/engine";
 import [AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}]fc from "fast-check";
 import { describe, expect, it } from "vitest";
 [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.2{t=2026-11-20T05:35:16.652Z}]import { assignTags } from "../src/core/tags.js";
@@ -12,9 +12,9 @@ const [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08
 const LIST_LINES = 2[AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}];
 const arbColourMode = fc.constantFrom("truecolor" as const, "ansi256" as const);
 
-/** Every ANSI sequence the viewer prints is `ESC \[ digits and semicolons m`. */
+/** Every ANSI sequence the viewer prints[AI:7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.1{t=2026-11-20T05:38:00.254Z}]: `ESC \[ digits and semicolons m`, or the erase `ESC \[ K[AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}]`. */
 // eslint-disable-next-line no-control-regex
-const ANSI = /\\u001b\\\[\[0-9;\]*m/g;
+const ANSI = /\\u001b\\\[\[0-9;\]*[AI:7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.2{t=2026-11-20T05:38:00.254Z}]\[mK\][AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}]/g;
 const stripAnsi = (s: string): string => s.replace(ANSI, "");
 
 /** The control-character pictures, written out here and not read from `neutralize.ts`. */

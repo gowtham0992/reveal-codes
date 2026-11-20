@@ -12,9 +12,9 @@ const LEGEND_LINES = 5;
 const LIST_LINES = 2;
 const arbColourMode = fc.constantFrom("truecolor" as const, "ansi256" as const);
 
-/** Every ANSI sequence the viewer prints is `ESC [ digits and semicolons m`. */
+/** Every ANSI sequence the viewer prints: `ESC [ digits and semicolons m`, or the erase `ESC [ K`. */
 // eslint-disable-next-line no-control-regex
-const ANSI = /\u001b\[[0-9;]*m/g;
+const ANSI = /\u001b\[[0-9;]*[mK]/g;
 const stripAnsi = (s: string): string => s.replace(ANSI, "");
 
 /** The control-character pictures, written out here and not read from `neutralize.ts`. */

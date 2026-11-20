@@ -18,6 +18,10 @@ export const PANE = {
 } as const satisfies { origin: Record<Origin, string> } & Record<string, unknown>;
 /** The sequence that ends all colour. */
 export const RESET = "\u001b[0m";
+/** Erase to end of line: terminals fill it with the current background (Req 9.17). */
+export const ERASE_LINE = "\u001b[K";
+/** The end of a solid coloured line: the erase, then the reset. */
+export const LINE_END = ERASE_LINE + RESET;
 /** `#RRGGBB` to its three channels. */
 export function parseHex(hex: string): Rgb {
   const n = Number.parseInt(hex.slice(1), 16);

@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,116,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,235,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,1602,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,43,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.5,15,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.6,111,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.7,151,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.8,231,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.9,115,0,0;r=7.3 `palette.ts`\, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1,2552,0,0}][AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]/**
+[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,116,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,235,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,1602,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,43,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.5,15,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.6,111,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.7,151,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.8,231,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.9,115,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.1,22,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.2,8,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.3,8,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.4,8,0,0;r=7.3 `palette.ts`\, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1,2552,0,0}][AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]/**
  * `viewRecord`: the file with its provenance codes inline (Req 9.1 to 9.8, 9.13; design M5, M6).
  * Pure; no `node:`. Only the four provenance codes are printed: the citation layer is emptied
  * before the Engine renders, and the colour body reads the codes of that same rendering.
@@ -6,7 +6,7 @@
 import { render, type Document } from "@reveal-codes/engine";
 import { legendLines } from "./legend.js";
 import { neutralize } from "./neutralize.js";
-import { onBody, PANE, RESET, type ColourMode } from "./palette.js";
+import { [AI:7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.1{t=2026-11-20T05:38:00.254Z}]LINE_END, onBody, PANE[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}], type ColourMode } from "./palette.js";
 [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]import { runsListLines, TAGS_SENTENCE } from "./runs-list.js";
 import { assignTags, windowRunOf } from "./tags.js";
 [AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]/** How the output is coloured: 24-bit, 256 colours, or none. */
@@ -56,7 +56,7 @@ function legendBlock(doc: Document, full: boolean, escape: boolean): string\[\] 
   return \[...items, TAGS_SENTENCE, ...runsListLines(assignTags(ids), escape)\];
 }
 [AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]function lineEnds(style: string, text: string): string {
-  return text.split("\\n").join(`${RESET}\\n${style}`);
+  return text.split("\\n").join(`${[AI:7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.2{t=2026-11-20T05:38:00.254Z}]LINE_END[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]}\\n${style}`);
 }
 function colourBody([AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.4{t=2026-11-20T05:35:16.652Z}]view: Document, mode: ColourMode): string {[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]
   const codes = render(view, "display").positions;
@@ -66,11 +66,11 @@ function colourBody([AI:7.11 Short run tags, "Runs in this file", `--full` 2026-
     const code = codes\[i\]?.code ?? "";
     out += style + lineEnds(style, code + view.text.slice(span.start, span.end));
   });
-  return out === "" ? out : out + RESET;
+  return out === "" ? out : out + [AI:7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.3{t=2026-11-20T05:38:00.254Z}]LINE_END[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}];
 }
 function colourLines(lines: readonly string\[\], colour: string, mode: ColourMode): string\[\] {
   const style = onBody(colour, mode);
-  return lines.map((line) => `${style}${line}${RESET}`);
+  return lines.map((line) => `${style}${line}${[AI:7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.4{t=2026-11-20T05:38:00.254Z}]LINE_END[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]}`);
 }
 function colourView(doc: Document, mode: ColourMode, path: string[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.5{t=2026-11-20T05:35:16.652Z}], full: boolean[AI:7.3 `palette.ts`, `neutralize.ts` and `view.ts` 2026-11-20T03:57:41Z.1{t=2026-11-20T04:03:18.620Z}]): string {
   const head = colourLines(\[headerLine(path)\], PANE.title, mode);
