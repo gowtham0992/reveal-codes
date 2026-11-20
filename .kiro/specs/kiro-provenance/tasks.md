@@ -201,7 +201,7 @@ Conventions that apply to every task:
     - **Validates: Requirements 3.26, 3.27, 16.23**
 
 - [ ] 6. Install the Recorder in this repository
-  - [~] 6.1 `scripts/build-power.mjs` builds the provenance Bundle
+  - [x] 6.1 `scripts/build-power.mjs` builds the provenance Bundle
     - Change `scripts/build-power.mjs` to a table of Powers. With no argument it builds `citation-check` and `provenance`; with an output directory only (the form `power.test.ts` uses) it builds `citation-check` into it exactly as before; with `--power provenance [out]` it builds `provenance`. The esbuild options are those of `citation-check` (`bundle`, `platform: "node"`, `format: "esm"`, `target: "node20"`, `legalComments: "none"`, the `createRequire` banner), entry `packages/provenance/src/cli/main.ts`, output `powers/provenance/server/provenance.mjs`. The build is deterministic. Add the generated path to `.prettierignore`; confirm `eslint.config.ts` already ignores `powers/*/server/*.mjs`.
     - Acceptance: the bytes of `powers/citation-check` are unchanged (`git status` clean after `pnpm power:build` for that Power); `node powers/provenance/server/provenance.mjs record manual` run in a temporary directory with no Record_Directory exits 0 with no output; the existing `power.test.ts` still passes.
     - _Requirements: 13.10, 13.11, 15.7, 1.11_

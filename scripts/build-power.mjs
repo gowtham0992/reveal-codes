@@ -1,38 +1,72 @@
-// Builds the generated files of the citation-check Power: the one-file server, the verifier
-// fixtures and the standing-orders dataset copy. Deterministic: the same sources give the same bytes.
-// Usage: node scripts/build-power.mjs [out-dir]   (default: powers/citation-check)
+// Builds the generated files of the Powers: the one-file servers, and for citation-check the
+// verifier fixtures and the standing-orders dataset copy. Deterministic: the same sources give the same bytes.
+// Usage:
+//   node scripts/build-power.mjs                          build every Power into powers/<name>
+//   node scripts/build-power.mjs <out-dir>                build citation-check into <out-dir>
+//   node scripts/build-power.mjs --power <name> [out-dir] build one Power (default out: powers/<name>)
 import { build } from "esbuild";
 import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const out = resolve(process.argv[2] ?? join(root, "powers", "citation-check"));
-const SERVER = join(out, "server", "courtlistener-mcp.mjs");
-const FIXTURES = join(out, "server", "fixtures");
-const DATASET = join(out, "skills", "court-ai-rules", "references", "standing-orders.json");
 // Some bundled CommonJS dependencies call require(); ESM output has no require of its own.
 const BANNER =
   'import { createRequire as __createRequire } from "node:module";\nconst require = __createRequire(import.meta.url);';
-const result = await build({
-  absWorkingDir: root,
-  entryPoints: ["packages/courtlistener-mcp/src/main.ts"],
-  bundle: true,
-  platform: "node",
-  format: "esm",
-  target: "node20",
-  write: false,
-  logLevel: "warning",
-  legalComments: "none",
-  define: { REVEAL_CODES_POWER: "true" },
-  banner: { js: BANNER },
-  outfile: SERVER,
-});
-const file = result.outputFiles[0];
-if (file === undefined) throw new Error("esbuild produced no output");
-mkdirSync(dirname(SERVER), { recursive: true });
-writeFileSync(SERVER, file.contents);
-rmSync(FIXTURES, { recursive: true, force: true });
-cpSync(join(root, "packages", "verifier", "fixtures"), FIXTURES, { recursive: true });
-mkdirSync(dirname(DATASET), { recursive: true });
-writeFileSync(DATASET, readFileSync(join(root, "data", "standing-orders.json")));
-console.log(`built ${SERVER}`);
+
+async function bundle(entry, outfile, define) {
+  const result = await build({
+    absWorkingDir: root,
+    entryPoints: [entry],
+    bundle: true,
+    platform: "node",
+    format: "esm",
+    target: "node20",
+    write: false,
+    logLevel: "warning",
+    legalComments: "none",
+    ...(define === undefined ? {} : { define }),
+    banner: { js: BANNER },
+    outfile,
+  });
+  const file = result.outputFiles[0];
+  if (file === undefined) throw new Error("esbuild produced no output");
+  mkdirSync(dirname(outfile), { recursive: true });
+  writeFileSync(outfile, file.contents);
+  console.log(`built ${outfile}`);
+}
+
+async function buildCitationCheck(out) {
+  const server = join(out, "server", "courtlistener-mcp.mjs");
+  const fixtures = join(out, "server", "fixtures");
+  const dataset = join(out, "skills", "court-ai-rules", "references", "standing-orders.json");
+  await bundle("packages/courtlistener-mcp/src/main.ts", server, { REVEAL_CODES_POWER: "true" });
+  rmSync(fixtures, { recursive: true, force: true });
+  cpSync(join(root, "packages", "verifier", "fixtures"), fixtures, { recursive: true });
+  mkdirSync(dirname(dataset), { recursive: true });
+  writeFileSync(dataset, readFileSync(join(root, "data", "standing-orders.json")));
+}
+
+async function buildProvenance(out) {
+  await bundle("packages/provenance/src/cli/main.ts", join(out, "server", "provenance.mjs"));
+}
+
+const POWERS = {
+  "citation-check": buildCitationCheck,
+  provenance: buildProvenance,
+};
+
+function parseArgs(args) {
+  if (args[0] === "--power") {
+    const name = args[1];
+    if (name === undefined || !Object.hasOwn(POWERS, name)) {
+      throw new Error(
+        `unknown power: ${name ?? "(none)"}; known: ${Object.keys(POWERS).join(", ")}`,
+      );
+    }
+    return [[name, resolve(args[2] ?? join(root, "powers", name))]];
+  }
+  if (args[0] !== undefined) return [["citation-check", resolve(args[0])]];
+  return Object.keys(POWERS).map((name) => [name, join(root, "powers", name)]);
+}
+
+for (const [name, out] of parseArgs(process.argv.slice(2))) await POWERS[name](out);
