@@ -1,0 +1,72 @@
+/**
+ * The Pane colours of product.md and their terminal escape sequences (Req 9.5, 9.6).
+ * Pure; no `node:`. The 256-colour mapping picks the nearest entry of the 6x6x6 cube
+ * (indexes 16 to 231) and the 24 greys (232 to 255) by squared RGB distance.
+ */
+import type { Origin } from "@reveal-codes/engine";
+/** An RGB colour, each channel 0 to 255. */
+export type Rgb = readonly [number, number, number];
+/** The colour modes of the viewer. */
+export type ColourMode = "truecolor" | "ansi256";
+/** The Pane's colours (product.md, "Pane palette"). */
+export const PANE = {
+  body: "#0F2766",
+  text: "#E8ECF6",
+  title: "#FFFFFF",
+  legend: "#BAC4E2",
+  origin: { HUM: "#E8ECF6", PST: "#F5D98B", AI: "#A6D4F7", "AI>HUM": "#D7C6F5" },
+} as const satisfies { origin: Record<Origin, string> } & Record<string, unknown>;
+/** The sequence that ends all colour. */
+export const RESET = "\u001b[0m";
+/** `#RRGGBB` to its three channels. */
+export function parseHex(hex: string): Rgb {
+  const n = Number.parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+const CUBE_LEVELS = [0, 95, 135, 175, 215, 255] as const;
+function distance(a: Rgb, b: Rgb): number {
+  return (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2;
+}
+/** The 240 candidates: index 16 to 255, in index order. */
+function candidates(): { index: number; rgb: Rgb }[] {
+  const out: { index: number; rgb: Rgb }[] = [];
+  CUBE_LEVELS.forEach((r, ri) => {
+    CUBE_LEVELS.forEach((g, gi) => {
+      CUBE_LEVELS.forEach((b, bi) => {
+        out.push({ index: 16 + 36 * ri + 6 * gi + bi, rgb: [r, g, b] });
+      });
+    });
+  });
+  for (let i = 0; i < 24; i += 1) {
+    const v = 8 + 10 * i;
+    out.push({ index: 232 + i, rgb: [v, v, v] });
+  }
+  return out;
+}
+const CANDIDATES = candidates();
+/** The nearest 256-colour index to `hex`; the lowest index wins a tie. */
+export function nearest256(hex: string): number {
+  const want = parseHex(hex);
+  let best = CANDIDATES[0];
+  if (best === undefined) return 16;
+  let bestDistance = distance(want, best.rgb);
+  for (const c of CANDIDATES) {
+    const d = distance(want, c.rgb);
+    if (d < bestDistance) {
+      best = c;
+      bestDistance = d;
+    }
+  }
+  return best.index;
+}
+/** The sequence that selects `hex` as foreground (`fg`) or background in `mode`. */
+export function colourSequence(hex: string, layer: "fg" | "bg", mode: ColourMode): string {
+  const base = layer === "fg" ? 38 : 48;
+  if (mode === "ansi256") return `\u001b[${String(base)};5;${String(nearest256(hex))}m`;
+  const [r, g, b] = parseHex(hex);
+  return `\u001b[${String(base)};2;${String(r)};${String(g)};${String(b)}m`;
+}
+/** Foreground `fg` on the pane body. */
+export function onBody(fg: string, mode: ColourMode): string {
+  return colourSequence(fg, "fg", mode) + colourSequence(PANE.body, "bg", mode);
+}
