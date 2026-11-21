@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.1,52,0,0}][PST{t=2026-11-20T03:04:47Z}]// @vitest-environment jsdom
+[DOC{v=1;n=0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.1,52,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.1,63,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.2,99,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.3,40,0,0}][PST{t=2026-11-20T03:04:47Z}]// @vitest-environment jsdom
 import { renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { createAutosave } from "../src/autosave";
@@ -11,7 +11,8 @@ import { buildDropTransaction, buildPasteTransaction, plainTextOf } from "../src
 import { PROVENANCE_META } from "../src/editor/meta";
 import { docText } from "../src/editor/offsets";
 import { EXPORT_UNSAFE_CHARACTER } from "../src/notices";
-import { defaultServices } from "../src/services";
+[AI:3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.1{t=2026-11-21T20:28:24.789Z}]import { createResolvedHolder } from "../src/resolved-holder";
+[PST{t=2026-11-20T03:04:47Z}]import { defaultServices } from "../src/services";
 import type { AppServices } from "../src/services";
 import { createStore } from "../src/store-runtime";
 import { EXPORT_NOW, EXPORT_VERIFIED_AT, storeWith } from "./support/export-fixtures";
@@ -80,7 +81,8 @@ function services(fake: Fake): AppServices {
 }
 
 describe("Entry_Points: the two samples _Requirements: 22.3_", () => {
-  it.each(\["demo", "avianca"\] as const)("loads the %s sample as Docx_Safe_Text", async (key) => {
+  [AI:3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.2{t=2026-11-21T20:28:24.789Z}]// The demo key now installs the recorded draft (recorded-sample spec), not plain text.
+  it.each(\[[PST{t=2026-11-20T03:04:47Z}]"avianca"\] as const)("loads the %s sample as Docx_Safe_Text", async (key) => {
     const svc = services({ demo: UNSAFE, avianca: UNSAFE, chunks: \[\] });
     const store = createStore(() => new Date(ISO));
     const autosave = createAutosave({
@@ -95,7 +97,8 @@ describe("Entry_Points: the two samples _Requirements: 22.3_", () => {
         svc,
         autosave,
         gate: createDraftGate(),
-        doc: store.getState().document,
+[AI:3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.3{t=2026-11-21T20:28:24.789Z}]        holder: createResolvedHolder(),
+[PST{t=2026-11-20T03:04:47Z}]        doc: store.getState().document,
       }),
     );
     result.current.onLoadSample(key);

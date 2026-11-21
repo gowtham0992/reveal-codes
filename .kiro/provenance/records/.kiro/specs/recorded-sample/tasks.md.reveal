@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.1,1,0,0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.2,50,0,0;r=2.1 Add `recordedSample` to the API client 2026-11-21T20:22:32Z.1,1,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.1,1,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.2,1,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.3,1,0,0}][HUM{t=2026-11-21T20:03:56.597Z}]# Implementation Plan: recorded-sample
+[DOC{v=1;n=0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.1,1,0,0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.2,50,0,0;r=2.1 Add `recordedSample` to the API client 2026-11-21T20:22:32Z.1,1,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.1,1,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.2,1,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.3,1,0,0;r=2.3 Property 1: install then save is the identity 2026-11-21T20:25:39Z.1,1,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.1,1,0,0}][HUM{t=2026-11-21T20:03:56.597Z}]# Implementation Plan: recorded-sample
 
 ## Overview
 
@@ -30,13 +30,13 @@ Conventions for every task:
     - In `apps/web/src/components/use-autosave.ts` extract `installRestored(store, restored, holder?)` from `loadAutosave` and call it there. Behaviour does not change.
     - Run `pnpm exec vitest run --project web apps/web/test/persist.test.ts apps/web/test/persist-resolved.properties.test.ts`, plus the autosave tests that match `autosave` in `apps/web/test`.
     - _Requirements: 3.6, 3.7_
-  - \[~\] 2.3 Property 1: install then save is the identity
+  - \[[AI:2.3 Property 1: install then save is the identity 2026-11-21T20:25:39Z.1{t=2026-11-21T20:25:39.953Z}]-[HUM{t=2026-11-21T20:03:56.597Z}]\] 2.3 Property 1: install then save is the identity
     - Write `apps/web/test/recorded-sample.properties.test.ts` with one `fc.assert(fc.property(...))` under `// Property 1`, `_Requirements: 8.1_` in the describe title, reusing the arbitraries of `persist-resolved.properties.test.ts` (export the case arbitrary from `support/` only if it is not already shared). Add the comment to the list in `apps/web/test/static/inventory.test.ts`.
     - Run `pnpm exec vitest run --project web apps/web/test/recorded-sample.properties.test.ts apps/web/test/static/inventory.test.ts`.
     - _Requirements: 8.1_
 
 - \[ \] 3. Load demo motion installs the recording
-  - \[~\] 3.1 Wire `loadSample` for key `demo`
+  - \[[AI:3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.1{t=2026-11-21T20:28:24.789Z}]-[HUM{t=2026-11-21T20:03:56.597Z}]\] 3.1 Wire `loadSample` for key `demo`
     - Add `RECORDED_SAMPLE_LOADED` to `apps/web/src/notices.ts`. In `use-document-actions.tsx` add `holder` to `Deps`, make the `demo` path fetch `recordedSample()`, `deserialise`, `installRestored`, then dispatch the notice; any failure dispatches `DEMO_FAILED`. Pass `a.holder` in `app-shell.tsx`. Keep the Confirm_Dialog copy as it is. Check the empty-page link's click handler: a click must call the same action as the Toolbar button (preventDefault, same confirm, installs the recording); keep its `href` to `demo-motion.txt` only as the no-script fallback. Change the handler if it does not.
     - Run `pnpm exec vitest run --project web apps/web/test/recorded-sample.test.ts`.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.6, 3.8_

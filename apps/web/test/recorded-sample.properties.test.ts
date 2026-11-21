@@ -1,0 +1,38 @@
+import * as fc from "fast-check";
+import { describe, expect, it } from "vitest";
+import { installRestored } from "../src/components/use-autosave";
+import { deserialise, serialise } from "../src/persist";
+import { createResolvedHolder } from "../src/resolved-holder";
+import { createStore } from "../src/store-runtime";
+import { runs } from "./support/fc";
+import { arbPersistCase } from "./support/persist-case";
+
+const NOW = new Date("2026-11-20T12:00:00.000Z");
+
+describe("installing a Persisted_Value as a sample _Requirements: 8.1_", () => {
+  it("installs it into a fresh Store and holder and saves the same value", () => {
+    // Property 1
+    fc.assert(
+      fc.property(arbPersistCase, ({ document, saved, runLog, verifiedAt }) => {
+        const stored = serialise(document, runLog, verifiedAt, null, saved.info);
+        const restored = deserialise(stored);
+        if (!restored.ok) throw new Error(`restore failed: ${restored.error.kind}`);
+
+        const store = createStore(() => NOW);
+        const holder = createResolvedHolder();
+        installRestored(store, restored.value, holder);
+
+        const s = store.getState();
+        const again = serialise(
+          s.document,
+          s.runLog,
+          s.verifiedAt,
+          s.declaration,
+          holder.get()?.info ?? null,
+        );
+        expect(again).toBe(stored);
+      }),
+      { numRuns: runs() },
+    );
+  });
+});

@@ -4,36 +4,12 @@ import { render } from "@reveal-codes/engine";
 import type { Document, IssueKey } from "@reveal-codes/engine";
 import { buildDocx, buildStatement } from "@reveal-codes/export";
 import type { DisplayInfo } from "@reveal-codes/verifier/link";
-import {
-  arbCheckedDocument,
-  arbSavedEntries,
-} from "../../../packages/engine/src/testing/arbitraries";
 import { storableInfo } from "../src/client/resolved";
 import { deserialise, serialise } from "../src/persist";
-import type { RunLogEntry } from "../src/store";
 import { runs } from "./support/fc";
+import { arbPersistCase as arbCase } from "./support/persist-case";
 
 const NOW = new Date("2026-11-20T12:00:00.000Z");
-
-const arbRunLog: fc.Arbitrary<readonly RunLogEntry[]> = fc.array(
-  fc.record({
-    runId: fc.stringMatching(/^[a-z0-9]{1,6}$/),
-    provider: fc.constantFrom("fixture", "anthropic"),
-    modelId: fc.option(fc.constantFrom("m1", "m2"), { nil: null }),
-    prompt: fc.string({ maxLength: 20 }),
-    timestamp: fc.constant("2026-11-02T12:00:00.000Z"),
-  }),
-  { maxLength: 2 },
-);
-
-const arbCase = arbCheckedDocument.chain(({ document }) =>
-  fc.record({
-    document: fc.constant(document),
-    saved: arbSavedEntries(document),
-    runLog: arbRunLog,
-    verifiedAt: fc.option(fc.constant("2026-11-20T18:25:00.000Z"), { nil: null }),
-  }),
-);
 
 async function docxOf(document: Document, verifiedAt: string | null): Promise<string> {
   const statement = buildStatement(document, [], { now: NOW, verifiedAt });

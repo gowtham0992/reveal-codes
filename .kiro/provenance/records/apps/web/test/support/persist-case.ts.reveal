@@ -1,0 +1,27 @@
+[DOC{v=1;n=0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.1,958,0,0}][AI:3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.1{t=2026-11-21T20:28:24.789Z}]import * as fc from "fast-check";
+import {
+  arbCheckedDocument,
+  arbSavedEntries,
+} from "../../../../packages/engine/src/testing/arbitraries";
+import type { RunLogEntry } from "../../src/store";
+
+export const arbRunLog: fc.Arbitrary<readonly RunLogEntry\[\]> = fc.array(
+  fc.record({
+    runId: fc.stringMatching(/^\[a-z0-9\]{1,6}$/),
+    provider: fc.constantFrom("fixture", "anthropic"),
+    modelId: fc.option(fc.constantFrom("m1", "m2"), { nil: null }),
+    prompt: fc.string({ maxLength: 20 }),
+    timestamp: fc.constant("2026-11-02T12:00:00.000Z"),
+  }),
+  { maxLength: 2 },
+);
+
+/** A checked Document with saved Display_Info entries, a Run_Log and a check date or null. */
+export const arbPersistCase = arbCheckedDocument.chain(({ document }) =>
+  fc.record({
+    document: fc.constant(document),
+    saved: arbSavedEntries(document),
+    runLog: arbRunLog,
+    verifiedAt: fc.option(fc.constant("2026-11-20T18:25:00.000Z"), { nil: null }),
+  }),
+);
