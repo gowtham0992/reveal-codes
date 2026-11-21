@@ -47,6 +47,7 @@ export function fakeVerifyApi(): FakeVerifyApi {
     mode: failed,
     demoMotion: failed,
     aviancaCitations: failed,
+    recordedSample: failed,
     draft: failed,
   };
   return { api, seen };

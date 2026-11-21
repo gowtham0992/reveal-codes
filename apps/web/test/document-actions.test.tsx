@@ -58,6 +58,8 @@ function apiWithDemo(base: ApiClient, reply: DemoReply): ApiClient {
           ? { ok: false as const, error: { kind: "network" as const } }
           : { ok: true as const, value: DEMO },
       ),
+    recordedSample: () =>
+      Promise.resolve({ ok: false as const, error: { kind: "network" as const } }),
   };
 }
 

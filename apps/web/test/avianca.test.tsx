@@ -59,7 +59,12 @@ function withSamples(base: ApiClient, reply: "fixture" | "fail"): ApiClient {
         ? { ok: false as const, error: { kind: "network" as const } }
         : { ok: true as const, value },
     );
-  return { ...base, demoMotion: () => answer(DEMO), aviancaCitations: () => answer(SAMPLE) };
+  return {
+    ...base,
+    demoMotion: () => answer(DEMO),
+    aviancaCitations: () => answer(SAMPLE),
+    recordedSample: () => answer(DEMO),
+  };
 }
 
 async function mount(stored: Document | null, reply: "fixture" | "fail" = "fixture") {

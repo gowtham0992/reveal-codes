@@ -67,6 +67,7 @@ function fakeApi(fake: Fake): ApiClient {
     mode: () => Promise.resolve(network),
     demoMotion: () => Promise.resolve({ ok: true, value: fake.demo }),
     aviancaCitations: () => Promise.resolve({ ok: true, value: fake.avianca }),
+    recordedSample: () => Promise.resolve(network),
     draft: (_prompt, _context, onChunk) => {
       for (const c of fake.chunks) onChunk(c);
       return Promise.resolve({ ok: true, value: undefined });

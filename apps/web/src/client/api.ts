@@ -36,6 +36,8 @@ export type ApiClient = Readonly<{
   mode(): Promise<Result<ModeInfo, ApiError>>;
   demoMotion(): Promise<Result<string, ApiError>>;
   aviancaCitations(): Promise<Result<string, ApiError>>;
+  /** The Persisted_Value text of the recorded demo draft. */
+  recordedSample(): Promise<Result<string, ApiError>>;
   /** Tier 2. Calls `onChunk` with each decoded piece as it arrives; resolves when the stream ends. */
   draft(
     prompt: string,
@@ -208,6 +210,8 @@ export function createApiClient(fetchFn: FetchFn): ApiClient {
     mode: () => request(fetchFn, "/api/mode", { method: "GET" }, jsonReader(toMode)),
     demoMotion: () => request(fetchFn, "/demo-motion.txt", { method: "GET" }, readText),
     aviancaCitations: () => request(fetchFn, "/avianca-citations.txt", { method: "GET" }, readText),
+    recordedSample: () =>
+      request(fetchFn, "/demo-motion.recorded.json", { method: "GET" }, readText),
     draft: (prompt, context, onChunk, signal) =>
       streamDraft(fetchFn, prompt, context, onChunk, signal),
   };

@@ -11,6 +11,7 @@ function lazyApi(): ApiClient {
     mode: () => browserApi().mode(),
     demoMotion: () => browserApi().demoMotion(),
     aviancaCitations: () => browserApi().aviancaCitations(),
+    recordedSample: () => browserApi().recordedSample(),
     draft: (prompt, context, onChunk, signal) =>
       browserApi().draft(prompt, context, onChunk, signal),
   };

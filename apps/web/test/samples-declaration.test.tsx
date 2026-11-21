@@ -48,7 +48,12 @@ type Mounted = Readonly<{ storage: MemoryStorage; timers: ManualTimers }>;
 
 function withSamples(base: ApiClient): ApiClient {
   const answer = (value: string) => Promise.resolve({ ok: true as const, value });
-  return { ...base, demoMotion: () => answer(DEMO), aviancaCitations: () => answer(AVIANCA) };
+  return {
+    ...base,
+    demoMotion: () => answer(DEMO),
+    aviancaCitations: () => answer(AVIANCA),
+    recordedSample: () => answer(DEMO),
+  };
 }
 
 function declared(): Declaration {

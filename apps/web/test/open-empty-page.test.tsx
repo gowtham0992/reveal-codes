@@ -42,6 +42,7 @@ function services(calls: Calls, mode: ModeApi): AppServices {
     mode: base.mode,
     demoMotion: count(base.demoMotion),
     aviancaCitations: count(base.aviancaCitations),
+    recordedSample: count(base.recordedSample),
     draft: count(base.draft),
   };
   return {
