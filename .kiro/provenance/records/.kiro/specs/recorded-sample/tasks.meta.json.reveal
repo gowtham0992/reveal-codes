@@ -1,0 +1,68 @@
+[DOC{v=1;n=0}][HUM{t=2026-11-21T20:20:18.039Z}]{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Keep the file out of Prettier and copy it to `public`": \[
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795292417445
+      }
+    \],
+    "2.1 Add `recordedSample` to the API client": \[
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795292417481
+      }
+    \],
+    "2.2 Share the restore step": \[
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795292417515
+      }
+    \],
+    "2.3 Property 1: install then save is the identity": \[
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795292417548
+      }
+    \],
+    "3.1 Wire `loadSample` for key `demo`": \[
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795292417572
+      }
+    \],
+    "3.2 Component tests for the load": \[
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795292417600
+      }
+    \],
+    "4.1 Point the Load demo tests at the recording": \[
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795292417638
+      }
+    \],
+    "5.1 Docs": \[
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795292417669
+      }
+    \],
+    "6.1 Run the full checks": \[
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795292417694
+      }
+    \]
+  }
+}
