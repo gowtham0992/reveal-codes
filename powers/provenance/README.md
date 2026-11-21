@@ -12,6 +12,10 @@ It is part of [Reveal Codes](../../README.md). It works in any Kiro workspace. N
 
 Node 20 or newer must be on the path. Nothing else is installed: the server, the recorder and the reveal command are one file, `server/provenance.mjs`. Windows is not supported.
 
+## After a rebuild: remove the Power and import it again
+
+Kiro copies an imported Power to `~/.kiro/powers/installed/<name>`. That copy keeps the old bundle after you rebuild `server/provenance.mjs` in this folder. To use a rebuilt Power, remove it in the Powers panel and import the folder again. Then ask Kiro to set up provenance again: setup refreshes `provenance.mjs` and `reveal` in the workspace and never re-baselines.
+
 ## What setup writes
 
 Setup writes into the workspace, because a Power cannot carry hooks:

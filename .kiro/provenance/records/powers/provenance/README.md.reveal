@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=10.1 `powers/provenance` manifests\, skills and README 2026-11-21T00:46:19Z.1,3880,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,869,0,0}][AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]# Provenance, a Kiro Power
+[DOC{v=1;n=0;r=10.1 `powers/provenance` manifests\, skills and README 2026-11-21T00:46:19Z.1,3880,0,0;r=10.10 Checkpoint - the attribution fix 2026-11-21T06:53:30Z.1,428,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,869,0,0}][AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]# Provenance, a Kiro Power
 
 This Power records which text in your source files the Kiro agent changed, and which text was changed while no agent window was open. `reveal <file>` shows the result as codes in front of the text, in the manner of WordPerfect's Reveal Codes.
 
@@ -12,7 +12,11 @@ It is part of \[Reveal Codes\](../../README.md). It works in any Kiro workspace.
 
 Node 20 or newer must be on the path. Nothing else is installed: the server, the recorder and the reveal command are one file, `server/provenance.mjs`. Windows is not supported.
 
-## What setup writes
+[AI:10.10 Checkpoint - the attribution fix 2026-11-21T06:53:30Z.1{t=2026-11-21T06:59:40.655Z}]## After a rebuild: remove the Power and import it again
+
+Kiro copies an imported Power to `~/.kiro/powers/installed/<name>`. That copy keeps the old bundle after you rebuild `server/provenance.mjs` in this folder. To use a rebuilt Power, remove it in the Powers panel and import the folder again. Then ask Kiro to set up provenance again: setup refreshes `provenance.mjs` and `reveal` in the workspace and never re-baselines.
+
+[AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]## What setup writes
 
 Setup writes into the workspace, because a Power cannot carry hooks:
 

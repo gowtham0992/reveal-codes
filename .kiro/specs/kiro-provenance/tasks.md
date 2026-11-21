@@ -385,7 +385,7 @@ Conventions that apply to every task:
     - Add the three examples of task 10.8 as named example tests of the property's reference (so that the reference itself is checked against the case that failed). Run the property at 500 runs. Confirm once that the property fails when the call of `widenToLines` in `changeHunks` is temporarily taken out (a local edit that is put back before the task ends), and say in the report that it did.
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`; each exits 0.
     - **Validates: Requirements 4.2, 4.15, 4.17, 16.25**
-  - [-] 10.10 Checkpoint - the attribution fix
+  - [x] 10.10 Checkpoint - the attribution fix
     - Edit `powers/provenance/README.md` so that the update step reads as Requirement 13, criterion 16 says (Kiro copies an imported Power to `~/.kiro/powers/installed/<name>`; the copy keeps the old Bundle after a rebuild; remove the Power and import the folder again), with no "not confirmed" wording.
     - Rebuild the Bundle with `node scripts/build-power.mjs --power provenance`, and then, as a separate command, copy `powers/provenance/server/provenance.mjs` to `.kiro/provenance/provenance.mjs`. Never refresh it by running setup in this repository.
     - Run, each with exit code 0: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, all properties at 500 runs, `pnpm power:build` twice with `git status --porcelain` empty after each, `pnpm kiro:check`, and `node .kiro/provenance/provenance.mjs reveal --check`.
