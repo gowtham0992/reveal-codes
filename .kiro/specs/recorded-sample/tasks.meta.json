@@ -142,6 +142,16 @@
         "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
         "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
         "timestamp": 1795292417694
+      },
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795293327363
+      },
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795293838897
       }
     ],
     "1. Protect and deliver the recorded file": [
@@ -177,6 +187,13 @@
         "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
         "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
         "timestamp": 1795293325244
+      }
+    ],
+    "6. Final checks, run once": [
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795293838922
       }
     ]
   }

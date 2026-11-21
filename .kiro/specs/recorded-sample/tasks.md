@@ -57,8 +57,8 @@ Conventions for every task:
     - Run `pnpm exec vitest run --project web apps/web/test/static` (docs and inventory scans).
     - _Requirements: 7.2, 9.1, 9.2, 9.3, 9.4_
 
-- [ ] 6. Final checks, run once
-  - [~] 6.1 Run the full checks
+- [x] 6. Final checks, run once
+  - [x] 6.1 Run the full checks
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, the clean-checkout web build (`pnpm --filter @reveal-codes/web build` from a fresh clone after `pnpm install`), `pnpm kiro:check` and `pnpm reveal --check`. Fix failures and rerun only what failed. Confirm `git status` shows the recorded file unchanged and its sha256 is `61db329c698fb01b64777ad90b681b0e73682382c95ca04b9a1423ef7c2a2c0e`. Do not push.
     - _Requirements: 1.2, 6.1, 6.3_
 
