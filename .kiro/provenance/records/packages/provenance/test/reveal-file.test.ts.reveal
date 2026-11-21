@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,794,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,2035,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.1,2,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.2,37,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.3,297,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,9924,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]import { createDocument, renderRecord } from "@reveal-codes/engine";
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,57,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.2,22,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,794,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,2035,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.1,2,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.2,37,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.3,297,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,9924,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]import { createDocument, renderRecord } from "@reveal-codes/engine";
 import { spawnSync } from "node:child_process";
 import { chmodSync, copyFileSync, readFileSync, rmSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
@@ -10,7 +10,8 @@ import { baselineCommand } from "../src/io/baseline-cmd.js";
 import { nodeDeps } from "../src/io/deps.js";
 import { colorEnvFrom } from "../src/io/env.js";
 import { chooseMode, relativeTo, revealCommand } from "../src/io/reveal-cmd.js";
-import { makeTempDir } from "./support/temp-repo.js";
+import { ma[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]rkHookEvent } from "./support/hook-event.js";
+import { ma[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]keTempDir } from "./support/temp-repo.js";
 import type { TempDir } from "./support/temp-repo.js";
 
 const ENTRY = new URL("../src/cli/main.ts", import.meta.url).pathname;
@@ -27,7 +28,8 @@ afterEach(() => {
 
 function fresh(): TempDir {
   dir = makeTempDir();
-  dir.write(`${PROV}/ignore`, "# none\\n");
+  dir.write(`${PROV}/ignore`, "# none\\n"[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.2{t=2026-11-21T05:54:41.073Z}]);
+  markHookEvent(dir[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]);
   return dir;
 }
 async function baseline(d: TempDir): Promise<void> {

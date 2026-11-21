@@ -1,0 +1,129 @@
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,5725,0,0}][AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]import { createDocument, renderRecord } from "@reveal-codes/engine";
+import { existsSync } from "node:fs";
+import { afterEach, describe, expect, it } from "vitest";
+import { NO_HOOK_EVENT_LINE } from "../src/core/hook-warning.js";
+import { updateRecord } from "../src/core/update.js";
+import { baselineCommand } from "../src/io/baseline-cmd.js";
+import { nodeDeps } from "../src/io/deps.js";
+import { colorEnvFrom } from "../src/io/env.js";
+import { revealCommand } from "../src/io/reveal-cmd.js";
+import { markHookEvent } from "./support/hook-event.js";
+import { makeTempDir } from "./support/temp-repo.js";
+import type { TempDir } from "./support/temp-repo.js";
+const PROV = ".kiro/provenance";
+const AT = "2026-11-19T10:00:00Z";
+const LINE =
+  "No hook event has been recorded in this workspace. The Provenance hooks may be disabled; text changed since setup cannot be attributed to the agent.";
+// eslint-disable-next-line no-control-regex -- the colour sequences of the view are what is stripped
+const ANSI = /\\u001b\\\[\[0-9;\]*\[A-Za-z\]/gu;
+const deps = nodeDeps();
+let dir: TempDir | null = null;
+afterEach(() => {
+  dir?.cleanup();
+  dir = null;
+});
+/** A workspace with the Unchanged_File README.md and a Record for a.ts, and no state.json. */
+async function workspace(): Promise<TempDir> {
+  const d = makeTempDir();
+  dir = d;
+  d.write(`${PROV}/ignore`, "# none\\n");
+  d.write("README.md", "hello\\n");
+  await baselineCommand(deps, d.root, () => undefined);
+  const made = createDocument("x\\n", AT);
+  if (!made.ok) throw new Error("createDocument failed");
+  const edited = updateRecord(made.value, "x\\ny\\n", "HUM", null, { nowIso: () => AT });
+  if (!edited.ok) throw new Error(edited.error.kind);
+  d.write(`${PROV}/records/a.ts.reveal`, renderRecord(edited.value, null, "full").text);
+  d.write("a.ts", "x\\ny\\n");
+  return d;
+}
+type Ran = { status: number; lines: string\[\] };
+const TRUECOLOR = { COLORTERM: "truecolor", TERM: "xterm-256color" };
+async function run(
+  d: TempDir,
+  args: string\[\],
+  tty = false,
+  onOut: (text: string) => void = () => undefined,
+): Promise<Ran> {
+  const lines: string\[\] = \[\];
+  const io = {
+    cwd: d.root,
+    env: colorEnvFrom(tty ? TRUECOLOR : {}),
+    isTTY: tty,
+    out: (t: string) => {
+      onOut(t);
+      lines.push(t);
+    },
+    err: () => undefined,
+  };
+  return { status: await revealCommand(deps, args, io), lines };
+}
+describe("the no-event warning _Requirements: 9.19, 3.29_", { timeout: 30_000 }, () => {
+  it("is the exact line of the requirement", () => {
+    expect(NO_HOOK_EVENT_LINE).toBe(LINE);
+  });
+  it("is the first line of reveal <file>, plain and colour, and the file view follows", async () => {
+    const d = await workspace();
+    const plain = await run(d, \["a.ts"\]);
+    const colour = await run(d, \["a.ts"\], true);
+    expect(plain.lines\[0\]).toBe(LINE);
+    expect(colour.lines\[0\]).toBe(LINE);
+    expect(plain.lines.filter((l) => l === LINE)).toHaveLength(1);
+    expect(plain.lines\[1\]).toContain("Reveal Codes: a.ts");
+    expect(colour.lines\[1\]?.replace(ANSI, "")).toBe(plain.lines\[1\]);
+    expect(colour.lines.join("\\n")).toContain("\\u001b\[");
+    expect(colour.lines.join("\\n").replace(ANSI, "")).toBe(
+      plain.lines.join("\\n").replace(ANSI, ""),
+    );
+  });
+  it("is the first line of reveal --summary and stands outside its totals", async () => {
+    const d = await workspace();
+    const without = await run(d, \["--summary"\]);
+    markHookEvent(d);
+    const withEvent = await run(d, \["--summary"\]);
+    expect(without.lines\[0\]).toBe(LINE);
+    expect(without.lines.slice(1)).toEqual(withEvent.lines);
+  });
+  it("does not change the exit status of any form", async () => {
+    const d = await workspace();
+    const forms = \[\["a.ts"\], \["missing.ts"\], \["--summary"\], \["--summary", "nowhere/x"\]\];
+    const before = await Promise.all(forms.map((f) => run(d, f)));
+    markHookEvent(d);
+    const after = await Promise.all(forms.map((f) => run(d, f)));
+    expect(before.map((r) => r.status)).toEqual(after.map((r) => r.status));
+    expect(before.map((r) => r.lines\[0\])).toEqual(Array(forms.length).fill(LINE));
+    expect(after.map((r) => r.lines.includes(LINE))).toEqual(Array(forms.length).fill(false));
+  });
+  it("is absent after a hook event, and after one the file view starts with its title", async () => {
+    const d = await workspace();
+    markHookEvent(d);
+    const ran = await run(d, \["a.ts"\]);
+    expect(ran.lines.join("\\n")).not.toContain("No hook event");
+    expect(ran.lines\[0\]).toContain("Reveal Codes: a.ts");
+  });
+  it("is not printed by reveal --check, with or without a hook event", async () => {
+    const d = await workspace();
+    const ran = await run(d, \["--check"\]);
+    expect(ran.lines.join("\\n")).not.toContain("No hook event");
+    markHookEvent(d);
+    expect((await run(d, \["--check"\])).lines).toEqual(ran.lines);
+  });
+  it("is printed by reveal --record before it records, and a manual record does not clear it", async () => {
+    const d = await workspace();
+    const recordExists = (): boolean => existsSync(`${d.root}/${PROV}/records/README.md.reveal`);
+    d.write("README.md", "hello\\nagain\\n");
+    const seen: boolean\[\] = \[\];
+    const ran = await run(d, \["--record"\], false, () => seen.push(recordExists()));
+    expect(ran.status).toBe(0);
+    expect(ran.lines).toEqual(\[LINE\]);
+    expect(seen).toEqual(\[false\]);
+    expect(recordExists()).toBe(true);
+    expect((await run(d, \["--record"\])).lines).toEqual(\[LINE\]);
+  });
+  it("is not printed when no Record_Directory is found", async () => {
+    const d = makeTempDir();
+    dir = d;
+    const ran = await run(d, \["a.ts"\]);
+    expect(ran.lines).toEqual(\["provenance is not set up here: run setup_provenance"\]);
+  });
+});

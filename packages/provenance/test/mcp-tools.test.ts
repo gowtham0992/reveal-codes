@@ -4,6 +4,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { createDocument, renderRecord } from "@reveal-codes/engine";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { NO_HOOK_EVENT_LINE } from "../src/core/hook-warning.js";
 import { humNotice, noPromptSessionsLine } from "../src/core/legend.js";
 import { updateRecord } from "../src/core/update.js";
 import { baselineCommand } from "../src/io/baseline-cmd.js";
@@ -16,6 +17,7 @@ import {
 } from "../src/mcp/schemas.js";
 import { NOT_SET_UP_MESSAGE } from "../src/mcp/workspace.js";
 import { fixedClock } from "./support/clock.js";
+import { markHookEvent } from "./support/hook-event.js";
 import { makeTempDir } from "./support/temp-repo.js";
 import type { TempDir } from "./support/temp-repo.js";
 const ENTRY = new URL("../src/cli/main.ts", import.meta.url).pathname;
@@ -301,5 +303,53 @@ describe("the server is read-only and needs a Record_Directory _Requirements: 12
     expect(isError).toBe(true);
     expect(text).toBe(NOT_SET_UP_MESSAGE);
     expect(text).toContain("setup_provenance");
+  });
+});
+
+describe("hookEvents and warning _Requirements: 12.15, 3.29_", { timeout: 60_000 }, () => {
+  const readTools: [string, Record<string, unknown>][] = [
+    ["reveal_file", { path: "src/a.ts" }],
+    ["untouched_agent_text", { path: "src/a.ts" }],
+    ["provenance_summary", {}],
+    ["check_records", {}],
+  ];
+  it("returns the warning as a field and as the first text line while no hook event is recorded", async () => {
+    for (const [name, args] of readTools) {
+      const { data, text, isError } = await call(name, { ...args, workspace: main.root });
+      expect(data).toMatchObject({ warning: NO_HOOK_EVENT_LINE });
+      expect(text.split("\n")[0]).toBe(NO_HOOK_EVENT_LINE);
+      expect(text.split("\n").length).toBeLessThanOrEqual(5);
+      expect(isError).toBe(false);
+    }
+  });
+  it("returns hookEvents { any: false, lastHookEventAt: null } for check_records without events", async () => {
+    const { data } = await call("check_records", { workspace: main.root });
+    const out = checkRecordsOutput.parse(data);
+    expect(out.hookEvents).toEqual({ any: false, lastHookEventAt: null });
+    expect(out.ok).toBe(true);
+  });
+  it("returns warning null, no warning line and the time of the event after a hook event", async () => {
+    const d = workspace();
+    d.write("README.md", "hello\n");
+    await baseline(d);
+    agentRecord(d, "src/a.ts", "one\n", "one\ntwo\n", "one\ntwo\n");
+    d.write("src/a.ts", "one\ntwo\n");
+    markHookEvent(d, "2026-11-19T10:00:00.000Z");
+    for (const [name, args] of readTools) {
+      const { data, text } = await call(name, { ...args, workspace: d.root });
+      expect(data).toMatchObject({ warning: null });
+      expect(text).not.toContain("No hook event");
+    }
+    const { data, isError } = await call("check_records", { workspace: d.root });
+    expect(checkRecordsOutput.parse(data).hookEvents).toEqual({
+      any: true,
+      lastHookEventAt: "2026-11-19T10:00:00.000Z",
+    });
+    expect(isError).toBe(false);
+  });
+  it("leaves isError of check_records as the command's status, with and without events", async () => {
+    const strict = await call("check_records", { strict: true, workspace: main.root });
+    expect(strict.isError).toBe(true);
+    expect(checkRecordsOutput.parse(strict.data).hookEvents.any).toBe(false);
   });
 });

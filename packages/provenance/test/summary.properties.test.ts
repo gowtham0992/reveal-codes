@@ -1,6 +1,7 @@
 import type { Document } from "@reveal-codes/engine";
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import { NO_HOOK_EVENT_LINE } from "../src/core/hook-warning.js";
 import {
   summarize,
   type SummaryInput,
@@ -215,6 +216,8 @@ function check(
 ): void {
   const input = toInput(entries, rawScope, top, all);
   const out = summarize(input);
+  // The no-event line is printed before the summary and is no line of it (Req 9.19).
+  expect(out.lines).not.toContain(NO_HOOK_EVENT_LINE);
   const scope = normalize(rawScope);
   const kept = entries.filter((e) => inScope(e.path, scope));
   if (entries.length === 0) {

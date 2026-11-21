@@ -9,17 +9,23 @@ const ROOT = fileURLToPath(new URL("../../../../", import.meta.url));
 const HOOKS_DIR = join(ROOT, ".kiro/hooks");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 
-type Hook = { trigger: string; timeout?: unknown; timeout_ms?: unknown; matcher?: unknown } & {
+type Hook = {
+  trigger: string;
+  enabled?: unknown;
+  timeout?: unknown;
+  timeout_ms?: unknown;
+  matcher?: unknown;
+} & {
   action: { type: string; command: string };
 };
 const parsed = (text: string): { hooks: Hook[] } => JSON.parse(text) as { hooks: Hook[] };
 
-describe("Hook_File 0-provenance.json (Req 8.1-8.3, 7.11)", () => {
+describe("Hook_File 0-provenance.json (Req 8.1-8.3, 8.9, 7.11)", () => {
   it("equals hookFileText() byte for byte", () => {
     expect(read(".kiro/hooks/0-provenance.json")).toBe(hookFileText());
   });
 
-  it("holds exactly four hooks with the four triggers, timeout 30, no timeout_ms and no matcher", () => {
+  it("holds exactly four hooks with the four triggers, timeout 30, enabled true, no timeout_ms and no matcher", () => {
     const { hooks } = parsed(hookFileText());
     expect(hooks.map((h) => h.trigger)).toEqual([
       "UserPromptSubmit",
@@ -29,6 +35,7 @@ describe("Hook_File 0-provenance.json (Req 8.1-8.3, 7.11)", () => {
     ]);
     for (const h of hooks) {
       expect(h.timeout).toBe(30);
+      expect(h.enabled).toBe(true);
       expect("timeout_ms" in h).toBe(false);
       expect("matcher" in h).toBe(false);
       expect(h.action.type).toBe("command");

@@ -1,0 +1,211 @@
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,131,0,0}][PST{t=2026-11-20T03:04:47Z}]/**
+ * One Recorder event from start to exit (design, One event, in order; Req 3, Req 7). It finds the
+ * Workspace_Root, takes the lock, reads the state, runs the pure window steps and the file phases
+ * in the design's order, and writes `sessions.json` (only when a session is counted) before
+ * `state.json`, which is written last. It never prints. Faults are logged and the run goes on;
+ * an exception is left for the entry module (`cli/main.ts`), which is the only place that catches.
+ */
+import { parsePayload } from "../core/payload.js";
+import type { FaultReason, HookEvent, Payload, WindowState } from "../core/types.js";
+import { closeLeftover, select, sessionKey, sweepStale, transition } from "../core/windows.js";
+import type { Stepped, Transitioned } from "../core/windows.js";
+import { createBaselineCache } from "./baseline-cache.js";
+import type { Deps, Logger } from "./deps.js";
+import { createFaultLog } from "./faults.js";
+import { acquireLock } from "./lock.js";
+import { recordFiles } from "./recorder-files.js";
+import type { StateStatus } from "./recorder-files.js";
+import { listCandidates } from "./scan.js";
+import { readStdin } from "./stdin.js";
+import { createStore } from "./store.js";
+import type { Store } from "./store.js";
+const EVENTS: readonly HookEvent\[\] = \["promptSubmit", "agentStop", "preTask", "postTask", "manual"\];
+/** The Hook_Event named on the command line, or null for any other name (Req 3.1). */
+export function parseEvent(name: string): HookEvent | null {
+  return EVENTS.find((e) => e === name) ?? null;
+}
+/** A path with `/` separators and no trailing separator (except the root itself). */
+export function normalizeDir(path: string): string {
+  const slashed = path.replace(/\\\\/gu, "/");
+  return slashed.length > 1 && slashed.endsWith("/") ? slashed.slice(0, -1) : slashed;
+}
+function isAbsolute(path: string): boolean {
+  return path.startsWith("/") || /^\[A-Za-z\]:\\//u.test(path);
+}
+function parentOf(dir: string): string | null {
+  const cut = dir.lastIndexOf("/");
+  if (cut < 0) return null;
+  if (cut === 0) return dir === "/" ? null : "/";
+  return dir.slice(0, cut);
+}
+async function holdsRecordDir(deps: Pick<Deps, "fs">, dir: string): Promise<boolean> {
+  const base = dir === "/" ? "" : dir;
+  const stat = await deps.fs.lstat(`${base}/.kiro/provenance`);
+  return stat.ok && stat.value.kind === "dir";
+}
+/**
+ * The Workspace_Root: the first directory from `cwd` upward that holds `.kiro/provenance`, else
+ * the payload `cwd` when it is absolute and holds one, else null (design, One event, step 3).
+ */
+export async function findWorkspaceRoot(
+  deps: Pick<Deps, "fs">,
+  cwd: string,
+  payloadCwd: string | null,
+): Promise<string | null> {
+  for (let dir: string | null = normalizeDir(cwd); dir !== null; dir = parentOf(dir)) {
+    if (await holdsRecordDir(deps, dir)) return dir;
+  }
+  if (payloadCwd === null) return null;
+  const given = normalizeDir(payloadCwd);
+  return isAbsolute(given) && (await holdsRecordDir(deps, given)) ? given : null;
+}
+type EventContext = {
+  deps: Deps;
+  root: string;
+  store: Store;
+  event: HookEvent;
+  payload: Payload;
+};
+function log(ctx: EventContext, reason: FaultReason): Promise<void> {
+  return ctx.deps.log.fault({ event: ctx.event, path: null, reason });
+}
+async function logAll(ctx: EventContext, step: Stepped): Promise<void> {
+  for (const f of step.faults) await log(ctx, f.kind);
+}
+function emptyState(nowMs: number): WindowState {
+  return {
+    version: 1,
+    order: 0,
+    lastWindowRun: null,
+    lastEventAt: null,
+    recordedAtMs: nowMs,
+    noSessionIdLogged: false,
+    sessions: {},
+    files: {},
+    skipped: {},
+  };
+}
+/** `state.json` as read; an absent, unreadable or undecodable file gives an empty state (Req 3.22). */
+async function loadState(store: Store, nowMs: number) {
+  const read = await store.readState();
+  let status: StateStatus = "ok";
+  if (!read.ok) status = "bad";
+  else if (read.value === null) status = "absent";
+  return {
+    status,
+    state: read.ok && read.value !== null ? read.value : emptyState(nowMs),
+  };
+}
+/** Steps 5 of the design: the sweep, then for `promptSubmit` the leftover closing. */
+async function sweepAndLeftover(
+  ctx: EventContext,
+  state: WindowState,
+  key: string | null,
+  nowMs: number,
+): Promise<WindowState> {
+  const swept = sweepStale(state, nowMs);
+  await logAll(ctx, swept);
+  if (ctx.event !== "promptSubmit" || key === null) return swept.state;
+  const left = closeLeftover(swept.state, key);
+  await logAll(ctx, left);
+  return left.state;
+}
+/** Adds 1 to `sessions.json`; false (nothing counted) when it does not parse or cannot be written. */
+async function addSession(ctx: EventContext): Promise<boolean> {
+  const count = await ctx.store.readSessions();
+  if (!count.ok) {
+    await log(ctx, "bad_sessions");
+    return false;
+  }
+  const written = await ctx.store.writeSessions(count.value + 1);
+  if (!written.ok) await log(ctx, "write_failed");
+  return written.ok;
+}
+function unflagSession(state: WindowState, key: string): WindowState {
+  const entry = Object.hasOwn(state.sessions, key) ? state.sessions\[key\] : undefined;
+  if (entry === undefined) return state;
+  return { ...state, sessions: { ...state.sessions, \[key\]: { ...entry, noPromptCounted: false } } };
+}
+/** Logs the transition's lines and, when it counted a session, writes `sessions.json` (step 10). */
+async function settleSession(
+  ctx: EventContext,
+  done: Transitioned,
+  key: string | null,
+): Promise<WindowState> {
+  for (const f of done.faults) if (f.kind !== "no_prompt_events") await log(ctx, f.kind);
+  if (!done.countSession || key === null) return done.state;
+  if (!(await addSession(ctx))) return unflagSession(done.state, key);
+  await log(ctx, "no_prompt_events");
+  return done.state;
+}
+async function runLocked(ctx: EventContext): Promise<void> {
+  const { deps, store, event, payload } = ctx;
+  const startMs = deps.clock.nowMs();
+  const eventIso = deps.clock.nowIso();
+  const loaded = await loadState(store, startMs);
+  const key = event === "manual" ? null : sessionKey(payload);
+  const state = await sweepAndLeftover(ctx, loaded.state, key, startMs);
+  const chosen = select(state, key);
+  const cache = createBaselineCache(deps, store.cacheDir());
+  const candidates = await listCandidates(deps, ctx.root);
+  const outcome = await recordFiles(
+    {
+      deps,
+      root: ctx.root,
+      store,
+      cache,
+      event,
+      state,
+      stateStatus: loaded.status,
+      baseline: await store.readBaseline(),
+      window: chosen === null ? null : { windowRun: chosen.windowRun },
+      eventIso,
+      startMs,
+    },
+    candidates.files,
+  );
+  const clock = { nowIso: () => eventIso };
+  const done = transition(outcome.state, event, key, payload, clock, outcome.outsideFound);
+  const next = await settleSession(ctx, done, key);
+  const [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]stamped = event === "manual" ? next : { ...next, lastHookEventAt: eventIso };
+  const written = await store.writeState({ ...stamped[PST{t=2026-11-20T03:04:47Z}], recordedAtMs: startMs });
+  if (!written.ok) await log(ctx, "write_failed");
+}
+async function recordInRoot(ctx: EventContext): Promise<void> {
+  const taken = await acquireLock(ctx.deps, `${ctx.store.dir}/lock`);
+  if (!taken.ok) {
+    await log(ctx, taken.error.kind);
+    return;
+  }
+  try {
+    await runLocked(ctx);
+  } finally {
+    await taken.value.release();
+  }
+}
+/**
+ * `provenance record <name>`. `cwd` is the process working directory. `onLog` is called once the
+ * Fault_Log exists, so the entry module can log an exception that escapes. Returns without output
+ * when there is no Record_Directory. Throws only what the dependencies throw.
+ */
+export async function runRecord(
+  deps: Deps,
+  name: string,
+  cwd: string,
+  onLog: (logger: Logger) => void = () => undefined,
+): Promise<void> {
+  const event = parseEvent(name);
+  const raw = event === null || event === "manual" ? "" : await readStdin(deps);
+  const payload = parsePayload(raw);
+  const root = await findWorkspaceRoot(deps, cwd, payload.cwd);
+  if (root === null) return;
+  const store = createStore(deps, `${root}/.kiro/provenance`);
+  const logger = createFaultLog(deps, `${store.dir}/errors.log`);
+  onLog(logger);
+  const live: Deps = { ...deps, log: logger };
+  if (event === null) {
+    await logger.fault({ event: "unknown", path: null, reason: "unknown_event" });
+    return;
+  }
+  await recordInRoot({ deps: live, root, store, event, payload });
+}

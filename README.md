@@ -160,6 +160,7 @@ Working on the repository with Kiro:
 - The free CourtListener tier is rate-limited, and the hosted site limits the checks per visitor that need CourtListener, and a check answered from the cache does not count. A second Verify within a minute can take up to a minute.
 - With no assistant provider configured, the assistant returns a recorded reply, and the statement says so.
 - The editor is plain text. It does not format captions, italics or indents.
+- Provenance for source files (the Provenance Power): the hooks that feed the recorder may be disabled in the Agent Hooks panel. While no hook event has been recorded in a workspace, `reveal` prints a warning as its first line, and text changed since setup cannot be attributed to the agent.
 - The editor needs a screen at least 1150 pixels wide. The checking page at `/check` reads from 320px.
 
 ## Licence

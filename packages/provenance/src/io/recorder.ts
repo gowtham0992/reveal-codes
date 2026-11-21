@@ -167,7 +167,8 @@ async function runLocked(ctx: EventContext): Promise<void> {
   const clock = { nowIso: () => eventIso };
   const done = transition(outcome.state, event, key, payload, clock, outcome.outsideFound);
   const next = await settleSession(ctx, done, key);
-  const written = await store.writeState({ ...next, recordedAtMs: startMs });
+  const stamped = event === "manual" ? next : { ...next, lastHookEventAt: eventIso };
+  const written = await store.writeState({ ...stamped, recordedAtMs: startMs });
   if (!written.ok) await log(ctx, "write_failed");
 }
 async function recordInRoot(ctx: EventContext): Promise<void> {

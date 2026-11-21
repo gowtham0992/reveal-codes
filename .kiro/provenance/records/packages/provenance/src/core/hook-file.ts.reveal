@@ -1,0 +1,33 @@
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,5,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.2,19,0,0}][PST{t=2026-11-20T03:04:47Z}]type HookSpec = {
+  readonly name: string;
+  readonly trigger: "UserPromptSubmit" | "Stop" | "PreTaskExec" | "PostTaskExec";
+  readonly event: "promptSubmit" | "agentStop" | "preTask" | "postTask";
+};
+
+/** The four hooks of the Hook_File, in file order (Req 8.1, 8.3). */
+const HOOKS: readonly HookSpec\[\] = \[
+  { name: "Provenance: prompt", trigger: "UserPromptSubmit", event: "promptSubmit" },
+  { name: "Provenance: stop", trigger: "Stop", event: "agentStop" },
+  { name: "Provenance: task start", trigger: "PreTaskExec", event: "preTask" },
+  { name: "Provenance: task end", trigger: "PostTaskExec", event: "postTask" },
+\];
+
+function commandFor(event: string): string {
+  return `node .kiro/provenance/provenance.mjs record ${event} >/dev/null 2>&1 || true`;
+}
+
+/**
+ * The exact content of `.kiro/hooks/0-provenance.json` (Req 8.1 to 8.3, [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]8.9, [PST{t=2026-11-20T03:04:47Z}]7.11).
+ * `timeout` is in seconds; there is no `timeout_ms`, no `matcher`, and standard
+ * input is not redirected because the payload arrives on it.
+ */
+export function hookFileText(): string {
+  const hooks = HOOKS.map((h) => ({
+    name: h.name,
+    trigger: h.trigger,
+    timeout: 30[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.2{t=2026-11-21T05:54:41.073Z}],
+    enabled: true[PST{t=2026-11-20T03:04:47Z}],
+    action: { type: "command", command: commandFor(h.event) },
+  }));
+  return `${JSON.stringify({ version: "v1", hooks }, null, 2)}\\n`;
+}

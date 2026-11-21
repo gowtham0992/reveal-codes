@@ -1,7 +1,8 @@
-[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,54,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,50,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,97,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,2298,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.5,27,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.6,2526,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.1,56,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.2,4,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.1,49,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.2,168,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.3,4,0,0;r=7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1,3118,0,0}][AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}]import [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]type { Document } from "@reveal-codes/engine";
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,59,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.2,121,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.3,314,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.4,260,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,54,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,50,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,97,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,2298,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.5,27,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.6,2526,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.1,56,0,0;r=7.12 Solid pane in colour mode 2026-11-20T05:35:20Z.2,4,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.1,49,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.2,168,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.3,4,0,0;r=7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1,3118,0,0}][AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}]import [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]type { Document } from "@reveal-codes/engine";
 import [AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}]fc from "fast-check";
 import { describe, expect, it } from "vitest";
-[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.2{t=2026-11-20T05:35:16.652Z}]import { assignTags } from "../src/core/tags.js";
+[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.2{t=2026-11-20T05:35:16.652Z}]import { [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]hookWarning } from "../src/core/hook-warning.js";
+import { [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.2{t=2026-11-20T05:35:16.652Z}]assignTags } from "../src/core/tags.js";
 [AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}]import { viewRecord } from "../src/core/view.js";
 import { arbPath, arbViewDocument } from "../src/testing/arbitraries.js";
 import { runs } from "./support/fc.js";
@@ -134,9 +135,14 @@ describe("view properties _Requirements: 9.4, 9.5, 9.6, 9.7, 9.8, 9.14, 9.15, 9.
         fc.boolean(),
         fc.array(arbWindowRun, { minLength: 1, maxLength: 4 }),
         fc.array(fc.nat(), { maxLength: 40 }),
-        (base, mode, path, full, windows, picks) => {
+        [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.2{t=2026-11-21T05:54:41.073Z}]fc.constantFrom<string | null>(null, "2026-11-19T10:00:00.000Z"),
+        (base, mode, path, full, windows, picks, hookAt[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.6{t=2026-11-20T05:35:16.652Z}]) => {
           const doc = intoWindows(base, windows, picks);
-          const plain = viewRecord(doc, "plain", path, full);
+[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.3{t=2026-11-21T05:54:41.073Z}]          // The whole output of `reveal <file>`: the no-event line, when there is one, then the view.
+          const warning = hookWarning(hookAt);
+          const whole = (view: string): string => (warning === null ? view : `${warning}\\n${view}`);
+          const lead = warning === null ? "" : `${warning}\\n`;
+[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.6{t=2026-11-20T05:35:16.652Z}]          const plain = viewRecord(doc, "plain", path, full);
           const coloured = viewRecord(doc, mode, path, full);
           const runs = agentRuns(doc);
           const count = new Set(runs.map(windowOf)).size;
@@ -150,9 +156,10 @@ describe("view properties _Requirements: 9.4, 9.5, 9.6, 9.7, 9.8, 9.14, 9.15, 9.
             .map((l) => l.replace(/\\\\(\[\\s\\S\])/gu, "$1"));
           const scanned = scanBody(lines.slice(LEGEND_LINES + listed[AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.3{t=2026-11-20T16:21:52.951Z}] + 1[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.6{t=2026-11-20T05:35:16.652Z}]).join("\\n"));
           const unescaped = \[...head.slice(0, LEGEND_LINES + LIST_LINES), ...list\].join("\\n");
-          expect(stripAnsi(coloured)).toBe(`${unescaped}\\n${scanned.kept}`);
-          expect(stripAnsi(coloured)).not.toContain("\\u001b");
-          expect(plain).not.toContain("\\u001b");
+          expect(stripAnsi([AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.4{t=2026-11-21T05:54:41.073Z}]whole(coloured))).toBe(`${lead}${unescaped}\\n${scanned.kept}`);
+          expect(stripAnsi(whole(coloured))).not.toContain("\\u001b");
+          expect(whole(plain)).not.toContain("\\u001b");
+          expect(whole(plain).split("\\n")\[0\]).toBe(warning ?? lines\[0\][AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.6{t=2026-11-20T05:35:16.652Z}]);
           expect(scanned.text).toBe(expectedPictures(doc.text));
           expect(scanned.codes.length).toBe(doc.spans.length);
           for (const code of scanned.codes) {

@@ -47,6 +47,10 @@ Run from the workspace root, as `.kiro/provenance/reveal …` or `node .kiro/pro
 - In a session with no prompt events, such as a spec chat that runs tasks, an edit the agent makes between tasks is recorded as `[HUM]`.
 - The record is not proof that no AI wrote a passage.
 
+## When the hooks are disabled
+
+The hooks may be disabled in the Agent Hooks panel (Kiro shows them as `(disabled)`). Switch on each Provenance hook there, and reload the window (`Developer: Reload Window`) if any was disabled. While no hook event has been recorded in the workspace, `reveal <file>`, `reveal --summary` and `reveal --record` print the line `No hook event has been recorded in this workspace. The Provenance hooks may be disabled; text changed since setup cannot be attributed to the agent.` first, and the four read tools return it as `warning`. Until a hook event arrives, text changed since setup cannot be attributed to the agent. The `check_records` tool also returns `hookEvents`, which says whether any hook event has arrived and when the last one did. The line cannot tell a disabled hook from a workspace in which no prompt has been sent yet.
+
 ## The record is committed
 
 `.kiro/provenance/` is meant to be committed, so that the record travels with the repository. Its `.gitignore` leaves out only `state.json`, `errors.log`, the lock file and `cache/`.

@@ -91,6 +91,14 @@ async function loadSessions(store: Store): Promise<SessionsCount> {
   return read.ok ? read.value : "unreadable";
 }
 
+/**
+ * `lastHookEventAt` of `state.json`: null when the file is absent, does not parse or has no such
+ * field, which all mean that no hook event has been recorded (Req 3.29). Reads only.
+ */
+export async function loadHookEventAt(deps: LoadDeps, root: string): Promise<string | null> {
+  const read = await createStore(deps, `${root}/.kiro/provenance`).readState();
+  return read.ok ? (read.value?.lastHookEventAt ?? null) : null;
+}
 /** Reads the whole workspace once: Records, Baseline_File, Sessions_File and the Tracked_Files. */
 export async function loadWorkspace(deps: LoadDeps, root: string): Loaded<WorkspaceFacts> {
   const store = createStore(deps, `${root}/.kiro/provenance`);

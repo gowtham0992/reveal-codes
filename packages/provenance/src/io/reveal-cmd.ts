@@ -3,10 +3,12 @@
  * the path argument and the form: `reveal <file>`, `--summary`, `--check` and `--record`.
  * Standard output and the injected writers carry every line.
  */
+import { hookWarning } from "../core/hook-warning.js";
 import { neutralize } from "../core/neutralize.js";
 import type { ViewMode } from "../core/view.js";
 import type { Deps } from "./deps.js";
 import type { ColorEnv } from "./env.js";
+import { loadHookEventAt } from "./load.js";
 import { findWorkspaceRoot, runRecord } from "./recorder.js";
 import { checkReport, parseCheckArgs, parseSummaryArgs, summaryReport } from "./reveal-report.js";
 import type { Report } from "./reveal-report.js";
@@ -47,6 +49,11 @@ export function relativeTo(root: string, cwd: string, arg: string): string | nul
   return parts.slice(base.length).join("/");
 }
 
+/** The no-event warning, as the first line of output, while no hook event has been recorded. */
+async function warnIfNoHookEvent(deps: RevealDeps, io: RevealIo, root: string): Promise<void> {
+  const line = hookWarning(await loadHookEventAt(deps, root));
+  if (line !== null) io.out(line);
+}
 async function revealOne(
   deps: RevealDeps,
   io: RevealIo,
@@ -58,6 +65,7 @@ async function revealOne(
     io.out(NOT_SET_UP);
     return 1;
   }
+  await warnIfNoHookEvent(deps, io, root);
   const path = relativeTo(root, io.cwd, arg);
   if (path === null) {
     io.out(`${neutralize(arg)}: not recorded: not_tracked`);
@@ -82,8 +90,10 @@ async function inWorkspace(
   deps: RevealDeps,
   io: RevealIo,
   run: (root: string) => Promise<Report>,
+  warn: boolean,
 ): Promise<number> {
   const root = await findWorkspaceRoot(deps, io.cwd, null);
+  if (root !== null && warn) await warnIfNoHookEvent(deps, io, root);
   const report = root === null ? { status: 1 as const, text: NOT_SET_UP } : await run(root);
   io.out(report.text);
   return report.status;
@@ -92,19 +102,20 @@ async function inWorkspace(
 async function summaryForm(deps: RevealDeps, io: RevealIo, args: readonly string[]) {
   const parsed = parseSummaryArgs(args);
   if (parsed === null) return usage(io);
-  return inWorkspace(deps, io, async (root) => {
+  const run = async (root: string): Promise<Report> => {
     const found = parsed.path === null ? { scope: null } : scopeOf(root, io.cwd, parsed.path);
     if (found === null) {
       return { status: 1, text: `${neutralize(parsed.path ?? "")}: not recorded: not_tracked` };
     }
     return summaryReport(deps, root, found.scope, parsed.top, parsed.all);
-  });
+  };
+  return inWorkspace(deps, io, run, true);
 }
 
 async function checkForm(deps: RevealDeps, io: RevealIo, args: readonly string[]) {
   const parsed = parseCheckArgs(args);
   if (parsed === null) return usage(io);
-  return inWorkspace(deps, io, (root) => checkReport(deps, root, parsed.strict));
+  return inWorkspace(deps, io, (root) => checkReport(deps, root, parsed.strict), false);
 }
 
 /** `reveal --record`: the Recorder with the event `manual` (Req 11.11). */
@@ -114,6 +125,7 @@ async function recordForm(deps: RevealDeps, io: RevealIo): Promise<number> {
     io.out(NOT_SET_UP);
     return 1;
   }
+  await warnIfNoHookEvent(deps, io, root);
   await runRecord(deps, "manual", io.cwd);
   return 0;
 }

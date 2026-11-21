@@ -1,11 +1,12 @@
-[DOC{v=1;n=0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.1,162,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.2,136,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.3,82,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.4,1067,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.5,39,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1,10446,0,0}][AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1{t=2026-11-20T04:28:48.740Z}]import { spawnSync } from "node:child_process";
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,57,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.2,22,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.1,162,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.2,136,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.3,82,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.4,1067,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.5,39,0,0;r=7.9 `reveal --summary`\, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1,10446,0,0}][AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1{t=2026-11-20T04:28:48.740Z}]import { spawnSync } from "node:child_process";
 import { rmSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import { humNotice } from "../src/core/legend.js";
 import { baselineCommand } from "../src/io/baseline-cmd.js";
 import { nodeDeps } from "../src/io/deps.js";
 import { record, snapshot, windowsOf } from "./support/report-files.js";
-import { makeTempDir } from "./support/temp-repo.js";
+import { ma[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]rkHookEvent } from "./support/hook-event.js";
+import { ma[AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1{t=2026-11-20T04:28:48.740Z}]keTempDir } from "./support/temp-repo.js";
 import type { TempDir } from "./support/temp-repo.js";
 
 const ENTRY = new URL("../src/cli/main.ts", import.meta.url).pathname;
@@ -21,7 +22,8 @@ afterEach(() => {
 
 function fresh(): TempDir {
   dir = makeTempDir();
-  dir.write(`${PROV}/ignore`, "# none\\n");
+  dir.write(`${PROV}/ignore`, "# none\\n"[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.2{t=2026-11-21T05:54:41.073Z}]);
+  markHookEvent(dir[AI:7.9 `reveal --summary`, `--check \[--strict\]` and `--record` 2026-11-20T04:21:36Z.1{t=2026-11-20T04:28:48.740Z}]);
   return dir;
 }
 async function baseline(d: TempDir): Promise<void> {

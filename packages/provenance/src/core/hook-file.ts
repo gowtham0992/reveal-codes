@@ -17,7 +17,7 @@ function commandFor(event: string): string {
 }
 
 /**
- * The exact content of `.kiro/hooks/0-provenance.json` (Req 8.1 to 8.3, 7.11).
+ * The exact content of `.kiro/hooks/0-provenance.json` (Req 8.1 to 8.3, 8.9, 7.11).
  * `timeout` is in seconds; there is no `timeout_ms`, no `matcher`, and standard
  * input is not redirected because the payload arrives on it.
  */
@@ -26,6 +26,7 @@ export function hookFileText(): string {
     name: h.name,
     trigger: h.trigger,
     timeout: 30,
+    enabled: true,
     action: { type: "command", command: commandFor(h.event) },
   }));
   return `${JSON.stringify({ version: "v1", hooks }, null, 2)}\n`;

@@ -5,6 +5,7 @@ import { humNotice } from "../src/core/legend.js";
 import { baselineCommand } from "../src/io/baseline-cmd.js";
 import { nodeDeps } from "../src/io/deps.js";
 import { record, snapshot, windowsOf } from "./support/report-files.js";
+import { markHookEvent } from "./support/hook-event.js";
 import { makeTempDir } from "./support/temp-repo.js";
 import type { TempDir } from "./support/temp-repo.js";
 
@@ -22,6 +23,7 @@ afterEach(() => {
 function fresh(): TempDir {
   dir = makeTempDir();
   dir.write(`${PROV}/ignore`, "# none\n");
+  markHookEvent(dir);
   return dir;
 }
 async function baseline(d: TempDir): Promise<void> {

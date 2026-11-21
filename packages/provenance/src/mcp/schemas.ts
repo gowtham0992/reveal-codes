@@ -62,7 +62,7 @@ export const revealReasons = [
   "tampered_record",
 ] as const;
 
-export const revealFileOutput = z.object({
+const revealFileData = z.object({
   file: z.string(),
   status: z.enum(["current", "unchanged_baseline", "stale", "unrecorded"]),
   reason: z.enum(revealReasons).nullable(),
@@ -71,7 +71,7 @@ export const revealFileOutput = z.object({
   legend: z.array(z.string()).length(4),
 });
 
-export const untouchedAgentTextOutput = z.object({
+const untouchedAgentTextData = z.object({
   path: z.string(),
   stretches: z.array(structuredSpanSchema),
   countsByOrigin: characters,
@@ -80,7 +80,7 @@ export const untouchedAgentTextOutput = z.object({
   notice: z.string(),
 });
 
-export const provenanceSummaryOutput = z.object({
+const provenanceSummaryData = z.object({
   files: z.array(fileCountsSchema),
   total: fileCountsSchema,
   windows: z.array(windowRowSchema),
@@ -95,13 +95,22 @@ const checkLine = z.object({
   reason: z.enum(["tampered_record", "orphan_record", "orphan_baseline", "stale", "no_record"]),
 });
 
-export const checkRecordsOutput = z.object({
+const checkRecordsData = z.object({
   ok: z.boolean(),
   filesChecked: count,
   failures: z.array(checkLine),
   reports: z.array(checkLine),
 });
 
+/** The no-event line of Requirement 9, criterion 19, or null (Req 12.15). */
+const warning = z.object({ warning: z.string().nullable() });
+export const revealFileOutput = revealFileData.merge(warning);
+export const untouchedAgentTextOutput = untouchedAgentTextData.merge(warning);
+export const provenanceSummaryOutput = provenanceSummaryData.merge(warning);
+/** `hookEvents`: `any` is true exactly when `lastHookEventAt` is a string (Req 12.15). */
+export const checkRecordsOutput = checkRecordsData.merge(warning).extend({
+  hookEvents: z.object({ any: z.boolean(), lastHookEventAt: z.string().nullable() }),
+});
 export const setupProvenanceOutput = z.object({
   written: z.array(z.string()),
   replaced: z.array(z.string()),
@@ -109,10 +118,10 @@ export const setupProvenanceOutput = z.object({
 });
 
 export type StructuredSpanJson = z.infer<typeof structuredSpanSchema>;
-export type RevealFileJson = z.infer<typeof revealFileOutput>;
-export type UntouchedAgentTextJson = z.infer<typeof untouchedAgentTextOutput>;
-export type ProvenanceSummaryJson = z.infer<typeof provenanceSummaryOutput>;
-export type CheckRecordsJson = z.infer<typeof checkRecordsOutput>;
+export type RevealFileJson = z.infer<typeof revealFileData>;
+export type UntouchedAgentTextJson = z.infer<typeof untouchedAgentTextData>;
+export type ProvenanceSummaryJson = z.infer<typeof provenanceSummaryData>;
+export type CheckRecordsJson = z.infer<typeof checkRecordsData>;
 export type SetupProvenanceJson = z.infer<typeof setupProvenanceOutput>;
 const workspaceArg = z.string().optional();
 const topArg = z.number().int().min(1).optional();

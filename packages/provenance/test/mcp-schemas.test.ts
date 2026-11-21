@@ -17,8 +17,11 @@ describe("mcp output schemas", () => {
       unrecordedCharacters: 0,
       spans,
       legend: legendLines("run"),
+      warning: null,
     };
     expect(revealFileOutput.safeParse(result).success).toBe(true);
+    expect(revealFileOutput.safeParse({ ...result, warning: "No hook event." }).success).toBe(true);
+    expect(revealFileOutput.safeParse({ ...result, warning: undefined }).success).toBe(false);
     expect(revealFileOutput.safeParse({ ...result, reason: "unknown" }).success).toBe(false);
     expect(revealFileOutput.safeParse({ ...result, legend: ["one"] }).success).toBe(false);
   });

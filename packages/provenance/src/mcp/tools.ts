@@ -7,11 +7,18 @@
  */
 import type { Document } from "@reveal-codes/engine";
 import { checkWorkspace } from "../core/check.js";
+import { hookWarning } from "../core/hook-warning.js";
 import { summarize } from "../core/summary.js";
 import { formatBaselineLine } from "../io/baseline-cmd.js";
 import type { Deps } from "../io/deps.js";
 import { createFaultLog } from "../io/faults.js";
-import { checkFactsOf, loadFile, loadWorkspace, summaryInputOf } from "../io/load.js";
+import {
+  checkFactsOf,
+  loadFile,
+  loadHookEventAt,
+  loadWorkspace,
+  summaryInputOf,
+} from "../io/load.js";
 import type { WorkspaceFacts } from "../io/load.js";
 import type { SetupReport } from "../io/setup.js";
 import { setupProvenance } from "../io/setup.js";
@@ -62,6 +69,24 @@ function recordDocs(facts: WorkspaceFacts): Map<string, Document> {
   }
   return docs;
 }
+/** At most five text lines with `warning` first; the lines just before the last one give way. */
+function warnedLines(warning: string | null, lines: readonly string[]): string[] {
+  if (warning === null) return [...lines];
+  const room = 4;
+  const kept = lines.length <= room ? lines : [...lines.slice(0, room - 1), lines.at(-1) ?? ""];
+  return [warning, ...kept];
+}
+/** An ok result whose `warning` field and first text line are the no-event line, if any (Req 12.15). */
+function warnedResult(
+  at: string | null,
+  data: object,
+  lines: readonly string[],
+  extra: object = {},
+  error = false,
+): ToolResult {
+  const warning = hookWarning(at);
+  return okResult({ ...data, warning, ...extra }, warnedLines(warning, lines), error);
+}
 export async function revealFileTool(
   ctx: ToolContext,
   args: Workspace & { path: string },
@@ -72,7 +97,7 @@ export async function revealFileTool(
     const facts = await loadFile(ctx.deps, root, target.path);
     if (!facts.ok) return errorResult(`${target.path}: ${facts.error.kind}`);
     const data = revealData(facts.value, target.path);
-    return okResult(data, revealLines(data));
+    return warnedResult(await loadHookEventAt(ctx.deps, root), data, revealLines(data));
   });
 }
 export async function untouchedAgentTextTool(
@@ -89,7 +114,8 @@ export async function untouchedAgentTextTool(
     if (summary === null || data === null) {
       return errorResult(`Nothing is recorded for ${target.path}.`);
     }
-    return okResult(data, untouchedLines(data, summary));
+    const at = await loadHookEventAt(ctx.deps, root);
+    return warnedResult(at, data, untouchedLines(data, summary));
   });
 }
 export async function provenanceSummaryTool(
@@ -105,7 +131,8 @@ export async function provenanceSummaryTool(
     const result = summarize(summaryInputOf(facts, scope, args.top));
     if (result.summary === null) return errorResult(result.lines[0] ?? "Nothing is recorded.");
     const data = summaryData(result.summary, recordDocs(facts), facts.sessions);
-    return okResult(data, summaryLines(result.summary));
+    const at = await loadHookEventAt(ctx.deps, root);
+    return warnedResult(at, data, summaryLines(result.summary));
   });
 }
 export async function checkRecordsTool(
@@ -117,7 +144,9 @@ export async function checkRecordsTool(
     if (!isFacts(facts)) return facts;
     const result = checkWorkspace(checkFactsOf(facts, args.strict === true));
     const data = checkData(result, facts.files.length);
-    return okResult(data, checkLines(result), result.status !== 0);
+    const at = await loadHookEventAt(ctx.deps, root);
+    const hookEvents = { any: at !== null, lastHookEventAt: at };
+    return warnedResult(at, data, checkLines(result), { hookEvents }, result.status !== 0);
   });
 }
 /** The text lines of a setup result: the counts, the baseline and, if asked for, the git hook. */

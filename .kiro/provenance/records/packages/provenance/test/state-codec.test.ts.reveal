@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.1,561,0,0}][PST{t=2026-11-20T03:04:47Z}]import { describe, expect, it } from "vitest";
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,863,0,0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.1,561,0,0}][PST{t=2026-11-20T03:04:47Z}]import { describe, expect, it } from "vitest";
 import {
   decodeSessions,
   decodeState,
@@ -63,7 +63,28 @@ function roundTrip(s: WindowState): WindowState {
   return r.value;
 }
 
-describe("decodeState(encodeState(s))", () => {
+describe("[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]lastHookEventAt (Req 3.29)", () => {
+  it("round-trips when present and is left out of the text when absent", () => {
+    const s = state({ lastHookEventAt: T1 });
+    expect(roundTrip(s)).toEqual(s);
+    expect(encodeState(s)).toContain(`"lastHookEventAt": "${T1}"`);
+    expect(encodeState(state())).not.toContain("lastHookEventAt");
+  });
+  it("reads a state.json without it as a state without it", () => {
+    const back = roundTrip(state());
+    expect(back).not.toHaveProperty("lastHookEventAt");
+  });
+  it("refuses a value that is not a time stamp", () => {
+    const edit = (value: unknown): string =>
+      withEdit((o) => {
+        o\["lastHookEventAt"\] = value;
+      });
+    expect(decodeState(edit("yesterday")).ok).toBe(false);
+    expect(decodeState(edit(5)).ok).toBe(false);
+    expect(decodeState(edit(null)).ok).toBe(false);
+  });
+});
+describe("[PST{t=2026-11-20T03:04:47Z}]decodeState(encodeState(s))", () => {
   it("round-trips the design's document", () => {
     expect(roundTrip(state())).toEqual(state());
   });

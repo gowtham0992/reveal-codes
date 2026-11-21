@@ -1,0 +1,20 @@
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,712,0,0}][AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]import { encodeState } from "../../src/core/state-codec.js";
+import type { WindowState } from "../../src/core/types.js";
+import type { TempDir } from "./temp-repo.js";
+export const HOOK_EVENT_AT = "2026-11-19T10:00:00.000Z";
+/** A `state.json` in `dir` that holds a hook event, so that `reveal` prints no no-event warning. */
+export function markHookEvent(dir: TempDir, at: string = HOOK_EVENT_AT): void {
+  const state: WindowState = {
+    version: 1,
+    order: 0,
+    lastWindowRun: null,
+    lastEventAt: null,
+    lastHookEventAt: at,
+    recordedAtMs: 0,
+    noSessionIdLogged: false,
+    sessions: {},
+    files: {},
+    skipped: {},
+  };
+  dir.write(".kiro/provenance/state.json", encodeState(state));
+}

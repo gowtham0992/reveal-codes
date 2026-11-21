@@ -1,7 +1,8 @@
-[DOC{v=1;n=0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.1,21,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.2,16,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.3,5,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.4,167,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.5,1820,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.6,33,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.7,21,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.8,88,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.9,52,0,0;r=7.6 Property 12: summary counts add up 2026-11-20T04:10:51Z.1,7635,0,0}][AI:7.6 Property 12: summary counts add up 2026-11-20T04:10:51Z.1{t=2026-11-20T04:14:22.608Z}]import type { Document } from "@reveal-codes/engine";
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,66,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.2,141,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.1,21,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.2,16,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.3,5,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.4,167,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.5,1820,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.6,33,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.7,21,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.8,88,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.9,52,0,0;r=7.6 Property 12: summary counts add up 2026-11-20T04:10:51Z.1,7635,0,0}][AI:7.6 Property 12: summary counts add up 2026-11-20T04:10:51Z.1{t=2026-11-20T04:14:22.608Z}]import type { Document } from "@reveal-codes/engine";
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import {
+import {[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}] NO_HOOK_EVENT_LINE } from "../src/core/hook-warning.js";
+import {[AI:7.6 Property 12: summary counts add up 2026-11-20T04:10:51Z.1{t=2026-11-20T04:14:22.608Z}]
   summarize,
   type SummaryInput,
   type SummaryRecord,
@@ -214,7 +215,9 @@ function check(
   all: boolean,
 ): void {
   const input = toInput(entries, rawScope, top, all[AI:7.6 Property 12: summary counts add up 2026-11-20T04:10:51Z.1{t=2026-11-20T04:14:22.608Z}]);
-  const out = summarize(input);
+  const out = summarize(input[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.2{t=2026-11-21T05:54:41.073Z}]);
+  // The no-event line is printed before the summary and is no line of it (Req 9.19).
+  expect(out.lines).not.toContain(NO_HOOK_EVENT_LINE[AI:7.6 Property 12: summary counts add up 2026-11-20T04:10:51Z.1{t=2026-11-20T04:14:22.608Z}]);
   const scope = normalize(rawScope);
   const kept = entries.filter((e) => inScope(e.path, scope));
   if (entries.length === 0) {

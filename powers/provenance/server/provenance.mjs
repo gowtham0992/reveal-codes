@@ -6007,18 +6007,21 @@ function decodeSkipped(v, where) {
     return bad4(`bad entry: ${where}`);
   return ok({ size, mtimeMs, reason });
 }
+function decodeMaps(r) {
+  const sessions = decodeMap(r["sessions"], "sessions", decodeSession);
+  if (!sessions.ok) return sessions;
+  const files = decodeMap(r["files"], "files", decodeFileCache);
+  if (!files.ok) return files;
+  const skipped = decodeMap(r["skipped"], "skipped", decodeSkipped);
+  if (!skipped.ok) return skipped;
+  return ok({ sessions: sessions.value, files: files.value, skipped: skipped.value });
+}
 function decodeState(text) {
   const parsed = parseJson2(text);
   if (!parsed.ok) return parsed;
-  const keys = [
-    "version",
-    "order",
-    "lastWindowRun",
-    "lastEventAt",
-    "recordedAtMs",
-    "noSessionIdLogged"
-  ];
-  const s = shape(parsed.value, "state", [...keys, "sessions", "files", "skipped"]);
+  const keys = ["version", "order", "lastWindowRun", "lastEventAt", "recordedAtMs"];
+  const required2 = [...keys, "noSessionIdLogged", "sessions", "files", "skipped"];
+  const s = shape(parsed.value, "state", required2, ["lastHookEventAt"]);
   if (!s.ok) return s;
   const r = s.value;
   if (r["version"] !== 1) return bad4("unsupported version");
@@ -6026,23 +6029,20 @@ function decodeState(text) {
   if (!isCount(order) || !isNum(recordedAtMs)) return bad4("bad counter");
   if (!isNullable(lastWindowRun, isStr)) return bad4("bad lastWindowRun");
   if (lastEventAt !== null && !validAt(lastEventAt)) return bad4("bad lastEventAt");
+  const hookAt = r["lastHookEventAt"];
+  if (hookAt !== void 0 && !validAt(hookAt)) return bad4("bad lastHookEventAt");
   if (typeof noSessionIdLogged !== "boolean") return bad4("bad noSessionIdLogged");
-  const sessions = decodeMap(r["sessions"], "sessions", decodeSession);
-  if (!sessions.ok) return sessions;
-  const files = decodeMap(r["files"], "files", decodeFileCache);
-  if (!files.ok) return files;
-  const skipped = decodeMap(r["skipped"], "skipped", decodeSkipped);
-  if (!skipped.ok) return skipped;
+  const maps = decodeMaps(r);
+  if (!maps.ok) return maps;
   return ok({
     version: 1,
     order,
     lastWindowRun,
     lastEventAt,
+    ...hookAt === void 0 ? {} : { lastHookEventAt: hookAt },
     recordedAtMs,
     noSessionIdLogged,
-    sessions: sessions.value,
-    files: files.value,
-    skipped: skipped.value
+    ...maps.value
   });
 }
 function sortedMap(map, f) {
@@ -6077,6 +6077,7 @@ function encodeState(state) {
     order: state.order,
     lastWindowRun: state.lastWindowRun,
     lastEventAt: state.lastEventAt,
+    ...state.lastHookEventAt === void 0 ? {} : { lastHookEventAt: state.lastHookEventAt },
     recordedAtMs: state.recordedAtMs,
     noSessionIdLogged: state.noSessionIdLogged,
     sessions: sortedMap(state.sessions, sessionJson),
@@ -7496,7 +7497,8 @@ async function runLocked(ctx) {
   const clock = { nowIso: () => eventIso };
   const done2 = transition(outcome.state, event, key, payload, clock, outcome.outsideFound);
   const next = await settleSession(ctx, done2, key);
-  const written = await store.writeState({ ...next, recordedAtMs: startMs });
+  const stamped = event === "manual" ? next : { ...next, lastHookEventAt: eventIso };
+  const written = await store.writeState({ ...stamped, recordedAtMs: startMs });
   if (!written.ok) await log(ctx, "write_failed");
 }
 async function recordInRoot(ctx) {
@@ -7544,6 +7546,18 @@ var init_recorder = __esm({
   }
 });
 
+// packages/provenance/src/core/hook-warning.ts
+function hookWarning(lastHookEventAt) {
+  return lastHookEventAt === null ? NO_HOOK_EVENT_LINE : null;
+}
+var NO_HOOK_EVENT_LINE;
+var init_hook_warning = __esm({
+  "packages/provenance/src/core/hook-warning.ts"() {
+    "use strict";
+    NO_HOOK_EVENT_LINE = "No hook event has been recorded in this workspace. The Provenance hooks may be disabled; text changed since setup cannot be attributed to the agent.";
+  }
+});
+
 // packages/provenance/src/core/neutralize.ts
 function replacement(code) {
   if (code === 10 || code === 9) return null;
@@ -7563,6 +7577,138 @@ function neutralize(text) {
 var init_neutralize = __esm({
   "packages/provenance/src/core/neutralize.ts"() {
     "use strict";
+  }
+});
+
+// packages/provenance/src/io/load.ts
+async function loadRecord2(store, path) {
+  const read = await store.readRecord(path);
+  if (read.ok) {
+    const document = read.value?.document;
+    return ok(document === void 0 ? null : { ok: true, text: document.text, doc: document });
+  }
+  return read.error.kind === "tampered_record" ? ok({ ok: false }) : err(read.error);
+}
+async function loadRecords(store) {
+  const records = {};
+  for (const path of (await store.listRecords()).sort()) {
+    const loaded = await loadRecord2(store, path);
+    if (!loaded.ok) return loaded;
+    if (loaded.value !== null) records[path] = loaded.value;
+  }
+  return ok(records);
+}
+async function readTexts(deps, root, list) {
+  const files = [];
+  for (let i = 0; i < list.length; i += READ_BATCH2) {
+    const batch = list.slice(i, i + READ_BATCH2);
+    const reads = await Promise.all(batch.map((c) => readCandidate(deps, root, c)));
+    reads.forEach((read, j) => {
+      if (read.kind === "text") {
+        files.push({ path: batch[j].path, digest: read.sha256, text: read.text });
+      }
+    });
+  }
+  return files;
+}
+function entryDigests(baseline) {
+  return Object.fromEntries(Object.entries(baseline?.files ?? {}).map(([p, e]) => [p, e.sha256]));
+}
+async function loadSessions(store) {
+  const read = await store.readSessions();
+  return read.ok ? read.value : "unreadable";
+}
+async function loadHookEventAt(deps, root) {
+  const read = await createStore(deps, `${root}/.kiro/provenance`).readState();
+  return read.ok ? read.value?.lastHookEventAt ?? null : null;
+}
+async function loadWorkspace(deps, root) {
+  const store = createStore(deps, `${root}/.kiro/provenance`);
+  const records = await loadRecords(store);
+  if (!records.ok) return records;
+  const baseline = await store.readBaseline();
+  if (!baseline.ok) return baseline;
+  const list = await listCandidates(deps, root);
+  return ok({
+    root,
+    files: await readTexts(deps, root, list.files),
+    records: records.value,
+    entries: entryDigests(baseline.value),
+    baseline: baseline.value,
+    sessions: await loadSessions(store)
+  });
+}
+async function readFileAt(deps, root, path) {
+  const stat = await deps.fs.lstat(`${root}/${path}`);
+  if (!stat.ok || stat.value.kind !== "file") return { kind: "absent" };
+  const { size, mtimeMs } = stat.value;
+  return readCandidate(deps, root, { path, size, mtimeMs });
+}
+async function baselineTextOf(deps, root, entry, read) {
+  if (entry === null || read.kind === "text" && read.sha256 === entry.sha256) return null;
+  const cache = createBaselineCache(deps, createStore(deps, `${root}/.kiro/provenance`).cacheDir());
+  return resolveBaselineText(deps, root, cache, entry);
+}
+async function loadFile(deps, root, path) {
+  const store = createStore(deps, `${root}/.kiro/provenance`);
+  const record2 = await loadRecord2(store, path);
+  if (!record2.ok) return record2;
+  const baseline = await store.readBaseline();
+  if (!baseline.ok) return baseline;
+  const read = await readFileAt(deps, root, path);
+  const entry = baseline.value?.files[path] ?? null;
+  return ok({
+    read,
+    record: record2.value,
+    entry,
+    baselineAt: baseline.value?.at ?? null,
+    baselineText: await baselineTextOf(deps, root, entry, read),
+    listed: record2.value !== null || entry !== null ? null : await isListed(deps, root, path)
+  });
+}
+async function isListed(deps, root, path) {
+  return (await listCandidates(deps, root)).files.some((c) => c.path === path);
+}
+function checkFactsOf(facts, strict) {
+  const records = {};
+  for (const [path, r] of Object.entries(facts.records)) {
+    records[path] = r.ok ? { ok: true, text: r.text } : { ok: false };
+  }
+  return { files: facts.files, records, entries: facts.entries, strict };
+}
+function summaryInputOf(facts, scope, top, all) {
+  const byPath = new Map(facts.files.map((f) => [f.path, f]));
+  const records = Object.entries(facts.records).flatMap(
+    ([path, r]) => r.ok ? [{ path, doc: r.doc, stale: byPath.get(path)?.text !== r.text }] : []
+  );
+  const unchanged = Object.entries(facts.entries).flatMap(([path, digest]) => {
+    const file = byPath.get(path);
+    const keep = !Object.hasOwn(facts.records, path);
+    return keep && file !== void 0 ? [{ path, length: file.text.length, stale: file.digest !== digest }] : [];
+  });
+  return {
+    records,
+    unchanged,
+    path: scope,
+    sessions: facts.sessions,
+    ...top ? { top } : {},
+    ...all ? { all } : {}
+  };
+}
+function unchangedDocument(text, baselineAt) {
+  const doc = createDocument(text, baselineAt);
+  return doc.ok ? doc.value : null;
+}
+var READ_BATCH2;
+var init_load = __esm({
+  "packages/provenance/src/io/load.ts"() {
+    "use strict";
+    init_src();
+    init_baseline_cache();
+    init_baseline_text();
+    init_scan2();
+    init_store();
+    READ_BATCH2 = 64;
   }
 });
 
@@ -7862,7 +8008,7 @@ function compareWindows(a, b) {
   }
   return compareCodeUnits2(a.windowRun, b.windowRun);
 }
-function isListed(file) {
+function isListed2(file) {
   const { AI, "AI>HUM": aiHuman, HUM } = file.counts;
   return file.stale || AI + aiHuman + HUM > 0;
 }
@@ -7873,7 +8019,7 @@ function buildSummary(records, unchanged, top, all) {
   const total = emptyCounts();
   for (const file of files) for (const o of ORIGINS3) total[o] += file.counts[o];
   const stretches = records.flatMap(stretchesOf).sort(compareStretches);
-  const listed = all ? files : files.filter(isListed);
+  const listed = all ? files : files.filter(isListed2);
   return {
     files,
     total,
@@ -7907,134 +8053,6 @@ var init_summary = __esm({
     init_summary_types();
     DEFAULT_TOP = 10;
     NOTHING_RECORDED = "Nothing is recorded. Run setup_provenance to start recording.";
-  }
-});
-
-// packages/provenance/src/io/load.ts
-async function loadRecord2(store, path) {
-  const read = await store.readRecord(path);
-  if (read.ok) {
-    const document = read.value?.document;
-    return ok(document === void 0 ? null : { ok: true, text: document.text, doc: document });
-  }
-  return read.error.kind === "tampered_record" ? ok({ ok: false }) : err(read.error);
-}
-async function loadRecords(store) {
-  const records = {};
-  for (const path of (await store.listRecords()).sort()) {
-    const loaded = await loadRecord2(store, path);
-    if (!loaded.ok) return loaded;
-    if (loaded.value !== null) records[path] = loaded.value;
-  }
-  return ok(records);
-}
-async function readTexts(deps, root, list) {
-  const files = [];
-  for (let i = 0; i < list.length; i += READ_BATCH2) {
-    const batch = list.slice(i, i + READ_BATCH2);
-    const reads = await Promise.all(batch.map((c) => readCandidate(deps, root, c)));
-    reads.forEach((read, j) => {
-      if (read.kind === "text") {
-        files.push({ path: batch[j].path, digest: read.sha256, text: read.text });
-      }
-    });
-  }
-  return files;
-}
-function entryDigests(baseline) {
-  return Object.fromEntries(Object.entries(baseline?.files ?? {}).map(([p, e]) => [p, e.sha256]));
-}
-async function loadSessions(store) {
-  const read = await store.readSessions();
-  return read.ok ? read.value : "unreadable";
-}
-async function loadWorkspace(deps, root) {
-  const store = createStore(deps, `${root}/.kiro/provenance`);
-  const records = await loadRecords(store);
-  if (!records.ok) return records;
-  const baseline = await store.readBaseline();
-  if (!baseline.ok) return baseline;
-  const list = await listCandidates(deps, root);
-  return ok({
-    root,
-    files: await readTexts(deps, root, list.files),
-    records: records.value,
-    entries: entryDigests(baseline.value),
-    baseline: baseline.value,
-    sessions: await loadSessions(store)
-  });
-}
-async function readFileAt(deps, root, path) {
-  const stat = await deps.fs.lstat(`${root}/${path}`);
-  if (!stat.ok || stat.value.kind !== "file") return { kind: "absent" };
-  const { size, mtimeMs } = stat.value;
-  return readCandidate(deps, root, { path, size, mtimeMs });
-}
-async function baselineTextOf(deps, root, entry, read) {
-  if (entry === null || read.kind === "text" && read.sha256 === entry.sha256) return null;
-  const cache = createBaselineCache(deps, createStore(deps, `${root}/.kiro/provenance`).cacheDir());
-  return resolveBaselineText(deps, root, cache, entry);
-}
-async function loadFile(deps, root, path) {
-  const store = createStore(deps, `${root}/.kiro/provenance`);
-  const record2 = await loadRecord2(store, path);
-  if (!record2.ok) return record2;
-  const baseline = await store.readBaseline();
-  if (!baseline.ok) return baseline;
-  const read = await readFileAt(deps, root, path);
-  const entry = baseline.value?.files[path] ?? null;
-  return ok({
-    read,
-    record: record2.value,
-    entry,
-    baselineAt: baseline.value?.at ?? null,
-    baselineText: await baselineTextOf(deps, root, entry, read),
-    listed: record2.value !== null || entry !== null ? null : await isListed2(deps, root, path)
-  });
-}
-async function isListed2(deps, root, path) {
-  return (await listCandidates(deps, root)).files.some((c) => c.path === path);
-}
-function checkFactsOf(facts, strict) {
-  const records = {};
-  for (const [path, r] of Object.entries(facts.records)) {
-    records[path] = r.ok ? { ok: true, text: r.text } : { ok: false };
-  }
-  return { files: facts.files, records, entries: facts.entries, strict };
-}
-function summaryInputOf(facts, scope, top, all) {
-  const byPath = new Map(facts.files.map((f) => [f.path, f]));
-  const records = Object.entries(facts.records).flatMap(
-    ([path, r]) => r.ok ? [{ path, doc: r.doc, stale: byPath.get(path)?.text !== r.text }] : []
-  );
-  const unchanged = Object.entries(facts.entries).flatMap(([path, digest]) => {
-    const file = byPath.get(path);
-    const keep = !Object.hasOwn(facts.records, path);
-    return keep && file !== void 0 ? [{ path, length: file.text.length, stale: file.digest !== digest }] : [];
-  });
-  return {
-    records,
-    unchanged,
-    path: scope,
-    sessions: facts.sessions,
-    ...top ? { top } : {},
-    ...all ? { all } : {}
-  };
-}
-function unchangedDocument(text, baselineAt) {
-  const doc = createDocument(text, baselineAt);
-  return doc.ok ? doc.value : null;
-}
-var READ_BATCH2;
-var init_load = __esm({
-  "packages/provenance/src/io/load.ts"() {
-    "use strict";
-    init_src();
-    init_baseline_cache();
-    init_baseline_text();
-    init_scan2();
-    init_store();
-    READ_BATCH2 = 64;
   }
 });
 
@@ -8407,12 +8425,17 @@ function relativeTo(root, cwd, arg) {
   if (parts.length <= base.length || base.some((p, i) => parts[i] !== p)) return null;
   return parts.slice(base.length).join("/");
 }
+async function warnIfNoHookEvent(deps, io, root) {
+  const line2 = hookWarning(await loadHookEventAt(deps, root));
+  if (line2 !== null) io.out(line2);
+}
 async function revealOne(deps, io, arg, full) {
   const root = await findWorkspaceRoot(deps, io.cwd, null);
   if (root === null) {
     io.out(NOT_SET_UP);
     return 1;
   }
+  await warnIfNoHookEvent(deps, io, root);
   const path = relativeTo(root, io.cwd, arg);
   if (path === null) {
     io.out(`${neutralize(arg)}: not recorded: not_tracked`);
@@ -8430,8 +8453,9 @@ function scopeOf(root, cwd, arg) {
   if (probe === null) return null;
   return { scope: probe === "x" ? null : probe.slice(0, -2) };
 }
-async function inWorkspace(deps, io, run) {
+async function inWorkspace(deps, io, run, warn) {
   const root = await findWorkspaceRoot(deps, io.cwd, null);
+  if (root !== null && warn) await warnIfNoHookEvent(deps, io, root);
   const report = root === null ? { status: 1, text: NOT_SET_UP } : await run(root);
   io.out(report.text);
   return report.status;
@@ -8439,18 +8463,19 @@ async function inWorkspace(deps, io, run) {
 async function summaryForm(deps, io, args) {
   const parsed = parseSummaryArgs(args);
   if (parsed === null) return usage(io);
-  return inWorkspace(deps, io, async (root) => {
+  const run = async (root) => {
     const found = parsed.path === null ? { scope: null } : scopeOf(root, io.cwd, parsed.path);
     if (found === null) {
       return { status: 1, text: `${neutralize(parsed.path ?? "")}: not recorded: not_tracked` };
     }
     return summaryReport(deps, root, found.scope, parsed.top, parsed.all);
-  });
+  };
+  return inWorkspace(deps, io, run, true);
 }
 async function checkForm(deps, io, args) {
   const parsed = parseCheckArgs(args);
   if (parsed === null) return usage(io);
-  return inWorkspace(deps, io, (root) => checkReport(deps, root, parsed.strict));
+  return inWorkspace(deps, io, (root) => checkReport(deps, root, parsed.strict), false);
 }
 async function recordForm(deps, io) {
   const root = await findWorkspaceRoot(deps, io.cwd, null);
@@ -8458,6 +8483,7 @@ async function recordForm(deps, io) {
     io.out(NOT_SET_UP);
     return 1;
   }
+  await warnIfNoHookEvent(deps, io, root);
   await runRecord(deps, "manual", io.cwd);
   return 0;
 }
@@ -8479,7 +8505,9 @@ var NOT_SET_UP, USAGE;
 var init_reveal_cmd = __esm({
   "packages/provenance/src/io/reveal-cmd.ts"() {
     "use strict";
+    init_hook_warning();
     init_neutralize();
+    init_load();
     init_recorder();
     init_reveal_report();
     init_reveal_file();
@@ -29745,8 +29773,8 @@ function validateToolName(name) {
 function issueToolNameWarning(name, warnings) {
   if (warnings.length > 0) {
     console.warn(`Tool name validation warning for "${name}":`);
-    for (const warning of warnings) {
-      console.warn(`  - ${warning}`);
+    for (const warning2 of warnings) {
+      console.warn(`  - ${warning2}`);
     }
     console.warn("Tool registration will proceed, but this may cause compatibility issues.");
     console.warn("Consider updating the tool name to conform to the MCP tool naming standard.");
@@ -30766,7 +30794,7 @@ var init_stdio2 = __esm({
 });
 
 // packages/provenance/src/mcp/schemas.ts
-var count, origin, structuredSpanSchema, fileSpanSchema, byOrigin, characters, fileCountsSchema, windowRowSchema, revealReasons, revealFileOutput, untouchedAgentTextOutput, provenanceSummaryOutput, checkLine, checkRecordsOutput, setupProvenanceOutput, workspaceArg, topArg, revealFileInput, untouchedAgentTextInput, provenanceSummaryInput, checkRecordsInput, setupProvenanceInput;
+var count, origin, structuredSpanSchema, fileSpanSchema, byOrigin, characters, fileCountsSchema, windowRowSchema, revealReasons, revealFileData, untouchedAgentTextData, provenanceSummaryData, checkLine, checkRecordsData, warning, revealFileOutput, untouchedAgentTextOutput, provenanceSummaryOutput, checkRecordsOutput, setupProvenanceOutput, workspaceArg, topArg, revealFileInput, untouchedAgentTextInput, provenanceSummaryInput, checkRecordsInput, setupProvenanceInput;
 var init_schemas4 = __esm({
   "packages/provenance/src/mcp/schemas.ts"() {
     "use strict";
@@ -30816,7 +30844,7 @@ var init_schemas4 = __esm({
       "no_record",
       "tampered_record"
     ];
-    revealFileOutput = external_exports.object({
+    revealFileData = external_exports.object({
       file: external_exports.string(),
       status: external_exports.enum(["current", "unchanged_baseline", "stale", "unrecorded"]),
       reason: external_exports.enum(revealReasons).nullable(),
@@ -30824,7 +30852,7 @@ var init_schemas4 = __esm({
       spans: external_exports.array(structuredSpanSchema),
       legend: external_exports.array(external_exports.string()).length(4)
     });
-    untouchedAgentTextOutput = external_exports.object({
+    untouchedAgentTextData = external_exports.object({
       path: external_exports.string(),
       stretches: external_exports.array(structuredSpanSchema),
       countsByOrigin: characters,
@@ -30832,7 +30860,7 @@ var init_schemas4 = __esm({
       stale: external_exports.boolean(),
       notice: external_exports.string()
     });
-    provenanceSummaryOutput = external_exports.object({
+    provenanceSummaryData = external_exports.object({
       files: external_exports.array(fileCountsSchema),
       total: fileCountsSchema,
       windows: external_exports.array(windowRowSchema),
@@ -30845,11 +30873,18 @@ var init_schemas4 = __esm({
       path: external_exports.string(),
       reason: external_exports.enum(["tampered_record", "orphan_record", "orphan_baseline", "stale", "no_record"])
     });
-    checkRecordsOutput = external_exports.object({
+    checkRecordsData = external_exports.object({
       ok: external_exports.boolean(),
       filesChecked: count,
       failures: external_exports.array(checkLine),
       reports: external_exports.array(checkLine)
+    });
+    warning = external_exports.object({ warning: external_exports.string().nullable() });
+    revealFileOutput = revealFileData.merge(warning);
+    untouchedAgentTextOutput = untouchedAgentTextData.merge(warning);
+    provenanceSummaryOutput = provenanceSummaryData.merge(warning);
+    checkRecordsOutput = checkRecordsData.merge(warning).extend({
+      hookEvents: external_exports.object({ any: external_exports.boolean(), lastHookEventAt: external_exports.string().nullable() })
     });
     setupProvenanceOutput = external_exports.object({
       written: external_exports.array(external_exports.string()),
@@ -30886,6 +30921,7 @@ function hookFileText() {
     name: h.name,
     trigger: h.trigger,
     timeout: 30,
+    enabled: true,
     action: { type: "command", command: commandFor(h.event) }
   }));
   return `${JSON.stringify({ version: "v1", hooks }, null, 2)}
@@ -31434,6 +31470,16 @@ function recordDocs(facts) {
   }
   return docs;
 }
+function warnedLines(warning2, lines) {
+  if (warning2 === null) return [...lines];
+  const room = 4;
+  const kept = lines.length <= room ? lines : [...lines.slice(0, room - 1), lines.at(-1) ?? ""];
+  return [warning2, ...kept];
+}
+function warnedResult(at, data, lines, extra = {}, error2 = false) {
+  const warning2 = hookWarning(at);
+  return okResult({ ...data, warning: warning2, ...extra }, warnedLines(warning2, lines), error2);
+}
 async function revealFileTool(ctx, args) {
   return withRoot(ctx, args, async (root) => {
     const target = filePath(root, args.path);
@@ -31441,7 +31487,7 @@ async function revealFileTool(ctx, args) {
     const facts = await loadFile(ctx.deps, root, target.path);
     if (!facts.ok) return errorResult(`${target.path}: ${facts.error.kind}`);
     const data = revealData(facts.value, target.path);
-    return okResult(data, revealLines(data));
+    return warnedResult(await loadHookEventAt(ctx.deps, root), data, revealLines(data));
   });
 }
 async function untouchedAgentTextTool(ctx, args) {
@@ -31455,7 +31501,8 @@ async function untouchedAgentTextTool(ctx, args) {
     if (summary === null || data === null) {
       return errorResult(`Nothing is recorded for ${target.path}.`);
     }
-    return okResult(data, untouchedLines(data, summary));
+    const at = await loadHookEventAt(ctx.deps, root);
+    return warnedResult(at, data, untouchedLines(data, summary));
   });
 }
 async function provenanceSummaryTool(ctx, args) {
@@ -31468,7 +31515,8 @@ async function provenanceSummaryTool(ctx, args) {
     const result = summarize(summaryInputOf(facts, scope, args.top));
     if (result.summary === null) return errorResult(result.lines[0] ?? "Nothing is recorded.");
     const data = summaryData(result.summary, recordDocs(facts), facts.sessions);
-    return okResult(data, summaryLines(result.summary));
+    const at = await loadHookEventAt(ctx.deps, root);
+    return warnedResult(at, data, summaryLines(result.summary));
   });
 }
 async function checkRecordsTool(ctx, args) {
@@ -31477,7 +31525,9 @@ async function checkRecordsTool(ctx, args) {
     if (!isFacts(facts)) return facts;
     const result = checkWorkspace(checkFactsOf(facts, args.strict === true));
     const data = checkData(result, facts.files.length);
-    return okResult(data, checkLines(result), result.status !== 0);
+    const at = await loadHookEventAt(ctx.deps, root);
+    const hookEvents = { any: at !== null, lastHookEventAt: at };
+    return warnedResult(at, data, checkLines(result), { hookEvents }, result.status !== 0);
   });
 }
 function setupLines(root, report) {
@@ -31508,6 +31558,7 @@ var init_tools = __esm({
   "packages/provenance/src/mcp/tools.ts"() {
     "use strict";
     init_check2();
+    init_hook_warning();
     init_summary();
     init_baseline_cmd();
     init_faults();

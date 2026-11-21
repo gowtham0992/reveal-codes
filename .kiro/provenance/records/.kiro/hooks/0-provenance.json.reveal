@@ -1,0 +1,45 @@
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,23,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.2,23,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.3,23,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.4,23,0,0}][PST{t=2026-11-20T03:04:47Z}]{
+  "version": "v1",
+  "hooks": \[
+    {
+      "name": "Provenance: prompt",
+      "trigger": "UserPromptSubmit",
+      "timeout": 30,
+      "[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]enabled": true,
+      "[PST{t=2026-11-20T03:04:47Z}]action": {
+        "type": "command",
+        "command": "node .kiro/provenance/provenance.mjs record promptSubmit >/dev/null 2>&1 || true"
+      }
+    },
+    {
+      "name": "Provenance: stop",
+      "trigger": "Stop",
+      "timeout": 30,
+[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.2{t=2026-11-21T05:54:41.073Z}]      "enabled": true,
+[PST{t=2026-11-20T03:04:47Z}]      "action": {
+        "type": "command",
+        "command": "node .kiro/provenance/provenance.mjs record agentStop >/dev/null 2>&1 || true"
+      }
+    },
+    {
+      "name": "Provenance: task start",
+      "trigger": "PreTaskExec",
+      "timeout": 30,
+[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.3{t=2026-11-21T05:54:41.073Z}]      "enabled": true,
+[PST{t=2026-11-20T03:04:47Z}]      "action": {
+        "type": "command",
+        "command": "node .kiro/provenance/provenance.mjs record preTask >/dev/null 2>&1 || true"
+      }
+    },
+    {
+      "name": "Provenance: task end",
+      "trigger": "PostTaskExec",
+      "timeout": 30[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.4{t=2026-11-21T05:54:41.073Z}],
+      "enabled": true[PST{t=2026-11-20T03:04:47Z}],
+      "action": {
+        "type": "command",
+        "command": "node .kiro/provenance/provenance.mjs record postTask >/dev/null 2>&1 || true"
+      }
+    }
+  \]
+}

@@ -28,7 +28,8 @@ Install the recorder in a workspace. Setup writes files into the workspace, so a
    - that the record starts on the day of setup and says nothing about earlier changes;
    - that Windows is not supported;
    - that running setup again never re-baselines: it only refreshes `provenance.mjs` and `reveal`.
-5. Give the three reveal commands, run from the workspace root:
+5. Check that the hooks are on. Ask the person to open the Agent Hooks panel in Kiro, to switch on every Provenance hook that is shown as disabled, and to run `Developer: Reload Window` if any was disabled. Then ask the person to send one prompt in this workspace. After it, call `check_records` with the `workspace` argument and read `hookEvents`. If `hookEvents.any` is true, say that a hook event arrived and give the time in `hookEvents.lastHookEventAt`. If `hookEvents.any` is false, say plainly that no hook event has arrived, that the Provenance hooks may still be disabled, and that text changed since setup cannot be attributed to the agent until one does. Do not say that recording works when `any` is false. Quote the `warning` field if it is not null.
+6. Give the three reveal commands, run from the workspace root:
    - `.kiro/provenance/reveal <file>` shows one file with its codes;
    - `.kiro/provenance/reveal --summary [path]` gives the shares by origin, the longest untouched agent stretches and the agent windows;
    - `.kiro/provenance/reveal --check [--strict]` checks the records for damage.
@@ -40,4 +41,5 @@ Install the recorder in a workspace. Setup writes files into the workspace, so a
 - Never write the git hook without a yes.
 - Never edit `.kiroignore`. Setup does not write it.
 - Report what the tool returned. Do not claim files were written that the result does not list.
+- Never say that the hooks are working unless `check_records` returned `hookEvents.any` as true.
 - Do not say that the record proves who wrote a passage. It records how text changed, and it does not tell typing from pasting.

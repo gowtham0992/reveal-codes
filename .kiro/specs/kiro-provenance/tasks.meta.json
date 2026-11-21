@@ -1342,6 +1342,44 @@
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795235155902
       }
+    ],
+    "10.4 Hooks enabled, hook-event check, no-event warning": [
+      {
+        "executionId": "b1ce6289-3e9a-47b0-b1e3-73400850ae7e",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795239900978
+      },
+      {
+        "executionId": "b1ce6289-3e9a-47b0-b1e3-73400850ae7e",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795239901663
+      },
+      {
+        "executionId": "b1ce6289-3e9a-47b0-b1e3-73400850ae7e",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795240480972
+      }
+    ],
+    "10.5 Slide ambiguous edits to a line start": [
+      {
+        "executionId": "b1ce6289-3e9a-47b0-b1e3-73400850ae7e",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795239901037
+      }
+    ],
+    "10.6 Runs list tag once, one version source, setup names each file": [
+      {
+        "executionId": "b1ce6289-3e9a-47b0-b1e3-73400850ae7e",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795239901078
+      }
+    ],
+    "10.7 Checkpoint - the walk findings": [
+      {
+        "executionId": "b1ce6289-3e9a-47b0-b1e3-73400850ae7e",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795239901122
+      }
     ]
   }
 }

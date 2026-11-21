@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=10.1 `powers/provenance` manifests\, skills and README 2026-11-21T00:46:19Z.1,3496,0,0}][AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]---
+[DOC{v=1;n=0;r=10.1 `powers/provenance` manifests\, skills and README 2026-11-21T00:46:19Z.1,3496,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,764,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.2,97,0,0}][AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]---
 name: setup-provenance
 description: Install provenance recording in a workspace so that Kiro records which text in each source file the agent changed. Use when asked to set up provenance, to record who wrote the code, to install Reveal Codes for source files, or to start tracking which text the agent wrote.
 ---
@@ -28,7 +28,8 @@ Install the recorder in a workspace. Setup writes files into the workspace, so a
    - that the record starts on the day of setup and says nothing about earlier changes;
    - that Windows is not supported;
    - that running setup again never re-baselines: it only refreshes `provenance.mjs` and `reveal`.
-5. Give the three reveal commands, run from the workspace root:
+5. [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]Check that the hooks are on. Ask the person to open the Agent Hooks panel in Kiro, to switch on every Provenance hook that is shown as disabled, and to run `Developer: Reload Window` if any was disabled. Then ask the person to send one prompt in this workspace. After it, call `check_records` with the `workspace` argument and read `hookEvents`. If `hookEvents.any` is true, say that a hook event arrived and give the time in `hookEvents.lastHookEventAt`. If `hookEvents.any` is false, say plainly that no hook event has arrived, that the Provenance hooks may still be disabled, and that text changed since setup cannot be attributed to the agent until one does. Do not say that recording works when `any` is false. Quote the `warning` field if it is not null.
+6. [AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]Give the three reveal commands, run from the workspace root:
    - `.kiro/provenance/reveal <file>` shows one file with its codes;
    - `.kiro/provenance/reveal --summary \[path\]` gives the shares by origin, the longest untouched agent stretches and the agent windows;
    - `.kiro/provenance/reveal --check \[--strict\]` checks the records for damage.
@@ -39,5 +40,6 @@ Install the recorder in a workspace. Setup writes files into the workspace, so a
 - Never call `setup_provenance` before the person agrees.
 - Never write the git hook without a yes.
 - Never edit `.kiroignore`. Setup does not write it.
-- Report what the tool returned. Do not claim files were written that the result does not list.
+- Report what the tool returned. Do not claim files were written that the result does not list[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.2{t=2026-11-21T05:54:41.073Z}].
+- Never say that the hooks are working unless `check_records` returned `hookEvents.any` as true[AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}].
 - Do not say that the record proves who wrote a passage. It records how text changed, and it does not tell typing from pasting.

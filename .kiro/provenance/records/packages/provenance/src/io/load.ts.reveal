@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.1,17,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.2,66,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.3,135,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,8022,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]/**
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,433,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.1,17,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.2,66,0,0;r=7.10 Summary order\, file filter\, `--all`\, aligned columns\, no repeated titles 2026-11-20T05:17:25Z.3,135,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,8022,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]/**
  * The loader (design, The Reveal_Command and The MCP tools): reads the Records, the Baseline_File,
  * the Sessions_File and the files into plain facts for the viewer, the summary, the check and the
  * MCP tools. It writes nothing and makes no network request; a failed read is a value.
@@ -91,7 +91,15 @@ async function loadSessions(store: Store): Promise<SessionsCount> {
   return read.ok ? read.value : "unreadable";
 }
 
-/** Reads the whole workspace once: Records, Baseline_File, Sessions_File and the Tracked_Files. */
+/**[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]
+ * `lastHookEventAt` of `state.json`: null when the file is absent, does not parse or has no such
+ * field, which all mean that no hook event has been recorded (Req 3.29). Reads only.
+ */
+export async function loadHookEventAt(deps: LoadDeps, root: string): Promise<string | null> {
+  const read = await createStore(deps, `${root}/.kiro/provenance`).readState();
+  return read.ok ? (read.value?.lastHookEventAt ?? null) : null;
+}
+/**[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}] Reads the whole workspace once: Records, Baseline_File, Sessions_File and the Tracked_Files. */
 export async function loadWorkspace(deps: LoadDeps, root: string): Loaded<WorkspaceFacts> {
   const store = createStore(deps, `${root}/.kiro/provenance`);
   const records = await loadRecords(store);

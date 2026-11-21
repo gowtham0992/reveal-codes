@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=8.1 MCP dependencies\, workspace discovery and schemas 2026-11-20T16:21:57Z.1,1336,0,0}][AI:8.1 MCP dependencies, workspace discovery and schemas 2026-11-20T16:21:57Z.1{t=2026-11-20T16:26:30.350Z}]import { createDocument } from "@reveal-codes/engine";
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,283,0,0;r=8.1 MCP dependencies\, workspace discovery and schemas 2026-11-20T16:21:57Z.1,1336,0,0}][AI:8.1 MCP dependencies, workspace discovery and schemas 2026-11-20T16:21:57Z.1{t=2026-11-20T16:26:30.350Z}]import { createDocument } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import { legendLines } from "../src/core/legend.js";
 import { structuredSpans } from "../src/core/structured.js";
@@ -17,8 +17,11 @@ describe("mcp output schemas", () => {
       unrecordedCharacters: 0,
       spans,
       legend: legendLines("run"),
+    [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]  warning: null,
     };
     expect(revealFileOutput.safeParse(result).success).toBe(true);
+    expect(revealFileOutput.safeParse({ ...result, warning: "No hook event." }).success).toBe(true);
+    expect(revealFileOutput.safeParse({ ...result, warning: undefined }).success).toBe(fals[AI:8.1 MCP dependencies, workspace discovery and schemas 2026-11-20T16:21:57Z.1{t=2026-11-20T16:26:30.350Z}]e);
     expect(revealFileOutput.safeParse({ ...result, reason: "unknown" }).success).toBe(false);
     expect(revealFileOutput.safeParse({ ...result, legend: \["one"\] }).success).toBe(false);
   });

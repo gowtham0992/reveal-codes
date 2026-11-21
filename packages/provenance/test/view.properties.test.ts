@@ -1,6 +1,7 @@
 import type { Document } from "@reveal-codes/engine";
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import { hookWarning } from "../src/core/hook-warning.js";
 import { assignTags } from "../src/core/tags.js";
 import { viewRecord } from "../src/core/view.js";
 import { arbPath, arbViewDocument } from "../src/testing/arbitraries.js";
@@ -134,8 +135,13 @@ describe("view properties _Requirements: 9.4, 9.5, 9.6, 9.7, 9.8, 9.14, 9.15, 9.
         fc.boolean(),
         fc.array(arbWindowRun, { minLength: 1, maxLength: 4 }),
         fc.array(fc.nat(), { maxLength: 40 }),
-        (base, mode, path, full, windows, picks) => {
+        fc.constantFrom<string | null>(null, "2026-11-19T10:00:00.000Z"),
+        (base, mode, path, full, windows, picks, hookAt) => {
           const doc = intoWindows(base, windows, picks);
+          // The whole output of `reveal <file>`: the no-event line, when there is one, then the view.
+          const warning = hookWarning(hookAt);
+          const whole = (view: string): string => (warning === null ? view : `${warning}\n${view}`);
+          const lead = warning === null ? "" : `${warning}\n`;
           const plain = viewRecord(doc, "plain", path, full);
           const coloured = viewRecord(doc, mode, path, full);
           const runs = agentRuns(doc);
@@ -150,9 +156,10 @@ describe("view properties _Requirements: 9.4, 9.5, 9.6, 9.7, 9.8, 9.14, 9.15, 9.
             .map((l) => l.replace(/\\([\s\S])/gu, "$1"));
           const scanned = scanBody(lines.slice(LEGEND_LINES + listed + 1).join("\n"));
           const unescaped = [...head.slice(0, LEGEND_LINES + LIST_LINES), ...list].join("\n");
-          expect(stripAnsi(coloured)).toBe(`${unescaped}\n${scanned.kept}`);
-          expect(stripAnsi(coloured)).not.toContain("\u001b");
-          expect(plain).not.toContain("\u001b");
+          expect(stripAnsi(whole(coloured))).toBe(`${lead}${unescaped}\n${scanned.kept}`);
+          expect(stripAnsi(whole(coloured))).not.toContain("\u001b");
+          expect(whole(plain)).not.toContain("\u001b");
+          expect(whole(plain).split("\n")[0]).toBe(warning ?? lines[0]);
           expect(scanned.text).toBe(expectedPictures(doc.text));
           expect(scanned.codes.length).toBe(doc.spans.length);
           for (const code of scanned.codes) {

@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.1,12,0,0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.2,10,0,0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.3,113,0,0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.4,135,0,0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.5,156,0,0}][PST{t=2026-11-20T03:04:47Z}]import { err, ok } from "@reveal-codes/engine";
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,524,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.2,162,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.3,220,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.4,122,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.5,49,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.6,66,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.7,7,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.8,96,0,0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.1,12,0,0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.2,10,0,0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.3,113,0,0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.4,135,0,0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.5,156,0,0}][PST{t=2026-11-20T03:04:47Z}]import { err, ok } from "@reveal-codes/engine";
 import type { Result } from "@reveal-codes/engine";
 import { validAt } from "./baseline-codec.js";
 import type {
@@ -159,23 +159,28 @@ function decodeSkipped(v: unknown, where: string): Result<SkippedFile, Provenanc
   return ok({ size, mtimeMs, reason });
 }
 
-/**
+[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]type Maps = Pick<WindowState, "sessions" | "files" | "skipped">;
+function decodeMaps(r: Obj): Result<Maps, ProvenanceError> {
+  const sessions = decodeMap(r\["sessions"\], "sessions", decodeSession);
+  if (!sessions.ok) return sessions;
+  const files = decodeMap(r\["files"\], "files", decodeFileCache);
+  if (!files.ok) return files;
+  const skipped = decodeMap(r\["skipped"\], "skipped", decodeSkipped);
+  if (!skipped.ok) return skipped;
+  return ok({ sessions: sessions.value, files: files.value, skipped: skipped.value });
+}
+[PST{t=2026-11-20T03:04:47Z}]/**
  * Read state.json (Req 3.17, 5.16): `version` 1 and exactly the fields of
- * `WindowState`. Any other shape, a session entry without `lastClosedBy`,
- * `promptSeen` or `noPromptCounted` included, is an error value. Never throws.
+ * `WindowState`[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.2{t=2026-11-21T05:54:41.073Z}] (`lastHookEventAt` is optional, Req 3.29). Any other shape, a session
+ * entry without `lastClosedBy`, `promptSeen` or `noPromptCounted` included, is an error
+ *[PST{t=2026-11-20T03:04:47Z}] value. Never throws.
  */
 export function decodeState(text: string): Result<WindowState, ProvenanceError> {
   const parsed = parseJson(text);
   if (!parsed.ok) return parsed;
-  const keys = \[
-    "version",
-    "order",
-    "lastWindowRun",
-    "lastEventAt",
-    "recordedAtMs",
-    "noSessionIdLogged",
-  \];
-  const s = shape(parsed.value, "state", \[...keys, "sessions", "files", "skipped"\]);
+  const keys = \[[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.3{t=2026-11-21T05:54:41.073Z}]"version", "order", "lastWindowRun", "lastEventAt", "recordedAtMs"\];
+  const required = \[...keys, "noSessionIdLogged", "sessions", "files", "skipped"\];
+  const s = shape(parsed.value, "state", required, \["lastHookEventAt[PST{t=2026-11-20T03:04:47Z}]"\]);
   if (!s.ok) return s;
   const r = s.value;
   if (r\["version"\] !== 1) return bad("unsupported version");
@@ -183,26 +188,22 @@ export function decodeState(text: string): Result<WindowState, ProvenanceError> 
   if (!isCount(order) || !isNum(recordedAtMs)) return bad("bad counter");
   if (!isNullable(lastWindowRun, isStr)) return bad("bad lastWindowRun");
   if (lastEventAt !== null && !validAt(lastEventAt)) return bad("bad lastEventAt");
-  if (typeof noSessionIdLogged !== "boolean") return bad("bad noSessionIdLogged");
-  const sessions = decodeMap(r\["sessions"\], "sessions", decodeSession);
-  if (!sessions.ok) return sessions;
-  const files = decodeMap(r\["files"\], "files", decodeFileCache);
-  if (!files.ok) return files;
-  const skipped = decodeMap(r\["skipped"\], "skipped", decodeSkipped);
-  if (!skipped.ok) return skipped;
+[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.4{t=2026-11-21T05:54:41.073Z}]  const hookAt = r\["lastHookEventAt"\];
+  if (hookAt !== undefined && !validAt(hookAt)) return bad("bad lastHookEventAt");
+[PST{t=2026-11-20T03:04:47Z}]  if (typeof noSessionIdLogged !== "boolean") return bad("bad noSessionIdLogged");
+  const [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.5{t=2026-11-21T05:54:41.073Z}]maps = decodeMaps(r);
+  if (!maps.ok) return maps[PST{t=2026-11-20T03:04:47Z}];
   return ok({
     version: 1,
     order,
     lastWindowRun: lastWindowRun as string | null,
     lastEventAt,
-    recordedAtMs,
+[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.6{t=2026-11-21T05:54:41.073Z}]    ...(hookAt === undefined ? {} : { lastHookEventAt: hookAt }),
+[PST{t=2026-11-20T03:04:47Z}]    recordedAtMs,
     noSessionIdLogged,
-    sessions: sessions.value,
-    files: files.value,
-    skipped: skipped.value,
+    [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.7{t=2026-11-21T05:54:41.073Z}]...maps[PST{t=2026-11-20T03:04:47Z}].value,
   });
 }
-
 function sortedMap<T, U>(map: Readonly<Record<string, T>>, f: (value: T) => U): Record<string, U> {
   return Object.fromEntries(
     Object.keys(map)
@@ -244,7 +245,8 @@ export function encodeState(state: WindowState): string {
     version: 1,
     order: state.order,
     lastWindowRun: state.lastWindowRun,
-    lastEventAt: state.lastEventAt,
+    lastEventAt: state.lastEventAt[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.8{t=2026-11-21T05:54:41.073Z}],
+    ...(state.lastHookEventAt === undefined ? {} : { lastHookEventAt: state.lastHookEventAt })[PST{t=2026-11-20T03:04:47Z}],
     recordedAtMs: state.recordedAtMs,
     noSessionIdLogged: state.noSessionIdLogged,
     sessions: sortedMap(state.sessions, sessionJson),

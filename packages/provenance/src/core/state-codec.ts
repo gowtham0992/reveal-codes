@@ -159,23 +159,28 @@ function decodeSkipped(v: unknown, where: string): Result<SkippedFile, Provenanc
   return ok({ size, mtimeMs, reason });
 }
 
+type Maps = Pick<WindowState, "sessions" | "files" | "skipped">;
+function decodeMaps(r: Obj): Result<Maps, ProvenanceError> {
+  const sessions = decodeMap(r["sessions"], "sessions", decodeSession);
+  if (!sessions.ok) return sessions;
+  const files = decodeMap(r["files"], "files", decodeFileCache);
+  if (!files.ok) return files;
+  const skipped = decodeMap(r["skipped"], "skipped", decodeSkipped);
+  if (!skipped.ok) return skipped;
+  return ok({ sessions: sessions.value, files: files.value, skipped: skipped.value });
+}
 /**
  * Read state.json (Req 3.17, 5.16): `version` 1 and exactly the fields of
- * `WindowState`. Any other shape, a session entry without `lastClosedBy`,
- * `promptSeen` or `noPromptCounted` included, is an error value. Never throws.
+ * `WindowState` (`lastHookEventAt` is optional, Req 3.29). Any other shape, a session
+ * entry without `lastClosedBy`, `promptSeen` or `noPromptCounted` included, is an error
+ * value. Never throws.
  */
 export function decodeState(text: string): Result<WindowState, ProvenanceError> {
   const parsed = parseJson(text);
   if (!parsed.ok) return parsed;
-  const keys = [
-    "version",
-    "order",
-    "lastWindowRun",
-    "lastEventAt",
-    "recordedAtMs",
-    "noSessionIdLogged",
-  ];
-  const s = shape(parsed.value, "state", [...keys, "sessions", "files", "skipped"]);
+  const keys = ["version", "order", "lastWindowRun", "lastEventAt", "recordedAtMs"];
+  const required = [...keys, "noSessionIdLogged", "sessions", "files", "skipped"];
+  const s = shape(parsed.value, "state", required, ["lastHookEventAt"]);
   if (!s.ok) return s;
   const r = s.value;
   if (r["version"] !== 1) return bad("unsupported version");
@@ -183,26 +188,22 @@ export function decodeState(text: string): Result<WindowState, ProvenanceError> 
   if (!isCount(order) || !isNum(recordedAtMs)) return bad("bad counter");
   if (!isNullable(lastWindowRun, isStr)) return bad("bad lastWindowRun");
   if (lastEventAt !== null && !validAt(lastEventAt)) return bad("bad lastEventAt");
+  const hookAt = r["lastHookEventAt"];
+  if (hookAt !== undefined && !validAt(hookAt)) return bad("bad lastHookEventAt");
   if (typeof noSessionIdLogged !== "boolean") return bad("bad noSessionIdLogged");
-  const sessions = decodeMap(r["sessions"], "sessions", decodeSession);
-  if (!sessions.ok) return sessions;
-  const files = decodeMap(r["files"], "files", decodeFileCache);
-  if (!files.ok) return files;
-  const skipped = decodeMap(r["skipped"], "skipped", decodeSkipped);
-  if (!skipped.ok) return skipped;
+  const maps = decodeMaps(r);
+  if (!maps.ok) return maps;
   return ok({
     version: 1,
     order,
     lastWindowRun: lastWindowRun as string | null,
     lastEventAt,
+    ...(hookAt === undefined ? {} : { lastHookEventAt: hookAt }),
     recordedAtMs,
     noSessionIdLogged,
-    sessions: sessions.value,
-    files: files.value,
-    skipped: skipped.value,
+    ...maps.value,
   });
 }
-
 function sortedMap<T, U>(map: Readonly<Record<string, T>>, f: (value: T) => U): Record<string, U> {
   return Object.fromEntries(
     Object.keys(map)
@@ -245,6 +246,7 @@ export function encodeState(state: WindowState): string {
     order: state.order,
     lastWindowRun: state.lastWindowRun,
     lastEventAt: state.lastEventAt,
+    ...(state.lastHookEventAt === undefined ? {} : { lastHookEventAt: state.lastHookEventAt }),
     recordedAtMs: state.recordedAtMs,
     noSessionIdLogged: state.noSessionIdLogged,
     sessions: sortedMap(state.sessions, sessionJson),

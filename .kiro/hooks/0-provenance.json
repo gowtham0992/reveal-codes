@@ -5,6 +5,7 @@
       "name": "Provenance: prompt",
       "trigger": "UserPromptSubmit",
       "timeout": 30,
+      "enabled": true,
       "action": {
         "type": "command",
         "command": "node .kiro/provenance/provenance.mjs record promptSubmit >/dev/null 2>&1 || true"
@@ -14,6 +15,7 @@
       "name": "Provenance: stop",
       "trigger": "Stop",
       "timeout": 30,
+      "enabled": true,
       "action": {
         "type": "command",
         "command": "node .kiro/provenance/provenance.mjs record agentStop >/dev/null 2>&1 || true"
@@ -23,6 +25,7 @@
       "name": "Provenance: task start",
       "trigger": "PreTaskExec",
       "timeout": 30,
+      "enabled": true,
       "action": {
         "type": "command",
         "command": "node .kiro/provenance/provenance.mjs record preTask >/dev/null 2>&1 || true"
@@ -32,6 +35,7 @@
       "name": "Provenance: task end",
       "trigger": "PostTaskExec",
       "timeout": 30,
+      "enabled": true,
       "action": {
         "type": "command",
         "command": "node .kiro/provenance/provenance.mjs record postTask >/dev/null 2>&1 || true"

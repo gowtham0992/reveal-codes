@@ -54,6 +54,8 @@ export type WindowState = {
   order: number;
   lastWindowRun: string | null;
   lastEventAt: string | null;
+  /** The clock reading of the latest hook event (never `manual`); absent until one is recorded (Req 3.29). */
+  lastHookEventAt?: string;
   recordedAtMs: number;
   noSessionIdLogged: boolean;
   sessions: Record<string, SessionState>;

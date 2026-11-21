@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,5247,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1,23,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.2,60,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.3,50,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.4,101,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.5,366,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.6,1763,0,0}][AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]/**
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,55,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.2,83,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.3,742,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.4,52,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.5,78,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.6,78,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.7,184,0,0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,5247,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1,23,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.2,60,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.3,50,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.4,101,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.5,366,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.6,1763,0,0}][AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]/**
  * The four read-only tools [AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1{t=2026-11-21T00:39:42.576Z}]and `setup_provenance` [AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}](Req 12.2 to 12.8, 12.10, 12.11, 12.13): `reveal_file`,
  * `provenance_summary`, `untouched_agent_text` and `check_records`. Each calls the functions the
  * Reveal_Command calls (`io/load.ts`, `core/summary.ts`, `core/check.ts`), reads only the
@@ -7,11 +7,18 @@
  */
 import type { Document } from "@reveal-codes/engine";
 import { checkWorkspace } from "../core/check.js";
-import { summarize } from "../core/summary.js";
+import { [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]hookWarning } from "../core/hook-warning.js";
+import { [AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]summarize } from "../core/summary.js";
 [AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.2{t=2026-11-21T00:39:42.576Z}]import { formatBaselineLine } from "../io/baseline-cmd.js";
 [AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]import type { Deps } from "../io/deps.js";
 [AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.3{t=2026-11-21T00:39:42.576Z}]import { createFaultLog } from "../io/faults.js";
-[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]import { checkFactsOf, loadFile, loadWorkspace, summaryInputOf } from "../io/load.js";
+[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]import {[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.2{t=2026-11-21T05:54:41.073Z}]
+  checkFactsOf,
+  loadFile,
+  loadHookEventAt,
+  loadWorkspace,
+  summaryInputOf,
+[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]} from "../io/load.js";
 import type { WorkspaceFacts } from "../io/load.js";
 [AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.4{t=2026-11-21T00:39:42.576Z}]import type { SetupReport } from "../io/setup.js";
 import { setupProvenance } from "../io/setup.js";
@@ -62,7 +69,25 @@ function recordDocs(facts: WorkspaceFacts): Map<string, Document> {
   }
   return docs;
 }
-export async function revealFileTool(
+[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.3{t=2026-11-21T05:54:41.073Z}]/** At most five text lines with `warning` first; the lines just before the last one give way. */
+function warnedLines(warning: string | null, lines: readonly string\[\]): string\[\] {
+  if (warning === null) return \[...lines\];
+  const room = 4;
+  const kept = lines.length <= room ? lines : \[...lines.slice(0, room - 1), lines.at(-1) ?? ""\];
+  return \[warning, ...kept\];
+}
+/** An ok result whose `warning` field and first text line are the no-event line, if any (Req 12.15). */
+function warnedResult(
+  at: string | null,
+  data: object,
+  lines: readonly string\[\],
+  extra: object = {},
+  error = false,
+): ToolResult {
+  const warning = hookWarning(at);
+  return okResult({ ...data, warning, ...extra }, warnedLines(warning, lines), error);
+}
+[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]export async function revealFileTool(
   ctx: ToolContext,
   args: Workspace & { path: string },
 ): Promise<ToolResult> {
@@ -72,7 +97,7 @@ export async function revealFileTool(
     const facts = await loadFile(ctx.deps, root, target.path);
     if (!facts.ok) return errorResult(`${target.path}: ${facts.error.kind}`);
     const data = revealData(facts.value, target.path);
-    return okResult(data, revealLines(data));
+    return [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.4{t=2026-11-21T05:54:41.073Z}]warnedResult(await loadHookEventAt(ctx.deps, root), [AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]data, revealLines(data));
   });
 }
 export async function untouchedAgentTextTool(
@@ -89,7 +114,8 @@ export async function untouchedAgentTextTool(
     if (summary === null || data === null) {
       return errorResult(`Nothing is recorded for ${target.path}.`);
     }
-    return okResult(data, untouchedLines(data, summary));
+    [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.5{t=2026-11-21T05:54:41.073Z}]const at = await loadHookEventAt(ctx.deps, root);
+    return warnedResult(at, [AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]data, untouchedLines(data, summary));
   });
 }
 export async function provenanceSummaryTool(
@@ -105,7 +131,8 @@ export async function provenanceSummaryTool(
     const result = summarize(summaryInputOf(facts, scope, args.top));
     if (result.summary === null) return errorResult(result.lines\[0\] ?? "Nothing is recorded.");
     const data = summaryData(result.summary, recordDocs(facts), facts.sessions);
-    return okResult(data, summaryLines(result.summary));
+    [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.6{t=2026-11-21T05:54:41.073Z}]const at = await loadHookEventAt(ctx.deps, root);
+    return warnedResult(at, [AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]data, summaryLines(result.summary));
   });
 }
 export async function checkRecordsTool(
@@ -117,7 +144,9 @@ export async function checkRecordsTool(
     if (!isFacts(facts)) return facts;
     const result = checkWorkspace(checkFactsOf(facts, args.strict === true));
     const data = checkData(result, facts.files.length);
-    return okResult(data, checkLines(result), result.status !== 0);
+    [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.7{t=2026-11-21T05:54:41.073Z}]const at = await loadHookEventAt(ctx.deps, root);
+    const hookEvents = { any: at !== null, lastHookEventAt: at };
+    return warnedResult(at, data, checkLines(result), { hookEvents }[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}], result.status !== 0);
   }[AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.6{t=2026-11-21T00:39:42.576Z}]);
 }
 /** The text lines of a setup result: the counts, the baseline and, if asked for, the git hook. */

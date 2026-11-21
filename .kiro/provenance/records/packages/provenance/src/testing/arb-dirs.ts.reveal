@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.1,157,0,0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.2,134,0,0}][PST{t=2026-11-20T03:04:47Z}]// Baseline part filled in by task 4.10, state part by task 4.12, directory part by task 5.8.
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,50,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.2,23,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.3,69,0,0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.1,157,0,0;r=6.6 One window per task: duplicate preTask and postTask by name 2026-11-20T03:31:04Z.2,134,0,0}][PST{t=2026-11-20T03:04:47Z}]// Baseline part filled in by task 4.10, state part by task 4.12, directory part by task 5.8.
 import fc from "fast-check";
 import type {
   Baseline,
@@ -171,7 +171,8 @@ export const arbWindowState: fc.Arbitrary<WindowState> = fc
     arbCount,
     fc.option(arbFree, { nil: null }),
     fc.option(arbBaselineAt, { nil: null }),
-    arbMs,
+    [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]fc.option(arbBaselineAt, { nil: undefined }),
+    [PST{t=2026-11-20T03:04:47Z}]arbMs,
     fc.boolean(),
     arbRecord(arbSessionState),
     arbRecord(arbFileCache),
@@ -182,7 +183,8 @@ export const arbWindowState: fc.Arbitrary<WindowState> = fc
       order,
       lastWindowRun,
       lastEventAt,
-      recordedAtMs,
+[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.2{t=2026-11-21T05:54:41.073Z}]      lastHookEventAt,
+[PST{t=2026-11-20T03:04:47Z}]      recordedAtMs,
       noSessionIdLogged,
       sessions,
       files,
@@ -191,7 +193,8 @@ export const arbWindowState: fc.Arbitrary<WindowState> = fc
       version: 1 as const,
       order,
       lastWindowRun,
-      lastEventAt,
+      lastEventAt[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.3{t=2026-11-21T05:54:41.073Z}],
+      ...(lastHookEventAt === undefined ? {} : { lastHookEventAt })[PST{t=2026-11-20T03:04:47Z}],
       recordedAtMs,
       noSessionIdLogged,
       sessions,
