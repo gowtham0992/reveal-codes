@@ -1,0 +1,9 @@
+[DOC{v=1;n=0;r=11.1 Static boundary tests 2026-11-21T07:02:51Z.1,30,0,0}][PST{t=2026-11-20T03:04:47Z}]{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "types": \["node"\]
+  },
+  "include": \["src", "test"\],
+  "references": \[{ "path": "../engine" }[AI:11.1 Static boundary tests 2026-11-21T07:02:51Z.1{t=2026-11-21T18:45:31.767Z}], { "path": "../export/test" }[PST{t=2026-11-20T03:04:47Z}]\]
+}

@@ -56,10 +56,21 @@ function nextLost(known: Known, lost: ReadonlySet<string>, tree: Tree): Set<stri
   }
   return out;
 }
-const startLost = (scenario: Scenario): Set<string> =>
-  new Set(
-    scenario.setup.filter((f) => f.tracking === "entry-none").map((f) => scenario.pool[f.at] ?? ""),
+/**
+ * The paths whose starting text the Recorder cannot find (Requirement 5, criteria 5 and 7). The
+ * Baseline_Cache is named by digest, so an entry that has no Blob_Id and no cache file of its own
+ * still finds its text when another entry with the same text has one; such a path is not lost.
+ */
+function startLost(scenario: Scenario): Set<string> {
+  const cached = new Set(
+    scenario.setup.filter((f) => f.tracking === "entry-cache").map((f) => f.text),
   );
+  return new Set(
+    scenario.setup
+      .filter((f) => f.tracking === "entry-none" && !cached.has(f.text))
+      .map((f) => scenario.pool[f.at] ?? ""),
+  );
+}
 function startKnown(scenario: Scenario): Known {
   return new Map(
     scenario.setup
@@ -183,7 +194,36 @@ async function replay(scenario: Scenario, seen: Seen): Promise<string[]> {
   if (seen.counted > countedBefore) seen.rerunCounted += 1;
   return out;
 }
+const SHARED_CACHE: Scenario = {
+  pool: ["a.txt", "b.txt"],
+  setup: [
+    { at: 0, text: "", tracking: "entry-none" },
+    { at: 1, text: "", tracking: "entry-cache" },
+  ],
+  steps: [
+    {
+      event: {
+        event: "agentStop",
+        session: "sess-2",
+        taskName: null,
+        specName: null,
+        taskSuccess: null,
+        gapMs: 1018,
+      },
+      changes: [{ kind: "prepend", at: 0, text: "\n" }],
+      dropState: false,
+    },
+  ],
+};
+
 describe("sessions-count properties _Requirements: 3.26, 3.27, 16.23_", () => {
+  // Shrunk counterexample of seed 2090571658: a same-digest cache file makes the text findable.
+  it("P16 example: an entry without its own cache file finds its text through a same-digest entry", async () => {
+    const seen: Seen = { counted: 0, quiet: 0, rerunCounted: 0, promptStopOutside: 0 };
+    expect(await replay(SHARED_CACHE, seen)).toEqual([]);
+    expect(seen.counted).toBe(1);
+  });
+
   // Property 16
   it("P16 sessions without prompt events are counted once", async () => {
     const seen: Seen = { counted: 0, quiet: 0, rerunCounted: 0, promptStopOutside: 0 };

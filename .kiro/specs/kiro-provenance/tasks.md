@@ -401,7 +401,7 @@ Conventions that apply to every task:
     - Add one line to the `BUILD_LOG.md` entry: the toKelvin finding, the old rule (earliest line start) and the new rule (latest line start, as git does), and that Properties 2, 3, 17 and 18 hold.
     - _Requirements: 4.2, 4.15, 4.16, 4.17, 16.24, 16.25_
 - [ ] 11. Boundary tests and documentation
-  - [~] 11.1 Static boundary tests
+  - [x] 11.1 Static boundary tests
     - File `test/static/boundaries.test.ts` over the sources of `packages/provenance/src`: no `node:` import under `src/core/`; `process.env` appears in `src/io/env.ts` only; no module over 300 lines and no function over 40 lines; no `any`; no default export; no class; no `fetch`, `http` or `https` use (no network); `@modelcontextprotocol/sdk` and `zod` imported only under `src/mcp/`; `dependencies` of the package are exactly the Engine, the SDK and `zod`; the Engine's `package.json` still has zero runtime dependencies and `packages/engine/src` is unchanged (`git diff --quiet origin/HEAD -- packages/engine/src` or the repository's equivalent baseline); `git diff` shows no change under `apps/web`, `packages/verifier`, `packages/export/src`, `crew/sentinel/src`, `data`, `scripts/commit-task.sh` and `pnpm-workspace.yaml`; `vitest.config.ts` holds one project named `provenance`; the root `package.json` changed only by the script `reveal`; `src/io/` reads no `KIRO_*` or `VSCODE_*` variable; no file in the Record_Directory format holds a Session_Key outside `state.json`.
     - _Requirements: 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10, 3.20, 3.25, 15.1, 15.2, 15.4, 15.5, 15.6, 15.8_
   - [~] 11.2 README section "Reveal Codes for your own repository"

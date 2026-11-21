@@ -4,6 +4,7 @@ export * from "./arb-lines.js";
 export * from "./arb-view.js";
 export * from "./arb-windows.js";
 export * from "./arb-dirs.js";
+export * from "./arb-scenario.js";
 export * from "./arb-ignore.js";
 export * from "./arb-payload.js";
 export * from "./arb-label.js";

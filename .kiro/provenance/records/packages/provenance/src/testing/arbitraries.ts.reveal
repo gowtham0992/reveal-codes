@@ -1,9 +1,10 @@
-[DOC{v=1;n=0;r=10.9 Property 18: only changed lines change 2026-11-21T06:48:39Z.1,32,0,0;r=7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1,31,0,0}][PST{t=2026-11-20T03:04:47Z}]export * from "./arb-text.js";
+[DOC{v=1;n=0;r=10.9 Property 18: only changed lines change 2026-11-21T06:48:39Z.1,32,0,0;r=11.1 Static boundary tests 2026-11-21T07:02:51Z.1,35,0,0;r=7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1,31,0,0}][PST{t=2026-11-20T03:04:47Z}]export * from "./arb-text.js";
 export * from "./arb-edits.js";
 [AI:10.9 Property 18: only changed lines change 2026-11-21T06:48:39Z.1{t=2026-11-21T06:53:30.818Z}]export * from "./arb-lines.js";
 [PST{t=2026-11-20T03:04:47Z}]export * from "./arb-[AI:7.4 Property 6: colour output is the plain output with the colour removed 2026-11-20T04:07:29Z.1{t=2026-11-20T04:10:47.277Z}]view.js";
 export * from "./arb-[PST{t=2026-11-20T03:04:47Z}]windows.js";
 export * from "./arb-dirs.js";
-export * from "./arb-ignore.js";
+[AI:11.1 Static boundary tests 2026-11-21T07:02:51Z.1{t=2026-11-21T18:45:31.767Z}]export * from "./arb-scenario.js";
+[PST{t=2026-11-20T03:04:47Z}]export * from "./arb-ignore.js";
 export * from "./arb-payload.js";
 export * from "./arb-label.js";

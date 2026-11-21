@@ -1,5 +1,5 @@
 /**
- * Plays a generated `Scenario` (src/testing/arb-dirs.ts) over in-memory `Deps` with the real
+ * Plays a generated `Scenario` (src/testing/arb-scenario.ts) over in-memory `Deps` with the real
  * `runRecord`: seeds the Record_Directory and the working tree, then for each step removes
  * `state.json` when asked, applies the file changes, and runs the event. Shared by the Recorder
  * properties (1, 2, 4, 5, 14 and 16).
@@ -7,8 +7,8 @@
 import { createDocument, renderRecord } from "@reveal-codes/engine";
 import { encodeBaseline } from "../../src/core/baseline-codec.js";
 import type { Baseline, BaselineEntry } from "../../src/core/types.js";
-import { applyChange } from "../../src/testing/arb-dirs.js";
-import type { Scenario, SetupFile, Step } from "../../src/testing/arb-dirs.js";
+import { applyChange } from "../../src/testing/arb-scenario.js";
+import type { Scenario, SetupFile, Step } from "../../src/testing/arb-scenario.js";
 import { payloadOf } from "../../src/testing/arb-windows.js";
 import { BASELINE_AT, PROV, ROOT, play } from "./event-harness.js";
 import { CLOCK_START_MS } from "./clock.js";
