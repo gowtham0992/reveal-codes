@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,3164,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1,49,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.2,23,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.3,609,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.4,34,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.5,128,0,0}][AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]/**
+[DOC{v=1;n=0;r=10.6 Runs list tag once\, one version source\, setup names each file 2026-11-21T06:05:01Z.1,46,0,0;r=10.6 Runs list tag once\, one version source\, setup names each file 2026-11-21T06:05:01Z.2,15,0,0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,3164,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1,49,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.2,23,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.3,609,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.4,34,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.5,128,0,0}][AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]/**
  * The stdio MCP server of `provenance mcp` (Req 12.1, 12.2, 12.14). Loaded by a dynamic
  * `import()` from `cli/main.ts` only for that command, so the hook path never evaluates the SDK.
  * Standard output carries protocol messages only.
@@ -26,7 +26,8 @@ import {
 [AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]  untouchedAgentTextTool,
 } from "./tools.js";
 import type { ToolContext } from "./tools.js";
-const READ_ONLY = { readOnlyHint: true };
+[AI:10.6 Runs list tag once, one version source, setup names each file 2026-11-21T06:05:01Z.1{t=2026-11-21T06:11:28.053Z}]import { serverVersion } from "./version.js";
+[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]const READ_ONLY = { readOnlyHint: true };
 function registerFileTools(server: McpServer, ctx: ToolContext): void {
   server.registerTool(
     "reveal_file",
@@ -90,7 +91,7 @@ function registerSetupTool(server: McpServer, ctx: ToolContext): void {
 }
 /** The server with the four read tools and `setup_provenance`[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]. */
 export function createProvenanceServer(ctx: ToolContext): McpServer {
-  const server = new McpServer({ name: "provenance", version: "0.0.0" });
+  const server = new McpServer({ name: "provenance", version: [AI:10.6 Runs list tag once, one version source, setup names each file 2026-11-21T06:05:01Z.2{t=2026-11-21T06:11:28.053Z}]serverVersion()[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}] });
   registerFileTools(server, ctx);
   registerWorkspaceTools(server, ctx);
 [AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.4{t=2026-11-21T00:39:42.576Z}]  registerSetupTool(server, ctx);

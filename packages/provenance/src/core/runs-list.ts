@@ -14,8 +14,12 @@ const INDENT = "  ";
 const width = (text: string): number => Array.from(text).length;
 const escapeText = (text: string): string => text.replace(/[\\[\]]/gu, "\\$&");
 
-/** The title without the Task_Number: the tag in the first column already carries it (Req 9.15). */
+/**
+ * The title without the Task_Number: the tag in the first column already carries it. Left out
+ * (an empty cell) when it equals the tag, so a prompt window prints `turn` once (Req 9.15).
+ */
 function description(w: WindowTag): string {
+  if (w.title === w.tag) return "";
   return neutralize(w.title).replace(/[\n\t]/gu, " ");
 }
 

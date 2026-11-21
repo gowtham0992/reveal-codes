@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,2203,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.1,101,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.2,51,0,0}][AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]/**
+[DOC{v=1;n=0;r=10.6 Runs list tag once\, one version source\, setup names each file 2026-11-21T06:05:01Z.1,273,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,2203,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.1,101,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.2,51,0,0}][AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]/**
  * The "Runs in this file" list of `reveal <file>` (Req 9.15; design, Runs in this file).
  * Pure; no `node:`. Titles come from the file's Record, so they are neutralized (M6) and, in plain
  * output, escaped like text. Columns are padded by the width of the unescaped title, so the
@@ -14,8 +14,12 @@ const INDENT = "  ";
 const width = (text: string): number => Array.from(text).length;
 const escapeText = (text: string): string => text.replace(/\[\\\\\[\\\]\]/gu, "\\\\$&");
 
-[AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.1{t=2026-11-20T16:21:52.951Z}]/** The title without the Task_Number: the tag in the first column already carries it (Req 9.15). */
-[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]function description(w: WindowTag): string {
+[AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.1{t=2026-11-20T16:21:52.951Z}]/**[AI:10.6 Runs list tag once, one version source, setup names each file 2026-11-21T06:05:01Z.1{t=2026-11-21T06:11:28.053Z}]
+ * The title without the Task_Number: the tag in the first column already carries it. Left out
+ * (an empty cell) when it equals the tag, so a prompt window prints `turn` once (Req 9.15).
+ */
+function description(w: WindowTag): string {
+  if (w.title === w.tag) return "";[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}]
   [AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.2{t=2026-11-20T16:21:52.951Z}]return neutralize(w.title).replace(/\[\\n\\t\]/gu, " ")[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.1{t=2026-11-20T05:35:16.652Z}];
 }
 

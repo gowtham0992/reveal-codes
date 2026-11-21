@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,1711,0,0}][AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]/**
+[DOC{v=1;n=0;r=10.6 Runs list tag once\, one version source\, setup names each file 2026-11-21T06:05:01Z.1,105,0,0;r=10.6 Runs list tag once\, one version source\, setup names each file 2026-11-21T06:05:01Z.2,310,0,0;r=10.6 Runs list tag once\, one version source\, setup names each file 2026-11-21T06:05:01Z.3,7,0,0;r=10.6 Runs list tag once\, one version source\, setup names each file 2026-11-21T06:05:01Z.4,3,0,0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,1711,0,0}][AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]/**
  * The shape of a tool result and the two ways to make one (Req 12.3, 12.8): structured content
  * with a text summary of one to five lines, or an error result with one message. Every string
  * that reaches a result passes through `neutralize`, so no control character or ANSI sequence
@@ -20,16 +20,24 @@ export function cleanStrings(value: unknown): unknown {
   }
   return value;
 }
-function textOf(lines: readonly string\[\]): { type: "text"; text: string }\[\] {
-  return \[{ type: "text", text: lines.slice(0, MAX_LINES).map(neutralize).join("\\n") }\];
+function textOf(lines: readonly string\[\][AI:10.6 Runs list tag once, one version source, setup names each file 2026-11-21T06:05:01Z.1{t=2026-11-21T06:11:28.053Z}], limit: number): { type: "text"; text: string }\[\] {
+  return \[{ type: "text", text: lines.slice(0, limit[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]).map(neutralize).join("\\n") }\];
 }
-/** A result with structured content and at most five lines of text. `error` marks `isError`. */
-export function okResult(structured: object, lines: readonly string\[\], error = false): ToolResult {
+/**[AI:10.6 Runs list tag once, one version source, setup names each file 2026-11-21T06:05:01Z.2{t=2026-11-21T06:11:28.053Z}]
+ * A result with structured content and at most `limit` lines of text (five, Req 12.3, unless the
+ * caller lifts it: `setup_provenance` names every file, Req 12.9). `error` marks `isError`.
+ */
+export function okResult(
+  structured: object,
+  lines: readonly string\[\],
+  error = false,
+  limit = MAX_LINES,
+[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]): ToolResult {
   const body = cleanStrings(structured) as Record<string, unknown>;
-  const base = { content: textOf(lines), structuredContent: body };
+  const base = { content: textOf(lines[AI:10.6 Runs list tag once, one version source, setup names each file 2026-11-21T06:05:01Z.3{t=2026-11-21T06:11:28.053Z}], limit[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]), structuredContent: body };
   return error ? { ...base, isError: true } : base;
 }
 /** An error result: one line of text, no structured content. */
 export function errorResult(message: string): ToolResult {
-  return { content: textOf(\[message\]), isError: true };
+  return { content: textOf(\[message\][AI:10.6 Runs list tag once, one version source, setup names each file 2026-11-21T06:05:01Z.4{t=2026-11-21T06:11:28.053Z}], 1[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]), isError: true };
 }

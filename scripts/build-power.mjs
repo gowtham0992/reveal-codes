@@ -47,7 +47,14 @@ async function buildCitationCheck(out) {
 }
 
 async function buildProvenance(out) {
-  await bundle("packages/provenance/src/cli/main.ts", join(out, "server", "provenance.mjs"));
+  const manifest = JSON.parse(
+    readFileSync(join(root, "packages", "provenance", "package.json"), "utf8"),
+  );
+  if (typeof manifest.version !== "string")
+    throw new Error("packages/provenance/package.json has no version");
+  await bundle("packages/provenance/src/cli/main.ts", join(out, "server", "provenance.mjs"), {
+    __PROVENANCE_VERSION__: JSON.stringify(manifest.version),
+  });
 }
 
 const POWERS = {

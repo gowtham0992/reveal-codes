@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,55,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.2,83,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.3,742,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.4,52,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.5,78,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.6,78,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.7,184,0,0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,5247,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1,23,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.2,60,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.3,50,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.4,101,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.5,366,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.6,1763,0,0}][AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]/**
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,55,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.2,83,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.3,742,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.4,52,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.5,78,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.6,78,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.7,184,0,0;r=10.6 Runs list tag once\, one version source\, setup names each file 2026-11-21T06:05:01Z.1,56,0,0;r=10.6 Runs list tag once\, one version source\, setup names each file 2026-11-21T06:05:01Z.2,55,0,0;r=10.6 Runs list tag once\, one version source\, setup names each file 2026-11-21T06:05:01Z.3,72,0,0;r=10.6 Runs list tag once\, one version source\, setup names each file 2026-11-21T06:05:01Z.4,123,0,0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,5247,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1,23,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.2,60,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.3,50,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.4,101,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.5,366,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.6,1763,0,0}][AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]/**
  * The four read-only tools [AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1{t=2026-11-21T00:39:42.576Z}]and `setup_provenance` [AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}](Req 12.2 to 12.8, 12.10, 12.11, 12.13): `reveal_file`,
  * `provenance_summary`, `untouched_agent_text` and `check_records`. Each calls the functions the
  * Reveal_Command calls (`io/load.ts`, `core/summary.ts`, `core/check.ts`), reads only the
@@ -9,8 +9,7 @@ import type { Document } from "@reveal-codes/engine";
 import { checkWorkspace } from "../core/check.js";
 import { [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]hookWarning } from "../core/hook-warning.js";
 import { [AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]summarize } from "../core/summary.js";
-[AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.2{t=2026-11-21T00:39:42.576Z}]import { formatBaselineLine } from "../io/baseline-cmd.js";
-[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]import type { Deps } from "../io/deps.js";
+import type { Deps } from "../io/deps.js";
 [AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.3{t=2026-11-21T00:39:42.576Z}]import { createFaultLog } from "../io/faults.js";
 [AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]import {[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.2{t=2026-11-21T05:54:41.073Z}]
   checkFactsOf,
@@ -21,7 +20,8 @@ import { [AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{
 [AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]} from "../io/load.js";
 import type { WorkspaceFacts } from "../io/load.js";
 [AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.4{t=2026-11-21T00:39:42.576Z}]import type { SetupReport } from "../io/setup.js";
-import { setupProvenance } from "../io/setup.js";
+[AI:10.6 Runs list tag once, one version source, setup names each file 2026-11-21T06:05:01Z.1{t=2026-11-21T06:11:28.053Z}]import { formatSetupReport } from "../io/setup-cmd.js";
+[AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.4{t=2026-11-21T00:39:42.576Z}]import { setupProvenance } from "../io/setup.js";
 [AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]import { revealData, revealLines } from "./reveal-data.js";
 import { errorResult, okResult } from "./results.js";
 import type { ToolResult } from "./results.js";
@@ -149,20 +149,9 @@ export async function checkRecordsTool(
     return warnedResult(at, data, checkLines(result), { hookEvents }[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}], result.status !== 0);
   }[AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.6{t=2026-11-21T00:39:42.576Z}]);
 }
-/** The text lines of a setup result: the counts, the baseline and, if asked for, the git hook. */
+/** The text lines of a setup result: the [AI:10.6 Runs list tag once, one version source, setup names each file 2026-11-21T06:05:01Z.2{t=2026-11-21T06:11:28.053Z}]lines `provenance setup` prints, under one heading line[AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.6{t=2026-11-21T00:39:42.576Z}]. */
 function setupLines(root: string, report: SetupReport): string\[\] {
-  const counts = \[report.written, report.replaced, report.kept\].map((list) => list.length);
-  const hook = report.gitHook;
-  const hookLine =
-    hook === undefined
-      ? \[\]
-      : \[`git hook: ${hook.status === "blocked" ? `not written (${hook.reason})` : hook.status}`\];
-  return \[
-    `Provenance is set up in ${root}.`,
-    `written ${String(counts\[0\])}, replaced ${String(counts\[1\])}, kept ${String(counts\[2\])} files.`,
-    formatBaselineLine(report.baseline),
-    ...hookLine,
-  \];
+  [AI:10.6 Runs list tag once, one version source, setup names each file 2026-11-21T06:05:01Z.3{t=2026-11-21T06:11:28.053Z}]return \[`Provenance is set up in ${root}.`, ...formatSetupReport(report)[AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.6{t=2026-11-21T00:39:42.576Z}]\];
 }
 /**
  * `setup_provenance` (Req 12.9, 12.12, 12.14, 13.3, 13.4): the installation of `provenance setup`
@@ -183,5 +172,6 @@ export async function setupProvenanceTool(
     return errorResult(`Setup failed (${done.error.kind}${detail}).`);
   }
   const { written, replaced, kept } = done.value;
-  return okResult({ written, replaced, kept }, setupLines(root.value, done.value)[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]);
+  [AI:10.6 Runs list tag once, one version source, setup names each file 2026-11-21T06:05:01Z.4{t=2026-11-21T06:11:28.053Z}]const lines = setupLines(root.value, done.value);
+  return okResult({ written, replaced, kept }, lines, false, lines.length[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]);
 }

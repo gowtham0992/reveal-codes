@@ -1,0 +1,21 @@
+[DOC{v=1;n=0;r=10.6 Runs list tag once\, one version source\, setup names each file 2026-11-21T06:05:01Z.1,913,0,0}][AI:10.6 Runs list tag once, one version source, setup names each file 2026-11-21T06:05:01Z.1{t=2026-11-21T06:11:28.053Z}]import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { describe, expect, it } from "vitest";
+import { DEV_VERSION, serverVersion } from "../src/mcp/version.js";
+
+function versionOf(relative: string): unknown {
+  const path = fileURLToPath(new URL(`../../../${relative}`, import.meta.url));
+  return (JSON.parse(readFileSync(path, "utf8")) as { version?: unknown }).version;
+}
+
+describe("one version source _Requirements: 12.16_", () => {
+  it("packages/provenance/package.json and powers/provenance/plugin.json carry the same version", () => {
+    const version = versionOf("packages/provenance/package.json");
+    expect(version).toBe("0.1.0");
+    expect(versionOf("powers/provenance/plugin.json")).toBe(version);
+  });
+
+  it("a run from sources, where no define is injected, reports the development version", () => {
+    expect(serverVersion()).toBe(DEV_VERSION);
+  });
+});

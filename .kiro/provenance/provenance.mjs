@@ -8212,6 +8212,7 @@ var init_palette = __esm({
 
 // packages/provenance/src/core/runs-list.ts
 function description(w) {
+  if (w.title === w.tag) return "";
   return neutralize(w.title).replace(/[\n\t]/gu, " ");
 }
 function hunkWords(n) {
@@ -31210,6 +31211,77 @@ var init_setup = __esm({
   }
 });
 
+// packages/provenance/src/io/setup-cmd.ts
+var setup_cmd_exports = {};
+__export(setup_cmd_exports, {
+  formatSetupReport: () => formatSetupReport,
+  parseSetupArgs: () => parseSetupArgs,
+  setupCommand: () => setupCommand
+});
+function collapse(paths) {
+  const plain = paths.filter((p) => !p.startsWith(CACHE_DIR));
+  const cached2 = paths.length - plain.length;
+  const noun = cached2 === 1 ? "file" : "files";
+  return cached2 === 0 ? plain : [...plain, `${CACHE_DIR} (${String(cached2)} ${noun})`];
+}
+function section(title, paths) {
+  const lines = collapse(paths);
+  return lines.length === 0 ? [`${title}: none`] : [`${title}:`, ...lines.map((l) => `  ${l}`)];
+}
+function hookLine(report) {
+  const hook = report.gitHook;
+  if (hook === void 0) return [];
+  if (hook.status === "blocked") {
+    return [`git hook: not written, the existing pre-commit hook is blocked (${hook.reason})`];
+  }
+  return [`git hook: ${HOOK_WORDS[hook.status]}`];
+}
+function formatSetupReport(report) {
+  const replacedNote = report.replaced.length === 0 ? [] : ["replaced files had different bytes and were refreshed"];
+  return [
+    ...section("written", report.written),
+    ...section("replaced", report.replaced),
+    ...replacedNote,
+    ...section("kept", report.kept),
+    formatBaselineLine(report.baseline),
+    ...hookLine(report)
+  ];
+}
+function parseSetupArgs(args) {
+  if (args.length === 0) return { gitHook: false };
+  return args.length === 1 && args[0] === "--git-hook" ? { gitHook: true } : null;
+}
+async function setupCommand(deps, root, bundlePath, args, io) {
+  const flags = parseSetupArgs(args);
+  if (flags === null) {
+    io.err("usage: provenance setup [--git-hook]");
+    return 1;
+  }
+  const result = await setupProvenance(deps, root, bundlePath, flags.gitHook);
+  if (!result.ok) {
+    const detail = result.error.detail === void 0 ? "" : `: ${result.error.detail}`;
+    io.err(`setup failed (${result.error.kind}${detail})`);
+    return 1;
+  }
+  for (const line2 of formatSetupReport(result.value)) io.out(line2);
+  return 0;
+}
+var CACHE_DIR, HOOK_WORDS;
+var init_setup_cmd = __esm({
+  "packages/provenance/src/io/setup-cmd.ts"() {
+    "use strict";
+    init_baseline_cmd();
+    init_setup();
+    CACHE_DIR = ".kiro/provenance/cache/";
+    HOOK_WORDS = {
+      written: "written (.git/hooks/pre-commit)",
+      appended: "appended to the existing .git/hooks/pre-commit",
+      replaced: "previous block replaced in .git/hooks/pre-commit",
+      kept: "kept (the block is already in .git/hooks/pre-commit)"
+    };
+  }
+});
+
 // packages/provenance/src/core/structured.ts
 function runFields(runId2) {
   if (runId2 === void 0) return { run: null, taskNumber: null, taskTitle: null };
@@ -31302,16 +31374,16 @@ function cleanStrings(value) {
   }
   return value;
 }
-function textOf(lines) {
-  return [{ type: "text", text: lines.slice(0, MAX_LINES).map(neutralize).join("\n") }];
+function textOf(lines, limit) {
+  return [{ type: "text", text: lines.slice(0, limit).map(neutralize).join("\n") }];
 }
-function okResult(structured, lines, error2 = false) {
+function okResult(structured, lines, error2 = false, limit = MAX_LINES) {
   const body = cleanStrings(structured);
-  const base = { content: textOf(lines), structuredContent: body };
+  const base = { content: textOf(lines, limit), structuredContent: body };
   return error2 ? { ...base, isError: true } : base;
 }
 function errorResult(message) {
-  return { content: textOf([message]), isError: true };
+  return { content: textOf([message], 1), isError: true };
 }
 var MAX_LINES;
 var init_results = __esm({
@@ -31566,15 +31638,7 @@ async function checkRecordsTool(ctx, args) {
   });
 }
 function setupLines(root, report) {
-  const counts = [report.written, report.replaced, report.kept].map((list) => list.length);
-  const hook = report.gitHook;
-  const hookLine2 = hook === void 0 ? [] : [`git hook: ${hook.status === "blocked" ? `not written (${hook.reason})` : hook.status}`];
-  return [
-    `Provenance is set up in ${root}.`,
-    `written ${String(counts[0])}, replaced ${String(counts[1])}, kept ${String(counts[2])} files.`,
-    formatBaselineLine(report.baseline),
-    ...hookLine2
-  ];
+  return [`Provenance is set up in ${root}.`, ...formatSetupReport(report)];
 }
 async function setupProvenanceTool(ctx, args) {
   const root = await resolveSetupRoot(ctx.deps, ctx.cwd, args.workspace);
@@ -31587,7 +31651,8 @@ async function setupProvenanceTool(ctx, args) {
     return errorResult(`Setup failed (${done2.error.kind}${detail}).`);
   }
   const { written, replaced, kept } = done2.value;
-  return okResult({ written, replaced, kept }, setupLines(root.value, done2.value));
+  const lines = setupLines(root.value, done2.value);
+  return okResult({ written, replaced, kept }, lines, false, lines.length);
 }
 var init_tools = __esm({
   "packages/provenance/src/mcp/tools.ts"() {
@@ -31595,14 +31660,24 @@ var init_tools = __esm({
     init_check2();
     init_hook_warning();
     init_summary();
-    init_baseline_cmd();
     init_faults();
     init_load();
+    init_setup_cmd();
     init_setup();
     init_reveal_data();
     init_results();
     init_summary_data();
     init_workspace();
+  }
+});
+
+// packages/provenance/src/mcp/version.ts
+function serverVersion() {
+  return true ? "0.1.0" : DEV_VERSION;
+}
+var init_version = __esm({
+  "packages/provenance/src/mcp/version.ts"() {
+    "use strict";
   }
 });
 
@@ -31668,7 +31743,7 @@ function registerSetupTool(server, ctx) {
   );
 }
 function createProvenanceServer(ctx) {
-  const server = new McpServer({ name: "provenance", version: "0.0.0" });
+  const server = new McpServer({ name: "provenance", version: serverVersion() });
   registerFileTools(server, ctx);
   registerWorkspaceTools(server, ctx);
   registerSetupTool(server, ctx);
@@ -31686,78 +31761,8 @@ var init_server3 = __esm({
     init_stdio2();
     init_schemas4();
     init_tools();
+    init_version();
     READ_ONLY = { readOnlyHint: true };
-  }
-});
-
-// packages/provenance/src/io/setup-cmd.ts
-var setup_cmd_exports = {};
-__export(setup_cmd_exports, {
-  formatSetupReport: () => formatSetupReport,
-  parseSetupArgs: () => parseSetupArgs,
-  setupCommand: () => setupCommand
-});
-function collapse(paths) {
-  const plain = paths.filter((p) => !p.startsWith(CACHE_DIR));
-  const cached2 = paths.length - plain.length;
-  const noun = cached2 === 1 ? "file" : "files";
-  return cached2 === 0 ? plain : [...plain, `${CACHE_DIR} (${String(cached2)} ${noun})`];
-}
-function section(title, paths) {
-  const lines = collapse(paths);
-  return lines.length === 0 ? [`${title}: none`] : [`${title}:`, ...lines.map((l) => `  ${l}`)];
-}
-function hookLine(report) {
-  const hook = report.gitHook;
-  if (hook === void 0) return [];
-  if (hook.status === "blocked") {
-    return [`git hook: not written, the existing pre-commit hook is blocked (${hook.reason})`];
-  }
-  return [`git hook: ${HOOK_WORDS[hook.status]}`];
-}
-function formatSetupReport(report) {
-  const replacedNote = report.replaced.length === 0 ? [] : ["replaced files had different bytes and were refreshed"];
-  return [
-    ...section("written", report.written),
-    ...section("replaced", report.replaced),
-    ...replacedNote,
-    ...section("kept", report.kept),
-    formatBaselineLine(report.baseline),
-    ...hookLine(report)
-  ];
-}
-function parseSetupArgs(args) {
-  if (args.length === 0) return { gitHook: false };
-  return args.length === 1 && args[0] === "--git-hook" ? { gitHook: true } : null;
-}
-async function setupCommand(deps, root, bundlePath, args, io) {
-  const flags = parseSetupArgs(args);
-  if (flags === null) {
-    io.err("usage: provenance setup [--git-hook]");
-    return 1;
-  }
-  const result = await setupProvenance(deps, root, bundlePath, flags.gitHook);
-  if (!result.ok) {
-    const detail = result.error.detail === void 0 ? "" : `: ${result.error.detail}`;
-    io.err(`setup failed (${result.error.kind}${detail})`);
-    return 1;
-  }
-  for (const line2 of formatSetupReport(result.value)) io.out(line2);
-  return 0;
-}
-var CACHE_DIR, HOOK_WORDS;
-var init_setup_cmd = __esm({
-  "packages/provenance/src/io/setup-cmd.ts"() {
-    "use strict";
-    init_baseline_cmd();
-    init_setup();
-    CACHE_DIR = ".kiro/provenance/cache/";
-    HOOK_WORDS = {
-      written: "written (.git/hooks/pre-commit)",
-      appended: "appended to the existing .git/hooks/pre-commit",
-      replaced: "previous block replaced in .git/hooks/pre-commit",
-      kept: "kept (the block is already in .git/hooks/pre-commit)"
-    };
   }
 });
 

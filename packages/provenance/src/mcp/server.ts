@@ -26,6 +26,7 @@ import {
   untouchedAgentTextTool,
 } from "./tools.js";
 import type { ToolContext } from "./tools.js";
+import { serverVersion } from "./version.js";
 const READ_ONLY = { readOnlyHint: true };
 function registerFileTools(server: McpServer, ctx: ToolContext): void {
   server.registerTool(
@@ -90,7 +91,7 @@ function registerSetupTool(server: McpServer, ctx: ToolContext): void {
 }
 /** The server with the four read tools and `setup_provenance`. */
 export function createProvenanceServer(ctx: ToolContext): McpServer {
-  const server = new McpServer({ name: "provenance", version: "0.0.0" });
+  const server = new McpServer({ name: "provenance", version: serverVersion() });
   registerFileTools(server, ctx);
   registerWorkspaceTools(server, ctx);
   registerSetupTool(server, ctx);

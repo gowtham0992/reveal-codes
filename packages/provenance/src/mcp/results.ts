@@ -20,16 +20,24 @@ export function cleanStrings(value: unknown): unknown {
   }
   return value;
 }
-function textOf(lines: readonly string[]): { type: "text"; text: string }[] {
-  return [{ type: "text", text: lines.slice(0, MAX_LINES).map(neutralize).join("\n") }];
+function textOf(lines: readonly string[], limit: number): { type: "text"; text: string }[] {
+  return [{ type: "text", text: lines.slice(0, limit).map(neutralize).join("\n") }];
 }
-/** A result with structured content and at most five lines of text. `error` marks `isError`. */
-export function okResult(structured: object, lines: readonly string[], error = false): ToolResult {
+/**
+ * A result with structured content and at most `limit` lines of text (five, Req 12.3, unless the
+ * caller lifts it: `setup_provenance` names every file, Req 12.9). `error` marks `isError`.
+ */
+export function okResult(
+  structured: object,
+  lines: readonly string[],
+  error = false,
+  limit = MAX_LINES,
+): ToolResult {
   const body = cleanStrings(structured) as Record<string, unknown>;
-  const base = { content: textOf(lines), structuredContent: body };
+  const base = { content: textOf(lines, limit), structuredContent: body };
   return error ? { ...base, isError: true } : base;
 }
 /** An error result: one line of text, no structured content. */
 export function errorResult(message: string): ToolResult {
-  return { content: textOf([message]), isError: true };
+  return { content: textOf([message], 1), isError: true };
 }

@@ -9,7 +9,6 @@ import type { Document } from "@reveal-codes/engine";
 import { checkWorkspace } from "../core/check.js";
 import { hookWarning } from "../core/hook-warning.js";
 import { summarize } from "../core/summary.js";
-import { formatBaselineLine } from "../io/baseline-cmd.js";
 import type { Deps } from "../io/deps.js";
 import { createFaultLog } from "../io/faults.js";
 import {
@@ -21,6 +20,7 @@ import {
 } from "../io/load.js";
 import type { WorkspaceFacts } from "../io/load.js";
 import type { SetupReport } from "../io/setup.js";
+import { formatSetupReport } from "../io/setup-cmd.js";
 import { setupProvenance } from "../io/setup.js";
 import { revealData, revealLines } from "./reveal-data.js";
 import { errorResult, okResult } from "./results.js";
@@ -149,20 +149,9 @@ export async function checkRecordsTool(
     return warnedResult(at, data, checkLines(result), { hookEvents }, result.status !== 0);
   });
 }
-/** The text lines of a setup result: the counts, the baseline and, if asked for, the git hook. */
+/** The text lines of a setup result: the lines `provenance setup` prints, under one heading line. */
 function setupLines(root: string, report: SetupReport): string[] {
-  const counts = [report.written, report.replaced, report.kept].map((list) => list.length);
-  const hook = report.gitHook;
-  const hookLine =
-    hook === undefined
-      ? []
-      : [`git hook: ${hook.status === "blocked" ? `not written (${hook.reason})` : hook.status}`];
-  return [
-    `Provenance is set up in ${root}.`,
-    `written ${String(counts[0])}, replaced ${String(counts[1])}, kept ${String(counts[2])} files.`,
-    formatBaselineLine(report.baseline),
-    ...hookLine,
-  ];
+  return [`Provenance is set up in ${root}.`, ...formatSetupReport(report)];
 }
 /**
  * `setup_provenance` (Req 12.9, 12.12, 12.14, 13.3, 13.4): the installation of `provenance setup`
@@ -183,5 +172,6 @@ export async function setupProvenanceTool(
     return errorResult(`Setup failed (${done.error.kind}${detail}).`);
   }
   const { written, replaced, kept } = done.value;
-  return okResult({ written, replaced, kept }, setupLines(root.value, done.value));
+  const lines = setupLines(root.value, done.value);
+  return okResult({ written, replaced, kept }, lines, false, lines.length);
 }

@@ -1,6 +1,6 @@
 {
   "name": "@reveal-codes/provenance",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "Records which agent run wrote which lines of a repository file, on top of the Engine's provenance model.",
   "license": "Apache-2.0",

@@ -1,6 +1,6 @@
-[DOC{v=1;n=0;r=8.1 MCP dependencies\, workspace discovery and schemas 2026-11-20T16:21:57Z.1,99,0,0}][PST{t=2026-11-20T03:04:47Z}]{
+[DOC{v=1;n=0;r=10.6 Runs list tag once\, one version source\, setup names each file 2026-11-21T06:05:01Z.1,1,0,0;r=8.1 MCP dependencies\, workspace discovery and schemas 2026-11-20T16:21:57Z.1,99,0,0}][PST{t=2026-11-20T03:04:47Z}]{
   "name": "@reveal-codes/provenance",
-  "version": "0.0.0",
+  "version": "0.[AI:10.6 Runs list tag once, one version source, setup names each file 2026-11-21T06:05:01Z.1{t=2026-11-21T06:11:28.053Z}]1[PST{t=2026-11-20T03:04:47Z}].0",
   "private": true,
   "description": "Records which agent run wrote which lines of a repository file, on top of the Engine's provenance model.",
   "license": "Apache-2.0",

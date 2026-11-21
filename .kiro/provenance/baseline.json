@@ -1113,7 +1113,6 @@
     "powers/citation-check/skills/check-citations/SKILL.md": { "sha256": "9b7580418157cacfc8bafb40de6398bd1485ad74ec6a425e62e1688fd2e0af46", "blob": "de67941ab93bb91b6b079fc7bbe7205ce2ffc39f" },
     "powers/citation-check/skills/check-citations/references/statuses.md": { "sha256": "a10e8e913313e3ad7789d0865a1635e527099f495229acc5a73a1865b130ebd7", "blob": "9d8cfffceaa3ca54ac69b7fdd7fd1329d764c872" },
     "powers/citation-check/skills/court-ai-rules/SKILL.md": { "sha256": "bc21517cea832e50f884f33b25fb16484e5e459a2b5613fac06f7a908151b26b", "blob": "e07075daa438f966386cfd676d9ea284c80810b7" },
-    "scripts/build-power.mjs": { "sha256": "a8092b70d104fc68c11323e0b37f1243edcd2bb70f547ccd7ed77a690aed8676", "blob": "12974d7af2cbcdbfc4646578e3eeba59e7738d8e" },
     "scripts/commit-task.sh": { "sha256": "11ed5944ccd0426f33795273a803ce71031f387f9b340610955da44ace09b319", "blob": "edafb847b5538ab4995152011e9294a94382ad19" },
     "scripts/kiro-usage-check.mjs": { "sha256": "08dfe109ee20101087fac94948d1c5be0e834f45b45e0473577ff987797f3eca", "blob": "4f1bb78dce599ff6840129dce849277aa26f800c" },
     "tsconfig.base.json": { "sha256": "97215ac82be11cb5f6619e93f27b59790e66fbd873469b7911e71633c41e4da1", "blob": "27d3946042439424d3524896de1263a9045c419c" },

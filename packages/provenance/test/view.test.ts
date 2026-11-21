@@ -162,8 +162,8 @@ describe("run tags and the Runs list (Req 9.14, 9.15)", () => {
     expect(lines[5]).toBe("Runs in this file");
     expect(lines.slice(6, 9)).toEqual([
       "  6.6   Wire it  opened 2026-11-19T10:00:00Z  1 hunk",
-      "  turn  turn     opened 2026-11-19T10:01:00Z  1 hunk",
-      "  task  task     opened 2026-11-19T10:02:00Z  1 hunk",
+      "  turn           opened 2026-11-19T10:01:00Z  1 hunk",
+      "  task           opened 2026-11-19T10:02:00Z  1 hunk",
     ]);
     expect(lines[9]).toBe("");
     expect(lines.join("\n")).not.toContain("Tags are listed");

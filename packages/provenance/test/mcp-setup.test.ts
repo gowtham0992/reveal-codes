@@ -8,11 +8,17 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { hookFileText } from "../src/core/hook-file.js";
 import { setupProvenanceOutput } from "../src/mcp/schemas.js";
+import { DEV_VERSION } from "../src/mcp/version.js";
 import { NEEDS_WORKSPACE_MESSAGE } from "../src/mcp/workspace.js";
 import { makeTempDir, useIsolatedGit } from "./support/temp-repo.js";
 import type { TempDir } from "./support/temp-repo.js";
 
 const REPO = fileURLToPath(new URL("../../../", import.meta.url));
+const PACKAGE_VERSION = (
+  JSON.parse(readFileSync(join(REPO, "packages/provenance/package.json"), "utf8")) as {
+    version: string;
+  }
+).version;
 const PROV = ".kiro/provenance";
 const scratch: string[] = [];
 const dirs: TempDir[] = [];
@@ -45,6 +51,11 @@ async function connect(cwd: string): Promise<Client> {
   const client = new Client({ name: "test", version: "0.0.0" });
   await client.connect(transport);
   return client;
+}
+
+function textOf(result: object): string[] {
+  const { content } = result as { content: { text: string }[] };
+  return content.flatMap((c) => c.text.split("\n"));
 }
 
 function tempWorkspace(git: boolean): TempDir {
@@ -109,6 +120,43 @@ describe(
       expect(two.written).toEqual([]);
       expect(two.replaced).toEqual([]);
       expect([...two.kept].sort()).toEqual([...one.written].sort());
+      await client.close();
+    });
+
+    it("names each file under written, replaced and kept, as `provenance setup` prints them", async () => {
+      const d = tempWorkspace(true);
+      const client = await connect(d.root);
+      const args = { workspace: d.root, gitHook: true };
+      const first = await client.callTool({ name: "setup_provenance", arguments: args });
+      const one = setupProvenanceOutput.parse(first.structuredContent);
+      const fresh = textOf(first);
+      expect(fresh[0]).toBe(`Provenance is set up in ${d.root}.`);
+      expect(fresh).toContain("written:");
+      expect(fresh).toContain("replaced: none");
+      expect(fresh).toContain("kept: none");
+      for (const path of one.written.filter((p) => !p.startsWith(`${PROV}/cache/`))) {
+        expect(fresh).toContain(`  ${path}`);
+      }
+      expect(fresh.some((l) => l.startsWith(`  ${PROV}/cache/ (`))).toBe(true);
+      expect(fresh.some((l) => l.startsWith("baseline: "))).toBe(true);
+      expect(fresh.at(-1)).toBe("git hook: written (.git/hooks/pre-commit)");
+      expect(fresh.length).toBeGreaterThan(5);
+      const second = await client.callTool({ name: "setup_provenance", arguments: args });
+      const again = textOf(second);
+      expect(again).toContain("written: none");
+      expect(again).toContain("kept:");
+      for (const path of one.written.filter((p) => !p.startsWith(`${PROV}/cache/`))) {
+        expect(again).toContain(`  ${path}`);
+      }
+      expect(again.at(-1)).toBe("git hook: kept (the block is already in .git/hooks/pre-commit)");
+      await client.close();
+    });
+
+    it("answers initialize with the version of packages/provenance/package.json", async () => {
+      const d = tempWorkspace(false);
+      const client = await connect(d.root);
+      expect(client.getServerVersion()?.version).toBe(PACKAGE_VERSION);
+      expect(PACKAGE_VERSION).not.toBe(DEV_VERSION);
       await client.close();
     });
 
