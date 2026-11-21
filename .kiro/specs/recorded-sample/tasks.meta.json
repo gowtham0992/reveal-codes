@@ -96,6 +96,11 @@
         "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
         "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
         "timestamp": 1795293135445
+      },
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795293264561
       }
     ],
     "4.1 Point the Load demo tests at the recording": [
@@ -148,6 +153,13 @@
         "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
         "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
         "timestamp": 1795293264199
+      }
+    ],
+    "3. Load demo motion installs the recording": [
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795293264582
       }
     ]
   }

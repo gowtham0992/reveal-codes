@@ -35,12 +35,12 @@ Conventions for every task:
     - Run `pnpm exec vitest run --project web apps/web/test/recorded-sample.properties.test.ts apps/web/test/static/inventory.test.ts`.
     - _Requirements: 8.1_
 
-- [ ] 3. Load demo motion installs the recording
+- [x] 3. Load demo motion installs the recording
   - [x] 3.1 Wire `loadSample` for key `demo`
     - Add `RECORDED_SAMPLE_LOADED` to `apps/web/src/notices.ts`. In `use-document-actions.tsx` add `holder` to `Deps`, make the `demo` path fetch `recordedSample()`, `deserialise`, `installRestored`, then dispatch the notice; any failure dispatches `DEMO_FAILED`. Pass `a.holder` in `app-shell.tsx`. Keep the Confirm_Dialog copy as it is. Check the empty-page link's click handler: a click must call the same action as the Toolbar button (preventDefault, same confirm, installs the recording); keep its `href` to `demo-motion.txt` only as the no-script fallback. Change the handler if it does not.
     - Run `pnpm exec vitest run --project web apps/web/test/recorded-sample.test.ts`.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.6, 3.8_
-  - [-] 3.2 Component tests for the load
+  - [x] 3.2 Component tests for the load
     - Write `apps/web/test/recorded-sample-load.test.tsx`: load on an empty draft; the confirm and the cancel; the notice text; the Issues_Region shows the Checked date; no `/api/*` request on load in Demo_Mode and in Live_Mode (a fetch fake that records every URL); failure notice and unchanged draft; Verify afterwards in Demo_Mode resolves from the fixtures and replaces the Check_Date; Export asks the Declaration question; clicking the empty-page link installs the recorded draft, same as the Toolbar button.
     - Run `pnpm exec vitest run --project web apps/web/test/recorded-sample-load.test.tsx`.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.8, 4.1, 4.2, 4.3, 5.1, 5.2, 7.1_
