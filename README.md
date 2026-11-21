@@ -22,6 +22,8 @@ WordPerfect 5.1 for DOS, in 1989, had a key that split the screen and showed eve
 
 **There is a page for checking citations alone.** `/check` takes pasted or opened text, lists every citation and quotation with its status and one plain sentence on what to do next, and needs no account. It reads from 320px wide, so it works on a phone.
 
+**It ships a finished example.** Load demo motion installs a draft recorded in this editor on the hosted site on 2026-11-21, with typed, pasted, assistant and edited text, its run log and its results.
+
 **Alt-F3 shows everything.** The codes pane opens under the page and prints the same text with every code inline. The margin numbers are the document's line numbers, the same ones the status line and the Sentinel use.
 
 **A draft can be opened from a file.** A draft can be opened from a `.docx`, `.txt` or `.md` file, and an exported `.docx` is reopened with its record; a file changed after it was exported is opened as pasted text.
@@ -41,7 +43,7 @@ WordPerfect 5.1 for DOS, in 1989, had a key that split the screen and showed eve
 On the hosted site citations are checked live. Locally, with no token set, the app runs on recorded responses.
 
 1. Open the site, or run `pnpm dev` and open http://localhost:3000.
-2. On the empty page, select Load demo motion, the second sample button; the Avianca sample, Load Mata v. Avianca, is the first offered. The text enters as one `PST` span.
+2. On the empty page, select Load demo motion, the second sample button; the Avianca sample, Load Mata v. Avianca, is the first offered. The text is a draft recorded in this editor on the hosted site on 2026-11-21, with its codes and results already in place.
 3. The codes pane is already open on a first visit; Alt-F3 hides and shows it.
 4. Select Verify. Two citations are found. Three are not, and one quotation is not in its opinion: they turn red in the pane, are underlined on the page, and are listed under Issues. Go jumps to each.
 5. Select Export. Choose a court, for example N.D. Tex. The dialog says how many blocking items remain and keeps Download .docx disabled.
@@ -92,7 +94,7 @@ The Kiro Crew app that schedules the Sentinel lives in a separate repository: ht
 
 ## Reveal Codes for your own repository
 
-The Provenance Power records which text in your source files the Kiro agent changed, and prints a file with its codes in front of the text. The record is made by Kiro's own hooks when the agent works, not guessed from the text.
+The Provenance Power records which text in your source files the Kiro agent changed, and prints a file with its codes in front of the text. The record is made by Kiro's own hooks when the agent works, not guessed from the text. No prompt text is stored, and nothing leaves the machine.
 
 ### Read a file with its codes
 

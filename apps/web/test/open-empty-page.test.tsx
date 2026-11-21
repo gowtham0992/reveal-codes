@@ -26,6 +26,15 @@ const NEW_PLACEHOLDER = "Type or paste your filing here, or open a draft.";
 
 type Calls = { api: number };
 
+const recordedFile: ApiClient["recordedSample"] = () =>
+  Promise.resolve({
+    ok: true as const,
+    value: readFileSync(
+      join(__dirname, "../../../packages/engine/fixtures/demo-motion.recorded.json"),
+      "utf8",
+    ),
+  });
+
 /** The shell's services over the fixture routes, with a counter on every Api method. */
 function services(calls: Calls, mode: ModeApi): AppServices {
   const timers = createManualTimers();
@@ -44,15 +53,7 @@ function services(calls: Calls, mode: ModeApi): AppServices {
     mode: base.mode,
     demoMotion: count(base.demoMotion),
     aviancaCitations: count(base.aviancaCitations),
-    recordedSample: count(() =>
-      Promise.resolve({
-        ok: true as const,
-        value: readFileSync(
-          join(__dirname, "../../../packages/engine/fixtures/demo-motion.recorded.json"),
-          "utf8",
-        ),
-      }),
-    ),
+    recordedSample: count(recordedFile),
     draft: count(base.draft),
   };
   return {

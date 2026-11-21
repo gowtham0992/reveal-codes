@@ -1,4 +1,4 @@
-[DOC{v=1;n=21;r=10.10 Checkpoint - the attribution fix 2026-11-21T06:53:30Z.1,1030,0,0;r=10.11 Latest line start for ambiguous edits 2026-11-21T07:07:15Z.1,2223,0,0;r=10.2 Bundle freshness\, tools from a copy outside the repository\, and the MCP import c 2026-11-21T00:49:48Z.1,1269,0,0;r=10.2 Bundle freshness\, tools from a copy outside the repository\, and the MCP import c 2026-11-21T00:49:48Z.2,20,0,0;r=10.2 Bundle freshness\, tools from a copy outside the repository\, and the MCP import c 2026-11-21T00:49:48Z.3,145,0,0;r=10.2 Bundle freshness\, tools from a copy outside the repository\, and the MCP import c 2026-11-21T00:49:48Z.4,41,0,0;r=10.7 Checkpoint - the walk findings 2026-11-21T06:11:28Z.1,1414,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.1,1645,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.2,416,0,0;r=11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.1,1485,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:12:34Z.1,858,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:14:46Z.1,592,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:14:46Z.2,819,0,0;r=6.8 Rebuild and reinstall the Bundle\, BUILD_LOG 2026-11-20T03:46:44Z.1,1461,0,0;r=9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.1,2171,0,0}][PST{t=2026-11-20T03:04:47Z}]## 2026-11-03
+[DOC{v=1;n=21;r=10.10 Checkpoint - the attribution fix 2026-11-21T06:53:30Z.1,1030,0,0;r=10.11 Latest line start for ambiguous edits 2026-11-21T07:07:15Z.1,2223,0,0;r=10.2 Bundle freshness\, tools from a copy outside the repository\, and the MCP import c 2026-11-21T00:49:48Z.1,1269,0,0;r=10.2 Bundle freshness\, tools from a copy outside the repository\, and the MCP import c 2026-11-21T00:49:48Z.2,20,0,0;r=10.2 Bundle freshness\, tools from a copy outside the repository\, and the MCP import c 2026-11-21T00:49:48Z.3,145,0,0;r=10.2 Bundle freshness\, tools from a copy outside the repository\, and the MCP import c 2026-11-21T00:49:48Z.4,41,0,0;r=10.7 Checkpoint - the walk findings 2026-11-21T06:11:28Z.1,1414,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.1,1645,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.2,416,0,0;r=11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.1,1485,0,0;r=5.1 Docs 2026-11-21T20:34:26Z.1,2188,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:12:34Z.1,858,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:14:46Z.1,592,0,0;r=6.4 Measure the Recorder and add the times to BUILD_LOG 2026-11-20T03:14:46Z.2,819,0,0;r=6.8 Rebuild and reinstall the Bundle\, BUILD_LOG 2026-11-20T03:46:44Z.1,1461,0,0;r=9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.1,2171,0,0}][PST{t=2026-11-20T03:04:47Z}]## 2026-11-03
 
 Bootstrapped repository with Kiro. Steering written first.
 
@@ -1059,3 +1059,25 @@ The Recorder runs from four Kiro hooks. `reveal <file>`, `reveal --summary`, `re
 
 - No boundary test beyond the two files of 11.1.
 - The README install section was written last.
+[AI:5.1 Docs 2026-11-21T20:34:26Z.1{t=2026-11-21T20:35:15.975Z}]
+## 2026-11-21: recorded-sample (Load demo motion installs a recorded draft)
+
+### What was built
+Load demo motion fetches `/demo-motion.recorded.json`, restores it with `deserialise` and installs it as a mount-time restore does. The file is `packages/engine/fixtures/demo-motion.recorded.json`, recorded in this editor on the hosted site on 2026-11-21, never edited, sha256 `61db329c698fb01b64777ad90b681b0e73682382c95ca04b9a1423ef7c2a2c0e`. The saved-draft format, the Engine, the Verifier and the server are unchanged.
+
+### Least-code choices (design.md)
+- **Delivery by copy and fetch, not import.** `copy-demo.ts` already copies fixtures to `apps/web/public/` and `api.ts` already fetches them as text. One more pair and one `ApiClient` method reuse that path; an import would reach outside the web package and need a bundler rule.
+- **File stays at `packages/engine/fixtures/`**, beside the two text samples the build copies.
+- **No new component or CSS.** The Load_Demo_Control, Confirm_Dialog and notice are the existing ones; only what `loadSample` does for key `demo` changed.
+- **No new request on load.** One static GET from the site's own origin; no `/api/*` route is called.
+- **Restore step shared, not copied.** `installRestored` is extracted from `loadAutosave` and called by both it and the sample install.
+- **Demo_Mode needs no new fixture.** Every citation and both quotation targets of the recording are already in `packages/verifier/fixtures/`.
+
+### Completion notes from tasks 1 to 4
+- `copy-demo.test.ts` already existed; it overlaps with `recorded-sample.test.ts`.
+- The tasks listed two tests to move, but `text-safety`, `open-empty-page` and `unreadable-draft` also depended on the old demo path and were updated.
+- The Verify_Summary is no longer empty after load, because the recording carries results.
+- The editor calls `/api/mode` on mount, so "no request on load" means no verify, opinion or assistant call.
+- The empty-page link already ran the same action as the Toolbar button; no handler change was needed.
+- `arbPersistCase` moved to `apps/web/test/support/persist-case.ts` so Property 1 can reuse it.
+- The recorded file is fetched as a static GET.

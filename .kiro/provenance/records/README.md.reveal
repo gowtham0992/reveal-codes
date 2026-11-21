@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,292,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1,10755,4323,1;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2,321,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.3,28,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.4,55,0,0;r=11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.1,1,0,0;r=11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.2,16,0,0}][PST{t=2026-11-20T03:04:47Z}]<img src="docs/images/mark.svg" width="48" height="48" alt="Reveal Codes mark: a page above a codes pane, with a failing code between brackets">
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,292,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1,10755,4323,1;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2,321,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.3,28,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.4,55,0,0;r=11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.1,1,0,0;r=11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.2,16,0,0;r=5.1 Docs 2026-11-21T20:34:26Z.1,202,0,0;r=5.1 Docs 2026-11-21T20:34:26Z.2,112,0,0;r=5.1 Docs 2026-11-21T20:34:26Z.3,58,0,0}][PST{t=2026-11-20T03:04:47Z}]<img src="docs/images/mark.svg" width="48" height="48" alt="Reveal Codes mark: a page above a codes pane, with a failing code between brackets">
 
 # Reveal Codes
 
@@ -22,7 +22,9 @@ WordPerfect 5.1 for DOS, in 1989, had a key that split the screen and showed eve
 
 **There is a page for checking citations alone.** `/check` takes pasted or opened text, lists every citation and quotation with its status and one plain sentence on what to do next, and needs no account. It reads from 320px wide, so it works on a phone.
 
-**Alt-F3 shows everything.** The codes pane opens under the page and prints the same text with every code inline. The margin numbers are the document's line numbers, the same ones the status line and the Sentinel use.
+[AI:5.1 Docs 2026-11-21T20:34:26Z.1{t=2026-11-21T20:35:15.975Z}]**It ships a finished example.** Load demo motion installs a draft recorded in this editor on the hosted site on 2026-11-21, with typed, pasted, assistant and edited text, its run log and its results.
+
+[PST{t=2026-11-20T03:04:47Z}]**Alt-F3 shows everything.** The codes pane opens under the page and prints the same text with every code inline. The margin numbers are the document's line numbers, the same ones the status line and the Sentinel use.
 
 **A draft can be opened from a file.** A draft can be opened from a `.docx`, `.txt` or `.md` file, and an exported `.docx` is reopened with its record; a file changed after it was exported is opened as pasted text.
 
@@ -41,7 +43,7 @@ WordPerfect 5.1 for DOS, in 1989, had a key that split the screen and showed eve
 On the hosted site citations are checked live. Locally, with no token set, the app runs on recorded responses.
 
 1. Open the site, or run `pnpm dev` and open http://localhost:3000.
-2. On the empty page, select Load demo motion, the second sample button; the Avianca sample, Load Mata v. Avianca, is the first offered. The text enters as one `PST` span.
+2. On the empty page, select Load demo motion, the second sample button; the Avianca sample, Load Mata v. Avianca, is the first offered. The text [AI:5.1 Docs 2026-11-21T20:34:26Z.2{t=2026-11-21T20:35:15.975Z}]is a draft recorded in this editor on the hosted site on 2026-11-21, with its codes and results already in place[PST{t=2026-11-20T03:04:47Z}].
 3. The codes pane is already open on a first visit; Alt-F3 hides and shows it.
 4. Select Verify. Two citations are found. Three are not, and one quotation is not in its opinion: they turn red in the pane, are underlined on the page, and are listed under Issues. Go jumps to each.
 5. Select Export. Choose a court, for example N.D. Tex. The dialog says how many blocking items remain and keeps Download .docx disabled.
@@ -92,7 +94,7 @@ The Kiro Crew app that schedules the Sentinel lives in a separate repository: ht
 
 [AI>HUM:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}]## Reveal Codes for your own repository
 
-The Provenance Power records which text in your source files the Kiro agent changed, and prints a file with its codes in front of the text. The record is made by Kiro's own hooks when the agent works, not guessed from the text.
+The Provenance Power records which text in your source files the Kiro agent changed, and prints a file with its codes in front of the text. The record is made by Kiro's own hooks when the agent works, not guessed from the text.[AI:5.1 Docs 2026-11-21T20:34:26Z.3{t=2026-11-21T20:35:15.975Z}] No prompt text is stored, and nothing leaves the machine.[AI>HUM:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}]
 
 ### Read a file with its codes
 
