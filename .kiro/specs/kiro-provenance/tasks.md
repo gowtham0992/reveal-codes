@@ -416,8 +416,8 @@ Conventions that apply to every task:
     - Complete the dated `BUILD_LOG.md` entry that tasks 1.3, 2.2 and 6.4 started: what was built; what Kiro got wrong and what fixed it (from the task completion notes); the measured times of Requirement 7; the measured hook order on the CLI; the Recorder's measured time against the node floor; the line that arbitraries live in this package and why (Decision 17); the Resolved points of `design.md`; and any property the build had to change and why.
     - _Requirements: 17.5, 16.17, 7.9, 8.6_
 
-- [ ] 12. Final checkpoint
-  - [ ] 12.1 Final checkpoint - everything green and the record complete
+- [x] 12. Final checkpoint
+  - [x] 12.1 Final checkpoint - everything green and the record complete
     - Refresh the installed copy: `node scripts/build-power.mjs --power provenance`, then `node powers/provenance/server/provenance.mjs setup`, and confirm with `git status` and `reveal --check --strict` that the setup run changed no Record and no Baseline_Entry (Req 14.3).
     - Run, in this order, each with exit code 0: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, the clean-checkout build (`git clone` of this working tree into a temporary directory, `pnpm install --frozen-lockfile`, `pnpm --filter @reveal-codes/web build`), `pnpm kiro:check`, `pnpm power:build` followed by `git status --porcelain` that prints nothing, `pnpm reveal --check --strict` and `pnpm reveal --summary` on this repository. Report the `--summary` totals and any `stale` or `no_record` line; if `--check --strict` fails only because of a file changed after the last event, run `pnpm reveal --record` and repeat it.
     - Confirm with `git diff --stat` against the commit before task 1.1 that no file under `apps/web`, `packages/verifier`, `packages/export/src`, `packages/engine/src`, `crew/sentinel/src` or `data` changed, that `scripts/commit-task.sh` and `pnpm-workspace.yaml` are unchanged, and that no probe file exists anywhere in the repository. Do not push. Ensure all tests pass, ask the user if questions arise.
