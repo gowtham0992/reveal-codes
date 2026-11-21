@@ -6,6 +6,7 @@
 import type { Document } from "@reveal-codes/engine";
 import { staleLine } from "../core/legend.js";
 import { neutralize } from "../core/neutralize.js";
+import { trimHunk } from "../core/trim.js";
 import { changeHunks } from "../core/update.js";
 import { headerLine, viewRecord } from "../core/view.js";
 import type { ViewMode } from "../core/view.js";
@@ -21,7 +22,9 @@ export type RevealOutput = { status: 0 | 1; text: string };
 
 /** The characters of the Hunks between `recorded` and `current` (Changed_Characters). */
 export function unrecordedCharacters(recorded: string, current: string): number {
-  return changeHunks(recorded, current).reduce((n, h) => n + (h.to - h.from) + h.text.length, 0);
+  return changeHunks(recorded, current)
+    .flatMap((h) => trimHunk(recorded, h) ?? [])
+    .reduce((n, h) => n + (h.to - h.from) + h.text.length, 0);
 }
 
 function notShown(path: string, reason: NotShown | "tampered_record"): RevealOutput {

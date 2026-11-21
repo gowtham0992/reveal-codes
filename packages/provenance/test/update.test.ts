@@ -231,7 +231,10 @@ describe("updateRecord whole-text trim before the line difference", () => {
       doc.spans.filter((s) => s.provenance.origin === "AI").map((s) => [s.start, s.end]),
     ).toEqual([[9, 10]]);
   });
-  it("keeps the last line feed, not the one on line 2, when a delete leaves one of two (shrunk counterexample)", () => {
+  // Both line feeds (the one on line 2 and the last one) are valid longest-common-subsequence
+  // matches of the new text "\n". The Record follows the line difference, which pairs the new
+  // line with old line 2, so the kept line feed is the PST one on line 2.
+  it("keeps the line feed that the line difference pairs (line 2), when a delete leaves one of two (shrunk counterexample)", () => {
     const old = "|S3[]H7D\u{2B2F3}\n\nP]\u{34998}+\n.C9\u{32511}!&6_-\n";
     expect(old.length).toBe(29);
     const start = must(
@@ -240,7 +243,7 @@ describe("updateRecord whole-text trim before the line difference", () => {
     expect(originAt(start, 28)).toBe("HUM");
     const doc = must(updateRecord(start, "\n", "HUM", null, clock));
     expect(doc.text).toBe("\n");
-    expect(originAt(doc, 0)).toBe("HUM");
+    expect(originAt(doc, 0)).toBe("PST");
   });
   it("deletes one of two identical line feeds and nothing else", () => {
     const base = must(createDocument("a\n\nb\n", AT));

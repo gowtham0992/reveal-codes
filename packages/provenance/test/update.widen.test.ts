@@ -1,0 +1,115 @@
+import { createDocument, type Document } from "@reveal-codes/engine";
+import { describe, expect, it } from "vitest";
+import { updateRecord } from "../src/core/update.js";
+import { fixedClock } from "./support/clock.js";
+
+const W = { windowRun: "turn 2026-11-19T10:00:00Z" };
+const AT = "2026-01-01T00:00:00.000Z";
+const clock = fixedClock();
+
+function must<T>(r: { ok: true; value: T } | { ok: false; error: unknown }): T {
+  if (!r.ok) throw new Error(JSON.stringify(r.error));
+  return r.value;
+}
+
+describe("updateRecord widens the middle to whole lines (Req 4.2, Decision 29)", () => {
+  const pieces = (d: Document, origin: string): string[] =>
+    d.spans.filter((s) => s.provenance.origin === origin).map((s) => d.text.slice(s.start, s.end));
+  const startsLine = (d: Document, start: number): boolean =>
+    start === 0 || d.text[start - 1] === "\n";
+  for (const [label, eol] of [
+    ["LF", "\n"],
+    ["CR LF", "\r\n"],
+  ] as const) {
+    const lines = (...l: string[]): string => l.map((x) => x + eol).join("");
+    describe(label, () => {
+      it("(1) records only the two inserted lines as AI over an all-PST Record", () => {
+        const old = lines("// head", "  keep line 1;", "  tail line;");
+        const text = lines(
+          "// new first line",
+          "// head",
+          "  keep line 1;",
+          "  new indented line;",
+          "  tail line;",
+        );
+        const doc = must(updateRecord(must(createDocument(old, AT)), text, "AI", W, clock));
+        expect(doc.text).toBe(text);
+        expect(pieces(doc, "AI")).toEqual([
+          lines("// new first line"),
+          lines("  new indented line;"),
+        ]);
+        expect(pieces(doc, "PST").join("")).toBe(old);
+        expect(doc.runs.map((r) => r.runId)).toEqual([`${W.windowRun}.1`, `${W.windowRun}.2`]);
+        for (const s of doc.spans.filter((x) => x.provenance.origin === "AI")) {
+          expect(startsLine(doc, s.start)).toBe(true);
+        }
+      });
+      it("(2) with three unchanged lines between, no AI code begins inside an old line", () => {
+        const keep = ["  keep line 1;", "  keep line 2;", "  keep line 3;"];
+        const old = lines("// head", ...keep, "  tail line;");
+        const text = lines(
+          "// new first line",
+          "// head",
+          ...keep,
+          "  new indented line;",
+          "  tail line;",
+        );
+        const doc = must(updateRecord(must(createDocument(old, AT)), text, "AI", W, clock));
+        expect(pieces(doc, "AI")).toEqual([
+          lines("// new first line"),
+          lines("  new indented line;"),
+        ]);
+        expect(pieces(doc, "PST").join("")).toBe(old);
+        for (const s of doc.spans.filter((x) => x.provenance.origin === "AI")) {
+          expect(startsLine(doc, s.start)).toBe(true);
+        }
+      });
+      it("(3) an Outside_Change over all-AI text keeps the unchanged lines AI in the same run", () => {
+        const old = lines("// head", "  keep line 1;", "  tail line;");
+        const text = lines(
+          "// new first line",
+          "// head",
+          "  keep line 1;",
+          "  new indented line;",
+          "  tail line;",
+        );
+        const base = must(updateRecord(must(createDocument("", AT)), old, "AI", W, clock));
+        const doc = must(updateRecord(base, text, "HUM", null, clock));
+        expect(pieces(doc, "HUM")).toEqual([
+          lines("// new first line"),
+          lines("  new indented line;"),
+        ]);
+        // The two insertions are more than 0.4 of the Run's original length, so the Engine's
+        // 0.4 rule relabels the run: its kept text is `AI>HUM` and not `AI`. Either way the
+        // kept text is the old text, in the same run.
+        const run = doc.runs.find((r) => r.runId === `${W.windowRun}.1`);
+        const kept = run?.relabelled === true ? "AI>HUM" : "AI";
+        expect(pieces(doc, kept).join("")).toBe(old);
+        const agentSpans = doc.spans.filter((s) => s.provenance.origin !== "HUM");
+        expect(agentSpans.every((s) => s.provenance.runId === `${W.windowRun}.1`)).toBe(true);
+      });
+      it("(3b) in a long agent run the edits stay under 0.4, so the unchanged lines are literally AI", () => {
+        const keeps = Array.from({ length: 14 }, (_, i) => `  keep line ${String(i + 1)};`);
+        const old = lines("// head", ...keeps, "  tail line;");
+        const text = lines(
+          "// new first line",
+          "// head",
+          ...keeps,
+          "  new indented line;",
+          "  tail line;",
+        );
+        const base = must(updateRecord(must(createDocument("", AT)), old, "AI", W, clock));
+        const doc = must(updateRecord(base, text, "HUM", null, clock));
+        expect(pieces(doc, "HUM")).toEqual([
+          lines("// new first line"),
+          lines("  new indented line;"),
+        ]);
+        expect(pieces(doc, "AI")).toEqual([lines("// head", ...keeps), lines("  tail line;")]);
+        expect(pieces(doc, "AI>HUM")).toEqual([]);
+        const agent = doc.spans.filter((s) => s.provenance.origin === "AI");
+        expect(agent.every((s) => s.provenance.runId === `${W.windowRun}.1`)).toBe(true);
+        expect(doc.runs.map((r) => [r.runId, r.relabelled])).toEqual([[`${W.windowRun}.1`, false]]);
+      });
+    });
+  }
+});

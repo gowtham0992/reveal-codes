@@ -30,7 +30,7 @@ function atoms(text: string): string[] {
   return text.match(/\r\n|[\ud800-\udbff][\udc00-\udfff]|[\s\S]/g) ?? [];
 }
 
-/** The atom-minimal changed stretch `[p, q)` of `oldText` against `newText`, before any slide. */
+/** The atom-minimal changed stretch `[p, q)` of `oldText` against `newText`. */
 function minimal(oldText: string, newText: string): { p: number; q: number; inserted: number } {
   const a = atoms(oldText);
   const b = atoms(newText);
@@ -48,35 +48,23 @@ function minimal(oldText: string, newText: string): { p: number; q: number; inse
   const q = oldText.length - len(a.slice(a.length - suf));
   return { p, q, inserted: newText.length - (oldText.length - (q - p)) };
 }
-const splits = (t: string, b: number): boolean =>
-  b > 0 && b < t.length && /^(?:[\ud800-\udbff][\udc00-\udfff]|\r\n)$/.test(t.slice(b - 1, b + 1));
-/** Whether the same edit placed `k` units further left gives the same new text, with no boundary inside a pair. */
-function equalAt(
-  oldText: string,
-  newText: string,
-  e: { p: number; q: number; inserted: number },
-  k: number,
-): boolean {
-  const p = e.p - k;
-  const q = e.q - k;
-  const end = p + e.inserted;
-  const sameEdit = oldText.slice(0, p) + newText.slice(p, end) + oldText.slice(q) === newText;
-  const safe =
-    [p, q].every((b) => !splits(oldText, b)) && [p, end].every((b) => !splits(newText, b));
-  return p >= 0 && sameEdit && safe;
-}
+const atLineStart = (t: string, at: number): boolean => at === 0 || t[at - 1] === "\n";
 /**
- * The minimal changed stretch `[p, q)` of `oldText` against `newText` after the slide
- * (Req 4.17): the nearest line start reached by equal positions one unit at a time, or
- * the minimal stretch itself when none is reachable. Written apart from `slideStretch`.
+ * The edited stretch widened to whole lines (Req 16.24), written apart from `trim.ts`: the
+ * minimal changed stretch, its start back to the start of its line, its end forward to just
+ * after the next line feed of the text after it (or to the end of the text), unless both
+ * ends already are line starts. Both texts widen by the same count, as the suffix is common.
  */
-function stretch(oldText: string, newText: string): { p: number; q: number; inserted: number } {
+function widened(oldText: string, newText: string): { p: number; q: number; inserted: number } {
   const e = minimal(oldText, newText);
-  for (let k = 0; ; k++) {
-    const at = e.p - k;
-    if (at === 0 || oldText[at - 1] === "\n") return { p: at, q: e.q - k, inserted: e.inserted };
-    if (!equalAt(oldText, newText, e, k + 1)) return e;
+  const start = e.p === 0 ? 0 : oldText.lastIndexOf("\n", e.p - 1) + 1;
+  const newEnd = e.p + e.inserted;
+  if (atLineStart(oldText, e.q) && atLineStart(newText, newEnd)) {
+    return { p: start, q: e.q, inserted: newEnd - start };
   }
+  const lf = oldText.indexOf("\n", e.q);
+  const forward = (lf === -1 ? oldText.length : lf + 1) - e.q;
+  return { p: start, q: e.q + forward, inserted: newEnd + forward - start };
 }
 function provAt(doc: Document, offset: number): Provenance {
   const span = doc.spans.find((s) => s.start <= offset && offset < s.end);
@@ -111,9 +99,9 @@ function isNew(now: Provenance, origin: "AI" | "HUM", window: string): boolean {
 }
 
 /**
- * Every character that replaces `[p, q)` has the new origin, or is an old character
- * from inside `[p, q)` (same text unit) that the line difference kept, with its run
- * and its origin up to the Engine's relabelling.
+ * Every character that replaces the widened stretch `[p, q)` has the new origin, or is an
+ * old character from inside it (same text unit) that the line difference kept as an equal
+ * line, with its run and its origin up to the Engine's relabelling.
  */
 function checkInserted(
   before: Document,
@@ -159,7 +147,7 @@ describe("update edit properties _Requirements: 4.10, 4.15, 4.16, 16.24_", () =>
           updateRecord(before, newText, origin, origin === "AI" ? window : null, clock),
         );
         expect(after.text).toBe(newText);
-        const edited = stretch(before.text, newText);
+        const edited = widened(before.text, newText);
         checkOutside(before, after, edited.p, edited.q);
         checkInserted(before, after, edited, origin, window.windowRun);
       }),

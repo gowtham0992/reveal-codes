@@ -6884,6 +6884,17 @@ function slideStretch(oldText, newText, affixes) {
   }
   return current;
 }
+function widenToLines(oldText, newText, affixes) {
+  const prefix = affixes.prefix === 0 ? 0 : oldText.lastIndexOf("\n", affixes.prefix - 1) + 1;
+  const atStart = (t, p) => p === 0 || t.charCodeAt(p - 1) === LF;
+  const oldEnd = oldText.length - affixes.suffix;
+  const newEnd = newText.length - affixes.suffix;
+  if (atStart(oldText, oldEnd) && atStart(newText, newEnd)) {
+    return { prefix, suffix: affixes.suffix };
+  }
+  const lf = oldText.indexOf("\n", oldEnd);
+  return { prefix, suffix: lf === -1 ? 0 : oldText.length - lf - 1 };
+}
 function trimHunk(oldDocText, hunk) {
   const oldText = oldDocText.slice(hunk.from, hunk.to);
   const newText = hunk.text;
@@ -6946,7 +6957,8 @@ var init_plan = __esm({
 
 // packages/provenance/src/core/update.ts
 function changeHunks(oldText, newText) {
-  const { prefix, suffix } = slideStretch(oldText, newText, commonAffixes(oldText, newText));
+  const slid = slideStretch(oldText, newText, commonAffixes(oldText, newText));
+  const { prefix, suffix } = widenToLines(oldText, newText, slid);
   const middle = diffLines(
     oldText.slice(prefix, oldText.length - suffix),
     newText.slice(prefix, newText.length - suffix)
@@ -8377,7 +8389,7 @@ var init_view = __esm({
 
 // packages/provenance/src/io/reveal-file.ts
 function unrecordedCharacters(recorded, current) {
-  return changeHunks(recorded, current).reduce((n, h) => n + (h.to - h.from) + h.text.length, 0);
+  return changeHunks(recorded, current).flatMap((h) => trimHunk(recorded, h) ?? []).reduce((n, h) => n + (h.to - h.from) + h.text.length, 0);
 }
 function notShown(path, reason) {
   const text = reason === "tampered_record" ? `${neutralize(path)}: tampered_record` : `${neutralize(path)}: not recorded: ${reason}`;
@@ -8431,6 +8443,7 @@ var init_reveal_file = __esm({
     "use strict";
     init_legend();
     init_neutralize();
+    init_trim();
     init_update();
     init_view();
     init_load();

@@ -81,6 +81,23 @@ function slidAffixes(a: string, b: string): { prefix: number; suffix: number } {
   }
 }
 
+const lineStart = (t: string, at: number): boolean => at === 0 || t[at - 1] === "\n";
+
+/**
+ * The slid affixes widened to whole lines (Req 4.15, 4.17, design M15), written apart from
+ * `trim.ts`: the start goes back to its line start; the end goes forward to just after the first
+ * line feed of the common suffix (or the end of the texts) unless it already is a line start in both.
+ */
+function widenedAffixes(a: string, b: string): { prefix: number; suffix: number } {
+  const { prefix, suffix } = slidAffixes(a, b);
+  const start = prefix === 0 ? 0 : a.lastIndexOf("\n", prefix - 1) + 1;
+  const q = a.length - suffix;
+  if (lineStart(a, q) && lineStart(b, b.length - suffix)) return { prefix: start, suffix };
+  const lf = a.indexOf("\n", q);
+  const forward = (lf === -1 ? a.length : lf + 1) - q;
+  return { prefix: start, suffix: suffix - forward };
+}
+
 /** What a character of the old Record allows its successor to be. */
 type Allowed = {
   relabelled: ReadonlySet<string>;
@@ -183,9 +200,9 @@ function runlessProblems(
   return problems;
 }
 
-/** The characters of the common prefix and suffix (after the slide) are outside every Hunk and are kept at their place. */
+/** The characters of the common prefix and suffix (after the slide and the widening to whole lines) are outside every Hunk and are kept at their place. */
 function affixProblems(old: Document, doc: Document, olds: Cell[], now: Cell[], a: Allowed) {
-  const { prefix, suffix } = slidAffixes(old.text, doc.text);
+  const { prefix, suffix } = widenedAffixes(old.text, doc.text);
   const problems: string[] = [];
   for (let i = 0; i < prefix; i += 1) {
     if (!kept(olds[i] as Cell, now[i] as Cell, a))

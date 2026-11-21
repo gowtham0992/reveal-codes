@@ -100,6 +100,24 @@ export function slideStretch(oldText: string, newText: string, affixes: Affixes)
   return current;
 }
 /**
+ * Widens a trimmed middle to whole lines (design Resolved point 26, Req 4.2). The start
+ * moves back to its line start (the same position in both texts, as the prefix is common).
+ * The end moves forward by the same count in both texts to just after the first line feed
+ * of the common suffix, or to the end of the texts when it has none, unless the end already
+ * is a line start in each text. It never splits CR LF: it stops after a line feed.
+ */
+export function widenToLines(oldText: string, newText: string, affixes: Affixes): Affixes {
+  const prefix = affixes.prefix === 0 ? 0 : oldText.lastIndexOf("\n", affixes.prefix - 1) + 1;
+  const atStart = (t: string, p: number): boolean => p === 0 || t.charCodeAt(p - 1) === LF;
+  const oldEnd = oldText.length - affixes.suffix;
+  const newEnd = newText.length - affixes.suffix;
+  if (atStart(oldText, oldEnd) && atStart(newText, newEnd)) {
+    return { prefix, suffix: affixes.suffix };
+  }
+  const lf = oldText.indexOf("\n", oldEnd);
+  return { prefix, suffix: lf === -1 ? 0 : oldText.length - lf - 1 };
+}
+/**
  * The part of `hunk` that really changed, or `null` when its old and new text
  * are equal, slid to a line start (Req 4.17). `oldDocText` is the whole old text
  * that the Hunk's offsets index. A Hunk that starts inside a line (the first, after

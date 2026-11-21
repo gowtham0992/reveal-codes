@@ -5,7 +5,7 @@
  */
 import { apply, createDocument, err, ok, type Document, type Result } from "@reveal-codes/engine";
 import { diffLines } from "./diff.js";
-import { commonAffixes, slideStretch, trimHunk } from "./trim.js";
+import { commonAffixes, slideStretch, trimHunk, widenToLines } from "./trim.js";
 import {
   existingRunNumbers,
   planHunks,
@@ -16,11 +16,12 @@ import {
 import type { Hunk, ProvenanceError } from "./types.js";
 /**
  * The Hunks of an edit (design M2): trim the common prefix and suffix of the
- * whole texts, run the line difference on the middle, shift its Hunks back by
- * the prefix length. Each Hunk is trimmed later, in `applyHunks`.
+ * whole texts, widen the middle to whole lines, run the line difference on it,
+ * shift its Hunks back by the prefix length. Each Hunk is trimmed later, in `applyHunks`.
  */
 export function changeHunks(oldText: string, newText: string): Hunk[] {
-  const { prefix, suffix } = slideStretch(oldText, newText, commonAffixes(oldText, newText));
+  const slid = slideStretch(oldText, newText, commonAffixes(oldText, newText));
+  const { prefix, suffix } = widenToLines(oldText, newText, slid);
   const middle = diffLines(
     oldText.slice(prefix, oldText.length - suffix),
     newText.slice(prefix, newText.length - suffix),

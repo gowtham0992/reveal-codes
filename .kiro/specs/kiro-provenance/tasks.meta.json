@@ -1410,6 +1410,37 @@
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795241738868
       }
+    ],
+    "10.8 Widen the trimmed middle to whole lines": [
+      {
+        "executionId": "12150996-d5de-49f8-bd80-53f9137ed91d",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795242533372
+      },
+      {
+        "executionId": "12150996-d5de-49f8-bd80-53f9137ed91d",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795242533838
+      },
+      {
+        "executionId": "666d61a0-b6aa-4942-81d4-56410fd8a43a",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795243719435
+      }
+    ],
+    "10.9 Property 18: only changed lines change": [
+      {
+        "executionId": "12150996-d5de-49f8-bd80-53f9137ed91d",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795242533434
+      }
+    ],
+    "10.10 Checkpoint - the attribution fix": [
+      {
+        "executionId": "12150996-d5de-49f8-bd80-53f9137ed91d",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795242533472
+      }
     ]
   }
 }

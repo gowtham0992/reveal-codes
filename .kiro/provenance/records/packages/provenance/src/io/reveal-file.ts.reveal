@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,283,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,8,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,3,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,8,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.5,73,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.6,3,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.7,8,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.8,3,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,4108,0,0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,7,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]/**
+[DOC{v=1;n=0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.1,44,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.2,54,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,283,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,8,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.3,3,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.4,8,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.5,73,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.6,3,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.7,8,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.8,3,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,4108,0,0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,7,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]/**
  * `reveal <file>` (Req 9, design The Reveal_Command): the file's state decides the output and the
  * exit status. Success prints nothing to standard error; a file that is not shown gets one line
  * and exit 1. The decision is a pure function of the facts; `revealFile` loads them.
@@ -6,7 +6,8 @@
 import type { Document } from "@reveal-codes/engine";
 import { staleLine } from "../core/legend.js";
 import { neutralize } from "../core/neutralize.js";
-import { changeHunks } from "../core/update.js";
+[AI:10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.1{t=2026-11-21T06:48:39.648Z}]import { trimHunk } from "../core/trim.js";
+[AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]import { changeHunks } from "../core/update.js";
 import { headerLine, viewRecord } from "../core/view.js";
 import type { ViewMode } from "../core/view.js";
 import type { Deps } from "./deps.js";
@@ -21,7 +22,9 @@ export type RevealOutput = { status: 0 | 1; text: string };
 
 /** The characters of the Hunks between `recorded` and `current` (Changed_Characters). */
 export function unrecordedCharacters(recorded: string, current: string): number {
-  return changeHunks(recorded, current).reduce((n, h) => n + (h.to - h.from) + h.text.length, 0);
+  return changeHunks(recorded, current)[AI:10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.2{t=2026-11-21T06:48:39.648Z}]
+    .flatMap((h) => trimHunk(recorded, h) ?? \[\])
+    [AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}].reduce((n, h) => n + (h.to - h.from) + h.text.length, 0);
 }
 
 function notShown(path: string, reason: NotShown | "tampered_record"): RevealOutput {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { commonAffixes, slideStretch, trimHunk } from "../src/core/trim.js";
+import { commonAffixes, slideStretch, trimHunk, widenToLines } from "../src/core/trim.js";
 
 const whole = (old: string, text: string) => ({ from: 0, to: old.length, text });
 
@@ -102,5 +102,52 @@ describe("slideStretch", () => {
       to: 5,
       text: "// tip\n",
     });
+  });
+});
+
+describe("widenToLines", () => {
+  const widen = (a: string, b: string) => widenToLines(a, b, slide(a, b));
+  it("moves a start and an end that lie inside lines to whole lines", () => {
+    const a = "one\ntwo words\nthree\n";
+    const b = "one\ntwo new words\nthree\n";
+    expect(commonAffixes(a, b)).toEqual({ prefix: 8, suffix: 12 });
+    expect(widen(a, b)).toEqual({ prefix: 4, suffix: 6 });
+  });
+  it("does not move a middle that already is whole lines", () => {
+    const a = "a\nb\nc\n";
+    const b = "a\nX\nc\n";
+    expect(widen(a, b)).toEqual({ prefix: 2, suffix: 2 });
+  });
+  it("moves both ends by the same count for an empty old middle and a new middle ending inside a line", () => {
+    const a = "a\nb\n";
+    const b = "a\nxx\nb\n";
+    expect(widen(a, b)).toEqual({ prefix: 2, suffix: 2 });
+    const c = "a\nbcd\n";
+    const d = "a\nxbcd\n";
+    const w = widen(c, d);
+    expect(w).toEqual({ prefix: 2, suffix: 0 });
+    expect(c.length - w.suffix - w.prefix).toBe(4);
+    expect(d.length - w.suffix - w.prefix).toBe(5);
+  });
+  it("runs to the end of the texts when the suffix has no line feed", () => {
+    expect(widen("a\nxyz", "a\nxqyz")).toEqual({ prefix: 2, suffix: 0 });
+  });
+  it("handles empty texts and a change at offset 0", () => {
+    expect(widenToLines("", "", { prefix: 0, suffix: 0 })).toEqual({ prefix: 0, suffix: 0 });
+    expect(widen("", "ab")).toEqual({ prefix: 0, suffix: 0 });
+    expect(widen("b\n", "ab\n")).toEqual({ prefix: 0, suffix: 0 });
+  });
+  it("handles a change at the end without a final line feed", () => {
+    expect(widen("a\nb", "a\nbc")).toEqual({ prefix: 2, suffix: 0 });
+  });
+  it("does not split CR LF at the boundary", () => {
+    const a = "x\r\nyz\r\n";
+    const b = "x\r\nywz\r\n";
+    const w = widen(a, b);
+    expect(w).toEqual({ prefix: 3, suffix: 0 });
+    expect(a[a.length - w.suffix - 1]).toBe("\n");
+    const c = "ab\r\ncd\r\n";
+    const d = "ab\r\nXcd\r\n";
+    expect(widen(c, d)).toEqual({ prefix: 4, suffix: 0 });
   });
 });

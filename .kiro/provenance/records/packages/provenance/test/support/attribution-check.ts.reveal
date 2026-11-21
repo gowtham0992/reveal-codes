@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.1,946,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.2,18,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.3,5,0,0}][PST{t=2026-11-20T03:04:47Z}]/**
+[DOC{v=1;n=0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.1,946,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.2,18,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.3,5,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.1,860,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.2,32,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.3,6,0,0}][PST{t=2026-11-20T03:04:47Z}]/**
  * The per-file checks of Property 2, character by character.
  *
  * What a Record lets a test see: the Engine merges adjacent spans of one origin and one run and
@@ -79,6 +79,23 @@ function slidAffixes(a: string, b: string): { prefix: number; suffix: number } {
       \[np, q - 1 + added\].every((x) => !splitsAt(b, x));
     if (!same || !safe) return first;
   }
+}
+
+[AI:10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.1{t=2026-11-21T06:48:39.648Z}]const lineStart = (t: string, at: number): boolean => at === 0 || t\[at - 1\] === "\\n";
+
+/**
+ * The slid affixes widened to whole lines (Req 4.15, 4.17, design M15), written apart from
+ * `trim.ts`: the start goes back to its line start; the end goes forward to just after the first
+ * line feed of the common suffix (or the end of the texts) unless it already is a line start in both.
+ */
+function widenedAffixes(a: string, b: string): { prefix: number; suffix: number } {
+  const { prefix, suffix } = slidAffixes(a, b);
+  const start = prefix === 0 ? 0 : a.lastIndexOf("\\n", prefix - 1) + 1;
+  const q = a.length - suffix;
+  if (lineStart(a, q) && lineStart(b, b.length - suffix)) return { prefix: start, suffix };
+  const lf = a.indexOf("\\n", q);
+  const forward = (lf === -1 ? a.length : lf + 1) - q;
+  return { prefix: start, suffix: suffix - forward };
 }
 
 [PST{t=2026-11-20T03:04:47Z}]/** What a character of the old Record allows its successor to be. */
@@ -183,9 +200,9 @@ function runlessProblems(
   return problems;
 }
 
-/** The characters of the common prefix and suffix [AI:10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.2{t=2026-11-21T06:05:01.263Z}](after the slide) [PST{t=2026-11-20T03:04:47Z}]are outside every Hunk and are kept at their place. */
+/** The characters of the common prefix and suffix [AI:10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.2{t=2026-11-21T06:05:01.263Z}](after the slide[AI:10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.2{t=2026-11-21T06:48:39.648Z}] and the widening to whole lines[AI:10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.2{t=2026-11-21T06:05:01.263Z}]) [PST{t=2026-11-20T03:04:47Z}]are outside every Hunk and are kept at their place. */
 function affixProblems(old: Document, doc: Document, olds: Cell\[\], now: Cell\[\], a: Allowed) {
-  const { prefix, suffix } = [AI:10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.3{t=2026-11-21T06:05:01.263Z}]slidA[PST{t=2026-11-20T03:04:47Z}]ffixes(old.text, doc.text);
+  const { prefix, suffix } = [AI:10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.3{t=2026-11-21T06:48:39.648Z}]widene[AI:10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.3{t=2026-11-21T06:05:01.263Z}]dA[PST{t=2026-11-20T03:04:47Z}]ffixes(old.text, doc.text);
   const problems: string\[\] = \[\];
   for (let i = 0; i < prefix; i += 1) {
     if (!kept(olds\[i\] as Cell, now\[i\] as Cell, a))

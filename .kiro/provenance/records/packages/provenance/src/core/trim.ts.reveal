@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.1,1051,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.2,796,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.3,294,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.4,377,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.5,50,0,0}][PST{t=2026-11-20T03:04:47Z}]/**
+[DOC{v=1;n=0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.1,1051,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.2,796,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.3,294,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.4,377,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.5,50,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:28:53Z.1,1065,0,0}][PST{t=2026-11-20T03:04:47Z}]/**
  * Character trim (design M2 and M15, Req 4.15 and 4.16). Cuts the common prefix
  * and then the common suffix of two texts (the whole texts, then each Hunk), by
  * UTF-16 code unit, never between a surrogate pair or a CR LF pair. Pure; no `node:`.
@@ -98,6 +98,24 @@ export function slideStretch(oldText: string, newText: string, affixes: Affixes)
     current = { prefix: current.prefix - 1, suffix: current.suffix + 1 };
   }
   return current;
+}
+/**
+[AI:10.8 Widen the trimmed middle to whole lines 2026-11-21T06:28:53Z.1{t=2026-11-21T06:34:22.435Z}] * Widens a trimmed middle to whole lines (design Resolved point 26, Req 4.2). The start
+ * moves back to its line start (the same position in both texts, as the prefix is common).
+ * The end moves forward by the same count in both texts to just after the first line feed
+ * of the common suffix, or to the end of the texts when it has none, unless the end already
+ * is a line start in each text. It never splits CR LF: it stops after a line feed.
+ */
+export function widenToLines(oldText: string, newText: string, affixes: Affixes): Affixes {
+  const prefix = affixes.prefix === 0 ? 0 : oldText.lastIndexOf("\\n", affixes.prefix - 1) + 1;
+  const atStart = (t: string, p: number): boolean => p === 0 || t.charCodeAt(p - 1) === LF;
+  const oldEnd = oldText.length - affixes.suffix;
+  const newEnd = newText.length - affixes.suffix;
+  if (atStart(oldText, oldEnd) && atStart(newText, newEnd)) {
+    return { prefix, suffix: affixes.suffix };
+  }
+  const lf = oldText.indexOf("\\n", oldEnd);
+  return { prefix, suffix: lf === -1 ? 0 : oldText.length - lf - 1 };
 }
 /**
 [PST{t=2026-11-20T03:04:47Z}] * The part of `hunk` that really changed, or `null` when its old and new text
