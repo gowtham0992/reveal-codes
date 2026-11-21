@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=10.1 `powers/provenance` manifests\, skills and README 2026-11-21T00:46:19Z.1,3880,0,0;r=10.10 Checkpoint - the attribution fix 2026-11-21T06:53:30Z.1,428,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,869,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1,451,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2,519,0,0}][AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]# Provenance, a Kiro Power
+[DOC{v=1;n=0;r=10.1 `powers/provenance` manifests\, skills and README 2026-11-21T00:46:19Z.1,3880,2711,1;r=10.10 Checkpoint - the attribution fix 2026-11-21T06:53:30Z.1,428,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,869,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1,451,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2,519,0,0}][AI>HUM:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]# Provenance, a Kiro Power
 
 This Power records which text in your source files the Kiro agent changed, and which text was changed while no agent window was open. `reveal <file>` shows the result as codes in front of the text, in the manner of WordPerfect's Reveal Codes.
 
@@ -14,14 +14,14 @@ It is part of \[Reveal Codes\](../../README.md). It works in any Kiro workspace.
 6. Switch on any Provenance hook that the panel shows as disabled.
 7. Reload the window (`Developer: Reload Window`).
 8. Send one prompt, and let the setup skill check with `check_records` that a hook event arrived.
-[AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]
+[AI>HUM:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]
 Node 20 or newer must be on the path. Nothing else is installed: the server, the recorder and the reveal command are one file, `server/provenance.mjs`. Windows is not supported.
 
 [AI:10.10 Checkpoint - the attribution fix 2026-11-21T06:53:30Z.1{t=2026-11-21T06:59:40.655Z}]## After a rebuild: remove the Power and import it again
 
 Kiro copies an imported Power to `~/.kiro/powers/installed/<name>`. That copy keeps the old bundle after you rebuild `server/provenance.mjs` in this folder. To use a rebuilt Power, remove it in the Powers panel and import the folder again. Then ask Kiro to set up provenance again: setup refreshes `provenance.mjs` and `reveal` in the workspace and never re-baselines.
 
-[AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]## What setup writes
+[AI>HUM:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]## What setup writes
 
 Setup writes into the workspace, because a Power cannot carry hooks:
 
@@ -62,11 +62,35 @@ Run from the workspace root, as `.kiro/provenance/reveal …` or `node .kiro/pro
 
 [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]While no hook event has been recorded in the workspace, `reveal <file>`, `reveal --summary` and `reveal --record` print the line `No hook event has been recorded in this workspace. The Provenance hooks may be disabled; text changed since setup cannot be attributed to the agent.` first, and the four read tools return it as `warning`. Until a hook event arrives, text changed since setup cannot be attributed to the agent. The `check_records` tool also returns `hookEvents`, which says whether any hook event has arrived and when the last one did. The line cannot tell a disabled hook from a workspace in which no prompt has been sent yet.
 
-## [AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]The record is committed
+## [AI>HUM:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]The record is committed
 
 `.kiro/provenance/` is meant to be committed, so that the record travels with the repository. Its `.gitignore` leaves out only `state.json`, `errors.log`, the lock file and `cache/`.
 
-## What is in this folder
+[HUM{t=2026-11-21T19:52:49.907Z}]## More about the record
+
+These parts of the README's Provenance section were moved here.
+
+- `reveal --record` (in either form) brings the records up to date by hand.
+
+In this repository, `pnpm reveal <file>` runs the same command from the sources.
+
+A file has no record until its first change. When the text the file had at the baseline cannot be found in git by its blob id or in the baseline cache at that change, the file's current text is recorded as `\[PST\]`, the change is attributed to no one, and `baseline_text_unavailable` is logged. Files created after installation are recorded by the next event. Running setup again never re-baselines.
+
+Records land in the commit of the task that made them, because the IDE runs the hooks of one trigger in file-name order; the order on the CLI is as measured in task 1 of the spec. An optional git pre-commit hook catches the record up before each commit. Git does not version hooks, so after a fresh clone the line `node powers/provenance/server/provenance.mjs setup --git-hook` recreates it.
+
+The recorder reads `.kiroignore` and never writes it. Patterns that apply only to recording go in `.kiro/provenance/ignore`. Both files use the full gitignore syntax; nested and global ignore files are not read.
+
+Further limits:
+
+- In a session with no prompt events, such as an IDE spec chat that runs tasks, the edits the agent makes between tasks are recorded as `\[HUM\]`. `reveal --summary` says how many such sessions were counted. The count is in the committed file `.kiro/provenance/sessions.json`, holds no session id, and is approximate: it misses a session whose between-task edits were first seen at its next task start, and it can count a session twice after `state.json` is removed or replaced.
+- On the CLI there are no task windows, so task titles never appear for CLI work and the turn window covers it.
+- Inside one changed line, everything between the first and the last changed character counts as changed: changing `Celsius and Fahrenheit.` to `Celsius, Fahrenheit, and Kelvin.` records `, Fahrenheit, and Kelvin` as the agent's.
+- An ambiguous edit, such as a line inserted above an equal line, is placed at the latest line start the text allows.
+- A record grows by about 125 bytes for every hunk ever applied, so a file the agent edits 1,000 times has a record of about 125 KB. Records are not compacted.
+- The recorder stops starting files after 20 seconds and logs `deadline_reached` with the number of files it did not reach. Changes in those files may be attributed at a later event, when the window may already be closed.
+- With `git commit <paths>` or `--only`, git uses a temporary index, and the records may be left for the next commit.
+
+[AI>HUM:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]## What is in this folder
 
 | Path                              | What it is                                                         |
 | --------------------------------- | ------------------------------------------------------------------ |

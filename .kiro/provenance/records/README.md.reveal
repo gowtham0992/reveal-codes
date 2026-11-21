@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,292,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1,10755,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2,321,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.3,28,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.4,55,0,0;r=11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.1,1,0,0;r=11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.2,16,0,0}][PST{t=2026-11-20T03:04:47Z}]<img src="docs/images/mark.svg" width="48" height="48" alt="Reveal Codes mark: a page above a codes pane, with a failing code between brackets">
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,292,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1,10755,4323,1;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2,321,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.3,28,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.4,55,0,0;r=11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.1,1,0,0;r=11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.2,16,0,0}][PST{t=2026-11-20T03:04:47Z}]<img src="docs/images/mark.svg" width="48" height="48" alt="Reveal Codes mark: a page above a codes pane, with a failing code between brackets">
 
 # Reveal Codes
 
@@ -90,22 +90,13 @@ The report is Markdown on stdout. Its second line states the mode, `fixtures` or
 
 The Kiro Crew app that schedules the Sentinel lives in a separate repository: https://github.com/gowtham0992/reveal-codes-sentinel. The app was installed in Kiro Crew 0.12.0 and its nightly job run once over three sample filings on 2026-11-09; the run swept all three and reported the one edited after export.
 
-[AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}]## Reveal Codes for your own repository
+[AI>HUM:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}]## Reveal Codes for your own repository
 
-The Provenance Power records which text in your source files the Kiro agent changed, and prints a file with its codes in front of the text. The record is made by Kiro's own hooks when the agent works, not guessed from the text. No prompt text is stored, and nothing leaves the machine.
+The Provenance Power records which text in your source files the Kiro agent changed, and prints a file with its codes in front of the text. The record is made by Kiro's own hooks when the agent works, not guessed from the text.
 
 ### Read a file with its codes
 
-Run these from the workspace root. Each command has two forms; the second runs where the wrapper cannot.
-
-- `.kiro/provenance/reveal <file>` or `node .kiro/provenance/provenance.mjs reveal <file>` prints the file with its codes.
-- `.kiro/provenance/reveal --summary \[path\]` or `node .kiro/provenance/provenance.mjs reveal --summary \[path\]` prints the share of each origin, the longest untouched agent stretches and the agent windows.
-- `.kiro/provenance/reveal --check \[--strict\]` or `node .kiro/provenance/provenance.mjs reveal --check \[--strict\]` checks the records for damage.
-- `reveal --record` (in either form) brings the records up to date by hand.
-
-In this repository, `pnpm reveal <file>` runs the same command from the sources.
-
-This is [AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2{t=2026-11-21T18:59:22.313Z}]an excerpt of `pnpm -s reveal packages/provenance/src/core/windows.ts`, piped so that it is plain, run in this repository on 2026-11-21: lines 1 to 8, then lines 9[AI:11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.1{t=2026-11-21T19:08:13.263Z}]9[AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2{t=2026-11-21T18:59:22.313Z}] to 108 (the bracketed line marks the cut). The text is unedited. The file was already in the repository at install, so it reads `\[PST\]`; the `\[AI:6.6\]` text[AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}] was written by the agent in task 6.6.
+This is [AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2{t=2026-11-21T18:59:22.313Z}]an excerpt of `pnpm -s reveal packages/provenance/src/core/windows.ts`, piped so that it is plain, run in this repository on 2026-11-21: lines 1 to 8, then lines 9[AI:11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.1{t=2026-11-21T19:08:13.263Z}]9[AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2{t=2026-11-21T18:59:22.313Z}] to 108 (the bracketed line marks the cut). The text is unedited. The file was already in the repository at install, so it reads `\[PST\]`; the `\[AI:6.6\]` text[AI>HUM:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}] was written by the agent in task 6.6.
 
 ```text
 Reveal Codes: packages/provenance/src/core/windows.ts
@@ -116,7 +107,7 @@ Reveal Codes: packages/provenance/src/core/windows.ts
 Runs in this file
   6.6  One window per task: duplicate preTask and postTask by name  opened 2026-11-20T03:31:04Z  5 hunks
 
-\[[AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.3{t=2026-11-21T18:59:22.313Z}]lines 9 to 9[AI:11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.2{t=2026-11-21T19:08:13.263Z}]8 left out here\][AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}]
+\[[AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.3{t=2026-11-21T18:59:22.313Z}]lines 9 to 9[AI:11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.2{t=2026-11-21T19:08:13.263Z}]8 left out here\][AI>HUM:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}]
   }
   return best;
 }
@@ -127,7 +118,7 @@ function nameOf(payload: Payload): string | null {
 }
 [AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.4{t=2026-11-21T18:59:22.313Z}]
 \[PST\]function freshEntry(now: string): SessionState {
-[AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}]```
+[AI>HUM:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}]```
 
 The legend:
 
@@ -136,31 +127,15 @@ The legend:
 - `\[HUM\]` changed while no agent window was open; typing, pasting and other tools are not told apart.
 - `\[PST\]` already in the file when recording started; origin not recorded.
 
-A file has no record until its first change. When the text the file had at the baseline cannot be found in git by its blob id or in the baseline cache at that change, the file's current text is recorded as `\[PST\]`, the change is attributed to no one, and `baseline_text_unavailable` is logged. Files created after installation are recorded by the next event. Running setup again never re-baselines.
-
-Records land in the commit of the task that made them, because the IDE runs the hooks of one trigger in file-name order; the order on the CLI is as measured in task 1 of the spec. An optional git pre-commit hook catches the record up before each commit. Git does not version hooks, so after a fresh clone the line `node powers/provenance/server/provenance.mjs setup --git-hook` recreates it.
-
-The recorder reads `.kiroignore` and never writes it. Patterns that apply only to recording go in `.kiro/provenance/ignore`. Both files use the full gitignore syntax; nested and global ignore files are not read.
-
-The record is not proof that no AI wrote a passage. It states how text changed while hooks were running; the author states the rest.
-
 ### Limits
 
-- Windows is not supported.
 - The record starts on the day it was installed, and text already in the files is `\[PST\]`.
 - `\[HUM\]` means changed while no agent window was open; it cannot tell typing from pasting from other tools.
-- A change a person saves while the agent is working counts as the agent's.
-- When two sessions overlap, which window a change belongs to is a rule and not a fact.
-- In a session with no prompt events, such as an IDE spec chat that runs tasks, the edits the agent makes between tasks are recorded as `\[HUM\]`. `reveal --summary` says how many such sessions were counted. The count is in the committed file `.kiro/provenance/sessions.json`, holds no session id, and is approximate: it misses a session whose between-task edits were first seen at its next task start, and it can count a session twice after `state.json` is removed or replaced.
-- On the CLI there are no task windows, so task titles never appear for CLI work and the turn window covers it.
-- Inside one changed line, everything between the first and the last changed character counts as changed: changing `Celsius and Fahrenheit.` to `Celsius, Fahrenheit, and Kelvin.` records `, Fahrenheit, and Kelvin` as the agent's.
-- An ambiguous edit, such as a line inserted above an equal line, is placed at the latest line start the text allows.
-- A record grows by about 125 bytes for every hunk ever applied, so a file the agent edits 1,000 times has a record of about 125 KB. Records are not compacted.
-- The recorder stops starting files after 20 seconds and logs `deadline_reached` with the number of files it did not reach. Changes in those files may be attributed at a later event, when the window may already be closed.
-- With `git commit <paths>` or `--only`, git uses a temporary index, and the records may be left for the next commit.
-- Running setup again never re-baselines, so it cannot repair a baseline.
-- While no hook event has been recorded, the hooks may be disabled. `reveal` and the tools then print a warning, and text changed since setup cannot be attributed to the agent.
-- Kiro copies an imported Power to `~/.kiro/powers/installed/<name>` and keeps that copy after the folder is rebuilt. A rebuilt Power must be removed and imported again.
+- [HUM{t=2026-11-21T19:53:24.015Z}]In a session with no prompt events, such as an IDE spec chat that runs tasks, the edits the agent makes between tasks are recorded as `\[HUM\]`.
+- While no hook event has been recorded, the Provenance hooks may be disabled, and text changed since setup cannot be attributed to the agent.
+- Windows is not supported[AI>HUM:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}].
+[HUM{t=2026-11-21T19:52:49.907Z}]
+The full list of limits is in powers/provenance/README.md[AI>HUM:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}].
 
 ### Install it
 

@@ -66,6 +66,30 @@ While no hook event has been recorded in the workspace, `reveal <file>`, `reveal
 
 `.kiro/provenance/` is meant to be committed, so that the record travels with the repository. Its `.gitignore` leaves out only `state.json`, `errors.log`, the lock file and `cache/`.
 
+## More about the record
+
+These parts of the README's Provenance section were moved here.
+
+- `reveal --record` (in either form) brings the records up to date by hand.
+
+In this repository, `pnpm reveal <file>` runs the same command from the sources.
+
+A file has no record until its first change. When the text the file had at the baseline cannot be found in git by its blob id or in the baseline cache at that change, the file's current text is recorded as `[PST]`, the change is attributed to no one, and `baseline_text_unavailable` is logged. Files created after installation are recorded by the next event. Running setup again never re-baselines.
+
+Records land in the commit of the task that made them, because the IDE runs the hooks of one trigger in file-name order; the order on the CLI is as measured in task 1 of the spec. An optional git pre-commit hook catches the record up before each commit. Git does not version hooks, so after a fresh clone the line `node powers/provenance/server/provenance.mjs setup --git-hook` recreates it.
+
+The recorder reads `.kiroignore` and never writes it. Patterns that apply only to recording go in `.kiro/provenance/ignore`. Both files use the full gitignore syntax; nested and global ignore files are not read.
+
+Further limits:
+
+- In a session with no prompt events, such as an IDE spec chat that runs tasks, the edits the agent makes between tasks are recorded as `[HUM]`. `reveal --summary` says how many such sessions were counted. The count is in the committed file `.kiro/provenance/sessions.json`, holds no session id, and is approximate: it misses a session whose between-task edits were first seen at its next task start, and it can count a session twice after `state.json` is removed or replaced.
+- On the CLI there are no task windows, so task titles never appear for CLI work and the turn window covers it.
+- Inside one changed line, everything between the first and the last changed character counts as changed: changing `Celsius and Fahrenheit.` to `Celsius, Fahrenheit, and Kelvin.` records `, Fahrenheit, and Kelvin` as the agent's.
+- An ambiguous edit, such as a line inserted above an equal line, is placed at the latest line start the text allows.
+- A record grows by about 125 bytes for every hunk ever applied, so a file the agent edits 1,000 times has a record of about 125 KB. Records are not compacted.
+- The recorder stops starting files after 20 seconds and logs `deadline_reached` with the number of files it did not reach. Changes in those files may be attributed at a later event, when the window may already be closed.
+- With `git commit <paths>` or `--only`, git uses a temporary index, and the records may be left for the next commit.
+
 ## What is in this folder
 
 | Path                              | What it is                                                         |
