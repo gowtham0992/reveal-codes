@@ -13,6 +13,7 @@ reveal-codes/
     agents/                   one file per custom agent: release-checker.md, orders-curator.md
     skills/<name>/SKILL.md    one folder per skill: add-standing-order
     settings/mcp.json         MCP servers available to Kiro in this workspace
+    provenance/               the installed Provenance_Package output: provenance.mjs (the bundle), reveal (wrapper), baseline.json, sessions.json and records/ (all committed), ignore (the exclusion file, committed), cache/ (starting text git cannot give back; ignored), state.json, errors.log and lock (ignored)
   packages/
     engine/                   pure provenance + citation-extraction engine (no deps)
       src/
@@ -24,6 +25,9 @@ reveal-codes/
         codes.ts              render(doc, mode) -> Reveal Codes text (full | display); parse(fullText) -> document
         testing/arbitraries.ts
       test/                   *.test.ts (examples) and *.properties.test.ts (PBT)
+    provenance/               records which text the agent changed in repository files (depends on engine, @modelcontextprotocol/sdk and zod)
+      src/                    core/ (pure: legend, check, wrapper, git-hook), io/ (files, git, setup, reveal command), mcp/ (server and tools), cli/ (main.ts), testing/ (shared arbitraries)
+      test/                   *.test.ts, *.properties.test.ts and static/
     verifier/                 CourtListener client, quote matcher, cache, fixtures
       scripts/                record-lookups.ts (the one script that records live lookups as fixtures)
     courtlistener-mcp/        MCP server exposing verifier as tools
@@ -59,6 +63,11 @@ reveal-codes/
         smoke/                API assumption regression tests for ProseMirror and TipTap
   powers/
     citation-check/           Kiro Power: plugin.json, mcp.json, built single-file MCP server, fixtures, two skills; generated parts come from pnpm power:build
+    provenance/               Kiro Power: plugin.json, mcp.json, README.md, the built single-file server/provenance.mjs and two skills (setup-provenance, reveal-codes-for-source); the bundle comes from `node scripts/build-power.mjs --power provenance`
+  scripts/
+    build-power.mjs           bundles a Power's MCP server (`pnpm power:build`; `--power provenance` builds the provenance Power)
+    commit-task.sh            the commit-after-task hook's commit script
+    kiro-usage-check.mjs      `pnpm kiro:check`: docs/KIRO_USAGE.md against the Kiro files
   crew/
     sentinel/                 the sweep CLI that the Reveal Codes Sentinel Crew app (separate repository) runs on a schedule; reads exports with the reader in @reveal-codes/export
   data/

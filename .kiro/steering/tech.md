@@ -7,8 +7,9 @@ inclusion: always
 ## Stack
 
 - TypeScript 5.x, strict mode, everywhere. No JavaScript source files.
-- pnpm workspaces. Packages: `packages/engine`, `packages/verifier`, `packages/courtlistener-mcp`, `packages/export`; apps: `apps/web`; sweep CLI: `crew/sentinel`.
+- pnpm workspaces. Packages: `packages/engine`, `packages/verifier`, `packages/courtlistener-mcp`, `packages/export`; apps: `apps/web`; sweep CLI: `crew/sentinel`. The Provenance_Package `packages/provenance` is also a workspace package (see below).
 - `packages/engine` has **zero runtime dependencies** and must not import from `node:` or the DOM. It is pure functions over plain data.
+- `packages/provenance` records which text the agent changed in repository files, on top of the Engine. Its runtime dependencies are `@modelcontextprotocol/sdk` and `zod`, for its MCP server only, and `@reveal-codes/engine`; it has no other runtime dependency. It writes its line difference and its ignore matcher by hand, as the Engine has no runtime dependency to take one from. Its Vitest project is named `provenance`. Its shared arbitraries live in `packages/provenance/src/testing/` (`arbitraries.ts` re-exports the others), not in `packages/engine` (Decision 17 of the kiro-provenance spec).
 - `packages/verifier` takes `fetch` as an injected dependency. Tests never touch the network; they use recorded fixtures in `packages/verifier/fixtures/`.
 - `packages/courtlistener-mcp` uses `@modelcontextprotocol/sdk` over stdio. Tool handlers are thin wrappers over `packages/verifier`.
 - `apps/web` is Next.js (App Router) with TipTap on ProseMirror. Provenance is captured in a ProseMirror plugin that inspects every transaction; it is the only place origin is assigned.
@@ -26,6 +27,7 @@ pnpm test:pbt      # property tests only, numRuns=500
 pnpm dev           # apps/web on :3000
 pnpm mcp           # starts courtlistener-mcp on stdio
 pnpm sentinel   # sweep a folder of exported .docx files for drift
+pnpm reveal <file>   # print a repository file with its provenance codes; also --summary, --check, --record
 pnpm --filter @reveal-codes/web build   # tsc -b of engine, verifier and export, then next build; works on a clean clone after install
 ```
 
@@ -34,7 +36,8 @@ pnpm --filter @reveal-codes/web build   # tsc -b of engine, verifier and export,
 - Library: **fast-check** with vitest. Do not generate Hypothesis or any Python; this repository has no Python.
 - Every invariant in a spec's `design.md` `Property N` list gets exactly one `fc.assert(fc.property(...))` in a file named `<module>.properties.test.ts`, with a comment `// Property N` above it and `_Requirements: x.y_` in the describe title.
 - `numRuns` ≥ 200 locally, 500 in CI. Seeds are logged on failure and must be reproducible with `fc.assert(..., { seed })`.
-- Arbitraries live in `packages/engine/src/testing/arbitraries.ts` and are shared. Write arbitraries for: document text, edit-operation sequences, citation strings (valid, near-miss, and garbage), and opinion bodies with embedded quotes.
+- Vitest projects: `engine`, `verifier`, `provenance`, `export`, `courtlistener-mcp`, `web`, `sentinel`, declared in the root `vitest.config.ts`.
+- Arbitraries live in `packages/engine/src/testing/arbitraries.ts` and are shared. The exception is `packages/provenance`, whose arbitraries live in `packages/provenance/src/testing/`. Write arbitraries for: document text, edit-operation sequences, citation strings (valid, near-miss, and garbage), and opinion bodies with embedded quotes.
 - A property that only checks the function does not throw is not a property. Each one must assert a relationship between input and output.
 
 ## Testing rules that apply to all tests

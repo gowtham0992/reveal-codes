@@ -1,0 +1,89 @@
+[DOC{v=1;n=0;r=11.3 `docs/KIRO_USAGE.md` and the steering files 2026-11-21T18:45:31Z.1,313,0,0;r=11.3 `docs/KIRO_USAGE.md` and the steering files 2026-11-21T18:45:31Z.2,406,0,0;r=11.3 `docs/KIRO_USAGE.md` and the steering files 2026-11-21T18:45:31Z.3,557,0,0}][PST{t=2026-11-20T03:04:47Z}]---
+inclusion: always
+---
+
+# Repository structure
+
+```
+reveal-codes/
+  .kiro/
+    steering/                 this folder; product.md, tech.md, structure.md are always included
+    specs/<feature>/          requirements.md, design.md, tasks.md per feature
+    hooks/                    one JSON file per hook
+    agents/                   one file per custom agent: release-checker.md, orders-curator.md
+    skills/<name>/SKILL.md    one folder per skill: add-standing-order
+    settings/mcp.json         MCP servers available to Kiro in this workspace
+[AI:11.3 `docs/KIRO_USAGE.md` and the steering files 2026-11-21T18:45:31Z.1{t=2026-11-21T18:48:45.177Z}]    provenance/               the installed Provenance_Package output: provenance.mjs (the bundle), reveal (wrapper), baseline.json, sessions.json and records/ (all committed), ignore (the exclusion file, committed), cache/ (starting text git cannot give back; ignored), state.json, errors.log and lock (ignored)
+[PST{t=2026-11-20T03:04:47Z}]  packages/
+    engine/                   pure provenance + citation-extraction engine (no deps)
+      src/
+        courts/               the /courts page: view-model.ts, intro.ts, hash.ts, links.ts, instrument-view.tsx, courts-browser.tsx
+        document.ts           Document, Span, Origin, apply(op)
+        ops.ts                Insert/Delete/Replace operations and inverses
+        segment.ts            sentence segmentation (lossless)
+        citations/            grammar, extract(), format()
+        codes.ts              render(doc, mode) -> Reveal Codes text (full | display); parse(fullText) -> document
+        testing/arbitraries.ts
+      test/                   *.test.ts (examples) and *.properties.test.ts (PBT)
+[AI:11.3 `docs/KIRO_USAGE.md` and the steering files 2026-11-21T18:45:31Z.2{t=2026-11-21T18:48:45.177Z}]    provenance/               records which text the agent changed in repository files (depends on engine, @modelcontextprotocol/sdk and zod)
+      src/                    core/ (pure: legend, check, wrapper, git-hook), io/ (files, git, setup, reveal command), mcp/ (server and tools), cli/ (main.ts), testing/ (shared arbitraries)
+      test/                   *.test.ts, *.properties.test.ts and static/
+[PST{t=2026-11-20T03:04:47Z}]    verifier/                 CourtListener client, quote matcher, cache, fixtures
+      scripts/                record-lookups.ts (the one script that records live lookups as fixtures)
+    courtlistener-mcp/        MCP server exposing verifier as tools
+    export/                   pure export package: gate, certification statement, appendix, DOCX builder, file name, and the shared .docx reader: docx-read.ts (readDocx), docx-notes.ts, docx-signature.ts, export-split.ts (splitExport), appendix-parse.ts, word-draft.ts (readWordDraft), docx-text.ts (docxSafe) (depends on engine, docx and fflate)
+  apps/
+    web/                      Next.js editor (source under apps/web/src/ and apps/web/app/, tests under apps/web/test/)
+      app/                    Next App Router: layout.tsx, page.tsx, globals.css, api/ route files (assistant, mode, opinion/\[clusterId\], verify) that import only src/server/; courts/ (the public /courts page: page.tsx and courts.module.css, importing only from src/)
+      src/
+        store.ts              app Store: Document, selection, notices, run log; actions return new state
+        store-actions.ts      Store action handlers
+        store-runtime.ts      subscription and dispatch runtime around the Store
+        history.ts            undo and redo stacks, emptied by the history barrier
+        persist.ts            Persisted_Value encode and decode for localStorage
+        autosave.ts           debounced autosave and mount-time load
+        draft-gate.ts         Draft_Gate: blocks autosave while the stored draft is unreadable
+        saved-draft.ts        Save a copy: file name and download of the stored draft string
+        services.ts           AppServices (fetch, storage, clock, timers) and defaultServices
+        notices.ts            Notice text for the status region
+        assistant-run.ts      assistant run bookkeeping (Tier 2)
+        index.ts              package entry
+        editor/               TipTap setup, provenance plugin, clipboard, reconcile, shortcuts, offset mapping
+        pane/                 Reveal Codes pane: layout.ts, pane.tsx, pane.module.css
+        limits.ts             size and text limits for opened files
+        client/               browser-side flows: api.ts, verify-flow.ts, verify-summary.ts, divergence.ts, assistant-client.ts; Open flow: open-file.ts, open-outcome.ts, open-text.ts, open-messages.ts, open-note.ts; check-date.ts, pasted-document.ts
+        server/               route logic: deps.ts (only reader of process.env), http.ts, body.ts, verify, opinion, mode and assistant routes, llm*.ts (draft provider selection)
+        components/           React components with one CSS module each: app-shell, toolbar, editor-surface, issues list and region, dialogs, status line, assistant column and panel; Open wiring: use-open.ts, use-open-draft.tsx, use-file-drop.ts
+      scripts/                copy-demo.ts (predev and prebuild)
+      fixtures/assistant/     recorded assistant response used by the fixture LLM provider
+      public/                 demo-motion.txt, copied from packages/engine/fixtures by copy-demo.ts; gitignored
+      test/                   *.test.ts(x) examples and *.properties.test.ts (PBT)
+        static/               source scans: boundaries, css-rules, copy-rules, limits, forbidden, env-and-size, package-json, docs, inventory
+        support/              shared test helpers: fc.ts, clock.ts, memory-storage.ts, dom-shims.ts, render.tsx, scan.ts, fetch fakes
+        smoke/                API assumption regression tests for ProseMirror and TipTap
+  powers/
+    citation-check/           Kiro Power: plugin.json, mcp.json, built single-file MCP server, fixtures, two skills; generated parts come from pnpm power:build
+[AI:11.3 `docs/KIRO_USAGE.md` and the steering files 2026-11-21T18:45:31Z.3{t=2026-11-21T18:48:45.177Z}]    provenance/               Kiro Power: plugin.json, mcp.json, README.md, the built single-file server/provenance.mjs and two skills (setup-provenance, reveal-codes-for-source); the bundle comes from `node scripts/build-power.mjs --power provenance`
+  scripts/
+    build-power.mjs           bundles a Power's MCP server (`pnpm power:build`; `--power provenance` builds the provenance Power)
+    commit-task.sh            the commit-after-task hook's commit script
+    kiro-usage-check.mjs      `pnpm kiro:check`: docs/KIRO_USAGE.md against the Kiro files
+[PST{t=2026-11-20T03:04:47Z}]  crew/
+    sentinel/                 the sweep CLI that the Reveal Codes Sentinel Crew app (separate repository) runs on a schedule; reads exports with the reader in @reveal-codes/export
+  data/
+    standing-orders.json      public, CC0 dataset of court orders; validated by packages/export/src/orders.ts
+    README.md
+  docs/
+    KIRO_USAGE.md             inventory of specs/hooks/steering/agents/MCP with file paths
+    demo-script.md            the 90-second demo, step by step
+  BUILD_LOG.md                dated entries: what was built, what Kiro got wrong, what fixed it
+  LICENSE                     Apache-2.0
+  README.md
+```
+
+## Placement rules
+
+- Anything that can be a pure function goes in `packages/engine`. If it needs the network, `packages/verifier`. If it needs the DOM, `apps/web`.
+- New engine capability means: update the spec first, then code, then properties. Never code first.
+- Fixtures are committed. A test that needs a new fixture adds it under the package's `fixtures/` with a `README` line saying where it came from and when.
+- Every spec task that lands code also lands a line in `docs/KIRO_USAGE.md` if it added or changed a hook, agent, steering file, or MCP tool. A hook enforces this.

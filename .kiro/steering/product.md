@@ -109,6 +109,17 @@ Colours of the codes in the Reveal Codes pane (text, background, outline). This 
 | Pane_Header | title `#FFFFFF`, Legend `#BAC4E2` | `#0F2766` | 1px `#2E4A8F` rule |
 | Status_Bar | `#C9D2EC`, key names `#FFFFFF` bold | `#0A1C4F` | none |
 
+## Source files
+
+The Provenance_Package (`packages/provenance`) records, for files of a repository, which text the agent changed, and `reveal <file>` prints the result with the Engine's codes. Its legend, the Source_Legend, reads:
+
+- `[AI:<tag>]`: changed while the agent was working, with the run it belongs to.
+- `[AI>HUM:<tag>]`: agent text in a run that the Engine counts as edited while no agent window was open.
+- `[HUM]`: changed while no agent window was open; typing, pasting and other tools are not told apart.
+- `[PST]`: already in the file when recording started; origin not recorded.
+
+The codes `HUM`, `PST`, `AI` and `AI>HUM` keep their spelling and gain these meanings only for the Records of the Provenance_Package. They change no other part of the Codes list above.
+
 ## Success for the hackathon demo
 
 A judge pastes an AI-drafted motion with three fabricated citations and one fabricated quote, presses Alt-F3, sees the red codes within ten seconds, tries to export, is blocked, writes an override for one and fixes the others, and exports a DOCX whose certification lists the one override. Under ninety seconds, end to end, with no account required.
