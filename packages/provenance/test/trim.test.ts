@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { commonAffixes, slideStretch, trimHunk, widenToLines } from "../src/core/trim.js";
+import {
+  commonAffixes,
+  slideStretch,
+  trimHunk,
+  trimHunks,
+  widenToLines,
+} from "../src/core/trim.js";
 
 const whole = (old: string, text: string) => ({ from: 0, to: old.length, text });
 
@@ -102,6 +108,51 @@ describe("slideStretch", () => {
       to: 5,
       text: "// tip\n",
     });
+  });
+});
+
+describe.each([
+  ["LF", "\n"],
+  ["CR LF", "\r\n"],
+])("the latest line start of the set (task 10.11, Req 4.17) with %s", (_name, eol) => {
+  const lines = (...xs: string[]): string => xs.map((x) => x + eol).join("");
+  const first = lines("function toFahrenheit(c) {", "  return (c * 9) / 5 + 32;", "}", "");
+  const kelvin = lines("function toKelvin(celsius) {", "  return celsius + 273.15;", "}", "");
+  const second = lines("function toCelsius(f) {", "  return (f - 32) * 5 / 9;", "}");
+  const old = first + second;
+  const next = first + kelvin + second;
+  const at = first.length;
+  // The set holds three line starts: the previous `}`, the blank line and `function toKelvin`.
+  const braceLine = first.lastIndexOf(`}${eol}`);
+  it("places the toKelvin insertion at `function toKelvin`, not at the previous `}`", () => {
+    expect(slide(old, next)).toEqual({ prefix: at, suffix: second.length });
+  });
+  it("slides a deletion of the toKelvin block the same way", () => {
+    expect(slide(next, old)).toEqual({ prefix: at, suffix: second.length });
+  });
+  it("in the per-hunk trim, moves a Hunk the line difference put at the previous `}`", () => {
+    const rotated = next.slice(braceLine, braceLine + kelvin.length);
+    expect(rotated.startsWith("}")).toBe(true);
+    const hunk = { from: braceLine, to: braceLine, text: rotated };
+    expect(trimHunk(old, hunk)).toEqual({ from: at, to: at, text: kelvin });
+    expect(trimHunks(old, [hunk])).toEqual([{ from: at, to: at, text: kelvin }]);
+  });
+  it("stops the per-hunk slide at the next Hunk", () => {
+    const doc = lines("x", "x", "y");
+    const step = `x${eol}`.length;
+    const hunks = [
+      { from: 0, to: 0, text: `x${eol}` },
+      { from: 2 * step, to: doc.length, text: lines("z") },
+    ];
+    expect(trimHunk(doc, hunks[0] as (typeof hunks)[0], step)).toEqual({
+      from: step,
+      to: step,
+      text: `x${eol}`,
+    });
+    expect(trimHunks(doc, hunks)).toEqual([
+      { from: 2 * step, to: 2 * step, text: `x${eol}` },
+      { from: 2 * step, to: 2 * step + 1, text: "z" },
+    ]);
   });
 });
 

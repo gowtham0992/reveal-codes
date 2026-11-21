@@ -64,8 +64,10 @@ const splitsAt = (t: string, b: number): boolean =>
   b > 0 && b < t.length && /^(?:[\ud800-\udbff][\udc00-\udfff]|\r\n)$/.test(t.slice(b - 1, b + 1));
 
 /**
- * `affixes`, then the changed stretch slid left to the nearest line start by equal positions
- * one unit at a time (Req 4.17); no step puts a boundary inside a pair; unchanged when none is reached.
+ * `affixes` (the prefix-maximal position), then the changed stretch slid left by equal positions
+ * one unit at a time to the first line start reached, which is the rightmost line start of the set
+ * of equivalent positions (Req 4.17, Resolved point 28); no step puts a boundary inside a pair;
+ * unchanged when none is reached.
  */
 function slidAffixes(a: string, b: string): { prefix: number; suffix: number } {
   const first = affixes(a, b);
@@ -200,7 +202,16 @@ function runlessProblems(
   return problems;
 }
 
-/** The characters of the common prefix and suffix (after the slide and the widening to whole lines) are outside every Hunk and are kept at their place. */
+/**
+ * The characters of the common prefix and suffix (after the slide and the widening to whole
+ * lines) are outside every Hunk and are kept at their place. One allowance (Req 4.17, design
+ * Resolved point 28): a Hunk's prefix-maximal position is measured against the unchanged text
+ * up to the next Hunk, so the last Hunk may slide right through equal text of the suffix. A
+ * leading stretch of the suffix (next to the middle) may therefore hold, at its place,
+ * characters this event inserted that equal the old ones there; the old characters it passed
+ * are still checked by the order checks of `updateProblems`. Every suffix character after
+ * that stretch is kept at its place.
+ */
 function affixProblems(old: Document, doc: Document, olds: Cell[], now: Cell[], a: Allowed) {
   const { prefix, suffix } = widenedAffixes(old.text, doc.text);
   const problems: string[] = [];
@@ -208,8 +219,18 @@ function affixProblems(old: Document, doc: Document, olds: Cell[], now: Cell[], 
     if (!kept(olds[i] as Cell, now[i] as Cell, a))
       problems.push(`prefix char ${String(i)} changed`);
   }
-  for (let j = 1; j <= suffix; j += 1) {
-    const [o, n] = [olds[olds.length - j], now[now.length - j]];
+  const at = (j: number): [Cell | undefined, Cell | undefined] => [
+    olds[olds.length - j],
+    now[now.length - j],
+  ];
+  const slidOver = (j: number): boolean => {
+    const [o, n] = at(j);
+    return o !== undefined && n !== undefined && n.ts === a.iso && n.ch === o.ch;
+  };
+  let lead = 0;
+  while (lead < suffix && slidOver(suffix - lead)) lead += 1;
+  for (let j = 1; j <= suffix - lead; j += 1) {
+    const [o, n] = at(j);
     if (o === undefined || n === undefined || !kept(o, n, a))
       problems.push(`suffix char ${String(j)} changed`);
   }

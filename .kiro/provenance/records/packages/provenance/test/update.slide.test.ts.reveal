@@ -1,0 +1,62 @@
+[DOC{v=1;n=0;r=10.11 Latest line start for ambiguous edits 2026-11-21T07:07:15Z.1,3011,0,0}][AI:10.11 Latest line start for ambiguous edits 2026-11-21T07:07:15Z.1{t=2026-11-21T18:36:55.425Z}]import { createDocument, type Document } from "@reveal-codes/engine";
+import { describe, expect, it } from "vitest";
+import { updateRecord } from "../src/core/update.js";
+import { fixedClock } from "./support/clock.js";
+/** The latest line start of an ambiguous edit through `updateRecord` (task 10.11, Req 4.17). */
+const W = { windowRun: "turn 2026-11-19T10:00:00Z" };
+const AT = "2026-01-01T00:00:00.000Z";
+const clock = fixedClock();
+function must<T>(r: { ok: true; value: T } | { ok: false; error: unknown }): T {
+  if (!r.ok) throw new Error(JSON.stringify(r.error));
+  return r.value;
+}
+const aiRanges = (d: Document): number\[\]\[\] =>
+  d.spans.filter((x) => x.provenance.origin === "AI").map((x) => \[x.start, x.end\]);
+describe.each(\[
+  \["LF", "\\n"\],
+  \["CR LF", "\\r\\n"\],
+\])("the toKelvin case with %s line ends (task 10.11)", (_name, eol) => {
+  const lines = (xs: string\[\]): string => xs.map((x) => x + eol).join("");
+  const first = lines(\["function toFahrenheit(c) {", "  return c * 9 / 5 + 32;", "}", ""\]);
+  const second = lines(\["function toCelsius(f) {", "  return f;", "}"\]);
+  const kelvin = lines(\["function toKelvin(celsius) {", "  return celsius + 273.15;", "}", ""\]);
+  const old = first + second;
+  const next = first + kelvin + second;
+  const view = (d: Document): \[string, string\]\[\] =>
+    d.spans.map((s) => \[s.provenance.origin, d.text.slice(s.start, s.end)\]);
+  it("marks the new function from its first line to its blank line, not the previous brace", () => {
+    const doc = must(updateRecord(must(createDocument(old, AT)), next, "AI", W, clock));
+    expect(doc.text).toBe(next);
+    expect(view(doc)).toEqual(\[
+      \["PST", first\],
+      \["AI", kelvin\],
+      \["PST", second\],
+    \]);
+  });
+  it("does the same when a second edit in the turn sends the change through the per-hunk trim", () => {
+    const head = `// Temp${eol}`;
+    const edited = `// Temperatures${eol}${first}${kelvin}${second}`;
+    const doc = must(updateRecord(must(createDocument(head + old, AT)), edited, "AI", W, clock));
+    expect(doc.text).toBe(edited);
+    expect(view(doc)).toEqual(\[
+      \["PST", "// Temp"\],
+      \["AI", "eratures"\],
+      \["PST", eol + first\],
+      \["AI", kelvin\],
+      \["PST", second\],
+    \]);
+  });
+  it("slides a deletion of the block the same way and keeps the file text", () => {
+    const doc = must(updateRecord(must(createDocument(next, AT)), old, "HUM", null, clock));
+    expect(doc.text).toBe(old);
+    expect(doc.spans.every((s) => s.provenance.origin === "PST")).toBe(true);
+  });
+});
+it("keeps a line inserted above an emoji line at its line start (P18 counterexample)", () => {
+  const old = "\\n\\r\\n\\n\\r\\n\\r\\n\\n\\r\\n\\r\\n\\r\\n\\n\\n\\r\\n\\r\\n\\u{1F600}\\n\\n";
+  const at = old.indexOf("\\u{1F600}");
+  const next = `${old.slice(0, at)}\\u{1F600}\\tTabbed;\\n${old.slice(at)}`;
+  const doc = must(updateRecord(must(createDocument(old, AT)), next, "AI", W, clock));
+  expect(doc.text).toBe(next);
+  expect(aiRanges(doc)).toEqual(\[\[at, at + "\\u{1F600}\\tTabbed;\\n".length\]\]);
+});

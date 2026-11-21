@@ -242,7 +242,19 @@ export function arbSingleEdit(text: string): fc.Arbitrary<SingleEdit> {
   return fc.oneof(
     { weight: 3, arbitrary: arbAnywhereEdit(text) },
     { weight: 2, arbitrary: arbNeighbourEdit(text) },
+    { weight: 1, arbitrary: arbBlockEdit(text) },
   );
+}
+/** The toKelvin shape (Req 4.17): at a line start, new lines then a copy of the 1 to 3 lines above. */
+function arbBlockEdit(text: string): fc.Arbitrary<SingleEdit> {
+  const starts = [0, ...[...text.matchAll(/\n/g)].map((m) => m.index + 1)];
+  return fc
+    .tuple(fc.constantFrom(...starts), fc.integer({ min: 1, max: 3 }), arbLine)
+    .map(([at, count, body]) => {
+      const above = starts.filter((s) => s < at).slice(-count)[0] ?? at;
+      const eol = text.slice(0, at).endsWith("\r\n") ? "\r\n" : "\n";
+      return { from: at, to: at, text: `${body} {${eol}}${eol}${text.slice(above, at)}` };
+    });
 }
 /** A Window_Run used by `arbBuiltRecord`, with the Task_Number and title its name carries (null: none). */
 export type KnownWindow = { windowRun: string; taskNumber: string | null; title: string };

@@ -1,7 +1,9 @@
 /**
  * Histories and line edits over a small vocabulary of lines, so that equal lines recur
  * (Req 4.2, 4.17, 16.25, Property 18): shared line starts, indentation, CR LF, a bare CR,
- * surrogate pairs, blank lines, a last line with no line feed. Only `src/testing/` imports fast-check.
+ * surrogate pairs, blank lines, a last line with no line feed, and lines inserted together
+ * with a copy of the lines just above them (the toKelvin shape: `}`, a blank line, then a
+ * block that ends in `}` and a blank line). Only `src/testing/` imports fast-check.
  */
 import fc from "fast-check";
 import { createDocument, type Document } from "@reveal-codes/engine";
@@ -38,14 +40,23 @@ const arbPiece: fc.Arbitrary<string> = fc
   .map(([line, eol]) => line + eol);
 
 type PieceEdit = {
-  kind: "insert" | "delete" | "replace" | "duplicate" | "clear";
+  kind: "insert" | "delete" | "replace" | "duplicate" | "clear" | "block";
   at: number;
   count: number;
   pieces: string[];
 };
 
 const arbPieceEdit: fc.Arbitrary<PieceEdit> = fc.record({
-  kind: fc.constantFrom("insert", "insert", "delete", "replace", "replace", "duplicate", "clear"),
+  kind: fc.constantFrom(
+    "insert",
+    "insert",
+    "delete",
+    "replace",
+    "replace",
+    "duplicate",
+    "clear",
+    "block",
+  ),
   at: fc.nat({ max: 40 }),
   count: fc.integer({ min: 1, max: 3 }),
   pieces: fc.array(arbPiece, { minLength: 1, maxLength: 3 }),
@@ -71,6 +82,9 @@ function applyPieceEdit(lines: readonly string[], e: PieceEdit): string[] {
       return [...head, ...tail.slice(0, e.count), ...tail];
     case "clear":
       return [];
+    case "block":
+      // The toKelvin shape (Req 4.17): new lines, then a copy of the lines just above.
+      return [...head, ...e.pieces, ...head.slice(-e.count), ...tail];
   }
 }
 

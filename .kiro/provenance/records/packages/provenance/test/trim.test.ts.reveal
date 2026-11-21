@@ -1,5 +1,11 @@
-[DOC{v=1;n=0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.1,29,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.2,1528,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:28:53Z.1,14,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:28:53Z.2,2019,0,0}][PST{t=2026-11-20T03:04:47Z}]import { describe, expect, it } from "vitest";
-import { [AI:10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.1{t=2026-11-21T06:05:01.263Z}]commonAffixes, slideStretch, [PST{t=2026-11-20T03:04:47Z}]trimHunk[AI:10.8 Widen the trimmed middle to whole lines 2026-11-21T06:28:53Z.1{t=2026-11-21T06:34:22.435Z}], widenToLines[PST{t=2026-11-20T03:04:47Z}] } from "../src/core/trim.js";
+[DOC{v=1;n=0;r=10.11 Latest line start for ambiguous edits 2026-11-21T07:07:15Z.1,75,0,0;r=10.11 Latest line start for ambiguous edits 2026-11-21T07:07:15Z.2,2084,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.1,29,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.2,1528,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:28:53Z.1,14,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:28:53Z.2,2019,0,0}][PST{t=2026-11-20T03:04:47Z}]import { describe, expect, it } from "vitest";
+import {[AI:10.11 Latest line start for ambiguous edits 2026-11-21T07:07:15Z.1{t=2026-11-21T18:36:55.425Z}]
+  commonAffixes,
+  slideStretch,
+  trimHunk,
+  trimHunks,
+  widenToLines,
+[PST{t=2026-11-20T03:04:47Z}]} from "../src/core/trim.js";
 
 const whole = (old: string, text: string) => ({ from: 0, to: old.length, text });
 
@@ -105,7 +111,52 @@ describe("slideStretch", () => {
   });
 });
 
-describe("widenToLines", () => {
+[AI:10.11 Latest line start for ambiguous edits 2026-11-21T07:07:15Z.2{t=2026-11-21T18:36:55.425Z}]describe.each(\[
+  \["LF", "\\n"\],
+  \["CR LF", "\\r\\n"\],
+\])("the latest line start of the set (task 10.11, Req 4.17) with %s", (_name, eol) => {
+  const lines = (...xs: string\[\]): string => xs.map((x) => x + eol).join("");
+  const first = lines("function toFahrenheit(c) {", "  return (c * 9) / 5 + 32;", "}", "");
+  const kelvin = lines("function toKelvin(celsius) {", "  return celsius + 273.15;", "}", "");
+  const second = lines("function toCelsius(f) {", "  return (f - 32) * 5 / 9;", "}");
+  const old = first + second;
+  const next = first + kelvin + second;
+  const at = first.length;
+  // The set holds three line starts: the previous `}`, the blank line and `function toKelvin`.
+  const braceLine = first.lastIndexOf(`}${eol}`);
+  it("places the toKelvin insertion at `function toKelvin`, not at the previous `}`", () => {
+    expect(slide(old, next)).toEqual({ prefix: at, suffix: second.length });
+  });
+  it("slides a deletion of the toKelvin block the same way", () => {
+    expect(slide(next, old)).toEqual({ prefix: at, suffix: second.length });
+  });
+  it("in the per-hunk trim, moves a Hunk the line difference put at the previous `}`", () => {
+    const rotated = next.slice(braceLine, braceLine + kelvin.length);
+    expect(rotated.startsWith("}")).toBe(true);
+    const hunk = { from: braceLine, to: braceLine, text: rotated };
+    expect(trimHunk(old, hunk)).toEqual({ from: at, to: at, text: kelvin });
+    expect(trimHunks(old, \[hunk\])).toEqual(\[{ from: at, to: at, text: kelvin }\]);
+  });
+  it("stops the per-hunk slide at the next Hunk", () => {
+    const doc = lines("x", "x", "y");
+    const step = `x${eol}`.length;
+    const hunks = \[
+      { from: 0, to: 0, text: `x${eol}` },
+      { from: 2 * step, to: doc.length, text: lines("z") },
+    \];
+    expect(trimHunk(doc, hunks\[0\] as (typeof hunks)\[0\], step)).toEqual({
+      from: step,
+      to: step,
+      text: `x${eol}`,
+    });
+    expect(trimHunks(doc, hunks)).toEqual(\[
+      { from: 2 * step, to: 2 * step, text: `x${eol}` },
+      { from: 2 * step, to: 2 * step + 1, text: "z" },
+    \]);
+  });
+});
+
+[AI:10.8 Widen the trimmed middle to whole lines 2026-11-21T06:28:53Z.2{t=2026-11-21T06:34:22.435Z}]describe("widenToLines", () => {
   const widen = (a: string, b: string) => widenToLines(a, b, slide(a, b));
   it("moves a start and an end that lie inside lines to whole lines", () => {
     const a = "one\\ntwo words\\nthree\\n";

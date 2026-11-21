@@ -49,14 +49,43 @@ function minimal(oldText: string, newText: string): { p: number; q: number; inse
   return { p, q, inserted: newText.length - (oldText.length - (q - p)) };
 }
 const atLineStart = (t: string, at: number): boolean => at === 0 || t[at - 1] === "\n";
+/** True when offset `b` of `t` lies between a high and a low surrogate or between CR and LF. */
+function inPair(t: string, b: number): boolean {
+  if (b <= 0 || b >= t.length) return false;
+  const x = t.charCodeAt(b - 1);
+  const y = t.charCodeAt(b);
+  return (x >= 0xd800 && x <= 0xdbff && y >= 0xdc00 && y <= 0xdfff) || (x === 13 && y === 10);
+}
+/** Whether the stretch at `p` (old `[p, q)`, `inserted` new units) can move one unit left (Req 4.17). */
+function canMoveLeft(oldText: string, newText: string, p: number, q: number, n: number): boolean {
+  if (p < 1) return false;
+  const before = oldText[p - 1];
+  if (q > p && oldText[q - 1] !== before) return false;
+  if (n > 0 && newText[p + n - 1] !== before) return false;
+  const cuts = [inPair(oldText, p - 1), inPair(oldText, q - 1), inPair(newText, p - 1 + n)];
+  return !cuts.some(Boolean);
+}
+/**
+ * The minimal changed stretch at the rule of Req 4.17: its equivalent positions are the
+ * prefix-maximal one and each one reached by moving left; the rightmost of them at a line
+ * start is taken, and the prefix-maximal one when none is.
+ */
+function placed(oldText: string, newText: string): { p: number; q: number; inserted: number } {
+  const e = minimal(oldText, newText);
+  for (let k = 0; ; k++) {
+    if (atLineStart(oldText, e.p - k)) return { p: e.p - k, q: e.q - k, inserted: e.inserted };
+    if (!canMoveLeft(oldText, newText, e.p - k, e.q - k, e.inserted)) return e;
+  }
+}
 /**
  * The edited stretch widened to whole lines (Req 16.24), written apart from `trim.ts`: the
- * minimal changed stretch, its start back to the start of its line, its end forward to just
+ * minimal changed stretch at the latest line start of its equivalent positions (`placed`,
+ * Req 4.17), its start back to the start of its line, its end forward to just
  * after the next line feed of the text after it (or to the end of the text), unless both
  * ends already are line starts. Both texts widen by the same count, as the suffix is common.
  */
 function widened(oldText: string, newText: string): { p: number; q: number; inserted: number } {
-  const e = minimal(oldText, newText);
+  const e = placed(oldText, newText);
   const start = e.p === 0 ? 0 : oldText.lastIndexOf("\n", e.p - 1) + 1;
   const newEnd = e.p + e.inserted;
   if (atLineStart(oldText, e.q) && atLineStart(newText, newEnd)) {

@@ -109,3 +109,34 @@ describe("whole-line widening through whole events (Req 4.2, Decision 29)", () =
     });
   }
 });
+
+describe("the toKelvin case through whole events (task 10.11, Req 4.17)", () => {
+  for (const [label, eol] of [
+    ["LF", "\n"],
+    ["CR LF", "\r\n"],
+  ] as const) {
+    it(`${label}: the new function is [AI:turn] from its first line to its blank line`, async () => {
+      const lines = (...l: string[]): string => l.map((x) => x + eol).join("");
+      const first = lines("function toFahrenheit(c) {", "  return (c * 9) / 5 + 32;", "}", "");
+      const kelvin = lines("function toKelvin(celsius) {", "  return celsius + 273.15;", "}", "");
+      const second = lines("function toCelsius(f) {", "  return f;", "}");
+      const deps = workspace();
+      baselined(deps, first + second);
+      await agentEdit(deps, first + kelvin + second);
+      expect(textOf(deps, "AI")).toEqual([kelvin]);
+      expect(textOf(deps, "PST")).toEqual([first, second]);
+      expect(pieces(deps, FILE).find((p) => p.origin === "AI")?.runId).toMatch(/^turn /);
+    });
+    it(`${label}: the same with a second edit in the turn (the CLI walk's shape)`, async () => {
+      const lines = (...l: string[]): string => l.map((x) => x + eol).join("");
+      const first = lines("function toFahrenheit(c) {", "  return (c * 9) / 5 + 32;", "}", "");
+      const kelvin = lines("function toKelvin(celsius) {", "  return celsius + 273.15;", "}", "");
+      const second = lines("function toCelsius(f) {", "  return (f - 32) * 5 / 9;", "}");
+      const deps = workspace();
+      baselined(deps, `// Temp${eol}${first}${second}`);
+      await agentEdit(deps, `// Temperatures${eol}${first}${kelvin}${second}`);
+      expect(textOf(deps, "AI")).toEqual(["eratures", kelvin]);
+      expect(textOf(deps, "PST")).toEqual(["// Temp", eol + first, second]);
+    });
+  }
+});

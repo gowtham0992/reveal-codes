@@ -86,9 +86,10 @@ function canStep(oldText: string, newText: string, start: number, a: Affixes): b
 /**
  * Slides a trimmed stretch left (design M15, Req 4.17) one UTF-16 unit at a time
  * while the unit before it equals the last unit of each non-empty stretch, and
- * stops at the first line start reached: position 0 or the position after a line
- * feed. No step splits a surrogate pair or a CR LF pair. When
- * no line start is reachable the original affixes are returned.
+ * stops at the first line start reached (position 0 or the position after a line
+ * feed). From the prefix-maximal position that is the rightmost line start of the
+ * set of equivalent positions, as git chooses. No step splits a surrogate pair or a
+ * CR LF pair. When no position of the set is a line start the given affixes are returned.
  */
 export function slideStretch(oldText: string, newText: string, affixes: Affixes): Affixes {
   const isStart = (p: number): boolean => p === 0 || oldText.charCodeAt(p - 1) === LF;
@@ -117,16 +118,11 @@ export function widenToLines(oldText: string, newText: string, affixes: Affixes)
   const lf = oldText.indexOf("\n", oldEnd);
   return { prefix, suffix: lf === -1 ? 0 : oldText.length - lf - 1 };
 }
-/**
- * The part of `hunk` that really changed, or `null` when its old and new text
- * are equal, slid to a line start (Req 4.17). `oldDocText` is the whole old text
- * that the Hunk's offsets index. A Hunk that starts inside a line (the first, after
- * a whole-text trim that could not slide) is read together with the equal start of
- * its line, so the slide can leave the Hunk's own text.
- */
-export function trimHunk(oldDocText: string, hunk: Hunk): Hunk | null {
-  const oldText = oldDocText.slice(hunk.from, hunk.to);
-  const newText = hunk.text;
+/** `hunk` read together with the old text up to `limit` and the equal start of its line, trimmed and slid. */
+function trimWithin(oldDocText: string, hunk: Hunk, limit: number): Hunk | null {
+  const after = oldDocText.slice(hunk.to, Math.max(hunk.to, limit));
+  const oldText = oldDocText.slice(hunk.from, hunk.to) + after;
+  const newText = hunk.text + after;
   const lineStart = hunk.from === 0 ? 0 : oldDocText.lastIndexOf("\n", hunk.from - 1) + 1;
   const context = oldDocText.slice(lineStart, hunk.from);
   const trimmed = commonAffixes(oldText, newText);
@@ -135,8 +131,28 @@ export function trimHunk(oldDocText: string, hunk: Hunk): Hunk | null {
     suffix: trimmed.suffix,
   });
   const from = lineStart + prefix;
-  const to = hunk.to - suffix;
+  const to = hunk.to + after.length - suffix;
   const text = (context + newText).slice(prefix, context.length + newText.length - suffix);
   if (from === to && text === "") return null;
   return { from, to, text };
+}
+/**
+ * The part of `hunk` that really changed, or `null` when its old and new text are
+ * equal, at the latest line start of its equivalent positions (Req 4.17, Resolved
+ * point 28). `oldDocText` is the whole old text that the Hunk's offsets index;
+ * `limit` is where the unchanged text after the Hunk ends (the next Hunk's start).
+ * The Hunk is first read together with that unchanged text, so its prefix-maximal
+ * position is the one the text allows and not the one the line difference picked;
+ * when the slide from there reaches no line start (a surrogate pair blocks it), the
+ * Hunk is trimmed within its own text, as before. Both read the equal start of the
+ * Hunk's line, so the slide can leave the Hunk's own text.
+ */
+export function trimHunk(oldDocText: string, hunk: Hunk, limit = oldDocText.length): Hunk | null {
+  const wide = trimWithin(oldDocText, hunk, limit);
+  const atStart = wide !== null && (wide.from === 0 || oldDocText.charCodeAt(wide.from - 1) === LF);
+  return wide === null || atStart ? wide : trimWithin(oldDocText, hunk, hunk.to);
+}
+/** Each Hunk of `hunks` (ascending, disjoint) trimmed by `trimHunk`, bounded by the next Hunk. */
+export function trimHunks(oldDocText: string, hunks: readonly Hunk[]): Hunk[] {
+  return hunks.flatMap((h, i) => trimHunk(oldDocText, h, hunks[i + 1]?.from) ?? []);
 }

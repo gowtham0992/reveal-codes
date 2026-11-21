@@ -6895,9 +6895,10 @@ function widenToLines(oldText, newText, affixes) {
   const lf = oldText.indexOf("\n", oldEnd);
   return { prefix, suffix: lf === -1 ? 0 : oldText.length - lf - 1 };
 }
-function trimHunk(oldDocText, hunk) {
-  const oldText = oldDocText.slice(hunk.from, hunk.to);
-  const newText = hunk.text;
+function trimWithin(oldDocText, hunk, limit) {
+  const after = oldDocText.slice(hunk.to, Math.max(hunk.to, limit));
+  const oldText = oldDocText.slice(hunk.from, hunk.to) + after;
+  const newText = hunk.text + after;
   const lineStart = hunk.from === 0 ? 0 : oldDocText.lastIndexOf("\n", hunk.from - 1) + 1;
   const context = oldDocText.slice(lineStart, hunk.from);
   const trimmed = commonAffixes(oldText, newText);
@@ -6906,10 +6907,18 @@ function trimHunk(oldDocText, hunk) {
     suffix: trimmed.suffix
   });
   const from = lineStart + prefix;
-  const to = hunk.to - suffix;
+  const to = hunk.to + after.length - suffix;
   const text = (context + newText).slice(prefix, context.length + newText.length - suffix);
   if (from === to && text === "") return null;
   return { from, to, text };
+}
+function trimHunk(oldDocText, hunk, limit = oldDocText.length) {
+  const wide = trimWithin(oldDocText, hunk, limit);
+  const atStart = wide !== null && (wide.from === 0 || oldDocText.charCodeAt(wide.from - 1) === LF);
+  return wide === null || atStart ? wide : trimWithin(oldDocText, hunk, hunk.to);
+}
+function trimHunks(oldDocText, hunks) {
+  return hunks.flatMap((h, i) => trimHunk(oldDocText, h, hunks[i + 1]?.from) ?? []);
 }
 var CR, LF;
 var init_trim = __esm({
@@ -6971,7 +6980,7 @@ function applyHunks(doc, hunks, fileText, origin2, window, clock) {
     return err({ kind: "no_open_window", detail: "an Agent_Change needs a Window_Run" });
   }
   const windowRun = window === null ? "" : window.windowRun;
-  const trimmed = hunks.flatMap((h) => trimHunk(doc.text, h) ?? []);
+  const trimmed = trimHunks(doc.text, hunks);
   const ops = planHunks(trimmed, origin2, windowRun, existingRunNumbers(doc, windowRun), clock);
   let current = doc;
   for (const op of ops) {
@@ -8389,7 +8398,10 @@ var init_view = __esm({
 
 // packages/provenance/src/io/reveal-file.ts
 function unrecordedCharacters(recorded, current) {
-  return changeHunks(recorded, current).flatMap((h) => trimHunk(recorded, h) ?? []).reduce((n, h) => n + (h.to - h.from) + h.text.length, 0);
+  return trimHunks(recorded, changeHunks(recorded, current)).reduce(
+    (n, h) => n + (h.to - h.from) + h.text.length,
+    0
+  );
 }
 function notShown(path, reason) {
   const text = reason === "tampered_record" ? `${neutralize(path)}: tampered_record` : `${neutralize(path)}: not recorded: ${reason}`;

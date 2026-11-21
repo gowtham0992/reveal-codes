@@ -9,8 +9,9 @@
       "lastRunTimestamp": 1795134900733
     },
     "5.13 Property 16: sessions without prompt events are counted once": {
-      "status": "passed",
-      "lastRunTimestamp": 1795142435353
+      "status": "failed",
+      "failingExample": "seed 2090571658, path \"39:262:0:3:2\" (fails with HEAD's trim.ts too). Shrunk: setup files at pool 1 (\"\" entry-none) and pool 3 (\"\" entry-cache); steps: promptSubmit sess-1; agentStop sess-1; agentStop (no session); agentStop sess-2 with change prepend \"\\n\" at pool 1; agentStop sess-1. Problems: \"event 3 (agentStop): count 0 to 1, want +0\", \"1 new no_prompt_events lines, want 0\", \"count 1, want 0\", \"flagged sess-2, want \".",
+      "lastRunTimestamp": 1795286021785
     },
     "10.9 Property 18: only changed lines change": {
       "status": "passed",
@@ -1013,6 +1014,16 @@
         "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795221711248
+      },
+      {
+        "executionId": "0a166b3c-5749-45b8-828e-874ade88edff",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795244571665
+      },
+      {
+        "executionId": "b9c54118-ed9a-44ab-847c-949d3be5a4ec",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795244835573
       }
     ],
     "11.2 README section \"Reveal Codes for your own repository\"": [
@@ -1025,6 +1036,11 @@
         "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795221711285
+      },
+      {
+        "executionId": "b9c54118-ed9a-44ab-847c-949d3be5a4ec",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795244835633
       }
     ],
     "11.3 `docs/KIRO_USAGE.md` and the steering files": [
@@ -1037,6 +1053,11 @@
         "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795221711325
+      },
+      {
+        "executionId": "b9c54118-ed9a-44ab-847c-949d3be5a4ec",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795244835708
       }
     ],
     "11.4 Complete the BUILD_LOG entry": [
@@ -1049,6 +1070,11 @@
         "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795221711386
+      },
+      {
+        "executionId": "b9c54118-ed9a-44ab-847c-949d3be5a4ec",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795244835789
       }
     ],
     "12.1 Final checkpoint - everything green and the record complete": [
@@ -1061,6 +1087,11 @@
         "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795221711425
+      },
+      {
+        "executionId": "b9c54118-ed9a-44ab-847c-949d3be5a4ec",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795244835838
       }
     ],
     "3. Package scaffold": [
@@ -1464,6 +1495,23 @@
         "executionId": "666d61a0-b6aa-4942-81d4-56410fd8a43a",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795244380519
+      }
+    ],
+    "10.11 Latest line start for ambiguous edits": [
+      {
+        "executionId": "b9c54118-ed9a-44ab-847c-949d3be5a4ec",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795244835484
+      },
+      {
+        "executionId": "b9c54118-ed9a-44ab-847c-949d3be5a4ec",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795244836358
+      },
+      {
+        "executionId": "b9c54118-ed9a-44ab-847c-949d3be5a4ec",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795286215273
       }
     ]
   }

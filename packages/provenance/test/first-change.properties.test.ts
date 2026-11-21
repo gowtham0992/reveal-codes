@@ -4,7 +4,7 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { decodeBaseline } from "../src/core/baseline-codec.js";
 import { diffLines } from "../src/core/diff.js";
-import { commonAffixes, slideStretch, trimHunk, widenToLines } from "../src/core/trim.js";
+import { commonAffixes, slideStretch, trimHunks, widenToLines } from "../src/core/trim.js";
 import type { Baseline, BaselineEntry, Hunk } from "../src/core/types.js";
 import { arbScenario } from "../src/testing/arbitraries.js";
 import type { Scenario, Tracking } from "../src/testing/arbitraries.js";
@@ -46,7 +46,7 @@ function hunksOf(oldText: string, newText: string): Hunk[] {
     newText.slice(prefix, newText.length - suffix),
   );
   const shifted = middle.map((h) => ({ from: h.from + prefix, to: h.to + prefix, text: h.text }));
-  return shifted.flatMap((h) => trimHunk(oldText, h) ?? []);
+  return trimHunks(oldText, shifted);
 }
 /** The starting document with the Hunks applied through Engine `apply`, highest offset first. */
 function expectedDocument(

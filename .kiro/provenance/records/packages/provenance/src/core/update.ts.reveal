@@ -1,11 +1,11 @@
-[DOC{v=1;n=0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.1,14,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.2,62,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:28:53Z.1,14,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:28:53Z.2,90,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:28:53Z.3,136,0,0}][PST{t=2026-11-20T03:04:47Z}]/**
+[DOC{v=1;n=0;r=10.11 Latest line start for ambiguous edits 2026-11-21T07:07:15Z.1,1,0,0;r=10.11 Latest line start for ambiguous edits 2026-11-21T07:07:15Z.2,25,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.1,14,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.2,62,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:28:53Z.1,14,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:28:53Z.2,90,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:28:53Z.3,136,0,0}][PST{t=2026-11-20T03:04:47Z}]/**
  * Records one file's change through the Engine and only the Engine (design
  * M2; Req 4.1 to 4.10, 5.6 to 5.9). No span, result, override or quote check
  * is built here, and `AI>HUM` is made only by the Engine's relabelling.
  */
 import { apply, createDocument, err, ok, type Document, type Result } from "@reveal-codes/engine";
 import { diffLines } from "./diff.js";
-import { commonAffixes, [AI:10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.1{t=2026-11-21T06:05:01.263Z}]slideStretch, [PST{t=2026-11-20T03:04:47Z}]trimHunk[AI:10.8 Widen the trimmed middle to whole lines 2026-11-21T06:28:53Z.1{t=2026-11-21T06:34:22.435Z}], widenToLines[PST{t=2026-11-20T03:04:47Z}] } from "./trim.js";
+import { commonAffixes, [AI:10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.1{t=2026-11-21T06:05:01.263Z}]slideStretch, [PST{t=2026-11-20T03:04:47Z}]trimHunk[AI:10.11 Latest line start for ambiguous edits 2026-11-21T07:07:15Z.1{t=2026-11-21T18:36:55.425Z}]s[AI:10.8 Widen the trimmed middle to whole lines 2026-11-21T06:28:53Z.1{t=2026-11-21T06:34:22.435Z}], widenToLines[PST{t=2026-11-20T03:04:47Z}] } from "./trim.js";
 import {
   existingRunNumbers,
   planHunks,
@@ -42,7 +42,7 @@ function applyHunks(
     return err({ kind: "no_open_window", detail: "an Agent_Change needs a Window_Run" });
   }
   const windowRun = window === null ? "" : window.windowRun;
-  const trimmed = hunks.flatMap((h) => trimHunk(doc.text, h) ?? \[\]);
+  const trimmed = [AI:10.11 Latest line start for ambiguous edits 2026-11-21T07:07:15Z.2{t=2026-11-21T18:36:55.425Z}]trimHunks(doc.text, hunks[PST{t=2026-11-20T03:04:47Z}]);
   const ops = planHunks(trimmed, origin, windowRun, existingRunNumbers(doc, windowRun), clock);
   let current = doc;
   for (const op of ops) {

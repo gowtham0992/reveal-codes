@@ -2,7 +2,7 @@ import fc from "fast-check";
 import { apply, createDocument, renderRecord, type Document } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import { diffLines } from "../src/core/diff.js";
-import { commonAffixes, slideStretch, trimHunk, widenToLines } from "../src/core/trim.js";
+import { commonAffixes, slideStretch, trimHunks, widenToLines } from "../src/core/trim.js";
 import { updateRecord } from "../src/core/update.js";
 import { arbAgentThenOutside } from "../src/testing/arbitraries.js";
 import { fixedClock } from "./support/clock.js";
@@ -22,9 +22,10 @@ function engineDirect(doc: Document, fileText: string, timestamp: string): Docum
   const slid = slideStretch(old, fileText, commonAffixes(old, fileText));
   const { prefix: p, suffix: s } = widenToLines(old, fileText, slid);
   const middle = diffLines(old.slice(p, old.length - s), fileText.slice(p, fileText.length - s));
-  const hunks = middle
-    .map((h) => ({ from: h.from + p, to: h.to + p, text: h.text }))
-    .flatMap((h) => trimHunk(old, h) ?? []);
+  const hunks = trimHunks(
+    old,
+    middle.map((h) => ({ from: h.from + p, to: h.to + p, text: h.text })),
+  );
   return [...hunks].reverse().reduce((current, h) => {
     const op = {
       kind: "replace" as const,

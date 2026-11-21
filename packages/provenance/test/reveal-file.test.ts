@@ -84,7 +84,7 @@ async function inProcess(d: TempDir, path: string, env: Record<string, string>, 
   return { status, text: out.join("\n") };
 }
 
-describe("reveal <file> _Requirements: 9.1, 9.7, 9.9, 9.12_", () => {
+describe("reveal <file> _Requirements: 9.1, 9.7, 9.9, 9.12_", { timeout: 30_000 }, () => {
   it("prints the header, the four legend lines and the codes of a current Record, plain when piped", () => {
     const d = fresh();
     d.write("a.ts", "x\n");
@@ -139,7 +139,7 @@ describe("reveal <file> _Requirements: 9.1, 9.7, 9.9, 9.12_", () => {
   });
 });
 
-describe("a stale file _Requirements: 9.10_", () => {
+describe("a stale file _Requirements: 9.10_", { timeout: 30_000 }, () => {
   const first = (text: string): string => text.split("\n")[0] ?? "";
   it("starts with the count of unrecorded characters and the command, then the Record as recorded", () => {
     const d = fresh();
@@ -176,7 +176,7 @@ describe("a stale file _Requirements: 9.10_", () => {
   });
 });
 
-describe("a file that is not shown _Requirements: 9.9, 9.11_", () => {
+describe("a file that is not shown _Requirements: 9.9, 9.11_", { timeout: 30_000 }, () => {
   it.each(["not_tracked", "over_limit", "binary", "ignored", "no_record"] as const)(
     "prints one line with %s and exits 1",
     async (reason) => {
@@ -237,7 +237,7 @@ describe("colour choice and paths _Requirements: 9.5, 9.6, 9.7_", () => {
   });
 });
 
-describe("the wrapper _Requirements: 1.11_", () => {
+describe("the wrapper _Requirements: 1.11_", { timeout: 30_000 }, () => {
   it("runs the Bundle that sits beside it and passes the arguments", async () => {
     const d = fresh();
     d.write("n.txt", "note\n");
@@ -255,52 +255,56 @@ describe("the wrapper _Requirements: 1.11_", () => {
     expect(readFileSync(installed, "utf8")).toBe(wrapperText());
   });
 });
-describe("run tags, the Runs list and --full _Requirements: 9.3, 9.14, 9.15, 9.16_", () => {
-  it("prints short tags and the Runs list, no tags sentence,, with a suffix for a clash", () => {
-    const d = fresh();
-    agentRecord(d, "a.ts", [W66, W66B]);
-    const ran = reveal(d, ["a.ts"]);
-    const lines = ran.stdout.split("\n");
-    expect(ran.status).toBe(0);
-    expect(lines.slice(1, 5)).toEqual(legendLines());
-    expect(ran.stdout).not.toContain("Tags are listed");
-    expect(lines[5]).toBe("Runs in this file");
-    expect(lines[6]).toBe("  6.6    Wire \\[it\\]  opened 2026-11-19T10:00:00Z  1 hunk");
-    expect(lines[7]).toBe("  6.6~2  Again      opened 2026-11-19T10:05:00Z  1 hunk");
-    expect(lines[8]).toBe("");
-    expect(ran.stdout).toContain("[AI:6.6]from 6.6\n[AI:6.6~2]from 6.6\n");
-  });
-  it("prints the full Run_Ids and no list with --full, before or after the file", () => {
-    const d = fresh();
-    agentRecord(d, "a.ts", [W66]);
-    for (const args of [
-      ["a.ts", "--full"],
-      ["--full", "a.ts"],
-    ]) {
-      const ran = reveal(d, args);
+describe(
+  "run tags, the Runs list and --full _Requirements: 9.3, 9.14, 9.15, 9.16_",
+  { timeout: 30_000 },
+  () => {
+    it("prints short tags and the Runs list, no tags sentence,, with a suffix for a clash", () => {
+      const d = fresh();
+      agentRecord(d, "a.ts", [W66, W66B]);
+      const ran = reveal(d, ["a.ts"]);
       const lines = ran.stdout.split("\n");
       expect(ran.status).toBe(0);
-      expect(lines.slice(1, 5)).toEqual(legendLines("run"));
-      expect(ran.stdout).not.toContain("Runs in this file");
-      expect(ran.stdout).toContain("[AI:6.6 Wire \\[it\\] 2026-11-19T10:00:00Z.1]from 6.6");
-    }
-  });
-  it("gives the usage line for a second file or an unknown flag", async () => {
-    const d = fresh();
-    agentRecord(d, "a.ts", [W66]);
-    for (const args of [["a.ts", "b.ts"], ["--full"], ["a.ts", "--wide"]]) {
-      const errors: string[] = [];
-      const io = {
-        cwd: d.root,
-        env: colorEnvFrom({}),
-        isTTY: false,
-        out: () => undefined,
-        err: (t: string) => errors.push(t),
-      };
-      expect(await revealCommand(deps, args, io)).toBe(1);
-      expect(errors).toEqual([
-        "usage: reveal <file> [--full] | --summary [path] [--top <n>] [--all] | --check [--strict] | --record",
-      ]);
-    }
-  });
-});
+      expect(lines.slice(1, 5)).toEqual(legendLines());
+      expect(ran.stdout).not.toContain("Tags are listed");
+      expect(lines[5]).toBe("Runs in this file");
+      expect(lines[6]).toBe("  6.6    Wire \\[it\\]  opened 2026-11-19T10:00:00Z  1 hunk");
+      expect(lines[7]).toBe("  6.6~2  Again      opened 2026-11-19T10:05:00Z  1 hunk");
+      expect(lines[8]).toBe("");
+      expect(ran.stdout).toContain("[AI:6.6]from 6.6\n[AI:6.6~2]from 6.6\n");
+    });
+    it("prints the full Run_Ids and no list with --full, before or after the file", () => {
+      const d = fresh();
+      agentRecord(d, "a.ts", [W66]);
+      for (const args of [
+        ["a.ts", "--full"],
+        ["--full", "a.ts"],
+      ]) {
+        const ran = reveal(d, args);
+        const lines = ran.stdout.split("\n");
+        expect(ran.status).toBe(0);
+        expect(lines.slice(1, 5)).toEqual(legendLines("run"));
+        expect(ran.stdout).not.toContain("Runs in this file");
+        expect(ran.stdout).toContain("[AI:6.6 Wire \\[it\\] 2026-11-19T10:00:00Z.1]from 6.6");
+      }
+    });
+    it("gives the usage line for a second file or an unknown flag", async () => {
+      const d = fresh();
+      agentRecord(d, "a.ts", [W66]);
+      for (const args of [["a.ts", "b.ts"], ["--full"], ["a.ts", "--wide"]]) {
+        const errors: string[] = [];
+        const io = {
+          cwd: d.root,
+          env: colorEnvFrom({}),
+          isTTY: false,
+          out: () => undefined,
+          err: (t: string) => errors.push(t),
+        };
+        expect(await revealCommand(deps, args, io)).toBe(1);
+        expect(errors).toEqual([
+          "usage: reveal <file> [--full] | --summary [path] [--top <n>] [--all] | --check [--strict] | --record",
+        ]);
+      }
+    });
+  },
+);

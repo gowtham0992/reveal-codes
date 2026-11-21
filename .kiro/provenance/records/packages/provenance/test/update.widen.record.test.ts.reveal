@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.1,5101,0,0}][AI:10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.1{t=2026-11-21T06:43:54.853Z}]import { parseRecord } from "@reveal-codes/engine";
+[DOC{v=1;n=0;r=10.11 Latest line start for ambiguous edits 2026-11-21T07:07:15Z.1,1746,0,0;r=10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.1,5101,0,0}][AI:10.8 Widen the trimmed middle to whole lines 2026-11-21T06:36:35Z.1{t=2026-11-21T06:43:54.853Z}]import { parseRecord } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import { encodeBaseline } from "../src/core/baseline-codec.js";
 import {
@@ -106,6 +106,37 @@ describe("whole-line widening through whole events (Req 4.2, Decision 29)", () =
         expect(agent.every((p) => p.runId === `${win}.1`)).toBe(true);
         expect(runsOf(deps)).toEqual(\[\[`${win}.1`, false\]\]);
       });
+    });
+  }
+});
+[AI:10.11 Latest line start for ambiguous edits 2026-11-21T07:07:15Z.1{t=2026-11-21T18:36:55.425Z}]
+describe("the toKelvin case through whole events (task 10.11, Req 4.17)", () => {
+  for (const \[label, eol\] of \[
+    \["LF", "\\n"\],
+    \["CR LF", "\\r\\n"\],
+  \] as const) {
+    it(`${label}: the new function is \[AI:turn\] from its first line to its blank line`, async () => {
+      const lines = (...l: string\[\]): string => l.map((x) => x + eol).join("");
+      const first = lines("function toFahrenheit(c) {", "  return (c * 9) / 5 + 32;", "}", "");
+      const kelvin = lines("function toKelvin(celsius) {", "  return celsius + 273.15;", "}", "");
+      const second = lines("function toCelsius(f) {", "  return f;", "}");
+      const deps = workspace();
+      baselined(deps, first + second);
+      await agentEdit(deps, first + kelvin + second);
+      expect(textOf(deps, "AI")).toEqual(\[kelvin\]);
+      expect(textOf(deps, "PST")).toEqual(\[first, second\]);
+      expect(pieces(deps, FILE).find((p) => p.origin === "AI")?.runId).toMatch(/^turn /);
+    });
+    it(`${label}: the same with a second edit in the turn (the CLI walk's shape)`, async () => {
+      const lines = (...l: string\[\]): string => l.map((x) => x + eol).join("");
+      const first = lines("function toFahrenheit(c) {", "  return (c * 9) / 5 + 32;", "}", "");
+      const kelvin = lines("function toKelvin(celsius) {", "  return celsius + 273.15;", "}", "");
+      const second = lines("function toCelsius(f) {", "  return (f - 32) * 5 / 9;", "}");
+      const deps = workspace();
+      baselined(deps, `// Temp${eol}${first}${second}`);
+      await agentEdit(deps, `// Temperatures${eol}${first}${kelvin}${second}`);
+      expect(textOf(deps, "AI")).toEqual(\["eratures", kelvin\]);
+      expect(textOf(deps, "PST")).toEqual(\["// Temp", eol + first, second\]);
     });
   }
 });
