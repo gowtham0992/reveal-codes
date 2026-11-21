@@ -1,0 +1,120 @@
+# Requirements Document
+
+## Introduction
+
+"Load demo motion" today installs `demo-motion.txt` as one pasted span with no results. This feature makes it install a draft that was recorded in this editor on the hosted site on 2026-11-21, with its whole saved state: typed, pasted, assistant and assistant-then-edited text, its Run_Log, its Check_Date and its results. The recording is `packages/engine/fixtures/demo-motion.recorded.json` (5,028 bytes, sha256 `61db329c698fb01b64777ad90b681b0e73682382c95ca04b9a1423ef7c2a2c0e`). It is one Persisted_Value exactly as the editor stored it. It is never edited or reformatted.
+
+Out of scope: a second sample button, editing the recorded file, and any change to the saved-draft format or the Engine.
+
+## Glossary
+
+- **Editor**: the `apps/web` application.
+- **Recorded_Sample**: the file `packages/engine/fixtures/demo-motion.recorded.json`.
+- **Persisted_Value**: the JSON the Editor stores for a draft, as defined by `PersistedValue` in `apps/web/src/persist.ts`.
+- **Restore_Function**: `deserialise` in `apps/web/src/persist.ts`, the function that restores an autosaved draft.
+- **Run_Log**: the list of assistant runs held in a Persisted_Value, each entry naming a run, a provider and a model.
+- **Check_Date**: the `verifiedAt` time of a Persisted_Value, shown in the Issues_Region as "Checked".
+- **Issues_Region**: the part of the Editor that lists citation and quotation results.
+- **Load_Demo_Control**: the "Load demo motion" button in the Toolbar and on the empty page.
+- **Confirm_Dialog**: the dialog that asks before the Editor replaces a non-empty draft.
+- **Demo_Mode**: the mode in which the Editor's server answers lookups from recorded Verifier fixtures.
+- **Live_Mode**: the mode in which the Editor's server answers lookups from CourtListener.
+- **Verify**: the toolbar action that checks the citations and quotations of the document.
+- **Declaration**: the author's answer about pasted text, held beside the document and asked at Export.
+- **Demo_Text**: `packages/engine/fixtures/demo-motion.txt`, the plain-text demo motion.
+
+## Requirements
+
+### Requirement 1: The Recorded_Sample is one Persisted_Value
+
+**User Story:** As a maintainer, I want the sample to be exactly what the Editor stored, so that it cannot drift from the saved-draft format.
+
+#### Acceptance Criteria
+
+1. THE Recorded_Sample SHALL be loadable by the Restore_Function with no error.
+2. THE Recorded_Sample SHALL be byte-identical to the file with sha256 `61db329c698fb01b64777ad90b681b0e73682382c95ca04b9a1423ef7c2a2c0e`.
+3. THE repository SHALL keep the Recorded_Sample out of Prettier's input.
+4. THE Recorded_Sample SHALL carry no Declaration.
+
+### Requirement 2: The Recorded_Sample holds the required content
+
+**User Story:** As a judge, I want the sample to show every kind of code, so that one load shows the whole product.
+
+#### Acceptance Criteria
+
+1. THE Recorded_Sample SHALL hold at least one span of each origin HUM, PST, AI and AI>HUM.
+2. THE Recorded_Sample SHALL hold one citation with status found, one citation with status not found, and one quotation recorded as not in the opinion.
+3. THE Recorded_Sample SHALL hold a Run_Log with at least one entry that names a model.
+4. THE Recorded_Sample SHALL hold a Check_Date.
+
+### Requirement 3: Load_Demo_Control installs the Recorded_Sample
+
+**User Story:** As a pro se litigant, I want Load demo motion to show a finished example, so that I see the codes without waiting for a check.
+
+#### Acceptance Criteria
+
+1. WHEN the author selects the Load_Demo_Control and the draft is empty, THE Editor SHALL install the document, Run_Log, Check_Date and results of the Recorded_Sample.
+2. WHEN the author selects the Load_Demo_Control and the draft is not empty, THE Editor SHALL show the Confirm_Dialog and SHALL install the Recorded_Sample only after the author confirms.
+3. WHEN the author cancels the Confirm_Dialog, THE Editor SHALL leave the draft unchanged.
+4. WHEN the Recorded_Sample is installed, THE Editor SHALL show the notice "Loaded the demo motion as recorded in this editor on 21 November 2026."
+5. WHEN the Recorded_Sample is installed, THE Issues_Region SHALL show the results of the Recorded_Sample with the recorded Checked date.
+6. WHEN the Recorded_Sample is installed, THE Editor SHALL restore it through the Restore_Function.
+7. WHEN the Recorded_Sample is installed, THE Editor SHALL store it on the next autosave in the same form as any other draft.
+8. IF the Recorded_Sample cannot be fetched or restored, THEN THE Editor SHALL show the notice "Could not load the demo motion." and SHALL leave the draft unchanged.
+
+### Requirement 4: Loading makes no verification request
+
+**User Story:** As a user, I want the same behaviour on load whichever mode the site runs in, so that the sample never depends on a lookup.
+
+#### Acceptance Criteria
+
+1. WHEN the Recorded_Sample is installed in Demo_Mode or in Live_Mode, THE Editor SHALL send no request to `/api/verify`, `/api/opinion` or `/api/assistant`.
+2. WHEN the author selects Verify after the Recorded_Sample is installed in Demo_Mode, THE Editor SHALL resolve every citation of the Recorded_Sample from the Verifier fixtures.
+3. WHEN the author selects Verify after the Recorded_Sample is installed, THE Editor SHALL replace the recorded results with the new results and the Check_Date with the new check time.
+
+### Requirement 5: Export still asks about pasted text
+
+**User Story:** As a filer, I want Export to ask about the pasted text of the sample, so that the sample cannot pass as a declared draft.
+
+#### Acceptance Criteria
+
+1. WHEN the Recorded_Sample is installed, THE Editor SHALL hold no Declaration.
+2. WHEN the author selects Export on the installed Recorded_Sample, THE Export_Dialog SHALL ask the Declaration question about the pasted text.
+
+### Requirement 6: Demo_Text stays
+
+**User Story:** As a maintainer, I want the plain-text demo kept, so that tests and tools that need text still have it.
+
+#### Acceptance Criteria
+
+1. THE build SHALL keep copying Demo_Text to `apps/web/public/demo-motion.txt`.
+2. THE `/check` page, the Verifier tests, the Export tests, the Engine tests and the MCP Power tests SHALL keep using Demo_Text.
+3. THE build SHALL copy the Recorded_Sample to `apps/web/public/demo-motion.recorded.json` byte for byte.
+
+### Requirement 7: The recorded draft is a snapshot
+
+**User Story:** As a release owner, I want the snapshot nature of the sample stated and checked, so that nobody mistakes its results for today's.
+
+#### Acceptance Criteria
+
+1. THE Issues_Region SHALL show the recorded Checked date for the installed Recorded_Sample.
+2. THE release checklist in `.kiro/steering/release.md` SHALL include the item "the recorded sample still loads".
+
+### Requirement 8: Property of installing and saving
+
+**User Story:** As a maintainer, I want installing then saving to lose nothing, so that the install path matches the restore path.
+
+#### Acceptance Criteria
+
+1. FOR ALL Persisted_Values produced by the existing arbitraries, installing the value as a sample and then saving again SHALL produce the same Persisted_Value.
+
+### Requirement 9: Documentation
+
+**User Story:** As a reader, I want the docs to describe the recorded sample, so that the demo path is accurate.
+
+#### Acceptance Criteria
+
+1. THE README SHALL describe the recorded sample in "What it does" and in "Demo path", using the words "recorded in this editor on the hosted site on 2026-11-21", one line each.
+2. THE README provenance section SHALL include the sentence "No prompt text is stored, and nothing leaves the machine."
+3. THE `BUILD_LOG.md` file SHALL hold an entry for this feature, including each least-code choice made.
+4. THE `docs/KIRO_USAGE.md` file SHALL hold one line for this spec.
