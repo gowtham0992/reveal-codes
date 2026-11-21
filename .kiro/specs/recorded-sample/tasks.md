@@ -14,8 +14,8 @@ Conventions for every task:
 
 ## Tasks
 
-- [ ] 1. Protect and deliver the recorded file
-  - [~] 1.1 Keep the file out of Prettier and copy it to `public`
+- [x] 1. Protect and deliver the recorded file
+  - [x] 1.1 Keep the file out of Prettier and copy it to `public`
     - Add `packages/engine/fixtures/demo-motion.recorded.json` to `.prettierignore` and `apps/web/public/demo-motion.recorded.json` to `.gitignore`. Add the pair to `DEFAULT_PAIRS` in `apps/web/scripts/copy-demo.ts`. Add one line to `packages/engine/fixtures/README.md` (recorded in this editor on the hosted site on 2026-11-21, sha256, "never edited").
     - Write `apps/web/test/recorded-sample.test.ts` with the digest pin, the load through `deserialise`, the content checks of Requirement 2, no Declaration, and a `copy-demo` byte-for-byte case. Add a check that a Demo_Mode verify of the file's full citations resolves from `packages/verifier/fixtures` with no gap; if any citation has no fixture, stop and report before building further.
     - Run `pnpm exec vitest run --project web apps/web/test/recorded-sample.test.ts apps/web/test/avianca.test.tsx`; update the `avianca.test.tsx` copy-demo case for the third file.
