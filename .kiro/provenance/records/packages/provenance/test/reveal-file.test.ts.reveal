@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,57,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.2,22,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,794,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,2035,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.1,2,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.2,37,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.3,297,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,9924,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]import { createDocument, renderRecord } from "@reveal-codes/engine";
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,57,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.2,22,0,0;r=11.1 Static boundary tests 2026-11-21T07:02:51Z.1,21,0,0;r=11.1 Static boundary tests 2026-11-21T07:02:51Z.2,21,0,0;r=11.1 Static boundary tests 2026-11-21T07:02:51Z.3,21,0,0;r=11.1 Static boundary tests 2026-11-21T07:02:51Z.4,21,0,0;r=11.1 Static boundary tests 2026-11-21T07:02:51Z.5,21,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.1,794,0,0;r=7.11 Short run tags\, "Runs in this file"\, `--full` 2026-11-20T05:24:08Z.2,2035,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.1,2,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.2,37,0,0;r=7.14 Runs list without repeated number\, no redundant tags sentence\, a blank pane line 2026-11-20T16:17:27Z.3,297,0,0;r=7.8 `load.ts`\, `reveal <file>`\, the wrapper and the root script 2026-11-20T04:14:29Z.1,9924,0,0}][AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]import { createDocument, renderRecord } from "@reveal-codes/engine";
 import { spawnSync } from "node:child_process";
 import { chmodSync, copyFileSync, readFileSync, rmSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
@@ -84,7 +84,7 @@ async function inProcess(d: TempDir, path: string, env: Record<string, string>, 
   return { status, text: out.join("\\n") };
 }
 
-describe("reveal <file> _Requirements: 9.1, 9.7, 9.9, 9.12_", () => {
+describe("reveal <file> _Requirements: 9.1, 9.7, 9.9, 9.12_", [AI:11.1 Static boundary tests 2026-11-21T07:02:51Z.1{t=2026-11-21T07:07:14.911Z}]{ timeout: 30_000 }, [AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]() => {
   it("prints the header, the four legend lines and the codes of a current Record, plain when piped", () => {
     const d = fresh();
     d.write("a.ts", "x\\n");
@@ -139,7 +139,7 @@ describe("reveal <file> _Requirements: 9.1, 9.7, 9.9, 9.12_", () => {
   });
 });
 
-describe("a stale file _Requirements: 9.10_", () => {
+describe("a stale file _Requirements: 9.10_", [AI:11.1 Static boundary tests 2026-11-21T07:02:51Z.2{t=2026-11-21T07:07:14.911Z}]{ timeout: 30_000 }, [AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]() => {
   const first = (text: string): string => text.split("\\n")\[0\] ?? "";
   it("starts with the count of unrecorded characters and the command, then the Record as recorded", () => {
     const d = fresh();
@@ -176,7 +176,7 @@ describe("a stale file _Requirements: 9.10_", () => {
   });
 });
 
-describe("a file that is not shown _Requirements: 9.9, 9.11_", () => {
+describe("a file that is not shown _Requirements: 9.9, 9.11_", [AI:11.1 Static boundary tests 2026-11-21T07:02:51Z.3{t=2026-11-21T07:07:14.911Z}]{ timeout: 30_000 }, [AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]() => {
   it.each(\["not_tracked", "over_limit", "binary", "ignored", "no_record"\] as const)(
     "prints one line with %s and exits 1",
     async (reason) => {
@@ -237,7 +237,7 @@ describe("colour choice and paths _Requirements: 9.5, 9.6, 9.7_", () => {
   });
 });
 
-describe("the wrapper _Requirements: 1.11_", () => {
+describe("the wrapper _Requirements: 1.11_", [AI:11.1 Static boundary tests 2026-11-21T07:02:51Z.4{t=2026-11-21T07:07:14.911Z}]{ timeout: 30_000 }, [AI:7.8 `load.ts`, `reveal <file>`, the wrapper and the root script 2026-11-20T04:14:29Z.1{t=2026-11-20T04:21:31.980Z}]() => {
   it("runs the Bundle that sits beside it and passes the arguments", async () => {
     const d = fresh();
     d.write("n.txt", "note\\n");
@@ -255,7 +255,7 @@ describe("the wrapper _Requirements: 1.11_", () => {
     expect(readFileSync(installed, "utf8")).toBe(wrapperText());[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.2{t=2026-11-20T05:35:16.652Z}]
   });
 });
-describe("run tags, the Runs list and --full _Requirements: 9.3, 9.14, 9.15, 9.16_", () => {
+describe("run tags, the Runs list and --full _Requirements: 9.3, 9.14, 9.15, 9.16_", [AI:11.1 Static boundary tests 2026-11-21T07:02:51Z.5{t=2026-11-21T07:07:14.911Z}]{ timeout: 30_000 }, [AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.2{t=2026-11-20T05:35:16.652Z}]() => {
   it("prints short tags[AI:7.14 Runs list without repeated number, no redundant tags sentence, a blank pane line 2026-11-20T16:17:27Z.2{t=2026-11-20T16:21:52.951Z}] and the Runs list, no tags sentence,[AI:7.11 Short run tags, "Runs in this file", `--full` 2026-11-20T05:24:08Z.2{t=2026-11-20T05:35:16.652Z}], with a suffix for a clash", () => {
     const d = fresh();
     agentRecord(d, "a.ts", \[W66, W66B\]);
