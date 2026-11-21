@@ -29,6 +29,7 @@ import { fakeBrowserServices } from "./support/browser-services";
 const ISO = "2026-11-02T12:00:00.000Z";
 const FIXTURES = resolve(__dirname, "../../../packages/engine/fixtures");
 const DEMO = readFileSync(resolve(FIXTURES, "demo-motion.txt"), "utf8");
+const RECORDED = readFileSync(resolve(FIXTURES, "demo-motion.recorded.json"), "utf8");
 const AVIANCA = readFileSync(resolve(FIXTURES, "avianca-citations.txt"), "utf8");
 
 function pasted(text: string): Document {
@@ -52,7 +53,7 @@ function withSamples(base: ApiClient): ApiClient {
     ...base,
     demoMotion: () => answer(DEMO),
     aviancaCitations: () => answer(AVIANCA),
-    recordedSample: () => answer(DEMO),
+    recordedSample: () => answer(RECORDED),
   };
 }
 
@@ -139,6 +140,7 @@ describe("Samples leave the Declaration Pending _Requirements: 10.1, 10.2_", () 
     await loadDemo();
     await click(named("Replace draft"));
     await flush(m);
+    expect(screen.getByRole("status", { name: "Verify result" })).toBeTruthy();
     expect(savedDeclaration(m)).toBeNull();
     await expectDialogAsks();
   });

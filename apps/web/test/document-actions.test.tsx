@@ -59,7 +59,11 @@ function apiWithDemo(base: ApiClient, reply: DemoReply): ApiClient {
           : { ok: true as const, value: DEMO },
       ),
     recordedSample: () =>
-      Promise.resolve({ ok: false as const, error: { kind: "network" as const } }),
+      Promise.resolve(
+        reply === "fail"
+          ? { ok: false as const, error: { kind: "network" as const } }
+          : { ok: true as const, value: RECORDED },
+      ),
   };
 }
 
@@ -127,6 +131,17 @@ const DEMO = readFileSync(
   "utf8",
 );
 
+const RECORDED = readFileSync(
+  resolve(__dirname, "../../../packages/engine/fixtures/demo-motion.recorded.json"),
+  "utf8",
+);
+
+function recordedState() {
+  const restored = deserialise(RECORDED);
+  if (!restored.ok) throw new Error("recorded sample rejected");
+  return restored.value;
+}
+
 describe("New _Requirements: 20.1, 20.2, 20.3_", () => {
   it("always confirms, even for an empty draft, and cancel keeps the draft", async () => {
     await mount(typed("My draft."));
@@ -164,36 +179,35 @@ describe("New and the Pane_Preference _Requirements: 1.9, 12.1_", () => {
 });
 
 describe("Load demo motion _Requirements: 20.1, 20.2, 20.4, 20.5_", () => {
-  it("loads without a dialog when the draft is empty, as one PST span over the fixture text", async () => {
+  it("loads without a dialog when the draft is empty, as the recorded draft with its Run_Log", async () => {
     const m = await mount(null);
     await click("Load demo motion");
     expect(screen.queryByRole("dialog")).toBeNull();
-    expect(editorText().replace(/\s+/g, " ")).toContain(DEMO.slice(0, 20).replace(/\s+/g, " "));
+    expect(noticeText()).toBe(
+      "Loaded the demo motion as recorded in this editor on 21 November 2026.",
+    );
+    const recorded = recordedState();
+    expect(recorded.runLog.length).toBeGreaterThan(0);
     await flush(m);
-    const doc = savedDocument(m);
-    expect(doc.text).toBe(DEMO);
-    expect(doc.spans.length).toBeGreaterThan(0);
-    expect(doc.spans.every((s) => s.provenance.origin === "PST")).toBe(true);
-    expect(doc.spans[0]?.start).toBe(0);
-    expect(doc.spans[doc.spans.length - 1]?.end).toBe(DEMO.length);
+    const saved = deserialise(m.storage.getItem(AUTOSAVE_KEY));
+    if (!saved.ok) throw new Error("no saved document");
+    expect(saved.value.document.text).toBe(recorded.document.text);
+    expect(saved.value.runLog).toEqual(recorded.runLog);
+    expect(saved.value.declaration ?? null).toBeNull();
+    const origins = new Set(saved.value.document.spans.map((x) => x.provenance.origin));
+    expect([...origins].sort()).toEqual(["AI", "AI>HUM", "HUM", "PST"]);
   });
 
-  it("shows [PST] and no [AI in the Pane", async () => {
+  it("shows PST, HUM and assistant codes in the Pane", async () => {
     await mount(null);
     await click("Load demo motion");
     await click("Show codes (Alt-F3)");
     const pane = screen.getByRole("region", { name: "Reveal Codes" });
-    const labels = [...pane.querySelectorAll('[role="img"]')].map((e) =>
-      e.getAttribute("aria-label"),
-    );
-    expect(labels).toContain("Pasted or from outside the editor");
-    expect(labels.some((l) => l?.toLowerCase().includes("assistant"))).toBe(false);
-    // The Pane_Header Legend names [AI], so scan only the scrolling body (header, body, status).
-    const [header, body] = [pane.children[0], pane.children[1]];
-    expect(header?.textContent).toContain("Reveal Codes");
-    expect(header?.textContent).toContain("[AI");
+    const body = pane.children[1];
     expect(body?.textContent).toContain("[PST");
-    expect(body?.textContent).not.toContain("[AI");
+    expect(body?.textContent).toContain("[HUM");
+    expect(body?.textContent).toContain("[AI:");
+    expect(body?.textContent).toContain("[AI>HUM:");
   });
 
   it("confirms when the draft is non-empty; cancel keeps it, confirm replaces it", async () => {
@@ -242,10 +256,10 @@ function verifyResult(): string {
   return screen.getByRole("status", { name: "Verify result" }).textContent;
 }
 describe("Verify_Summary lifecycle _Requirements: 5.2, 5.4, 5.5, 5.14, 5.15, 5.16_", () => {
-  it("is empty before a run, filled after it, and cleared by New and by Load demo motion", async () => {
+  it("shows the recorded results after a load, is refilled by Verify, and is cleared by New", async () => {
     const m = await mount(null);
     await click("Load demo motion");
-    expect(verifyResult()).toBe("");
+    expect(verifyResult()).toContain("Citations: 2 found · 3 not found");
     await click("Verify");
     await act(async () => {
       await new Promise((r) => setTimeout(r, 30));
@@ -253,7 +267,7 @@ describe("Verify_Summary lifecycle _Requirements: 5.2, 5.4, 5.5, 5.14, 5.15, 5.1
     expect(verifyResult()).toContain("Citations:");
     await loadDemo();
     await click("Replace draft");
-    expect(verifyResult()).toBe("");
+    expect(verifyResult()).toContain("Citations: 2 found · 3 not found");
     await click("Verify");
     await act(async () => {
       await new Promise((r) => setTimeout(r, 30));

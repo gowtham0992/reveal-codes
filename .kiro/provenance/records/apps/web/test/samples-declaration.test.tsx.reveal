@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.1,136,0,0}][PST{t=2026-11-20T03:04:47Z}]// @vitest-environment jsdom
+[DOC{v=1;n=0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.1,136,0,0;r=4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.1,87,0,0;r=4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.2,8,0,0;r=4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.3,80,0,0}][PST{t=2026-11-20T03:04:47Z}]// @vitest-environment jsdom
 // Task 10.1: every sample and New leaves the Declaration Pending (null) and the Export dialog asks.
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -29,7 +29,8 @@ import { fakeBrowserServices } from "./support/browser-services";
 const ISO = "2026-11-02T12:00:00.000Z";
 const FIXTURES = resolve(__dirname, "../../../packages/engine/fixtures");
 const DEMO = readFileSync(resolve(FIXTURES, "demo-motion.txt"), "utf8");
-const AVIANCA = readFileSync(resolve(FIXTURES, "avianca-citations.txt"), "utf8");
+[AI:4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.1{t=2026-11-21T20:32:53.528Z}]const RECORDED = readFileSync(resolve(FIXTURES, "demo-motion.recorded.json"), "utf8");
+[PST{t=2026-11-20T03:04:47Z}]const AVIANCA = readFileSync(resolve(FIXTURES, "avianca-citations.txt"), "utf8");
 
 function pasted(text: string): Document {
   const created = createDocument("", ISO);
@@ -52,7 +53,7 @@ function withSamples(base: ApiClient): ApiClient {
     ...base,
     demoMotion: () => answer(DEMO),
     aviancaCitations: () => answer(AVIANCA),
-    recordedSample: () => answer(DEMO),
+    recordedSample: () => answer([AI:4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.2{t=2026-11-21T20:32:53.528Z}]RECORDED[AI:2.2 Share the restore step 2026-11-21T20:22:33Z.1{t=2026-11-21T20:24:56.362Z}]),
  [PST{t=2026-11-20T03:04:47Z}] };
 }
 
@@ -139,7 +140,8 @@ describe("Samples leave the Declaration Pending _Requirements: 10.1, 10.2_", () 
     await loadDemo();
     await click(named("Replace draft"));
     await flush(m);
-    expect(savedDeclaration(m)).toBeNull();
+[AI:4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.3{t=2026-11-21T20:32:53.528Z}]    expect(screen.getByRole("status", { name: "Verify result" })).toBeTruthy();
+[PST{t=2026-11-20T03:04:47Z}]    expect(savedDeclaration(m)).toBeNull();
     await expectDialogAsks();
   });
 
