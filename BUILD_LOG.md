@@ -1063,9 +1063,11 @@ The Recorder runs from four Kiro hooks. `reveal <file>`, `reveal --summary`, `re
 ## 2026-11-21: recorded-sample (Load demo motion installs a recorded draft)
 
 ### What was built
+
 Load demo motion fetches `/demo-motion.recorded.json`, restores it with `deserialise` and installs it as a mount-time restore does. The file is `packages/engine/fixtures/demo-motion.recorded.json`, recorded in this editor on the hosted site on 2026-11-21, never edited, sha256 `61db329c698fb01b64777ad90b681b0e73682382c95ca04b9a1423ef7c2a2c0e`. The saved-draft format, the Engine, the Verifier and the server are unchanged.
 
 ### Least-code choices (design.md)
+
 - **Delivery by copy and fetch, not import.** `copy-demo.ts` already copies fixtures to `apps/web/public/` and `api.ts` already fetches them as text. One more pair and one `ApiClient` method reuse that path; an import would reach outside the web package and need a bundler rule.
 - **File stays at `packages/engine/fixtures/`**, beside the two text samples the build copies.
 - **No new component or CSS.** The Load_Demo_Control, Confirm_Dialog and notice are the existing ones; only what `loadSample` does for key `demo` changed.
@@ -1074,6 +1076,7 @@ Load demo motion fetches `/demo-motion.recorded.json`, restores it with `deseria
 - **Demo_Mode needs no new fixture.** Every citation and both quotation targets of the recording are already in `packages/verifier/fixtures/`.
 
 ### Completion notes from tasks 1 to 4
+
 - `copy-demo.test.ts` already existed; it overlaps with `recorded-sample.test.ts`.
 - The tasks listed two tests to move, but `text-safety`, `open-empty-page` and `unreadable-draft` also depended on the old demo path and were updated.
 - The Verify_Summary is no longer empty after load, because the recording carries results.
