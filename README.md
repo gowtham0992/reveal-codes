@@ -90,6 +90,91 @@ The report is Markdown on stdout. Its second line states the mode, `fixtures` or
 
 The Kiro Crew app that schedules the Sentinel lives in a separate repository: https://github.com/gowtham0992/reveal-codes-sentinel. The app was installed in Kiro Crew 0.12.0 and its nightly job run once over three sample filings on 2026-11-09; the run swept all three and reported the one edited after export.
 
+## Reveal Codes for your own repository
+
+The Provenance Power records which text in your source files the Kiro agent changed, and prints a file with its codes in front of the text. The record is made by Kiro's own hooks when the agent works, not guessed from the text. No prompt text is stored, and nothing leaves the machine.
+
+### Read a file with its codes
+
+Run these from the workspace root. Each command has two forms; the second runs where the wrapper cannot.
+
+- `.kiro/provenance/reveal <file>` or `node .kiro/provenance/provenance.mjs reveal <file>` prints the file with its codes.
+- `.kiro/provenance/reveal --summary [path]` or `node .kiro/provenance/provenance.mjs reveal --summary [path]` prints the share of each origin, the longest untouched agent stretches and the agent windows.
+- `.kiro/provenance/reveal --check [--strict]` or `node .kiro/provenance/provenance.mjs reveal --check [--strict]` checks the records for damage.
+- `reveal --record` (in either form) brings the records up to date by hand.
+
+In this repository, `pnpm reveal <file>` runs the same command from the sources.
+
+This is an excerpt of `pnpm -s reveal packages/provenance/src/core/windows.ts`, piped so that it is plain, run in this repository on 2026-11-21: lines 1 to 8, then lines 98 to 108 (the bracketed line marks the cut). The text is unedited. The file was already in the repository at install, so it reads `[PST]`; the `[AI:6.6]` text was written by the agent in task 6.6.
+
+```text
+Reveal Codes: packages/provenance/src/core/windows.ts
+[AI:<tag>] changed while the agent was working, with the run it belongs to
+[AI>HUM:<tag>] agent text in a run that the Engine counts as edited while no agent window was open
+[HUM] changed while no agent window was open; typing, pasting and other tools are not told apart
+[PST] already in the file when recording started; origin not recorded
+Runs in this file
+  6.6  One window per task: duplicate preTask and postTask by name  opened 2026-11-20T03:31:04Z  5 hunks
+
+[lines 9 to 97 left out here]
+    if (top !== null && (best === null || top.order > best.order)) best = top;
+  }
+  return best;
+}
+
+[AI:6.6]/** The raw `task_name`, or null when absent or empty. */
+function nameOf(payload: Payload): string | null {
+  return payload.taskName === null || payload.taskName === "" ? null : payload.taskName;
+}
+
+[PST]function freshEntry(now: string): SessionState {
+```
+
+The legend:
+
+- `[AI:<tag>]` changed while the agent was working, with the run it belongs to. It includes the output of commands the agent ran, such as a formatter.
+- `[AI>HUM:<tag>]` agent text in a run that the Engine counts as edited while no agent window was open.
+- `[HUM]` changed while no agent window was open; typing, pasting and other tools are not told apart.
+- `[PST]` already in the file when recording started; origin not recorded.
+
+A file has no record until its first change. When the text the file had at the baseline cannot be found in git by its blob id or in the baseline cache at that change, the file's current text is recorded as `[PST]`, the change is attributed to no one, and `baseline_text_unavailable` is logged. Files created after installation are recorded by the next event. Running setup again never re-baselines.
+
+Records land in the commit of the task that made them, because the IDE runs the hooks of one trigger in file-name order; the order on the CLI is as measured in task 1 of the spec. An optional git pre-commit hook catches the record up before each commit. Git does not version hooks, so after a fresh clone the line `node powers/provenance/server/provenance.mjs setup --git-hook` recreates it.
+
+The recorder reads `.kiroignore` and never writes it. Patterns that apply only to recording go in `.kiro/provenance/ignore`. Both files use the full gitignore syntax; nested and global ignore files are not read.
+
+The record is not proof that no AI wrote a passage. It states how text changed while hooks were running; the author states the rest.
+
+### Limits
+
+- Windows is not supported.
+- The record starts on the day it was installed, and text already in the files is `[PST]`.
+- `[HUM]` means changed while no agent window was open; it cannot tell typing from pasting from other tools.
+- A change a person saves while the agent is working counts as the agent's.
+- When two sessions overlap, which window a change belongs to is a rule and not a fact.
+- In a session with no prompt events, such as an IDE spec chat that runs tasks, the edits the agent makes between tasks are recorded as `[HUM]`. `reveal --summary` says how many such sessions were counted. The count is in the committed file `.kiro/provenance/sessions.json`, holds no session id, and is approximate: it misses a session whose between-task edits were first seen at its next task start, and it can count a session twice after `state.json` is removed or replaced.
+- On the CLI there are no task windows, so task titles never appear for CLI work and the turn window covers it.
+- Inside one changed line, everything between the first and the last changed character counts as changed: changing `Celsius and Fahrenheit.` to `Celsius, Fahrenheit, and Kelvin.` records `, Fahrenheit, and Kelvin` as the agent's.
+- An ambiguous edit, such as a line inserted above an equal line, is placed at the latest line start the text allows.
+- A record grows by about 125 bytes for every hunk ever applied, so a file the agent edits 1,000 times has a record of about 125 KB. Records are not compacted.
+- The recorder stops starting files after 20 seconds and logs `deadline_reached` with the number of files it did not reach. Changes in those files may be attributed at a later event, when the window may already be closed.
+- With `git commit <paths>` or `--only`, git uses a temporary index, and the records may be left for the next commit.
+- Running setup again never re-baselines, so it cannot repair a baseline.
+- While no hook event has been recorded, the hooks may be disabled. `reveal` and the tools then print a warning, and text changed since setup cannot be attributed to the agent.
+- Kiro copies an imported Power to `~/.kiro/powers/installed/<name>` and keeps that copy after the folder is rebuilt. A rebuilt Power must be removed and imported again.
+
+### Install it
+
+Setup writes the hooks into the workspace, because a Power cannot carry them. After setup, the hooks may not be running yet, so check before you rely on the record.
+
+1. Import the Power: in the Powers panel choose Add Custom Power, then Import power from a folder, and select `powers/provenance`.
+2. Ask Kiro: "Set up provenance in this workspace". It asks before it writes anything.
+3. Check the Agent Hooks panel.
+4. Trust the workspace if Kiro asks. On the CLI, use `kiro-cli chat --trust-workspace`: hooks from a folder load only once the folder is trusted.
+5. Switch on any Provenance hook that the panel shows as disabled.
+6. Reload the window.
+7. Send one prompt, and let the setup skill check with `check_records` that a hook event arrived. If none did, the skill says so, and nothing is attributed to the agent until one does.
+
 ## What leaves your machine
 
 - Verify sends only citation records to this app's own server, and each record includes the case name written before the citation; from there only citation strings go to CourtListener. The rest of your draft text is not sent.
@@ -160,7 +245,6 @@ Working on the repository with Kiro:
 - The free CourtListener tier is rate-limited, and the hosted site limits the checks per visitor that need CourtListener, and a check answered from the cache does not count. A second Verify within a minute can take up to a minute.
 - With no assistant provider configured, the assistant returns a recorded reply, and the statement says so.
 - The editor is plain text. It does not format captions, italics or indents.
-- Provenance for source files (the Provenance Power): the hooks that feed the recorder may be disabled in the Agent Hooks panel. While no hook event has been recorded in a workspace, `reveal` prints a warning as its first line, and text changed since setup cannot be attributed to the agent.
 - The editor needs a screen at least 1150 pixels wide. The checking page at `/check` reads from 320px.
 
 ## Licence

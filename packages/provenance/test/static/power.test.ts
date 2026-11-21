@@ -107,3 +107,12 @@ describe("Provenance Power README (Req 13.9)", () => {
     expect(text).toContain("never re-baselines");
   });
 });
+
+describe("No file promises that the hooks are on after setup (Req 13.15, 17.12)", () => {
+  it("the setup skill and the Power README contain no such phrase", () => {
+    const promise = /hooks (are|is|will be) (now )?(on|active|enabled|running)\b/i;
+    for (const text of [read("README.md"), read("skills", "setup-provenance", "SKILL.md")]) {
+      expect(text).not.toMatch(promise);
+    }
+  });
+});

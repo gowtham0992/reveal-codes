@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=10.1 `powers/provenance` manifests\, skills and README 2026-11-21T00:46:19Z.1,3880,0,0;r=10.10 Checkpoint - the attribution fix 2026-11-21T06:53:30Z.1,428,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,869,0,0}][AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]# Provenance, a Kiro Power
+[DOC{v=1;n=0;r=10.1 `powers/provenance` manifests\, skills and README 2026-11-21T00:46:19Z.1,3880,0,0;r=10.10 Checkpoint - the attribution fix 2026-11-21T06:53:30Z.1,428,0,0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,869,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1,451,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2,519,0,0}][AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]# Provenance, a Kiro Power
 
 This Power records which text in your source files the Kiro agent changed, and which text was changed while no agent window was open. `reveal <file>` shows the result as codes in front of the text, in the manner of WordPerfect's Reveal Codes.
 
@@ -9,7 +9,12 @@ It is part of \[Reveal Codes\](../../README.md). It works in any Kiro workspace.
 1. In Kiro, open the Powers panel and choose Add Custom Power.
 2. Choose Import power from a folder and select this folder (`powers/provenance`), or choose Import power from GitHub and give the repository URL, `https://github.com/gowtham0992/reveal-codes`.
 3. In a workspace, say "set up provenance". The agent asks first, then calls `setup_provenance`.
-
+[AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}]4. Check the Agent Hooks panel. Setup writes the hooks, and they may not be running yet.
+5. Trust the workspace if Kiro asks. On the CLI, use `kiro-cli chat --trust-workspace`: hooks from a folder load only once the folder is trusted.
+6. Switch on any Provenance hook that the panel shows as disabled.
+7. Reload the window (`Developer: Reload Window`).
+8. Send one prompt, and let the setup skill check with `check_records` that a hook event arrived.
+[AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]
 Node 20 or newer must be on the path. Nothing else is installed: the server, the recorder and the reveal command are one file, `server/provenance.mjs`. Windows is not supported.
 
 [AI:10.10 Checkpoint - the attribution fix 2026-11-21T06:53:30Z.1{t=2026-11-21T06:59:40.655Z}]## After a rebuild: remove the Power and import it again
@@ -53,7 +58,9 @@ Run from the workspace root, as `.kiro/provenance/reveal …` or `node .kiro/pro
 
 ## [AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]When the hooks are disabled
 
-The hooks may be disabled in the Agent Hooks panel (Kiro shows them as `(disabled)`). Switch on each Provenance hook there, and reload the window (`Developer: Reload Window`) if any was disabled. While no hook event has been recorded in the workspace, `reveal <file>`, `reveal --summary` and `reveal --record` print the line `No hook event has been recorded in this workspace. The Provenance hooks may be disabled; text changed since setup cannot be attributed to the agent.` first, and the four read tools return it as `warning`. Until a hook event arrives, text changed since setup cannot be attributed to the agent. The `check_records` tool also returns `hookEvents`, which says whether any hook event has arrived and when the last one did. The line cannot tell a disabled hook from a workspace in which no prompt has been sent yet.
+[AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2{t=2026-11-21T18:57:43.165Z}]After setup the hooks may not be running. In the IDE, Kiro has shown them as `(disabled)` in the Agent Hooks panel, and `kiro-cli chat --help` says of `--trust-workspace` that hooks from a folder load only once the folder is trusted. The cause of the disabled hooks in the IDE is not confirmed. Check the Agent Hooks panel, trust the workspace if Kiro asks, switch on each Provenance hook shown as disabled, reload the window, send one prompt and let the setup skill verify with `check_records` that an event arrived.
+
+[AI:10.4 Hooks enabled, hook-event check, no-event warning 2026-11-21T05:45:01Z.1{t=2026-11-21T05:54:41.073Z}]While no hook event has been recorded in the workspace, `reveal <file>`, `reveal --summary` and `reveal --record` print the line `No hook event has been recorded in this workspace. The Provenance hooks may be disabled; text changed since setup cannot be attributed to the agent.` first, and the four read tools return it as `warning`. Until a hook event arrives, text changed since setup cannot be attributed to the agent. The `check_records` tool also returns `hookEvents`, which says whether any hook event has arrived and when the last one did. The line cannot tell a disabled hook from a workspace in which no prompt has been sent yet.
 
 ## [AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]The record is committed
 
