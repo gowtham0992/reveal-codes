@@ -1,0 +1,21 @@
+[DOC{v=1;n=0;r=10.1 `powers/provenance` manifests\, skills and README 2026-11-21T00:46:19Z.1,642,0,0}][AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "reveal-codes-provenance",
+  "version": "0.1.0",
+  "description": "Records which text in your source files an AI agent changed and which text was changed while no agent window was open, and shows it as Reveal Codes.",
+  "author": {
+    "name": "Reveal Codes",
+    "url": "https://github.com/gowtham0992/reveal-codes"
+  },
+  "repository": "https://github.com/gowtham0992/reveal-codes",
+  "license": "Apache-2.0",
+  "keywords": \[
+    "provenance",
+    "who wrote",
+    "agent wrote",
+    "untouched",
+    "reveal codes",
+    "ai-written",
+    "hooks"
+  \]
+}

@@ -1,0 +1,43 @@
+---
+name: setup-provenance
+description: Install provenance recording in a workspace so that Kiro records which text in each source file the agent changed. Use when asked to set up provenance, to record who wrote the code, to install Reveal Codes for source files, or to start tracking which text the agent wrote.
+---
+
+# Set up provenance
+
+Install the recorder in a workspace. Setup writes files into the workspace, so ask first.
+
+## Procedure
+
+1. Ask the person whether to set up provenance recording in this workspace. Say that setup writes files under `.kiro/provenance/` and `.kiro/hooks/`, and that nothing leaves the machine. Do not call `setup_provenance` until the person says yes.
+2. Call `setup_provenance` with the `workspace` argument set to the absolute path of the workspace root. Do not leave `workspace` out. Do not call the tool again to retry without telling the person why.
+3. Ask whether the person wants a git pre-commit hook. Offer it, and show its text first:
+   ```sh
+   # reveal-codes provenance: catch up the record, stage it. Never blocks a commit.
+   if [ -f .kiro/provenance/provenance.mjs ]; then
+     node .kiro/provenance/provenance.mjs record manual >/dev/null 2>&1 || true
+     for p in .kiro/provenance/baseline.json .kiro/provenance/sessions.json .kiro/provenance/records; do [ -e "$p" ] && git add -- "$p" >/dev/null 2>&1; done; true
+   fi
+   ```
+   Say that it runs the recorder before each commit and stages the record files. Write it only if the person says yes. To write it, run `node .kiro/provenance/provenance.mjs setup --git-hook` in the workspace root. If the person says no, or does not answer, write nothing. If the command reports an existing hook with an unconditional `exit` before its end, tell the person that the block would never run and that you did not edit the hook.
+4. After setup, tell the person:
+   - which files were written, which were replaced and which were kept, from the tool's result;
+   - that a Power cannot carry hooks, so the Hook_File `.kiro/hooks/0-provenance.json` was written into the workspace;
+   - that text already in the files is recorded as `[PST]`, which means it was there when recording started and its origin is not recorded;
+   - that a file gets a record at its first change after setup;
+   - that the record starts on the day of setup and says nothing about earlier changes;
+   - that Windows is not supported;
+   - that running setup again never re-baselines: it only refreshes `provenance.mjs` and `reveal`.
+5. Give the three reveal commands, run from the workspace root:
+   - `.kiro/provenance/reveal <file>` shows one file with its codes;
+   - `.kiro/provenance/reveal --summary [path]` gives the shares by origin, the longest untouched agent stretches and the agent windows;
+   - `.kiro/provenance/reveal --check [--strict]` checks the records for damage.
+     Where `.kiro/provenance/reveal` cannot run, the same forms run as `node .kiro/provenance/provenance.mjs reveal <file>`, `node .kiro/provenance/provenance.mjs reveal --summary [path]` and `node .kiro/provenance/provenance.mjs reveal --check [--strict]`.
+
+## Rules
+
+- Never call `setup_provenance` before the person agrees.
+- Never write the git hook without a yes.
+- Never edit `.kiroignore`. Setup does not write it.
+- Report what the tool returned. Do not claim files were written that the result does not list.
+- Do not say that the record proves who wrote a passage. It records how text changed, and it does not tell typing from pasting.

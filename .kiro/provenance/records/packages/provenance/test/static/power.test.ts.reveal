@@ -1,0 +1,109 @@
+[DOC{v=1;n=0;r=10.1 `powers/provenance` manifests\, skills and README 2026-11-21T00:46:19Z.1,4771,0,0}][AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { describe, expect, it } from "vitest";
+
+const POWER = join(fileURLToPath(new URL("../../../../", import.meta.url)), "powers", "provenance");
+const read = (...parts: string\[\]): string => readFileSync(join(POWER, ...parts), "utf8");
+
+function record(v: unknown): Record<string, unknown> {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) throw new Error("expected object");
+  return v as Record<string, unknown>;
+}
+
+/** The frontmatter fields of a SKILL.md as `key: value` lines, and its body. */
+function skill(name: string): { fields: Record<string, string>; body: string } {
+  const text = read("skills", name, "SKILL.md");
+  const match = /^---\\n(\[\\s\\S\]*?)\\n---\\n(\[\\s\\S\]*)$/.exec(text);
+  if (match === null) throw new Error(`${name}: no frontmatter`);
+  const fields: Record<string, string> = {};
+  for (const line of (match\[1\] ?? "").split("\\n")) {
+    const at = line.indexOf(": ");
+    if (at > 0) fields\[line.slice(0, at)\] = line.slice(at + 2);
+  }
+  return { fields, body: match\[2\] ?? "" };
+}
+
+describe("Provenance Power manifests (Req 13.1, 13.2, 13.13)", () => {
+  const plugin = record(JSON.parse(read("plugin.json")));
+  const mcp = record(JSON.parse(read("mcp.json")));
+
+  it("plugin.json names the Power, carries the schema and every keyword", () => {
+    expect(plugin\["$schema"\]).toBe("https://agent-plugins.org/schemas/1.0.0/plugin.schema.json");
+    expect(plugin\["name"\]).toBe("reveal-codes-provenance");
+    for (const word of \[
+      "provenance",
+      "who wrote",
+      "agent wrote",
+      "untouched",
+      "reveal codes",
+      "ai-written",
+      "hooks",
+    \]) {
+      expect(plugin\["keywords"\]).toContain(word);
+    }
+  });
+
+  it("plugin.json declares no hook component", () => {
+    expect(Object.keys(plugin).filter((k) => /hook/i.test(k))).toEqual(\[\]);
+  });
+
+  it("mcp.json starts node on the bundle with the mcp argument and has no env", () => {
+    const servers = record(mcp\["mcpServers"\]);
+    expect(Object.keys(servers)).toEqual(\["provenance"\]);
+    const server = record(servers\["provenance"\]);
+    expect(server\["command"\]).toBe("node");
+    expect(server\["args"\]).toEqual(\["${PLUGIN_ROOT}/server/provenance.mjs", "mcp"\]);
+    expect("env" in server).toBe(false);
+    expect(read("mcp.json")).not.toMatch(/autoApprove/i);
+  });
+});
+
+describe("Provenance Power skills (Req 13.5 to 13.9)", () => {
+  it("each skill has frontmatter with a name that matches its folder and a description", () => {
+    for (const name of \["setup-provenance", "reveal-codes-for-source"\]) {
+      const { fields } = skill(name);
+      expect(fields\["name"\]).toBe(name);
+      expect((fields\["description"\] ?? "").length).toBeGreaterThan(20);
+    }
+  });
+
+  it("the Setup_Skill asks first, names setup_provenance and workspace, and offers the git hook", () => {
+    const { body } = skill("setup-provenance");
+    expect(body).toMatch(/ask the person/i);
+    expect(body).toContain("Do not call `setup_provenance` until the person says yes");
+    expect(body).toContain("`setup_provenance` with the `workspace` argument");
+    expect(body).toContain("setup --git-hook");
+    expect(body).toContain("Write it only if the person says yes");
+    expect(body).toContain("a Power cannot carry hooks");
+    expect(body).toContain("`\[PST\]`");
+    expect(body).toContain("Windows is not supported");
+    for (const form of \["reveal <file>", "reveal --summary \[path\]", "reveal --check \[--strict\]"\]) {
+      expect(body).toContain(`.kiro/provenance/${form}`);
+    }
+    expect(body).toContain("node .kiro/provenance/provenance.mjs reveal");
+  });
+
+  it("the second skill calls untouched_agent_text, quotes the notice and says it answers from the record", () => {
+    const { body } = skill("reveal-codes-for-source");
+    expect(body).toContain("`untouched_agent_text`");
+    expect(body).toContain(
+      "`\[HUM\]` means changed while no agent window was open, and typing, pasting and other tools are not told apart",
+    );
+    expect(body).toContain("from the record and not from memory");
+  });
+});
+
+describe("Provenance Power README (Req 13.9)", () => {
+  const text = read("README.md");
+  it("states Node 20, Windows, the committed record directory and the exact legend", () => {
+    expect(text).toContain("Node 20 or newer");
+    expect(text).toContain("Windows is not supported");
+    expect(text).toContain("is meant to be committed");
+    expect(text).toContain(
+      "`\[HUM\]` changed while no agent window was open; typing, pasting and other tools are not told apart.",
+    );
+    expect(text).toContain("A file has no record until it first changes");
+    expect(text).toContain("never re-baselines");
+  });
+});

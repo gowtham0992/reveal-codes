@@ -1,0 +1,24 @@
+[DOC{v=1;n=0;r=10.1 `powers/provenance` manifests\, skills and README 2026-11-21T00:46:19Z.1,2048,0,0}][AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]---
+name: reveal-codes-for-source
+description: Answer which parts of a source file the agent wrote and has not been changed since, and show who changed what, from the provenance record. Use when asked which parts of a file the person has not touched since the agent wrote them, which code the agent wrote, or what share of a file is agent text.
+---
+
+# Reveal codes for source files
+
+Answer questions about who changed which text in a source file, from the provenance record.
+
+## Procedure
+
+1. For a question such as "which parts of this file have I not touched since you wrote them?", call `untouched_agent_text` with the file `path` and, when the person wants a different number, `top`. Pass the `workspace` argument when the workspace root is not the current directory.
+2. Report each stretch the tool returns: the file, the first and last line, the length, and the words of the run it was written in. Report them in the order the tool returns them.
+3. If the file is `stale`, say that the file changed after the last recorded event and that `.kiro/provenance/reveal --record` brings the record up to date. Do not present the answer as current.
+4. If the tool says nothing is recorded for the file, say so and say why in the words of its result. A file has no record until it first changes after setup. If provenance is not set up, offer the `setup-provenance` skill.
+5. Quote the notice from the tool's `notice` field: `\[HUM\]` means changed while no agent window was open, and typing, pasting and other tools are not told apart.
+6. Say that the answer comes from the record and not from memory. You do not remember writing the text. The record shows it.
+
+## Rules
+
+- Do not say the person wrote a `\[HUM\]` passage. The record cannot tell typing from pasting or from another tool.
+- Do not say that text is free of AI. The record is not proof that no AI wrote a passage.
+- Text recorded as `\[PST\]` was in the file when recording started. Its origin is not recorded.
+- A change that a person saves while the agent is working counts as the agent's.

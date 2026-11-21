@@ -1,0 +1,10 @@
+[DOC{v=1;n=0;r=10.1 `powers/provenance` manifests\, skills and README 2026-11-21T00:46:19Z.1,234,0,0}][AI:10.1 `powers/provenance` manifests, skills and README 2026-11-21T00:46:19Z.1{t=2026-11-21T00:49:47.463Z}]{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "provenance": {
+      "type": "stdio",
+      "command": "node",
+      "args": \["${PLUGIN_ROOT}/server/provenance.mjs", "mcp"\]
+    }
+  }
+}
