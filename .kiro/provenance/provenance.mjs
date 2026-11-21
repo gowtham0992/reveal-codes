@@ -30768,7 +30768,7 @@ var init_stdio2 = __esm({
 });
 
 // packages/provenance/src/mcp/schemas.ts
-var count, origin, structuredSpanSchema, fileSpanSchema, byOrigin, characters, fileCountsSchema, windowRowSchema, revealReasons, revealFileOutput, untouchedAgentTextOutput, provenanceSummaryOutput, checkLine, checkRecordsOutput, setupProvenanceOutput, workspaceArg, topArg, revealFileInput, untouchedAgentTextInput, provenanceSummaryInput, checkRecordsInput;
+var count, origin, structuredSpanSchema, fileSpanSchema, byOrigin, characters, fileCountsSchema, windowRowSchema, revealReasons, revealFileOutput, untouchedAgentTextOutput, provenanceSummaryOutput, checkLine, checkRecordsOutput, setupProvenanceOutput, workspaceArg, topArg, revealFileInput, untouchedAgentTextInput, provenanceSummaryInput, checkRecordsInput, setupProvenanceInput;
 var init_schemas4 = __esm({
   "packages/provenance/src/mcp/schemas.ts"() {
     "use strict";
@@ -30872,418 +30872,10 @@ var init_schemas4 = __esm({
       workspace: workspaceArg
     };
     checkRecordsInput = { strict: external_exports.boolean().optional(), workspace: workspaceArg };
-  }
-});
-
-// packages/provenance/src/core/structured.ts
-function runFields(runId2) {
-  if (runId2 === void 0) return { run: null, taskNumber: null, taskTitle: null };
-  const name = parseRunId(runId2);
-  return { run: runId2, taskNumber: name.taskNumber, taskTitle: name.title };
-}
-function toStructured(index, span) {
-  const from = positionAt(index, span.start);
-  const to = positionAt(index, span.end);
-  const origin2 = span.provenance.origin;
-  const hasRun = origin2 === "AI" || origin2 === "AI>HUM";
-  return {
-    startLine: from.line,
-    startColumn: from.column,
-    endLine: to.line,
-    endColumn: to.column,
-    length: span.end - span.start,
-    origin: origin2,
-    ...runFields(hasRun ? span.provenance.runId : void 0)
-  };
-}
-function structuredSpans(doc) {
-  const index = createLineIndex(doc.text);
-  return doc.spans.map((span) => toStructured(index, span));
-}
-var init_structured = __esm({
-  "packages/provenance/src/core/structured.ts"() {
-    "use strict";
-    init_label();
-    init_lines();
-  }
-});
-
-// packages/provenance/src/mcp/reveal-data.ts
-function unrecorded(file, reason) {
-  const status = "unrecorded";
-  return { file, status, reason, unrecordedCharacters: 0, spans: [], legend: legendLines("run") };
-}
-function shown2(file, how) {
-  return { file, reason: null, legend: legendLines("run"), ...how };
-}
-function entryData(facts, file, text) {
-  const { entry, baselineAt, baselineText } = facts;
-  if (entry === null || baselineAt === null) return unrecorded(file, "no_record");
-  if (facts.read.kind === "text" && facts.read.sha256 === entry.sha256) {
-    const doc2 = unchangedDocument(text, baselineAt);
-    if (doc2 === null) return unrecorded(file, "no_record");
-    const spans2 = structuredSpans(doc2);
-    return shown2(file, { status: "unchanged_baseline", unrecordedCharacters: 0, spans: spans2 });
-  }
-  const count2 = baselineText === null ? text.length : unrecordedCharacters(baselineText, text);
-  const doc = baselineText === null ? null : unchangedDocument(baselineText, baselineAt);
-  const spans = doc === null ? [] : structuredSpans(doc);
-  return shown2(file, { status: "stale", unrecordedCharacters: count2, spans });
-}
-function revealData(facts, path) {
-  const { record: record2, read } = facts;
-  if (record2 !== null && !record2.ok) return unrecorded(path, "tampered_record");
-  const reason = reasonOf(facts);
-  if (reason !== null || read.kind !== "text") return unrecorded(path, reason ?? "not_tracked");
-  if (record2 === null) return entryData(facts, path, read.text);
-  const spans = structuredSpans(record2.doc);
-  if (record2.text === read.text) {
-    return shown2(path, { status: "current", unrecordedCharacters: 0, spans });
-  }
-  const count2 = unrecordedCharacters(record2.text, read.text);
-  return shown2(path, { status: "stale", unrecordedCharacters: count2, spans });
-}
-function revealLines(data) {
-  const head = `${data.file}: ${data.status}${data.reason === null ? "" : ` (${data.reason})`}`;
-  const counts = `${String(data.spans.length)} spans; ${String(data.unrecordedCharacters)} characters not yet recorded.`;
-  return data.status === "unrecorded" ? [head] : [head, counts];
-}
-var init_reveal_data = __esm({
-  "packages/provenance/src/mcp/reveal-data.ts"() {
-    "use strict";
-    init_legend();
-    init_structured();
-    init_load();
-    init_reveal_file();
-  }
-});
-
-// packages/provenance/src/mcp/results.ts
-function cleanStrings(value) {
-  if (typeof value === "string") return neutralize(value);
-  if (Array.isArray(value)) return value.map(cleanStrings);
-  if (typeof value === "object" && value !== null) {
-    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, cleanStrings(v)]));
-  }
-  return value;
-}
-function textOf(lines) {
-  return [{ type: "text", text: lines.slice(0, MAX_LINES).map(neutralize).join("\n") }];
-}
-function okResult(structured, lines, error2 = false) {
-  const body = cleanStrings(structured);
-  const base = { content: textOf(lines), structuredContent: body };
-  return error2 ? { ...base, isError: true } : base;
-}
-function errorResult(message) {
-  return { content: textOf([message]), isError: true };
-}
-var MAX_LINES;
-var init_results = __esm({
-  "packages/provenance/src/mcp/results.ts"() {
-    "use strict";
-    init_neutralize();
-    MAX_LINES = 5;
-  }
-});
-
-// packages/provenance/src/mcp/summary-data.ts
-function spansByOffset(doc) {
-  const spans = structuredSpans(doc);
-  return new Map(doc.spans.map((span, i) => [span.start, spans[i]]));
-}
-function shares(counts, whole) {
-  const out = { AI: 0, "AI>HUM": 0, HUM: 0, PST: 0 };
-  for (const origin2 of ORIGINS3) out[origin2] = Number(formatShare(counts[origin2], whole));
-  return out;
-}
-function fileCounts(file) {
-  const { path, stale, counts } = file;
-  return { path, stale, characters: { ...counts }, shares: shares(counts, file.characters) };
-}
-function totalCounts(summary) {
-  const stale = summary.files.some((file) => file.stale);
-  const counts = { ...summary.total };
-  return { path: "", stale, characters: counts, shares: shares(counts, summary.totalCharacters) };
-}
-function spanFinder(docs) {
-  const cache = /* @__PURE__ */ new Map();
-  return (stretch) => {
-    const doc = docs.get(stretch.path);
-    if (doc === void 0) return null;
-    const index = cache.get(stretch.path) ?? spansByOffset(doc);
-    cache.set(stretch.path, index);
-    return index.get(stretch.offset) ?? null;
-  };
-}
-function stretchLine2(stretch, withPath) {
-  const where = stretch.firstLine === stretch.lastLine ? `line ${String(stretch.firstLine)}` : `lines ${String(stretch.firstLine)} to ${String(stretch.lastLine)}`;
-  const place = withPath ? `${stretch.path} ${where}` : where;
-  return `${place}: ${String(stretch.length)} characters, ${stretch.words}`;
-}
-function untouchedData(path, summary, docs) {
-  const [file] = summary.files;
-  if (summary.files.length !== 1 || file === void 0 || file.path !== path) return null;
-  const find = spanFinder(docs);
-  const stretches = summary.stretches.flatMap((s) => find(s) ?? []);
-  return {
-    path,
-    stretches,
-    countsByOrigin: { ...file.counts },
-    omittedAiHumCharacters: summary.omittedAiHuman,
-    stale: file.stale,
-    notice: humNotice()
-  };
-}
-function untouchedLines(data, summary) {
-  const { AI } = data.countsByOrigin;
-  const stale = data.stale ? " (the file changed after the last recorded event)" : "";
-  const head = `${data.path}: ${String(AI)} characters of agent text not touched since written${stale}.`;
-  return [head, ...summary.stretches.slice(0, 3).map((s) => stretchLine2(s, false)), data.notice];
-}
-function summaryNotice(sessions) {
-  const count2 = sessions === "unreadable" ? 0 : sessions;
-  return count2 > 0 ? `${humNotice()}
-${noPromptSessionsLine(count2)}` : humNotice();
-}
-function summaryData(summary, docs, sessions) {
-  const find = spanFinder(docs);
-  return {
-    files: summary.files.map(fileCounts),
-    total: totalCounts(summary),
-    windows: summary.windows.map((w) => ({
-      windowRun: w.windowRun,
-      taskNumber: w.taskNumber,
-      taskTitle: w.title,
-      openedAt: w.openedAt,
-      files: w.files,
-      runs: w.runs,
-      aiCharacters: w.ai,
-      aiHumCharacters: w.aiHuman
-    })),
-    stretches: summary.stretches.flatMap((s) => {
-      const span = find(s);
-      return span === null ? [] : [{ ...span, file: s.path }];
-    }),
-    omittedAiHumCharacters: summary.omittedAiHuman,
-    noPromptEventSessions: sessions === "unreadable" ? 0 : sessions,
-    notice: summaryNotice(sessions)
-  };
-}
-function summaryLines(summary) {
-  const t = summary.total;
-  const head = `${String(summary.files.length)} files: ${String(t.AI)} AI, ${String(t["AI>HUM"])} AI>HUM, ${String(t.HUM)} HUM, ${String(t.PST)} PST characters.`;
-  return [head, ...summary.stretches.slice(0, 3).map((s) => stretchLine2(s, true)), humNotice()];
-}
-function checkItem(item) {
-  return { path: item.path, reason: item.reason };
-}
-function checkData(result, filesChecked) {
-  return {
-    ok: result.status === 0,
-    filesChecked,
-    failures: result.failures.map(checkItem),
-    reports: result.reports.map(checkItem)
-  };
-}
-function checkLines(result) {
-  return result.lines.slice(0, 5);
-}
-var init_summary_data = __esm({
-  "packages/provenance/src/mcp/summary-data.ts"() {
-    "use strict";
-    init_legend();
-    init_structured();
-    init_summary_types();
-  }
-});
-
-// packages/provenance/src/mcp/workspace.ts
-function isAbsolutePath(path) {
-  return path.startsWith("/") || /^[A-Za-z]:\//u.test(path);
-}
-async function resolveWorkspace(deps, cwd, workspace) {
-  const start = normalizeDir(workspace ?? cwd);
-  if (!isAbsolutePath(start)) {
-    return err({ message: "The argument workspace must be an absolute path." });
-  }
-  const root = await findWorkspaceRoot(deps, start, null);
-  return root === null ? err({ message: NOT_SET_UP_MESSAGE }) : ok(root);
-}
-function resolveInside(root, path) {
-  if (path === "") return ok("");
-  const probe = relativeTo(root, root, `${path}/x`);
-  if (probe === null) {
-    return err({ message: `The path ${JSON.stringify(path)} is outside the workspace.` });
-  }
-  return ok(probe === "x" ? "" : probe.slice(0, -2));
-}
-var NOT_SET_UP_MESSAGE;
-var init_workspace = __esm({
-  "packages/provenance/src/mcp/workspace.ts"() {
-    "use strict";
-    init_src();
-    init_recorder();
-    init_reveal_cmd();
-    NOT_SET_UP_MESSAGE = "Provenance is not set up in this workspace. Call the tool setup_provenance first.";
-  }
-});
-
-// packages/provenance/src/mcp/tools.ts
-async function withRoot(ctx, args, run) {
-  const root = await resolveWorkspace(ctx.deps, ctx.cwd, args.workspace);
-  return root.ok ? run(root.value) : errorResult(root.error.message);
-}
-function filePath(root, path) {
-  const inside = resolveInside(root, path);
-  if (!inside.ok) return errorResult(inside.error.message);
-  return inside.value === "" ? errorResult("The path must name a file.") : { path: inside.value };
-}
-function isFailure(value) {
-  return !("path" in value);
-}
-async function loadAll(ctx, root) {
-  const loaded = await loadWorkspace(ctx.deps, root);
-  return loaded.ok ? loaded.value : errorResult(`Records cannot be read: ${loaded.error.kind}`);
-}
-function isFacts(value) {
-  return "records" in value;
-}
-function recordDocs(facts) {
-  const docs = /* @__PURE__ */ new Map();
-  for (const [path, record2] of Object.entries(facts.records)) {
-    if (record2.ok) docs.set(path, record2.doc);
-  }
-  return docs;
-}
-async function revealFileTool(ctx, args) {
-  return withRoot(ctx, args, async (root) => {
-    const target = filePath(root, args.path);
-    if (isFailure(target)) return target;
-    const facts = await loadFile(ctx.deps, root, target.path);
-    if (!facts.ok) return errorResult(`${target.path}: ${facts.error.kind}`);
-    const data = revealData(facts.value, target.path);
-    return okResult(data, revealLines(data));
-  });
-}
-async function untouchedAgentTextTool(ctx, args) {
-  return withRoot(ctx, args, async (root) => {
-    const target = filePath(root, args.path);
-    if (isFailure(target)) return target;
-    const facts = await loadAll(ctx, root);
-    if (!isFacts(facts)) return facts;
-    const { summary } = summarize(summaryInputOf(facts, target.path, args.top));
-    const data = summary === null ? null : untouchedData(target.path, summary, recordDocs(facts));
-    if (summary === null || data === null) {
-      return errorResult(`Nothing is recorded for ${target.path}.`);
-    }
-    return okResult(data, untouchedLines(data, summary));
-  });
-}
-async function provenanceSummaryTool(ctx, args) {
-  return withRoot(ctx, args, async (root) => {
-    const inside = resolveInside(root, args.path ?? "");
-    if (!inside.ok) return errorResult(inside.error.message);
-    const facts = await loadAll(ctx, root);
-    if (!isFacts(facts)) return facts;
-    const scope = inside.value === "" ? null : inside.value;
-    const result = summarize(summaryInputOf(facts, scope, args.top));
-    if (result.summary === null) return errorResult(result.lines[0] ?? "Nothing is recorded.");
-    const data = summaryData(result.summary, recordDocs(facts), facts.sessions);
-    return okResult(data, summaryLines(result.summary));
-  });
-}
-async function checkRecordsTool(ctx, args) {
-  return withRoot(ctx, args, async (root) => {
-    const facts = await loadAll(ctx, root);
-    if (!isFacts(facts)) return facts;
-    const result = checkWorkspace(checkFactsOf(facts, args.strict === true));
-    const data = checkData(result, facts.files.length);
-    return okResult(data, checkLines(result), result.status !== 0);
-  });
-}
-var init_tools = __esm({
-  "packages/provenance/src/mcp/tools.ts"() {
-    "use strict";
-    init_check2();
-    init_summary();
-    init_load();
-    init_reveal_data();
-    init_results();
-    init_summary_data();
-    init_workspace();
-  }
-});
-
-// packages/provenance/src/mcp/server.ts
-var server_exports = {};
-__export(server_exports, {
-  createProvenanceServer: () => createProvenanceServer,
-  runMcpServer: () => runMcpServer
-});
-function registerFileTools(server, ctx) {
-  server.registerTool(
-    "reveal_file",
-    {
-      description: "Call this to see which agent run or person wrote each span of one file, as line and column ranges, from the record and not from memory.",
-      inputSchema: revealFileInput,
-      outputSchema: revealFileOutput,
-      annotations: READ_ONLY
-    },
-    (args) => revealFileTool(ctx, args)
-  );
-  server.registerTool(
-    "untouched_agent_text",
-    {
-      description: "Call this when asked which parts of a file the agent wrote and nobody has changed since.",
-      inputSchema: untouchedAgentTextInput,
-      outputSchema: untouchedAgentTextOutput,
-      annotations: READ_ONLY
-    },
-    (args) => untouchedAgentTextTool(ctx, args)
-  );
-}
-function registerWorkspaceTools(server, ctx) {
-  server.registerTool(
-    "provenance_summary",
-    {
-      description: "Call this for the share of agent, edited and human text across the workspace or under a path, the agent windows that wrote it and the longest untouched stretches.",
-      inputSchema: provenanceSummaryInput,
-      outputSchema: provenanceSummaryOutput,
-      annotations: READ_ONLY
-    },
-    (args) => provenanceSummaryTool(ctx, args)
-  );
-  server.registerTool(
-    "check_records",
-    {
-      description: "Call this to find out whether the Records are intact and current, before relying on them or when a result looks wrong.",
-      inputSchema: checkRecordsInput,
-      outputSchema: checkRecordsOutput,
-      annotations: READ_ONLY
-    },
-    (args) => checkRecordsTool(ctx, args)
-  );
-}
-function createProvenanceServer(ctx) {
-  const server = new McpServer({ name: "provenance", version: "0.0.0" });
-  registerFileTools(server, ctx);
-  registerWorkspaceTools(server, ctx);
-  return server;
-}
-async function runMcpServer(deps, cwd) {
-  const server = createProvenanceServer({ deps, cwd: cwd.replace(/\\/gu, "/") });
-  await server.connect(new StdioServerTransport());
-}
-var READ_ONLY;
-var init_server3 = __esm({
-  "packages/provenance/src/mcp/server.ts"() {
-    "use strict";
-    init_mcp();
-    init_stdio2();
-    init_schemas4();
-    init_tools();
-    READ_ONLY = { readOnlyHint: true };
+    setupProvenanceInput = {
+      workspace: workspaceArg,
+      gitHook: external_exports.boolean().default(false)
+    };
   }
 });
 
@@ -31549,6 +31141,471 @@ var init_setup = __esm({
   }
 });
 
+// packages/provenance/src/core/structured.ts
+function runFields(runId2) {
+  if (runId2 === void 0) return { run: null, taskNumber: null, taskTitle: null };
+  const name = parseRunId(runId2);
+  return { run: runId2, taskNumber: name.taskNumber, taskTitle: name.title };
+}
+function toStructured(index, span) {
+  const from = positionAt(index, span.start);
+  const to = positionAt(index, span.end);
+  const origin2 = span.provenance.origin;
+  const hasRun = origin2 === "AI" || origin2 === "AI>HUM";
+  return {
+    startLine: from.line,
+    startColumn: from.column,
+    endLine: to.line,
+    endColumn: to.column,
+    length: span.end - span.start,
+    origin: origin2,
+    ...runFields(hasRun ? span.provenance.runId : void 0)
+  };
+}
+function structuredSpans(doc) {
+  const index = createLineIndex(doc.text);
+  return doc.spans.map((span) => toStructured(index, span));
+}
+var init_structured = __esm({
+  "packages/provenance/src/core/structured.ts"() {
+    "use strict";
+    init_label();
+    init_lines();
+  }
+});
+
+// packages/provenance/src/mcp/reveal-data.ts
+function unrecorded(file, reason) {
+  const status = "unrecorded";
+  return { file, status, reason, unrecordedCharacters: 0, spans: [], legend: legendLines("run") };
+}
+function shown2(file, how) {
+  return { file, reason: null, legend: legendLines("run"), ...how };
+}
+function entryData(facts, file, text) {
+  const { entry, baselineAt, baselineText } = facts;
+  if (entry === null || baselineAt === null) return unrecorded(file, "no_record");
+  if (facts.read.kind === "text" && facts.read.sha256 === entry.sha256) {
+    const doc2 = unchangedDocument(text, baselineAt);
+    if (doc2 === null) return unrecorded(file, "no_record");
+    const spans2 = structuredSpans(doc2);
+    return shown2(file, { status: "unchanged_baseline", unrecordedCharacters: 0, spans: spans2 });
+  }
+  const count2 = baselineText === null ? text.length : unrecordedCharacters(baselineText, text);
+  const doc = baselineText === null ? null : unchangedDocument(baselineText, baselineAt);
+  const spans = doc === null ? [] : structuredSpans(doc);
+  return shown2(file, { status: "stale", unrecordedCharacters: count2, spans });
+}
+function revealData(facts, path) {
+  const { record: record2, read } = facts;
+  if (record2 !== null && !record2.ok) return unrecorded(path, "tampered_record");
+  const reason = reasonOf(facts);
+  if (reason !== null || read.kind !== "text") return unrecorded(path, reason ?? "not_tracked");
+  if (record2 === null) return entryData(facts, path, read.text);
+  const spans = structuredSpans(record2.doc);
+  if (record2.text === read.text) {
+    return shown2(path, { status: "current", unrecordedCharacters: 0, spans });
+  }
+  const count2 = unrecordedCharacters(record2.text, read.text);
+  return shown2(path, { status: "stale", unrecordedCharacters: count2, spans });
+}
+function revealLines(data) {
+  const head = `${data.file}: ${data.status}${data.reason === null ? "" : ` (${data.reason})`}`;
+  const counts = `${String(data.spans.length)} spans; ${String(data.unrecordedCharacters)} characters not yet recorded.`;
+  return data.status === "unrecorded" ? [head] : [head, counts];
+}
+var init_reveal_data = __esm({
+  "packages/provenance/src/mcp/reveal-data.ts"() {
+    "use strict";
+    init_legend();
+    init_structured();
+    init_load();
+    init_reveal_file();
+  }
+});
+
+// packages/provenance/src/mcp/results.ts
+function cleanStrings(value) {
+  if (typeof value === "string") return neutralize(value);
+  if (Array.isArray(value)) return value.map(cleanStrings);
+  if (typeof value === "object" && value !== null) {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, cleanStrings(v)]));
+  }
+  return value;
+}
+function textOf(lines) {
+  return [{ type: "text", text: lines.slice(0, MAX_LINES).map(neutralize).join("\n") }];
+}
+function okResult(structured, lines, error2 = false) {
+  const body = cleanStrings(structured);
+  const base = { content: textOf(lines), structuredContent: body };
+  return error2 ? { ...base, isError: true } : base;
+}
+function errorResult(message) {
+  return { content: textOf([message]), isError: true };
+}
+var MAX_LINES;
+var init_results = __esm({
+  "packages/provenance/src/mcp/results.ts"() {
+    "use strict";
+    init_neutralize();
+    MAX_LINES = 5;
+  }
+});
+
+// packages/provenance/src/mcp/summary-data.ts
+function spansByOffset(doc) {
+  const spans = structuredSpans(doc);
+  return new Map(doc.spans.map((span, i) => [span.start, spans[i]]));
+}
+function shares(counts, whole) {
+  const out = { AI: 0, "AI>HUM": 0, HUM: 0, PST: 0 };
+  for (const origin2 of ORIGINS3) out[origin2] = Number(formatShare(counts[origin2], whole));
+  return out;
+}
+function fileCounts(file) {
+  const { path, stale, counts } = file;
+  return { path, stale, characters: { ...counts }, shares: shares(counts, file.characters) };
+}
+function totalCounts(summary) {
+  const stale = summary.files.some((file) => file.stale);
+  const counts = { ...summary.total };
+  return { path: "", stale, characters: counts, shares: shares(counts, summary.totalCharacters) };
+}
+function spanFinder(docs) {
+  const cache = /* @__PURE__ */ new Map();
+  return (stretch) => {
+    const doc = docs.get(stretch.path);
+    if (doc === void 0) return null;
+    const index = cache.get(stretch.path) ?? spansByOffset(doc);
+    cache.set(stretch.path, index);
+    return index.get(stretch.offset) ?? null;
+  };
+}
+function stretchLine2(stretch, withPath) {
+  const where = stretch.firstLine === stretch.lastLine ? `line ${String(stretch.firstLine)}` : `lines ${String(stretch.firstLine)} to ${String(stretch.lastLine)}`;
+  const place = withPath ? `${stretch.path} ${where}` : where;
+  return `${place}: ${String(stretch.length)} characters, ${stretch.words}`;
+}
+function untouchedData(path, summary, docs) {
+  const [file] = summary.files;
+  if (summary.files.length !== 1 || file === void 0 || file.path !== path) return null;
+  const find = spanFinder(docs);
+  const stretches = summary.stretches.flatMap((s) => find(s) ?? []);
+  return {
+    path,
+    stretches,
+    countsByOrigin: { ...file.counts },
+    omittedAiHumCharacters: summary.omittedAiHuman,
+    stale: file.stale,
+    notice: humNotice()
+  };
+}
+function untouchedLines(data, summary) {
+  const { AI } = data.countsByOrigin;
+  const stale = data.stale ? " (the file changed after the last recorded event)" : "";
+  const head = `${data.path}: ${String(AI)} characters of agent text not touched since written${stale}.`;
+  return [head, ...summary.stretches.slice(0, 3).map((s) => stretchLine2(s, false)), data.notice];
+}
+function summaryNotice(sessions) {
+  const count2 = sessions === "unreadable" ? 0 : sessions;
+  return count2 > 0 ? `${humNotice()}
+${noPromptSessionsLine(count2)}` : humNotice();
+}
+function summaryData(summary, docs, sessions) {
+  const find = spanFinder(docs);
+  return {
+    files: summary.files.map(fileCounts),
+    total: totalCounts(summary),
+    windows: summary.windows.map((w) => ({
+      windowRun: w.windowRun,
+      taskNumber: w.taskNumber,
+      taskTitle: w.title,
+      openedAt: w.openedAt,
+      files: w.files,
+      runs: w.runs,
+      aiCharacters: w.ai,
+      aiHumCharacters: w.aiHuman
+    })),
+    stretches: summary.stretches.flatMap((s) => {
+      const span = find(s);
+      return span === null ? [] : [{ ...span, file: s.path }];
+    }),
+    omittedAiHumCharacters: summary.omittedAiHuman,
+    noPromptEventSessions: sessions === "unreadable" ? 0 : sessions,
+    notice: summaryNotice(sessions)
+  };
+}
+function summaryLines(summary) {
+  const t = summary.total;
+  const head = `${String(summary.files.length)} files: ${String(t.AI)} AI, ${String(t["AI>HUM"])} AI>HUM, ${String(t.HUM)} HUM, ${String(t.PST)} PST characters.`;
+  return [head, ...summary.stretches.slice(0, 3).map((s) => stretchLine2(s, true)), humNotice()];
+}
+function checkItem(item) {
+  return { path: item.path, reason: item.reason };
+}
+function checkData(result, filesChecked) {
+  return {
+    ok: result.status === 0,
+    filesChecked,
+    failures: result.failures.map(checkItem),
+    reports: result.reports.map(checkItem)
+  };
+}
+function checkLines(result) {
+  return result.lines.slice(0, 5);
+}
+var init_summary_data = __esm({
+  "packages/provenance/src/mcp/summary-data.ts"() {
+    "use strict";
+    init_legend();
+    init_structured();
+    init_summary_types();
+  }
+});
+
+// packages/provenance/src/mcp/workspace.ts
+function isAbsolutePath(path) {
+  return path.startsWith("/") || /^[A-Za-z]:\//u.test(path);
+}
+async function holdsEntry(deps, dir, name) {
+  const base = dir === "/" ? "" : dir;
+  return (await deps.fs.lstat(`${base}/${name}`)).ok;
+}
+async function resolveWorkspace(deps, cwd, workspace) {
+  const start = normalizeDir(workspace ?? cwd);
+  if (!isAbsolutePath(start)) {
+    return err({ message: "The argument workspace must be an absolute path." });
+  }
+  const root = await findWorkspaceRoot(deps, start, null);
+  return root === null ? err({ message: NOT_SET_UP_MESSAGE }) : ok(root);
+}
+async function resolveSetupRoot(deps, cwd, workspace) {
+  if (workspace !== void 0) {
+    const given = normalizeDir(workspace);
+    return isAbsolutePath(given) ? ok(given) : err({ message: "The argument workspace must be an absolute path." });
+  }
+  const here = normalizeDir(cwd);
+  const found = await holdsEntry(deps, here, ".git") || await holdsEntry(deps, here, ".kiro");
+  return found ? ok(here) : err({ message: NEEDS_WORKSPACE_MESSAGE });
+}
+function resolveInside(root, path) {
+  if (path === "") return ok("");
+  const probe = relativeTo(root, root, `${path}/x`);
+  if (probe === null) {
+    return err({ message: `The path ${JSON.stringify(path)} is outside the workspace.` });
+  }
+  return ok(probe === "x" ? "" : probe.slice(0, -2));
+}
+var NOT_SET_UP_MESSAGE, NEEDS_WORKSPACE_MESSAGE;
+var init_workspace = __esm({
+  "packages/provenance/src/mcp/workspace.ts"() {
+    "use strict";
+    init_src();
+    init_recorder();
+    init_reveal_cmd();
+    NOT_SET_UP_MESSAGE = "Provenance is not set up in this workspace. Call the tool setup_provenance first.";
+    NEEDS_WORKSPACE_MESSAGE = "The current directory holds neither .git nor .kiro. Pass the argument workspace (an absolute path).";
+  }
+});
+
+// packages/provenance/src/mcp/tools.ts
+async function withRoot(ctx, args, run) {
+  const root = await resolveWorkspace(ctx.deps, ctx.cwd, args.workspace);
+  return root.ok ? run(root.value) : errorResult(root.error.message);
+}
+function filePath(root, path) {
+  const inside = resolveInside(root, path);
+  if (!inside.ok) return errorResult(inside.error.message);
+  return inside.value === "" ? errorResult("The path must name a file.") : { path: inside.value };
+}
+function isFailure(value) {
+  return !("path" in value);
+}
+async function loadAll(ctx, root) {
+  const loaded = await loadWorkspace(ctx.deps, root);
+  return loaded.ok ? loaded.value : errorResult(`Records cannot be read: ${loaded.error.kind}`);
+}
+function isFacts(value) {
+  return "records" in value;
+}
+function recordDocs(facts) {
+  const docs = /* @__PURE__ */ new Map();
+  for (const [path, record2] of Object.entries(facts.records)) {
+    if (record2.ok) docs.set(path, record2.doc);
+  }
+  return docs;
+}
+async function revealFileTool(ctx, args) {
+  return withRoot(ctx, args, async (root) => {
+    const target = filePath(root, args.path);
+    if (isFailure(target)) return target;
+    const facts = await loadFile(ctx.deps, root, target.path);
+    if (!facts.ok) return errorResult(`${target.path}: ${facts.error.kind}`);
+    const data = revealData(facts.value, target.path);
+    return okResult(data, revealLines(data));
+  });
+}
+async function untouchedAgentTextTool(ctx, args) {
+  return withRoot(ctx, args, async (root) => {
+    const target = filePath(root, args.path);
+    if (isFailure(target)) return target;
+    const facts = await loadAll(ctx, root);
+    if (!isFacts(facts)) return facts;
+    const { summary } = summarize(summaryInputOf(facts, target.path, args.top));
+    const data = summary === null ? null : untouchedData(target.path, summary, recordDocs(facts));
+    if (summary === null || data === null) {
+      return errorResult(`Nothing is recorded for ${target.path}.`);
+    }
+    return okResult(data, untouchedLines(data, summary));
+  });
+}
+async function provenanceSummaryTool(ctx, args) {
+  return withRoot(ctx, args, async (root) => {
+    const inside = resolveInside(root, args.path ?? "");
+    if (!inside.ok) return errorResult(inside.error.message);
+    const facts = await loadAll(ctx, root);
+    if (!isFacts(facts)) return facts;
+    const scope = inside.value === "" ? null : inside.value;
+    const result = summarize(summaryInputOf(facts, scope, args.top));
+    if (result.summary === null) return errorResult(result.lines[0] ?? "Nothing is recorded.");
+    const data = summaryData(result.summary, recordDocs(facts), facts.sessions);
+    return okResult(data, summaryLines(result.summary));
+  });
+}
+async function checkRecordsTool(ctx, args) {
+  return withRoot(ctx, args, async (root) => {
+    const facts = await loadAll(ctx, root);
+    if (!isFacts(facts)) return facts;
+    const result = checkWorkspace(checkFactsOf(facts, args.strict === true));
+    const data = checkData(result, facts.files.length);
+    return okResult(data, checkLines(result), result.status !== 0);
+  });
+}
+function setupLines(root, report) {
+  const counts = [report.written, report.replaced, report.kept].map((list) => list.length);
+  const hook = report.gitHook;
+  const hookLine2 = hook === void 0 ? [] : [`git hook: ${hook.status === "blocked" ? `not written (${hook.reason})` : hook.status}`];
+  return [
+    `Provenance is set up in ${root}.`,
+    `written ${String(counts[0])}, replaced ${String(counts[1])}, kept ${String(counts[2])} files.`,
+    formatBaselineLine(report.baseline),
+    ...hookLine2
+  ];
+}
+async function setupProvenanceTool(ctx, args) {
+  const root = await resolveSetupRoot(ctx.deps, ctx.cwd, args.workspace);
+  if (!root.ok) return errorResult(root.error.message);
+  const log2 = createFaultLog(ctx.deps, `${root.value}/.kiro/provenance/errors.log`);
+  const deps = { ...ctx.deps, log: log2 };
+  const done2 = await setupProvenance(deps, root.value, ctx.bundlePath, args.gitHook === true);
+  if (!done2.ok) {
+    const detail = done2.error.detail === void 0 ? "" : `: ${done2.error.detail}`;
+    return errorResult(`Setup failed (${done2.error.kind}${detail}).`);
+  }
+  const { written, replaced, kept } = done2.value;
+  return okResult({ written, replaced, kept }, setupLines(root.value, done2.value));
+}
+var init_tools = __esm({
+  "packages/provenance/src/mcp/tools.ts"() {
+    "use strict";
+    init_check2();
+    init_summary();
+    init_baseline_cmd();
+    init_faults();
+    init_load();
+    init_setup();
+    init_reveal_data();
+    init_results();
+    init_summary_data();
+    init_workspace();
+  }
+});
+
+// packages/provenance/src/mcp/server.ts
+var server_exports = {};
+__export(server_exports, {
+  createProvenanceServer: () => createProvenanceServer,
+  runMcpServer: () => runMcpServer
+});
+function registerFileTools(server, ctx) {
+  server.registerTool(
+    "reveal_file",
+    {
+      description: "Call this to see which agent run or person wrote each span of one file, as line and column ranges, from the record and not from memory.",
+      inputSchema: revealFileInput,
+      outputSchema: revealFileOutput,
+      annotations: READ_ONLY
+    },
+    (args) => revealFileTool(ctx, args)
+  );
+  server.registerTool(
+    "untouched_agent_text",
+    {
+      description: "Call this when asked which parts of a file the agent wrote and nobody has changed since.",
+      inputSchema: untouchedAgentTextInput,
+      outputSchema: untouchedAgentTextOutput,
+      annotations: READ_ONLY
+    },
+    (args) => untouchedAgentTextTool(ctx, args)
+  );
+}
+function registerWorkspaceTools(server, ctx) {
+  server.registerTool(
+    "provenance_summary",
+    {
+      description: "Call this for the share of agent, edited and human text across the workspace or under a path, the agent windows that wrote it and the longest untouched stretches.",
+      inputSchema: provenanceSummaryInput,
+      outputSchema: provenanceSummaryOutput,
+      annotations: READ_ONLY
+    },
+    (args) => provenanceSummaryTool(ctx, args)
+  );
+  server.registerTool(
+    "check_records",
+    {
+      description: "Call this to find out whether the Records are intact and current, before relying on them or when a result looks wrong.",
+      inputSchema: checkRecordsInput,
+      outputSchema: checkRecordsOutput,
+      annotations: READ_ONLY
+    },
+    (args) => checkRecordsTool(ctx, args)
+  );
+}
+function registerSetupTool(server, ctx) {
+  server.registerTool(
+    "setup_provenance",
+    {
+      description: "Call this, after the person agrees, to install provenance recording in a workspace; it writes files and returns which were written, replaced and kept.",
+      inputSchema: setupProvenanceInput,
+      outputSchema: setupProvenanceOutput
+    },
+    (args) => setupProvenanceTool(ctx, args)
+  );
+}
+function createProvenanceServer(ctx) {
+  const server = new McpServer({ name: "provenance", version: "0.0.0" });
+  registerFileTools(server, ctx);
+  registerWorkspaceTools(server, ctx);
+  registerSetupTool(server, ctx);
+  return server;
+}
+async function runMcpServer(deps, cwd, bundlePath) {
+  const server = createProvenanceServer({ deps, cwd: cwd.replace(/\\/gu, "/"), bundlePath });
+  await server.connect(new StdioServerTransport());
+}
+var READ_ONLY;
+var init_server3 = __esm({
+  "packages/provenance/src/mcp/server.ts"() {
+    "use strict";
+    init_mcp();
+    init_stdio2();
+    init_schemas4();
+    init_tools();
+    READ_ONLY = { readOnlyHint: true };
+  }
+});
+
 // packages/provenance/src/io/setup-cmd.ts
 var setup_cmd_exports = {};
 __export(setup_cmd_exports, {
@@ -31787,7 +31844,7 @@ async function revealMain(args) {
 }
 async function mcpMain() {
   const { runMcpServer: runMcpServer2 } = await Promise.resolve().then(() => (init_server3(), server_exports));
-  await runMcpServer2(nodeDeps(), process.cwd());
+  await runMcpServer2(nodeDeps(), process.cwd(), fileURLToPath(import.meta.url));
 }
 async function setupMain(args) {
   const { setupCommand: setupCommand2 } = await Promise.resolve().then(() => (init_setup_cmd(), setup_cmd_exports));

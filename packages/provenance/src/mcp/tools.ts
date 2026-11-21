@@ -1,5 +1,5 @@
 /**
- * The four read-only tools (Req 12.2 to 12.8, 12.10, 12.11, 12.13): `reveal_file`,
+ * The four read-only tools and `setup_provenance` (Req 12.2 to 12.8, 12.10, 12.11, 12.13): `reveal_file`,
  * `provenance_summary`, `untouched_agent_text` and `check_records`. Each calls the functions the
  * Reveal_Command calls (`io/load.ts`, `core/summary.ts`, `core/check.ts`), reads only the
  * Record_Directory, the ignore files and the files it describes, writes nothing and calls no
@@ -8,9 +8,13 @@
 import type { Document } from "@reveal-codes/engine";
 import { checkWorkspace } from "../core/check.js";
 import { summarize } from "../core/summary.js";
+import { formatBaselineLine } from "../io/baseline-cmd.js";
 import type { Deps } from "../io/deps.js";
+import { createFaultLog } from "../io/faults.js";
 import { checkFactsOf, loadFile, loadWorkspace, summaryInputOf } from "../io/load.js";
 import type { WorkspaceFacts } from "../io/load.js";
+import type { SetupReport } from "../io/setup.js";
+import { setupProvenance } from "../io/setup.js";
 import { revealData, revealLines } from "./reveal-data.js";
 import { errorResult, okResult } from "./results.js";
 import type { ToolResult } from "./results.js";
@@ -22,9 +26,13 @@ import {
   untouchedData,
   untouchedLines,
 } from "./summary-data.js";
-import { resolveInside, resolveWorkspace } from "./workspace.js";
-/** What every tool needs: the file system and git, and the current directory of the process. */
-export type ToolContext = { deps: Deps; cwd: string };
+import { resolveInside, resolveSetupRoot, resolveWorkspace } from "./workspace.js";
+/**
+ * What every tool needs: the file system and git, the current directory of the process, and the
+ * path of the running Bundle, which `setup_provenance` copies (an `.mjs` file; anything else is
+ * an error result, as for `provenance setup`).
+ */
+export type ToolContext = { deps: Deps; cwd: string; bundlePath: string };
 type Workspace = { workspace?: string | undefined };
 type RootRun = (root: string) => Promise<ToolResult>;
 async function withRoot(ctx: ToolContext, args: Workspace, run: RootRun): Promise<ToolResult> {
@@ -111,4 +119,40 @@ export async function checkRecordsTool(
     const data = checkData(result, facts.files.length);
     return okResult(data, checkLines(result), result.status !== 0);
   });
+}
+/** The text lines of a setup result: the counts, the baseline and, if asked for, the git hook. */
+function setupLines(root: string, report: SetupReport): string[] {
+  const counts = [report.written, report.replaced, report.kept].map((list) => list.length);
+  const hook = report.gitHook;
+  const hookLine =
+    hook === undefined
+      ? []
+      : [`git hook: ${hook.status === "blocked" ? `not written (${hook.reason})` : hook.status}`];
+  return [
+    `Provenance is set up in ${root}.`,
+    `written ${String(counts[0])}, replaced ${String(counts[1])}, kept ${String(counts[2])} files.`,
+    formatBaselineLine(report.baseline),
+    ...hookLine,
+  ];
+}
+/**
+ * `setup_provenance` (Req 12.9, 12.12, 12.14, 13.3, 13.4): the installation of `provenance setup`
+ * for `workspace`, or for the current directory only when it holds `.git` or `.kiro`. The only
+ * tool that writes. `gitHook` also writes the pre-commit block (Req 13.14); it is off by default.
+ */
+export async function setupProvenanceTool(
+  ctx: ToolContext,
+  args: Workspace & { gitHook?: boolean | undefined },
+): Promise<ToolResult> {
+  const root = await resolveSetupRoot(ctx.deps, ctx.cwd, args.workspace);
+  if (!root.ok) return errorResult(root.error.message);
+  const log = createFaultLog(ctx.deps, `${root.value}/.kiro/provenance/errors.log`);
+  const deps = { ...ctx.deps, log };
+  const done = await setupProvenance(deps, root.value, ctx.bundlePath, args.gitHook === true);
+  if (!done.ok) {
+    const detail = done.error.detail === undefined ? "" : `: ${done.error.detail}`;
+    return errorResult(`Setup failed (${done.error.kind}${detail}).`);
+  }
+  const { written, replaced, kept } = done.value;
+  return okResult({ written, replaced, kept }, setupLines(root.value, done.value));
 }

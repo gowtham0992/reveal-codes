@@ -129,3 +129,8 @@ export const provenanceSummaryInput = {
   workspace: workspaceArg,
 };
 export const checkRecordsInput = { strict: z.boolean().optional(), workspace: workspaceArg };
+/** `setup_provenance`: `gitHook` also writes the pre-commit block; the Setup_Skill only offers it (Req 13.7). */
+export const setupProvenanceInput = {
+  workspace: workspaceArg,
+  gitHook: z.boolean().default(false),
+};

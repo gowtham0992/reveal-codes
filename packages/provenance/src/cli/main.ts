@@ -60,7 +60,7 @@ async function revealMain(args: readonly string[]): Promise<number> {
 /** `mcp`: the stdio server. The SDK is loaded here only, never on the hook path. */
 async function mcpMain(): Promise<void> {
   const { runMcpServer } = await import("../mcp/server.js");
-  await runMcpServer(nodeDeps(), process.cwd());
+  await runMcpServer(nodeDeps(), process.cwd(), fileURLToPath(import.meta.url));
 }
 /** `setup`: the running Bundle copies itself, found through `import.meta.url`. */
 async function setupMain(args: readonly string[]): Promise<number> {

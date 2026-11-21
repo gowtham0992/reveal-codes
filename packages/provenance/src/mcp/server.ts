@@ -13,6 +13,8 @@ import {
   provenanceSummaryOutput,
   revealFileInput,
   revealFileOutput,
+  setupProvenanceInput,
+  setupProvenanceOutput,
   untouchedAgentTextInput,
   untouchedAgentTextOutput,
 } from "./schemas.js";
@@ -20,6 +22,7 @@ import {
   checkRecordsTool,
   provenanceSummaryTool,
   revealFileTool,
+  setupProvenanceTool,
   untouchedAgentTextTool,
 } from "./tools.js";
 import type { ToolContext } from "./tools.js";
@@ -72,15 +75,29 @@ function registerWorkspaceTools(server: McpServer, ctx: ToolContext): void {
     (args) => checkRecordsTool(ctx, args),
   );
 }
-/** The server with the four read tools; `setup_provenance` is added in task 9.2. */
+/** `setup_provenance` is the only tool that writes, so it carries no `readOnlyHint` (Req 12.14). */
+function registerSetupTool(server: McpServer, ctx: ToolContext): void {
+  server.registerTool(
+    "setup_provenance",
+    {
+      description:
+        "Call this, after the person agrees, to install provenance recording in a workspace; it writes files and returns which were written, replaced and kept.",
+      inputSchema: setupProvenanceInput,
+      outputSchema: setupProvenanceOutput,
+    },
+    (args) => setupProvenanceTool(ctx, args),
+  );
+}
+/** The server with the four read tools and `setup_provenance`. */
 export function createProvenanceServer(ctx: ToolContext): McpServer {
   const server = new McpServer({ name: "provenance", version: "0.0.0" });
   registerFileTools(server, ctx);
   registerWorkspaceTools(server, ctx);
+  registerSetupTool(server, ctx);
   return server;
 }
 /** Serves the tools over standard input and output until the client closes the stream. */
-export async function runMcpServer(deps: Deps, cwd: string): Promise<void> {
-  const server = createProvenanceServer({ deps, cwd: cwd.replace(/\\/gu, "/") });
+export async function runMcpServer(deps: Deps, cwd: string, bundlePath: string): Promise<void> {
+  const server = createProvenanceServer({ deps, cwd: cwd.replace(/\\/gu, "/"), bundlePath });
   await server.connect(new StdioServerTransport());
 }

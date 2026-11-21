@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,13676,0,0}][AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]import { spawnSync } from "node:child_process";
+[DOC{v=1;n=0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,13676,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1,34,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.2,26,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.3,186,0,0}][AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]import { spawnSync } from "node:child_process";
 import { readdirSync, statSync, unlinkSync } from "node:fs";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
@@ -104,15 +104,19 @@ afterAll(async () => {
   for (const d of dirs) d.cleanup();
 });
 describe("MCP tools over stdio _Requirements: 12.1, 12.3, 12.14_", { timeout: 60_000 }, () => {
-  it("lists the four read tools, each marked read-only, each with an output schema", async () => {
+  it("lists the four read tools, each marked read-only, [AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1{t=2026-11-21T00:39:42.576Z}]and setup_provenance, which is not[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]", async () => {
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual(\[
       "check_records",
       "provenance_summary",
       "reveal_file",
-      "untouched_agent_text",
+[AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.2{t=2026-11-21T00:39:42.576Z}]      "setup_provenance",
+[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]      "untouched_agent_text",
     \]);
-    for (const tool of tools) {
+    [AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.3{t=2026-11-21T00:39:42.576Z}]expect(tools.find((t) => t.name === "setup_provenance")?.annotations?.readOnlyHint).not.toBe(
+      true,
+    );
+    for (const tool of tools.filter((t) => t.name !== "setup_provenance")[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]) {
       expect(tool.annotations?.readOnlyHint).toBe(true);
       expect(tool.outputSchema).toBeDefined();
       expect(tool.description?.startsWith("Call this")).toBe(true);

@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=8.1 MCP dependencies\, workspace discovery and schemas 2026-11-20T16:21:57Z.1,3612,0,0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,577,0,0}][AI:8.1 MCP dependencies, workspace discovery and schemas 2026-11-20T16:21:57Z.1{t=2026-11-20T16:26:30.350Z}]/**
+[DOC{v=1;n=0;r=8.1 MCP dependencies\, workspace discovery and schemas 2026-11-20T16:21:57Z.1,3612,0,0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,577,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1,221,0,0}][AI:8.1 MCP dependencies, workspace discovery and schemas 2026-11-20T16:21:57Z.1{t=2026-11-20T16:26:30.350Z}]/**
  * The `outputSchema` of the five Provenance_Tools (Req 12.3 to 12.9, design "The MCP tools",
  * Types). With `workspace.ts` this is where `zod` is imported; nothing outside `src/mcp/` may.
  */
@@ -129,3 +129,8 @@ export const provenanceSummaryInput = {
   workspace: workspaceArg,
 };
 export const checkRecordsInput = { strict: z.boolean().optional(), workspace: workspaceArg };
+[AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1{t=2026-11-21T00:39:42.576Z}]/** `setup_provenance`: `gitHook` also writes the pre-commit block; the Setup_Skill only offers it (Req 13.7). */
+export const setupProvenanceInput = {
+  workspace: workspaceArg,
+  gitHook: z.boolean().default(false),
+};

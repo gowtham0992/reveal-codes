@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,3164,0,0}][AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]/**
+[DOC{v=1;n=0;r=8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1,3164,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1,49,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.2,23,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.3,609,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.4,34,0,0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.5,128,0,0}][AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]/**
  * The stdio MCP server of `provenance mcp` (Req 12.1, 12.2, 12.14). Loaded by a dynamic
  * `import()` from `cli/main.ts` only for that command, so the hook path never evaluates the SDK.
  * Standard output carries protocol messages only.
@@ -13,14 +13,17 @@ import {
   provenanceSummaryOutput,
   revealFileInput,
   revealFileOutput,
-  untouchedAgentTextInput,
+  [AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1{t=2026-11-21T00:39:42.576Z}]setupProvenanceInput,
+  setupProvenanceOutput,
+  [AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]untouchedAgentTextInput,
   untouchedAgentTextOutput,
 } from "./schemas.js";
 import {
   checkRecordsTool,
   provenanceSummaryTool,
   revealFileTool,
-  untouchedAgentTextTool,
+[AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.2{t=2026-11-21T00:39:42.576Z}]  setupProvenanceTool,
+[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]  untouchedAgentTextTool,
 } from "./tools.js";
 import type { ToolContext } from "./tools.js";
 const READ_ONLY = { readOnlyHint: true };
@@ -72,15 +75,29 @@ function registerWorkspaceTools(server: McpServer, ctx: ToolContext): void {
     (args) => checkRecordsTool(ctx, args),
   );
 }
-/** The server with the four read tools; `setup_provenance` is added in task 9.2. */
+/** [AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.3{t=2026-11-21T00:39:42.576Z}]`setup_provenance` is the only tool that writes, so it carries no `readOnlyHint` (Req 12.14). */
+function registerSetupTool(server: McpServer, ctx: ToolContext): void {
+  server.registerTool(
+    "setup_provenance",
+    {
+      description:
+        "Call this, after the person agrees, to install provenance recording in a workspace; it writes files and returns which were written, replaced and kept.",
+      inputSchema: setupProvenanceInput,
+      outputSchema: setupProvenanceOutput,
+    },
+    (args) => setupProvenanceTool(ctx, args),
+  );
+}
+/** The server with the four read tools and `setup_provenance`[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]. */
 export function createProvenanceServer(ctx: ToolContext): McpServer {
   const server = new McpServer({ name: "provenance", version: "0.0.0" });
   registerFileTools(server, ctx);
   registerWorkspaceTools(server, ctx);
-  return server;
+[AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.4{t=2026-11-21T00:39:42.576Z}]  registerSetupTool(server, ctx);
+[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}]  return server;
 }
 /** Serves the tools over standard input and output until the client closes the stream. */
-export async function runMcpServer(deps: Deps, cwd: string): Promise<void> {
-  const server = createProvenanceServer({ deps, cwd: cwd.replace(/\\\\/gu, "/") });
+export async function runMcpServer(deps: Deps, cwd: string[AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.5{t=2026-11-21T00:39:42.576Z}], bundlePath: string): Promise<void> {
+  const server = createProvenanceServer({ deps, cwd: cwd.replace(/\\\\/gu, "/"), bundlePath[AI:8.2 The four read-only tools and the server 2026-11-20T16:26:46Z.1{t=2026-11-20T16:34:11.498Z}] });
   await server.connect(new StdioServerTransport());
 }

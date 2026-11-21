@@ -104,15 +104,19 @@ afterAll(async () => {
   for (const d of dirs) d.cleanup();
 });
 describe("MCP tools over stdio _Requirements: 12.1, 12.3, 12.14_", { timeout: 60_000 }, () => {
-  it("lists the four read tools, each marked read-only, each with an output schema", async () => {
+  it("lists the four read tools, each marked read-only, and setup_provenance, which is not", async () => {
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual([
       "check_records",
       "provenance_summary",
       "reveal_file",
+      "setup_provenance",
       "untouched_agent_text",
     ]);
-    for (const tool of tools) {
+    expect(tools.find((t) => t.name === "setup_provenance")?.annotations?.readOnlyHint).not.toBe(
+      true,
+    );
+    for (const tool of tools.filter((t) => t.name !== "setup_provenance")) {
       expect(tool.annotations?.readOnlyHint).toBe(true);
       expect(tool.outputSchema).toBeDefined();
       expect(tool.description?.startsWith("Call this")).toBe(true);
