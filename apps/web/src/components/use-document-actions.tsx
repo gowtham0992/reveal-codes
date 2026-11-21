@@ -6,11 +6,14 @@ import { useState } from "react";
 import type { Autosave } from "../autosave";
 import { pastedDocument } from "../client/pasted-document";
 import type { DraftGate } from "../draft-gate";
-import { SAVE_COPY_FAILED } from "../notices";
+import { RECORDED_SAMPLE_LOADED, SAVE_COPY_FAILED } from "../notices";
+import { deserialise } from "../persist";
+import type { ResolvedHolder } from "../resolved-holder";
 import { saveDraftCopy } from "../saved-draft";
 import type { AppServices } from "../services";
 import type { Store } from "../store-runtime";
 import { ConfirmDialog } from "./confirm-dialog";
+import { installRestored } from "./use-autosave";
 import { useOpenDraft } from "./use-open-draft";
 
 export const DEMO_FAILED = "Could not load the demo motion.";
@@ -27,11 +30,31 @@ function installDocument(store: Store, svc: AppServices, text: string): void {
   else store.dispatch({ type: "replace", document: doc });
 }
 
-async function loadSample(store: Store, svc: AppServices, key: SampleKey): Promise<void> {
-  const fetched = await (key === "demo" ? svc.api.demoMotion() : svc.api.aviancaCitations());
-  if (!fetched.ok) {
-    store.dispatch({ type: "notice", text: key === "demo" ? DEMO_FAILED : AVIANCA_FAILED });
-  } else installDocument(store, svc, docxSafe(fetched.value).text);
+async function loadRecordedSample(
+  store: Store,
+  svc: AppServices,
+  holder: ResolvedHolder,
+): Promise<void> {
+  const fetched = await svc.api.recordedSample();
+  const restored = fetched.ok ? deserialise(fetched.value) : null;
+  if (restored === null || !restored.ok) {
+    store.dispatch({ type: "notice", text: DEMO_FAILED });
+    return;
+  }
+  installRestored(store, restored.value, holder);
+  store.dispatch({ type: "notice", text: RECORDED_SAMPLE_LOADED });
+}
+
+async function loadSample(
+  store: Store,
+  svc: AppServices,
+  holder: ResolvedHolder,
+  key: SampleKey,
+): Promise<void> {
+  if (key === "demo") return loadRecordedSample(store, svc, holder);
+  const fetched = await svc.api.aviancaCitations();
+  if (!fetched.ok) store.dispatch({ type: "notice", text: AVIANCA_FAILED });
+  else installDocument(store, svc, docxSafe(fetched.value).text);
 }
 
 function startNew(store: Store, svc: AppServices, autosave: Autosave): void {
@@ -55,6 +78,7 @@ type Deps = Readonly<{
   svc: AppServices;
   autosave: Autosave;
   gate: DraftGate;
+  holder: ResolvedHolder;
   doc: Document;
 }>;
 
@@ -97,7 +121,7 @@ function useDialogOpener() {
 function runPending(kind: Pending, d: Deps): void {
   if (kind === "new") startNew(d.store, d.svc, d.autosave);
   else if (kind === "newBlocked") startNewBlocked(d.store, d.svc, d.autosave, d.gate);
-  else void loadSample(d.store, d.svc, kind);
+  else void loadSample(d.store, d.svc, d.holder, kind);
 }
 
 function saveCopyOrNotice(svc: AppServices, store: Store): void {

@@ -131,7 +131,7 @@ type FlowsArgs = Readonly<{
 function useShellFlows(a: FlowsArgs) {
   const { svc, store, autosave, gate, doc } = a;
   const exportGate = useExport(a);
-  const actions = useDocumentActions({ store, svc, autosave, gate, doc });
+  const actions = useDocumentActions({ store, svc, autosave, gate, holder: a.holder, doc });
   const verify = useVerify(svc, store, a.holder);
   return { exportGate, actions, verify };
 }

@@ -2,6 +2,8 @@
 //
 // The empty page, the Open button and the no-network guarantee of open-draft.
 // _Requirements: 2.1, 2.6, 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7, 17.1, 17.2, 19.10_
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { createDocument } from "@reveal-codes/engine";
 import { buildDocx, buildStatement } from "@reveal-codes/export";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -42,7 +44,15 @@ function services(calls: Calls, mode: ModeApi): AppServices {
     mode: base.mode,
     demoMotion: count(base.demoMotion),
     aviancaCitations: count(base.aviancaCitations),
-    recordedSample: count(base.recordedSample),
+    recordedSample: count(() =>
+      Promise.resolve({
+        ok: true as const,
+        value: readFileSync(
+          join(__dirname, "../../../packages/engine/fixtures/demo-motion.recorded.json"),
+          "utf8",
+        ),
+      }),
+    ),
     draft: count(base.draft),
   };
   return {

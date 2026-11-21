@@ -11,6 +11,7 @@ import { buildDropTransaction, buildPasteTransaction, plainTextOf } from "../src
 import { PROVENANCE_META } from "../src/editor/meta";
 import { docText } from "../src/editor/offsets";
 import { EXPORT_UNSAFE_CHARACTER } from "../src/notices";
+import { createResolvedHolder } from "../src/resolved-holder";
 import { defaultServices } from "../src/services";
 import type { AppServices } from "../src/services";
 import { createStore } from "../src/store-runtime";
@@ -80,7 +81,8 @@ function services(fake: Fake): AppServices {
 }
 
 describe("Entry_Points: the two samples _Requirements: 22.3_", () => {
-  it.each(["demo", "avianca"] as const)("loads the %s sample as Docx_Safe_Text", async (key) => {
+  // The demo key now installs the recorded draft (recorded-sample spec), not plain text.
+  it.each(["avianca"] as const)("loads the %s sample as Docx_Safe_Text", async (key) => {
     const svc = services({ demo: UNSAFE, avianca: UNSAFE, chunks: [] });
     const store = createStore(() => new Date(ISO));
     const autosave = createAutosave({
@@ -95,6 +97,7 @@ describe("Entry_Points: the two samples _Requirements: 22.3_", () => {
         svc,
         autosave,
         gate: createDraftGate(),
+        holder: createResolvedHolder(),
         doc: store.getState().document,
       }),
     );

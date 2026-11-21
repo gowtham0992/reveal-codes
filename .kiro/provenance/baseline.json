@@ -432,7 +432,6 @@
     "apps/web/test/support/route-deps.ts": { "sha256": "e9b41b52c9fa3e4946716554cebc2d849fde0f7a4be8fe85d7623290b531e85d", "blob": "15645edb0835ba05fe4ed455489e9b37f8257d58" },
     "apps/web/test/support/route-fetch.ts": { "sha256": "0e702ada4d37e9919339743af2eadbb7f1dbd9d4edcd9b55af0ffb6884e9719d", "blob": "74bf23fbc51e730504e9ff4b7408539ff4a02217" },
     "apps/web/test/support/scan.ts": { "sha256": "d4942fef99b538d47d382c957cf46083581711d9d89dd09fdee8ebeba8b7b970", "blob": "167ad561b18eeee5292fccaae95de4533386376e" },
-    "apps/web/test/support/unreadable-draft.tsx": { "sha256": "22cab347524a5b602464dc7bf645a60e1cdbe43b33a1434bfca8176f3bb5c2a2", "blob": "8eab99803163d6152ee08f1c70493f0d641f1996" },
     "apps/web/test/support/unreadable-property.ts": { "sha256": "836eccf2626f86d46a9643509f53eb5a640b63db7fc09861f2a0f297c9e045dc", "blob": "2b4f4a3283a45302eb3d05fdc8173b49be2cddb8" },
     "apps/web/test/support/viewport.ts": { "sha256": "6fc15aee4c5ec8af64488c57a263aa263824a8b2bea5534630147adda8e2d6f4", "blob": "f66389dbdec2be244847157d08f489e6a4c36bc7" },
     "apps/web/test/support/word-fixtures.ts": { "sha256": "9f00fc24ad49412afaa878f85c702d9a2a565a15c756782305ca2ca98225539e", "blob": "9c8ee849703b4fecffeb5e9f9305368d13ec2142" },

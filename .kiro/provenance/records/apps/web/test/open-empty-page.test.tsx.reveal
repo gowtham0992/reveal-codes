@@ -1,8 +1,10 @@
-[DOC{v=1;n=3;r=2.2 Share the restore step 2026-11-21T20:22:33Z.1,48,0,0}][PST{t=2026-11-20T03:04:47Z}]// @vitest-environment jsdom
+[DOC{v=1;n=3;r=2.2 Share the restore step 2026-11-21T20:22:33Z.1,48,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.1,74,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.2,219,0,0}][PST{t=2026-11-20T03:04:47Z}]// @vitest-environment jsdom
 //
 // The empty page, the Open button and the no-network guarantee of open-draft.
 // _Requirements: 2.1, 2.6, 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7, 17.1, 17.2, 19.10_
-import { createDocument } from "@reveal-codes/engine";
+[AI:3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.1{t=2026-11-21T20:32:03.860Z}]import { readFileSync } from "node:fs";
+import { join } from "node:path";
+[PST{t=2026-11-20T03:04:47Z}]import { createDocument } from "@reveal-codes/engine";
 import { buildDocx, buildStatement } from "@reveal-codes/export";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AppShell } from "../src/components/app-shell";
@@ -42,7 +44,15 @@ function services(calls: Calls, mode: ModeApi): AppServices {
     mode: base.mode,
     demoMotion: count(base.demoMotion),
     aviancaCitations: count(base.aviancaCitations),
-[AI:2.2 Share the restore step 2026-11-21T20:22:33Z.1{t=2026-11-21T20:24:56.362Z}]    recordedSample: count(base.recordedSample),
+[AI:2.2 Share the restore step 2026-11-21T20:22:33Z.1{t=2026-11-21T20:24:56.362Z}]    recordedSample: count([AI:3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.2{t=2026-11-21T20:32:03.860Z}]() =>
+      Promise.resolve({
+        ok: true as const,
+        value: readFileSync(
+          join(__dirname, "../../../packages/engine/fixtures/demo-motion.recorded.json"),
+          "utf8",
+        ),
+      }),
+    [AI:2.2 Share the restore step 2026-11-21T20:22:33Z.1{t=2026-11-21T20:24:56.362Z}]),
 [PST{t=2026-11-20T03:04:47Z}]    draft: count(base.draft),
   };
   return {

@@ -25,6 +25,14 @@ export function oldDraft(): string {
   return JSON.stringify({ version: 1, codes: full, runLog: [], verifiedAt: null });
 }
 
+/** A small readable draft that stands in for the recorded sample. */
+function sampleDraft(): string {
+  const doc = createDocument("Demo sample text.", ISO);
+  if (!doc.ok) throw new Error("createDocument failed");
+  const codes = render(doc.value, "full").text;
+  return JSON.stringify({ version: 1, codes, runLog: [], verifiedAt: null });
+}
+
 export const KINDS = [
   { kind: "not_json", raw: "this is {not json" },
   { kind: "bad_shape", raw: JSON.stringify({ version: 2, codes: "x" }) },
@@ -73,7 +81,7 @@ export async function mount(o: Options = {}) {
   const services: AppServices = {
     api: {
       ...mode.api,
-      demoMotion: () => Promise.resolve({ ok: true as const, value: "Demo sample text." }),
+      recordedSample: () => Promise.resolve({ ok: true as const, value: sampleDraft() }),
     },
     now: timers.clock.now,
     setTimer: (fn, ms) => timers.setTimeout(fn, ms),

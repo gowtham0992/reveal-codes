@@ -49,3 +49,7 @@ export const SAVE_COPY_FAILED =
 /** Open print view while the Draft_Gate is blocked. */
 export const PRINT_BLOCKED =
   "Choose Save a copy or Start a new document before opening the print view.";
+
+/** Shown after Load demo motion installs the recorded sample. */
+export const RECORDED_SAMPLE_LOADED =
+  "Loaded the demo motion as recorded in this editor on 21 November 2026.";
