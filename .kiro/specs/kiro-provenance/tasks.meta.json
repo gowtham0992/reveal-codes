@@ -11,6 +11,10 @@
     "5.13 Property 16: sessions without prompt events are counted once": {
       "status": "passed",
       "lastRunTimestamp": 1795142435353
+    },
+    "10.9 Property 18: only changed lines change": {
+      "status": "passed",
+      "lastRunTimestamp": 1795243997141
     }
   },
   "executionHistory": {
@@ -1433,6 +1437,16 @@
         "executionId": "12150996-d5de-49f8-bd80-53f9137ed91d",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795242533434
+      },
+      {
+        "executionId": "666d61a0-b6aa-4942-81d4-56410fd8a43a",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795243720011
+      },
+      {
+        "executionId": "666d61a0-b6aa-4942-81d4-56410fd8a43a",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795244011301
       }
     ],
     "10.10 Checkpoint - the attribution fix": [
@@ -1440,6 +1454,11 @@
         "executionId": "12150996-d5de-49f8-bd80-53f9137ed91d",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795242533472
+      },
+      {
+        "executionId": "666d61a0-b6aa-4942-81d4-56410fd8a43a",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795244011015
       }
     ]
   }

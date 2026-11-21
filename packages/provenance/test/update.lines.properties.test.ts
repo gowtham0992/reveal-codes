@@ -1,0 +1,131 @@
+import fc from "fast-check";
+import { type Document, type Provenance } from "@reveal-codes/engine";
+import { describe, expect, it } from "vitest";
+import { updateRecord } from "../src/core/update.js";
+import {
+  arbLineCase,
+  buildLineRecord,
+  historyText,
+  KNOWN_WINDOWS,
+  type LineCase,
+} from "../src/testing/arbitraries.js";
+import { advancingClock } from "./support/clock.js";
+import { runs } from "./support/fc.js";
+import { lineReference, splitLines, type LineReference } from "./support/line-reference.js";
+
+function must<T>(r: { ok: true; value: T } | { ok: false; error: unknown }): T {
+  if (!r.ok) throw new Error(JSON.stringify(r.error));
+  return r.value;
+}
+
+/** The provenance of each UTF-16 code unit of the Record's text. */
+function perChar(doc: Document): Provenance[] {
+  const out: Provenance[] = [];
+  for (const s of doc.spans) for (let i = s.start; i < s.end; i++) out[i] = s.provenance;
+  return out;
+}
+
+const lineStarts = (lines: readonly string[]): number[] => {
+  let at = 0;
+  return lines.map((l) => {
+    const start = at;
+    at += l.length;
+    return start;
+  });
+};
+
+/** The origin an old character must show in `after`: its own, or `AI>HUM` when its `AI` run is relabelled. */
+function expectedOrigin(after: Document, was: Provenance): Provenance["origin"] {
+  const relabelled = after.runs.find((r) => r.runId === was.runId)?.relabelled === true;
+  return was.origin === "AI" && relabelled ? "AI>HUM" : was.origin;
+}
+
+/** Checks every character of every unchanged new line; returns the number of changed lines found. */
+function checkUnchangedLines(before: Document, after: Document, ref: LineReference): void {
+  const oldLines = splitLines(before.text);
+  const newLines = splitLines(after.text);
+  const oldStarts = lineStarts(oldLines);
+  const newStarts = lineStarts(newLines);
+  const was = perChar(before);
+  const now = perChar(after);
+  newLines.forEach((line, j) => {
+    if (ref.changed[j] === true) return;
+    const partners = oldLines.flatMap((_, i) => (ref.possible(i, j) ? [i] : []));
+    expect(
+      partners.length,
+      `unchanged new line ${String(j)} has a possible partner`,
+    ).toBeGreaterThan(0);
+    for (let c = 0; c < line.length; c++) {
+      const got = now[(newStarts[j] as number) + c] as Provenance;
+      const ok = partners.some((i) => {
+        const old = was[(oldStarts[i] as number) + c] as Provenance;
+        return got.runId === old.runId && got.origin === expectedOrigin(after, old);
+      });
+      expect(ok, `line ${String(j)} column ${String(c)} is ${JSON.stringify(got)}`).toBe(true);
+    }
+  });
+}
+
+type Seen = { recurring: boolean; separated: boolean; empty: boolean };
+
+function observe(oldText: string, newText: string, ref: LineReference, seen: Seen): void {
+  const oldLines = splitLines(oldText);
+  if (new Set(oldLines).size < oldLines.length) seen.recurring = true;
+  if (oldText === "" || newText === "") seen.empty = true;
+  const marks = ref.changed.map((c, j) => (c ? j : -1)).filter((j) => j >= 0);
+  if (marks.some((j, k) => k > 0 && j - (marks[k - 1] as number) > 1)) seen.separated = true;
+}
+
+function run(c: LineCase, seen: Seen): void {
+  const before = buildLineRecord(c.history);
+  expect(before.text).toBe(historyText(c.history));
+  const window = c.origin === "AI" ? (KNOWN_WINDOWS[c.window] ?? null) : null;
+  const after = must(updateRecord(before, c.newText, c.origin, window, advancingClock()));
+  expect(after.text).toBe(c.newText);
+  const ref = lineReference(splitLines(before.text), splitLines(after.text));
+  observe(before.text, after.text, ref, seen);
+  checkUnchangedLines(before, after, ref);
+}
+
+describe("update line properties _Requirements: 4.2, 4.15, 4.17, 16.25_", () => {
+  // Property 18
+  it("P18 only changed lines change", () => {
+    const seen: Seen = { recurring: false, separated: false, empty: false };
+    fc.assert(
+      fc.property(arbLineCase, (c) => {
+        run(c, seen);
+      }),
+      { numRuns: runs(process.env) },
+    );
+    expect(seen).toEqual({ recurring: true, separated: true, empty: true });
+  });
+});
+
+// The three examples of task 10.8 are the named tests of `update.widen.test.ts`; they run the
+// code. These run the reference against the first of them (lines kept, lines inserted).
+describe("the Property 18 reference on the case of task 10.8 (1)", () => {
+  const old = splitLines("// head\n  keep line 1;\n  tail line;\n");
+  const text = splitLines(
+    "// new first line\n// head\n  keep line 1;\n  new indented line;\n  tail line;\n",
+  );
+  const ref = lineReference(old, text);
+  it("marks the two inserted lines as changed and the three kept lines as unchanged", () => {
+    expect(ref.lcs).toBe(3);
+    expect(ref.changed).toEqual([true, false, false, true, false]);
+  });
+  it("pairs each kept line only with its old line", () => {
+    const pairs = old.flatMap((_, i) =>
+      text.flatMap((_, j) => (ref.possible(i, j) ? [[i, j]] : [])),
+    );
+    expect(pairs).toEqual([
+      [0, 1],
+      [1, 2],
+      [2, 4],
+    ]);
+  });
+  it("lets a repeated line pair with each place it can take", () => {
+    const r = lineReference(["a\n", "a\n"], ["a\n"]);
+    expect(r.changed).toEqual([false]);
+    expect([r.possible(0, 0), r.possible(1, 0)]).toEqual([true, true]);
+  });
+});

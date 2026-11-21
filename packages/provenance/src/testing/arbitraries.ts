@@ -1,5 +1,6 @@
 export * from "./arb-text.js";
 export * from "./arb-edits.js";
+export * from "./arb-lines.js";
 export * from "./arb-view.js";
 export * from "./arb-windows.js";
 export * from "./arb-dirs.js";
