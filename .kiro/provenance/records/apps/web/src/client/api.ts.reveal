@@ -1,0 +1,223 @@
+[DOC{v=1;n=0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.1,117,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.2,109,0,0}][PST{t=2026-11-20T03:04:47Z}]import type { CitationRecord, IssueKey, Result, VerificationResult } from "@reveal-codes/engine";
+import { isDisplayInfo } from "@reveal-codes/verifier/link";
+import type { DisplayInfo } from "@reveal-codes/verifier/link";
+import { streamDraft } from "./assistant-client";
+
+export type ApiError =
+  | Readonly<{ kind: "network" }>
+  | Readonly<{ kind: "status"; status: number; message?: string }>
+  | Readonly<{ kind: "shape" }>;
+export type FullRecord = Extract<CitationRecord, { kind: "full" }>;
+export type VerifyPairs = readonly (readonly \[IssueKey, VerificationResult\])\[\];
+export type InfoPairs = readonly (readonly \[IssueKey, DisplayInfo\])\[\];
+/** The verify route's answer: results, and Display_Info beside them (never part of a result). */
+export type VerifyReply = Readonly<{ pairs: VerifyPairs; info: InfoPairs }>;
+export type AssistantInfo = Readonly<{
+  provider: "bedrock" | "anthropic" | "fixture";
+  modelId: string | null;
+}>;
+export type ModeInfo = Readonly<{ mode: "fixtures" | "live"; assistant?: AssistantInfo }>;
+export type FetchFn = (
+  input: string,
+  init?: Readonly<{
+    method?: string;
+    headers?: Readonly<Record<string, string>>;
+    body?: string;
+    signal?: AbortSignal;
+  }>,
+) => Promise<Response>;
+
+export type ApiClient = Readonly<{
+  verify(
+    records: readonly FullRecord\[\],
+    signal?: AbortSignal,
+  ): Promise<Result<VerifyReply, ApiError>>;
+  opinion(clusterId: string, signal?: AbortSignal): Promise<Result<string | null, ApiError>>;
+  mode(): Promise<Result<ModeInfo, ApiError>>;
+  demoMotion(): Promise<Result<string, ApiError>>;
+  aviancaCitations(): Promise<Result<string, ApiError>>;
+[AI:2.2 Share the restore step 2026-11-21T20:22:33Z.1{t=2026-11-21T20:24:56.362Z}]  /** The Persisted_Value text of the recorded demo draft. */
+  recordedSample(): Promise<Result<string, ApiError>>;
+[PST{t=2026-11-20T03:04:47Z}]  /** Tier 2. Calls `onChunk` with each decoded piece as it arrives; resolves when the stream ends. */
+  draft(
+    prompt: string,
+    context: string,
+    onChunk: (text: string) => void,
+    signal?: AbortSignal,
+  ): Promise<Result<void, ApiError>>;
+}>;
+
+type Init = NonNullable<Parameters<FetchFn>\[1\]>;
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isStrings(value: unknown): boolean {
+  return Array.isArray(value) && value.every((v) => typeof v === "string");
+}
+
+function isWrongCase(value: Record<string, unknown>): boolean {
+  const { clusterId, foundName, foundYear } = value;
+  if (typeof clusterId !== "string" || clusterId === "") return false;
+  if (typeof foundName !== "string" || foundName === "") return false;
+  return (
+    foundYear === undefined ||
+    (typeof foundYear === "number" &&
+      Number.isInteger(foundYear) &&
+      foundYear >= 1000 &&
+      foundYear <= 9999)
+  );
+}
+
+function isVerificationResult(value: unknown): value is VerificationResult {
+  if (!isObject(value)) return false;
+  switch (value\["status"\]) {
+    case "verified":
+      return typeof value\["clusterId"\] === "string";
+    case "wrong_case":
+      return isWrongCase(value);
+    case "ambiguous":
+      return isStrings(value\["candidates"\]);
+    case "not_found":
+    case "unchecked":
+      return true;
+    default:
+      return false;
+  }
+}
+
+function toPair(value: unknown): readonly \[IssueKey, VerificationResult\] | null {
+  if (!Array.isArray(value) || value.length !== 2) return null;
+  const \[key, result\] = value as \[unknown, unknown\];
+  return typeof key === "string" && isVerificationResult(result) ? \[key, result\] : null;
+}
+
+function toInfo(value: unknown): readonly \[IssueKey, DisplayInfo\] | null {
+  if (!Array.isArray(value) || value.length !== 2) return null;
+  const \[key, info\] = value as \[unknown, unknown\];
+  return typeof key === "string" && isDisplayInfo(info) ? \[key, info\] : null;
+}
+
+function collect<T>(items: unknown, read: (item: unknown) => T | null): readonly T\[\] {
+  const out: T\[\] = \[\];
+  for (const item of Array.isArray(items) ? (items as unknown\[\]) : \[\]) {
+    const read1 = read(item);
+    if (read1 !== null) out.push(read1);
+  }
+  return out;
+}
+
+/** Malformed pairs and malformed Display_Info items are dropped; a body that is not `{ results }` is a shape error. */
+function toReply(body: unknown): Result<VerifyReply, ApiError> {
+  if (!isObject(body) || !Array.isArray(body\["results"\])) {
+    return { ok: false, error: { kind: "shape" } };
+  }
+  return {
+    ok: true,
+    value: { pairs: collect(body\["results"\], toPair), info: collect(body\["info"\], toInfo) },
+  };
+}
+
+function toOpinion(body: unknown): Result<string | null, ApiError> {
+  if (!isObject(body)) return { ok: false, error: { kind: "shape" } };
+  const text = body\["text"\];
+  if (text === null || typeof text === "string") return { ok: true, value: text };
+  return { ok: false, error: { kind: "shape" } };
+}
+
+function toAssistant(value: unknown): AssistantInfo | null {
+  if (!isObject(value)) return null;
+  const { provider, modelId } = value;
+  const known = provider === "bedrock" || provider === "anthropic" || provider === "fixture";
+  if (!known || (modelId !== null && typeof modelId !== "string")) return null;
+  return { provider, modelId };
+}
+
+/** A missing or malformed `assistant` field is dropped, not an error: Tier 1 never needs it. */
+function toMode(body: unknown): Result<ModeInfo, ApiError> {
+  if (!isObject(body)) return { ok: false, error: { kind: "shape" } };
+  const mode = body\["mode"\];
+  if (mode !== "fixtures" && mode !== "live") return { ok: false, error: { kind: "shape" } };
+  const assistant = toAssistant(body\["assistant"\]);
+  return { ok: true, value: assistant === null ? { mode } : { mode, assistant } };
+}
+
+/** Turns a rejection into a value so callers branch on it instead of catching. */
+async function attempt<T>(run: () => Promise<T>): Promise<T | Error> {
+  try {
+    return await run();
+  } catch (error) {
+    return error instanceof Error ? error : new Error("request failed");
+  }
+}
+
+type Reader<T> = (response: Response) => Promise<Result<T, ApiError>>;
+
+async function request<T>(
+  fetchFn: FetchFn,
+  url: string,
+  init: Init | undefined,
+  read: Reader<T>,
+): Promise<Result<T, ApiError>> {
+  const response = await attempt(() => fetchFn(url, init));
+  if (response instanceof Error) return { ok: false, error: { kind: "network" } };
+  if (!response.ok) return { ok: false, error: { kind: "status", status: response.status } };
+  return read(response);
+}
+
+function jsonReader<T>(narrow: (body: unknown) => Result<T, ApiError>): Reader<T> {
+  return async (response) => {
+    const body = await attempt(() => response.json() as Promise<unknown>);
+    if (body instanceof Error) return { ok: false, error: { kind: "shape" } };
+    return narrow(body);
+  };
+}
+
+const readText: Reader<string> = async (response) => {
+  const text = await attempt(() => response.text());
+  if (text instanceof Error) return { ok: false, error: { kind: "network" } };
+  return { ok: true, value: text };
+};
+
+function withSignal(init: Init, signal?: AbortSignal): Init {
+  return signal === undefined ? init : { ...init, signal };
+}
+
+export function createApiClient(fetchFn: FetchFn): ApiClient {
+  return {
+    verify: (records, signal) =>
+      request(
+        fetchFn,
+        "/api/verify",
+        withSignal(
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ records }),
+          },
+          signal,
+        ),
+        jsonReader(toReply),
+      ),
+    opinion: (clusterId, signal) =>
+      request(
+        fetchFn,
+        `/api/opinion/${encodeURIComponent(clusterId)}`,
+        withSignal({ method: "GET" }, signal),
+        jsonReader(toOpinion),
+      ),
+    mode: () => request(fetchFn, "/api/mode", { method: "GET" }, jsonReader(toMode)),
+    demoMotion: () => request(fetchFn, "/demo-motion.txt", { method: "GET" }, readText),
+    aviancaCitations: () => request(fetchFn, "/avianca-citations.txt", { method: "GET" }, readText),
+[AI:2.2 Share the restore step 2026-11-21T20:22:33Z.2{t=2026-11-21T20:24:56.362Z}]    recordedSample: () =>
+      request(fetchFn, "/demo-motion.recorded.json", { method: "GET" }, readText),
+[PST{t=2026-11-20T03:04:47Z}]    draft: (prompt, context, onChunk, signal) =>
+      streamDraft(fetchFn, prompt, context, onChunk, signal),
+  };
+}
+
+/** The only `fetch(` call in the browser bundle. */
+export function browserApi(): ApiClient {
+  return createApiClient((input, init) => fetch(input, init));
+}

@@ -6,6 +6,7 @@ import type { ResolvedHolder } from "../resolved-holder";
 import { storableInfo } from "../storable-info";
 import type { DraftGate } from "../draft-gate";
 import { AUTOSAVE_KEY, deserialise, readRaw } from "../persist";
+import type { Restored } from "../persist";
 import { NARROW_WIDTH } from "../services";
 import type { AppServices } from "../services";
 import type { Store } from "../store-runtime";
@@ -28,15 +29,22 @@ export function loadAutosave(
     if (restored.error.kind !== "absent") gate?.block();
     return;
   }
+  installRestored(store, restored.value, holder);
+}
+
+/**
+ * Replaces the Document with a restored value and seeds the session with its resolved info, with
+ * the epoch of the store after the replace (25.3, 25.6).
+ */
+export function installRestored(store: Store, restored: Restored, holder?: ResolvedHolder): void {
   store.dispatch({
     type: "replace",
-    document: restored.value.document,
-    runLog: restored.value.runLog,
-    verifiedAt: restored.value.verifiedAt,
-    declaration: restored.value.declaration,
+    document: restored.document,
+    runLog: restored.runLog,
+    verifiedAt: restored.verifiedAt,
+    declaration: restored.declaration,
   });
-  // Only a restore seeds the session, with the epoch of the store after the restore (25.3, 25.6).
-  const info = storableInfo(restored.value.document, restored.value.resolved);
+  const info = storableInfo(restored.document, restored.resolved);
   if (holder !== undefined && info.size > 0) holder.set({ epoch: store.getState().epoch, info });
 }
 

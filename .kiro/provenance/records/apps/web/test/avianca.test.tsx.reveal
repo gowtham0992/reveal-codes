@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.1,192,0,0}][PST{t=2026-11-20T03:04:47Z}]// @vitest-environment jsdom
+[DOC{v=1;n=0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.1,192,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.1,135,0,0}][PST{t=2026-11-20T03:04:47Z}]// @vitest-environment jsdom
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -59,7 +59,12 @@ function withSamples(base: ApiClient, reply: "fixture" | "fail"): ApiClient {
         ? { ok: false as const, error: { kind: "network" as const } }
         : { ok: true as const, value },
     );
-  return { ...base, demoMotion: () => answer(DEMO), aviancaCitations: () => answer(SAMPLE) };
+  return {[AI:2.2 Share the restore step 2026-11-21T20:22:33Z.1{t=2026-11-21T20:24:56.362Z}]
+    ...base,
+    demoMotion: () => answer(DEMO),
+    aviancaCitations: () => answer(SAMPLE),
+    recordedSample: () => answer(DEMO),
+ [PST{t=2026-11-20T03:04:47Z}] };
 }
 
 async function mount(stored: Document | null, reply: "fixture" | "fail" = "fixture") {

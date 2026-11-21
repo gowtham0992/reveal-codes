@@ -1,0 +1,124 @@
+[DOC{v=1;n=0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.1,57,0,0}][PST{t=2026-11-20T03:04:47Z}]import type { AutosaveDeps, StorageLike } from "./autosave";
+import { browserApi } from "./client/api";
+import type { ApiClient } from "./client/api";
+import { browserDownload } from "./client/download";
+
+/** Builds `browserApi()` on first call, so server rendering never touches `fetch`. */
+function lazyApi(): ApiClient {
+  return {
+    verify: (records, signal) => browserApi().verify(records, signal),
+    opinion: (clusterId, signal) => browserApi().opinion(clusterId, signal),
+    mode: () => browserApi().mode(),
+    demoMotion: () => browserApi().demoMotion(),
+    aviancaCitations: () => browserApi().aviancaCitations(),
+[AI:2.2 Share the restore step 2026-11-21T20:22:33Z.1{t=2026-11-21T20:24:56.362Z}]    recordedSample: () => browserApi().recordedSample(),
+[PST{t=2026-11-20T03:04:47Z}]    draft: (prompt, context, onChunk, signal) =>
+      browserApi().draft(prompt, context, onChunk, signal),
+  };
+}
+
+/** Below this width the Small_Screen_Page replaces the shell. */
+export const NARROW_WIDTH = 800;
+/** Minimum width of the shell itself. */
+export const SHELL_MIN_WIDTH = 1150;
+
+/** Window width and a change subscription; `subscribe` returns the unsubscribe function. */
+export type Viewport = Readonly<{
+  width: () => number;
+  subscribe: (onChange: () => void) => () => void;
+}>;
+
+const NARROW_QUERY = `(min-width: ${String(NARROW_WIDTH)}px)`;
+
+function browserViewport(): Viewport {
+  return {
+    width: () => window.innerWidth,
+    subscribe: (onChange) => {
+      window.addEventListener("resize", onChange);
+      // Some device emulation and orientation changes report the crossing only
+      // through the media query. A script query, not a stylesheet at-rule.
+      const query =
+        typeof window.matchMedia === "function" ? window.matchMedia(NARROW_QUERY) : null;
+      query?.addEventListener("change", onChange);
+      return () => {
+        window.removeEventListener("resize", onChange);
+        query?.removeEventListener("change", onChange);
+      };
+    },
+  };
+}
+
+/**
+ * Browser services the shell depends on. Tests supply fakes.
+ */
+export type AppServices = Readonly<{
+  api: ApiClient;
+  now: () => Date;
+  setTimer: AutosaveDeps\["setTimer"\];
+  clearTimer: AutosaveDeps\["clearTimer"\];
+  storage: StorageLike;
+  download: (bytes: Uint8Array, fileName: string, mime?: string) => void;
+  /** True when the print tab opened. */
+  openPrint: () => boolean;
+  viewport: Viewport;
+  /** Per-tab storage, used only for the checker's hand-over to the editor. */
+  session: StorageLike;
+  clipboard: Clipboard;
+}>;
+
+/** Clipboard access; `available` is false where the browser offers none. */
+export type Clipboard = Readonly<{
+  available: () => boolean;
+  write: (text: string) => Promise<void>;
+}>;
+
+/** No `noopener` feature: it makes `window.open` return null even on success. */
+function openPrintTab(): boolean {
+  const w = window.open("/print", "_blank");
+  if (w === null) return false;
+  w.opener = null;
+  return true;
+}
+
+/**
+ * Every browser global is read lazily, inside a method, so building the
+ * services during server rendering never touches `window` or `localStorage`.
+ */
+export function defaultServices(): AppServices {
+  return {
+    api: lazyApi(),
+    now: () => new Date(),
+    setTimer: (fn, ms) => window.setTimeout(fn, ms),
+    clearTimer: (handle) => {
+      window.clearTimeout(handle as number);
+    },
+    storage: {
+      getItem: (key) => window.localStorage.getItem(key),
+      setItem: (key, value) => {
+        window.localStorage.setItem(key, value);
+      },
+      removeItem: (key) => {
+        window.localStorage.removeItem(key);
+      },
+    },
+    download: (bytes, fileName, mime) => {
+      if (mime === undefined) browserDownload(bytes, fileName);
+      else browserDownload(bytes, fileName, mime);
+    },
+    openPrint: openPrintTab,
+    viewport: browserViewport(),
+    session: {
+      getItem: (key) => window.sessionStorage.getItem(key),
+      setItem: (key, value) => {
+        window.sessionStorage.setItem(key, value);
+      },
+      removeItem: (key) => {
+        window.sessionStorage.removeItem(key);
+      },
+    },
+    clipboard: {
+      available: () => typeof navigator !== "undefined" && "clipboard" in navigator,
+      write: (text) => navigator.clipboard.writeText(text),
+    },
+  };
+}
