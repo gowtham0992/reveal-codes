@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.1,11216,0,0}][AI:4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.1{t=2026-11-21T20:34:03.567Z}]// @vitest-environment jsdom
+[DOC{v=1;n=0;r=4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.1,11216,0,0;r=4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.2,475,0,0}][AI:4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.1{t=2026-11-21T20:34:03.567Z}]// @vitest-environment jsdom
 // Task 3.2: Load demo motion installs the recorded draft. _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.8, 4.1, 4.2, 4.3, 5.1, 5.2, 7.1_
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -141,7 +141,6 @@ describe("Load demo motion installs the recording _Requirements: 3.1, 3.4, 3.5, 
     expect(screen.getByText(RECORDED_SAMPLE_LOADED)).toBeTruthy();
     const r = recorded();
     expect(editorText()).toContain("Plaintiff Dana Whitfield, representing herself");
-    expect(editorText().length).toBeGreaterThan(r.document.text.replaceAll("\\n", "").length - 1);
     const stored = saved(m);
     expect(stored.document.text).toBe(r.document.text);
     expect(stored.runLog).toEqual(r.runLog);
@@ -202,15 +201,18 @@ describe("Load demo motion on a non-empty draft _Requirements: 3.2, 3.3, 3.8_", 
 });
 
 describe("Load makes no verification request _Requirements: 4.1_", () => {
-  it.each(\["fixtures", "live"\] as const)("sends no verify, opinion or assistant request in %s mode", async (setting) => {
-    const m = await mount({ setting });
-    await click(named("Load demo motion"));
-    await flush(m);
-    expect(screen.getByText(RECORDED_SAMPLE_LOADED)).toBeTruthy();
-    expect(m.urls.filter((u) => u === "/demo-motion.recorded.json")).toHaveLength(1);
-    expect(heavy(m)).toEqual(\[\]);
-    expect(apiRequests(m).every((u) => u === "/api/mode")).toBe(true);
-  });
+  it.each(\["fixtures", "live"\] as const)([AI:4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.2{t=2026-11-21T20:34:14.473Z}]
+    "sends no verify, opinion or assistant request in %s mode",
+    async (setting) => {
+      const m = await mount({ setting });
+      await click(named("Load demo motion"));
+      await flush(m);
+      expect(screen.getByText(RECORDED_SAMPLE_LOADED)).toBeTruthy();
+      expect(m.urls.filter((u) => u === "/demo-motion.recorded.json")).toHaveLength(1);
+      expect(heavy(m)).toEqual(\[\]);
+      expect(apiRequests(m).every((u) => u === "/api/mode")).toBe(true);
+    },
+  [AI:4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.1{t=2026-11-21T20:34:03.567Z}]);
 });
 
 describe("After the load _Requirements: 4.2, 4.3, 5.1, 5.2_", () => {

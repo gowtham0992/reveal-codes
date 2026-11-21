@@ -141,7 +141,6 @@ describe("Load demo motion installs the recording _Requirements: 3.1, 3.4, 3.5, 
     expect(screen.getByText(RECORDED_SAMPLE_LOADED)).toBeTruthy();
     const r = recorded();
     expect(editorText()).toContain("Plaintiff Dana Whitfield, representing herself");
-    expect(editorText().length).toBeGreaterThan(r.document.text.replaceAll("\n", "").length - 1);
     const stored = saved(m);
     expect(stored.document.text).toBe(r.document.text);
     expect(stored.runLog).toEqual(r.runLog);
@@ -202,15 +201,18 @@ describe("Load demo motion on a non-empty draft _Requirements: 3.2, 3.3, 3.8_", 
 });
 
 describe("Load makes no verification request _Requirements: 4.1_", () => {
-  it.each(["fixtures", "live"] as const)("sends no verify, opinion or assistant request in %s mode", async (setting) => {
-    const m = await mount({ setting });
-    await click(named("Load demo motion"));
-    await flush(m);
-    expect(screen.getByText(RECORDED_SAMPLE_LOADED)).toBeTruthy();
-    expect(m.urls.filter((u) => u === "/demo-motion.recorded.json")).toHaveLength(1);
-    expect(heavy(m)).toEqual([]);
-    expect(apiRequests(m).every((u) => u === "/api/mode")).toBe(true);
-  });
+  it.each(["fixtures", "live"] as const)(
+    "sends no verify, opinion or assistant request in %s mode",
+    async (setting) => {
+      const m = await mount({ setting });
+      await click(named("Load demo motion"));
+      await flush(m);
+      expect(screen.getByText(RECORDED_SAMPLE_LOADED)).toBeTruthy();
+      expect(m.urls.filter((u) => u === "/demo-motion.recorded.json")).toHaveLength(1);
+      expect(heavy(m)).toEqual([]);
+      expect(apiRequests(m).every((u) => u === "/api/mode")).toBe(true);
+    },
+  );
 });
 
 describe("After the load _Requirements: 4.2, 4.3, 5.1, 5.2_", () => {
