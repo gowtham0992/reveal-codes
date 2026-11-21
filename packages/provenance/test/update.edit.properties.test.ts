@@ -30,8 +30,8 @@ function atoms(text: string): string[] {
   return text.match(/\r\n|[\ud800-\udbff][\udc00-\udfff]|[\s\S]/g) ?? [];
 }
 
-/** The minimal changed stretch `[p, q)` of `oldText` against `newText`, and the length of what replaces it. */
-function stretch(oldText: string, newText: string): { p: number; q: number; inserted: number } {
+/** The atom-minimal changed stretch `[p, q)` of `oldText` against `newText`, before any slide. */
+function minimal(oldText: string, newText: string): { p: number; q: number; inserted: number } {
   const a = atoms(oldText);
   const b = atoms(newText);
   let pre = 0;
@@ -48,7 +48,36 @@ function stretch(oldText: string, newText: string): { p: number; q: number; inse
   const q = oldText.length - len(a.slice(a.length - suf));
   return { p, q, inserted: newText.length - (oldText.length - (q - p)) };
 }
-
+const splits = (t: string, b: number): boolean =>
+  b > 0 && b < t.length && /^(?:[\ud800-\udbff][\udc00-\udfff]|\r\n)$/.test(t.slice(b - 1, b + 1));
+/** Whether the same edit placed `k` units further left gives the same new text, with no boundary inside a pair. */
+function equalAt(
+  oldText: string,
+  newText: string,
+  e: { p: number; q: number; inserted: number },
+  k: number,
+): boolean {
+  const p = e.p - k;
+  const q = e.q - k;
+  const end = p + e.inserted;
+  const sameEdit = oldText.slice(0, p) + newText.slice(p, end) + oldText.slice(q) === newText;
+  const safe =
+    [p, q].every((b) => !splits(oldText, b)) && [p, end].every((b) => !splits(newText, b));
+  return p >= 0 && sameEdit && safe;
+}
+/**
+ * The minimal changed stretch `[p, q)` of `oldText` against `newText` after the slide
+ * (Req 4.17): the nearest line start reached by equal positions one unit at a time, or
+ * the minimal stretch itself when none is reachable. Written apart from `slideStretch`.
+ */
+function stretch(oldText: string, newText: string): { p: number; q: number; inserted: number } {
+  const e = minimal(oldText, newText);
+  for (let k = 0; ; k++) {
+    const at = e.p - k;
+    if (at === 0 || oldText[at - 1] === "\n") return { p: at, q: e.q - k, inserted: e.inserted };
+    if (!equalAt(oldText, newText, e, k + 1)) return e;
+  }
+}
 function provAt(doc: Document, offset: number): Provenance {
   const span = doc.spans.find((s) => s.start <= offset && offset < s.end);
   if (span === undefined) throw new Error(`no span at ${String(offset)}`);

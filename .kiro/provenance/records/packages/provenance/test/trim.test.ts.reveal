@@ -1,0 +1,106 @@
+[DOC{v=1;n=0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.1,29,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.2,1528,0,0}][PST{t=2026-11-20T03:04:47Z}]import { describe, expect, it } from "vitest";
+import { [AI:10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.1{t=2026-11-21T06:05:01.263Z}]commonAffixes, slideStretch, [PST{t=2026-11-20T03:04:47Z}]trimHunk } from "../src/core/trim.js";
+
+const whole = (old: string, text: string) => ({ from: 0, to: old.length, text });
+
+describe("trimHunk", () => {
+  it("keeps only the one changed character of a typo fix", () => {
+    const old = "the quikk fox\\n";
+    expect(trimHunk(old, whole(old, "the quick fox\\n"))).toEqual({ from: 7, to: 8, text: "c" });
+  });
+
+  it("gives only the inserted characters for an insert at the start and at the end of a line", () => {
+    expect(trimHunk("line\\n", whole("line\\n", ">> line\\n"))).toEqual({
+      from: 0,
+      to: 0,
+      text: ">> ",
+    });
+    expect(trimHunk("line\\n", whole("line\\n", "line!!\\n"))).toEqual({ from: 4, to: 4, text: "!!" });
+  });
+
+  it("offsets into the whole old text", () => {
+    const doc = "aa\\nbxb\\ncc\\n";
+    expect(trimHunk(doc, { from: 3, to: 7, text: "byb\\n" })).toEqual({ from: 4, to: 5, text: "y" });
+  });
+
+  it("does not split CR LF when the last character before it is edited", () => {
+    const old = "ab\\r\\n";
+    // Common suffix is "\\r\\n"; the edit of "b" keeps the pair outside the remainder.
+    expect(trimHunk(old, whole(old, "ac\\r\\n"))).toEqual({ from: 1, to: 2, text: "c" });
+    // Old "a\\r\\n" to "a\\n": the shared "\\n" would split the old pair, so it stays in the remainder.
+    expect(trimHunk("a\\r\\n", whole("a\\r\\n", "a\\n"))).toEqual({ from: 1, to: 3, text: "\\n" });
+    expect(trimHunk("a\\n", whole("a\\n", "a\\r\\n"))).toEqual({ from: 1, to: 2, text: "\\r\\n" });
+  });
+
+  it("does not split a surrogate pair in the prefix", () => {
+    const old = "a\\u{1F600}\\n"; // high D83D, low DE00
+    expect(trimHunk(old, whole(old, "a\\u{1F601}\\n"))).toEqual({
+      from: 1,
+      to: 3,
+      text: "\\u{1F601}",
+    });
+  });
+
+  it("does not split a surrogate pair in the suffix", () => {
+    const old = "a\\u{1F600}\\n";
+    expect(trimHunk(old, whole(old, "a\\u{1F680}\\n"))).toEqual({
+      from: 1,
+      to: 3,
+      text: "\\u{1F680}",
+    });
+    expect(trimHunk("x\\n", whole("x\\n", "x\\u{1F600}\\n"))).toEqual({
+      from: 1,
+      to: 1,
+      text: "\\u{1F600}",
+    });
+  });
+
+  it("returns null when old and new text are equal", () => {
+    expect(trimHunk("same\\n", whole("same\\n", "same\\n"))).toBeNull();
+  });
+
+  it("returns a delete-only remainder with empty text", () => {
+    expect(trimHunk("abc\\n", whole("abc\\n", "ac\\n"))).toEqual({ from: 1, to: 2, text: ""[AI:10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.2{t=2026-11-21T06:05:01.263Z}] });
+  });
+});
+const slide = (a: string, b: string) => slideStretch(a, b, commonAffixes(a, b));
+describe("slideStretch", () => {
+  it("moves an insertion after `// ` back to the line start", () => {
+    const a = "// a\\n// b\\n";
+    const b = "// a\\n// tip\\n// b\\n";
+    expect(commonAffixes(a, b)).toEqual({ prefix: 8, suffix: 2 });
+    expect(slide(a, b)).toEqual({ prefix: 5, suffix: 5 });
+  });
+  it("moves an indented inserted line to the start of its line", () => {
+    expect(slide("  x\\n", "  y\\n  x\\n")).toEqual({ prefix: 0, suffix: 4 });
+  });
+  it("slides a deletion", () => {
+    expect(slide("a b\\nb\\n", "a b\\n").prefix).toBe(4);
+  });
+  it("leaves a replacement where it is", () => {
+    const a = "ab\\n";
+    const b = "ac\\n";
+    expect(slide(a, b)).toEqual(commonAffixes(a, b));
+  });
+  it("stays when no line start is reachable", () => {
+    expect(slide("xaa", "xaaa")).toEqual(commonAffixes("xaa", "xaaa"));
+  });
+  it("does not take a step that splits a surrogate pair", () => {
+    const a = "\\u{1F600}";
+    const b = "\\u{1F600}\\u{1F600}";
+    expect(slide(a, b)).toEqual(commonAffixes(a, b));
+  });
+  it("does not take a step that splits CR LF", () => {
+    const a = "\\r\\n";
+    const b = "\\r\\n\\r\\n";
+    expect(slide(a, b)).toEqual(commonAffixes(a, b));
+  });
+  it("slides inside a Hunk when the Hunk starts at a line start", () => {
+    const doc = "// a\\n// b\\n";
+    expect(trimHunk(doc, { from: 5, to: 10, text: "// tip\\n// b\\n" })).toEqual({
+      from: 5,
+      to: 5,
+      text: "// tip\\n",
+   [PST{t=2026-11-20T03:04:47Z}] });
+  });
+});

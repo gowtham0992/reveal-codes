@@ -1,0 +1,124 @@
+[DOC{v=1;n=0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.1,1051,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.2,796,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.3,294,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.4,377,0,0;r=10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.5,50,0,0}][PST{t=2026-11-20T03:04:47Z}]/**
+ * Character trim (design M2 and M15, Req 4.15 and 4.16). Cuts the common prefix
+ * and then the common suffix of two texts (the whole texts, then each Hunk), by
+ * UTF-16 code unit, never between a surrogate pair or a CR LF pair. Pure; no `node:`.
+ */
+import type { Hunk } from "./types.js";
+
+function isHigh(code: number): boolean {
+  return code >= 0xd800 && code <= 0xdbff;
+}
+function isLow(code: number): boolean {
+  return code >= 0xdc00 && code <= 0xdfff;
+}
+const CR = 0x0d;
+const LF = 0x0a;
+
+function commonPrefix(a: string, b: string): number {
+  const max = Math.min(a.length, b.length);
+  let n = 0;
+  while (n < max && a.charCodeAt(n) === b.charCodeAt(n)) n++;
+  return n;
+}
+
+function commonSuffix(a: string, b: string, max: number): number {
+  let n = 0;
+  while (n < max && a.charCodeAt(a.length - 1 - n) === b.charCodeAt(b.length - 1 - n)) n++;
+  return n;
+}
+
+/** The prefix length, shortened so that it ends between no pair in either text. */
+function safePrefix(oldText: string, newText: string): number {
+  const p = commonPrefix(oldText, newText);
+  if (p === 0) return 0;
+  const last = oldText.charCodeAt(p - 1);
+  if (isHigh(last)) return p - 1;
+  const splitsCrLf = last === CR && (oldText.charCodeAt(p) === LF || newText.charCodeAt(p) === LF);
+  return splitsCrLf ? p - 1 : p;
+}
+
+/** The suffix length (at most `max`), shortened so that it starts between no pair in either text. */
+function safeSuffix(oldText: string, newText: string, max: number): number {
+  const s = commonSuffix(oldText, newText, max);
+  if (s === 0) return 0;
+  const oi = oldText.length - s;
+  const ni = newText.length - s;
+  const first = oldText.charCodeAt(oi);
+  const splitsPair = isLow(first)
+    ? isHigh(oldText.charCodeAt(oi - 1)) || isHigh(newText.charCodeAt(ni - 1))
+    : first === LF && (oldText.charCodeAt(oi - 1) === CR || newText.charCodeAt(ni - 1) === CR);
+  return splitsPair ? s - 1 : s;
+}
+
+/** The lengths of the common prefix and then the common suffix (not overlapping), pair-safe in both texts. */
+export function commonAffixes(
+  oldText: string,
+  newText: string,
+): { prefix: number; suffix: number } {
+  const prefix = safePrefix(oldText, newText);
+  const room = Math.min(oldText.length, newText.length) - prefix;
+  return { prefix, suffix: safeSuffix(oldText, newText, room) };
+}
+
+[AI:10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.1{t=2026-11-21T06:05:01.263Z}]type Affixes = { prefix: number; suffix: number };
+/** True when position `b` of `text` lies inside a surrogate pair or between CR and LF. */
+function splitsAt(text: string, b: number): boolean {
+  if (b <= 0 || b >= text.length) return false;
+  const before = text.charCodeAt(b - 1);
+  const after = text.charCodeAt(b);
+  return (isHigh(before) && isLow(after)) || (before === CR && after === LF);
+}
+/** True when one step left of `start` (and of both ends) is allowed by the texts. */
+function canStep(oldText: string, newText: string, start: number, a: Affixes): boolean {
+  const oldEnd = oldText.length - a.suffix;
+  const newEnd = newText.length - a.suffix;
+  if (start < 1) return false;
+  if (oldEnd > start && oldText.charCodeAt(start - 1) !== oldText.charCodeAt(oldEnd - 1)) {
+    return false;
+  }
+  if (newEnd > start && newText.charCodeAt(start - 1) !== newText.charCodeAt(newEnd - 1)) {
+    return false;
+  }
+  return !\[oldText, newText\].some(
+    (t, i) => splitsAt(t, start - 1) || splitsAt(t, (i === 0 ? oldEnd : newEnd) - 1),
+  );
+}
+[PST{t=2026-11-20T03:04:47Z}]/**
+[AI:10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.2{t=2026-11-21T06:05:01.263Z}] * Slides a trimmed stretch left (design M15, Req 4.17) one UTF-16 unit at a time
+ * while the unit before it equals the last unit of each non-empty stretch, and
+ * stops at the first line start reached: position 0 or the position after a line
+ * feed. No step splits a surrogate pair or a CR LF pair. When
+ * no line start is reachable the original affixes are returned.
+ */
+export function slideStretch(oldText: string, newText: string, affixes: Affixes): Affixes {
+  const isStart = (p: number): boolean => p === 0 || oldText.charCodeAt(p - 1) === LF;
+  let current = affixes;
+  while (!isStart(current.prefix)) {
+    if (!canStep(oldText, newText, current.prefix, current)) return affixes;
+    current = { prefix: current.prefix - 1, suffix: current.suffix + 1 };
+  }
+  return current;
+}
+/**
+[PST{t=2026-11-20T03:04:47Z}] * The part of `hunk` that really changed, or `null` when its old and new text
+ * are equal[AI:10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.3{t=2026-11-21T06:05:01.263Z}], slid to a line start (Req 4.17). `oldDocText` is the whole old text
+ * that the Hunk's offsets index. A Hunk that starts inside a line (the first, after
+ * a whole-text trim that could not slide) is read together with the equal start of
+ * its line, so the slide can leave the Hunk's own text[PST{t=2026-11-20T03:04:47Z}].
+ */
+export function trimHunk(oldDocText: string, hunk: Hunk): Hunk | null {
+  const oldText = oldDocText.slice(hunk.from, hunk.to);
+  const newText = hunk.text;
+  const [AI:10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.4{t=2026-11-21T06:05:01.263Z}]lineStart = hunk.from === 0 ? 0 : oldDocText.lastIndexOf("\\n", hunk.from - 1) + 1;
+  const context = oldDocText.slice(lineStart, hunk.from);
+  const trimmed = commonAffixes(oldText, newText);
+  const { prefix, suffix } = slideStretch(context + oldText, context + newText, {
+    prefix: context.length + trimmed.prefix,
+    suffix: trimmed.suffix,
+  });
+  const from = lineStart[PST{t=2026-11-20T03:04:47Z}] + prefix;
+  const to = hunk.to - suffix;
+  const text = [AI:10.5 Slide ambiguous edits to a line start 2026-11-21T05:54:41Z.5{t=2026-11-21T06:05:01.263Z}](context + newText).slice(prefix, context.length +[PST{t=2026-11-20T03:04:47Z}] newText.length - suffix);
+  if (from === to && text === "") return null;
+  return { from, to, text };
+}

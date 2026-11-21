@@ -6855,13 +6855,48 @@ function commonAffixes(oldText, newText) {
   const room = Math.min(oldText.length, newText.length) - prefix;
   return { prefix, suffix: safeSuffix(oldText, newText, room) };
 }
+function splitsAt(text, b) {
+  if (b <= 0 || b >= text.length) return false;
+  const before = text.charCodeAt(b - 1);
+  const after = text.charCodeAt(b);
+  return isHigh4(before) && isLow4(after) || before === CR && after === LF;
+}
+function canStep(oldText, newText, start, a) {
+  const oldEnd = oldText.length - a.suffix;
+  const newEnd = newText.length - a.suffix;
+  if (start < 1) return false;
+  if (oldEnd > start && oldText.charCodeAt(start - 1) !== oldText.charCodeAt(oldEnd - 1)) {
+    return false;
+  }
+  if (newEnd > start && newText.charCodeAt(start - 1) !== newText.charCodeAt(newEnd - 1)) {
+    return false;
+  }
+  return ![oldText, newText].some(
+    (t, i) => splitsAt(t, start - 1) || splitsAt(t, (i === 0 ? oldEnd : newEnd) - 1)
+  );
+}
+function slideStretch(oldText, newText, affixes) {
+  const isStart = (p) => p === 0 || oldText.charCodeAt(p - 1) === LF;
+  let current = affixes;
+  while (!isStart(current.prefix)) {
+    if (!canStep(oldText, newText, current.prefix, current)) return affixes;
+    current = { prefix: current.prefix - 1, suffix: current.suffix + 1 };
+  }
+  return current;
+}
 function trimHunk(oldDocText, hunk) {
   const oldText = oldDocText.slice(hunk.from, hunk.to);
   const newText = hunk.text;
-  const { prefix, suffix } = commonAffixes(oldText, newText);
-  const from = hunk.from + prefix;
+  const lineStart = hunk.from === 0 ? 0 : oldDocText.lastIndexOf("\n", hunk.from - 1) + 1;
+  const context = oldDocText.slice(lineStart, hunk.from);
+  const trimmed = commonAffixes(oldText, newText);
+  const { prefix, suffix } = slideStretch(context + oldText, context + newText, {
+    prefix: context.length + trimmed.prefix,
+    suffix: trimmed.suffix
+  });
+  const from = lineStart + prefix;
   const to = hunk.to - suffix;
-  const text = newText.slice(prefix, newText.length - suffix);
+  const text = (context + newText).slice(prefix, context.length + newText.length - suffix);
   if (from === to && text === "") return null;
   return { from, to, text };
 }
@@ -6911,7 +6946,7 @@ var init_plan = __esm({
 
 // packages/provenance/src/core/update.ts
 function changeHunks(oldText, newText) {
-  const { prefix, suffix } = commonAffixes(oldText, newText);
+  const { prefix, suffix } = slideStretch(oldText, newText, commonAffixes(oldText, newText));
   const middle = diffLines(
     oldText.slice(prefix, oldText.length - suffix),
     newText.slice(prefix, newText.length - suffix)

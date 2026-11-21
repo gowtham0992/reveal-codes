@@ -2,7 +2,7 @@ import fc from "fast-check";
 import { apply, createDocument, renderRecord, type Document } from "@reveal-codes/engine";
 import { describe, expect, it } from "vitest";
 import { diffLines } from "../src/core/diff.js";
-import { commonAffixes, trimHunk } from "../src/core/trim.js";
+import { commonAffixes, slideStretch, trimHunk } from "../src/core/trim.js";
 import { updateRecord } from "../src/core/update.js";
 import { arbAgentThenOutside } from "../src/testing/arbitraries.js";
 import { fixedClock } from "./support/clock.js";
@@ -19,7 +19,7 @@ function must<T>(r: { ok: true; value: T } | { ok: false; error: unknown }): T {
 /** The Engine applied directly: whole-text trim, line diff of the middle, one `replace` per trimmed Hunk, highest offset first, no config. */
 function engineDirect(doc: Document, fileText: string, timestamp: string): Document {
   const old = doc.text;
-  const { prefix: p, suffix: s } = commonAffixes(old, fileText);
+  const { prefix: p, suffix: s } = slideStretch(old, fileText, commonAffixes(old, fileText));
   const middle = diffLines(old.slice(p, old.length - s), fileText.slice(p, fileText.length - s));
   const hunks = middle
     .map((h) => ({ from: h.from + p, to: h.to + p, text: h.text }))

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { trimHunk } from "../src/core/trim.js";
+import { commonAffixes, slideStretch, trimHunk } from "../src/core/trim.js";
 
 const whole = (old: string, text: string) => ({ from: 0, to: old.length, text });
 
@@ -61,5 +61,46 @@ describe("trimHunk", () => {
 
   it("returns a delete-only remainder with empty text", () => {
     expect(trimHunk("abc\n", whole("abc\n", "ac\n"))).toEqual({ from: 1, to: 2, text: "" });
+  });
+});
+const slide = (a: string, b: string) => slideStretch(a, b, commonAffixes(a, b));
+describe("slideStretch", () => {
+  it("moves an insertion after `// ` back to the line start", () => {
+    const a = "// a\n// b\n";
+    const b = "// a\n// tip\n// b\n";
+    expect(commonAffixes(a, b)).toEqual({ prefix: 8, suffix: 2 });
+    expect(slide(a, b)).toEqual({ prefix: 5, suffix: 5 });
+  });
+  it("moves an indented inserted line to the start of its line", () => {
+    expect(slide("  x\n", "  y\n  x\n")).toEqual({ prefix: 0, suffix: 4 });
+  });
+  it("slides a deletion", () => {
+    expect(slide("a b\nb\n", "a b\n").prefix).toBe(4);
+  });
+  it("leaves a replacement where it is", () => {
+    const a = "ab\n";
+    const b = "ac\n";
+    expect(slide(a, b)).toEqual(commonAffixes(a, b));
+  });
+  it("stays when no line start is reachable", () => {
+    expect(slide("xaa", "xaaa")).toEqual(commonAffixes("xaa", "xaaa"));
+  });
+  it("does not take a step that splits a surrogate pair", () => {
+    const a = "\u{1F600}";
+    const b = "\u{1F600}\u{1F600}";
+    expect(slide(a, b)).toEqual(commonAffixes(a, b));
+  });
+  it("does not take a step that splits CR LF", () => {
+    const a = "\r\n";
+    const b = "\r\n\r\n";
+    expect(slide(a, b)).toEqual(commonAffixes(a, b));
+  });
+  it("slides inside a Hunk when the Hunk starts at a line start", () => {
+    const doc = "// a\n// b\n";
+    expect(trimHunk(doc, { from: 5, to: 10, text: "// tip\n// b\n" })).toEqual({
+      from: 5,
+      to: 5,
+      text: "// tip\n",
+    });
   });
 });

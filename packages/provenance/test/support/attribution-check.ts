@@ -60,6 +60,27 @@ function affixes(a: string, b: string): { prefix: number; suffix: number } {
   return { prefix, suffix: backOffSuffix(a, b, s) };
 }
 
+const splitsAt = (t: string, b: number): boolean =>
+  b > 0 && b < t.length && /^(?:[\ud800-\udbff][\udc00-\udfff]|\r\n)$/.test(t.slice(b - 1, b + 1));
+
+/**
+ * `affixes`, then the changed stretch slid left to the nearest line start by equal positions
+ * one unit at a time (Req 4.17); no step puts a boundary inside a pair; unchanged when none is reached.
+ */
+function slidAffixes(a: string, b: string): { prefix: number; suffix: number } {
+  const first = affixes(a, b);
+  const added = b.length - a.length;
+  for (let p = first.prefix, q = a.length - first.suffix; ; p -= 1, q -= 1) {
+    if (p === 0 || a[p - 1] === "\n") return { prefix: p, suffix: a.length - q };
+    const np = p - 1;
+    const same = a.slice(0, np) + b.slice(np, q - 1 + added) + a.slice(q - 1) === b;
+    const safe =
+      [np, q - 1].every((x) => !splitsAt(a, x)) &&
+      [np, q - 1 + added].every((x) => !splitsAt(b, x));
+    if (!same || !safe) return first;
+  }
+}
+
 /** What a character of the old Record allows its successor to be. */
 type Allowed = {
   relabelled: ReadonlySet<string>;
@@ -162,9 +183,9 @@ function runlessProblems(
   return problems;
 }
 
-/** The characters of the common prefix and suffix are outside every Hunk and are kept at their place. */
+/** The characters of the common prefix and suffix (after the slide) are outside every Hunk and are kept at their place. */
 function affixProblems(old: Document, doc: Document, olds: Cell[], now: Cell[], a: Allowed) {
-  const { prefix, suffix } = affixes(old.text, doc.text);
+  const { prefix, suffix } = slidAffixes(old.text, doc.text);
   const problems: string[] = [];
   for (let i = 0; i < prefix; i += 1) {
     if (!kept(olds[i] as Cell, now[i] as Cell, a))

@@ -5,7 +5,7 @@
  */
 import { apply, createDocument, err, ok, type Document, type Result } from "@reveal-codes/engine";
 import { diffLines } from "./diff.js";
-import { commonAffixes, trimHunk } from "./trim.js";
+import { commonAffixes, slideStretch, trimHunk } from "./trim.js";
 import {
   existingRunNumbers,
   planHunks,
@@ -20,7 +20,7 @@ import type { Hunk, ProvenanceError } from "./types.js";
  * the prefix length. Each Hunk is trimmed later, in `applyHunks`.
  */
 export function changeHunks(oldText: string, newText: string): Hunk[] {
-  const { prefix, suffix } = commonAffixes(oldText, newText);
+  const { prefix, suffix } = slideStretch(oldText, newText, commonAffixes(oldText, newText));
   const middle = diffLines(
     oldText.slice(prefix, oldText.length - suffix),
     newText.slice(prefix, newText.length - suffix),

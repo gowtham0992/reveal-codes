@@ -177,12 +177,8 @@ const arbInserted: fc.Arbitrary<string> = fc
   )
   .map(([lines, eols]) => lines.map((l, i) => l + (eols[i] ?? "")).join(""));
 
-/**
- * A single insert, delete or replace of a contiguous stretch of `text`: within
- * one line or across lines, at the start, at the end, or anywhere, on empty text
- * as well. No offset falls inside a surrogate pair; a CR LF pair may be split.
- */
-export function arbSingleEdit(text: string): fc.Arbitrary<SingleEdit> {
+/** A single insert, delete or replace anywhere in `text` (see `arbSingleEdit`). */
+function arbAnywhereEdit(text: string): fc.Arbitrary<SingleEdit> {
   const n = text.length;
   const arbAt = fc.oneof(fc.constant(0), fc.constant(n), fc.integer({ min: 0, max: n }));
   return fc
@@ -202,6 +198,52 @@ export function arbSingleEdit(text: string): fc.Arbitrary<SingleEdit> {
     });
 }
 
+/** The offset just after the line feed that ends the line starting at `at`, or the end of `text`. */
+function lineEnd(text: string, at: number): number {
+  const lf = text.indexOf("\n", at);
+  return lf < 0 ? text.length : lf + 1;
+}
+/**
+ * An edit beside a line that shares its start with the new text (Req 4.17): a line
+ * inserted above or below a line, copying a prefix of it (an indent, `// `, or the
+ * whole line); or a whole line deleted. Offsets of a surrogate pair are snapped.
+ */
+function arbNeighbourEdit(text: string): fc.Arbitrary<SingleEdit> {
+  const starts = [0, ...[...text.matchAll(/\n(?=[\s\S])/g)].map((m) => m.index + 1)];
+  return fc
+    .tuple(
+      fc.constantFrom(...starts),
+      fc.constantFrom("above", "below", "delete"),
+      fc.nat({ max: 6 }),
+      arbLine,
+    )
+    .map(([at, how, share, tail]) => {
+      const end = lineEnd(text, at);
+      const line = text.slice(at, end);
+      if (how === "delete") return { from: at, to: end, text: "" };
+      const eol = line.endsWith("\r\n") ? "\r\n" : "\n";
+      const copy = line.slice(0, snap(line, Math.min(share, line.length)));
+      const inserted = share > 4 ? line : copy + tail + eol;
+      const from = how === "above" ? at : end;
+      return {
+        from,
+        to: from,
+        text: from === text.length && !line.endsWith("\n") ? eol + inserted : inserted,
+      };
+    });
+}
+/**
+ * A single insert, delete or replace of a contiguous stretch of `text`: within
+ * one line or across lines, at the start, at the end, or anywhere, on empty text
+ * as well; also beside a line with a shared start. No offset falls inside a
+ * surrogate pair; a CR LF pair may be split.
+ */
+export function arbSingleEdit(text: string): fc.Arbitrary<SingleEdit> {
+  return fc.oneof(
+    { weight: 3, arbitrary: arbAnywhereEdit(text) },
+    { weight: 2, arbitrary: arbNeighbourEdit(text) },
+  );
+}
 /** A Window_Run used by `arbBuiltRecord`, with the Task_Number and title its name carries (null: none). */
 export type KnownWindow = { windowRun: string; taskNumber: string | null; title: string };
 /** Three windows: one with a dotted Task_Number, one with a plain one, one with none. */

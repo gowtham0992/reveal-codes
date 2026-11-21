@@ -60,17 +60,65 @@ export function commonAffixes(
   return { prefix, suffix: safeSuffix(oldText, newText, room) };
 }
 
+type Affixes = { prefix: number; suffix: number };
+/** True when position `b` of `text` lies inside a surrogate pair or between CR and LF. */
+function splitsAt(text: string, b: number): boolean {
+  if (b <= 0 || b >= text.length) return false;
+  const before = text.charCodeAt(b - 1);
+  const after = text.charCodeAt(b);
+  return (isHigh(before) && isLow(after)) || (before === CR && after === LF);
+}
+/** True when one step left of `start` (and of both ends) is allowed by the texts. */
+function canStep(oldText: string, newText: string, start: number, a: Affixes): boolean {
+  const oldEnd = oldText.length - a.suffix;
+  const newEnd = newText.length - a.suffix;
+  if (start < 1) return false;
+  if (oldEnd > start && oldText.charCodeAt(start - 1) !== oldText.charCodeAt(oldEnd - 1)) {
+    return false;
+  }
+  if (newEnd > start && newText.charCodeAt(start - 1) !== newText.charCodeAt(newEnd - 1)) {
+    return false;
+  }
+  return ![oldText, newText].some(
+    (t, i) => splitsAt(t, start - 1) || splitsAt(t, (i === 0 ? oldEnd : newEnd) - 1),
+  );
+}
+/**
+ * Slides a trimmed stretch left (design M15, Req 4.17) one UTF-16 unit at a time
+ * while the unit before it equals the last unit of each non-empty stretch, and
+ * stops at the first line start reached: position 0 or the position after a line
+ * feed. No step splits a surrogate pair or a CR LF pair. When
+ * no line start is reachable the original affixes are returned.
+ */
+export function slideStretch(oldText: string, newText: string, affixes: Affixes): Affixes {
+  const isStart = (p: number): boolean => p === 0 || oldText.charCodeAt(p - 1) === LF;
+  let current = affixes;
+  while (!isStart(current.prefix)) {
+    if (!canStep(oldText, newText, current.prefix, current)) return affixes;
+    current = { prefix: current.prefix - 1, suffix: current.suffix + 1 };
+  }
+  return current;
+}
 /**
  * The part of `hunk` that really changed, or `null` when its old and new text
- * are equal. `oldDocText` is the whole old text that the Hunk's offsets index.
+ * are equal, slid to a line start (Req 4.17). `oldDocText` is the whole old text
+ * that the Hunk's offsets index. A Hunk that starts inside a line (the first, after
+ * a whole-text trim that could not slide) is read together with the equal start of
+ * its line, so the slide can leave the Hunk's own text.
  */
 export function trimHunk(oldDocText: string, hunk: Hunk): Hunk | null {
   const oldText = oldDocText.slice(hunk.from, hunk.to);
   const newText = hunk.text;
-  const { prefix, suffix } = commonAffixes(oldText, newText);
-  const from = hunk.from + prefix;
+  const lineStart = hunk.from === 0 ? 0 : oldDocText.lastIndexOf("\n", hunk.from - 1) + 1;
+  const context = oldDocText.slice(lineStart, hunk.from);
+  const trimmed = commonAffixes(oldText, newText);
+  const { prefix, suffix } = slideStretch(context + oldText, context + newText, {
+    prefix: context.length + trimmed.prefix,
+    suffix: trimmed.suffix,
+  });
+  const from = lineStart + prefix;
   const to = hunk.to - suffix;
-  const text = newText.slice(prefix, newText.length - suffix);
+  const text = (context + newText).slice(prefix, context.length + newText.length - suffix);
   if (from === to && text === "") return null;
   return { from, to, text };
 }

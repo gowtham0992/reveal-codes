@@ -205,21 +205,22 @@ describe("updateRecord whole-text trim before the line difference", () => {
       .filter((s) => s.provenance.origin === "AI")
       .map((s) => doc.text.slice(s.start, s.end))
       .join("");
-  it("gives an agent insert of F and a line feed before a line that starts with F only the inserted stretch", () => {
+  it("places an agent insert of F and a line feed before a line that starts with F at the line start (slide)", () => {
     const base = must(createDocument("head\nFoo\n", AT));
     const doc = must(updateRecord(base, "head\nF\nFoo\n", "AI", W, clock));
     expect(doc.text).toBe("head\nF\nFoo\n");
-    expect(aiChars(doc)).toBe("\nF");
-    expect(originAt(doc, 5)).toBe("PST");
+    expect(aiChars(doc)).toBe("F\n");
+    expect(originAt(doc, 5)).toBe("AI");
+    expect(originAt(doc, 7)).toBe("PST");
     expect(originAt(doc, 8)).toBe("PST");
   });
-  it("keeps the old F of a line at the start of the text when the agent inserts F and a line feed before it (shrunk counterexample)", () => {
+  it("slides an agent insert of F and a line feed to the start of the text, keeping the old line (shrunk counterexample)", () => {
     const base = must(createDocument("FH;\r\n", AT));
     const doc = must(updateRecord(base, "F\nFH;\r\n", "AI", W, clock));
     expect(doc.text).toBe("F\nFH;\r\n");
-    expect(originAt(doc, 0)).toBe("PST");
-    expect(aiChars(doc)).toBe("\nF");
-    expect(doc.spans.filter((s) => s.provenance.origin === "AI")[0]?.start).toBe(1);
+    expect(originAt(doc, 2)).toBe("PST");
+    expect(aiChars(doc)).toBe("F\n");
+    expect(doc.spans.filter((s) => s.provenance.origin === "AI")[0]?.start).toBe(0);
   });
   it("keeps an old line feed from inside the edited stretch that the line difference matches (shrunk counterexample)", () => {
     const base = must(createDocument("[7c57FT\n09Q\nH\n\n{gD\n", AT));
@@ -247,5 +248,34 @@ describe("updateRecord whole-text trim before the line difference", () => {
     expect(doc.text).toBe("a\nb\n");
     expect(doc.spans.every((s) => s.provenance.origin === "PST")).toBe(true);
     expect(doc.runs).toEqual([]);
+  });
+  describe("slide to a line start (Req 4.17)", () => {
+    const aiRanges = (d: Document): number[][] =>
+      d.spans.filter((x) => x.provenance.origin === "AI").map((x) => [x.start, x.end]);
+    it("places a comment line added above `// b` at the start of line 2", () => {
+      const base = must(createDocument("// a\n// b\n", AT));
+      const doc = must(updateRecord(base, "// a\n// tip\n// b\n", "AI", W, clock));
+      expect(aiRanges(doc)).toEqual([[5, 12]]);
+      expect(doc.runs).toHaveLength(1);
+    });
+    it("places an indented line with its indent", () => {
+      const base = must(createDocument("f {\n  x;\n}\n", AT));
+      const doc = must(updateRecord(base, "f {\n  y;\n  x;\n}\n", "AI", W, clock));
+      expect(aiRanges(doc)).toEqual([[4, 9]]);
+    });
+    it("slides a deletion and keeps the file text", () => {
+      const base = must(createDocument("// a\n// b\n// b\n", AT));
+      const doc = must(updateRecord(base, "// a\n// b\n", "HUM", null, clock));
+      expect(doc.text).toBe("// a\n// b\n");
+      expect(doc.spans.every((x) => x.provenance.origin === "PST")).toBe(true);
+    });
+    it("slides the first Hunk of an edit that has a second Hunk", () => {
+      const base = must(createDocument("// a\n// b\nmid\nend\n", AT));
+      const doc = must(updateRecord(base, "// a\n// x\n// b\nmid\nfin\n", "AI", W, clock));
+      expect(aiRanges(doc)).toEqual([
+        [5, 10],
+        [19, 22],
+      ]);
+    });
   });
 });

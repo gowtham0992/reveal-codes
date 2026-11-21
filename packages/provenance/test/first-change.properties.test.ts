@@ -4,7 +4,7 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { decodeBaseline } from "../src/core/baseline-codec.js";
 import { diffLines } from "../src/core/diff.js";
-import { commonAffixes, trimHunk } from "../src/core/trim.js";
+import { commonAffixes, slideStretch, trimHunk } from "../src/core/trim.js";
 import type { Baseline, BaselineEntry, Hunk } from "../src/core/types.js";
 import { arbScenario } from "../src/testing/arbitraries.js";
 import type { Scenario, Tracking } from "../src/testing/arbitraries.js";
@@ -39,7 +39,7 @@ function documentOf(text: string, at: string): Document {
 }
 /** The Hunks from `oldText` to `newText`: whole-text affixes, a line difference, each Hunk trimmed. */
 function hunksOf(oldText: string, newText: string): Hunk[] {
-  const { prefix, suffix } = commonAffixes(oldText, newText);
+  const { prefix, suffix } = slideStretch(oldText, newText, commonAffixes(oldText, newText));
   const middle = diffLines(
     oldText.slice(prefix, oldText.length - suffix),
     newText.slice(prefix, newText.length - suffix),
