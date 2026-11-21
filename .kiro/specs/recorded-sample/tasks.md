@@ -51,8 +51,8 @@ Conventions for every task:
     - Run `pnpm exec vitest run --project web apps/web/test/document-actions.test.tsx apps/web/test/samples-declaration.test.tsx apps/web/test/check-page.test.tsx apps/web/test/check-rows.test.ts`.
     - _Requirements: 3.1, 5.2, 6.2_
 
-- [ ] 5. Documentation and release checklist
-  - [-] 5.1 Docs
+- [x] 5. Documentation and release checklist
+  - [x] 5.1 Docs
     - README: one line in "What it does" and one in "Demo path" using "recorded in this editor on the hosted site on 2026-11-21"; add "No prompt text is stored, and nothing leaves the machine." to the provenance section. `BUILD_LOG.md`: an entry with the least-code choices of the design and the completion notes. `docs/KIRO_USAGE.md`: one row for this spec. `.kiro/steering/release.md`: item 4 gains "the recorded sample still loads".
     - Run `pnpm exec vitest run --project web apps/web/test/static` (docs and inventory scans).
     - _Requirements: 7.2, 9.1, 9.2, 9.3, 9.4_
