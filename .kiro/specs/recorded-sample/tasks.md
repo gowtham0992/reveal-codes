@@ -40,13 +40,13 @@ Conventions for every task:
     - Add `RECORDED_SAMPLE_LOADED` to `apps/web/src/notices.ts`. In `use-document-actions.tsx` add `holder` to `Deps`, make the `demo` path fetch `recordedSample()`, `deserialise`, `installRestored`, then dispatch the notice; any failure dispatches `DEMO_FAILED`. Pass `a.holder` in `app-shell.tsx`. Keep the Confirm_Dialog copy as it is. Check the empty-page link's click handler: a click must call the same action as the Toolbar button (preventDefault, same confirm, installs the recording); keep its `href` to `demo-motion.txt` only as the no-script fallback. Change the handler if it does not.
     - Run `pnpm exec vitest run --project web apps/web/test/recorded-sample.test.ts`.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.6, 3.8_
-  - [~] 3.2 Component tests for the load
+  - [-] 3.2 Component tests for the load
     - Write `apps/web/test/recorded-sample-load.test.tsx`: load on an empty draft; the confirm and the cancel; the notice text; the Issues_Region shows the Checked date; no `/api/*` request on load in Demo_Mode and in Live_Mode (a fetch fake that records every URL); failure notice and unchanged draft; Verify afterwards in Demo_Mode resolves from the fixtures and replaces the Check_Date; Export asks the Declaration question; clicking the empty-page link installs the recorded draft, same as the Toolbar button.
     - Run `pnpm exec vitest run --project web apps/web/test/recorded-sample-load.test.tsx`.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.8, 4.1, 4.2, 4.3, 5.1, 5.2, 7.1_
 
-- [ ] 4. Move the existing demo tests
-  - [~] 4.1 Point the Load demo tests at the recording
+- [x] 4. Move the existing demo tests
+  - [x] 4.1 Point the Load demo tests at the recording
     - In `document-actions.test.tsx` (lines 164 to 270) and `samples-declaration.test.tsx` (line 132) answer `recordedSample` with the recorded file's text and update the expectations (notice, Run_Log now filled, Declaration still asked). Leave `check-page.test.tsx`, `check-rows.test.ts` and the support files on Demo_Text.
     - Run `pnpm exec vitest run --project web apps/web/test/document-actions.test.tsx apps/web/test/samples-declaration.test.tsx apps/web/test/check-page.test.tsx apps/web/test/check-rows.test.ts`.
     - _Requirements: 3.1, 5.2, 6.2_

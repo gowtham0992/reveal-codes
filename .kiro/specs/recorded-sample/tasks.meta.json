@@ -91,6 +91,11 @@
         "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
         "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
         "timestamp": 1795292417600
+      },
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795293135445
       }
     ],
     "4.1 Point the Load demo tests at the recording": [
@@ -98,6 +103,16 @@
         "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
         "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
         "timestamp": 1795292417638
+      },
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795293135851
+      },
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795293264171
       }
     ],
     "5.1 Docs": [
@@ -126,6 +141,13 @@
         "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
         "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
         "timestamp": 1795293132824
+      }
+    ],
+    "4. Move the existing demo tests": [
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795293264199
       }
     ]
   }
