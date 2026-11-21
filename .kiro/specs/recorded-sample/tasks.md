@@ -21,7 +21,7 @@ Conventions for every task:
     - Run `pnpm exec vitest run --project web apps/web/test/recorded-sample.test.ts apps/web/test/avianca.test.tsx`; update the `avianca.test.tsx` copy-demo case for the third file.
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 4.2, 6.3_
 
-- [ ] 2. Install path
+- [x] 2. Install path
   - [x] 2.1 Add `recordedSample` to the API client
     - Add `recordedSample()` to `ApiClient` and `createApiClient` in `apps/web/src/client/api.ts`, and to `lazyApi` in `apps/web/src/services.ts`. Add one line to each test fake that lists every member (`avianca.test.tsx`, `samples-declaration.test.tsx`, `text-safety.test.tsx`, `support/check-date-fixtures.ts`, `open-empty-page.test.tsx`, and `document-actions.test.tsx`).
     - Run `pnpm exec vitest run --project web apps/web/test/avianca.test.tsx apps/web/test/text-safety.test.tsx apps/web/test/open-empty-page.test.tsx`.
@@ -30,13 +30,13 @@ Conventions for every task:
     - In `apps/web/src/components/use-autosave.ts` extract `installRestored(store, restored, holder?)` from `loadAutosave` and call it there. Behaviour does not change.
     - Run `pnpm exec vitest run --project web apps/web/test/persist.test.ts apps/web/test/persist-resolved.properties.test.ts`, plus the autosave tests that match `autosave` in `apps/web/test`.
     - _Requirements: 3.6, 3.7_
-  - [~] 2.3 Property 1: install then save is the identity
+  - [x] 2.3 Property 1: install then save is the identity
     - Write `apps/web/test/recorded-sample.properties.test.ts` with one `fc.assert(fc.property(...))` under `// Property 1`, `_Requirements: 8.1_` in the describe title, reusing the arbitraries of `persist-resolved.properties.test.ts` (export the case arbitrary from `support/` only if it is not already shared). Add the comment to the list in `apps/web/test/static/inventory.test.ts`.
     - Run `pnpm exec vitest run --project web apps/web/test/recorded-sample.properties.test.ts apps/web/test/static/inventory.test.ts`.
     - _Requirements: 8.1_
 
 - [ ] 3. Load demo motion installs the recording
-  - [~] 3.1 Wire `loadSample` for key `demo`
+  - [-] 3.1 Wire `loadSample` for key `demo`
     - Add `RECORDED_SAMPLE_LOADED` to `apps/web/src/notices.ts`. In `use-document-actions.tsx` add `holder` to `Deps`, make the `demo` path fetch `recordedSample()`, `deserialise`, `installRestored`, then dispatch the notice; any failure dispatches `DEMO_FAILED`. Pass `a.holder` in `app-shell.tsx`. Keep the Confirm_Dialog copy as it is. Check the empty-page link's click handler: a click must call the same action as the Toolbar button (preventDefault, same confirm, installs the recording); keep its `href` to `demo-motion.txt` only as the no-script fallback. Change the handler if it does not.
     - Run `pnpm exec vitest run --project web apps/web/test/recorded-sample.test.ts`.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.6, 3.8_

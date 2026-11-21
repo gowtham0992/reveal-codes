@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.1,185,0,0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.2,185,0,0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.3,241,0,0;r=2.1 Add `recordedSample` to the API client 2026-11-21T20:22:32Z.1,185,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.1,185,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.2,185,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.3,185,0,0;r=2.3 Property 1: install then save is the identity 2026-11-21T20:25:39Z.1,185,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.1,185,0,0}][HUM{t=2026-11-21T20:20:18.039Z}]{
+[DOC{v=1;n=0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.1,185,0,0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.2,185,0,0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.3,241,0,0;r=2.1 Add `recordedSample` to the API client 2026-11-21T20:22:32Z.1,185,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.1,185,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.2,185,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.3,185,0,0;r=2.3 Property 1: install then save is the identity 2026-11-21T20:25:39Z.1,185,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.1,185,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.2,185,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.3,216,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.4,185,0,0}][HUM{t=2026-11-21T20:20:18.039Z}]{
   "pbtResults": {},
   "executionHistory": {
     "1.1 Keep the file out of Prettier and copy it to `public`": \[
@@ -62,6 +62,11 @@
         "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
         "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
         "timestamp": 1795292739645
+[AI:3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.2{t=2026-11-21T20:32:12.916Z}]      },
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795293132791
 [HUM{t=2026-11-21T20:20:18.039Z}]      }
     \],
     "3.1 Wire `loadSample` for key `demo`": \[
@@ -74,6 +79,11 @@
         "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
         "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
         "timestamp": 1795292740078
+[AI:3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.4{t=2026-11-21T20:32:13.155Z}]      },
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795293133138
 [HUM{t=2026-11-21T20:20:18.039Z}]      }
     \],
     "3.2 Component tests for the load": \[
@@ -109,6 +119,13 @@
         "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
         "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
         "timestamp": 1795292550679
+      }
+[AI:3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.3{t=2026-11-21T20:32:12.916Z}]    \],
+    "2. Install path": \[
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795293132824
       }
 [HUM{t=2026-11-21T20:20:18.039Z}]    \]
   }
