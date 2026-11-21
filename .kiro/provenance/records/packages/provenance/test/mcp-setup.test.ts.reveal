@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1,6081,0,0}][AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1{t=2026-11-21T00:39:42.576Z}]import { spawnSync } from "node:child_process";
+[DOC{v=1;n=0;r=9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1,6081,0,0;r=9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.1,147,0,0;r=9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.2,189,0,0}][AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1{t=2026-11-21T00:39:42.576Z}]import { spawnSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -97,11 +97,15 @@ describe(
       expect(readFileSync(`${d.root}/${PROV}/provenance.mjs`)).toEqual(readFileSync(bundle));
       expect(existsSync(`${d.root}/.kiroignore`)).toBe(false);
       expect(existsSync(`${d.root}/.git/hooks/pre-commit`)).toBe(false);
-      const second = await client.callTool({
+      const [AI:9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.1{t=2026-11-21T00:46:10.276Z}]baselineBytes = readFileSync(`${d.root}/${PROV}/baseline.json`, "utf8");
+      d.write("later.txt", "created after the first call\\n");
+      const [AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1{t=2026-11-21T00:39:42.576Z}]second = await client.callTool({
         name: "setup_provenance",
         arguments: { workspace: d.root },
       });
-      const two = setupProvenanceOutput.parse(second.structuredContent);
+      const two = setupProvenanceOutput.parse(second.structuredContent[AI:9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.2{t=2026-11-21T00:46:10.276Z}]);
+      expect(readFileSync(`${d.root}/${PROV}/baseline.json`, "utf8")).toBe(baselineBytes);
+      expect(readFileSync(`${d.root}/${PROV}/baseline.json`, "utf8")).not.toContain("later.txt"[AI:9.2 The `setup_provenance` tool 2026-11-20T16:40:48Z.1{t=2026-11-21T00:39:42.576Z}]);
       expect(two.written).toEqual(\[\]);
       expect(two.replaced).toEqual(\[\]);
       expect(\[...two.kept\].sort()).toEqual(\[...one.written\].sort());

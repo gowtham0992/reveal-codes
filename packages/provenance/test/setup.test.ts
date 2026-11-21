@@ -4,6 +4,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
   statSync,
@@ -95,7 +96,11 @@ describe.each([true, false])("provenance setup (git: %s)", (git) => {
   it("a second run keeps every file and replaces nothing", async () => {
     const d = workspace(git);
     const first = await run(d);
+    const baseline = read(d, `${PROV}/baseline.json`);
+    d.write("later.txt", "created after the first run\n");
     const second = await run(d);
+    expect(read(d, `${PROV}/baseline.json`)).toBe(baseline);
+    expect(second.baseline).toEqual({ added: 0, skipped: 0 });
     expect(second.written).toEqual([]);
     expect(second.replaced).toEqual([]);
     expect(withoutCache(second.kept)).toEqual([
@@ -264,5 +269,52 @@ describe("the built Bundle, outside the repository with no node_modules", () => 
       encoding: "utf8",
     });
     expect(wrapped.status).toBe(0);
+  }, 60_000);
+  it("setup on an installed workspace changes nothing under baseline and cache, so a new file is recorded by the next event ([HUM] outside a window, [AI] inside one)", () => {
+    const out = mkdtempSync(join(tmpdir(), "reveal-bundle-"));
+    extra.push(out);
+    const built = spawnSync("node", ["scripts/build-power.mjs", "--power", "provenance", out], {
+      cwd: REPO,
+      encoding: "utf8",
+    });
+    expect(built.status).toBe(0);
+    const outside = join(out, "server", "provenance.mjs");
+    const d = makeTempDir();
+    dir = d;
+    d.git("init", "-q");
+    d.write("a.txt", "alpha\n");
+    const node = (args: string[], input?: string) =>
+      spawnSync("node", args, { cwd: d.root, encoding: "utf8", input });
+    expect(node([outside, "setup"]).status).toBe(0);
+    d.git("add", "-A");
+    d.git("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "installed");
+    const installed = `${d.root}/${PROV}/provenance.mjs`;
+    d.write("outside.txt", "written before any window\n");
+    const baseline = read(d, `${PROV}/baseline.json`);
+    const cache = readdirSync(`${d.root}/${PROV}/cache`).sort();
+    const cacheBytes = cache.map((n) => readFileSync(`${d.root}/${PROV}/cache/${n}`, "utf8"));
+    const again = node([installed, "setup"]);
+    expect(again.status).toBe(0);
+    expect(again.stdout).toContain("baseline: 0 added, 0 skipped");
+    expect(again.stdout).toContain(`  ${PROV}/baseline.json\n`);
+    expect(again.stdout.startsWith("written: none\nreplaced: none\nkept:\n")).toBe(true);
+    expect(read(d, `${PROV}/baseline.json`)).toBe(baseline);
+    expect(readdirSync(`${d.root}/${PROV}/cache`).sort()).toEqual(cache);
+    expect(cache.map((n) => readFileSync(`${d.root}/${PROV}/cache/${n}`, "utf8"))).toEqual(
+      cacheBytes,
+    );
+    expect(d.git("status", "--porcelain", "--", `${PROV}/baseline.json`)).toBe("");
+    const send = (event: string, hook: string) =>
+      node(
+        [installed, "record", event],
+        JSON.stringify({ session_id: "setup-test-0001", hook_event_name: hook, cwd: d.root }),
+      );
+    expect(send("promptSubmit", "UserPromptSubmit").status).toBe(0);
+    d.write("inside.txt", "written inside the window\n");
+    expect(send("agentStop", "Stop").status).toBe(0);
+    const reveal = (file: string) => node([installed, "reveal", file]).stdout;
+    expect(reveal("outside.txt")).toContain("[HUM]written before any window");
+    expect(reveal("outside.txt")).not.toMatch(/^\[AI[^\n]*written before/mu);
+    expect(reveal("inside.txt")).toMatch(/\[AI:[^\]]+\]written inside the window/u);
   }, 60_000);
 });

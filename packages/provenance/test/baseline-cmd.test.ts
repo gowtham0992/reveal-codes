@@ -52,19 +52,16 @@ describe("provenance baseline", () => {
     const at = (JSON.parse(before[0] as string) as { at: string }).at;
     expect(at).toMatch(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/u);
   });
-  it("adds a file that appears later without changing at or the first entries", async () => {
+  it("adds no entry and no cache file for a file that appears after the first run, and keeps at", async () => {
     const d = fresh(false);
     d.write("a.txt", "a\n");
     await lineOf(d);
-    const first = JSON.parse(read(d, `${PROV}/baseline.json`)) as { at: string };
+    const before = read(d, `${PROV}/baseline.json`);
+    const cache = cacheFiles(d);
     d.write("z.txt", "z\n");
-    expect(await lineOf(d)).toEqual(["baseline: 1 added, 0 skipped"]);
-    const second = JSON.parse(read(d, `${PROV}/baseline.json`)) as {
-      at: string;
-      files: Record<string, unknown>;
-    };
-    expect(second.at).toBe(first.at);
-    expect(Object.keys(second.files)).toEqual(["a.txt", "z.txt"]);
+    expect(await lineOf(d)).toEqual(["baseline: 0 added, 0 skipped"]);
+    expect(read(d, `${PROV}/baseline.json`)).toBe(before);
+    expect(cacheFiles(d)).toEqual(cache);
   });
   it("does not baseline a file that has a Record, and creates no Record", async () => {
     const d = fresh(false);
@@ -101,7 +98,7 @@ describe("provenance baseline", () => {
     expect(lines).toEqual([]);
     expect(read(d, `${PROV}/baseline.json`)).toBe("{ nope");
   });
-  it("gives every file of a directory without git a cache file, shared by identical text, and prunes unnamed ones", async () => {
+  it("gives every file of a directory without git a cache file, shared by identical text, and prunes nothing on a second run", async () => {
     const d = fresh(false);
     d.write("a.txt", "same\n");
     d.write("b.txt", "same\n");
@@ -113,7 +110,10 @@ describe("provenance baseline", () => {
     d.write("d.txt", "d\n");
     await lineOf(d);
     expect(cacheFiles(d)).toHaveLength(3);
-    expect(cacheFiles(d)).not.toContain(orphan);
+    expect(cacheFiles(d)).toContain(orphan);
+    expect(
+      existsSync(`${d.root}/${PROV}/cache/${createHash("sha256").update("d\n").digest("hex")}`),
+    ).toBe(false);
   });
 });
 describe.skipIf(!gitAvailable())("provenance baseline in a git repository", () => {

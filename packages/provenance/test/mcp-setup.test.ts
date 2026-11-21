@@ -97,11 +97,15 @@ describe(
       expect(readFileSync(`${d.root}/${PROV}/provenance.mjs`)).toEqual(readFileSync(bundle));
       expect(existsSync(`${d.root}/.kiroignore`)).toBe(false);
       expect(existsSync(`${d.root}/.git/hooks/pre-commit`)).toBe(false);
+      const baselineBytes = readFileSync(`${d.root}/${PROV}/baseline.json`, "utf8");
+      d.write("later.txt", "created after the first call\n");
       const second = await client.callTool({
         name: "setup_provenance",
         arguments: { workspace: d.root },
       });
       const two = setupProvenanceOutput.parse(second.structuredContent);
+      expect(readFileSync(`${d.root}/${PROV}/baseline.json`, "utf8")).toBe(baselineBytes);
+      expect(readFileSync(`${d.root}/${PROV}/baseline.json`, "utf8")).not.toContain("later.txt");
       expect(two.written).toEqual([]);
       expect(two.replaced).toEqual([]);
       expect([...two.kept].sort()).toEqual([...one.written].sort());

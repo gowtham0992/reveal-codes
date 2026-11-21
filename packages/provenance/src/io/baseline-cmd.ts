@@ -1,8 +1,8 @@
 /**
- * `provenance baseline` (Req 6, design Baseline file): a Baseline_Entry for every Tracked_File
- * that has neither a Record nor an entry. Records, existing entries and their cache files stay as
- * they are, `at` is written once, no Record is created, and the Sessions_File is created when
- * absent. The cache holds only the text that git cannot give back (Req 5.19).
+ * `provenance baseline` (Req 6, design Baseline file): acts only when `baseline.json` does not
+ * exist, and then writes a Baseline_Entry for every Tracked_File that has no Record. When it
+ * exists nothing is added, written, rewritten or pruned; only an absent Sessions_File is created.
+ * `at` is written once and no Record is created. The cache holds only the text that git cannot give back (Req 5.19).
  */
 import { ok } from "@reveal-codes/engine";
 import type { Result } from "@reveal-codes/engine";
@@ -101,11 +101,11 @@ async function ensureSessions(deps: BaselineDeps, store: Store): Promise<void> {
   const written = await store.writeSessions(0);
   if (!written.ok) await deps.log.fault({ event: EVENT, path: null, reason: "write_failed" });
 }
-/** The entries for the files that have neither a Record nor an entry; skipped files are counted. */
-async function collect(deps: BaselineDeps, root: string, store: Store, base: Baseline | null) {
+/** The entries for the files that have no Record; skipped files are counted. */
+async function collect(deps: BaselineDeps, root: string, store: Store) {
   const list = await listCandidates(deps, root);
   const recorded = new Set(await listRecordPaths(deps, `${store.dir}/records`));
-  const todo = list.files.filter((f) => !recorded.has(f.path) && base?.files[f.path] === undefined);
+  const todo = list.files.filter((f) => !recorded.has(f.path));
   const { texts, skipped } = await readAll(deps, root, todo);
   const plan = await planEntries(deps, root, list.git, texts);
   return { ...plan, texts, skipped };
@@ -121,21 +121,20 @@ async function baselineLocked(
     await deps.log.fault({ event: EVENT, path: null, reason: existing.error.kind });
     return existing;
   }
-  const found = await collect(deps, root, store, existing.value);
+  if (existing.value !== null) {
+    // Baseline only once (Req 6.1, 6.2): an installed workspace is never re-baselined.
+    await ensureSessions(deps, store);
+    return ok({ added: 0, skipped: 0 });
+  }
+  const found = await collect(deps, root, store);
   await writeCacheFiles(deps, cache, found.texts, found.needed);
-  const next: Baseline = existing.value ?? {
+  const merged: Baseline = {
     version: 1,
     at: `${deps.clock.nowIso().slice(0, 19)}Z`,
-    files: {},
+    files: Object.fromEntries(found.entries),
   };
-  const merged: Baseline = {
-    ...next,
-    files: { ...next.files, ...Object.fromEntries(found.entries) },
-  };
-  if (existing.value === null || found.entries.size > 0) {
-    const written = await store.writeBaseline(merged);
-    if (!written.ok) return written;
-  }
+  const written = await store.writeBaseline(merged);
+  if (!written.ok) return written;
   await cache.prune(merged);
   await ensureSessions(deps, store);
   return ok({ added: found.entries.size, skipped: found.skipped });

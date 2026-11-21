@@ -1,8 +1,8 @@
-[DOC{v=1;n=0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.1,41,0,0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.2,29,0,0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.3,16,0,0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.4,794,0,0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.5,166,0,0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.6,43,0,0}][PST{t=2026-11-20T03:04:47Z}]/**
- * `provenance baseline` (Req 6, design Baseline file): a Baseline_Entry for every Tracked_File
- * that has neither a Record nor an entry. Records, existing entries and their cache files stay as
- * they are, `at` is written once, no Record is created, and the Sessions_File is created when
- * absent. The cache holds only the text that git cannot give back (Req 5.19).
+[DOC{v=1;n=0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.1,41,0,0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.2,29,0,0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.3,16,0,0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.4,794,0,0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.5,166,0,0;r=6.7 Close the gaps: baseline lock\, Property 16 prompt-then-stop sessions\, crash hand 2026-11-20T03:37:40Z.6,43,0,0;r=9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.1,280,0,0;r=9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.2,109,0,0;r=9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.3,249,0,0;r=9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.4,18,0,0;r=9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.5,33,0,0;r=9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.6,79,0,0}][PST{t=2026-11-20T03:04:47Z}]/**
+ * `provenance baseline` (Req 6, design Baseline file): a[AI:9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.1{t=2026-11-21T00:46:10.276Z}]cts only when `baseline.json` does not
+ * exist, and then writes a Baseline_Entry for every Tracked_File that has no Record. When it
+ * exists nothing is added, written, rewritten or pruned; only an absent Sessions_File is created.
+ * `at` is written once and no Record is created[PST{t=2026-11-20T03:04:47Z}]. The cache holds only the text that git cannot give back (Req 5.19).
  */
 import { ok } from "@reveal-codes/engine";
 import type { Result } from "@reveal-codes/engine";
@@ -101,11 +101,11 @@ async function ensureSessions(deps: BaselineDeps, store: Store): Promise<void> {
   const written = await store.writeSessions(0);
   if (!written.ok) await deps.log.fault({ event: EVENT, path: null, reason: "write_failed" });
 }
-/** The entries for the files that have neither a Record nor an entry; skipped files are counted. */
-async function collect(deps: BaselineDeps, root: string, store: Store, base: Baseline | null) {
+/** The entries for the files that have n[AI:9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.2{t=2026-11-21T00:46:10.276Z}]o Record; skipped files are counted. */
+async function collect(deps: BaselineDeps, root: string, store: Store[PST{t=2026-11-20T03:04:47Z}]) {
   const list = await listCandidates(deps, root);
   const recorded = new Set(await listRecordPaths(deps, `${store.dir}/records`));
-  const todo = list.files.filter((f) => !recorded.has(f.path) && base?.files\[f.path\] === undefined);
+  const todo = list.files.filter((f) => !recorded.has(f.path));
   const { texts, skipped } = await readAll(deps, root, todo);
   const plan = await planEntries(deps, root, list.git, texts);
   return { ...plan, texts, skipped };
@@ -121,21 +121,20 @@ async function collect(deps: BaselineDeps, root: string, store: Store, base: Bas
     await deps.log.fault({ event: EVENT, path: null, reason: existing.error.kind });
     return existing;
   }
-  const found = await collect(deps, root, store, existing.value);
+  [AI:9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.3{t=2026-11-21T00:46:10.276Z}]if (existing.value !== null) {
+    // Baseline only once (Req 6.1, 6.2): an installed workspace is never re-baselined.
+    await ensureSessions(deps, store);
+    return ok({ added: 0, skipped: 0 });
+  }
+  const found = await collect(deps, root, stor[PST{t=2026-11-20T03:04:47Z}]e);
   await writeCacheFiles(deps, cache, found.texts, found.needed);
-  const next: Baseline = existing.value ?? {
+  const [AI:9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.4{t=2026-11-21T00:46:10.276Z}]merged: Baseline =[PST{t=2026-11-20T03:04:47Z}] {
     version: 1,
     at: `${deps.clock.nowIso().slice(0, 19)}Z`,
-    files: {},
+    files: [AI:9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.5{t=2026-11-21T00:46:10.276Z}]Object.fromEntries(found.entries)[PST{t=2026-11-20T03:04:47Z}],
   };
-  const merged: Baseline = {
-    ...next,
-    files: { ...next.files, ...Object.fromEntries(found.entries) },
-  };
-  if (existing.value === null || found.entries.size > 0) {
-    const written = await store.writeBaseline(merged);
-    if (!written.ok) return written;
-  }
+  const [AI:9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.6{t=2026-11-21T00:46:10.276Z}]written = await store.writeBaseline(merged);
+  if (!written.ok) return written;[PST{t=2026-11-20T03:04:47Z}]
   await cache.prune(merged);
   await ensureSessions(deps, store);
   return ok({ added: found.entries.size, skipped: found.skipped });

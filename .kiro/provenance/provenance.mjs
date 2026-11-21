@@ -6290,10 +6290,10 @@ async function ensureSessions(deps, store) {
   const written = await store.writeSessions(0);
   if (!written.ok) await deps.log.fault({ event: EVENT, path: null, reason: "write_failed" });
 }
-async function collect(deps, root, store, base) {
+async function collect(deps, root, store) {
   const list = await listCandidates(deps, root);
   const recorded = new Set(await listRecordPaths2(deps, `${store.dir}/records`));
-  const todo = list.files.filter((f) => !recorded.has(f.path) && base?.files[f.path] === void 0);
+  const todo = list.files.filter((f) => !recorded.has(f.path));
   const { texts, skipped } = await readAll(deps, root, todo);
   const plan = await planEntries(deps, root, list.git, texts);
   return { ...plan, texts, skipped };
@@ -6305,21 +6305,19 @@ async function baselineLocked(deps, root, store) {
     await deps.log.fault({ event: EVENT, path: null, reason: existing2.error.kind });
     return existing2;
   }
-  const found = await collect(deps, root, store, existing2.value);
+  if (existing2.value !== null) {
+    await ensureSessions(deps, store);
+    return ok({ added: 0, skipped: 0 });
+  }
+  const found = await collect(deps, root, store);
   await writeCacheFiles(deps, cache, found.texts, found.needed);
-  const next = existing2.value ?? {
+  const merged = {
     version: 1,
     at: `${deps.clock.nowIso().slice(0, 19)}Z`,
-    files: {}
+    files: Object.fromEntries(found.entries)
   };
-  const merged = {
-    ...next,
-    files: { ...next.files, ...Object.fromEntries(found.entries) }
-  };
-  if (existing2.value === null || found.entries.size > 0) {
-    const written = await store.writeBaseline(merged);
-    if (!written.ok) return written;
-  }
+  const written = await store.writeBaseline(merged);
+  if (!written.ok) return written;
   await cache.prune(merged);
   await ensureSessions(deps, store);
   return ok({ added: found.entries.size, skipped: found.skipped });

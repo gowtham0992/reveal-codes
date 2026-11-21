@@ -960,6 +960,11 @@
         "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795063644992
+      },
+      {
+        "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795221711130
       }
     ],
     "10.2 Bundle freshness, tools from a copy outside the repository, and the MCP import cost": [
@@ -967,6 +972,11 @@
         "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795063645021
+      },
+      {
+        "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795221711167
       }
     ],
     "11.1 Static boundary tests": [
@@ -974,6 +984,11 @@
         "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795063645050
+      },
+      {
+        "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795221711248
       }
     ],
     "11.2 README section \"Reveal Codes for your own repository\"": [
@@ -981,6 +996,11 @@
         "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795063645078
+      },
+      {
+        "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795221711285
       }
     ],
     "11.3 `docs/KIRO_USAGE.md` and the steering files": [
@@ -988,6 +1008,11 @@
         "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795063645108
+      },
+      {
+        "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795221711325
       }
     ],
     "11.4 Complete the BUILD_LOG entry": [
@@ -995,6 +1020,11 @@
         "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795063645136
+      },
+      {
+        "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795221711386
       }
     ],
     "12.1 Final checkpoint - everything green and the record complete": [
@@ -1002,6 +1032,11 @@
         "executionId": "172e1aaf-5734-4d12-9694-6f33f96c434c",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795063645166
+      },
+      {
+        "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795221711425
       }
     ],
     "3. Package scaffold": [
@@ -1233,6 +1268,11 @@
         "executionId": "29d568bd-5d41-4510-9d88-3c9c4766e377",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795191443279
+      },
+      {
+        "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795221711204
       }
     ],
     "8. The MCP server": [
@@ -1247,6 +1287,23 @@
         "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
         "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
         "timestamp": 1795221582470
+      }
+    ],
+    "9.3 Setup never re-baselines an installed workspace": [
+      {
+        "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795221711055
+      },
+      {
+        "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795221716013
+      },
+      {
+        "executionId": "5ff4f3a1-de5d-42c2-8f68-73e79632d434",
+        "chatSessionId": "sess_02e56ad6-4884-40b8-936f-0756b2d7071e",
+        "timestamp": 1795221970110
       }
     ]
   }

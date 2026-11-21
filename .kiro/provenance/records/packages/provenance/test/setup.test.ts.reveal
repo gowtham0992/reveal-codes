@@ -1,10 +1,11 @@
-[DOC{v=1;n=0;r=9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.1,12230,0,0}][AI:9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.1{t=2026-11-20T16:40:48.005Z}]import { spawnSync } from "node:child_process";
+[DOC{v=1;n=0;r=9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.1,12230,0,0;r=9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.1,15,0,0;r=9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.2,114,0,0;r=9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.3,124,0,0;r=9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.4,2584,0,0}][AI:9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.1{t=2026-11-20T16:40:48.005Z}]import { spawnSync } from "node:child_process";
 import {
   chmodSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
-  readFileSync,
+  read[AI:9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.1{t=2026-11-21T00:46:10.276Z}]dirSync,
+  read[AI:9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.1{t=2026-11-20T16:40:48.005Z}]FileSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -95,8 +96,12 @@ describe.each(\[true, false\])("provenance setup (git: %s)", (git) => {
   it("a second run keeps every file and replaces nothing", async () => {
     const d = workspace(git);
     const first = await run(d);
-    const second = await run(d);
-    expect(second.written).toEqual(\[\]);
+[AI:9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.2{t=2026-11-21T00:46:10.276Z}]    const baseline = read(d, `${PROV}/baseline.json`);
+    d.write("later.txt", "created after the first run\\n");
+[AI:9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.1{t=2026-11-20T16:40:48.005Z}]    const second = await run(d);
+[AI:9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.3{t=2026-11-21T00:46:10.276Z}]    expect(read(d, `${PROV}/baseline.json`)).toBe(baseline);
+    expect(second.baseline).toEqual({ added: 0, skipped: 0 });
+[AI:9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.1{t=2026-11-20T16:40:48.005Z}]    expect(second.written).toEqual(\[\]);
     expect(second.replaced).toEqual(\[\]);
     expect(withoutCache(second.kept)).toEqual(\[
       ...FILES,
@@ -263,6 +268,53 @@ describe("the built Bundle, outside the repository with no node_modules", () => 
       cwd: d.root,
       encoding: "utf8",
     });
-    expect(wrapped.status).toBe(0);
+    expect(wrapped.status).toBe(0[AI:9.3 Setup never re-baselines an installed workspace 2026-11-21T00:41:55Z.4{t=2026-11-21T00:46:10.276Z}]);
+  }, 60_000);
+  it("setup on an installed workspace changes nothing under baseline and cache, so a new file is recorded by the next event (\[HUM\] outside a window, \[AI\] inside one)", () => {
+    const out = mkdtempSync(join(tmpdir(), "reveal-bundle-"));
+    extra.push(out);
+    const built = spawnSync("node", \["scripts/build-power.mjs", "--power", "provenance", out\], {
+      cwd: REPO,
+      encoding: "utf8",
+    });
+    expect(built.status).toBe(0);
+    const outside = join(out, "server", "provenance.mjs");
+    const d = makeTempDir();
+    dir = d;
+    d.git("init", "-q");
+    d.write("a.txt", "alpha\\n");
+    const node = (args: string\[\], input?: string) =>
+      spawnSync("node", args, { cwd: d.root, encoding: "utf8", input });
+    expect(node(\[outside, "setup"\]).status).toBe(0);
+    d.git("add", "-A");
+    d.git("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "installed");
+    const installed = `${d.root}/${PROV}/provenance.mjs`;
+    d.write("outside.txt", "written before any window\\n");
+    const baseline = read(d, `${PROV}/baseline.json`);
+    const cache = readdirSync(`${d.root}/${PROV}/cache`).sort();
+    const cacheBytes = cache.map((n) => readFileSync(`${d.root}/${PROV}/cache/${n}`, "utf8"));
+    const again = node(\[installed, "setup"\]);
+    expect(again.status).toBe(0);
+    expect(again.stdout).toContain("baseline: 0 added, 0 skipped");
+    expect(again.stdout).toContain(`  ${PROV}/baseline.json\\n`);
+    expect(again.stdout.startsWith("written: none\\nreplaced: none\\nkept:\\n")).toBe(true);
+    expect(read(d, `${PROV}/baseline.json`)).toBe(baseline);
+    expect(readdirSync(`${d.root}/${PROV}/cache`).sort()).toEqual(cache);
+    expect(cache.map((n) => readFileSync(`${d.root}/${PROV}/cache/${n}`, "utf8"))).toEqual(
+      cacheBytes,
+    );
+    expect(d.git("status", "--porcelain", "--", `${PROV}/baseline.json`)).toBe("");
+    const send = (event: string, hook: string) =>
+      node(
+        \[installed, "record", event\],
+        JSON.stringify({ session_id: "setup-test-0001", hook_event_name: hook, cwd: d.root }),
+      );
+    expect(send("promptSubmit", "UserPromptSubmit").status).toBe(0);
+    d.write("inside.txt", "written inside the window\\n");
+    expect(send("agentStop", "Stop").status).toBe(0);
+    const reveal = (file: string) => node(\[installed, "reveal", file\]).stdout;
+    expect(reveal("outside.txt")).toContain("\[HUM\]written before any window");
+    expect(reveal("outside.txt")).not.toMatch(/^\\\[AI\[^\\n\]*written before/mu);
+    expect(reveal("inside.txt")).toMatch(/\\\[AI:\[^\\\]\]+\\\]written inside the window/u[AI:9.1 `setup.ts` and the `provenance setup` command 2026-11-20T16:34:17Z.1{t=2026-11-20T16:40:48.005Z}]);
   }, 60_000);
 });
