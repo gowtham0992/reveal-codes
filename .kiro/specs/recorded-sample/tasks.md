@@ -36,7 +36,7 @@ Conventions for every task:
     - _Requirements: 8.1_
 
 - [ ] 3. Load demo motion installs the recording
-  - [-] 3.1 Wire `loadSample` for key `demo`
+  - [x] 3.1 Wire `loadSample` for key `demo`
     - Add `RECORDED_SAMPLE_LOADED` to `apps/web/src/notices.ts`. In `use-document-actions.tsx` add `holder` to `Deps`, make the `demo` path fetch `recordedSample()`, `deserialise`, `installRestored`, then dispatch the notice; any failure dispatches `DEMO_FAILED`. Pass `a.holder` in `app-shell.tsx`. Keep the Confirm_Dialog copy as it is. Check the empty-page link's click handler: a click must call the same action as the Toolbar button (preventDefault, same confirm, installs the recording); keep its `href` to `demo-motion.txt` only as the no-script fallback. Change the handler if it does not.
     - Run `pnpm exec vitest run --project web apps/web/test/recorded-sample.test.ts`.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.6, 3.8_
