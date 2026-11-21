@@ -33,8 +33,8 @@ export function routeFetch(): RouteFetch {
       );
     }
     if (opinion?.[1] !== undefined) return handleOpinion(decodeURIComponent(opinion[1]), deps);
-    if (input === "/demo-motion.txt") {
-      const file = resolve(__dirname, "../../../../packages/engine/fixtures/demo-motion.txt");
+    if (input === "/demo-motion.txt" || input === "/demo-motion.recorded.json") {
+      const file = resolve(__dirname, `../../../../packages/engine/fixtures${input}`);
       return new Response(readFileSync(file, "utf8"));
     }
     return new Response("not found", { status: 404 });

@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.1,185,0,0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.2,185,0,0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.3,241,0,0;r=2.1 Add `recordedSample` to the API client 2026-11-21T20:22:32Z.1,185,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.1,185,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.2,185,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.3,185,0,0;r=2.3 Property 1: install then save is the identity 2026-11-21T20:25:39Z.1,185,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.1,185,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.2,185,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.3,216,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.4,185,0,0;r=3.2 Component tests for the load 2026-11-21T20:32:15Z.1,185,0,0;r=3.2 Component tests for the load 2026-11-21T20:32:15Z.2,185,0,0;r=3.2 Component tests for the load 2026-11-21T20:32:15Z.3,243,0,0;r=4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.1,185,0,0;r=4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.2,185,0,0;r=4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.3,232,0,0;r=5.1 Docs 2026-11-21T20:34:26Z.1,185,0,0;r=5.1 Docs 2026-11-21T20:34:26Z.2,185,0,0;r=5.1 Docs 2026-11-21T20:34:26Z.3,239,0,0}][HUM{t=2026-11-21T20:20:18.039Z}]{
+[DOC{v=1;n=0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.1,185,0,0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.2,185,0,0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.3,241,0,0;r=2.1 Add `recordedSample` to the API client 2026-11-21T20:22:32Z.1,185,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.1,185,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.2,185,0,0;r=2.2 Share the restore step 2026-11-21T20:22:33Z.3,185,0,0;r=2.3 Property 1: install then save is the identity 2026-11-21T20:25:39Z.1,185,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.1,185,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.2,185,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.3,216,0,0;r=3.1 Wire `loadSample` for key `demo` 2026-11-21T20:25:39Z.4,185,0,0;r=3.2 Component tests for the load 2026-11-21T20:32:15Z.1,185,0,0;r=3.2 Component tests for the load 2026-11-21T20:32:15Z.2,185,0,0;r=3.2 Component tests for the load 2026-11-21T20:32:15Z.3,243,0,0;r=4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.1,185,0,0;r=4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.2,185,0,0;r=4.1 Point the Load demo tests at the recording 2026-11-21T20:32:15Z.3,232,0,0;r=5.1 Docs 2026-11-21T20:34:26Z.1,185,0,0;r=5.1 Docs 2026-11-21T20:34:26Z.2,185,0,0;r=5.1 Docs 2026-11-21T20:34:26Z.3,239,0,0;r=6.1 Run the full checks 2026-11-21T20:35:27Z.1,185,0,0}][HUM{t=2026-11-21T20:20:18.039Z}]{
   "pbtResults": {},
   "executionHistory": {
     "1.1 Keep the file out of Prettier and copy it to `public`": \[
@@ -142,7 +142,12 @@
         "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
         "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
         "timestamp": 1795292417694
-      }
+[AI:6.1 Run the full checks 2026-11-21T20:35:27Z.1{t=2026-11-21T20:43:08.449Z}]      },
+      {
+        "executionId": "ad31ecf3-9e01-4729-b5fb-bc9a9c885357",
+        "chatSessionId": "sess_e0dbea07-a7bd-4f9a-b683-8b6d04e6163b",
+        "timestamp": 1795293327363
+[HUM{t=2026-11-21T20:20:18.039Z}]      }
 [AI:1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.3{t=2026-11-21T20:22:30.770Z}]    \],
     "1. Protect and deliver the recorded file": \[
       {

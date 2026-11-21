@@ -1,0 +1,43 @@
+[DOC{v=1;n=0;r=6.1 Run the full checks 2026-11-21T20:35:27Z.1,130,0,0}][PST{t=2026-11-20T03:04:47Z}]import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { handleOpinion } from "../../src/server/opinion-route";
+import { handleVerify } from "../../src/server/verify-route";
+import type { FetchFn } from "../../src/client/api";
+import { fixturesDeps } from "./route-deps";
+
+export type RecordedRequest = Readonly<{ url: string; method: string; body: string | null }>;
+
+export type RouteFetch = Readonly<{
+  fetch: FetchFn;
+  requests: RecordedRequest\[\];
+  /** Runs before each response is returned; lets a test act mid-flow. */
+  onRequest: { current: ((request: RecordedRequest) => void) | null };
+}>;
+
+const OPINION = /^\\/api\\/opinion\\/(\[^/\]+)$/;
+
+/** An in-process fake server: the real route handlers over recorded fixtures. */
+export function routeFetch(): RouteFetch {
+  const deps = fixturesDeps();
+  const requests: RecordedRequest\[\] = \[\];
+  const onRequest: RouteFetch\["onRequest"\] = { current: null };
+  const fetchFn: FetchFn = async (input, init) => {
+    const recorded = { url: input, method: init?.method ?? "GET", body: init?.body ?? null };
+    requests.push(recorded);
+    onRequest.current?.(recorded);
+    const opinion = OPINION.exec(input);
+    if (input === "/api/verify") {
+      return handleVerify(
+        new Request("http://localhost/api/verify", { method: "POST", body: init?.body ?? "" }),
+        deps,
+      );
+    }
+    if (opinion?.\[1\] !== undefined) return handleOpinion(decodeURIComponent(opinion\[1\]), deps);
+    if (input === "/demo-motion.txt"[AI:6.1 Run the full checks 2026-11-21T20:35:27Z.1{t=2026-11-21T20:43:08.449Z}] || input === "/demo-motion.recorded.json") {
+      const file = resolve(__dirname, `../../../../packages/engine/fixtures${input}`[PST{t=2026-11-20T03:04:47Z}]);
+      return new Response(readFileSync(file, "utf8"));
+    }
+    return new Response("not found", { status: 404 });
+  };
+  return { fetch: fetchFn, requests, onRequest };
+}

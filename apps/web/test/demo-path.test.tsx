@@ -77,7 +77,7 @@ async function loadAndOpenPane(): Promise<void> {
     await Promise.resolve();
   });
   await waitFor(() => {
-    expect(button(/^Export/).textContent).toBe("Export (7 blocking)");
+    expect(button(/^Export/).textContent).toBe("Export (4 blocking)");
   });
   // The Pane opens on first visit; toggle it only when it is not already open.
   if (screen.queryByRole("region", { name: "Reveal Codes" }) === null) {
@@ -85,11 +85,13 @@ async function loadAndOpenPane(): Promise<void> {
       fireEvent.keyDown(document.body, { key: "F3", altKey: true, bubbles: true });
     });
   }
+  // The recorded draft arrives checked, with every origin.
   const before = codes();
   expect(count(before, "[PST]")).toBeGreaterThan(0);
-  expect(before.some((c) => c.startsWith("[AI"))).toBe(false);
-  expect(count(before, "[CIT …]")).toBe(7);
-  expect(count(before, "[QUO …]")).toBe(2);
+  expect(before.some((c) => c.startsWith("[AI:"))).toBe(true);
+  expect(before.some((c) => c.startsWith("[AI>HUM:"))).toBe(true);
+  expect(count(before, "[CIT ✘]")).toBe(4);
+  expect(count(before, "[CIT …]")).toBe(0);
 }
 
 async function verifyAndWait(): Promise<void> {
@@ -176,11 +178,14 @@ function expectOnlyCitationsLeft(mode: ModeApi): void {
 }
 
 describe("Demo path _Requirements: 21.1, 21.2, 21.3, 21.4, 21.5, 21.7, 20.7_", () => {
-  it("walks Load, Alt-F3, Verify, Go, Override with 7, 4, 3 blocking and no quote text on the wire", async () => {
+  it("walks Load, Alt-F3, Verify, Go, Override with 4, 4, 3 blocking and no quote text on the wire", async () => {
     const mode = await mountDemo();
     expect(button("Verify").disabled).toBe(true);
     await loadAndOpenPane();
-    expect(screen.getByRole("status", { name: "Verify result" }).textContent).toBe("");
+    // The recorded results show before any Verify (recorded-sample Requirement 3.5).
+    expect(screen.getByRole("status", { name: "Verify result" }).textContent).toContain(
+      "Citations: 2 found · 3 not found",
+    );
     await verifyAndWait();
     expectRedAndGreenCodes();
     expectIssuesAndGo();

@@ -6,6 +6,11 @@ import { PROVENANCE_ROOT, REPO_ROOT } from "../support/scan.js";
 
 /** The commit this spec started from (design, "Baseline of the repository"). */
 const BASE = "d563a75";
+/**
+ * The last commit of this spec. Later specs (recorded-sample) change apps/web on purpose, so the
+ * boundary of this spec is checked over its own range, not against the working tree.
+ */
+const END = "d2c8811";
 
 function git(...args: string[]): string {
   return execFileSync("git", args, { cwd: REPO_ROOT, encoding: "utf8" });
@@ -30,6 +35,11 @@ function changed(...paths: string[]): string[] {
   return [...new Set([...diff, ...fresh])].filter((p) => p !== "").sort();
 }
 
+/** Paths under `paths` that this spec's own commits changed, from BASE to END. */
+function changedBySpec(...paths: string[]): string[] {
+  const diff = git("diff", "--name-only", BASE, END, "--", ...paths).split("\n");
+  return diff.filter((p) => p !== "").sort();
+}
 const readJson = (path: string): Record<string, unknown> =>
   JSON.parse(readFileSync(path, "utf8")) as Record<string, unknown>;
 
@@ -56,7 +66,7 @@ describe("repository boundaries _Requirements: 1.2, 1.3, 1.4, 1.10, 1.11, 3.25_"
   });
 
   withBase("no file changed under apps/web, packages/verifier or packages/engine/src", () => {
-    expect(changed("apps/web", "packages/verifier", "packages/engine/src")).toEqual([]);
+    expect(changedBySpec("apps/web", "packages/verifier", "packages/engine/src")).toEqual([]);
   });
 
   withBase("no file changed under data, scripts/commit-task.sh or pnpm-workspace.yaml", () => {

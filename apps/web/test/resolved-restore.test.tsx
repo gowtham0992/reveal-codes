@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 // Saved display information: restore, edit, replacement, gate, Save a copy, print, /check.
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { createDocument } from "@reveal-codes/engine";
 import type { IssueKey } from "@reveal-codes/engine";
 import type { DisplayInfo } from "@reveal-codes/verifier/link";
@@ -119,7 +121,7 @@ describe("New and a sample in the shell _Requirements: 25.6, 25.12_", () => {
       await Promise.resolve();
     });
   }
-  it("New, then Load demo motion, show no Resolved_List and store no entry", async () => {
+  it("New, then Load demo motion, keep only the recorded sample's entries", async () => {
     const storage = seeded();
     const m = await mountShell(storage);
     await verify();
@@ -141,8 +143,14 @@ describe("New and a sample in the shell _Requirements: 25.6, 25.12_", () => {
       );
     });
     await wait300(m);
-    expect(section()).toBeNull();
-    expect(storedResolved(storage)).toBeUndefined();
+    // The recorded sample is a restored Draft_Value: its own entries come with it (25.6).
+    const recorded = JSON.parse(
+      readFileSync(
+        resolve(__dirname, "../../../packages/engine/fixtures/demo-motion.recorded.json"),
+        "utf8",
+      ),
+    ) as Record<string, unknown>;
+    expect(storedResolved(storage)).toEqual(recorded["resolved"]);
   });
 });
 

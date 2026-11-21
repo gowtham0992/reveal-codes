@@ -113,12 +113,6 @@ async function flush(m: Mounted): Promise<void> {
   });
 }
 
-function savedDocument(m: Mounted): Document {
-  const restored = deserialise(m.storage.getItem(AUTOSAVE_KEY));
-  if (!restored.ok) throw new Error("no saved document");
-  return restored.value.document;
-}
-
 function noticeText(): string {
   return within(screen.getByRole("toolbar")).getByRole("status").textContent;
 }
