@@ -105,7 +105,7 @@ Run these from the workspace root. Each command has two forms; the second runs w
 
 In this repository, `pnpm reveal <file>` runs the same command from the sources.
 
-This is an excerpt of `pnpm -s reveal packages/provenance/src/core/windows.ts`, piped so that it is plain, run in this repository on 2026-11-21: lines 1 to 8, then lines 98 to 108 (the bracketed line marks the cut). The text is unedited. The file was already in the repository at install, so it reads `[PST]`; the `[AI:6.6]` text was written by the agent in task 6.6.
+This is an excerpt of `pnpm -s reveal packages/provenance/src/core/windows.ts`, piped so that it is plain, run in this repository on 2026-11-21: lines 1 to 8, then lines 99 to 108 (the bracketed line marks the cut). The text is unedited. The file was already in the repository at install, so it reads `[PST]`; the `[AI:6.6]` text was written by the agent in task 6.6.
 
 ```text
 Reveal Codes: packages/provenance/src/core/windows.ts
@@ -116,8 +116,7 @@ Reveal Codes: packages/provenance/src/core/windows.ts
 Runs in this file
   6.6  One window per task: duplicate preTask and postTask by name  opened 2026-11-20T03:31:04Z  5 hunks
 
-[lines 9 to 97 left out here]
-    if (top !== null && (best === null || top.order > best.order)) best = top;
+[lines 9 to 98 left out here]
   }
   return best;
 }

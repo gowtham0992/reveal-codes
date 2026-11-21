@@ -1,0 +1,40 @@
+[DOC{v=1;n=0;r=11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.1,39,0,0}][PST{t=2026-11-20T03:04:47Z}]name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+[AI:11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.1{t=2026-11-21T19:06:58.795Z}]        with:
+          fetch-depth: 0
+[PST{t=2026-11-20T03:04:47Z}]      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm kiro:check
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm test:pbt
+  # Clean checkout: install and the web build only, so an earlier `pnpm typecheck`
+  # (which leaves the packages' declaration output behind) cannot satisfy it.
+  clean-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @reveal-codes/web build

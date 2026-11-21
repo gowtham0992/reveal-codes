@@ -2,7 +2,6 @@
   "version": 1,
   "at": "2026-11-20T03:04:47Z",
   "files": {
-    ".github/workflows/ci.yml": { "sha256": "0b6e1c05ca3c031580e7b512d9cac47d459a9b36e576d96675c195cd8fc26b71", "blob": "75cf7f2605aa6e3357b1f31cdf7959f1e7767ab7" },
     ".gitignore": { "sha256": "467016600cb8fbc64ec71de3836f9ff1cc99d3edac9f494a1bc3ac4ddc6d801f", "blob": "e4a0825b7f0e292d08d3afec37e73440f22d4502" },
     ".kiro/agents/orders-curator.md": { "sha256": "cb2452e723149fc6a5b03e54719a89f85683f51db0fb3c51b2c662d9018a19a2", "blob": "c5fd2fb5f50e40c36ca43ff681572ac8fc9a8a6e" },
     ".kiro/agents/release-checker.md": { "sha256": "c599ef5391a0bb14b8c41553816939528aea10acf6fd906630fa07135297d790", "blob": "884163e30ec471e33dafc44e2f4be5109b6a89f1" },

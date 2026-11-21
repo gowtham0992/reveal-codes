@@ -1,4 +1,4 @@
-[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,292,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1,10755,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2,321,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.3,28,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.4,55,0,0}][PST{t=2026-11-20T03:04:47Z}]<img src="docs/images/mark.svg" width="48" height="48" alt="Reveal Codes mark: a page above a codes pane, with a failing code between brackets">
+[DOC{v=1;n=0;r=10.4 Hooks enabled\, hook-event check\, no-event warning 2026-11-21T05:45:01Z.1,292,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1,10755,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2,321,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.3,28,0,0;r=11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.4,55,0,0;r=11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.1,1,0,0;r=11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.2,16,0,0}][PST{t=2026-11-20T03:04:47Z}]<img src="docs/images/mark.svg" width="48" height="48" alt="Reveal Codes mark: a page above a codes pane, with a failing code between brackets">
 
 # Reveal Codes
 
@@ -105,7 +105,7 @@ Run these from the workspace root. Each command has two forms; the second runs w
 
 In this repository, `pnpm reveal <file>` runs the same command from the sources.
 
-This is [AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2{t=2026-11-21T18:59:22.313Z}]an excerpt of `pnpm -s reveal packages/provenance/src/core/windows.ts`, piped so that it is plain, run in this repository on 2026-11-21: lines 1 to 8, then lines 98 to 108 (the bracketed line marks the cut). The text is unedited. The file was already in the repository at install, so it reads `\[PST\]`; the `\[AI:6.6\]` text[AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}] was written by the agent in task 6.6.
+This is [AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2{t=2026-11-21T18:59:22.313Z}]an excerpt of `pnpm -s reveal packages/provenance/src/core/windows.ts`, piped so that it is plain, run in this repository on 2026-11-21: lines 1 to 8, then lines 9[AI:11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.1{t=2026-11-21T19:08:13.263Z}]9[AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.2{t=2026-11-21T18:59:22.313Z}] to 108 (the bracketed line marks the cut). The text is unedited. The file was already in the repository at install, so it reads `\[PST\]`; the `\[AI:6.6\]` text[AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}] was written by the agent in task 6.6.
 
 ```text
 Reveal Codes: packages/provenance/src/core/windows.ts
@@ -116,8 +116,7 @@ Reveal Codes: packages/provenance/src/core/windows.ts
 Runs in this file
   6.6  One window per task: duplicate preTask and postTask by name  opened 2026-11-20T03:31:04Z  5 hunks
 
-\[[AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.3{t=2026-11-21T18:59:22.313Z}]lines 9 to 97 left out here\][AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}]
-    if (top !== null && (best === null || top.order > best.order)) best = top;
+\[[AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.3{t=2026-11-21T18:59:22.313Z}]lines 9 to 9[AI:11.4 Complete the BUILD_LOG entry 2026-11-21T18:59:22Z.2{t=2026-11-21T19:08:13.263Z}]8 left out here\][AI:11.2 README section "Reveal Codes for your own repository" 2026-11-21T18:48:45Z.1{t=2026-11-21T18:57:43.165Z}]
   }
   return best;
 }

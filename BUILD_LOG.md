@@ -1039,3 +1039,23 @@ Nothing was pushed.
 - **The Power must be imported again after a rebuild** (observed 2026-11-21; Requirement 13, criterion 16): Kiro copies an imported Power to `~/.kiro/powers/installed/<name>`, that copy keeps the old Bundle, so remove the Power and import it again. The Power README states it.
 - **Property 2's reference model follows the widening (wording unchanged); the stale count counts Changed_Characters from trimmed Hunks.** The reference in `test/support/attribution-check.ts` now takes the slid common affixes widened to whole lines, written apart from `trim.ts`. `unrecordedCharacters` in `src/io/reveal-file.ts` sums the trimmed Hunks, so the whole-line Hunks no longer overstate Requirement 9.10.
 - **Latest line start for ambiguous edits** (task 10.11, 2026-11-21; design Resolved point 28, Decision 30): the CLI walk found that the earliest-line-start rule attributed the previous block's closing line: inserting `function toKelvin(celsius) {⏎  return celsius + 273.15;⏎}⏎⏎` between two functions showed the previous function's `}` as `[AI:turn]` and the new `}` as `[PST]`. The rule now takes the latest line start, as git does. **Where the cause was:** from the prefix-maximal position, `slideStretch` already stopped at the first line start going left, which is the latest one. The walk's view came from the per-Hunk path. When another edit in the same turn (for example a changed header line) keeps the whole-text trim from isolating the block, the line difference places the inserted lines at the earliest line start, and `trimHunk` took that Hunk position as prefix-maximal. **Fix:** `trimHunk` now reads the Hunk together with the unchanged old text up to the next Hunk (`trimHunks`), so its prefix-maximal position is the one the text allows. If the slide from there reaches no line start (a surrogate pair blocks the step, the shrunk Property 18 counterexample now kept as an example in `test/update.slide.test.ts`), it trims within the Hunk as before. Examples in `test/trim.test.ts`, `test/update.slide.test.ts` (new) and `test/update.widen.record.test.ts`, LF and CR LF, single-edit and two-edit shapes; no earlier test was edited. Properties 2, 3, 17 and 18 hold as worded. **Property 2's reference changed** (user's choice, 2026-11-21): at seed 962335488 it rejected an inserted `⏎` slid through the whole-text suffix (old `e…;⏎⏎`, new `⏎e…;⏎⏎⏎`), because it fixed every suffix character at its place. A leading stretch of the suffix may now hold equal characters the event inserted, and every later suffix character is still checked at its place. Property 17's normalisation now places the minimal stretch at the latest line start of its set, and the generators of Properties 17 and 18 add the toKelvin shape (new lines followed by a copy of the lines above). Property 16 fails at seed 2090571658, path `39:262:0:3:2`, with `trim.ts` from HEAD as well, so it was failing before this change; still open.
+
+### What was built (task 11.4)
+
+The Recorder runs from four Kiro hooks. `reveal <file>`, `reveal --summary`, `reveal --check` and `reveal --record` print and maintain the codes. The MCP server has five tools. The Power `powers/provenance` carries the Bundle and two skills, and it is installed in this repository from task 6.3.
+
+### Where Kiro got wrong and what fixed it (task 11.4)
+
+- The sections above hold each case: hook field `timeout_ms` (fixed in 2.1), probe trigger name and environment-split captures (1.3), Property 17 changes (1.3 and 10.8), windows opened together (6.6), setup re-baselining (9.3), the five findings of the walk (10.4 to 10.7), whole-line widening (10.8) and latest line start (10.11).
+- The measured times are in "Recorder times (task 6.4)" and "MCP import cost on the hook path (task 10.2)"; they are not repeated here.
+
+### Task 11.1 notes
+
+- **Property 16 oracle fix:** an entry-none file whose text equals a cached file's text is not lost. The oracle counted it as lost before.
+- **`arb-dirs.ts` was split** into `arb-scenario.ts` for the 300-line module limit.
+- **Shallow clone:** CI's checkout is shallow, so the base-commit check in `repository.test.ts` fails in CI unless `fetch-depth: 0` is set. Least-code choice: one line, `fetch-depth: 0`, added to the checkout step of the `check` job in `.github/workflows/ci.yml`.
+
+### Skipped (task 11.4)
+
+- No boundary test beyond the two files of 11.1.
+- The README install section was written last.
