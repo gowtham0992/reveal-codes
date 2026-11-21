@@ -1,0 +1,32 @@
+[DOC{v=1;n=0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.1,42,0,0}][PST{t=2026-11-20T03:04:47Z}]# .kiro/ is tracked on purpose: nothing under it may be ignored (steering, specs, hooks, agents, MCP settings).
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+apps/web/public/demo-motion.txt
+apps/web/public/avianca-citations.txt
+[AI:1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.1{t=2026-11-21T20:22:22.497Z}]apps/web/public/demo-motion.recorded.json
+[PST{t=2026-11-20T03:04:47Z}]
+# Environment: never commit secrets, but do commit .env.example
+.env
+.env.*
+!.env.example
+
+# Logs and OS files
+*.log
+.DS_Store
+coverage/
+# Stray declaration emit of the root vitest config (not produced by tsc -b)
+/vitest.config.d.ts
+# Declaration files are never committed (tsc -b writes to dist/); this one is hand-written
+*.d.ts
+!apps/web/src/css-modules.d.ts

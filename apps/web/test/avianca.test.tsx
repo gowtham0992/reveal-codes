@@ -117,6 +117,8 @@ describe("copy-demo with no argument _Requirements: 10.6_", () => {
     expect(copied.equals(readFileSync(FIXTURE))).toBe(true);
     const demo = readFileSync(join(__dirname, "../public/demo-motion.txt"));
     expect(demo.equals(Buffer.from(DEMO, "utf8"))).toBe(true);
+    const recorded = readFileSync(join(__dirname, "../public/demo-motion.recorded.json"));
+    expect(recorded.equals(readFileSync(join(FIXTURE, "../demo-motion.recorded.json")))).toBe(true);
   });
 
   it("keeps the explicit-argument behaviour", () => {

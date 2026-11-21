@@ -1,0 +1,41 @@
+[DOC{v=1;n=0;r=1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.1,98,0,0}][PST{t=2026-11-20T03:04:47Z}]import { copyFileSync, existsSync, mkdirSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+type CopyResult = Readonly<{ ok: true; value: undefined }> | Readonly<{ ok: false; error: string }>;
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const FIXTURES = resolve(HERE, "../../../packages/engine/fixtures");
+const PUBLIC = resolve(HERE, "../public");
+const DEFAULT_PAIRS: readonly (readonly \[string, string\])\[\] = \[
+  \[resolve(FIXTURES, "demo-motion.txt"), resolve(PUBLIC, "demo-motion.txt")\],
+  \[resolve(FIXTURES, "avianca-citations.txt"), resolve(PUBLIC, "avianca-citations.txt")\],
+[AI:1.1 Keep the file out of Prettier and copy it to `public` 2026-11-21T20:20:21Z.1{t=2026-11-21T20:22:22.497Z}]  \[resolve(FIXTURES, "demo-motion.recorded.json"), resolve(PUBLIC, "demo-motion.recorded.json")\],
+[PST{t=2026-11-20T03:04:47Z}]\];
+
+/** Copies the demo motion byte for byte, creating the destination directory. */
+export function copyDemo(src: string, dest: string): CopyResult {
+  if (!existsSync(src)) return { ok: false, error: `Demo motion source is missing: ${src}` };
+  mkdirSync(dirname(dest), { recursive: true });
+  copyFileSync(src, dest);
+  return { ok: true, value: undefined };
+}
+
+function main(argv: readonly string\[\]): number {
+  const \[src, dest\] = argv;
+  const pairs =
+    src === undefined ? DEFAULT_PAIRS : \[\[src, dest ?? DEFAULT_PAIRS\[0\]?.\[1\] ?? ""\] as const\];
+  let code = 0;
+  for (const \[from, to\] of pairs) {
+    const result = copyDemo(from, to);
+    if (result.ok) continue;
+    process.stderr.write(`copy-demo: ${result.error}\\n`);
+    code = 1;
+  }
+  return code;
+}
+
+const entry = process.argv\[1\];
+if (entry !== undefined && resolve(entry) === fileURLToPath(import.meta.url)) {
+  process.exitCode = main(process.argv.slice(2));
+}

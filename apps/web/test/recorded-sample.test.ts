@@ -1,0 +1,125 @@
+import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
+import type { Document, Origin } from "@reveal-codes/engine";
+import { deserialise } from "../src/persist";
+import type { Restored } from "../src/persist";
+import { handleVerify } from "../src/server/verify-route";
+import type { FullRecord } from "../src/server/verify-route";
+import { fixturesDeps } from "./support/route-deps";
+
+const FILE = join(__dirname, "../../../packages/engine/fixtures/demo-motion.recorded.json");
+const DIGEST = "61db329c698fb01b64777ad90b681b0e73682382c95ca04b9a1423ef7c2a2c0e";
+
+function bytes(): Buffer {
+  return readFileSync(FILE);
+}
+
+function restored(): Restored {
+  const result = deserialise(bytes().toString("utf8"));
+  if (!result.ok) throw new Error(`recorded sample did not restore: ${result.error.kind}`);
+  return result.value;
+}
+
+function fullRecords(doc: Document): readonly FullRecord[] {
+  return doc.citations.filter((c): c is FullRecord => c.kind === "full");
+}
+
+describe("Recorded_Sample file _Requirements: 1.1, 1.2, 1.4_", () => {
+  it("is byte-identical to the pinned digest and size", () => {
+    expect(bytes().length).toBe(5028);
+    expect(createHash("sha256").update(bytes()).digest("hex")).toBe(DIGEST);
+  });
+
+  it("restores through deserialise with no error", () => {
+    expect(deserialise(bytes().toString("utf8")).ok).toBe(true);
+  });
+
+  it("carries no Declaration", () => {
+    expect(restored().declaration).toBeNull();
+    const raw: unknown = JSON.parse(bytes().toString("utf8"));
+    expect(Object.keys(raw as object)).not.toContain("declaration");
+  });
+});
+
+describe("Recorded_Sample content _Requirements: 2.1, 2.2, 2.3, 2.4_", () => {
+  it("holds a span of each origin HUM, PST, AI and AI>HUM", () => {
+    const origins = new Set<Origin>(restored().document.spans.map((s) => s.provenance.origin));
+    for (const origin of ["HUM", "PST", "AI", "AI>HUM"] as const) {
+      expect(origins.has(origin), origin).toBe(true);
+    }
+  });
+
+  it("holds a verified citation, a not-found citation and a quotation not in the opinion", () => {
+    const { document } = restored();
+    const statuses = fullRecords(document).map((c) => c.result.status);
+    expect(statuses).toContain("verified");
+    expect(statuses).toContain("not_found");
+    expect(document.quotes.map((q) => q.result.status)).toContain("mismatch");
+  });
+
+  it("holds a Run_Log entry that names a model", () => {
+    expect(restored().runLog.some((r) => typeof r.modelId === "string" && r.modelId !== "")).toBe(
+      true,
+    );
+  });
+
+  it("holds a Check_Date", () => {
+    expect(restored().verifiedAt).toBe("2026-11-21T19:56:41.891Z");
+  });
+});
+
+describe("Demo_Mode verify of the Recorded_Sample _Requirements: 4.2_", () => {
+  it("resolves every full citation from the Verifier fixtures with no gap", async () => {
+    const records = fullRecords(restored().document);
+    expect(records.length).toBe(5);
+    const request = new Request("http://localhost/api/verify", {
+      method: "POST",
+      body: JSON.stringify({ records }),
+    });
+    const res = await handleVerify(request, fixturesDeps());
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { results: [string, { status: string }][] };
+    const byKey = new Map(body.results);
+    for (const record of records) {
+      const fresh = byKey.get(record.key)?.status;
+      expect(fresh, record.citation.text).toBeDefined();
+      expect(fresh, record.citation.text).not.toBe("unchecked");
+      expect(fresh, record.citation.text).toBe(record.result.status);
+    }
+  });
+});
+
+describe("copy-demo of the Recorded_Sample _Requirements: 6.3_", () => {
+  const dirs: string[] = [];
+  afterEach(() => {
+    for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true });
+  });
+
+  it("copies the file byte for byte to public, and exits zero", () => {
+    const run = spawnSync(
+      process.execPath,
+      ["--import", "jiti/register", join(__dirname, "../scripts/copy-demo.ts")],
+      { encoding: "utf8", cwd: join(__dirname, "..") },
+    );
+    expect(run.status).toBe(0);
+    const copied = readFileSync(join(__dirname, "../public/demo-motion.recorded.json"));
+    expect(copied.equals(bytes())).toBe(true);
+  });
+
+  it("copies to an explicit destination byte for byte", () => {
+    const dir = mkdtempSync(join(tmpdir(), "recorded-copy-"));
+    dirs.push(dir);
+    const dest = join(dir, "out.json");
+    const run = spawnSync(
+      process.execPath,
+      ["--import", "jiti/register", join(__dirname, "../scripts/copy-demo.ts"), FILE, dest],
+      { encoding: "utf8", cwd: join(__dirname, "..") },
+    );
+    expect(run.status).toBe(0);
+    expect(readFileSync(dest).equals(bytes())).toBe(true);
+  });
+});

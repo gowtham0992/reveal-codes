@@ -10,6 +10,7 @@ const PUBLIC = resolve(HERE, "../public");
 const DEFAULT_PAIRS: readonly (readonly [string, string])[] = [
   [resolve(FIXTURES, "demo-motion.txt"), resolve(PUBLIC, "demo-motion.txt")],
   [resolve(FIXTURES, "avianca-citations.txt"), resolve(PUBLIC, "avianca-citations.txt")],
+  [resolve(FIXTURES, "demo-motion.recorded.json"), resolve(PUBLIC, "demo-motion.recorded.json")],
 ];
 
 /** Copies the demo motion byte for byte, creating the destination directory. */
