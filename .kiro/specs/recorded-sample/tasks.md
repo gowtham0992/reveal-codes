@@ -26,7 +26,7 @@ Conventions for every task:
     - Add `recordedSample()` to `ApiClient` and `createApiClient` in `apps/web/src/client/api.ts`, and to `lazyApi` in `apps/web/src/services.ts`. Add one line to each test fake that lists every member (`avianca.test.tsx`, `samples-declaration.test.tsx`, `text-safety.test.tsx`, `support/check-date-fixtures.ts`, `open-empty-page.test.tsx`, and `document-actions.test.tsx`).
     - Run `pnpm exec vitest run --project web apps/web/test/avianca.test.tsx apps/web/test/text-safety.test.tsx apps/web/test/open-empty-page.test.tsx`.
     - _Requirements: 3.1_
-  - [-] 2.2 Share the restore step
+  - [x] 2.2 Share the restore step
     - In `apps/web/src/components/use-autosave.ts` extract `installRestored(store, restored, holder?)` from `loadAutosave` and call it there. Behaviour does not change.
     - Run `pnpm exec vitest run --project web apps/web/test/persist.test.ts apps/web/test/persist-resolved.properties.test.ts`, plus the autosave tests that match `autosave` in `apps/web/test`.
     - _Requirements: 3.6, 3.7_
