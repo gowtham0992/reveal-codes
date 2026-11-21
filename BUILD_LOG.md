@@ -1017,3 +1017,12 @@ Nothing was pushed.
 - **Reading:** the 20 ms threshold of task 10.2 is exceeded either way it is read. The Bundle's load cost is about 24.5 ms; the part due to the MCP modules alone was not isolated (no variant Bundle was built, because the layout must not change without a decision).
 - **Only fallback:** a second file `provenance-mcp.mjs` for the `mcp` command, which breaks Req 13.10 (one file). The Bundle layout is unchanged. The user declined it (see Decision above).
 - **Also:** the `git status --porcelain` check of `pnpm power:build` is not a vitest test, because it rewrites `powers/` in place while other test files read the Bundle; it was run by hand twice, with no change in the status.
+
+### The walk in a second workspace, five findings (2026-11-21, tasks 10.4 to 10.7)
+
+- **Hooks showed as disabled, and no event reached the Recorder until a window reload.** The cause is unknown: the reload or the enabled flag. The documentation says `hooks[].enabled` is optional and defaults to true (https://kiro.dev/docs/hooks/, fetched 2026-11-21), and the troubleshooting page says to check the eye icon (https://kiro.dev/docs/hooks/troubleshooting/). Nothing documents that hooks written by a tool stay disabled until a reload. Fix: setup writes `"enabled": true`; the skill walks the person through the Agent Hooks panel and a reload, then verifies an event with `check_records` `hookEvents`; `reveal` and the read tools warn when no hook event was ever recorded.
+- **A whole-line insertion above a line with the same start was shown mid-line.** Fix: an ambiguous insertion or deletion slides left to a line start. Property 17 and the Property 2 reference model follow the rule, and two "F⏎" examples now expect the line start.
+- **The Runs list printed `turn  turn`.** Fix: the tag is printed once.
+- **The MCP server reported version 0.0.0.** Fix: one version, from `packages/provenance/package.json`, injected by the build.
+- **`setup_provenance` returned counts only.** Fix: it names each file, as the command does.
+- **The rebuilt Bundle was installed during 10.4**, so each task commit stayed green.

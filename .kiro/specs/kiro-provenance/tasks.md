@@ -366,7 +366,7 @@ Conventions that apply to every task:
     - Finding 5: the text result of `setup_provenance` (`src/mcp/tools.ts`, using the report of `src/io/setup.ts`) names each file under `written`, `replaced` and `kept`, as `provenance setup` prints them, with the cache collapsed as `cache/ (N files)`. Test it on a fresh workspace, on a second call, and with the git hook.
     - Run `pnpm lint`, `pnpm typecheck`, `pnpm test`; each exits 0. Do not rebuild or copy the Bundle here (10.7).
     - _Requirements: 9.15, 12.9, 12.16_
-  - [~] 10.7 Checkpoint - the walk findings
+  - [x] 10.7 Checkpoint - the walk findings
     - Rebuild the Bundle with `node scripts/build-power.mjs --power provenance`, and then, as a separate command, copy `powers/provenance/server/provenance.mjs` to `.kiro/provenance/provenance.mjs`. Never refresh it by running setup in this repository.
     - Run, each with exit code 0: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:pbt`, all properties at 500 runs, `pnpm power:build` twice with `git status --porcelain` empty after each, `pnpm kiro:check`, and `node .kiro/provenance/provenance.mjs reveal --check`.
     - Add to the `BUILD_LOG.md` entry one line for each of the five findings of the walk (hooks shown as disabled, with the Decision about the documentation and the unknown cause; whole-line insertions shown mid-line; `turn  turn`; version 0.0.0 against 0.1.0; counts-only setup result) and one line for the refresh question: the documentation names a refresh only for a remote Power, so after a rebuild remove the Power and import the folder again (not confirmed by the documentation).
