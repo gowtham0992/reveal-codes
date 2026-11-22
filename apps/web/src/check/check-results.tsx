@@ -26,7 +26,7 @@ function CopyButton({
   const onCopy = (): void => {
     const rows = checkRows(results.document, results.info, { caseNames: true });
     const further = furtherLine(results.outcome, results.document);
-    const lines = summaryLines(results.document, results.checkedAt, further);
+    const lines = summaryLines(results.document, results.checkedAt, further, svc.now());
     const text = copyText(rows, lines[0] ?? "", localDate(results.checkedAt));
     setFailed(false);
     void svc.clipboard.write(text).then(undefined, () => {
@@ -56,7 +56,7 @@ type Props = Readonly<{
 export function CheckResults(props: Props): React.JSX.Element {
   const { results, stale, running, svc, classes } = props;
   const further = furtherLine(results.outcome, results.document);
-  const lines = summaryLines(results.document, results.checkedAt, further);
+  const lines = summaryLines(results.document, results.checkedAt, further, svc.now());
   return (
     <div className={classes.group}>
       {stale ? (

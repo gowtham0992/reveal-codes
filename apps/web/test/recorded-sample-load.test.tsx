@@ -7,7 +7,7 @@ import type { Document } from "@reveal-codes/engine";
 import { describe, expect, it, vi } from "vitest";
 import { createApiClient } from "../src/client/api";
 import type { FetchFn } from "../src/client/api";
-import { localTime } from "../src/client/verify-summary";
+import { checkedStamp, localTime } from "../src/client/verify-summary";
 import { AppShell } from "../src/components/app-shell";
 import { RECORDED_SAMPLE_LOADED } from "../src/notices";
 import { PANE_KEY, encodePreference } from "../src/pane-preference";
@@ -152,7 +152,7 @@ describe("Load demo motion installs the recording _Requirements: 3.1, 3.4, 3.5, 
     await flush(m);
     const at = recorded().verifiedAt;
     expect(at).not.toBeNull();
-    expect(result()).toContain(`Checked ${localTime(at ?? "") ?? ""}`);
+    expect(result()).toContain(`Checked ${checkedStamp(at ?? "", new Date(NOW)) ?? ""}`);
     expect(result()).toContain("Citations:");
   });
   it("the empty-page link installs the same recorded draft as the Toolbar button", async () => {

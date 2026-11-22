@@ -1,0 +1,78 @@
+[DOC{v=1;n=0}][PST{t=2026-11-20T03:04:47Z}]"use client";
+import { useState, useSyncExternalStore } from "react";
+import { checkRows } from "../client/check-rows";
+import { furtherLine, localDate, summaryLines } from "../client/verify-summary";
+import type { AppServices } from "../services";
+import { COPY_FAILED, EARLIER_LABEL, STALE_SENTENCE } from "./check-text";
+import { copyText } from "./copy-text";
+import { ResultList } from "./result-list";
+import type { ResultListClasses } from "./result-list";
+import type { CheckDone } from "./run-check";
+
+const noSubscribe = (): (() => void) => () => undefined;
+
+function CopyButton({
+  results,
+  svc,
+}: Readonly<{ results: CheckDone; svc: AppServices }>): React.JSX.Element | null {
+  const \[failed, setFailed\] = useState(false);
+  // False on the server and on the first client render, so no server HTML holds the button.
+  const canCopy = useSyncExternalStore(
+    noSubscribe,
+    () => svc.clipboard.available(),
+    () => false,
+  );
+  if (!canCopy) return null;
+  const onCopy = (): void => {
+    const rows = checkRows(results.document, results.info, { caseNames: true });
+    const further = furtherLine(results.outcome, results.document);
+    const lines = summaryLines(results.document, results.checkedAt, further[HUM{t=2026-11-22T00:50:56.432Z}], svc.now()[PST{t=2026-11-20T03:04:47Z}]);
+    const text = copyText(rows, lines\[0\] ?? "", localDate(results.checkedAt));
+    setFailed(false);
+    void svc.clipboard.write(text).then(undefined, () => {
+      setFailed(true);
+    });
+  };
+  return (
+    <>
+      <button type="button" onClick={onCopy}>
+        Copy results
+      </button>
+      {failed ? <p>{COPY_FAILED}</p> : null}
+    </>
+  );
+}
+
+type Props = Readonly<{
+  results: CheckDone;
+  stale: boolean;
+  running: boolean;
+  svc: AppServices;
+  classes: ResultListClasses & Readonly<{ label?: string; group?: string }>;
+  onAgain: () => void;
+}>;
+
+/** The Summary_Line and Result_Items of the last completed run; out-of-date results are labelled. */
+export function CheckResults(props: Props): React.JSX.Element {
+  const { results, stale, running, svc, classes } = props;
+  const further = furtherLine(results.outcome, results.document);
+  const lines = summaryLines(results.document, results.checkedAt, further[HUM{t=2026-11-22T00:50:56.432Z}], svc.now()[PST{t=2026-11-20T03:04:47Z}]);
+  return (
+    <div className={classes.group}>
+      {stale ? (
+        <>
+          <p>{STALE_SENTENCE}</p>
+          <button type="button" disabled={running} onClick={props.onAgain}>
+            Check again
+          </button>
+          <p className={classes.label}>{EARLIER_LABEL}</p>
+        </>
+      ) : null}
+      {lines.map((line) => (
+        <p key={line}>{line}</p>
+      ))}
+      <ResultList document={results.document} info={results.info} classes={classes} />
+      {stale ? null : <CopyButton results={results} svc={svc} />}
+    </div>
+  );
+}

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { VerifyOutcome } from "../src/client/verify-flow";
 import {
   FAILED_NOTICE,
+  checkedStamp,
   furtherLine,
   localTime,
   summaryLines,
@@ -70,7 +71,7 @@ describe("summaryLines _Requirements: 5.6, 5.7, 5.8, 5.9, 5.10_", () => {
       ambiguous: 1,
       unchecked: 1,
     });
-    expect(summaryLines(doc, ISO, null)).toEqual([
+    expect(summaryLines(doc, ISO, null, new Date(ISO))).toEqual([
       "Citations: 1 found · 1 not found · 1 ambiguous · 1 not checked",
       "Quotations: 1 match · 1 not in the opinion",
       `Checked ${hhmm(ISO)}`,
@@ -82,13 +83,15 @@ describe("summaryLines _Requirements: 5.6, 5.7, 5.8, 5.9, 5.10_", () => {
       { status: "verified", clusterId: "1" },
       { status: "verified", clusterId: "2" },
     ]);
-    expect(summaryLines(doc, ISO, null)[0]).toBe("Citations: 2 found · 2 not checked");
+    expect(summaryLines(doc, ISO, null, new Date(ISO))[0]).toBe(
+      "Citations: 2 found · 2 not checked",
+    );
   });
 
   it("drops a line with no terms whole", () => {
     const created = createDocument("No citations here.", ISO);
     if (!created.ok) throw new Error("rejected");
-    expect(summaryLines(created.value, ISO, null)).toEqual([`Checked ${hhmm(ISO)}`]);
+    expect(summaryLines(created.value, ISO, null, new Date(ISO))).toEqual([`Checked ${hhmm(ISO)}`]);
   });
 
   it("leaves out the Checked line for an unparseable time and appends the further line", () => {
@@ -96,9 +99,34 @@ describe("summaryLines _Requirements: 5.6, 5.7, 5.8, 5.9, 5.10_", () => {
       build(ALL),
       "not a date",
       "Some items were skipped; try Verify again.",
+      new Date(ISO),
     );
     expect(lines.some((l) => l.startsWith("Checked"))).toBe(false);
     expect(lines[lines.length - 1]).toBe("Some items were skipped; try Verify again.");
+  });
+});
+
+describe("checkedStamp", () => {
+  const at = new Date(2026, 10, 21, 12, 56).toISOString();
+  it("shows the time only for a check made today", () => {
+    expect(checkedStamp(at, new Date(2026, 10, 21, 23, 59))).toBe("12:56");
+  });
+  it("adds the local date for a check made on an earlier day", () => {
+    expect(checkedStamp(at, new Date(2026, 10, 22, 0, 1))).toBe("21 Nov 2026, 12:56");
+    expect(checkedStamp(new Date(2026, 0, 5, 9, 3).toISOString(), new Date(2027, 0, 1))).toBe(
+      "5 Jan 2026, 09:03",
+    );
+  });
+  it("shows the time only for a check dated after now, and null for garbage", () => {
+    expect(checkedStamp(at, new Date(2026, 10, 20, 8, 0))).toBe("12:56");
+    expect(checkedStamp("nope", new Date())).toBeNull();
+  });
+  it("puts the stamp in the Checked line", () => {
+    const created = createDocument("No citations here.", ISO);
+    if (!created.ok) throw new Error("rejected");
+    expect(summaryLines(created.value, at, null, new Date(2026, 10, 23))).toEqual([
+      "Checked 21 Nov 2026, 12:56",
+    ]);
   });
 });
 

@@ -102,7 +102,13 @@ function IssuesTop(props: IssuesRegionProps) {
         <UnreadableDraft onSaveCopy={draft.onSaveCopy} onStartNew={draft.onStartNew} />
       ) : null}
       <OpenNote store={props.store} />
-      <VerifyResult document={document} verifiedAt={verifiedAt} further={note} failure={failure} />
+      <VerifyResult
+        document={document}
+        verifiedAt={verifiedAt}
+        further={note}
+        now={props.now}
+        failure={failure}
+      />
       {demoMode ? <p className={styles["note"]}>{DEMO_MODE_LINE}</p> : null}
     </>
   );

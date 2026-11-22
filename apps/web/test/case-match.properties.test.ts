@@ -164,9 +164,12 @@ describe("Citations line _Requirements: 7.9_", () => {
         ]
           .filter(([n]) => (n as number) > 0)
           .map(([n, t]) => `${String(n)} ${String(t)}`);
-        const line = summaryLines(doc, "2026-01-01T12:00:00Z", null).find((l) =>
-          l.startsWith("Citations:"),
-        );
+        const line = summaryLines(
+          doc,
+          "2026-01-01T12:00:00Z",
+          null,
+          new Date("2026-01-01T12:00:00Z"),
+        ).find((l) => l.startsWith("Citations:"));
         if (expectedTerms.length === 0) {
           expect(line).toBeUndefined();
           return;

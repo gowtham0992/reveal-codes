@@ -6,13 +6,20 @@ export type VerifyResultProps = Readonly<{
   document: Document;
   verifiedAt: string | null;
   further: string | null;
+  now: () => Date;
   /** The sentence for a failed run; nothing else in the region changes. */
   failure?: string | null;
 }>;
 
 /** The Verify_Summary: always rendered, empty until a Verify has completed. */
-export function VerifyResult({ document, verifiedAt, further, failure = null }: VerifyResultProps) {
-  const summary = verifiedAt === null ? [] : summaryLines(document, verifiedAt, further);
+export function VerifyResult({
+  document,
+  verifiedAt,
+  further,
+  now,
+  failure = null,
+}: VerifyResultProps) {
+  const summary = verifiedAt === null ? [] : summaryLines(document, verifiedAt, further, now());
   const lines = failure === null ? summary : [failure, ...summary];
   return (
     <div role="status" aria-label="Verify result" className={styles["result"]}>

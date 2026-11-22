@@ -41,19 +41,33 @@ export function localDate(iso: string): string | null {
   return `${String(date.getFullYear())}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** "HH:MM" for a check made today (local); "D Mon YYYY, HH:MM" for an earlier local day. */
+export function checkedStamp(iso: string, now: Date): string | null {
+  const time = localTime(iso);
+  const day = localDate(iso);
+  const today = localDate(now.toISOString());
+  if (time === null || day === null || today === null || day >= today) return time;
+  const date = new Date(iso);
+  const month = MONTHS[date.getMonth()] ?? "";
+  return `${String(date.getDate())} ${month} ${String(date.getFullYear())}, ${time}`;
+}
+
 function line(label: string, terms: readonly (readonly [number, string])[]): string | null {
   const parts = terms.filter(([n]) => n > 0).map(([n, text]) => `${String(n)} ${text}`);
   return parts.length === 0 ? null : `${label}: ${parts.join(" · ")}`;
 }
 
-/** The lines of the Verify result: Citations, Quotations, Checked, then the further line. */
+/** The lines of the Verify result: Citations, Quotations, Checked, then the further line. `now` is passed in so the function stays pure. */
 export function summaryLines(
   document: Document,
   checkedAt: string,
   further: string | null,
+  now: Date,
 ): readonly string[] {
   const { citations: c, quotes: q } = tallyDocument(document);
-  const time = localTime(checkedAt);
+  const time = checkedStamp(checkedAt, now);
   const lines = [
     line("Citations", [
       [c.verified, W.found],
