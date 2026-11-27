@@ -241,4 +241,4 @@ Working on the repository with Kiro:
 
 ## Licence
 
-Apache-2.0. See [LICENSE](LICENSE).
+Apache-2.0. Copyright 2026 Gowtham Sarveswaran. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
