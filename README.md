@@ -6,6 +6,8 @@ A drafting editor for court filings that shows where every word came from and ca
 
 Try it at https://reveal-codes.gowthamsarveswaran.com. Built for Kiroween 2026, Resurrection category.
 
+Watch the demo (2:56): https://youtu.be/rTs8e12CUUQ
+
 <img src="docs/images/editor.png" alt="The editor after Verify on the Mata v. Avianca citations: the page above, the codes pane below with four failing citations as red blocks, and the Issues list on the right naming the case each wrong citation really belongs to">
 
 ## Try it in one minute
