@@ -6,7 +6,18 @@ A drafting editor for court filings that shows where every word came from and ca
 
 Try it at https://reveal-codes.gowthamsarveswaran.com. Built for Kiroween 2026, Resurrection category.
 
-<img src="docs/images/editor.png" alt="The editor with a verified motion: the page above, the codes pane below with four failing citations as red blocks, and the Issues list on the right">
+<img src="docs/images/editor.png" alt="The editor after Verify on the Mata v. Avianca citations: the page above, the codes pane below with four failing citations as red blocks, and the Issues list on the right naming the case each wrong citation really belongs to">
+
+## Try it in one minute
+
+No account is needed.
+
+1. Open https://reveal-codes.gowthamsarveswaran.com and select Load Mata v. Avianca, then Verify. These are citations from the 2023 brief that made AI hallucinations famous. The result reads "2 found · 2 wrong case · 2 not found". A wrong-case citation has a real volume and page that belong to a different case, and the row names that case.
+2. Look at the codes pane under the page. It prints every code inline, and Alt-F3 hides and shows it.
+3. Select Export. The button reads "Export (4 blocking)", and the download stays disabled until each red item is fixed or overridden with a written reason.
+4. Select New, then Load demo motion, to see a draft with all four origins: typed, pasted, written by the assistant, and assistant text a person then edited.
+
+On a phone, open https://reveal-codes.gowthamsarveswaran.com/check.
 
 ## Why it exists
 
@@ -24,13 +35,15 @@ WordPerfect 5.1 for DOS, in 1989, had a key that split the screen and showed eve
 
 **It ships a finished example.** Load demo motion installs a draft recorded in this editor on the hosted site on 2026-11-21, with typed, pasted, assistant and edited text, its run log and its results.
 
+<img src="docs/images/origins.png" alt="The codes pane on the demo motion, showing pasted text, a paragraph written by the assistant, assistant text the author then edited, and words the author typed">
+
 **Alt-F3 shows everything.** The codes pane opens under the page and prints the same text with every code inline. The margin numbers are the document's line numbers, the same ones the status line and the Sentinel use.
 
 **A draft can be opened from a file.** A draft can be opened from a `.docx`, `.txt` or `.md` file, and an exported `.docx` is reopened with its record; a file changed after it was exported is opened as pasted text.
 
 **Export is gated.** A filing with red codes will not export until each one is fixed or overridden with a written reason, and the reason is printed. The .docx carries the filing, an AI-Use and Verification Statement, and a Provenance Appendix that can be read back by machine.
 
-<img src="docs/images/statement.png" alt="The AI-Use and Verification Statement in the print view: the court's rule cited, a table of citations with their status, a table of quotations, and the override reasons">
+<img src="docs/images/statement.png" alt="The AI-Use and Verification Statement in the print view: a table of citations with their status, a table of quotations, and each override with the author's written reason and its time">
 
 **The statement states the record; the author states the rest.** The statement reports what the tool recorded: how text entered, which citations and quotations were checked, which overrides were written. Text that was pasted or imported has no recorded origin beyond that, so the author makes a declaration about it, and the statement prints it as the author's own. The tool never asserts on its own that no AI was used.
 
@@ -47,7 +60,7 @@ On the hosted site citations are checked live. Locally, with no token set, the a
 3. The codes pane is already open on a first visit; Alt-F3 hides and shows it.
 4. Select Verify. Two citations are found. Three are not, and one quotation is not in its opinion: they turn red in the pane, are underlined on the page, and are listed under Issues. Go jumps to each.
 5. Select Export. Choose a court, for example N.D. Tex. The dialog says how many blocking items remain and keeps Download .docx disabled.
-6. Make the declaration about the pasted text: choose Declaration_Choice_AI (generative AI was used to prepare some or all of it) and type a named tool in the tool field.
+6. Make the declaration about the pasted text: choose "Generative AI was used to prepare some or all of the pasted text" and type the tool's name in the Tool name field.
 7. Select Override… on an item and write a reason, or correct the text and Verify again. When nothing blocks, Download .docx produces the filing with its statement and appendix. The statement prints the declaration as the author's statement, with the tool you named.
 
 Open is the other way in beside Load demo motion: choose Open to start from a `.docx`, `.txt` or `.md` file of your own.
@@ -137,7 +150,7 @@ The legend:
 - While no hook event has been recorded, the Provenance hooks may be disabled, and text changed since setup cannot be attributed to the agent.
 - Windows is not supported.
 
-The full list of limits is in powers/provenance/README.md.
+The full list of limits is in [the Power's README](powers/provenance/README.md).
 
 ### Install it
 
@@ -189,7 +202,7 @@ The web app builds with webpack (`next dev --webpack`, `next build --webpack`), 
 | `apps/web`                   | The Next.js editor: page, codes pane, Issues, assistant, Export and print view.                                              |
 | `crew/sentinel`              | The Sentinel CLI that re-checks exported filings.                                                                            |
 
-Because provenance is recorded and not inferred, the engine is deterministic, so its guarantees can be stated as properties and tested: rendering a document to codes and parsing it back returns the same document; an edit never changes the origin of text it did not touch. The suite is 4,897 tests in 463 files, with 214 property-based tests in 78 files that run at 500 cases each in CI.
+Because provenance is recorded and not inferred, the engine is deterministic, so its guarantees can be stated as properties and tested: rendering a document to codes and parsing it back returns the same document; an edit never changes the origin of text it did not touch. The suite is 4,897 tests in 463 files: 4,891 run and pass, and 6 are skipped. 214 of them are property-based tests, in 78 files, that run at 500 cases each in CI.
 
 ## Built with Kiro
 
@@ -199,11 +212,12 @@ Kiro wrote the application code and tests.
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Specs         | Sixteen, each with requirements, a design with numbered properties, and a task list: provenance-engine, citation-verifier, editor-app, export-certification, shell-polish, sentinel-sweep, court-orders, first-run-and-flow, legal-record-ui, citation-check-page, case-match, court-rules-page, open-draft, pasted-text-declaration, kiro-provenance, recorded-sample |
 | Steering      | Seven files: product, structure, tech, testing, UI rules, citation handling, release runbook                                                                                                                                                                                                                                                                           |
-| Hooks         | Eight files: one commits each finished spec task, five run the edited package's tests on save, one prompts an agent to re-check the dataset when it changes, one records provenance at the start and end of each agent run                                                                                                                                             |
+| Hooks         | Eight files: one commits each finished spec task, five run the edited package's tests on save, one prompts an agent to re-check the dataset when it changes, one holds the four provenance hooks, which run when a prompt is submitted, when the agent stops, and before and after each spec task                                                                      |
 | MCP           | Two servers, both built in this repository: the CourtListener checker and the provenance record                                                                                                                                                                                                                                                                        |
 | Powers        | Two: `citation-check` and `provenance`                                                                                                                                                                                                                                                                                                                                 |
 | Custom agents | `release-checker` and `orders-curator`                                                                                                                                                                                                                                                                                                                                 |
 | Skills        | Five: `add-standing-order`, `check-citations`, `court-ai-rules`, `setup-provenance`, `reveal-codes-for-source`                                                                                                                                                                                                                                                         |
+| Kiro CLI      | Ran the `orders-curator` agent to add dataset entry 41, with the same agent file and skill as the IDE                                                                                                                                                                                                                                                                  |
 | Kiro Crew     | A separate app schedules the Sentinel (see above)                                                                                                                                                                                                                                                                                                                      |
 
 The full inventory, with the reason each file exists, is in [docs/KIRO_USAGE.md](docs/KIRO_USAGE.md). What was built when, what Kiro got wrong, and what fixed it are in [BUILD_LOG.md](BUILD_LOG.md).
